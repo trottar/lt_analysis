@@ -54,13 +54,9 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax,target):
     Q2max = Q2Val + 1.5 # Maximum value of Q2 on the Q2 vs W plot
     Wmin = WVal - 0.5 # min y-range for Q2vsW plot
     Wmax = WVal + 0.5 # max y-range for Q2vsW plot
+    
     Qs = str(Q2Val).replace('.','p')
-
-    if (len(Qs)<4 and '6p' not in Qs and '5p' not in Qs):
-        Qs = Qs + '0'
     Ws = str(WVal).replace('.','p')
-    if len(Ws)<4:
-        Ws = Ws + '0'
     
     #FilenameOverride = 'Q'+Qs+'W'+Ws+phi_setting
     FilenameOverride = 'Q'+Qs+'W'+Ws
