@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-19 21:07:56 trottar"
+# Time-stamp: "2023-01-21 12:35:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -463,9 +463,10 @@ def defineHists(phi_setting):
     # 2D histograms
 
     MM_vs_CoinTime_DATA = ROOT.TH2D("MM_vs_CoinTime_DATA","Missing Mass vs CTime; MM; Coin_Time",100, 0, 2, 100, -2, 2)
-    CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 100, -2, 2, 100, 0.6, 1.4)
+    CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 100, -2, 2, 100, 0, 2)
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
+    Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, 0.0, 10.0, 200, 0.0, 10.0)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -541,6 +542,7 @@ def defineHists(phi_setting):
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_eta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_eta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
+          Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
 
@@ -822,6 +824,7 @@ def defineHists(phi_setting):
         "CoinTime_vs_beta_DATA" : CoinTime_vs_beta_DATA,
         "MM_vs_beta_DATA" : MM_vs_beta_DATA,
         "phiq_vs_t_DATA" : phiq_vs_t_DATA,
+        "Q2_vs_W_DATA" : Q2_vs_W_DATA,
         "InFile_DATA" : InFile_DATA,
     }
 
@@ -1294,6 +1297,18 @@ for i,hist in enumerate(histlist):
     hist["MM_vs_beta_DATA"].SetTitle(phisetlist[i])
 
 Cmmbeta.Print(outputpdf)
+
+Cqw = TCanvas()
+
+Cqw.Divide(2,2)
+
+for i,hist in enumerate(histlist):
+    Cqw.cd(i+1)
+    hist["Q2_vs_W_DATA"].SetLineColor(i+1)
+    hist["Q2_vs_W_DATA"].Draw("same, COLZ")
+    hist["Q2_vs_W_DATA"].SetTitle(phisetlist[i])
+
+Cqw.Print(outputpdf)
 
 Cpht = TCanvas()
 
