@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-21 15:40:07 trottar"
+# Time-stamp: "2023-01-21 15:45:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -232,7 +232,7 @@ def defineHists(phi_setting):
     InSIMCFilename = "Prod_Coin_{}.root".format(kinematics[0]+phi_setting.lower()+"_"+kinematics[1])
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
-        print("ERROR: No simc file found called {}".format(rootFileSimc))
+        print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
         return {}
 
     InFile_SIMC = ROOT.TFile.Open(rootFileSimc, "OPEN")
@@ -255,7 +255,7 @@ def defineHists(phi_setting):
     if 'simc_nevents' and 'simc_normfactor' in locals():
         print('\n\nsimc_nevents = ',simc_nevents,'\nsimc_normfactor = ',simc_normfactor,'\n\n')
     else:
-        print("ERROR: Invalid simc hist file %s" % simc_hist)
+        print("\n\nERROR: Invalid simc hist file %s\n\n" % simc_hist)
         sys.exit(1)
     f_simc.close()    
     
@@ -264,7 +264,7 @@ def defineHists(phi_setting):
 
     rootFileData = OUTPATH+"/"+InDATAFilename+"_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileData):
-        print("ERROR: No data file found called {}".format(rootFileData))
+        print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         return {}
 
     InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
