@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-21 12:35:52 trottar"
+# Time-stamp: "2023-01-21 15:40:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -232,6 +232,7 @@ def defineHists(phi_setting):
     InSIMCFilename = "Prod_Coin_{}.root".format(kinematics[0]+phi_setting.lower()+"_"+kinematics[1])
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
+        print("ERROR: No simc file found called {}".format(rootFileSimc))
         return {}
 
     InFile_SIMC = ROOT.TFile.Open(rootFileSimc, "OPEN")
@@ -263,6 +264,7 @@ def defineHists(phi_setting):
 
     rootFileData = OUTPATH+"/"+InDATAFilename+"_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileData):
+        print("ERROR: No data file found called {}".format(rootFileData))
         return {}
 
     InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
