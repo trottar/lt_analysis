@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-21 15:45:23 trottar"
+# Time-stamp: "2023-01-21 15:54:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -233,7 +233,7 @@ def defineHists(phi_setting):
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
-        return {}
+        #return {}
 
     InFile_SIMC = ROOT.TFile.Open(rootFileSimc, "OPEN")
 
@@ -472,7 +472,7 @@ def defineHists(phi_setting):
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
-    
+    '''
     print("\nPlotting %s simc..." % phi_setting)
     for evt in TBRANCH_SIMC:
 
@@ -515,7 +515,7 @@ def defineHists(phi_setting):
           H_t_DATA.Fill(evt.t)
           H_epsilon_SIMC.Fill(evt.epsilon, evt.Weight)
           H_MM_SIMC.Fill(np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2)), evt.Weight)
-
+    '''
     
     ################################################################################################################################################
     # Fill histograms for various trees called above
