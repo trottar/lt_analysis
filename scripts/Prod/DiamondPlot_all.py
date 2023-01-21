@@ -82,7 +82,7 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax,target):
     lenm = 10000
     lenl = 10000
     if(target == '0'): target = ""
-    print("Kinematics: ",FilenameOverride,"Phi Setting: ",target)
+    print("Kinematics: ",FilenameOverride,"\nPhi Setting: ",target)
     #    for file in glob.glob(OUTPATH+'/**/'+FilenameOverride+'*'+target+'*Analysed_Data.root',recursive = True):
     for file in glob.glob(OUTPATH+'/*'+FilenameOverride+'*'+target+'*.root'):
 	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
