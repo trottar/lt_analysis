@@ -19,7 +19,7 @@ begin parm kinematics_main
   spec%e%P = 5292.0		;  e arm central momentum (MeV/c)
   spec%e%theta = 11.160   	;  e arm angle setting (degrees)
   spec%p%P = 4983.0		;  p arm central momentum (MeV/c)
-  spec%p%theta = 10.735   	;  p arm angle setting (degrees)
+  spec%p%theta = 7.735   	;  p arm angle setting (degrees)
 end parm kinematics_main
 
 begin parm target
