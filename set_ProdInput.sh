@@ -37,7 +37,7 @@ while getopts 'h' flag; do
         echo "----------------------------------------------------------"
         echo
         echo "The following flags can be called for the heep analysis..."
-	echo "    KIN=arg1"
+	echo "    EPSILON=arg1, Q2=arg2, W=arg3"
         echo "    -h, help"
         exit 0
         ;;
