@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-21 16:00:43 trottar"
+# Time-stamp: "2023-01-22 19:02:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,6 +224,10 @@ def defineHists(phi_setting):
     b3 = paramDict["b3"]
     a4 = paramDict["a4"]
     b4 = paramDict["b4"]
+
+    if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
+        print("ERROR: Diamond cut failed. See script output above...")
+        sys.exit(1)
 
     ################################################################################################################################################
     # Define simc root file trees of interest
