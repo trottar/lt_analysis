@@ -265,7 +265,7 @@ do
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=5p5, W=3p02
 	    echo "Run Numbers: [${data_left[@]}]"
 	    echo
-	fi
+	elif [[ $i = "CENTER" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_center="Q5p5W3p02center_${EPSILON}e_dummy"
 	    else
@@ -298,17 +298,17 @@ do
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=4p4, W=2p74
 	    echo "Run Numbers: [${data_right[@]}]"
 	    echo
-	fi
+	elif [[ $i = "LEFT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_left="Q4p4W2p74left_${EPSILON}e_dummy"
 	    else
 		file_left="Q4p4W2p74left_${EPSILON}e"
-	    fi	    else
+	    fi
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=4p4, W=2p74
 	    echo "Run Numbers: [${data_left[@]}]"
 	    echo
-	fi
+	elif [[ $i = "CENTER" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_center="Q4p4W2p74center_${EPSILON}e_dummy"
 	    else
@@ -336,12 +336,12 @@ do
 		file_right="Q3W3p14right_${EPSILON}e_dummy"
 	    else
 		file_right="Q3W3p14right_${EPSILON}e"
-	    fi	    else
+	    fi
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=3p0, W=3p14
 	    echo "Run Numbers: [${data_right[@]}]"
 	    echo
-	fi
+	elif [[ $i = "LEFT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_left="Q3W3p14left_${EPSILON}e_dummy"
 	    else
@@ -351,7 +351,7 @@ do
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=3p0, W=3p14
 	    echo "Run Numbers: [${data_left[@]}]"
 	    echo	
-	fi
+	elif [[ $i = "CENTER" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_center="Q3W3p14center_${EPSILON}e_dummy"
 	    else
@@ -379,12 +379,12 @@ do
 		file_right="Q3W2p32right_${EPSILON}e_dummy"
 	    else
 		file_right="Q3W2p32right_${EPSILON}e"
-	    fi	    else
+	    fi
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=3p0, W=2p32
 	    echo "Run Numbers: [${data_right[@]}]"
 	    echo
-	fi
+	elif [[ $i = "LEFT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_left="Q3W2p32left_${EPSILON}e_dummy"
 	    else
@@ -394,7 +394,7 @@ do
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=3p0, W=2p32
 	    echo "Run Numbers: [${data_left[@]}]"
 	    echo
-	fi
+	elif [[ $i = "CENTER" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_center="Q3W2p32center_${EPSILON}e_dummy"
 	    else
@@ -422,12 +422,12 @@ do
 		file_right="Q2p1W2p95right_${EPSILON}e_dummy"
 	    else
 		file_right="Q2p1W2p95right_${EPSILON}e"
-	    fi	    else
+	    fi
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=2p1, W=2p95
 	    echo "Run Numbers: [${data_right[@]}]"
 	    echo
-	fi
+	elif [[ $i = "LEFT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_left="Q2p1W2p95left_${EPSILON}e_dummy"
 	    else
@@ -437,7 +437,7 @@ do
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=2p1, W=2p95
 	    echo "Run Numbers: [${data_left[@]}]"
 	    echo
-	fi
+	elif [[ $i = "CENTER" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_center="Q2p1W2p95center_${EPSILON}e_dummy"
 	    else
@@ -465,12 +465,12 @@ do
 		file_right="Q0p5W2p40right_${EPSILON}e_dummy"
 	    else
 		file_right="Q0p5W2p40right_${EPSILON}e"
-	    fi	    else
+	    fi
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=0p5, W=2p40
 	    echo "Run Numbers: [${data_right[@]}]"
 	    echo
-	fi
+	elif [[ $i = "LEFT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_left="Q0p5W2p40left_${EPSILON}e_dummy"
 	    else
@@ -480,7 +480,7 @@ do
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=0p5, W=2p40
 	    echo "Run Numbers: [${data_left[@]}]"
 	    echo
-	fi
+	elif [[ $i = "CENTER" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
 		file_center="Q0p5W2p40center_${EPSILON}e_dummy"
 	    else
@@ -720,7 +720,6 @@ if [ ${#data_right[@]} -eq 0 ]; then
 else
     python3 createPhysicsList.py ${Q2} ${POL} ${EPSVAL} ${TMIN} ${TMAX} ${NumtBins} ${KSet} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" "${DataChargeValRight[*]}" "${DataChargeValLeft[*]}" "${DataChargeValCenter[*]}" "${DataChargeErrRight[*]}" "${DataChargeErrLeft[*]}" "${DataChargeErrCenter[*]}" ${TargetType}
 fi
-
 
 if [[ $t_flag = "true" || $d_flag = "true" ]]; then
     cd "${LTANAPATH}"
