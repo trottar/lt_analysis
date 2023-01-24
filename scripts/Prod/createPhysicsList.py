@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 17:08:55 trottar"
+# Time-stamp: "2023-01-24 17:30:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,31 +32,31 @@ TMAX = sys.argv[5]
 NumtBins = sys.argv[6]
 Kset = sys.argv[7]
 
-runNumRight = sys.argv[8].split(" ")
-runNumLeft = sys.argv[9].split(" ")
-runNumCenter = sys.argv[10].split(" ")
+runNumRight = list(sys.argv[8].split(" "))
+runNumLeft = list(sys.argv[9].split(" "))
+runNumCenter = list(sys.argv[10].split(" "))
 
-pThetaValRight = sys.argv[11].split(" ")
-pThetaValLeft = sys.argv[12].split(" ")
-pThetaValCenter = sys.argv[13].split(" ")
+pThetaValRight = list(sys.argv[11].split(" "))
+pThetaValLeft = list(sys.argv[12].split(" "))
+pThetaValCenter = list(sys.argv[13].split(" "))
 
-EbeamValRight = sys.argv[14].split(" ")
-EbeamValLeft = sys.argv[15].split(" ")
-EbeamValCenter = sys.argv[16].split(" ")
+EbeamValRight = list(sys.argv[14].split(" "))
+EbeamValLeft = list(sys.argv[15].split(" "))
+EbeamValCenter = list(sys.argv[16].split(" "))
 
-EffValRight = sys.argv[17].split(" ")
-EffValLeft = sys.argv[18].split(" ")
-EffValCenter = sys.argv[19].split(" ")
-EffErrRight = sys.argv[20].split(" ")
-EffErrLeft = sys.argv[21].split(" ")
-EffErrCenter = sys.argv[22].split(" ")
+EffValRight = list(sys.argv[17].split(" "))
+EffValLeft = list(sys.argv[18].split(" "))
+EffValCenter = list(sys.argv[19].split(" "))
+EffErrRight = list(sys.argv[20].split(" "))
+EffErrLeft = list(sys.argv[21].split(" "))
+EffErrCenter = list(sys.argv[22].split(" "))
 
-ChargeValRight = sys.argv[23].split(" ")
-ChargeValLeft = sys.argv[24].split(" ")
-ChargeValCenter = sys.argv[25].split(" ")
-ChargeErrRight = sys.argv[26].split(" ")
-ChargeErrLeft = sys.argv[27].split(" ")
-ChargeErrCenter = sys.argv[28].split(" ")
+ChargeValRight = list(sys.argv[23].split(" "))
+ChargeValLeft = list(sys.argv[24].split(" "))
+ChargeValCenter = list(sys.argv[25].split(" "))
+ChargeErrRight = list(sys.argv[26].split(" "))
+ChargeErrLeft = list(sys.argv[27].split(" "))
+ChargeErrCenter = list(sys.argv[28].split(" "))
 
 TargetType = sys.argv[29]
 
@@ -89,13 +89,6 @@ try:
     angle_flag = False
     for line in f_simc_right:
         #print(line)
-        if "Ebeam" in line:
-            val = line.split("=")
-            EbeamValRight = float(val[1].replace("MeV\n",""))/1000
-        if "angle" in line and angle_flag == False:
-            angle_flag = True
-            val = line.split("=")
-            pThetaValRight = float(val[1].replace("deg\n","").split("          ")[1])
         if "Ngen" in line:
             val = line.split("=")
             simc_right_nevents = int(val[1])
@@ -116,13 +109,6 @@ f_simc_left = open(simc_left_hist)
 angle_flag = False
 for line in f_simc_left:
     #print(line)
-    if "Ebeam" in line:
-        val = line.split("=")
-        EbeamValLeft = float(val[1].replace("MeV\n",""))/1000
-    if "angle" in line and angle_flag == False:
-        angle_flag = True
-        val = line.split("=")
-        pThetaValLeft = float(val[1].replace("deg\n","").split("          ")[1])
     if "Ngen" in line:
         val = line.split("=")
         simc_left_nevents = int(val[1])
@@ -162,10 +148,6 @@ def write_to_file(f_out,line):
         f.write(line)
 
 ################################################################################################################################################
-
-print(pThetaValRight)
-print(pThetaValLeft)
-print(pThetaValCenter)
 
 # Define thpq vector relative to middle setting
 if float(runNumRight[0]) != 0:
