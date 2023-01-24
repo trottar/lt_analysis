@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 13:01:02 trottar"
+# Time-stamp: "2023-01-24 13:24:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -172,10 +172,10 @@ def write_to_file(f_out,line):
 
 # Define thpq vector relative to middle setting
 try:
-    thpq_right = abs(float(pThetaValCenter)-float(pThetaValRight))
+    thpq_right = abs(float(pThetaValCenter[0])-float(pThetaValRight[0]))
 except NameError:
     print("")
-thpq_left = abs(float(pThetaValCenter)-float(pThetaValLeft))
+thpq_left = abs(float(pThetaValCenter[0])-float(pThetaValLeft[0]))
 thpq_center = 0.000
 
 ################################################################################################################################################

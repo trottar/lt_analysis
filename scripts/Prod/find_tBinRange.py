@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-22 20:17:18 trottar"
+# Time-stamp: "2023-01-24 13:07:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -474,11 +474,12 @@ def defineHists(phi_setting):
     # Fill histograms for various trees called above
     
     print("\nPlotting %s simc..." % phi_setting)
-    for evt in TBRANCH_SIMC:
+    for i,evt in enumerate(TBRANCH_SIMC):
 
+      # Progress bar
+      Misc.progressBar(i, TBRANCH_SIMC.GetEntries())
+        
       # Define the acceptance cuts  
-
-      # Select the cuts
       SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
       HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
       if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
