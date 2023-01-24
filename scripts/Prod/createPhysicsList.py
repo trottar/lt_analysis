@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 14:09:55 trottar"
+# Time-stamp: "2023-01-24 15:00:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,6 +65,29 @@ kinematics = sys.argv[30].split("_")
 InSIMCFilenameRight = "Prod_Coin_{}.root".format(kinematics[0]+"right_"+kinematics[1])
 InSIMCFilenameLeft = "Prod_Coin_{}.root".format(kinematics[0]+"left_"+kinematics[1])
 InSIMCFilenameCenter = "Prod_Coin_{}.root".format(kinematics[0]+"center_"+kinematics[1])
+
+print(runNumRight)
+print(runNumLeft)
+print(runNumCenter)
+print(pThetaValRight)
+print(pThetaValLeft)
+print(pThetaValCenter)
+print(EbeamValRight)
+print(EbeamValLeft)
+print(EbeamValCenter)
+print(EffValRight)
+print(EffValLeft)
+print(EffValCenter)
+print(EffErrRight)
+print(EffErrLeft)
+print(EffErrCenter)
+print(ChargeValRight)
+print(ChargeValLeft)
+print(ChargeValCenter)
+print(ChargeErrRight)
+print(ChargeErrLeft)
+print(ChargeErrCenter)
+
 
 ################################################################################################################################################
 '''
@@ -172,8 +195,8 @@ def write_to_file(f_out,line):
 
 # Define thpq vector relative to middle setting
 if float(runNumRight[0]) != 0:
-    thpq_right = abs(float(pThetaValCenter)-float(pThetaValRight))
-thpq_left = abs(float(pThetaValCenter)-float(pThetaValLeft))
+    thpq_right = abs(float(pThetaValCenter[0])-float(pThetaValRight[0]))
+thpq_left = abs(float(pThetaValCenter[0])-float(pThetaValLeft[0]))
 thpq_center = 0.000
 
 ################################################################################################################################################
