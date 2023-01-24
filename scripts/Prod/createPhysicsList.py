@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 17:36:35 trottar"
+# Time-stamp: "2023-01-24 17:50:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -160,7 +160,7 @@ thpq_center = 0.000
 f_list = '{}/src/root_ana/list.simc'.format(LTANAPATH)
 if not os.path.exists(f_list):
     open(f_list, "w").close()    
-# Open a file in write mode
+# Open a file in read mode
 with open(f_list, 'r') as f:
     lines = f.readlines()
     try:
@@ -212,7 +212,7 @@ else:
 
 if not os.path.exists(f_list):
     open(f_list, "w").close()    
-# Open a file in write mode
+# Open a file in read mode
 with open(f_list, 'r') as f:
     lines = f.readlines()
     if float(runNumRight[0]) != 0:
