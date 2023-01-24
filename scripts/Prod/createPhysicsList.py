@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 15:16:47 trottar"
+# Time-stamp: "2023-01-24 17:08:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -162,6 +162,10 @@ def write_to_file(f_out,line):
         f.write(line)
 
 ################################################################################################################################################
+
+print(pThetaValRight)
+print(pThetaValLeft)
+print(pThetaValCenter)
 
 # Define thpq vector relative to middle setting
 if float(runNumRight[0]) != 0:
