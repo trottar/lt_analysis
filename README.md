@@ -1,6 +1,6 @@
-![LT_Analyisis Workflow](docs/LT_Analysis_Workflow.png)
-
-<embed src="LT_Analysis_Workflow.pdf" width="500" height="375" type="application/pdf">
+![LT_Analyisis Workflow Part 1](docs/LT_Analysis_Workflow_1.png)
+![LT_Analyisis Workflow Part 2](docs/LT_Analysis_Workflow_2.png)
+![LT_Analyisis Workflow Part 3](docs/LT_Analysis_Workflow_3.png)
 
 /*--------------------------------------------------*/
 Installation instruction
