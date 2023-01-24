@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 17:03:10 trottar"
+# Time-stamp: "2023-01-24 17:11:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -278,7 +278,7 @@ def defineHists(phi_setting):
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
 
     #TBRANCH_RAND  = InFile_RAND.Get("Cut_Kaon_Events_rand_noRF")
-    TBRANCH_RAND  = InFile_RAND.Get("Cut_Kaon_Events_rand_RF")
+    TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
     
     ################################################################################################################################################
     # Grab and calculate efficiency
