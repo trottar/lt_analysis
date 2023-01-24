@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 13:07:30 trottar"
+# Time-stamp: "2023-01-24 15:03:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -477,7 +477,7 @@ def defineHists(phi_setting):
     for i,evt in enumerate(TBRANCH_SIMC):
 
       # Progress bar
-      Misc.progressBar(i, TBRANCH_SIMC.GetEntries())
+      #Misc.progressBar(i, TBRANCH_SIMC.GetEntries())
         
       # Define the acceptance cuts  
       SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
@@ -530,7 +530,7 @@ def defineHists(phi_setting):
     for i,evt in enumerate(TBRANCH_DATA):
 
         # Progress bar
-        Misc.progressBar(i, TBRANCH_DATA.GetEntries())
+        #Misc.progressBar(i, TBRANCH_DATA.GetEntries())
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4

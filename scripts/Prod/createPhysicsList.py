@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 15:00:32 trottar"
+# Time-stamp: "2023-01-24 15:05:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,28 +66,27 @@ InSIMCFilenameRight = "Prod_Coin_{}.root".format(kinematics[0]+"right_"+kinemati
 InSIMCFilenameLeft = "Prod_Coin_{}.root".format(kinematics[0]+"left_"+kinematics[1])
 InSIMCFilenameCenter = "Prod_Coin_{}.root".format(kinematics[0]+"center_"+kinematics[1])
 
-print(runNumRight)
-print(runNumLeft)
-print(runNumCenter)
-print(pThetaValRight)
-print(pThetaValLeft)
-print(pThetaValCenter)
-print(EbeamValRight)
-print(EbeamValLeft)
-print(EbeamValCenter)
-print(EffValRight)
-print(EffValLeft)
-print(EffValCenter)
-print(EffErrRight)
-print(EffErrLeft)
-print(EffErrCenter)
-print(ChargeValRight)
-print(ChargeValLeft)
-print(ChargeValCenter)
-print(ChargeErrRight)
-print(ChargeErrLeft)
-print(ChargeErrCenter)
-
+print("runNumRight",runNumRight)
+print("runNumLeft",runNumLeft)
+print("runNumCenter",runNumCenter)
+print("pThetaValRight",pThetaValRight)
+print("pThetaValLeft",pThetaValLeft)
+print("pThetaValCenter",pThetaValCenter)
+print("EbeamValRight",EbeamValRight)
+print("EbeamValLeft",EbeamValLeft)
+print("EbeamValCenter",EbeamValCenter)
+print("EffValRight",EffValRight)
+print("EffValLeft",EffValLeft)
+print("EffValCenter",EffValCenter)
+print("EffErrRight",EffErrRight)
+print("EffErrLeft",EffErrLeft)
+print("EffErrCenter",EffErrCenter)
+print("ChargeValRight",ChargeValRight)
+print("ChargeValLeft",ChargeValLeft)
+print("ChargeValCenter",ChargeValCenter)
+print("ChargeErrRight",ChargeErrRight)
+print("ChargeErrLeft",ChargeErrLeft)
+print("ChargeErrCenter",ChargeErrCenter)
 
 ################################################################################################################################################
 '''
