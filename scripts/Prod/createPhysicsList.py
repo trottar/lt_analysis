@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 17:30:02 trottar"
+# Time-stamp: "2023-01-24 17:36:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -166,18 +166,18 @@ with open(f_list, 'r') as f:
     try:
         if float(runNumRight[0]) != 0:
             # Write the value of the variable to the file
-            check_line = "{} {:.5f} {} -{:.3f} {} {}\n".format(Q2,float(EbeamValRight),EPSVAL,thpq_right,simc_right_normfactor,simc_right_nevents)
+            check_line = "{} {:.5f} {} -{:.3f} {} {}\n".format(Q2,float(EbeamValRight[0]),EPSVAL,thpq_right,simc_right_normfactor,simc_right_nevents)
             # Check if the line already exists
             if check_line not in lines:
                 write_to_file(f_list,check_line)
     except NameError:
         print("")                
     if float(runNumLeft[0]) != 0:
-        check_line = "{} {:.5f} {} +{:.3f} {} {}\n".format(Q2,float(EbeamValLeft),EPSVAL,thpq_left,simc_left_normfactor,simc_left_nevents)
+        check_line = "{} {:.5f} {} +{:.3f} {} {}\n".format(Q2,float(EbeamValLeft[0]),EPSVAL,thpq_left,simc_left_normfactor,simc_left_nevents)
         if check_line not in lines:
             write_to_file(f_list,check_line)
     if float(runNumCenter[0]) != 0:
-        check_line = "{} {:.5f} {} {:.3f} {} {}\n".format(Q2,float(EbeamValCenter),EPSVAL,thpq_center,simc_center_normfactor,simc_center_nevents)
+        check_line = "{} {:.5f} {} {:.3f} {} {}\n".format(Q2,float(EbeamValCenter[0]),EPSVAL,thpq_center,simc_center_normfactor,simc_center_nevents)
         if check_line not in lines:
             write_to_file(f_list,check_line)
             
