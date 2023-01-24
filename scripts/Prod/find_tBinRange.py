@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 15:03:41 trottar"
+# Time-stamp: "2023-01-24 17:03:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -276,6 +276,9 @@ def defineHists(phi_setting):
     TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+
+    #TBRANCH_RAND  = InFile_RAND.Get("Cut_Kaon_Events_rand_noRF")
+    TBRANCH_RAND  = InFile_RAND.Get("Cut_Kaon_Events_rand_RF")
     
     ################################################################################################################################################
     # Grab and calculate efficiency
@@ -428,38 +431,38 @@ def defineHists(phi_setting):
     P_hgcer_npeSum_DATA = ROOT.TH1D("P_hgcer_npeSum_DATA", "SHMS HGCer Npe Sum", 200, 0, 50)
     P_aero_npeSum_DATA = ROOT.TH1D("P_aero_npeSum_DATA", "SHMS Aero Npe Sum", 200, 0, 50)
 
-    H_hsdelta_DATA_rand  = ROOT.TH1D("H_hsdelta_DATA_rand","HMS Delta", 200, -20.0, 20.0)
-    H_hsxptar_DATA_rand  = ROOT.TH1D("H_hsxptar_DATA_rand","HMS xptar", 200, -0.1, 0.1)
-    H_hsyptar_DATA_rand  = ROOT.TH1D("H_hsyptar_DATA_rand","HMS yptar", 200, -0.1, 0.1)
-    H_ssxfp_DATA_rand    = ROOT.TH1D("H_ssxfp_DATA_rand","SHMS xfp", 200, -25.0, 25.0)
-    H_ssyfp_DATA_rand    = ROOT.TH1D("H_ssyfp_DATA_rand","SHMS yfp", 200, -25.0, 25.0)
-    H_ssxpfp_DATA_rand   = ROOT.TH1D("H_ssxpfp_DATA_rand","SHMS xpfp", 200, -0.09, 0.09)
-    H_ssypfp_DATA_rand   = ROOT.TH1D("H_ssypfp_DATA_rand","SHMS ypfp", 200, -0.05, 0.04)
-    H_hsxfp_DATA_rand    = ROOT.TH1D("H_hsxfp_DATA_rand","HMS xfp", 200, -40.0, 40.0)
-    H_hsyfp_DATA_rand    = ROOT.TH1D("H_hsyfp_DATA_rand","HMS yfp", 200, -20.0, 20.0)
-    H_hsxpfp_DATA_rand   = ROOT.TH1D("H_hsxpfp_DATA_rand","HMS xpfp", 200, -0.09, 0.05)
-    H_hsypfp_DATA_rand   = ROOT.TH1D("H_hsypfp_DATA_rand","HMS ypfp", 200, -0.05, 0.04)
-    H_ssdelta_DATA_rand  = ROOT.TH1D("H_ssdelta_DATA_rand","SHMS delta", 200, -20.0, 20.0)
-    H_ssxptar_DATA_rand  = ROOT.TH1D("H_ssxptar_DATA_rand","SHMS xptar", 200, -0.1, 0.1)
-    H_ssyptar_DATA_rand  = ROOT.TH1D("H_ssyptar_DATA_rand","SHMS yptar", 200, -0.04, 0.04)
-    H_q_DATA_rand        = ROOT.TH1D("H_q_DATA_rand","q", 200, 0.0, 10.0)
-    H_Q2_DATA_rand       = ROOT.TH1D("H_Q2_DATA_rand","Q2", 200, 0.0, 10.0)
-    H_W_DATA_rand  = ROOT.TH1D("H_W_DATA_rand","W ", 200, 0.0, 10.0)
-    H_t_DATA_rand       = ROOT.TH1D("H_t_DATA_rand","-t", 200, -1.0, 1.5)
-    H_epsilon_DATA_rand  = ROOT.TH1D("H_epsilon_DATA_rand","epsilon", 200, 0., 1.0)
-    H_MM_DATA_rand  = ROOT.TH1D("H_MM_DATA_rand","MM_{K}", 200, 0.0, 2.0)
-    H_th_DATA_rand  = ROOT.TH1D("H_th_DATA_rand","X' tar", 200, -0.1, 0.1)
-    H_ph_DATA_rand  = ROOT.TH1D("H_ph_DATA_rand","Y' tar", 200, -0.1, 0.1)
-    H_ph_q_DATA_rand  = ROOT.TH1D("H_ph_q_DATA_rand","Phi Detected (ph_xq)", 200, -10.0, 10.0)
-    H_th_q_DATA_rand  = ROOT.TH1D("H_th_q_DATA_rand","Theta Detected (th_xq)", 200, -0.2, 0.2)
-    H_ph_recoil_DATA_rand  = ROOT.TH1D("H_ph_recoil_DATA_rand","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-    H_th_recoil_DATA_rand  = ROOT.TH1D("H_th_recoil_DATA_rand","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-    H_pmiss_DATA_rand  = ROOT.TH1D("H_pmiss_DATA_rand","pmiss", 200, 0.0, 10.0)
-    H_emiss_DATA_rand  = ROOT.TH1D("H_emiss_DATA_rand","emiss", 200, 0.0, 10.0)
-    H_pmx_DATA_rand  = ROOT.TH1D("H_pmx_DATA_rand","pmx", 200, -10.0, 10.0)
-    H_pmy_DATA_rand  = ROOT.TH1D("H_pmy_DATA_rand","pmy ", 200, -10.0, 10.0)
-    H_pmz_DATA_rand  = ROOT.TH1D("H_pmz_DATA_rand","pmz", 200, -10.0, 10.0)
-    H_ct_ep_DATA_rand = ROOT.TH1D("H_ct_ep_DATA_rand", "Electron-Proton CTime", 200, -10, 10)
+    H_hsdelta_RAND  = ROOT.TH1D("H_hsdelta_RAND","HMS Delta", 200, -20.0, 20.0)
+    H_hsxptar_RAND  = ROOT.TH1D("H_hsxptar_RAND","HMS xptar", 200, -0.1, 0.1)
+    H_hsyptar_RAND  = ROOT.TH1D("H_hsyptar_RAND","HMS yptar", 200, -0.1, 0.1)
+    H_ssxfp_RAND    = ROOT.TH1D("H_ssxfp_RAND","SHMS xfp", 200, -25.0, 25.0)
+    H_ssyfp_RAND    = ROOT.TH1D("H_ssyfp_RAND","SHMS yfp", 200, -25.0, 25.0)
+    H_ssxpfp_RAND   = ROOT.TH1D("H_ssxpfp_RAND","SHMS xpfp", 200, -0.09, 0.09)
+    H_ssypfp_RAND   = ROOT.TH1D("H_ssypfp_RAND","SHMS ypfp", 200, -0.05, 0.04)
+    H_hsxfp_RAND    = ROOT.TH1D("H_hsxfp_RAND","HMS xfp", 200, -40.0, 40.0)
+    H_hsyfp_RAND    = ROOT.TH1D("H_hsyfp_RAND","HMS yfp", 200, -20.0, 20.0)
+    H_hsxpfp_RAND   = ROOT.TH1D("H_hsxpfp_RAND","HMS xpfp", 200, -0.09, 0.05)
+    H_hsypfp_RAND   = ROOT.TH1D("H_hsypfp_RAND","HMS ypfp", 200, -0.05, 0.04)
+    H_ssdelta_RAND  = ROOT.TH1D("H_ssdelta_RAND","SHMS delta", 200, -20.0, 20.0)
+    H_ssxptar_RAND  = ROOT.TH1D("H_ssxptar_RAND","SHMS xptar", 200, -0.1, 0.1)
+    H_ssyptar_RAND  = ROOT.TH1D("H_ssyptar_RAND","SHMS yptar", 200, -0.04, 0.04)
+    H_q_RAND        = ROOT.TH1D("H_q_RAND","q", 200, 0.0, 10.0)
+    H_Q2_RAND       = ROOT.TH1D("H_Q2_RAND","Q2", 200, 0.0, 10.0)
+    H_W_RAND  = ROOT.TH1D("H_W_RAND","W ", 200, 0.0, 10.0)
+    H_t_RAND       = ROOT.TH1D("H_t_RAND","-t", 200, -1.0, 1.5)
+    H_epsilon_RAND  = ROOT.TH1D("H_epsilon_RAND","epsilon", 200, 0., 1.0)
+    H_MM_RAND  = ROOT.TH1D("H_MM_RAND","MM_{K}", 200, 0.0, 2.0)
+    H_th_RAND  = ROOT.TH1D("H_th_RAND","X' tar", 200, -0.1, 0.1)
+    H_ph_RAND  = ROOT.TH1D("H_ph_RAND","Y' tar", 200, -0.1, 0.1)
+    H_ph_q_RAND  = ROOT.TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 200, -10.0, 10.0)
+    H_th_q_RAND  = ROOT.TH1D("H_th_q_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
+    H_ph_recoil_RAND  = ROOT.TH1D("H_ph_recoil_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
+    H_th_recoil_RAND  = ROOT.TH1D("H_th_recoil_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
+    H_pmiss_RAND  = ROOT.TH1D("H_pmiss_RAND","pmiss", 200, 0.0, 10.0)
+    H_emiss_RAND  = ROOT.TH1D("H_emiss_RAND","emiss", 200, 0.0, 10.0)
+    H_pmx_RAND  = ROOT.TH1D("H_pmx_RAND","pmx", 200, -10.0, 10.0)
+    H_pmy_RAND  = ROOT.TH1D("H_pmy_RAND","pmy ", 200, -10.0, 10.0)
+    H_pmz_RAND  = ROOT.TH1D("H_pmz_RAND","pmz", 200, -10.0, 10.0)
+    H_ct_ep_RAND = ROOT.TH1D("H_ct_ep_RAND", "Electron-Proton CTime", 200, -10, 10)
 
     ################################################################################################################################################
     # 2D histograms
@@ -590,44 +593,65 @@ def defineHists(phi_setting):
           #H_MM_DATA.Fill(pow(evt.MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
 
-          ###################################################################################################################################################
-
-          # Random subtraction
-
-          H_ssxfp_DATA_rand.Fill(evt.ssxfp)
-          H_ssyfp_DATA_rand.Fill(evt.ssyfp)
-          H_ssxpfp_DATA_rand.Fill(evt.ssxpfp)
-          H_ssypfp_DATA_rand.Fill(evt.ssypfp)
-          H_ssdelta_DATA_rand.Fill(evt.ssdelta)
-          H_ssxptar_DATA_rand.Fill(evt.ssxptar)
-          H_ssyptar_DATA_rand.Fill(evt.ssyptar)
-
-          H_hsxfp_DATA_rand.Fill(evt.hsxfp)
-          H_hsyfp_DATA_rand.Fill(evt.hsyfp)
-          H_hsxpfp_DATA_rand.Fill(evt.hsxpfp)
-          H_hsypfp_DATA_rand.Fill(evt.hsypfp)
-          H_hsdelta_DATA_rand.Fill(evt.hsdelta)
-          H_hsxptar_DATA_rand.Fill(evt.hsxptar)	
-          H_hsyptar_DATA_rand.Fill(evt.hsyptar)
-
-          H_pmiss_DATA_rand.Fill(evt.pmiss)	
-          H_emiss_DATA_rand.Fill(evt.emiss)	
-          #H_emiss_DATA_rand.Fill(evt.emiss_nuc)
-          H_pmx_DATA_rand.Fill(evt.pmx)
-          H_pmy_DATA_rand.Fill(evt.pmy)
-          H_pmz_DATA_rand.Fill(evt.pmz)
-          H_Q2_DATA_rand.Fill(evt.Q2)
-          H_t_DATA_rand.Fill(-evt.MandelT)
-          H_W_DATA_rand.Fill(evt.W)
-          H_epsilon_DATA_rand.Fill(evt.epsilon)
-          H_MM_DATA_rand.Fill(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))  )
-
           H_cal_etottracknorm_DATA.Fill(evt.H_cal_etottracknorm)
           H_cer_npeSum_DATA.Fill(evt.H_cer_npeSum)
 
           P_cal_etottracknorm_DATA.Fill(evt.P_cal_etottracknorm)
           P_hgcer_npeSum_DATA.Fill(evt.P_hgcer_npeSum)
-          P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)
+          P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)          
+
+    ###################################################################################################################################################
+    
+    # Random subtraction
+    ibin = 1
+    print("\nPlotting %s random data..." % phi_setting)
+    for i,evt in enumerate(TBRANCH_RAND):
+
+        # Progress bar
+        #Misc.progressBar(i, TBRANCH_RAND.GetEntries())
+        
+        #CUTs Definations 
+        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+
+        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+        HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+        if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
+            Diamond = True
+        else:
+            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+
+        #........................................
+                
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):          
+
+          H_ssxfp_RAND.Fill(evt.ssxfp)
+          H_ssyfp_RAND.Fill(evt.ssyfp)
+          H_ssxpfp_RAND.Fill(evt.ssxpfp)
+          H_ssypfp_RAND.Fill(evt.ssypfp)
+          H_ssdelta_RAND.Fill(evt.ssdelta)
+          H_ssxptar_RAND.Fill(evt.ssxptar)
+          H_ssyptar_RAND.Fill(evt.ssyptar)
+
+          H_hsxfp_RAND.Fill(evt.hsxfp)
+          H_hsyfp_RAND.Fill(evt.hsyfp)
+          H_hsxpfp_RAND.Fill(evt.hsxpfp)
+          H_hsypfp_RAND.Fill(evt.hsypfp)
+          H_hsdelta_RAND.Fill(evt.hsdelta)
+          H_hsxptar_RAND.Fill(evt.hsxptar)	
+          H_hsyptar_RAND.Fill(evt.hsyptar)
+
+          H_pmiss_RAND.Fill(evt.pmiss)	
+          H_emiss_RAND.Fill(evt.emiss)	
+          #H_emiss_RAND.Fill(evt.emiss_nuc)
+          H_pmx_RAND.Fill(evt.pmx)
+          H_pmy_RAND.Fill(evt.pmy)
+          H_pmz_RAND.Fill(evt.pmz)
+          H_Q2_RAND.Fill(evt.Q2)
+          H_t_RAND.Fill(-evt.MandelT)
+          H_W_RAND.Fill(evt.W)
+          H_epsilon_RAND.Fill(evt.epsilon)
+          H_MM_RAND.Fill(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))  )
 
           ibin+=1
           
@@ -702,59 +726,59 @@ def defineHists(phi_setting):
     H_ct_ep_DATA.Scale(normfac_data)
 
     # Data Random subtraction
-    H_ssxfp_DATA_rand.Scale(normfac_data/nWindows)
-    H_ssyfp_DATA_rand.Scale(normfac_data/nWindows)
-    H_ssxpfp_DATA_rand.Scale(normfac_data/nWindows)
-    H_ssypfp_DATA_rand.Scale(normfac_data/nWindows)
-    H_hsxfp_DATA_rand.Scale(normfac_data/nWindows)
-    H_hsyfp_DATA_rand.Scale(normfac_data/nWindows)
-    H_hsxpfp_DATA_rand.Scale(normfac_data/nWindows)
-    H_hsypfp_DATA_rand.Scale(normfac_data/nWindows)
-    H_ssxptar_DATA_rand.Scale(normfac_data/nWindows)
-    H_ssyptar_DATA_rand.Scale(normfac_data/nWindows)
-    H_hsxptar_DATA_rand.Scale(normfac_data/nWindows)
-    H_hsyptar_DATA_rand.Scale(normfac_data/nWindows)
-    H_ssdelta_DATA_rand.Scale(normfac_data/nWindows)
-    H_hsdelta_DATA_rand.Scale(normfac_data/nWindows)
-    H_Q2_DATA_rand.Scale(normfac_data/nWindows)
-    H_t_DATA_rand.Scale(normfac_data/nWindows)
-    H_epsilon_DATA_rand.Scale(normfac_data/nWindows)
-    H_MM_DATA_rand.Scale(normfac_data/nWindows)
-    H_pmiss_DATA_rand.Scale(normfac_data/nWindows)
-    H_emiss_DATA_rand.Scale(normfac_data/nWindows)
-    H_pmx_DATA_rand.Scale(normfac_data/nWindows)
-    H_pmy_DATA_rand.Scale(normfac_data/nWindows)
-    H_pmz_DATA_rand.Scale(normfac_data/nWindows)
-    H_W_DATA_rand.Scale(normfac_data/nWindows)
-    #H_ct_ep_DATA_rand.Scale(normfac_data/nWindows)
+    H_ssxfp_RAND.Scale(normfac_data/nWindows)
+    H_ssyfp_RAND.Scale(normfac_data/nWindows)
+    H_ssxpfp_RAND.Scale(normfac_data/nWindows)
+    H_ssypfp_RAND.Scale(normfac_data/nWindows)
+    H_hsxfp_RAND.Scale(normfac_data/nWindows)
+    H_hsyfp_RAND.Scale(normfac_data/nWindows)
+    H_hsxpfp_RAND.Scale(normfac_data/nWindows)
+    H_hsypfp_RAND.Scale(normfac_data/nWindows)
+    H_ssxptar_RAND.Scale(normfac_data/nWindows)
+    H_ssyptar_RAND.Scale(normfac_data/nWindows)
+    H_hsxptar_RAND.Scale(normfac_data/nWindows)
+    H_hsyptar_RAND.Scale(normfac_data/nWindows)
+    H_ssdelta_RAND.Scale(normfac_data/nWindows)
+    H_hsdelta_RAND.Scale(normfac_data/nWindows)
+    H_Q2_RAND.Scale(normfac_data/nWindows)
+    H_t_RAND.Scale(normfac_data/nWindows)
+    H_epsilon_RAND.Scale(normfac_data/nWindows)
+    H_MM_RAND.Scale(normfac_data/nWindows)
+    H_pmiss_RAND.Scale(normfac_data/nWindows)
+    H_emiss_RAND.Scale(normfac_data/nWindows)
+    H_pmx_RAND.Scale(normfac_data/nWindows)
+    H_pmy_RAND.Scale(normfac_data/nWindows)
+    H_pmz_RAND.Scale(normfac_data/nWindows)
+    H_W_RAND.Scale(normfac_data/nWindows)
+    #H_ct_ep_RAND.Scale(normfac_data/nWindows)
 
     ###
     # Data Random subtraction
-    H_ssxfp_DATA.Add(H_ssxfp_DATA_rand,-1)
-    H_ssyfp_DATA.Add(H_ssyfp_DATA_rand,-1)
-    H_ssxpfp_DATA.Add(H_ssxpfp_DATA_rand,-1)
-    H_ssypfp_DATA.Add(H_ssypfp_DATA_rand,-1)
-    H_hsxfp_DATA.Add(H_hsxfp_DATA_rand,-1)
-    H_hsyfp_DATA.Add(H_hsyfp_DATA_rand,-1)
-    H_hsxpfp_DATA.Add(H_hsxpfp_DATA_rand,-1)
-    H_hsypfp_DATA.Add(H_hsypfp_DATA_rand,-1)
-    H_ssxptar_DATA.Add(H_ssxptar_DATA_rand,-1)
-    H_ssyptar_DATA.Add(H_ssyptar_DATA_rand,-1)
-    H_hsxptar_DATA.Add(H_hsxptar_DATA_rand,-1)
-    H_hsyptar_DATA.Add(H_hsyptar_DATA_rand,-1)
-    H_ssdelta_DATA.Add(H_ssdelta_DATA_rand,-1)
-    H_hsdelta_DATA.Add(H_hsdelta_DATA_rand,-1)
-    H_Q2_DATA.Add(H_Q2_DATA_rand,-1)
-    H_t_DATA.Add(H_t_DATA_rand,-1)
-    H_epsilon_DATA.Add(H_epsilon_DATA_rand,-1)
-    H_MM_DATA.Add(H_MM_DATA_rand,-1)
-    H_pmiss_DATA.Add(H_pmiss_DATA_rand,-1)
-    H_emiss_DATA.Add(H_emiss_DATA_rand,-1)
-    H_pmx_DATA.Add(H_pmx_DATA_rand,-1)
-    H_pmy_DATA.Add(H_pmy_DATA_rand,-1)
-    H_pmz_DATA.Add(H_pmz_DATA_rand,-1)
-    H_W_DATA.Add(H_W_DATA_rand,-1)
-    H_ct_ep_DATA.Add(H_ct_ep_DATA_rand,-1)
+    H_ssxfp_DATA.Add(H_ssxfp_RAND,-1)
+    H_ssyfp_DATA.Add(H_ssyfp_RAND,-1)
+    H_ssxpfp_DATA.Add(H_ssxpfp_RAND,-1)
+    H_ssypfp_DATA.Add(H_ssypfp_RAND,-1)
+    H_hsxfp_DATA.Add(H_hsxfp_RAND,-1)
+    H_hsyfp_DATA.Add(H_hsyfp_RAND,-1)
+    H_hsxpfp_DATA.Add(H_hsxpfp_RAND,-1)
+    H_hsypfp_DATA.Add(H_hsypfp_RAND,-1)
+    H_ssxptar_DATA.Add(H_ssxptar_RAND,-1)
+    H_ssyptar_DATA.Add(H_ssyptar_RAND,-1)
+    H_hsxptar_DATA.Add(H_hsxptar_RAND,-1)
+    H_hsyptar_DATA.Add(H_hsyptar_RAND,-1)
+    H_ssdelta_DATA.Add(H_ssdelta_RAND,-1)
+    H_hsdelta_DATA.Add(H_hsdelta_RAND,-1)
+    H_Q2_DATA.Add(H_Q2_RAND,-1)
+    H_t_DATA.Add(H_t_RAND,-1)
+    H_epsilon_DATA.Add(H_epsilon_RAND,-1)
+    H_MM_DATA.Add(H_MM_RAND,-1)
+    H_pmiss_DATA.Add(H_pmiss_RAND,-1)
+    H_emiss_DATA.Add(H_emiss_RAND,-1)
+    H_pmx_DATA.Add(H_pmx_RAND,-1)
+    H_pmy_DATA.Add(H_pmy_RAND,-1)
+    H_pmz_DATA.Add(H_pmz_RAND,-1)
+    H_W_DATA.Add(H_W_RAND,-1)
+    H_ct_ep_DATA.Add(H_ct_ep_RAND,-1)
 
     histDict = {
         "phi_setting" : phi_setting,
