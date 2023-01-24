@@ -1,5 +1,7 @@
 ![LT_Analyisis Workflow](docs/LT_Analysis_Workflow.png)
 
+<embed src="LT_Analysis_Workflow.pdf" width="500" height="375" type="application/pdf">
+
 /*--------------------------------------------------*/
 Installation instruction
 
