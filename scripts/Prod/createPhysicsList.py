@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 12:42:07 trottar"
+# Time-stamp: "2023-01-24 13:01:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,8 +15,8 @@ import sys, os
 ##################################################################################################################################################
 
 # Check the number of arguments provided to the script
-if len(sys.argv)-1!=29:
-    print("!!!!! ERROR !!!!!\n Expected 29 arguments\n Usage is with - Q2 POL EPSVAL TMIN TMAX NumtBins Kset runNumRight runNumLeft runNumCenter pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter EffValRight EffValLeft EffValCenter EffErrRight EffErrLeft EffErrCenter ChargeValRight ChargeValLeft ChargeValCenter ChargeErrRight ChargeErrLeft ChargeErrCenter \n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=30:
+    print("!!!!! ERROR !!!!!\n Expected 30 arguments\n Usage is with - Q2 POL EPSVAL TMIN TMAX NumtBins Kset runNumRight runNumLeft runNumCenter pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter EffValRight EffValLeft EffValCenter EffErrRight EffErrLeft EffErrCenter ChargeValRight ChargeValLeft ChargeValCenter ChargeErrRight ChargeErrLeft ChargeErrCenter kinematics\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ################################################################################################################################################
@@ -59,6 +59,8 @@ ChargeErrLeft = sys.argv[27].split(" ")
 ChargeErrCenter = sys.argv[28].split(" ")
 
 TargetType = sys.argv[29]
+
+kinematics = sys.argv[30].split("_")
 
 InSIMCFilenameRight = "Prod_Coin_{}.root".format(kinematics[0]+"right_"+kinematics[1])
 InSIMCFilenameLeft = "Prod_Coin_{}.root".format(kinematics[0]+"left_"+kinematics[1])
