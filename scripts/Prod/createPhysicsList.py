@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 13:29:01 trottar"
+# Time-stamp: "2023-01-24 13:30:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,7 +187,7 @@ if not os.path.exists(f_list):
 with open(f_list, 'r') as f:
     lines = f.readlines()
     try:
-        if int(runNumRight[0]) == 0:
+        if float(runNumRight[0]) == 0.0:
             # Write the value of the variable to the file
             check_line = "{} {:.5f} {} -{:.3f} {} {}\n".format(Q2,float(EbeamValRight),EPSVAL,thpq_right,simc_right_normfactor,simc_right_nevents)
             # Check if the line already exists
@@ -195,11 +195,11 @@ with open(f_list, 'r') as f:
                 write_to_file(f_list,check_line)
     except NameError:
         print("")                
-    if int(runNumLeft[0]) == 1:
+    if float(runNumLeft[0]) == 0.0:
         check_line = "{} {:.5f} {} +{:.3f} {} {}\n".format(Q2,float(EbeamValLeft),EPSVAL,thpq_left,simc_left_normfactor,simc_left_nevents)
         if check_line not in lines:
             write_to_file(f_list,check_line)
-    if int(runNumCenter[0]) == 2:
+    if float(runNumCenter[0]) == 0.0:
         check_line = "{} {:.5f} {} {:.3f} {} {}\n".format(Q2,float(EbeamValCenter),EPSVAL,thpq_center,simc_center_normfactor,simc_center_nevents)
         if check_line not in lines:
             write_to_file(f_list,check_line)
