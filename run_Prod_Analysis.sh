@@ -191,9 +191,13 @@ EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
 grab_runs () {
     RunList=$1
     INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
-    cd "${LTANAPATH}/scripts"
-    RunNumArr=$(python3 getRunNumbers.py $INPDIR)
-    echo $RunNumArr
+    if [[ -e $INPDIR ]]; then
+	cd "${LTANAPATH}/scripts"
+	RunNumArr=$(python3 getRunNumbers.py $INPDIR)
+	echo $RunNumArr
+    else
+	exit
+    fi
 }
 
 echo
