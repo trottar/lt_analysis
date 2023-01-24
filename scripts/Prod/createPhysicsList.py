@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 15:05:06 trottar"
+# Time-stamp: "2023-01-24 15:11:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,28 +65,6 @@ kinematics = sys.argv[30].split("_")
 InSIMCFilenameRight = "Prod_Coin_{}.root".format(kinematics[0]+"right_"+kinematics[1])
 InSIMCFilenameLeft = "Prod_Coin_{}.root".format(kinematics[0]+"left_"+kinematics[1])
 InSIMCFilenameCenter = "Prod_Coin_{}.root".format(kinematics[0]+"center_"+kinematics[1])
-
-print("runNumRight",runNumRight)
-print("runNumLeft",runNumLeft)
-print("runNumCenter",runNumCenter)
-print("pThetaValRight",pThetaValRight)
-print("pThetaValLeft",pThetaValLeft)
-print("pThetaValCenter",pThetaValCenter)
-print("EbeamValRight",EbeamValRight)
-print("EbeamValLeft",EbeamValLeft)
-print("EbeamValCenter",EbeamValCenter)
-print("EffValRight",EffValRight)
-print("EffValLeft",EffValLeft)
-print("EffValCenter",EffValCenter)
-print("EffErrRight",EffErrRight)
-print("EffErrLeft",EffErrLeft)
-print("EffErrCenter",EffErrCenter)
-print("ChargeValRight",ChargeValRight)
-print("ChargeValLeft",ChargeValLeft)
-print("ChargeValCenter",ChargeValCenter)
-print("ChargeErrRight",ChargeErrRight)
-print("ChargeErrLeft",ChargeErrLeft)
-print("ChargeErrCenter",ChargeErrCenter)
 
 ################################################################################################################################################
 '''
@@ -163,13 +141,6 @@ f_simc_center = open(simc_center_hist)
 angle_flag = False
 for line in f_simc_center:
     #print(line)
-    if "Ebeam" in line:
-        val = line.split("=")
-        EbeamValCenter = float(val[1].replace("MeV\n",""))/1000
-    if "angle" in line and angle_flag == False:
-        angle_flag = True
-        val = line.split("=")
-        pThetaValCenter = float(val[1].replace("deg\n","").split("          ")[1])
     if "Ngen" in line:
         val = line.split("=")
         simc_center_nevents = int(val[1])
