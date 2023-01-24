@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 13:52:00 trottar"
+# Time-stamp: "2023-01-24 13:56:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -172,7 +172,7 @@ def write_to_file(f_out,line):
 print(runNumRight)
 print(len(runNumRight))
 # Define thpq vector relative to middle setting
-if len(runNumRight) != 0:
+if float(runNumRight) != 0:
     thpq_right = abs(float(pThetaValCenter[0])-float(pThetaValRight[0]))
 thpq_left = abs(float(pThetaValCenter[0])-float(pThetaValLeft[0]))
 thpq_center = 0.000
@@ -186,7 +186,7 @@ if not os.path.exists(f_list):
 with open(f_list, 'r') as f:
     lines = f.readlines()
     try:
-        if len(runNumRight) != 0:
+        if float(runNumRight) != 0:
             # Write the value of the variable to the file
             check_line = "{} {:.5f} {} -{:.3f} {} {}\n".format(Q2,float(EbeamValRight),EPSVAL,thpq_right,simc_right_normfactor,simc_right_nevents)
             # Check if the line already exists
@@ -194,11 +194,11 @@ with open(f_list, 'r') as f:
                 write_to_file(f_list,check_line)
     except NameError:
         print("")                
-    if len(runNumLeft) != 0:
+    if float(runNumLeft) != 0:
         check_line = "{} {:.5f} {} +{:.3f} {} {}\n".format(Q2,float(EbeamValLeft),EPSVAL,thpq_left,simc_left_normfactor,simc_left_nevents)
         if check_line not in lines:
             write_to_file(f_list,check_line)
-    if len(runNumCenter) != 0:
+    if float(runNumCenter) != 0:
         check_line = "{} {:.5f} {} {:.3f} {} {}\n".format(Q2,float(EbeamValCenter),EPSVAL,thpq_center,simc_center_normfactor,simc_center_nevents)
         if check_line not in lines:
             write_to_file(f_list,check_line)
@@ -211,16 +211,16 @@ if not os.path.exists(f_list_settings):
 # First check if line exists
 with open(f_list_settings, 'r') as f:
     lines = f.readlines()
-    if len(runNumRight[0]) != 0:
+    if float(runNumRight[0]) != 0:
         check_line = "{} {} {} -{:.3f} {} {} {} {}\n".format(POL,Q2,EPSVAL,thpq_right,TMIN,TMAX,NumtBins,Kset)
         # Check if the line already exists
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
-    if len(runNumLeft[0]) != 0:
+    if float(runNumLeft[0]) != 0:
         check_line = "{} {} {} +{:.3f} {} {} {} {}\n".format(POL,Q2,EPSVAL,thpq_left,TMIN,TMAX,NumtBins,Kset)
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
-    if len(runNumCenter[0]) != 0:
+    if float(runNumCenter[0]) != 0:
         check_line = "{} {} {} {:.3f} {} {} {} {}\n".format(POL,Q2,EPSVAL,thpq_center,TMIN,TMAX,NumtBins,Kset)
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
@@ -237,7 +237,7 @@ if not os.path.exists(f_list):
 # Open a file in write mode
 with open(f_list, 'r') as f:
     lines = f.readlines()
-    if len(runNumRight[0]) != 0:
+    if float(runNumRight[0]) != 0:
         # Write the value of the variable to the file
         for i,thpq in enumerate(EbeamValRight):
             # convert uC to C (10^-6C=1uC)
@@ -247,14 +247,14 @@ with open(f_list, 'r') as f:
             # Check if the line already exists
             if check_line not in lines:
                 write_to_file(f_list,check_line)
-    if len(runNumLeft[0]) != 0:
+    if float(runNumLeft[0]) != 0:
         for i,thpq in enumerate(EbeamValLeft):
             check_line = "{} {} {} {} {} {:.5f} {} {} +{:.3f}\n" \
                     .format(runNumLeft[i],Q2,EbeamValLeft[i],float(ChargeValLeft[i])/1000000,ChargeErrLeft[i], \
                             float(EffValLeft[i]),EffErrLeft[i],EPSVAL,thpq_left)
             if check_line not in lines:
                 write_to_file(f_list,check_line)
-    if len(runNumCenter[0]) != 0:
+    if float(runNumCenter[0]) != 0:
         for i,thpq in enumerate(EbeamValCenter):
             check_line = "{} {} {} {} {} {:.5f} {} {} {:.3f}\n" \
                     .format(runNumCenter[i],Q2,EbeamValCenter[i],float(ChargeValCenter[i])/1000000,ChargeErrCenter[i], \
