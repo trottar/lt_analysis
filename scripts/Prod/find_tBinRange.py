@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 21:17:26 trottar"
+# Time-stamp: "2023-01-24 21:26:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -659,7 +659,7 @@ def defineHists(phi_setting):
     # Normalize simc by normfactor/nevents
     # Normalize data by effective charge
 
-    normfac_simc = (simc_normfactor*100)/(simc_nevents)
+    normfac_simc = (simc_normfactor)/(simc_nevents)
     H_ssxfp_SIMC.Scale(normfac_simc)
     H_ssyfp_SIMC.Scale(normfac_simc)
     H_ssxpfp_SIMC.Scale(normfac_simc)
