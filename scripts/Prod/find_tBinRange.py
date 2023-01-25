@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 21:26:29 trottar"
+# Time-stamp: "2023-01-24 21:34:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,7 +130,7 @@ def find_tbins():
                 # Grab t bin range
                 for i,evt in enumerate(TBRANCH_RIGHT_DATA):
                     # Progress bar
-                    Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries())
+                    Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries(),bar_length=25)
                     if (tmin <= -evt.MandelT <= tmax):
                         H_t_Right.append(-evt.MandelT)   
                 #rbins,H_t_Right = np.histogram(H_t_Right,bins=200)
@@ -150,7 +150,7 @@ def find_tbins():
                 # Grab t bin range
                 for i,evt in enumerate(TBRANCH_LEFT_DATA):
                     # Progress bar
-                    Misc.progressBar(i, TBRANCH_LEFT_DATA.GetEntries())
+                    Misc.progressBar(i, TBRANCH_LEFT_DATA.GetEntries(),bar_length=25)
                     if (tmin <= -evt.MandelT <= tmax):
                         H_t_Left.append(-evt.MandelT)
                 #lbins,H_t_Left = np.histogram(H_t_Left,bins=200)
@@ -169,7 +169,7 @@ def find_tbins():
                 # Grab t bin range
                 for i,evt in enumerate(TBRANCH_CENTER_DATA):
                     # Progress bar
-                    Misc.progressBar(i, TBRANCH_CENTER_DATA.GetEntries())
+                    Misc.progressBar(i, TBRANCH_CENTER_DATA.GetEntries(),bar_length=25)
                     if (tmin <= -evt.MandelT <= tmax):
                         H_t_Center.append(-evt.MandelT)
                 #cbins,H_t_Center = np.histogram(H_t_Center,bins=200)
@@ -480,7 +480,7 @@ def defineHists(phi_setting):
     for i,evt in enumerate(TBRANCH_SIMC):
 
       # Progress bar
-      #Misc.progressBar(i, TBRANCH_SIMC.GetEntries())
+      Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
         
       # Define the acceptance cuts  
       SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
@@ -533,7 +533,7 @@ def defineHists(phi_setting):
     for i,evt in enumerate(TBRANCH_DATA):
 
         # Progress bar
-        #Misc.progressBar(i, TBRANCH_DATA.GetEntries())
+        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
@@ -608,7 +608,7 @@ def defineHists(phi_setting):
     for i,evt in enumerate(TBRANCH_RAND):
 
         # Progress bar
-        #Misc.progressBar(i, TBRANCH_RAND.GetEntries())
+        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
