@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-14 13:40:43 trottar"
+# Time-stamp: "2023-02-02 10:31:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,7 +200,7 @@ RandomWindows[3] = PromptPeak + (BunchSpacing/2) + CoinOffset + (nSkip*BunchSpac
 
 ################################################################################################################################################
 # Grabs PID cut string
-
+'''
 log_hist = "%s/log/Analysed_COIN_%s.log" % (LTANAPATH,data_runNums.split(' ')[0])
 f_log = open(log_hist)
 for line in f_log:
@@ -212,7 +212,7 @@ else:
     print("ERROR: Invalid log file %s" % log_hist)
     sys.exit(0)
 f_log.close()
-
+'''
 ################################################################################################################################################
 # Define root file trees of interest
 
@@ -1769,7 +1769,7 @@ gPad.SetLogy()
 P_aero_npeSum_DATA.Draw("E1")
 P_aero_npeSum_DATA_nocut.Draw("same, E1")
 P_aero_npeSum_DATA_nopid.Draw("same, E1")
-
+'''
 c_pid.cd(6)
 l_pid.SetTextSize(0.05)
 log_txt = ROOT.TPaveText(0.,0.3,1.0,0.5,"NDC");
@@ -1783,7 +1783,7 @@ l_pid.AddEntry(H_cal_etottracknorm_DATA_nopid,"No PID cut")
 log_txt.Draw("same, E1")
 l_pid.Draw("same, E1")
 c_pid.Draw()
-
+'''
 c_pid.Print(outputpdf)
 
 c_pid_2d = TCanvas()
