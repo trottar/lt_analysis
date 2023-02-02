@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 21:53:03 trottar"
+# Time-stamp: "2023-02-02 13:44:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -178,7 +178,19 @@ def find_tbins():
     ################################################################################################################################################
 
     def histedges_equalN(x, nbin):
+        # Grab number of events in array
         npt = len(x)
+        # One-dimensional linear interpolation for monotonically increasing sample points.
+        # Returns the one-dimensional piecewise linear interpolant to a function with given
+        # discrete data points (xp, fp), evaluated at x.
+        #
+        # np.interp(x, xp, fp)
+        # x -> np.linspace(0, npt, nbin + 1) : The x-coordinates at which to evaluate the interpolated values
+        # In this case, this is an array of evenly spaced t-bins
+        # xp -> np.arange(npt) : The x-coordinates of the data points
+        # In this case, this returns evenly spaced values within a given interval
+        # yp -> np.sort(x) : he y-coordinates of the data points
+        # In this case, this returns a sorted copy of the array
         return np.interp(np.linspace(0, npt, nbin + 1),np.arange(npt),np.sort(x))
 
     H_t_BinTest = []
@@ -193,6 +205,14 @@ def find_tbins():
             for c in H_t_Center:
                 H_t_BinTest.append(c)
 
+    # Histogram takes the array data set and the bins as input
+    # The bins are determined by a linear interpolation (see function above)
+    # This returns the binned data with equal number of events per bin
+    # Returns...
+    # n -> The values of the histogram bins
+    # bins -> The edges of the bins
+    # patches -> Container of individual artists used to create the histogram or list of
+    # such containers if there are multiple input datasets.
     n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, NumtBins))
 
     rn, rbins = np.histogram(H_t_Right, bins=bins)
