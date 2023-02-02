@@ -41,7 +41,7 @@ while getopts 'hdat' flag; do
 	echo "    -d, debug"	
         echo "    -a, analyze"	
         echo "    -t, set t-bin (!!!required for script!!!)"
-	echo "        EPSILON=arg1, Q2=arg2, W=arg3"	
+	echo "        EPSILON=arg1, Q2=arg2, W=arg3, target=arg4"	
         exit 0
         ;;
 	d) d_flag='true' ;;
