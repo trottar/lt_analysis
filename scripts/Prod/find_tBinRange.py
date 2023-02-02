@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-02 13:44:23 trottar"
+# Time-stamp: "2023-02-02 14:04:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -191,6 +191,7 @@ def find_tbins():
         # In this case, this returns evenly spaced values within a given interval
         # yp -> np.sort(x) : he y-coordinates of the data points
         # In this case, this returns a sorted copy of the array
+        print("\n\n~~~~~~~~~~~~~~~~~~~~~~~~",np.linspace(0, npt, nbin + 1),np.arange(npt),np.sort(x))
         return np.interp(np.linspace(0, npt, nbin + 1),np.arange(npt),np.sort(x))
 
     H_t_BinTest = []
@@ -213,8 +214,10 @@ def find_tbins():
     # bins -> The edges of the bins
     # patches -> Container of individual artists used to create the histogram or list of
     # such containers if there are multiple input datasets.
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",histedges_equalN(H_t_BinTest, NumtBins))
     n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, NumtBins))
-
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~",bins)
+    
     rn, rbins = np.histogram(H_t_Right, bins=bins)
     ln, lbins = np.histogram(H_t_Left, bins=bins)
     cn, cbins = np.histogram(H_t_Center, bins=bins)
