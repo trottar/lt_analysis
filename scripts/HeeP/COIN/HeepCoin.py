@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-09 14:35:21 trottar"
+# Time-stamp: "2023-02-09 17:25:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -111,8 +111,8 @@ outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 ###############################################################################################################################################
 
 # Grabs simc number of events and normalizaton factor
-#simc_hist = "%s/OUTPUT/Analysis/HeeP/%s" % (LTANAPATH,InSIMCFilename.replace('.root','.hist'))
-simc_hist = "%s/OUTPUT/Analysis/KaonLT/%s" % (LTANAPATH,InSIMCFilename.replace('.root','.hist'))
+simc_hist = "%s/OUTPUT/Analysis/HeeP/%s" % (LTANAPATH,InSIMCFilename.replace('.root','.hist'))
+
 f_simc = open(simc_hist)
 for line in f_simc:
     print(line)
