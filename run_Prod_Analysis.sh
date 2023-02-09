@@ -41,7 +41,15 @@ while getopts 'hdat' flag; do
 	echo "    -d, debug"	
         echo "    -a, analyze"	
         echo "    -t, set t-bin (!!!required for script!!!)"
-	echo "        EPSILON=arg1, Q2=arg2, W=arg3, target=arg4"	
+	echo "        EPSILON=arg1, Q2=arg2, W=arg3, target=arg4"
+	echo
+	echo " Avaliable Kinematics..."	
+	echo "                      Q2=5p5, W=3p02"
+	echo "                      Q2=4p4, W=2p74"
+	echo "                      Q2=3p0, W=3p14"
+	echo "                      Q2=3p0, W=2p32"
+	echo "                      Q2=2p1, W=2p95"
+	echo "                      Q2=0p5, W=2p40"
         exit 0
         ;;
 	d) d_flag='true' ;;
@@ -702,8 +710,11 @@ fi
 
 # Run the plotting script if t-flag enabled
 # Checks that array isn't empty
-
 if [[ $t_flag = "true" || $d_flag = "true" ]]; then
+    echo
+    echo
+    echo
+    echo "Finding t-bins..."
     cd "${LTANAPATH}/scripts/Prod"    
     if [ ${#data_right[@]} -eq 0 ]; then
 	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${TargetType}
@@ -712,9 +723,13 @@ if [[ $t_flag = "true" || $d_flag = "true" ]]; then
     fi
 fi
 
-# Create input for lt_analysis code
+echo
+echo
+echo
+echo "Creating analysis lists..."
 cd "${LTANAPATH}/scripts/Prod/"
 
+# Create input for lt_analysis code
 if [ ${#data_right[@]} -eq 0 ]; then
     python3 createPhysicsList.py ${Q2} ${POL} ${EPSVAL} ${TMIN} ${TMAX} ${NumtBins} ${KSet} "0" "${data_left[*]}" "${data_center[*]}" "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" "0" "${DataChargeValLeft[*]}" "${DataChargeValCenter[*]}" "0" "${DataChargeErrLeft[*]}" "${DataChargeErrCenter[*]}" ${TargetType} ${KIN}
 else
@@ -726,3 +741,7 @@ if [[ $t_flag = "true" || $d_flag = "true" ]]; then
     evince "OUTPUT/Analysis/${ANATYPE}LT/${OutFullAnalysisFilename}.pdf"
 fi
 
+echo
+echo
+echo
+echo "Script Complete!"

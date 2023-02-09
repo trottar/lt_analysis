@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-02 14:22:32 trottar"
+# Time-stamp: "2023-02-09 13:48:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
 import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar 
+from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
@@ -328,6 +328,24 @@ def defineHists(phi_setting):
     # Define total efficiency vs run number plots
     G_data_eff = ROOT.TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
 
+    ################################################################################################################################################
+    # Grabs PID cut string
+
+    pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+    if os.path.exists(pid_log):
+        with open(pid_log, 'r') as f_log:
+            for line in f_log:
+                if "coin_ep_cut_prompt_noRF_pid" in line:
+                    pid_text = next(f_log)
+    else:
+        pid_text = "\nNo cuts file found in logs..."
+
+    if 'pid_text' in locals():
+        print('\n\nPID Cuts = ',pid_text,'\n\n')
+    else:
+        print("ERROR: Invalid log file %s" % pid_log)
+        sys.exit(0)
+
     ###############################################################################################################################################
     # Grab windows for random subtraction
 
@@ -564,9 +582,18 @@ def defineHists(phi_setting):
         else:
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
+
+        '''
+        if phi_setting == "Right":
+            ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
+        else:
+            ct_cut = True
+
         #........................................
                 
-        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
+        '''
 
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_eta)
@@ -639,9 +666,18 @@ def defineHists(phi_setting):
         else:
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
+
+        '''
+        if phi_setting == "Right":
+            ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
+        else:
+            ct_cut = True
+
         #........................................
                 
-        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):          
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
+        '''
 
           H_ssxfp_RAND.Fill(evt.ssxfp)
           H_ssyfp_RAND.Fill(evt.ssyfp)
@@ -800,6 +836,7 @@ def defineHists(phi_setting):
 
     histDict = {
         "phi_setting" : phi_setting,
+        "pid_text" : pid_text,
         "runNums" : runNums.split(' '),
         "InData_efficiency" : InData_efficiency.split(' '),
         "G_data_eff" : G_data_eff,
@@ -1414,8 +1451,17 @@ tradius.SetLineColor(2)
 tradius.SetLabelColor(2)
 tradius.Draw()
 
-Cpht.Print(outputpdf+')')
+Cpht.Print(outputpdf)
 
+Ctext = TCanvas()
+
+for i,hist in enumerate(histlist):
+    tex = TLatex(.1,.1,"{}".format(hist["pid_text"]))
+    tex.SetTextColor(i+1)
+    tex.SetNDC(True)
+    tex.Draw()
+
+Ctext.Print(outputpdf+')')
 
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
