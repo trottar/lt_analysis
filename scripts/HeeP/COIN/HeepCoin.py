@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-10 13:29:20 trottar"
+# Time-stamp: "2023-02-10 13:31:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -618,7 +618,7 @@ for evt in TBRANCH_SIMC:
 
       H_pmiss_SIMC.Fill(evt.Pm, evt.Weight)	
       H_emiss_SIMC.Fill(evt.Em, evt.Weight)	
-      H_pmx_SIMC.Fill(evt.pmx-3.809, evt.Weight)
+      H_pmx_SIMC.Fill(evt.Pmx-3.809, evt.Weight)
       H_pmy_SIMC.Fill(evt.Pmy, evt.Weight)
       H_pmz_SIMC.Fill(evt.Pmz+1.866, evt.Weight)
       H_Q2_SIMC.Fill(evt.Q2, evt.Weight)
