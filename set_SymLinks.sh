@@ -57,6 +57,21 @@ elif [ -L "${LTANAPATH}/OUTPUT" ]; then
     fi
 fi
 
+if [ ! -L "${LTANAPATH}/log" ]; then
+    ln -s "${VOLATILEPATH}/log/" "${LTANAPATH}/log"
+elif [ -L "${LTANAPATH}/log" ]; then
+    if [ ! -e "${LTANAPATH}/log" ]; then
+	echo "${LTANAPATH}/log sym link exits but is broken, replacing"
+	rm "${LTANAPATH}/log"
+	ln -s "${VOLATILEPATH}/log/" "${LTANAPATH}/log"
+    else 
+	echo "${LTANAPATH}/log sym link already exists and not broken"
+	echo "             ${LTANAPATH}/log-->${VOLATILEPATH}/log/"
+	echo
+	echo
+    fi
+fi
+
 if [ ! -L "${LTANAPATH}/src/data" ]; then
     ln -s "${VOLATILEPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "${LTANAPATH}/src/data"
 elif [ -L "${LTANAPATH}/src/data" ]; then

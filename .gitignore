@@ -30,5 +30,6 @@ OUTPUTS
 OUTPUT
 data
 simc_gfortran
+log
 
 $HOME
