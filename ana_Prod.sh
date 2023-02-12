@@ -389,9 +389,9 @@ if [ ${PHIVAL} = "right" ]; then
     echo "Analysing right data..."
     echo
     echo
-    echo "-----------------------------"
+    echo "--------------------------------"
     echo "Analysing right data run ${RUNNUM}..."
-    echo "-----------------------------"
+    echo "--------------------------------"
     echo
     cd "${LTANAPATH}/scripts/Prod"
     python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
@@ -404,9 +404,9 @@ if [ ${PHIVAL} = "left" ]; then
     echo "Analysing left data..."
     echo
     echo
-    echo "-----------------------------"
+    echo "--------------------------------"
     echo "Analysing left data run ${RUNNUM}..."
-    echo "-----------------------------"
+    echo "--------------------------------"
     echo
     cd "${LTANAPATH}/scripts/Prod"
     python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
@@ -418,9 +418,9 @@ if [ ${PHIVAL} = "center" ]; then
     echo "Analysing center data..."
     echo
     echo
-    echo "-----------------------------"
+    echo "--------------------------------"
     echo "Analysing center data run ${RUNNUM}..."
-    echo "-----------------------------"
+    echo "--------------------------------"
     echo
     cd "${LTANAPATH}/scripts/Prod"
     python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
