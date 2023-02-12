@@ -26,7 +26,7 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
-# Flag definitions (flags: h, a, o, s)
+# Flag definitions (flags: h)
 while getopts 'h' flag; do
     case "${flag}" in
         h) 
