@@ -390,7 +390,7 @@ if [ ${PHIVAL} = "right" ]; then
     echo
     echo
     echo "-----------------------------"
-    echo "Analysing right data run $i..."
+    echo "Analysing right data run ${RUNNUM}..."
     echo "-----------------------------"
     echo
     cd "${LTANAPATH}/scripts/Prod"
