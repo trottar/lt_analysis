@@ -38,8 +38,7 @@ while getopts 'hdat' flag; do
         echo
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
-	echo "    -d, debug"	
-        echo "    -a, analyze"	
+	echo "    -d, debug"
         echo "    -t, set t-bin (!!!required for script!!!)"
 	echo "        EPSILON=arg1, Q2=arg2, W=arg3, target=arg4"
 	echo
@@ -53,7 +52,6 @@ while getopts 'hdat' flag; do
         exit 0
         ;;
 	d) d_flag='true' ;;
-	a) a_flag='true' ;;
         t) t_flag='true' ;;
         *) print_usage
         exit 1 ;;
@@ -516,96 +514,6 @@ done
 InDATAFilename="Proc_Data_${KIN}.root"
 OutDATAFilename="Analysed_Data_${KIN}"
 OutFullAnalysisFilename="FullAnalysis_${KIN}"
-
-# When analysis flag is used then the analysis script (Analysed_Prod.py)
-# will create a new root file per run number which are combined using hadd
-if [[ $a_flag = "true" ]]; then
-
-    # Checks that array isn't empty
-    if [ ${#data_right[@]} -ne 0 ]; then
-	echo
-	echo "Analysing right data..."
-	echo
-	for i in "${data_right[@]}"
-	do
-	    echo
-	    echo "-----------------------------"
-	    echo "Analysing right data run $i..."
-	    echo "-----------------------------"
-	    echo
-	    cd "${LTANAPATH}/scripts/Prod"
-	    python3 Analysed_Prod.py "$i" | tee ../../log/Analysed_Prod_$i.log
-	    echo
-	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-	    echo "Combining run $i with ${OutDATAFilename}_Right.root..."  
-	    hadd -f ${OutDATAFilename}_Right.root ${i}_-1_Raw_Data.root
-	    echo "Renaming Raw_Data to Proc_Data..."
-	    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-	done
-	echo
-	#echo "Combining root files..."  
-	#hadd -f ${OutDATAFilename}_Right.root *_-1_Raw_Data.root
-	#echo "Renaming Raw_Data to Proc_Data..."
-	#for i in *_-1_Raw_Data.root; do mv -- "$i" "${i%_-1_Raw_Data.root}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis"; done
-    fi
-
-    # Checks that array isn't empty
-    if [ ${#data_left[@]} -ne 0 ]; then
-	echo
-	echo "Analysing left data..."
-	echo
-	for i in "${data_left[@]}"
-	do
-	    echo
-	    echo "-----------------------------"
-	    echo "Analysing left data run $i..."
-	    echo "-----------------------------"
-	    echo
-	    cd "${LTANAPATH}/scripts/Prod"
-	    python3 Analysed_Prod.py "$i" | tee ../../log/Analysed_Prod_$i.log
-	    echo
-	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-	    echo "Combining run $i with ${OutDATAFilename}_Left.root..."  
-	    hadd -f ${OutDATAFilename}_Left.root ${i}_-1_Raw_Data.root
-	    echo "Renaming Raw_Data to Proc_Data..."
-	    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-	done
-	echo
-	#echo "Combining root files..."  
-	#hadd -f ${OutDATAFilename}_Left.root *_-1_Raw_Data.root
-	#echo "Renaming Raw_Data to Proc_Data..."
-	#for i in *_-1_Raw_Data.root; do mv -- "$i" "${i%_-1_Raw_Data.root}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis"; done
-    fi
-
-    # Checks that array isn't empty
-    if [ ${#data_center[@]} -ne 0 ]; then
-	echo
-	echo "Analysing center data..."
-	echo
-	for i in "${data_center[@]}"
-	do
-	    echo
-	    echo "-----------------------------"
-	    echo "Analysing center data run $i..."
-	    echo "-----------------------------"
-	    echo
-	    cd "${LTANAPATH}/scripts/Prod"
-	    python3 Analysed_Prod.py "$i" | tee ../../log/Analysed_Prod_$i.log
-	    echo
-	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-	    echo "Combining run $i with ${OutDATAFilename}_Center.root..."  
-	    hadd -f ${OutDATAFilename}_Center.root ${i}_-1_Raw_Data.root
-	    echo "Renaming Raw_Data to Proc_Data..."
-	    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-	done
-	echo
-	#echo "Combining root files..."  
-	#hadd -f ${OutDATAFilename}_Center.root *_-1_Raw_Data.root
-	#echo "Renaming Raw_Data to Proc_Data..."
-	#for i in *_-1_Raw_Data.root; do mv -- "$i" "${i%_-1_Raw_Data.root}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis"; done
-    fi
-    
-fi
 
 cd "${LTANAPATH}/scripts"
 
