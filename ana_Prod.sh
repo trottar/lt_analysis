@@ -33,7 +33,7 @@ while getopts 'h' flag; do
         echo "--------------------------------------------------------------"
         echo "./ana_Prod.sh -{flags} {variable arguments, see help}"
 	echo
-        echo "Description: Plots data vs simc"
+        echo "Description: Creates root files with PID and CT cuts applied"
         echo "--------------------------------------------------------------"
         echo
         echo "The following flags can be called for the heep analysis..."
@@ -396,16 +396,6 @@ if [ ${PHIVAL} = "right" ]; then
     cd "${LTANAPATH}/scripts/Prod"
     python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
     echo
-    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-    echo "Combining run ${RUNNUM} with ${OutDATAFilename}_Right.root..."  
-    hadd -f ${OutDATAFilename}_Right.root ${RUNNUM}_-1_Raw_Data.root
-    echo "Renaming Raw_Data to Proc_Data..."
-    mv ${RUNNUM}_-1_Raw_Data.root ${RUNNUM}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-    echo
-    #echo "Combining root files..."  
-    #hadd -f ${OutDATAFilename}_Right.root *_-1_Raw_Data.root
-    #echo "Renaming Raw_Data to Proc_Data..."
-    #for i in *_-1_Raw_Data.root; do mv -- "$i" "${i%_-1_Raw_Data.root}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis"; done
 fi
 
 # Checks that array isn't empty
@@ -420,17 +410,6 @@ if [ ${PHIVAL} = "left" ]; then
     echo
     cd "${LTANAPATH}/scripts/Prod"
     python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
-    echo
-    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-    echo "Combining run ${RUNNUM} with ${OutDATAFilename}_Left.root..."  
-    hadd -f ${OutDATAFilename}_Left.root ${RUNNUM}_-1_Raw_Data.root
-    echo "Renaming Raw_Data to Proc_Data..."
-    mv ${RUNNUM}_-1_Raw_Data.root ${RUNNUM}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-    echo
-    #echo "Combining root files..."  
-    #hadd -f ${OutDATAFilename}_Left.root *_-1_Raw_Data.root
-    #echo "Renaming Raw_Data to Proc_Data..."
-    #for i in *_-1_Raw_Data.root; do mv -- "$i" "${i%_-1_Raw_Data.root}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis"; done
 fi
 
 # Checks that array isn't empty
@@ -445,17 +424,6 @@ if [ ${PHIVAL} = "center" ]; then
     echo
     cd "${LTANAPATH}/scripts/Prod"
     python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
-    echo
-    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-    echo "Combining run ${RUNNUM} with ${OutDATAFilename}_Center.root..."  
-    hadd -f ${OutDATAFilename}_Center.root ${RUNNUM}_-1_Raw_Data.root
-    echo "Renaming Raw_Data to Proc_Data..."
-    mv ${RUNNUM}_-1_Raw_Data.root ${RUNNUM}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-    echo
-    #echo "Combining root files..."  
-    #hadd -f ${OutDATAFilename}_Center.root *_-1_Raw_Data.root
-    #echo "Renaming Raw_Data to Proc_Data..."
-    #for i in *_-1_Raw_Data.root; do mv -- "$i" "${i%_-1_Raw_Data.root}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis"; done
 fi
 
 echo
