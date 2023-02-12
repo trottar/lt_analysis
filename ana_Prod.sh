@@ -383,7 +383,7 @@ InDATAFilename="Proc_Data_${KIN}.root"
 OutDATAFilename="Analysed_Data_${KIN}"
 OutFullAnalysisFilename="FullAnalysis_${KIN}"
 
-# The analysis script (Analysed_Prod.py) will create a new root file per run number which are combined using hadd
+# The analysis script (Analysed_Prod.py) will create a new root file per run number
 if [ ${PHIVAL} = "right" ]; then
     echo
     echo "Analysing right data..."
