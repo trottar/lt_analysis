@@ -388,22 +388,19 @@ if [ ${PHIVAL} = "right" ]; then
     echo
     echo "Analysing right data..."
     echo
-    for i in "${data_right[@]}"
-    do
-	echo
-	echo "-----------------------------"
-	echo "Analysing right data run $i..."
-	echo "-----------------------------"
-	echo
-	cd "${LTANAPATH}/scripts/Prod"
-	python3 Analysed_Prod.py "$i" | tee ../../log/Analysed_Prod_$i.log
-	echo
-	cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-	echo "Combining run $i with ${OutDATAFilename}_Right.root..."  
-	hadd -f ${OutDATAFilename}_Right.root ${i}_-1_Raw_Data.root
-	echo "Renaming Raw_Data to Proc_Data..."
-	mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-    done
+    echo
+    echo "-----------------------------"
+    echo "Analysing right data run $i..."
+    echo "-----------------------------"
+    echo
+    cd "${LTANAPATH}/scripts/Prod"
+    python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
+    echo
+    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+    echo "Combining run ${RUNNUM} with ${OutDATAFilename}_Right.root..."  
+    hadd -f ${OutDATAFilename}_Right.root ${RUNNUM}_-1_Raw_Data.root
+    echo "Renaming Raw_Data to Proc_Data..."
+    mv ${RUNNUM}_-1_Raw_Data.root ${RUNNUM}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
     echo
     #echo "Combining root files..."  
     #hadd -f ${OutDATAFilename}_Right.root *_-1_Raw_Data.root
@@ -416,22 +413,19 @@ if [ ${PHIVAL} = "left" ]; then
     echo
     echo "Analysing left data..."
     echo
-    for i in "${data_left[@]}"
-    do
-	echo
-	echo "-----------------------------"
-	echo "Analysing left data run $i..."
-	echo "-----------------------------"
-	echo
-	cd "${LTANAPATH}/scripts/Prod"
-	python3 Analysed_Prod.py "$i" | tee ../../log/Analysed_Prod_$i.log
-	echo
-	cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-	echo "Combining run $i with ${OutDATAFilename}_Left.root..."  
-	hadd -f ${OutDATAFilename}_Left.root ${i}_-1_Raw_Data.root
-	echo "Renaming Raw_Data to Proc_Data..."
-	mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-    done
+    echo
+    echo "-----------------------------"
+    echo "Analysing left data run ${RUNNUM}..."
+    echo "-----------------------------"
+    echo
+    cd "${LTANAPATH}/scripts/Prod"
+    python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
+    echo
+    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+    echo "Combining run ${RUNNUM} with ${OutDATAFilename}_Left.root..."  
+    hadd -f ${OutDATAFilename}_Left.root ${RUNNUM}_-1_Raw_Data.root
+    echo "Renaming Raw_Data to Proc_Data..."
+    mv ${RUNNUM}_-1_Raw_Data.root ${RUNNUM}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
     echo
     #echo "Combining root files..."  
     #hadd -f ${OutDATAFilename}_Left.root *_-1_Raw_Data.root
@@ -444,22 +438,19 @@ if [ ${PHIVAL} = "center" ]; then
     echo
     echo "Analysing center data..."
     echo
-    for i in "${data_center[@]}"
-    do
-	echo
-	echo "-----------------------------"
-	echo "Analysing center data run $i..."
-	echo "-----------------------------"
-	echo
-	cd "${LTANAPATH}/scripts/Prod"
-	python3 Analysed_Prod.py "$i" | tee ../../log/Analysed_Prod_$i.log
-	echo
-	cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-	echo "Combining run $i with ${OutDATAFilename}_Center.root..."  
-	hadd -f ${OutDATAFilename}_Center.root ${i}_-1_Raw_Data.root
-	echo "Renaming Raw_Data to Proc_Data..."
-	mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-    done
+    echo
+    echo "-----------------------------"
+    echo "Analysing center data run ${RUNNUM}..."
+    echo "-----------------------------"
+    echo
+    cd "${LTANAPATH}/scripts/Prod"
+    python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
+    echo
+    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+    echo "Combining run ${RUNNUM} with ${OutDATAFilename}_Center.root..."  
+    hadd -f ${OutDATAFilename}_Center.root ${RUNNUM}_-1_Raw_Data.root
+    echo "Renaming Raw_Data to Proc_Data..."
+    mv ${RUNNUM}_-1_Raw_Data.root ${RUNNUM}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
     echo
     #echo "Combining root files..."  
     #hadd -f ${OutDATAFilename}_Center.root *_-1_Raw_Data.root
