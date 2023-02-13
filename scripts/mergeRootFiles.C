@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 13:27:39 trottar"
+ * Time-stamp: "2023-02-13 13:28:19 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,7 +43,7 @@ void mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeNa
 
   TFile *outfile = new TFile(RootPath+OutputFileName+".root", "RECREATE");
 
-  chain.Merge(f->GetName());
+  chain.Merge(outfile->GetName());
   
   outfile->Close();
   
