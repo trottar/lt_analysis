@@ -527,11 +527,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	root -l << EOF
-.L mergeRootFiles.C+
-mergeRootFiles(\"${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/\", \"_-1_Raw_Data\", \"Cut_Kaon_Events_all_RF\", \"${OutDATAFilename}_Right\", \"${data_right[*]}\")
-.q
-EOF
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
 	for i in "${data_right[@]}"
 	do
 	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
