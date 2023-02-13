@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 18:33:27 trottar"
+# Time-stamp: "2023-02-13 18:45:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,7 +30,7 @@ from ltsep import Misc
 
 ###############################################################################################################################################
 
-outfile = ROOT.TFile(root_path + output_file_name + ".root", "UPDATE")
+outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
 if not outfile.IsOpen():
     print("Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
     sys.exit(1)
@@ -43,7 +43,7 @@ for tree in input_tree_names.split():
 
     for i,n in enumerate(arr_run_nums):
         # Progress bar
-        Misc.progressBar(i, len(arr_run_nums),bar_length=25)
+        Misc.progressBar(i, len(arr_run_nums)-1,bar_length=25)
         filepath = root_path + str(n) + input_file_name + ".root"
         tempfile = ROOT.TFile.Open(filepath)
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
@@ -53,9 +53,16 @@ for tree in input_tree_names.split():
         chain.Add(filepath)
 
 
-    chain.Merge(outfile.GetName())
+    intermediate_file = ROOT.TFile(root_path + tree + "_" + output_file_name + ".root", "RECREATE")
+    chain.Merge(intermediate_file.GetName())
+    intermediate_file.Close()
     
-    print("\n\tTree {} added to {}.root".format(tree,output_file_name))        
+    print("\n\tTree {} added to {}.root".format(tree,output_file_name))
 
+# Merge the intermediate files into the final file
+final_chain = ROOT.TChain()
+for tree in input_tree_names.split():
+    intermediate_file_path = root_path + tree + "_" + output_file_name + ".root"
+    final_chain.Add(intermediate_file_path)
+final_chain.Merge(outfile.GetName())
 outfile.Close()
-
