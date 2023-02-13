@@ -597,8 +597,8 @@ if [[ $a_flag = "true" ]]; then
 	do
 	    echo "Combining run $i with ${OutDATAFilename}_Center.root..."  
 	    echo "Renaming Raw_Data to Proc_Data..."
-	    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-	    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+	    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+	    mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	done
 	echo
     fi
