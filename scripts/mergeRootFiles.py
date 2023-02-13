@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 15:01:57 trottar"
+# Time-stamp: "2023-02-13 15:03:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,7 +30,7 @@ for n in arr_run_nums:
     if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
         print("File {} not found or not opened or corrupted. Skipping this file.".format(filepath))
         continue
-    print("Adding filepath...")
+    print("Adding {}...".format(filepath))
     chain.Add(filepath)
 
 outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
