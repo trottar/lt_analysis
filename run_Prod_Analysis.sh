@@ -528,9 +528,11 @@ if [[ $a_flag = "true" ]]; then
 	echo
 	cd "${LTANAPATH}/scripts"
 	SCRIPT="mergeRootFiles.C"
-	rootrun="root -l<<EOF	
-	.L $SCRIPT+		
-	mergeRootFiles(\"${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/\", \"_-1_Raw_Data\", \"Cut_Kaon_Events_all_RF\", \"${OutDATAFilename}_Right\", \"${data_right[*]}\")EOF"
+	rootrun=
+"root -l<<EOF
+.L $SCRIPT+
+mergeRootFiles(\"${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/\", \"_-1_Raw_Data\", \"Cut_Kaon_Events_all_RF\", \"${OutDATAFilename}_Right\", \"${data_right[*]}\")
+EOF"
 	eval "${rootrun}"
 	for i in "${data_right[@]}"
 	do
