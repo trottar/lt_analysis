@@ -532,13 +532,13 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Right" "${data_right[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    for i in "${data_right[@]}"
 	    do
@@ -567,13 +567,13 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining left data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Left" "${data_left[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    for i in "${data_left[@]}"
 	    do
@@ -602,13 +602,13 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining center data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Center" "${data_center[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    for i in "${data_center[@]}"
 	    do
