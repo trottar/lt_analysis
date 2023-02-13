@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-09 13:48:02 trottar"
+# Time-stamp: "2023-02-13 15:40:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -581,9 +581,6 @@ def defineHists(phi_setting):
             Diamond = True
         else:
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-
-        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
-
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -594,6 +591,9 @@ def defineHists(phi_setting):
                 
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
         '''
+
+            
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_eta)
@@ -666,8 +666,6 @@ def defineHists(phi_setting):
         else:
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
-
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -678,6 +676,9 @@ def defineHists(phi_setting):
                 
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
         '''
+
+            
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
           H_ssxfp_RAND.Fill(evt.ssxfp)
           H_ssyfp_RAND.Fill(evt.ssyfp)

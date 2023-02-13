@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 15:10:54 trottar"
+# Time-stamp: "2023-02-13 15:26:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ if not outfile.IsOpen():
 
 chain.Merge(outfile.GetName())
 
-print("Tree {} added to {}".format(input_tree_name,output_file_name))
+print("\tTree {} added to {}".format(input_tree_name,output_file_name))
 
 outfile.Close()
 
