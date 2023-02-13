@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 18:00:06 trottar"
+# Time-stamp: "2023-02-13 18:02:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,11 +50,15 @@ for tree in input_tree_names.split():
             print("File {} not found or not opened or corrupted. Skipping this file.".format(filepath))
             continue
         #print("Adding {}...".format(filepath))
-        chain.Add(filepath)
-
-    outtree = chain.MergeTrees()
-    outtree.Write()
         
+        # Create a TList object and add the chain to it
+        tree_list = ROOT.TList()
+        tree_list.Add(chain)
+
+    # Merge the trees in the list
+    outtree = chain.MergeTrees(tree_list)
+
+    outtree.Write()        
     print("\n\tTree {} added to {}.root".format(tree,output_file_name))
 
 outfile.Close()
