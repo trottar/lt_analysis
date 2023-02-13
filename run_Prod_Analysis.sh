@@ -527,13 +527,9 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right data..."
 	echo
 	SCRIPT="mergeRootFiles.C"
-	arg1="_-1_Raw_Data"
-	arg2="Cut_Kaon_Events_all_RF"
-	arg3="${OutDATAFilename}_Right"
-	arg4="${data_right[*]}"
 	rootrun="root -l<<EOF	
 	.L $SCRIPT+		
-	CombineRootFiles('$arg1', '$arg2', '$arg3', '$arg4')
+	CombineRootFiles(\"_-1_Raw_Data\", \"Cut_Kaon_Events_all_RF\", \"${OutDATAFilename}_Right\", \"${data_right[*]}\")
 	EOF"
 	eval "${rootrun}"
 	for i in "${data_right[@]}"
