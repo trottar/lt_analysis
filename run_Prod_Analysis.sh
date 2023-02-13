@@ -529,7 +529,7 @@ if [[ $a_flag = "true" ]]; then
 	cd "${LTANAPATH}/scripts"
 	root -l << EOF
 .L mergeRootFiles.C+
-mergeRootFiles(\"${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/\", \"_-1_Raw_Data\", \"Cut_Kaon_Events_all_RF\", \"${OutDATAFilename}_Right\", \"${data_right[*]}\")
+main(\"${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/\", \"_-1_Raw_Data\", \"Cut_Kaon_Events_all_RF\", \"${OutDATAFilename}_Right\", \"${data_right[*]}\")
 .q
 EOF
 	for i in "${data_right[@]}"
