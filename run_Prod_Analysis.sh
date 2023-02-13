@@ -527,14 +527,21 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right data..."
 	echo
 	cd "${LTANAPATH}/scripts"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
 	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
 	for i in "${data_right[@]}"
 	do
 	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 	    echo "Combining run $i with ${OutDATAFilename}_Right.root..."
 	    #hadd -f ${OutDATAFilename}_Right.root ${i}_-1_Raw_Data.root
 	    echo "Renaming Raw_Data to Proc_Data..."
-	    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+	    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+	    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	done
 	echo
 	#echo "Combining root files..."  
@@ -552,7 +559,13 @@ if [[ $a_flag = "true" ]]; then
 	do
 	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 	    echo "Combining run $i with ${OutDATAFilename}_Left.root..."  
-	    hadd -f ${OutDATAFilename}_Left.root ${i}_-1_Raw_Data.root
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Left" "${data_left[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
 	    echo "Renaming Raw_Data to Proc_Data..."
 	    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
@@ -572,7 +585,13 @@ if [[ $a_flag = "true" ]]; then
 	for i in "${data_center[@]}"
 	do
 	    echo "Combining run $i with ${OutDATAFilename}_Center.root..."  
-	    hadd -f ${OutDATAFilename}_Center.root ${i}_-1_Raw_Data.root
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Center" "${data_center[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
 	    echo "Renaming Raw_Data to Proc_Data..."
 	    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
