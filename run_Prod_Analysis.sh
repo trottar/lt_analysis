@@ -527,10 +527,10 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	SCRIPT="mergeRootFiles.C"
 	root -l << EOF
-.L $SCRIPT+
+.L mergeRootFiles.C+
 mergeRootFiles(\"${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/\", \"_-1_Raw_Data\", \"Cut_Kaon_Events_all_RF\", \"${OutDATAFilename}_Right\", \"${data_right[*]}\")
+.q
 EOF
 	for i in "${data_right[@]}"
 	do
