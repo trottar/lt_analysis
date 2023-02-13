@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 18:05:51 trottar"
+# Time-stamp: "2023-02-13 18:33:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,7 +30,7 @@ from ltsep import Misc
 
 ###############################################################################################################################################
 
-outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
+outfile = ROOT.TFile(root_path + output_file_name + ".root", "UPDATE")
 if not outfile.IsOpen():
     print("Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
     sys.exit(1)
@@ -52,12 +52,9 @@ for tree in input_tree_names.split():
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
 
-    outfile_tree = ROOT.TFile(root_path + output_file_name + "_" + tree + ".root", "RECREATE")
-    if not outfile_tree.IsOpen():
-        print("Output file {} cannot be opened. Exiting the function.".format(outfile_tree.GetName()))
-    chain.Merge(outfile_tree.GetName())
-    outfile_tree.Close()
 
+    chain.Merge(outfile.GetName())
+    
     print("\n\tTree {} added to {}.root".format(tree,output_file_name))        
 
 outfile.Close()
