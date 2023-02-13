@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 14:52:45 trottar"
+# Time-stamp: "2023-02-13 14:56:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,6 +13,14 @@
 import sys
 import os
 import ROOT
+
+root_path = sys.argv[1]
+input_file_name = sys.argv[2]
+input_tree_name = sys.argv[3]
+output_file_name = sys.argv[4]
+string_run_nums = sys.argv[5]
+
+mergeRootFiles(root_path, input_file_name, input_tree_name, output_file_name, string_run_nums)
 
 def mergeRootFiles(root_path, input_file_name, input_tree_name, output_file_name, string_run_nums):
     
