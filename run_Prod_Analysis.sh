@@ -533,7 +533,7 @@ if [[ $a_flag = "true" ]]; then
 	arg4="${data_right[*]}"
 	rootrun="root -l<<EOF	
 	.L $SCRIPT+		
-	CombineRootFiles($arg1, $arg2, $arg3, arg4)
+	CombineRootFiles('$arg1', '$arg2', '$arg3', '$arg4')
 	EOF"
 	eval "${rootrun}"
 	for i in "${data_right[@]}"
