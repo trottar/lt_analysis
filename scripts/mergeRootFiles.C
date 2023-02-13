@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:27:07 trottar"
+ * Time-stamp: "2023-02-13 14:27:42 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,13 +14,13 @@
 //#include <vector>
 #include <string>
 //#include <Rtypes.h>
-#include <TString.h>
+//#include <TString.h>
 //#include <TFile.h>
 //#include <TChain.h>
 
 using namespace std;
 
-int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, string StringRunNums) {
+int mergeRootFiles(string RootPath, string InputFileName, string InputTreeName, string OutputFileName, string StringRunNums) {
 
   /*
   stringstream ss(StringRunNums);
