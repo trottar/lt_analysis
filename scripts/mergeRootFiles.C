@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 13:50:45 trottar"
+ * Time-stamp: "2023-02-13 14:01:31 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,5 +58,12 @@ int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeNam
 
   outfile->Close();
 
+  return 0;
+}
+
+int main(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, string StringRunNums) {
+  
+  mergeRootFiles(RootPath, InputFileName, InputTreeName, OutputFileName, StringRunNums);
+  
   return 0;
 }
