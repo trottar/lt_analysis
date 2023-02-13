@@ -526,7 +526,8 @@ if [[ $a_flag = "true" ]]; then
 	echo
 	echo "Combining right data..."
 	echo
-	source /apps/root/6.18.04/setroot_CUE.bash
+	#source /apps/root/6.18.04/setroot_CUE.bash
+	source /apps/root/6.22.06/setroot_CUE.bash
 	cd "${LTANAPATH}/scripts"
 	root -l << EOF
 .L mergeRootFiles.C+
