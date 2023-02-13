@@ -526,6 +526,7 @@ if [[ $a_flag = "true" ]]; then
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    echo
 	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root exists, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root"
 	fi
 	echo
 	echo "Combining right data..."
@@ -542,7 +543,7 @@ if [[ $a_flag = "true" ]]; then
 	do
 	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 	    echo "Combining run $i with ${OutDATAFilename}_Right.root..."
-	    echo "Renaming Raw_Data to Proc_Data..."
+	    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 	    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	    mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	done
@@ -554,6 +555,7 @@ if [[ $a_flag = "true" ]]; then
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    echo
 	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root exists, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root"
 	fi
 	echo
 	echo "Combining left data..."
@@ -569,7 +571,7 @@ if [[ $a_flag = "true" ]]; then
 	for i in "${data_left[@]}"
 	do
 	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-	    echo "Renaming Raw_Data to Proc_Data..."
+	    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 	    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	    mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	done
@@ -581,6 +583,7 @@ if [[ $a_flag = "true" ]]; then
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    echo
 	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root exists, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root"
 	fi
 	echo
 	echo "Combining center data..."
@@ -596,7 +599,7 @@ if [[ $a_flag = "true" ]]; then
 	for i in "${data_center[@]}"
 	do
 	    echo "Combining run $i with ${OutDATAFilename}_Center.root..."  
-	    echo "Renaming Raw_Data to Proc_Data..."
+	    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 	    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	    mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	done
