@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:33:45 trottar"
+ * Time-stamp: "2023-02-13 14:39:39 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,6 +17,7 @@
 #include <TString.h>
 #include <TFile.h>
 #include <TChain.h>
+#include "mergeRootFiles.h"
 
 using namespace std;
 
