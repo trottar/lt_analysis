@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:01:31 trottar"
+ * Time-stamp: "2023-02-13 14:09:55 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,7 +61,19 @@ int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeNam
   return 0;
 }
 
-int main(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, string StringRunNums) {
+int main(int argc, char* argv[]) {
+
+  if (argc != 6) {
+    cout << "Error: Incorrect number of arguments provided." << endl;
+    cout << "Usage: ./<executable> <RootPath> <InputFileName> <InputTreeName> <OutputFileName> <StringRunNums>" << endl;
+    return 0;
+  }
+  
+  TString RootPath = argv[1];
+  TString InputFileName = argv[2];
+  TString InputTreeName = argv[3];
+  TString OutputFileName = argv[4];
+  string StringRunNums = argv[5];
   
   mergeRootFiles(RootPath, InputFileName, InputTreeName, OutputFileName, StringRunNums);
   
