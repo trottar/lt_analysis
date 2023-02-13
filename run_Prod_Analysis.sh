@@ -526,7 +526,7 @@ if [[ $a_flag = "true" ]]; then
 	echo
 	echo "Combining right data..."
 	echo
-	SCRIPT=mergeRootFiles.C
+	SCRIPT="mergeRootFiles.C"
 	arg1="_-1_Raw_Data"
 	arg2="Cut_Kaon_Events_all_RF"
 	arg3="${OutDATAFilename}_Right"
