@@ -523,6 +523,8 @@ if [[ $a_flag = "true" ]]; then
 
     # Checks that array isn't empty
     if [ ${#data_right[@]} -ne 0 ]; then
+	cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+	mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    echo
 	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root exists, deleting..."
