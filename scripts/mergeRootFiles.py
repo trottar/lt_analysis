@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 17:23:31 trottar"
+# Time-stamp: "2023-02-13 17:36:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,10 +30,6 @@ from ltsep import Misc
 
 ###############################################################################################################################################
 
-outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
-if not outfile.IsOpen():
-    print("Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
-
 arr_run_nums = [int(x) for x in string_run_nums.split()]
 
 for tree in input_tree_names.split():
@@ -53,7 +49,11 @@ for tree in input_tree_names.split():
 
     print("\n\tTree {} added to {}.root".format(tree,output_file_name))
 
-#chain.Merge(outfile.GetName())    
+    outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
+    if not outfile.IsOpen():
+        print("Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
+
+    chain.Merge(outfile.GetName())    
 
 outfile.Close()
 
