@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 16:30:30 trottar"
+# Time-stamp: "2023-02-13 17:04:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,9 +51,9 @@ for tree in input_tree_names.split():
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
 
-    chain.Merge(outfile.GetName())
-
     print("\n\tTree {} added to {}.root".format(tree,output_file_name))
+
+chain.Merge(outfile.GetName())    
 
 outfile.Close()
 
