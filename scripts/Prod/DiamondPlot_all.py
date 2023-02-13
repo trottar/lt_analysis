@@ -44,7 +44,7 @@ OUTPATH=lt.OUTPATH
 
 #################################################################################################################################################
 
-print("!!! Ensure all relevant Analysed_Data.root file names have same precision of Q2 and W  !!!")
+print("\n\n!!! Ensure all relevant Analysed_Data.root file names have same precision of Q2 and W  !!!")
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 

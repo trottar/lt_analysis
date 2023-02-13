@@ -525,20 +525,14 @@ if [[ $a_flag = "true" ]]; then
     if [ ${#data_right[@]} -ne 0 ]; then
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root exists, deleting..."
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root exists already, deleting..."
 	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root"
 	fi
 	echo
 	echo "Combining right data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Right" "${data_right[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    for i in "${data_right[@]}"
 	    do
@@ -560,20 +554,14 @@ if [[ $a_flag = "true" ]]; then
     if [ ${#data_left[@]} -ne 0 ]; then
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root exists, deleting..."
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root exists already, deleting..."
 	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root"
 	fi
 	echo
 	echo "Combining left data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Left" "${data_left[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    for i in "${data_left[@]}"
 	    do
@@ -595,20 +583,14 @@ if [[ $a_flag = "true" ]]; then
     if [ ${#data_center[@]} -ne 0 ]; then
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root exists, deleting..."
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root exists already, deleting..."
 	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root"
 	fi
 	echo
 	echo "Combining center data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events" "${OutDATAFilename}_Center" "${data_center[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_noRF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_all_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_prompt_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    for i in "${data_center[@]}"
 	    do
