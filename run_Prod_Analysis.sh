@@ -526,11 +526,23 @@ if [[ $a_flag = "true" ]]; then
 	echo
 	echo "Combining right data..."
 	echo
+	SCRIPT=mergeRootFiles.C
+	arg1="_-1_Raw_Data"
+	arg2="Cut_Kaon_Events_all_RF"
+	arg3="${OutDATAFilename}_Right"
+	arg4="${data_right[*]}"
+	rootrun="{
+	root -l<<EOF	
+	.L $SCRIPT+		
+	CombineRootFiles($arg1, $arg2, $arg3, arg4)
+	EOF
+	}"
+	eval "$rootrun"
 	for i in "${data_right[@]}"
 	do
 	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-	    echo "Combining run $i with ${OutDATAFilename}_Right.root..."  
-	    hadd -f ${OutDATAFilename}_Right.root ${i}_-1_Raw_Data.root
+	    echo "Combining run $i with ${OutDATAFilename}_Right.root..."
+	    #hadd -f ${OutDATAFilename}_Right.root ${i}_-1_Raw_Data.root
 	    echo "Renaming Raw_Data to Proc_Data..."
 	    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	done
