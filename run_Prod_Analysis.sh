@@ -532,7 +532,8 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    for i in "${data_right[@]}"
 	    do
@@ -541,7 +542,6 @@ if [[ $a_flag = "true" ]]; then
 		    echo "Combining run $i with ${OutDATAFilename}_Right.root..."
 		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 		    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
 		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
 		fi
@@ -561,7 +561,8 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining left data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    for i in "${data_left[@]}"
 	    do
@@ -570,7 +571,6 @@ if [[ $a_flag = "true" ]]; then
 		    echo "Combining run $i with ${OutDATAFilename}_Left.root..."
 		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 		    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
 		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
 		fi
@@ -590,7 +590,8 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining center data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	#python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    for i in "${data_center[@]}"
 	    do
@@ -599,7 +600,6 @@ if [[ $a_flag = "true" ]]; then
 		    echo "Combining run $i with ${OutDATAFilename}_Center.root..."
 		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 		    mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
 		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
 		fi
