@@ -523,7 +523,7 @@ if [[ $a_flag = "true" ]]; then
 
     # Checks that array isn't empty
     if [ ${#data_right[@]} -ne 0 ]; then
-	if [ test -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    echo
 	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root exists, deleting..."
 	fi
@@ -556,7 +556,7 @@ if [[ $a_flag = "true" ]]; then
 
     # Checks that array isn't empty
     if [ ${#data_left[@]} -ne 0 ]; then
-	if [ test -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    echo
 	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root exists, deleting..."
 	fi
@@ -587,7 +587,7 @@ if [[ $a_flag = "true" ]]; then
 
     # Checks that array isn't empty
     if [ ${#data_center[@]} -ne 0 ]; then
-	if [ test -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    echo
 	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root exists, deleting..."
 	fi
