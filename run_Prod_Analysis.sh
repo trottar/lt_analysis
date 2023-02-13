@@ -341,9 +341,9 @@ do
     if [[ $Q2 = "3p0" && $W = "3p14" ]]; then
 	if [[ $i = "RIGHT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
-		file_right="Q3W3p14right_${EPSILON}e_dummy"
+		file_right="Q3p0W3p14right_${EPSILON}e_dummy"
 	    else
-		file_right="Q3W3p14right_${EPSILON}e"
+		file_right="Q3p0W3p14right_${EPSILON}e"
 	    fi
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=3p0, W=3p14
@@ -351,9 +351,9 @@ do
 	    echo
 	elif [[ $i = "LEFT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
-		file_left="Q3W3p14left_${EPSILON}e_dummy"
+		file_left="Q3p0W3p14left_${EPSILON}e_dummy"
 	    else
-		file_left="Q3W3p14left_${EPSILON}e"
+		file_left="Q3p0W3p14left_${EPSILON}e"
 	    fi
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=3p0, W=3p14
@@ -361,9 +361,9 @@ do
 	    echo	
 	elif [[ $i = "CENTER" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
-		file_center="Q3W3p14center_${EPSILON}e_dummy"
+		file_center="Q3p0W3p14center_${EPSILON}e_dummy"
 	    else
-		file_center="Q3W3p14center_${EPSILON}e"
+		file_center="Q3p0W3p14center_${EPSILON}e"
 	    fi
 	    echo "Reading in run numbers for center file ${file_center}..."
 	    IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=3p0, W=3p14
@@ -376,17 +376,17 @@ do
 	    EPSVAL=0.6668
 	fi
 	if [[ $TargetType = "dummy" ]]; then
-	    KIN="Q3W3p14_${EPSILON}e_dummy"
+	    KIN="Q3p0W3p14_${EPSILON}e_dummy"
 	else
-	    KIN="Q3W3p14_${EPSILON}e"
+	    KIN="Q3p0W3p14_${EPSILON}e"
 	fi
     fi
     if [[ $Q2 = "3p0" && $W = "2p32" ]]; then
 	if [[ $i = "RIGHT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
-		file_right="Q3W2p32right_${EPSILON}e_dummy"
+		file_right="Q3p0W2p32right_${EPSILON}e_dummy"
 	    else
-		file_right="Q3W2p32right_${EPSILON}e"
+		file_right="Q3p0W2p32right_${EPSILON}e"
 	    fi
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=3p0, W=2p32
@@ -394,9 +394,9 @@ do
 	    echo
 	elif [[ $i = "LEFT" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
-		file_left="Q3W2p32left_${EPSILON}e_dummy"
+		file_left="Q3p0W2p32left_${EPSILON}e_dummy"
 	    else
-		file_left="Q3W2p32left_${EPSILON}e"
+		file_left="Q3p0W2p32left_${EPSILON}e"
 	    fi
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=3p0, W=2p32
@@ -404,9 +404,9 @@ do
 	    echo
 	elif [[ $i = "CENTER" ]]; then
 	    if [[ $TargetType = "dummy" ]]; then
-		file_center="Q3W2p32center_${EPSILON}e_dummy"
+		file_center="Q3p0W2p32center_${EPSILON}e_dummy"
 	    else
-		file_center="Q3W2p32center_${EPSILON}e"
+		file_center="Q3p0W2p32center_${EPSILON}e"
 	    fi
 	    echo "Reading in run numbers for center file ${file_center}..."
 	    IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=3p0, W=2p32
@@ -419,9 +419,9 @@ do
 	    EPSVAL=0.8791
 	fi
 	if [[ $TargetType = "dummy" ]]; then
-	    KIN="Q3W2p32_${EPSILON}e_dummy"
+	    KIN="Q3p0W2p32_${EPSILON}e_dummy"
 	else
-	    KIN="Q3W2p32_${EPSILON}e"
+	    KIN="Q3p0W2p32_${EPSILON}e"
 	fi
     fi
     if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
