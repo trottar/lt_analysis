@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 13:44:56 trottar"
+ * Time-stamp: "2023-02-13 13:50:05 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -12,16 +12,23 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <string>
 #include <Rtypes.h>
 #include <TString.h>
 #include <TFile.h>
 #include <TChain.h>
 #include <TObject.h>
 
+#include <cstdlib>
+#include <cxxabi.h>
+
 using namespace std;
 
 int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, string StringRunNums) {
 
+  string version = abi::__cxa_demangle(cxxabi::__version__, 0, 0, 0);
+  cout << "Runtime Standard Library Version: " << version << endl;
+  
   stringstream ss(StringRunNums);
 
   vector<Int_t> ArrRunNums;
