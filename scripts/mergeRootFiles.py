@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 16:17:24 trottar"
+# Time-stamp: "2023-02-13 16:30:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ if not outfile.IsOpen():
 
 arr_run_nums = [int(x) for x in string_run_nums.split()]
 
-for tree in input_tree_names:
+for tree in input_tree_names.split():
 
     chain = ROOT.TChain(tree)
 
