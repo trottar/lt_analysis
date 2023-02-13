@@ -536,7 +536,7 @@ if [[ $a_flag = "true" ]]; then
 	.L $SCRIPT+		
 	CombineRootFiles($arg1, $arg2, $arg3, arg4)
 	EOF"
-	eval "$rootrun"
+	eval "${rootrun}"
 	for i in "${data_right[@]}"
 	do
 	    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
