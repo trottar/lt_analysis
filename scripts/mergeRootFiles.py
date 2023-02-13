@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 14:57:16 trottar"
+# Time-stamp: "2023-02-13 15:01:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,13 +28,14 @@ for n in arr_run_nums:
     filepath = root_path + str(n) + input_file_name + ".root"
     tempfile = ROOT.TFile.Open(filepath)
     if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
-        print("File {filepath} not found or not opened or corrupted. Skipping this file.")
+        print("File {} not found or not opened or corrupted. Skipping this file.".format(filepath))
         continue
+    print("Adding filepath...")
     chain.Add(filepath)
 
 outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
 if not outfile.IsOpen():
-    print("Output file {outfile.GetName()} cannot be opened. Exiting the function.")
+    print("Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
 
 chain.Merge(outfile.GetName())
 
