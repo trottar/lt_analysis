@@ -1,23 +1,13 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:20:05 trottar"
+ * Time-stamp: "2023-02-13 14:26:24 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
  *
  * Copyright (c) trottar
  */
-
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <Rtypes.h>
-#include <TString.h>
-#include <TFile.h>
-#include <TChain.h>
-#include <TObject.h>
 
 using namespace std;
 
