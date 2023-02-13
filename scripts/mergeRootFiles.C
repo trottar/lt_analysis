@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:29:13 trottar"
+ * Time-stamp: "2023-02-13 14:30:21 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -9,20 +9,19 @@
  * Copyright (c) trottar
  */
 
-//#include <iostream>
-//#include <sstream>
-//#include <vector>
+#include <iostream>
+#include <sstream>
+#include <vector>
 #include <string>
-//#include <Rtypes.h>
-//#include <TString.h>
-//#include <TFile.h>
-//#include <TChain.h>
+#include <Rtypes.h>
+#include <TString.h>
+#include <TFile.h>
+#include <TChain.h>
 
-//using namespace std;
+using namespace std;
 
 int mergeRootFiles(string RootPath, string InputFileName, string InputTreeName, string OutputFileName, string StringRunNums) {
 
-  /*
   stringstream ss(StringRunNums);
 
   vector<Int_t> ArrRunNums;
@@ -57,28 +56,6 @@ int mergeRootFiles(string RootPath, string InputFileName, string InputTreeName, 
   chain.Merge(outfile->GetName());
 
   outfile->Close();
-  */
+
   return 0;
 }
-
-
-/*
-int main(int argc, char* argv[]) {
-
-  if (argc != 6) {
-    cout << "Error: Incorrect number of arguments provided." << endl;
-    cout << "Usage: ./<executable> <RootPath> <InputFileName> <InputTreeName> <OutputFileName> <StringRunNums>" << endl;
-    return 0;
-  }
-  
-  TString RootPath = argv[1];
-  TString InputFileName = argv[2];
-  TString InputTreeName = argv[3];
-  TString OutputFileName = argv[4];
-  string StringRunNums = argv[5];
-  
-  mergeRootFiles(RootPath, InputFileName, InputTreeName, OutputFileName, StringRunNums);
-  
-  return 0;
-}
-*/
