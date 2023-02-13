@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 13:07:11 trottar"
+ * Time-stamp: "2023-02-13 13:10:28 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,7 +20,7 @@
 
 using namespace std;
 
-void mergeRootFiles(TString InputFileName, TString InputTreeName, TString OutputFileName, TString StringRunNums) {
+void mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, TString StringRunNums) {
 
   stringstream ss(StringRunNums);
 
@@ -38,10 +38,10 @@ void mergeRootFiles(TString InputFileName, TString InputTreeName, TString Output
   for (const auto &n : ArrRunNums) {
     cout << n << " ";
     TString str = TString(n);
-    chain.Add(str+InputFileName+".root"); 
+    chain.Add(RootPath+str+InputFileName+".root"); 
   }
 
-  TFile *outfile = new TFile(OutputFileName+".root", "RECREATE");
+  TFile *outfile = new TFile(RootPath+OutputFileName+".root", "RECREATE");
   TObject *obj;
   
   while ((obj = chain.Get())) {
