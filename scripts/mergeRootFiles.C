@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:09:55 trottar"
+ * Time-stamp: "2023-02-13 14:17:51 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,6 +61,7 @@ int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeNam
   return 0;
 }
 
+/*
 int main(int argc, char* argv[]) {
 
   if (argc != 6) {
@@ -79,3 +80,4 @@ int main(int argc, char* argv[]) {
   
   return 0;
 }
+*/
