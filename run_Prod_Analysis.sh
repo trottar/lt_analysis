@@ -531,8 +531,7 @@ if [[ $a_flag = "true" ]]; then
 	arg2="Cut_Kaon_Events_all_RF"
 	arg3="${OutDATAFilename}_Right"
 	arg4="${data_right[*]}"
-	rootrun="root -l<<
-	EOF	
+	rootrun="root -l<<EOF	
 	.L $SCRIPT+		
 	CombineRootFiles($arg1, $arg2, $arg3, arg4)
 	EOF"
