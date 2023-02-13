@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:30:21 trottar"
+ * Time-stamp: "2023-02-13 14:31:11 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,7 +20,7 @@
 
 using namespace std;
 
-int mergeRootFiles(string RootPath, string InputFileName, string InputTreeName, string OutputFileName, string StringRunNums) {
+int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, string TStringRunNums) {
 
   stringstream ss(StringRunNums);
 
