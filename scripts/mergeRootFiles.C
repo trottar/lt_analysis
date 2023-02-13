@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 13:42:50 trottar"
+ * Time-stamp: "2023-02-13 13:44:56 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,7 +20,7 @@
 
 using namespace std;
 
-void mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, string StringRunNums) {
+int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, string StringRunNums) {
 
   stringstream ss(StringRunNums);
 
@@ -50,12 +50,12 @@ void mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeNa
   TFile *outfile = new TFile(RootPath + OutputFileName + ".root", "RECREATE");
   if (!outfile->IsOpen()) {
     cout << "Output file " << outfile->GetName() << " cannot be opened. Exiting the function." << endl;
-    return;
+    return 0;
   }
 
   chain.Merge(outfile->GetName());
 
   outfile->Close();
 
-  return;
+  return 0;
 }
