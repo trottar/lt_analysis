@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:28:30 trottar"
+ * Time-stamp: "2023-02-13 14:29:13 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,9 +18,9 @@
 //#include <TFile.h>
 //#include <TChain.h>
 
-using namespace std;
+//using namespace std;
 
-int main(string RootPath, string InputFileName, string InputTreeName, string OutputFileName, string StringRunNums) {
+int mergeRootFiles(string RootPath, string InputFileName, string InputTreeName, string OutputFileName, string StringRunNums) {
 
   /*
   stringstream ss(StringRunNums);
