@@ -1,7 +1,7 @@
 /*
  * Description:
  * ================================================================
- * Time-stamp: "2023-02-13 14:17:51 trottar"
+ * Time-stamp: "2023-02-13 14:20:05 trottar"
  * ================================================================
  *
  * Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -22,7 +22,8 @@
 using namespace std;
 
 int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeName, TString OutputFileName, string StringRunNums) {
-  
+
+  /*
   stringstream ss(StringRunNums);
 
   vector<Int_t> ArrRunNums;
@@ -57,9 +58,10 @@ int mergeRootFiles(TString RootPath, TString InputFileName, TString InputTreeNam
   chain.Merge(outfile->GetName());
 
   outfile->Close();
-
+  */
   return 0;
 }
+
 
 /*
 int main(int argc, char* argv[]) {
