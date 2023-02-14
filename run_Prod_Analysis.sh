@@ -627,6 +627,7 @@ if [[ ${#data_right[@]} -ne 0 ]]; then
     arr6=()
     itt=0
     while read line; do
+	echo $line
 	itt=$((itt+1))       
 	# split the line into an array based on space
 	IFS=' ' read -ra line_array <<< "$line"
