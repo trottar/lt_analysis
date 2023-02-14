@@ -618,7 +618,7 @@ cd "${LTANAPATH}/scripts"
 if [[ ${#data_right[@]} -ne 0 ]]; then
     echo
     echo "Calculating data total effective charge right..."
-    PYRIGHTSTRING="$(python3 findEffectiveCharge.py ${EffData} "${data_right[*]}")"
+    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_right[*]}")
     arr1=()
     arr2=()
     arr3=()
@@ -626,8 +626,7 @@ if [[ ${#data_right[@]} -ne 0 ]]; then
     arr5=()
     arr6=()
     itt=0
-    while read line; do
-	echo $line
+    while read line; do       
 	itt=$((itt+1))       
 	# split the line into an array based on space
 	IFS=' ' read -ra line_array <<< "$line"
@@ -661,6 +660,7 @@ if [[ ${#data_left[@]} -ne 0 ]]; then
     arr6=()
     itt=0
     while read line; do
+	echo $line
 	itt=$((itt+1))       
 	# split the line into an array based on space
 	IFS=' ' read -ra line_array <<< "$line"
