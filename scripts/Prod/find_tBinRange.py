@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 18:15:36 trottar"
+# Time-stamp: "2023-02-14 18:17:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -349,7 +349,7 @@ def defineHists(phi_setting):
         InData_efficiency = InData_efficiency_center
 
     if 'pid_text' in locals():
-        print('\n\n',phi_setting,' PID Cuts = ',pid_text,'\n\n')
+        print('\n\n',phi_setting,'PID Cuts = ',pid_text,'\n\n')
     else:
         print("ERROR: Invalid {} log file {}!".format(phi_setting.lower(),pid_log))
         pid_text = "\nNo {} cuts file found in logs...".format(phi_setting.lower())
