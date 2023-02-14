@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2022-12-22 13:27:45 trottar"
+# Time-stamp: "2023-02-14 17:06:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -12,10 +12,6 @@
 #
 import pandas as pd
 import sys,os
-
-runNum = sys.argv[1]
-efficiency_table = sys.argv[2]
-table_val = sys.argv[3]
 
 ###############################################################################################################################################
 
@@ -31,39 +27,51 @@ lt=Root(os.path.realpath(__file__))
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
 
-if table_val == "efficiency":
-    ################################################################################################################################################
-    # Grab and calculate efficiency 
+def getEfficiencyValue(runNum,efficiency_table,table_val):
 
-    from getDataTable import calculate_efficiency
+    if table_val == "efficiency":
+        ################################################################################################################################################
+        # Grab and calculate efficiency 
 
-    tot_efficiency = calculate_efficiency(runNum,efficiency_table)
+        from getDataTable import calculate_efficiency
 
-    ################################################################################################################################################
+        tot_efficiency = calculate_efficiency(runNum,efficiency_table)
 
-    print(tot_efficiency)
+        ################################################################################################################################################
+
+        return tot_efficiency
+
+    if table_val == "bcm":
+        ################################################################################################################################################
+        # Grab beam energy
+
+        from getDataTable import get_bcm
+
+        bcm_val = get_bcm(runNum,efficiency_table)
+
+        ################################################################################################################################################
     
-if table_val == "ebeam":
-    ################################################################################################################################################
-    # Grab beam energy
+    if table_val == "ebeam":
+        ################################################################################################################################################
+        # Grab beam energy
 
-    from getDataTable import get_ebeam
+        from getDataTable import get_ebeam
 
-    ebeam_val = get_ebeam(runNum,efficiency_table)
+        ebeam_val = get_ebeam(runNum,efficiency_table)
 
-    ################################################################################################################################################
+        ################################################################################################################################################
 
-    print(ebeam_val)
+        return ebeam_val
 
-if table_val == "pTheta":
-    ################################################################################################################################################
-    # Grab pTheta
+    if table_val == "pTheta":
+        ################################################################################################################################################
+        # Grab pTheta
 
-    from getDataTable import get_pTheta
+        from getDataTable import get_pTheta
 
-    pTheta_val = get_pTheta(runNum,efficiency_table)
+        pTheta_val = get_pTheta(runNum,efficiency_table)
 
-    ################################################################################################################################################
+        ################################################################################################################################################
 
-    print(pTheta_val)
-    
+        return pTheta_val
+

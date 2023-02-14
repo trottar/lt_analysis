@@ -616,29 +616,31 @@ cd "${LTANAPATH}/scripts"
 
 # Checks that array isn't empty
 if [[ ${#data_right[@]} -ne 0 ]]; then
-    DataChargeValRight=()
-    DataChargeErrRight=()
-    DataEffValRight=()
-    DataEffErrRight=()
-    DatapThetaValRight=()
-    DataEbeamValRight=()
     echo
     echo "Calculating data total effective charge right..."
-    for i in "${data_right[@]}"
-    do
-	# Calculates total efficiency then applies to the charge for each run number
-	# to get the effective charge per run and saves as an array
-	DataChargeValRight+=($(python3 findEffectiveCharge.py ${EffData} "replay_coin_production" "$i" -1))
-	DataChargeErrRight+=(1) # HERE! These uncertainties are set to unity until the replays are updated with proper uncertainties
-	# Grabs the total effiency value per run and saves as an array
-	DataEffValRight+=($(python3 getEfficiencyValue.py "$i" ${EffData} "efficiency"))
-	DataEffErrRight+=(1) # HERE! These uncertainties are set to unity until the replays are updated with proper uncertainties
-	# Grabs pTheta value per run
-	DatapThetaValRight+=($(python3 getEfficiencyValue.py "$i" ${EffData} "pTheta"))
-	# Grabs ebeam value per run
-	DataEbeamValRight+=($(python3 getEfficiencyValue.py "$i" ${EffData} "ebeam"))
-	#echo "${DataChargeValRight[@]} uC"
-    done
+    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_right[*]}")
+    arr1=()
+    arr2=()
+    arr3=()
+    arr4=()
+    arr5=()
+    arr6=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+
+	# store the elements in the corresponding array
+	eval "arr$counter=(\"\${line_array[@]}\")"
+    done <<< "$PYRIGHTSTRING"
+    DataChargeValRight=$arr1
+    DataChargeErrRight=$arr2
+    DataEffValRight=$arr3
+    DataEffErrRight=$arr4
+    DatapThetaValRight=$arr5
+    DataEbeamValRight=$arr6
     #echo ${DataChargeVal[*]}
     # Sums the array to get the total effective charge
     # Note: this must be done as an array! This is why uC is used at this step

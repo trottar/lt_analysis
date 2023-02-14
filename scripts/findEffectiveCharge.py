@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2022-12-05 23:41:10 trottar"
+# Time-stamp: "2023-02-14 17:09:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,16 +11,14 @@
 # Copyright (c) trottar
 #
 import pandas as pd
-import re, sys, os
+import sys, os
 
 ################################################################################################################################################
 '''
 User Inputs
 '''
 efficiency_table = sys.argv[1]
-ROOTPrefix = sys.argv[2]
-runNum = sys.argv[3]
-MaxEvent=sys.argv[4]
+RUNLIST = sys.argv[2].split(" ")
 
 ################################################################################################################################################
 '''
@@ -37,26 +35,30 @@ UTILPATH=lt.UTILPATH
 ################################################################################################################################################
 # Grab and calculate efficiency 
 
-from getDataTable import calculate_efficiency
-
-tot_efficiency = calculate_efficiency(runNum,efficiency_table)
+from getEfficiencyValue import getEfficiencyValue
 
 ################################################################################################################################################
 
-# Open report file to grab prescale values and tracking efficiency
-report = UTILPATH+"/REPORT_OUTPUT/Analysis/General/%s_%s_%s.report" % (ROOTPrefix,runNum,MaxEvent)
-#report = UTILPATH+"/REPORT_OUTPUT/Analysis/HeeP/%s_%s_%s.report" % (ROOTPrefix,runNum,MaxEvent)
+effective_charge = ""
+effective_charge_uncern = ""
+tot_efficiency = ""
+tot_efficiency_uncern = ""
+ebeam_val = ""
+pTheta_val = ""
 
-with open(report) as f:
-    # Search for keywords, then save as value in dictionary
-    for line in f:
-        data = line.split(':')
-        if 'BCM1_Beam_Cut_Charge' in data[0]:
-            charge = int(re.sub("\D","","%s" % data[1]))
-        if 'Total_Events' in data[0]:
-            numevts = int(re.sub("\D","","%s" % data[1]))
+for runNum in RUNLIST:
 
-effective_charge = float(charge/1000)*float(tot_efficiency)
+    charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
+    # Need to convert to int value for bash to interpret correctly
+    effective_charge += " " + str(int(1000*(float(charge/1000)*float(tot_efficiency))))
+    effective_charge_uncern += " " + "1"
+    
+    tot_efficiency += " " + getEfficiencyValue(runNum,efficiency_table,"efficiency")
+    tot_efficiency_uncern += " " + "1"
+    
+    ebeam_val += " " + getEfficiencyValue(runNum,efficiency_table,"ebeam")
+    pTheta_val += " " + getEfficiencyValue(runNum,efficiency_table,"pTheta")    
 
-# Need to convert to int value for bash to interpret correctly
-print(int(1000*effective_charge))
+
+BashInput=("({}) ({}) ({}) ({}) ({}) ({})".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, ebeam_val, pTheta_val))
+print(BashInput)

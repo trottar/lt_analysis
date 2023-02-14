@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2022-12-30 21:22:12 trottar"
+# Time-stamp: "2023-02-14 17:06:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,6 +28,27 @@ lt=Root(os.path.realpath(__file__))
 
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
+
+################################################################################################################################################
+# Grab bcm value
+
+def get_bcm(runNum,efficiency_table):
+    
+    inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
+
+    # Converts csv data to dataframe
+    try:
+        eff_data = pd.read_csv(inp_f)
+    except IOError:
+        print("Error: %s does not appear to exist." % inp_f)
+        sys.exit(0)
+    #print(eff_data.keys())
+
+    # Redefine table to be only the run number of interest
+    eff_data = eff_data[eff_data['Run_Number'] == int(runNum)]
+    #print(eff_data)
+    
+    return eff_data["BCM1_Beam_Cut_Charge"].iloc[0]
 
 ################################################################################################################################################
 # Grab ebeam value
