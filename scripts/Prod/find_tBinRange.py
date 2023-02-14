@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 01:20:59 trottar"
+# Time-stamp: "2023-02-14 01:27:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1479,12 +1479,14 @@ for i,hist in enumerate(histlist):
     for tex in texlist:
         tex.Draw()
 
+    Ctext.Print(outputpdf+')')
+    '''
     #if hist["phi_setting"][i] == "Center":
     if i == len(histlist):
         Ctext.Print(outputpdf+')')
     else:
         Ctext.Print(outputpdf)
-
+    '''
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
 
