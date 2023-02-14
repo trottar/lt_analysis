@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 18:43:46 trottar"
+# Time-stamp: "2023-02-14 18:55:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,6 +99,14 @@ Importing diamond cut script
 '''
 
 from DiamondPlot_all import DiamondPlot
+
+Q2Val = float(Q2.replace("p","."))
+WVal = float(W.replace("p","."))
+
+Q2min = Q2Val - (2/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
+Q2max = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
+Wmin = WVal - (2/7)*WVal # min y-range for Q2vsW plot
+Wmax = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 
 ################################################################################################################################################
 
@@ -234,7 +242,7 @@ def defineHists(phi_setting):
     ################################################################################################################################################
     # Call diamond cut script
 
-    paramDict = DiamondPlot(particle,float(Q2.replace("p",".")),float(W.replace("p",".")),phi_setting,tmin,tmax,target)
+    paramDict = DiamondPlot(particle, Q2Val, WVal, phi_setting,tmin,tmax,target)
     
     a1 = paramDict["a1"]
     b1 = paramDict["b1"]
@@ -531,7 +539,7 @@ def defineHists(phi_setting):
     CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 100, -2, 2, 100, 0, 2)
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
-    Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, 0.0, 10.0, 200, 0.0, 10.0)
+    Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Wmin, Wmax, 200, Q2min, Q2max)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
