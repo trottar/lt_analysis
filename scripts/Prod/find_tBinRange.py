@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 02:03:41 trottar"
+# Time-stamp: "2023-02-14 18:05:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -299,12 +299,21 @@ def defineHists(phi_setting):
     TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
     
     ################################################################################################################################################
-    # Grab and calculate efficiency
-
+    # Grabs PID cut string
     
     if phi_setting == "Right":
         runNums= runNumRight
-        runNum = runNumRight.split(' ')[0]
+        for run in runNumRight.split(' '):
+            runNum = run
+            pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+            if os.path.exists(pid_log):
+                    with open(pid_log, 'r') as f_log:
+                        for line in f_log:
+                            if "coin_ek_cut_all_RF" in line:
+                                break
+            else:
+                continue                            
+            
         InData_efficiency = InData_efficiency_right
     if phi_setting == "Left":
         runNums= runNumLeft
@@ -315,23 +324,6 @@ def defineHists(phi_setting):
         runNum = runNumCenter.split(' ')[0]
         InData_efficiency = InData_efficiency_center
 
-    sys.path.append('../')
-    from getDataTable import calculate_effError
-
-    tot_effError_data = [calculate_effError(run,efficiency_table) for run in runNums.split(' ')]
-    #print(InData_efficiency)
-    #print(tot_effError_data)
-    eff_errProp_data = sum(tot_effError_data) # Error propagation for addition
-
-    print("\n\nTotal Data Efficiency Uncertainty =",eff_errProp_data)
-
-    # Define total efficiency vs run number plots
-    G_data_eff = ROOT.TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
-
-    ################################################################################################################################################
-    # Grabs PID cut string
-
-    pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
     if os.path.exists(pid_log):
         with open(pid_log, 'r') as f_log:
             for line in f_log:
@@ -345,6 +337,22 @@ def defineHists(phi_setting):
     else:
         print("ERROR: Invalid log file %s" % pid_log)
         sys.exit(0)
+
+    ################################################################################################################################################
+    # Grab and calculate efficiency
+    
+    sys.path.append('../')
+    from getDataTable import calculate_effError
+
+    tot_effError_data = [calculate_effError(run,efficiency_table) for run in runNums.split(' ')]
+    #print(InData_efficiency)
+    #print(tot_effError_data)
+    eff_errProp_data = sum(tot_effError_data) # Error propagation for addition
+
+    print("\n\nTotal Data Efficiency Uncertainty =",eff_errProp_data)
+
+    # Define total efficiency vs run number plots
+    G_data_eff = ROOT.TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
 
     ###############################################################################################################################################
     # Grab windows for random subtraction
