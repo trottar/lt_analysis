@@ -533,6 +533,7 @@ if [[ $a_flag = "true" ]]; then
 	echo
 	cd "${LTANAPATH}/scripts"
 	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    for i in "${data_right[@]}"
 	    do       
@@ -561,6 +562,7 @@ if [[ $a_flag = "true" ]]; then
 	echo
 	cd "${LTANAPATH}/scripts"
 	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    for i in "${data_left[@]}"
 	    do
@@ -589,6 +591,7 @@ if [[ $a_flag = "true" ]]; then
 	echo
 	cd "${LTANAPATH}/scripts"
 	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    for i in "${data_center[@]}"
 	    do

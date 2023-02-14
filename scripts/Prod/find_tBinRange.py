@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 15:40:19 trottar"
+# Time-stamp: "2023-02-13 19:56:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -335,7 +335,7 @@ def defineHists(phi_setting):
     if os.path.exists(pid_log):
         with open(pid_log, 'r') as f_log:
             for line in f_log:
-                if "coin_ep_cut_prompt_noRF_pid" in line:
+                if "coin_ek_cut_all_RF" in line:
                     pid_text = next(f_log)
     else:
         pid_text = "\nNo cuts file found in logs..."
