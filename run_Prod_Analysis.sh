@@ -538,7 +538,6 @@ if [[ $a_flag = "true" ]]; then
 	    do       
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
 		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Combining run $i with ${OutDATAFilename}_Right.root..."
 		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
@@ -567,7 +566,6 @@ if [[ $a_flag = "true" ]]; then
 	    do
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
 		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Combining run $i with ${OutDATAFilename}_Left.root..."
 		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
@@ -595,8 +593,7 @@ if [[ $a_flag = "true" ]]; then
 	    for i in "${data_center[@]}"
 	    do
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Combining run $i with ${OutDATAFilename}_Center.root..."
+		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"       
 		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis

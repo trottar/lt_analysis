@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 19:26:14 trottar"
+# Time-stamp: "2023-02-13 19:36:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ for tree in input_tree_names.split():
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
 
-    new_tree = chain.CloneTree()
+    new_tree = chain.CloneTree(0)
     for i in range(chain.GetEntries()):
         chain.GetEntry(i)
         new_tree.Fill()
