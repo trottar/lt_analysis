@@ -195,6 +195,8 @@ KSet=1 # Arbitrary value
 #EffData="coin_production_Prod_efficiency_data_2022_12_30.csv"
 EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
 
+TreeNames="Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF"
+
 # Function that calls python script to grab run numbers
 grab_runs () {
     RunList=$1
@@ -532,7 +534,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Right" "${data_right[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    for i in "${data_right[@]}"
@@ -561,7 +563,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining left data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Left" "${data_left[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    for i in "${data_left[@]}"
@@ -590,7 +592,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining center data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF" "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Center" "${data_center[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    for i in "${data_center[@]}"
