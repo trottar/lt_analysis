@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 17:30:04 trottar"
+# Time-stamp: "2023-02-14 17:30:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,7 +56,7 @@ for runNum in RUNLIST:
     effective_charge += " " + str(int(1000*(float(charge/1000)*float(efficiency))))
     effective_charge_uncern += " " + "1"
     
-    tot_efficiency += " " + efficiency
+    tot_efficiency += " " + str(efficiency)
     tot_efficiency_uncern += " " + "1"
     
     ebeam_val += " " + getEfficiencyValue(runNum,efficiency_table,"ebeam")
