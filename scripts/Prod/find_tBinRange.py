@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 01:07:21 trottar"
+# Time-stamp: "2023-02-14 01:14:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1464,21 +1464,25 @@ tradius.Draw()
 
 Cpht.Print(outputpdf)
 
-Ctext = TCanvas()
-
-texlist = []
 for i,hist in enumerate(histlist):
+    Ctext = TCanvas()
+
+    texlist = []
+
+    tex = TLatex(0.,0.+(0.95),"{}".format(hist["phi_setting"][i]))
     for j,line in enumerate(hist["pid_text"]):
-        tex = TLatex(0.,0.+(0.9-(0.1*2*i+(0.1*j/2))),"{}".format(line))
+        tex = TLatex(0.,0.+(0.9-((0.1*j/2))),"{}".format(line))
         tex.SetTextColor(i+1)
         #tex.SetNDC(True)
         texlist.append(tex)
 
-for tex in texlist:
-    tex.Draw()
+    for tex in texlist:
+        tex.Draw()
 
-    
-Ctext.Print(outputpdf+')')
+    if hist["phi_setting"][i] == "Center":
+        Ctext.Print(outputpdf+')')
+    else:
+        Ctext.Print(outputpdf)
 
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
