@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 17:24:41 trottar"
+# Time-stamp: "2023-02-14 17:25:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,14 +48,14 @@ pTheta_val = ""
 
 for runNum in RUNLIST:
 
+    tot_efficiency += " " + getEfficiencyValue(runNum,efficiency_table,"efficiency")
+    tot_efficiency_uncern += " " + "1"
+    
     charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
     print(charge)
     # Need to convert to int value for bash to interpret correctly
     effective_charge += " " + str(int(1000*(float(charge/1000)*float(tot_efficiency))))
     effective_charge_uncern += " " + "1"
-    
-    tot_efficiency += " " + getEfficiencyValue(runNum,efficiency_table,"efficiency")
-    tot_efficiency_uncern += " " + "1"
     
     ebeam_val += " " + getEfficiencyValue(runNum,efficiency_table,"ebeam")
     pTheta_val += " " + getEfficiencyValue(runNum,efficiency_table,"pTheta")    
