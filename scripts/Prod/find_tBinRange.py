@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 00:45:00 trottar"
+# Time-stamp: "2023-02-14 00:54:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -336,7 +336,7 @@ def defineHists(phi_setting):
         with open(pid_log, 'r') as f_log:
             for line in f_log:
                 if "coin_ek_cut_all_RF" in line:
-                    pid_text = "#splitline"+next(f_log).replace("[","").replace("]","").replace("'","").replace(", ","")
+                    pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
     else:
         pid_text = "\nNo cuts file found in logs..."
 
@@ -1468,10 +1468,11 @@ Ctext = TCanvas()
 
 texlist = []
 for i,hist in enumerate(histlist):
-    tex = TLatex(0.,0.+(0.9-(0.1*i)),"{}".format(hist["pid_text"]))
-    tex.SetTextColor(i+1)
-    #tex.SetNDC(True)
-    texlist.append(tex)
+    for line in hist["pid_text"]:
+        tex = TLatex(0.,0.+(0.9-(0.1*i)),"{}".format(line))
+        tex.SetTextColor(i+1)
+        #tex.SetNDC(True)
+        texlist.append(tex)
 
 for tex in texlist:
     tex.Draw()
