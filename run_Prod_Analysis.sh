@@ -627,11 +627,9 @@ if [[ ${#data_right[@]} -ne 0 ]]; then
     arr6=()
     itt=0
     while read line; do
-	itt=$((itt+1))
-	
+	itt=$((itt+1))       
 	# split the line into an array based on space
 	IFS=' ' read -ra line_array <<< "$line"
-
 	# store the elements in the corresponding array
 	eval "arr$counter=(\"\${line_array[@]}\")"
     done <<< "$PYRIGHTSTRING"
@@ -651,29 +649,29 @@ fi
 
 # Checks that array isn't empty
 if [[ ${#data_left[@]} -ne 0 ]]; then
-    DataChargeValLeft=()
-    DataChargeErrLeft=()
-    DataEffValLeft=()
-    DataEffErrLeft=()
-    DatapThetaValLeft=()
-    DataEbeamValLeft=()
     echo
     echo "Calculating data total effective charge left..."
-    for i in "${data_left[@]}"
-    do
-	# Calculates total efficiency then applies to the charge for each run number
-	# to get the effective charge per run and saves as an array
-	DataChargeValLeft+=($(python3 findEffectiveCharge.py ${EffData} "replay_coin_production" "$i" -1))
-	DataChargeErrLeft+=(1) # HERE! These uncertainties are set to unity until the replays are updated with proper uncertainties
-	# Grabs the total effiency value per run and saves as an array
-	DataEffValLeft+=($(python3 getEfficiencyValue.py "$i" ${EffData} "efficiency"))
-	DataEffErrLeft+=(1) # HERE! These uncertainties are set to unity until the replays are updated with proper uncertainties
-	# Grabs pTheta value per run
-	DatapThetaValLeft+=($(python3 getEfficiencyValue.py "$i" ${EffData} "pTheta"))
-	# Grabs ebeam value per run
-	DataEbeamValLeft+=($(python3 getEfficiencyValue.py "$i" ${EffData} "ebeam"))
-	#echo "${DataChargeValLeft[@]} uC"
-    done
+    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_left[*]}")
+    arr1=()
+    arr2=()
+    arr3=()
+    arr4=()
+    arr5=()
+    arr6=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))       
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$counter=(\"\${line_array[@]}\")"
+    done <<< "$PYLEFTSTRING"
+    DataChargeValLeft=$arr1
+    DataChargeErrLeft=$arr2
+    DataEffValLeft=$arr3
+    DataEffErrLeft=$arr4
+    DatapThetaValLeft=$arr5
+    DataEbeamValLeft=$arr6
     #echo ${DataChargeVal[*]}
     # Sums the array to get the total effective charge
     # Note: this must be done as an array! This is why uC is used at this step
