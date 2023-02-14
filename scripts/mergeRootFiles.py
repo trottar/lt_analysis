@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 19:44:01 trottar"
+# Time-stamp: "2023-02-13 19:48:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,9 @@ for tree in input_tree_names.split():
         chain.Add(filepath)
     
 
-    chain.Write()
+        
+    outfile.cd()
+    chain.Write(tree, ROOT.TObject.kWriteDelete)
     
     print("\n\tTree {} added to {}.root".format(tree,output_file_name))
     
