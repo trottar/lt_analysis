@@ -50,10 +50,10 @@ print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, R
 
 def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax,target):
 
-    Q2min = Q2Val - 1.5 # Minimum value of Q2 on the Q2 vs W plot
-    Q2max = Q2Val + 1.5 # Maximum value of Q2 on the Q2 vs W plot
-    Wmin = WVal - 0.5 # min y-range for Q2vsW plot
-    Wmax = WVal + 0.5 # max y-range for Q2vsW plot
+    Q2min = Q2Val - (1/3)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
+    Q2max = Q2Val + (1/3)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
+    Wmin = WVal - (1/3)*WVal # min y-range for Q2vsW plot
+    Wmax = WVal + (1/3)*WVal # max y-range for Q2vsW plot
     
     Qs = str(Q2Val).replace('.','p')
     Ws = str(WVal).replace('.','p')
