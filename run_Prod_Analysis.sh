@@ -626,19 +626,21 @@ if [[ ${#data_right[@]} -ne 0 ]]; then
     arr5=()
     arr6=()
     itt=0
-    while read line; do       
-	itt=$((itt+1))       
+    while read line; do
+	itt=$((itt+1))
+	echo "${itt} -> ${line}"
 	# split the line into an array based on space
 	IFS=' ' read -ra line_array <<< "$line"
 	# store the elements in the corresponding array
-	eval "arr$counter=(\"\${line_array[@]}\")"
+	eval "arr$itt=(\"\${line_array[@]}\")"
     done <<< "$PYRIGHTSTRING"
-    DataChargeValRight=$arr1
-    DataChargeErrRight=$arr2
-    DataEffValRight=$arr3
-    DataEffErrRight=$arr4
-    DatapThetaValRight=$arr5
-    DataEbeamValRight=$arr6
+    echo "${arr1[@]}"
+    DataChargeValRight=("${arr1[@]}")
+    DataChargeErrRight=("${arr2[@]}")
+    DataEffValRight=("${arr3[@]}")
+    DataEffErrRight=("${arr4[@]}")
+    DatapThetaValRight=("${arr5[@]}")
+    DataEbeamValRight=("${arr6[@]}")
     #echo ${DataChargeVal[*]}
     # Sums the array to get the total effective charge
     # Note: this must be done as an array! This is why uC is used at this step
@@ -684,29 +686,31 @@ fi
 
 # Checks that array isn't empty
 if [[ ${#data_center[@]} -ne 0 ]]; then
-    DataChargeValCenter=()
-    DataChargeErrCenter=()
-    DataEffValCenter=()
-    DataEffErrCenter=()
-    DatapThetaValCenter=()
-    DataEbeamValCenter=()
     echo
     echo "Calculating data total effective charge center..."
-    for i in "${data_center[@]}"
-    do
-	# Calculates total efficiency then applies to the charge for each run number
-	# to get the effective charge per run and saves as an array
-	DataChargeValCenter+=($(python3 findEffectiveCharge.py ${EffData} "replay_coin_production" "$i" -1))
-	DataChargeErrCenter+=(1) # HERE! These uncertainties are set to unity until the replays are updated with proper uncertainties
-	# Grabs the total effiency value per run and saves as an array
-	DataEffValCenter+=($(python3 getEfficiencyValue.py "$i" ${EffData} "efficiency"))
-	DataEffErrCenter+=(1) # HERE! These uncertainties are set to unity until the replays are updated with proper uncertainties
-	# Grabs pTheta value per run
-	DatapThetaValCenter+=($(python3 getEfficiencyValue.py "$i" ${EffData} "pTheta"))
-	# Grabs ebeam value per run
-	DataEbeamValCenter+=($(python3 getEfficiencyValue.py "$i" ${EffData} "ebeam"))
-	#echo "${DataChargeValCenter[@]} uC"
-    done
+    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_center[*]}")
+    arr1=()
+    arr2=()
+    arr3=()
+    arr4=()
+    arr5=()
+    arr6=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	echo "${itt} -> ${line}"
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$itt=(\"\${line_array[@]}\")"
+    done <<< "$PYCENTERSTRING"
+    echo "${arr1[@]}"
+    DataChargeValCenter=("${arr1[@]}")
+    DataChargeErrCenter=("${arr2[@]}")
+    DataEffValCenter=("${arr3[@]}")
+    DataEffErrCenter=("${arr4[@]}")
+    DatapThetaValCenter=("${arr5[@]}")
+    DataEbeamValCenter=("${arr6[@]}")
     #echo ${DataChargeVal[*]}
     # Sums the array to get the total effective charge
     # Note: this must be done as an array! This is why uC is used at this step
