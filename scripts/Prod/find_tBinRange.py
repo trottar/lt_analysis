@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 18:08:13 trottar"
+# Time-stamp: "2023-02-14 18:09:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -318,11 +318,31 @@ def defineHists(phi_setting):
         InData_efficiency = InData_efficiency_right
     if phi_setting == "Left":
         runNums= runNumLeft
-        runNum = runNumLeft.split(' ')[0]
+        for run in runNumLeft.split(' '):
+            runNum = run
+            pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+            if os.path.exists(pid_log):
+                    with open(pid_log, 'r') as f_log:
+                        for line in f_log:
+                            if "coin_ek_cut_all_RF" in line:
+                                break
+            else:
+                print("WARNING: Run {} does not have a valid PID log!".format(run))
+                continue
         InData_efficiency = InData_efficiency_left
     if phi_setting == "Center":
         runNums= runNumCenter
-        runNum = runNumCenter.split(' ')[0]
+        for run in runNumCenter.split(' '):
+            runNum = run
+            pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+            if os.path.exists(pid_log):
+                    with open(pid_log, 'r') as f_log:
+                        for line in f_log:
+                            if "coin_ek_cut_all_RF" in line:
+                                break
+            else:
+                print("WARNING: Run {} does not have a valid PID log!".format(run))
+                continue
         InData_efficiency = InData_efficiency_center
 
     if os.path.exists(pid_log):
