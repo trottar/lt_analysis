@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 17:31:18 trottar"
+# Time-stamp: "2023-02-14 17:31:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,8 +50,7 @@ for runNum in RUNLIST:
 
     efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
     charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
-    print(efficiency)
-    print(charge)
+
     # Need to convert to int value for bash to interpret correctly
     effective_charge += " " + str(int(1000*(float(charge/1000)*float(efficiency))))
     effective_charge_uncern += " " + "1"
