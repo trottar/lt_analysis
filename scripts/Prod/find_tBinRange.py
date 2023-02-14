@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 18:09:58 trottar"
+# Time-stamp: "2023-02-14 18:11:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -310,6 +310,7 @@ def defineHists(phi_setting):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
                             if "coin_ek_cut_all_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
                                 break
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
@@ -325,6 +326,7 @@ def defineHists(phi_setting):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
                             if "coin_ek_cut_all_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
                                 break
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
@@ -339,25 +341,18 @@ def defineHists(phi_setting):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
                             if "coin_ek_cut_all_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
                                 break
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
         InData_efficiency = InData_efficiency_center
 
-    if os.path.exists(pid_log):
-        with open(pid_log, 'r') as f_log:
-            for line in f_log:
-                if "coin_ek_cut_all_RF" in line:
-                    pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
-                else:
-                    pid_text = "\nNo cuts file found in logs..."
-
     if 'pid_text' in locals():
         print('\n\nPID Cuts = ',pid_text,'\n\n')
     else:
         print("ERROR: Invalid log file %s" % pid_log)
-        sys.exit(0)
+        pid_text = "\nNo cuts file found in logs..."
 
     ################################################################################################################################################
     # Grab and calculate efficiency
