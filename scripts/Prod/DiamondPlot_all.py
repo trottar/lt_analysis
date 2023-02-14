@@ -78,7 +78,7 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax,target):
     lenm = 10000
     lenl = 10000
     if(target == '0'): target = ""
-    print("Kinematics: ",FilenameOverride,"\nPhi Setting: ",target)
+    print("\n\nKinematics: ",FilenameOverride,"\nPhi Setting: ",target)
     #    for file in glob.glob(OUTPATH+'/**/'+FilenameOverride+'*'+target+'*Analysed_Data.root',recursive = True):
     for file in glob.glob(OUTPATH+'/*'+FilenameOverride+'*'+target+'*.root'):
 	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
@@ -391,7 +391,7 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax,target):
     gStyle.SetOptStat(0)
     pages = 2
     if (highe_input !=False):
-        print("test high")
+        #print("test high")
         Q2vsW_cut.Draw("col")
         ex1.Draw()
         Q2vsW_cut.Draw("col same")
@@ -406,7 +406,7 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax,target):
                 Q2vsW_lowe_cut.Draw("col same")
                 pages = 6
         elif (lowe_input !=False):
-            print("test high low")
+            #print("test high low")
             ex2.Draw()
             Q2vsW_lowe_cut.Draw("col same")
             pages = 4
@@ -421,7 +421,7 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax,target):
             Q2vsW_lowe_cut.Draw("col same")
             pages = 4
     elif (lowe_input !=False):
-        print("test low")
+        #print("test low")
         Q2vsW_lowe_cut.Draw("colz")
         ex1.Draw()
         Q2vsW_lowe_cut.Draw("col same")

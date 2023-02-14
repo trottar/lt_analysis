@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 19:48:12 trottar"
+# Time-stamp: "2023-02-13 20:35:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,7 +31,7 @@ from ltsep import Misc
 
 outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
 if not outfile.IsOpen():
-    print("Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
+    print("ERROR: Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
     sys.exit(1)
 
 arr_run_nums = [int(x) for x in string_run_nums.split()]
@@ -46,12 +46,10 @@ for tree in input_tree_names.split():
         filepath = root_path + str(n) + input_file_name + ".root"
         tempfile = ROOT.TFile.Open(filepath)
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
-            print("File {} not found or not opened or corrupted. Skipping this file.".format(filepath))
+            print("WARNING: File {} not found or not opened or corrupted. Skipping this file.".format(filepath))
             continue
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
-    
-
         
     outfile.cd()
     chain.Write(tree, ROOT.TObject.kWriteDelete)
