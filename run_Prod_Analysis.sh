@@ -665,14 +665,15 @@ if [[ ${#data_left[@]} -ne 0 ]]; then
 	# split the line into an array based on space
 	IFS=' ' read -ra line_array <<< "$line"
 	# store the elements in the corresponding array
-	eval "arr$itt+=(\"\${line_array[@]}\")"
+	eval "arr$itt=(\"\${line_array[@]}\")"
     done <<< "$PYLEFTSTRING"
-    DataChargeValLeft=$arr1
-    DataChargeErrLeft=$arr2
-    DataEffValLeft=$arr3
-    DataEffErrLeft=$arr4
-    DatapThetaValLeft=$arr5
-    DataEbeamValLeft=$arr6
+    echo "${arr1[@]}"
+    DataChargeValLeft=("${arr1[@]}")
+    DataChargeErrLeft=("${arr2[@]}")
+    DataEffValLeft=("${arr3[@]}")
+    DataEffErrLeft=("${arr4[@]}")
+    DatapThetaValLeft=("${arr5[@]}")
+    DataEbeamValLeft=("${arr6[@]}")
     #echo ${DataChargeVal[*]}
     # Sums the array to get the total effective charge
     # Note: this must be done as an array! This is why uC is used at this step
