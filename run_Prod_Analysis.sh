@@ -660,13 +660,14 @@ if [[ ${#data_left[@]} -ne 0 ]]; then
     arr6=()
     itt=0
     while read line; do
-	echo $line
-	itt=$((itt+1))       
+	itt=$((itt+1))
+	echo "${itt} -> ${line}"
 	# split the line into an array based on space
 	IFS=' ' read -ra line_array <<< "$line"
 	# store the elements in the corresponding array
 	eval "arr$counter=(\"\${line_array[@]}\")"
     done <<< "$PYLEFTSTRING"
+    echo $arr1
     DataChargeValLeft=$arr1
     DataChargeErrLeft=$arr2
     DataEffValLeft=$arr3
