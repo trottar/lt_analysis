@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 18:11:54 trottar"
+# Time-stamp: "2023-02-14 18:15:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -349,10 +349,10 @@ def defineHists(phi_setting):
         InData_efficiency = InData_efficiency_center
 
     if 'pid_text' in locals():
-        print('\n\nPID Cuts = ',pid_text,'\n\n')
+        print('\n\n',phi_setting,' PID Cuts = ',pid_text,'\n\n')
     else:
-        print("ERROR: Invalid log file %s" % pid_log)
-        pid_text = "\nNo cuts file found in logs..."
+        print("ERROR: Invalid {} log file {}!".format(phi_setting.lower(),pid_log))
+        pid_text = "\nNo {} cuts file found in logs...".format(phi_setting.lower())
 
     ################################################################################################################################################
     # Grab and calculate efficiency
@@ -536,7 +536,7 @@ def defineHists(phi_setting):
     ################################################################################################################################################
     # Fill histograms for various trees called above
     
-    print("\nPlotting %s simc..." % phi_setting)
+    print("\nGrabbing %s simc..." % phi_setting)
     for i,evt in enumerate(TBRANCH_SIMC):
 
       # Progress bar
@@ -593,7 +593,7 @@ def defineHists(phi_setting):
 
     
     ibin = 1
-    print("\nPlotting %s data..." % phi_setting)
+    print("\nGrabbing %s data..." % phi_setting)
     for i,evt in enumerate(TBRANCH_DATA):
 
         # Progress bar
@@ -680,7 +680,7 @@ def defineHists(phi_setting):
     
     # Random subtraction
     ibin = 1
-    print("\nPlotting %s random data..." % phi_setting)
+    print("\nGrabbing %s random data..." % phi_setting)
     for i,evt in enumerate(TBRANCH_RAND):
 
         # Progress bar
