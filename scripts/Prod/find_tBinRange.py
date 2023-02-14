@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 22:28:56 trottar"
+# Time-stamp: "2023-02-13 22:30:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1469,9 +1469,9 @@ Ctext = TCanvas()
 for i,hist in enumerate(histlist):
     texvar = "tex_" + str(i)
     exec(texvar = TLatex(0.,0.+(0.9-(0.01*i)),"{}".format(hist["pid_text"])))
-    tex.SetTextColor(i+1)
+    exec(texvar.SetTextColor(i+1))
     #tex.SetNDC(True)
-    tex.Draw()
+    exec(texvar.Draw())
 
 Ctext.Print(outputpdf+')')
 
