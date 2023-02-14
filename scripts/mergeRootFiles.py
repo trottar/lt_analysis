@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 18:45:36 trottar"
+# Time-stamp: "2023-02-13 19:26:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,17 +52,15 @@ for tree in input_tree_names.split():
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
 
-
-    intermediate_file = ROOT.TFile(root_path + tree + "_" + output_file_name + ".root", "RECREATE")
-    chain.Merge(intermediate_file.GetName())
-    intermediate_file.Close()
+    new_tree = chain.CloneTree()
+    for i in range(chain.GetEntries()):
+        chain.GetEntry(i)
+        new_tree.Fill()
+    
+    outfile.cd()
+    new_tree.Write(tree)
     
     print("\n\tTree {} added to {}.root".format(tree,output_file_name))
 
-# Merge the intermediate files into the final file
-final_chain = ROOT.TChain()
-for tree in input_tree_names.split():
-    intermediate_file_path = root_path + tree + "_" + output_file_name + ".root"
-    final_chain.Add(intermediate_file_path)
-final_chain.Merge(outfile.GetName())
 outfile.Close()
+
