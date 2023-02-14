@@ -665,9 +665,8 @@ if [[ ${#data_left[@]} -ne 0 ]]; then
 	# split the line into an array based on space
 	IFS=' ' read -ra line_array <<< "$line"
 	# store the elements in the corresponding array
-	eval "arr$itt=(\"\${line_array[@]}\")"
+	eval "arr$itt+=(\"\${line_array[@]}\")"
     done <<< "$PYLEFTSTRING"
-    echo "${arr1[@]}"
     DataChargeValLeft=$arr1
     DataChargeErrLeft=$arr2
     DataEffValLeft=$arr3
