@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 01:27:15 trottar"
+# Time-stamp: "2023-02-14 01:40:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1479,7 +1479,7 @@ for i,hist in enumerate(histlist):
     for tex in texlist:
         tex.Draw()
 
-    Ctext.Print(outputpdf+')')
+Ctext.Print(outputpdf+')')
     '''
     #if hist["phi_setting"][i] == "Center":
     if i == len(histlist):
