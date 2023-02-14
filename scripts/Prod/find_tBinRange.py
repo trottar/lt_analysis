@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 01:47:08 trottar"
+# Time-stamp: "2023-02-14 01:47:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1469,7 +1469,7 @@ Ctext = TCanvas()
 texlist = []
 for i,hist in enumerate(histlist):
     for j,line in enumerate(hist["pid_text"]):
-        tex = TLatex(0.,0.+(0.9-(0.1*i+(0.1*j/2))),"{}".format(line))
+        tex = TLatex(0.,0.+(0.9-(0.5*i+(0.1*j/2))),"{}".format(line))
         tex.SetTextSize(0.05)
         tex.SetTextColor(i+1)
         #tex.SetNDC(True)
