@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 18:55:22 trottar"
+# Time-stamp: "2023-02-14 18:56:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -444,8 +444,8 @@ def defineHists(phi_setting):
     H_ssxptar_SIMC  = ROOT.TH1D("H_ssxptar_SIMC","SHMS xptar", 200, -0.1, 0.1)
     H_ssyptar_SIMC  = ROOT.TH1D("H_ssyptar_SIMC","SHMS yptar", 200, -0.04, 0.04)
     H_q_SIMC        = ROOT.TH1D("H_q_SIMC","q", 200, 0.0, 10.0)
-    H_Q2_SIMC       = ROOT.TH1D("H_Q2_SIMC","Q2", 200, 0.0, 10.0)
-    H_W_SIMC  = ROOT.TH1D("H_W_SIMC","W ", 200, 0.0, 10.0)
+    H_Q2_SIMC       = ROOT.TH1D("H_Q2_SIMC","Q2", 200, Q2min, Q2max)
+    H_W_SIMC  = ROOT.TH1D("H_W_SIMC","W ", 200, Wmin, Wmax)
     H_t_SIMC       = ROOT.TH1D("H_t_SIMC","-t", 200, -1.0, 1.5)  
     H_epsilon_SIMC  = ROOT.TH1D("H_epsilon_SIMC","epsilon", 200, 0., 1.0)
     H_MM_SIMC  = ROOT.TH1D("H_MM_SIMC","MM_{K}", 200, 0.0, 2.0)
@@ -476,8 +476,8 @@ def defineHists(phi_setting):
     H_ssxptar_DATA  = ROOT.TH1D("H_ssxptar_DATA","SHMS xptar", 200, -0.1, 0.1)
     H_ssyptar_DATA  = ROOT.TH1D("H_ssyptar_DATA","SHMS yptar", 200, -0.04, 0.04)
     H_q_DATA        = ROOT.TH1D("H_q_DATA","q", 200, 0.0, 10.0)
-    H_Q2_DATA       = ROOT.TH1D("H_Q2_DATA","Q2", 200, 0.0, 10.0)
-    H_W_DATA  = ROOT.TH1D("H_W_DATA","W ", 200, 0.0, 10.0)
+    H_Q2_DATA       = ROOT.TH1D("H_Q2_DATA","Q2", 200, Q2min, Q2max)
+    H_W_DATA  = ROOT.TH1D("H_W_DATA","W ", 200, Wmin, Wmax)
     H_t_DATA       = ROOT.TH1D("H_t_DATA","-t", 200, -1.0, 1.5)  
     H_epsilon_DATA  = ROOT.TH1D("H_epsilon_DATA","epsilon", 200, 0., 1.0)
     H_MM_DATA  = ROOT.TH1D("H_MM_DATA","MM_{K}", 200, 0.0, 2.0)
@@ -514,8 +514,8 @@ def defineHists(phi_setting):
     H_ssxptar_RAND  = ROOT.TH1D("H_ssxptar_RAND","SHMS xptar", 200, -0.1, 0.1)
     H_ssyptar_RAND  = ROOT.TH1D("H_ssyptar_RAND","SHMS yptar", 200, -0.04, 0.04)
     H_q_RAND        = ROOT.TH1D("H_q_RAND","q", 200, 0.0, 10.0)
-    H_Q2_RAND       = ROOT.TH1D("H_Q2_RAND","Q2", 200, 0.0, 10.0)
-    H_W_RAND  = ROOT.TH1D("H_W_RAND","W ", 200, 0.0, 10.0)
+    H_Q2_RAND       = ROOT.TH1D("H_Q2_RAND","Q2", 200, Q2min, Q2max)
+    H_W_RAND  = ROOT.TH1D("H_W_RAND","W ", 200, Wmin, Wmax)
     H_t_RAND       = ROOT.TH1D("H_t_RAND","-t", 200, -1.0, 1.5)
     H_epsilon_RAND  = ROOT.TH1D("H_epsilon_RAND","epsilon", 200, 0., 1.0)
     H_MM_RAND  = ROOT.TH1D("H_MM_RAND","MM_{K}", 200, 0.0, 2.0)
