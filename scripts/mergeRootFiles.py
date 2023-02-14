@@ -3,15 +3,14 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-13 19:36:47 trottar"
+# Time-stamp: "2023-02-13 19:40:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
-import sys
-import os
+import os, sys
 import ROOT
 
 root_path = sys.argv[1]
@@ -57,10 +56,9 @@ for tree in input_tree_names.split():
         chain.GetEntry(i)
         new_tree.Fill()
     
-    outfile.cd()
-    new_tree.Write(tree)
-    
+    new_tree = chain.CloneTree()
+    new_tree.Write(tree, ROOT.TObject.kOverwrite)
     print("\n\tTree {} added to {}.root".format(tree,output_file_name))
-
+    
 outfile.Close()
 
