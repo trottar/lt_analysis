@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 18:05:56 trottar"
+# Time-stamp: "2023-02-14 18:08:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -312,7 +312,8 @@ def defineHists(phi_setting):
                             if "coin_ek_cut_all_RF" in line:
                                 break
             else:
-                continue                            
+                print("WARNING: Run {} does not have a valid PID log!".format(run))
+                continue
             
         InData_efficiency = InData_efficiency_right
     if phi_setting == "Left":
@@ -329,8 +330,8 @@ def defineHists(phi_setting):
             for line in f_log:
                 if "coin_ek_cut_all_RF" in line:
                     pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
-    else:
-        pid_text = "\nNo cuts file found in logs..."
+                else:
+                    pid_text = "\nNo cuts file found in logs..."
 
     if 'pid_text' in locals():
         print('\n\nPID Cuts = ',pid_text,'\n\n')
