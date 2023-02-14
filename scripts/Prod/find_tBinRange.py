@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 18:43:19 trottar"
+# Time-stamp: "2023-02-14 18:43:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1494,12 +1494,13 @@ texlist = []
 for i,hist in enumerate(histlist):
     for j,line in enumerate(hist["pid_text"]):
         if j == 0:
-            tex = TLatex(0.7,0.+(0.9-(0.3*i)),"{}".format(hist["phi_setting"])
+            tex = TLatex(0.7,0.+(0.9-(0.3*i)),"{}".format(hist["phi_setting"]))
+            tex.SetTextSize(0.03)
+            tex.SetTextColor(i+1)
             texlist.append(tex)
         tex = TLatex(0.,0.+(0.9-(0.3*i+(0.05*j/2))),"{}".format(line))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
-        #tex.SetNDC(True)
         texlist.append(tex)
 
 for tex in texlist:
