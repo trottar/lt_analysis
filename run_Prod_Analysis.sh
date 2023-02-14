@@ -667,7 +667,7 @@ if [[ ${#data_left[@]} -ne 0 ]]; then
 	# store the elements in the corresponding array
 	eval "arr$counter=(\"\${line_array[@]}\")"
     done <<< "$PYLEFTSTRING"
-    echo $arr1
+    echo "${arr1[@]}"
     DataChargeValLeft=$arr1
     DataChargeErrLeft=$arr2
     DataEffValLeft=$arr3
