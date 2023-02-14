@@ -618,7 +618,7 @@ cd "${LTANAPATH}/scripts"
 if [[ ${#data_right[@]} -ne 0 ]]; then
     echo
     echo "Calculating data total effective charge right..."
-    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_right[*]}")
+    PYRIGHTSTRING="$(python3 findEffectiveCharge.py ${EffData} "${data_right[*]}")"
     arr1=()
     arr2=()
     arr3=()
