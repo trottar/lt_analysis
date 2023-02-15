@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 15:29:51 trottar"
+# Time-stamp: "2023-02-15 15:33:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1851,9 +1851,6 @@ for i,hist in enumerate(histlist):
 Cpht.Print(outputpdf)
 
 Cphtsame = TCanvas()
-
-tmin=0.0
-tmax=2.0
 
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
