@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:13:50 trottar"
+# Time-stamp: "2023-02-15 18:18:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -632,7 +632,7 @@ def defineHists(phi_setting):
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
     polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
-    poly_phiq_vs_t_DATA = ROOT.TH2Poly("poly_phiq_vs_t_DATA", "", -10, 10, -10, 10)
+    poly_phiq_vs_t_DATA = ROOT.TH2Poly("poly_phiq_vs_t_DATA", "", -1, 1, -1, 1)
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
@@ -733,11 +733,6 @@ def defineHists(phi_setting):
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
           #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
-          r = -evt.MandelT
-          phi = evt.ph_q
-          x = r * math.cos(phi)
-          y = r * math.sin(phi)
-          poly_phiq_vs_t_DATA.Fill(x, y, 1)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1872,11 +1867,47 @@ Cpht.Print(outputpdf)
 
 Cphtsame = TCanvas()
 
-for i,hist in enumerate(histlist):
-    hist["poly_phiq_vs_t_DATA"].Draw("COLZ")
+# create a new TH2Poly object
+h2 = ROOT.TH2Poly("h2", "", -1, 1, -1, 1)
+h2.SetStats(False)
+h2.SetTitle("Density Plot")
 
-    # Set the color scale for the density plot
-    gStyle.SetPalette(1+i)
+# create a list of TGraphPolar objects
+gr_list = []
+
+for i, hist in enumerate(histlist):
+    # set colors for the TGraphPolar object
+    hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
+    hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
+    gr_list.append(hist["polar_phiq_vs_t_DATA"])
+
+# loop over the TGraphPolar objects and add their points to the TH2Poly object
+for gr in gr_list:
+    for i in range(gr.GetN()):
+        r = gr.GetRadius()[i]
+        theta = gr.GetTheta()[i]
+        bin_num = h2.FindBin(r * ROOT.TMath.Cos(theta), r * ROOT.TMath.Sin(theta))
+        h2.SetBinContent(bin_num, h2.GetBinContent(bin_num) + 1)
+
+# set the color palette for the TH2Poly object
+palette = [ROOT.kWhite, ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kYellow, ROOT.kMagenta, ROOT.kCyan]
+palette_size = len(palette)
+for i in range(1, h2.GetNumberOfBins() + 1):
+    bin_content = h2.GetBinContent(i)
+    if bin_content > 0:
+        h2.SetFillColor(i, palette[bin_content % palette_size])
+
+# draw the TH2Poly object
+c = ROOT.TCanvas("c", "c", 800, 800)
+h2.Draw("colz")
+c.Update()
+
+# set radial range, label color, and label size for the TGraphPolargram object
+for gr in gr_list:
+    gr.GetPolargram().SetRangeRadial(0, 2.0)
+    gr.GetPolargram().SetRadialLabelColor(0)
+    gr.GetPolargram().SetRadialLabelSize(0)
+
 
 
 '''
@@ -1889,7 +1920,6 @@ for i,hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     # Hide radial axis labels since redefined below
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelSize(0)
-'''
 
 # Section for polar plotting
 gStyle.SetPalette(55)
@@ -1925,7 +1955,8 @@ tradius = TGaxis(0,0,tmax,0,tmin,tmax,10,"-+")
 tradius.SetLineColor(9)
 tradius.SetLabelColor(9)
 tradius.Draw()
-    
+'''
+
 Cphtsame.Print(outputpdf)
 
 Ctext = TCanvas()
