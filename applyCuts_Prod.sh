@@ -31,7 +31,7 @@ while getopts 'h' flag; do
     case "${flag}" in
         h) 
         echo "--------------------------------------------------------------"
-        echo "./ana_Prod.sh -{flags} {variable arguments, see help}"
+        echo "./applyCuts_Prod.sh -{flags} {variable arguments, see help}"
 	echo
         echo "Description: Creates root files with PID and CT cuts applied"
         echo "--------------------------------------------------------------"
