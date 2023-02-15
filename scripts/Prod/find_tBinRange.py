@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 20:57:16 trottar"
+# Time-stamp: "2023-02-14 22:29:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1039,6 +1039,7 @@ def defineHists(phi_setting):
     H_W_DATA.Add(H_W_RAND,-1)
     H_ct_ep_DATA.Add(H_ct_ep_RAND,-1)
 
+    '''
     ###
     # Dummy Subtraction
     H_ssxfp_DATA.Add(H_ssxfp_DUMMY,-1)
@@ -1066,6 +1067,7 @@ def defineHists(phi_setting):
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_W_DATA.Add(H_W_DUMMY,-1)
     H_ct_ep_DATA.Add(H_ct_ep_DUMMY,-1)
+    '''
     
     histDict = {
         "phi_setting" : phi_setting,
