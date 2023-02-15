@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 13:23:54 trottar"
+# Time-stamp: "2023-02-15 13:30:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1856,9 +1856,8 @@ for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    polargram = hist["polar_phiq_vs_t_DATA"].GetPolargram()
-    polargram.SetMinimum(0.0)
-    polargram.SetMaximum(2.0)
+    hist["polar_phiq_vs_t_DATA"].SetMinRadial(0.0)
+    hist["polar_phiq_vs_t_DATA"].SetMaxRadial(2.0)
     hist["polar_phiq_vs_t_DATA"].Draw("AP")
 
 Cphtsame.Print(outputpdf)
