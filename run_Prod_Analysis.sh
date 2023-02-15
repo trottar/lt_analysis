@@ -225,6 +225,9 @@ echo
 data_right=()
 data_left=()
 data_center=()
+dummy_right=()
+dummy_left=()
+dummy_center=()
 # Get run numbers for left, right, and, center settings
 declare -a PHI=("RIGHT" "LEFT" "CENTER")
 for i in "${PHI[@]}"
@@ -254,36 +257,36 @@ do
 
     if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
 	if [[ $i = "RIGHT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		# Define run list based off kinematics selected
-		file_right="Q5p5W3p02right_${EPSILON}e_dummy"
-	    else
-		file_right="Q5p5W3p02right_${EPSILON}e"		   
-	    fi
-	    echo "Reading in run numbers for right file ${file_right}..."
+	    # Define run list based off kinematics selected
+	    file_right_dummy="Q5p5W3p02right_${EPSILON}e_dummy"
+	    file_right="Q5p5W3p02right_${EPSILON}e"
+	    echo "Reading in run numbers for right file ${file_right_dummy}..."
 	    # Converts python output to bash array
+	    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"             # RIGHT, Q2=5p5, W=3p02
-	    echo "Run Numbers: [${data_right[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+	    echo "Data Run Numbers: [${data_right[@]}]"
 	    echo
 	elif [[ $i = "LEFT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_left="Q5p5W3p02left_${EPSILON}e_dummy"
-	    else
-		file_left="Q5p5W3p02left_${EPSILON}e"
-	    fi
+	    file_left_dummy="Q5p5W3p02left_${EPSILON}e_dummy"
+	    file_left="Q5p5W3p02left_${EPSILON}e"
+	    echo "Reading in run numbers for left file ${file_left_dummy}..."
+	    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=5p5, W=3p02
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=5p5, W=3p02
-	    echo "Run Numbers: [${data_left[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+	    echo "Data Run Numbers: [${data_left[@]}]"
 	    echo
 	elif [[ $i = "CENTER" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_center="Q5p5W3p02center_${EPSILON}e_dummy"
-	    else
-		file_center="Q5p5W3p02center_${EPSILON}e"
-	    fi
+	    file_center_dummy="Q5p5W3p02center_${EPSILON}e_dummy"
+	    file_center="Q5p5W3p02center_${EPSILON}e"
+	    echo "Reading in run numbers for center file ${file_center_dummy}..."
+	    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=5p5, W=3p02
 	    echo "Reading in run numbers for center file ${file_center}..."
 	    IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=5p5, W=3p02
-	    echo "Run Numbers: [${data_center[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+	    echo "Data Run Numbers: [${data_center[@]}]"
 	    echo
 	fi
 	if [[ ${EPSILON} == "low" ]]; then
@@ -291,85 +294,81 @@ do
 	else
 	    EPSVAL=0.5291
 	fi
-	if [[ $TargetType = "dummy" ]]; then
-	    KIN="Q5p5W3p02_${EPSILON}e_dummy"
-	else
-	    KIN="Q5p5W3p02_${EPSILON}e"
+	KIN_dummy="Q5p5W3p02_${EPSILON}e_dummy"
+	KIN="Q5p5W3p02_${EPSILON}e"
 	fi
     fi
     if [[ $Q2 = "4p4" && $W = "2p74" ]]; then
 	if [[ $i = "RIGHT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_right="Q4p4W2p74right_${EPSILON}e_dummy"
-	    else
-		file_right="Q4p4W2p74right_${EPSILON}e"
-	    fi
+	    file_right_dummy="Q4p4W2p74right_${EPSILON}e_dummy"
+	    file_right="Q4p4W2p74right_${EPSILON}e"
+	    echo "Reading in run numbers for right file ${file_right_dummy}..."
+	    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=4p4, W=2p74
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=4p4, W=2p74
-	    echo "Run Numbers: [${data_right[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+	    echo "Data Run Numbers: [${data_right[@]}]"
 	    echo
 	elif [[ $i = "LEFT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_left="Q4p4W2p74left_${EPSILON}e_dummy"
-	    else
-		file_left="Q4p4W2p74left_${EPSILON}e"
-	    fi
+	    file_left_dummy="Q4p4W2p74left_${EPSILON}e_dummy"
+	    file_left="Q4p4W2p74left_${EPSILON}e"
+	    echo "Reading in run numbers for left file ${file_left_dummy}..."
+	    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=4p4, W=2p74
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=4p4, W=2p74
-	    echo "Run Numbers: [${data_left[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+	    echo "Data Run Numbers: [${data_left[@]}]"
 	    echo
 	elif [[ $i = "CENTER" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_center="Q4p4W2p74center_${EPSILON}e_dummy"
-	    else
-		file_center="Q4p4W2p74center_${EPSILON}e"
-	    fi
+	    file_center_dummy="Q4p4W2p74center_${EPSILON}e_dummy"
+	    file_center="Q4p4W2p74center_${EPSILON}e"
+	    echo "Reading in run numbers for center file ${file_center_dummy}..."
+	    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=4p4, W=2p74
 	    echo "Reading in run numbers for center file ${file_center}..."
 	    IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=4p4, W=2p74
-	    echo "Run Numbers: [${data_center[@]}]"
-	    echo	
+	    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+	    echo "Data Run Numbers: [${data_center[@]}]"
+	    echo
 	fi
 	if [[ ${EPSILON} == "low" ]]; then
 	    EPSVAL=0.4805
 	else
 	    EPSVAL=0.7148
 	fi
-	if [[ $TargetType = "dummy" ]]; then
-	    KIN="Q4p4W2p74_${EPSILON}e_dummy"
-	else
-	    KIN="Q4p4W2p74_${EPSILON}e"
+	KIN_dummy="Q4p4W2p74_${EPSILON}e_dummy"
+	KIN="Q4p4W2p74_${EPSILON}e"
 	fi
     fi
     if [[ $Q2 = "3p0" && $W = "3p14" ]]; then
 	if [[ $i = "RIGHT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_right="Q3p0W3p14right_${EPSILON}e_dummy"
-	    else
-		file_right="Q3p0W3p14right_${EPSILON}e"
-	    fi
+	    file_right_dummy="Q3p0W3p14right_${EPSILON}e_dummy"
+	    file_right="Q3p0W3p14right_${EPSILON}e"
+	    echo "Reading in run numbers for right file ${file_right_dummy}..."
+	    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=3p0, W=3p14
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=3p0, W=3p14
-	    echo "Run Numbers: [${data_right[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+	    echo "Data Run Numbers: [${data_right[@]}]"
 	    echo
 	elif [[ $i = "LEFT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_left="Q3p0W3p14left_${EPSILON}e_dummy"
-	    else
-		file_left="Q3p0W3p14left_${EPSILON}e"
-	    fi
+	    file_left_dummy="Q3p0W3p14left_${EPSILON}e_dummy"
+	    file_left="Q3p0W3p14left_${EPSILON}e"
+	    echo "Reading in run numbers for left file ${file_left_dummy}..."
+	    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=3p0, W=3p14
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=3p0, W=3p14
-	    echo "Run Numbers: [${data_left[@]}]"
-	    echo	
+	    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+	    echo "Data Run Numbers: [${data_left[@]}]"
+	    echo
 	elif [[ $i = "CENTER" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_center="Q3p0W3p14center_${EPSILON}e_dummy"
-	    else
-		file_center="Q3p0W3p14center_${EPSILON}e"
-	    fi
+	    file_center_dummy="Q3p0W3p14center_${EPSILON}e_dummy"
+	    file_center="Q3p0W3p14center_${EPSILON}e"
+	    echo "Reading in run numbers for center file ${file_center_dummy}..."
+	    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=3p0, W=3p14
 	    echo "Reading in run numbers for center file ${file_center}..."
 	    IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=3p0, W=3p14
-	    echo "Run Numbers: [${data_center[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+	    echo "Data Run Numbers: [${data_center[@]}]"
 	    echo
 	fi
 	if [[ ${EPSILON} == "low" ]]; then
@@ -377,42 +376,40 @@ do
 	else
 	    EPSVAL=0.6668
 	fi
-	if [[ $TargetType = "dummy" ]]; then
-	    KIN="Q3p0W3p14_${EPSILON}e_dummy"
-	else
-	    KIN="Q3p0W3p14_${EPSILON}e"
+	KIN_dummy="Q3p0W3p14_${EPSILON}e_dummy"
+	KIN="Q3p0W3p14_${EPSILON}e"
 	fi
     fi
     if [[ $Q2 = "3p0" && $W = "2p32" ]]; then
 	if [[ $i = "RIGHT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_right="Q3p0W2p32right_${EPSILON}e_dummy"
-	    else
-		file_right="Q3p0W2p32right_${EPSILON}e"
-	    fi
+	    file_right_dummy="Q3p0W2p32right_${EPSILON}e_dummy"
+	    file_right="Q3p0W2p32right_${EPSILON}e"
+	    echo "Reading in run numbers for right file ${file_right_dummy}..."
+	    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=3p0, W=2p32
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=3p0, W=2p32
-	    echo "Run Numbers: [${data_right[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+	    echo "Data Run Numbers: [${data_right[@]}]"
 	    echo
 	elif [[ $i = "LEFT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_left="Q3p0W2p32left_${EPSILON}e_dummy"
-	    else
-		file_left="Q3p0W2p32left_${EPSILON}e"
-	    fi
+	    file_left_dummy="Q3p0W2p32left_${EPSILON}e_dummy"
+	    file_left="Q3p0W2p32left_${EPSILON}e"
+	    echo "Reading in run numbers for left file ${file_left_dummy}..."
+	    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=3p0, W=2p32
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=3p0, W=2p32
-	    echo "Run Numbers: [${data_left[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+	    echo "Data Run Numbers: [${data_left[@]}]"
 	    echo
 	elif [[ $i = "CENTER" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_center="Q3p0W2p32center_${EPSILON}e_dummy"
-	    else
-		file_center="Q3p0W2p32center_${EPSILON}e"
-	    fi
+	    file_center_dummy="Q3p0W2p32center_${EPSILON}e_dummy"
+	    file_center="Q3p0W2p32center_${EPSILON}e"
+	    echo "Reading in run numbers for center file ${file_center_dummy}..."
+	    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=3p0, W=2p32
 	    echo "Reading in run numbers for center file ${file_center}..."
 	    IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=3p0, W=2p32
-	    echo "Run Numbers: [${data_center[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+	    echo "Data Run Numbers: [${data_center[@]}]"
 	    echo
 	fi
 	if [[ ${EPSILON} == "low" ]]; then
@@ -420,42 +417,40 @@ do
 	else
 	    EPSVAL=0.8791
 	fi
-	if [[ $TargetType = "dummy" ]]; then
-	    KIN="Q3p0W2p32_${EPSILON}e_dummy"
-	else
-	    KIN="Q3p0W2p32_${EPSILON}e"
+	KIN_dummy="Q3p0W2p32_${EPSILON}e_dummy"
+	KIN="Q3p0W2p32_${EPSILON}e"
 	fi
     fi
     if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
 	if [[ $i = "RIGHT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_right="Q2p1W2p95right_${EPSILON}e_dummy"
-	    else
-		file_right="Q2p1W2p95right_${EPSILON}e"
-	    fi
+	    file_right_dummy="Q2p1W2p95right_${EPSILON}e_dummy"
+	    file_right="Q2p1W2p95right_${EPSILON}e"
+	    echo "Reading in run numbers for right file ${file_right_dummy}..."
+	    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=2p1, W=2p95
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=2p1, W=2p95
-	    echo "Run Numbers: [${data_right[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+	    echo "Data Run Numbers: [${data_right[@]}]"
 	    echo
 	elif [[ $i = "LEFT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_left="Q2p1W2p95left_${EPSILON}e_dummy"
-	    else
-		file_left="Q2p1W2p95left_${EPSILON}e"
-	    fi
+	    file_left_dummy="Q2p1W2p95left_${EPSILON}e_dummy"
+	    file_left="Q2p1W2p95left_${EPSILON}e"
+	    echo "Reading in run numbers for left file ${file_left_dummy}..."
+	    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=2p1, W=2p95
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=2p1, W=2p95
-	    echo "Run Numbers: [${data_left[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+	    echo "Data Run Numbers: [${data_left[@]}]"
 	    echo
 	elif [[ $i = "CENTER" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_center="Q2p1W2p95center_${EPSILON}e_dummy"
-	    else
-		file_center="Q2p1W2p95center_${EPSILON}e"
-	    fi
+	    file_center_dummy="Q2p1W2p95center_${EPSILON}e_dummy"
+	    file_center="Q2p1W2p95center_${EPSILON}e"
+	    echo "Reading in run numbers for center file ${file_center_dummy}..."
+	    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=2p1, W=2p95
 	    echo "Reading in run numbers for center file ${file_center}..."
 	    IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=2p1, W=2p95
-	    echo "Run Numbers: [${data_center[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+	    echo "Data Run Numbers: [${data_center[@]}]"
 	    echo
 	fi
 	if [[ ${EPSILON} == "low" ]]; then
@@ -463,42 +458,40 @@ do
 	else
 	    EPSVAL=0.7864
 	fi
-	if [[ $TargetType = "dummy" ]]; then
-	    KIN="Q2p1W2p95_${EPSILON}e_dummy"
-	else
-	    KIN="Q2p1W2p95_${EPSILON}e"
+	KIN_dummy="Q2p1W2p95_${EPSILON}e_dummy"
+	KIN="Q2p1W2p95_${EPSILON}e"
 	fi
     fi        
     if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
 	if [[ $i = "RIGHT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_right="Q0p5W2p40right_${EPSILON}e_dummy"
-	    else
-		file_right="Q0p5W2p40right_${EPSILON}e"
-	    fi
+	    file_right_dummy="Q0p5W2p40right_${EPSILON}e_dummy"
+	    file_right="Q0p5W2p40right_${EPSILON}e"
+	    echo "Reading in run numbers for right file ${file_right_dummy}..."
+	    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=0p5, W=2p40
 	    echo "Reading in run numbers for right file ${file_right}..."
 	    IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=0p5, W=2p40
-	    echo "Run Numbers: [${data_right[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+	    echo "Data Run Numbers: [${data_right[@]}]"
 	    echo
 	elif [[ $i = "LEFT" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_left="Q0p5W2p40left_${EPSILON}e_dummy"
-	    else
-		file_left="Q0p5W2p40left_${EPSILON}e"
-	    fi
+	    file_left_dummy="Q0p5W2p40left_${EPSILON}e_dummy"
+	    file_left="Q0p5W2p40left_${EPSILON}e"
+	    echo "Reading in run numbers for left file ${file_left_dummy}..."
+	    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=0p5, W=2p40
 	    echo "Reading in run numbers for left file ${file_left}..."
 	    IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=0p5, W=2p40
-	    echo "Run Numbers: [${data_left[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+	    echo "Data Run Numbers: [${data_left[@]}]"
 	    echo
 	elif [[ $i = "CENTER" ]]; then
-	    if [[ $TargetType = "dummy" ]]; then
-		file_center="Q0p5W2p40center_${EPSILON}e_dummy"
-	    else
-		file_center="Q0p5W2p40center_${EPSILON}e"
-	    fi
+	    file_center_dummy="Q0p5W2p40center_${EPSILON}e_dummy"
+	    file_center="Q0p5W2p40center_${EPSILON}e"
+	    echo "Reading in run numbers for center file ${file_center_dummy}..."
+	    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=0p5, W=2p40
 	    echo "Reading in run numbers for center file ${file_center}..."
 	    IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=0p5, W=2p40
-	    echo "Run Numbers: [${data_center[@]}]"
+	    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+	    echo "Data Run Numbers: [${data_center[@]}]"
 	    echo
 	fi
 	if [[ ${EPSILON} == "low" ]]; then
@@ -506,10 +499,8 @@ do
 	else
 	    EPSVAL=0.6979
 	fi
-	if [[ $TargetType = "dummy" ]]; then
-	    KIN="Q0p5W2p40_${EPSILON}e_dummy"
-	else
-	    KIN="Q0p5W2p40_${EPSILON}e"
+	KIN_dummy="Q0p5W2p40_${EPSILON}e_dummy"
+	KIN="Q0p5W2p40_${EPSILON}e"
 	fi
     fi    
 done
@@ -517,11 +508,42 @@ done
 # Define input and output file names
 InDATAFilename="Proc_Data_${KIN}.root"
 OutDATAFilename="Analysed_Data_${KIN}"
+InDUMMYFilename="Proc_Dummy_${KIN_dummy}.root"
+OutDUMMYFilename="Analysed_Dummy_${KIN_dummy}"
 OutFullAnalysisFilename="FullAnalysis_${KIN}"
 
 # When analysis flag is used then the analysis script (Analysed_Prod.py)
 # will create a new root file per run number which are combined using hadd
 if [[ $a_flag = "true" ]]; then
+
+    # Checks that array isn't empty
+    if [ ${#dummy_right[@]} -ne 0 ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Right.root" ]; then
+	    echo
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Right.root exists already, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Right.root"
+	fi
+	echo
+	echo "Combining right dummy..."
+	echo
+	cd "${LTANAPATH}/scripts"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Dummy" ${TreeNames} "${OutDUMMYFilename}_Right" "${dummy_right[*]}"
+	echo
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Right.root" ]; then
+	    for i in "${dummy_right[@]}"
+	    do       
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Dummy.root" ]; then
+		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
+		    #mv ${i}_-1_Raw_Dummy.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		else
+		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
+		fi
+	    done	 
+	fi
+	echo
+    fi
 
     # Checks that array isn't empty
     if [ ${#data_right[@]} -ne 0 ]; then
@@ -551,7 +573,7 @@ if [[ $a_flag = "true" ]]; then
 	fi
 	echo
     fi
-
+    
     # Checks that array isn't empty
     if [ ${#data_left[@]} -ne 0 ]; then
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
@@ -582,6 +604,122 @@ if [[ $a_flag = "true" ]]; then
     fi
 
     # Checks that array isn't empty
+    if [ ${#dummy_left[@]} -ne 0 ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Left.root" ]; then
+	    echo
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Left.root exists already, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Left.root"
+	fi
+	echo
+	echo "Combining left dummy..."
+	echo
+	cd "${LTANAPATH}/scripts"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Dummy" ${TreeNames} "${OutDUMMYFilename}_Left" "${dummy_left[*]}"
+	echo
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Left.root" ]; then
+	    for i in "${dummy_left[@]}"
+	    do       
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Dummy.root" ]; then
+		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
+		    #mv ${i}_-1_Raw_Dummy.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		else
+		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
+		fi
+	    done	 
+	fi
+	echo
+    fi
+
+    # Checks that array isn't empty
+    if [ ${#data_left[@]} -ne 0 ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
+	    echo
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root exists already, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root"
+	fi
+	echo
+	echo "Combining left data..."
+	echo
+	cd "${LTANAPATH}/scripts"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Left" "${data_left[*]}"
+	echo
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
+	    for i in "${data_left[@]}"
+	    do       
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		else
+		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		fi
+	    done	 
+	fi
+	echo
+    fi
+    
+    # Checks that array isn't empty
+    if [ ${#data_left[@]} -ne 0 ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
+	    echo
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root exists already, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root"
+	fi
+	echo
+	echo "Combining left data..."
+	echo
+	cd "${LTANAPATH}/scripts"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Left" "${data_left[*]}"
+	echo
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
+	    for i in "${data_left[@]}"
+	    do
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		else
+		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		fi
+	    done	 
+	fi
+	echo
+    fi
+
+    # Checks that array isn't empty
+    if [ ${#dummy_center[@]} -ne 0 ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Center.root" ]; then
+	    echo
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Center.root exists already, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Center.root"
+	fi
+	echo
+	echo "Combining center dummy..."
+	echo
+	cd "${LTANAPATH}/scripts"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Dummy" ${TreeNames} "${OutDUMMYFilename}_Center" "${dummy_center[*]}"
+	echo
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Center.root" ]; then
+	    for i in "${dummy_center[@]}"
+	    do       
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Dummy.root" ]; then
+		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
+		    #mv ${i}_-1_Raw_Dummy.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		else
+		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
+		fi
+	    done	 
+	fi
+	echo
+    fi
+
+    # Checks that array isn't empty
     if [ ${#data_center[@]} -ne 0 ]; then
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    echo
@@ -596,9 +734,38 @@ if [[ $a_flag = "true" ]]; then
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    for i in "${data_center[@]}"
+	    do       
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		else
+		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		fi
+	    done	 
+	fi
+	echo
+    fi
+    
+    # Checks that array isn't empty
+    if [ ${#data_left[@]} -ne 0 ]; then
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
+	    echo
+	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root exists already, deleting..."
+	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root"
+	fi
+	echo
+	echo "Combining left data..."
+	echo
+	cd "${LTANAPATH}/scripts"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Left" "${data_left[*]}"
+	echo
+	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
+	    for i in "${data_left[@]}"
 	    do
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"       
+		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
@@ -648,6 +815,39 @@ if [[ ${#data_right[@]} -ne 0 ]]; then
 fi
 
 # Checks that array isn't empty
+if [[ ${#dummy_right[@]} -ne 0 ]]; then
+    echo
+    echo "Calculating dummy total effective charge right..."
+    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_right[*]}")
+    arr1=()
+    arr2=()
+    arr3=()
+    arr4=()
+    arr5=()
+    arr6=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$itt=(\"\${line_array[@]}\")"
+    done <<< "$PYRIGHTSTRING"
+    DummyChargeValRight=("${arr1[@]}")
+    DummyChargeErrRight=("${arr2[@]}")
+    DummyEffValRight=("${arr3[@]}")
+    DummyEffErrRight=("${arr4[@]}")
+    DummypThetaValRight=("${arr5[@]}")
+    DummyEbeamValRight=("${arr6[@]}")
+    #echo ${DummyChargeVal[*]}
+    # Sums the array to get the total effective charge
+    # Note: this must be done as an array! This is why uC is used at this step
+    #       and later converted to C
+    DummyChargeSumRight=$(IFS=+; echo "$((${DummyChargeValRight[*]}))") # Only works for integers
+    echo "Total Dummy Charge Right: ${DummyChargeSumRight} uC"
+fi
+
+# Checks that array isn't empty
 if [[ ${#data_left[@]} -ne 0 ]]; then
     echo
     echo "Calculating data total effective charge left..."
@@ -678,6 +878,39 @@ if [[ ${#data_left[@]} -ne 0 ]]; then
     #       and later converted to C
     DataChargeSumLeft=$(IFS=+; echo "$((${DataChargeValLeft[*]}))") # Only works for integers
     echo "Total Charge Left: ${DataChargeSumLeft} uC"
+fi
+
+# Checks that array isn't empty
+if [[ ${#dummy_left[@]} -ne 0 ]]; then
+    echo
+    echo "Calculating dummy total effective charge left..."
+    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_left[*]}")
+    arr1=()
+    arr2=()
+    arr3=()
+    arr4=()
+    arr5=()
+    arr6=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$itt=(\"\${line_array[@]}\")"
+    done <<< "$PYLEFTSTRING"
+    DummyChargeValLeft=("${arr1[@]}")
+    DummyChargeErrLeft=("${arr2[@]}")
+    DummyEffValLeft=("${arr3[@]}")
+    DummyEffErrLeft=("${arr4[@]}")
+    DummypThetaValLeft=("${arr5[@]}")
+    DummyEbeamValLeft=("${arr6[@]}")
+    #echo ${DummyChargeVal[*]}
+    # Sums the array to get the total effective charge
+    # Note: this must be done as an array! This is why uC is used at this step
+    #       and later converted to C
+    DummyChargeSumLeft=$(IFS=+; echo "$((${DummyChargeValLeft[*]}))") # Only works for integers
+    echo "Total Dummy Charge Left: ${DummyChargeSumLeft} uC"
 fi
 
 # Checks that array isn't empty
@@ -713,6 +946,39 @@ if [[ ${#data_center[@]} -ne 0 ]]; then
     echo "Total Charge Center: ${DataChargeSumCenter} uC"
 fi
 
+# Checks that array isn't empty
+if [[ ${#dummy_center[@]} -ne 0 ]]; then
+    echo
+    echo "Calculating dummy total effective charge center..."
+    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_center[*]}")
+    arr1=()
+    arr2=()
+    arr3=()
+    arr4=()
+    arr5=()
+    arr6=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$itt=(\"\${line_array[@]}\")"
+    done <<< "$PYCENTERSTRING"
+    DummyChargeValCenter=("${arr1[@]}")
+    DummyChargeErrCenter=("${arr2[@]}")
+    DummyEffValCenter=("${arr3[@]}")
+    DummyEffErrCenter=("${arr4[@]}")
+    DummypThetaValCenter=("${arr5[@]}")
+    DummyEbeamValCenter=("${arr6[@]}")
+    #echo ${DummyChargeVal[*]}
+    # Sums the array to get the total effective charge
+    # Note: this must be done as an array! This is why uC is used at this step
+    #       and later converted to C
+    DummyChargeSumCenter=$(IFS=+; echo "$((${DummyChargeValCenter[*]}))") # Only works for integers
+    echo "Total Dummy Charge Center: ${DummyChargeSumCenter} uC"
+fi
+
 # Run the plotting script if t-flag enabled
 # Checks that array isn't empty
 if [[ $t_flag = "true" || $d_flag = "true" ]]; then
@@ -722,9 +988,9 @@ if [[ $t_flag = "true" || $d_flag = "true" ]]; then
     echo "Finding t-bins..."
     cd "${LTANAPATH}/scripts/Prod"    
     if [ ${#data_right[@]} -eq 0 ]; then
-	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${TargetType}
+	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" "${dummy_left[*]}" "${dummy_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${TargetType}
     else
-	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${TargetType}
+	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" "${dummy_right[*]}" "${dummy_left[*]}" "${dummy_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${TargetType}
     fi
 fi
 

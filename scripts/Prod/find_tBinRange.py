@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 19:01:00 trottar"
+# Time-stamp: "2023-02-14 19:19:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,8 +32,8 @@ from functools import reduce
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=21:
-    print("!!!!! ERROR !!!!!\n Expected 21 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table target\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=28:
+    print("!!!!! ERROR !!!!!\n Expected 28 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InDummy_efficiency_right InDummy_efficiency_left InDummy_efficiency_center efficiency_table target\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -46,22 +46,29 @@ W = sys.argv[2]
 Q2 = sys.argv[3]
 EPSVAL = sys.argv[4]
 InDATAFilename = sys.argv[5]
-OutFilename = sys.argv[6]
-tmin = float(sys.argv[7])
-tmax = float(sys.argv[8])
-NumtBins = int(sys.argv[9])
-NumPhiBins = int(sys.argv[10])
-runNumRight = sys.argv[11]
-runNumLeft = sys.argv[12]
-runNumCenter = sys.argv[13]
-data_charge_right = int(sys.argv[14])/1000
-data_charge_left = int(sys.argv[15])/1000
-data_charge_center = int(sys.argv[16])/1000
-InData_efficiency_right = sys.argv[17]
-InData_efficiency_left = sys.argv[18]
-InData_efficiency_center = sys.argv[19]
-efficiency_table = sys.argv[20]
-target = sys.argv[21]
+InDUMMYFilename = sys.argv[6] # HERE
+OutFilename = sys.argv[7]
+tmin = float(sys.argv[8])
+tmax = float(sys.argv[9])
+NumtBins = int(sys.argv[10])
+NumPhiBins = int(sys.argv[11])
+runNumRight = sys.argv[12]
+runNumLeft = sys.argv[13]
+runNumCenter = sys.argv[14]
+data_charge_right = int(sys.argv[15])/1000
+data_charge_left = int(sys.argv[16])/1000
+data_charge_center = int(sys.argv[17])/1000
+dummy_charge_right = int(sys.argv[18])/1000 # HERE
+dummy_charge_left = int(sys.argv[19])/1000 # HERE
+dummy_charge_center = int(sys.argv[20])/1000 # HERE
+InData_efficiency_right = sys.argv[21]
+InData_efficiency_left = sys.argv[22]
+InData_efficiency_center = sys.argv[23]
+InDummy_efficiency_right = sys.argv[24] # HERE
+InDummy_efficiency_left = sys.argv[25] # HERE
+InDummy_efficiency_center = sys.argv[26] # HERE
+efficiency_table = sys.argv[27]
+target = sys.argv[28]
 
 particle = "kaon"
 
@@ -305,6 +312,22 @@ def defineHists(phi_setting):
 
     #TBRANCH_RAND  = InFile_RAND.Get("Cut_Kaon_Events_rand_noRF")
     TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+
+    rootFileDummy = OUTPATH+"/"+InDUMMYFilename+"_%s.root" % (phi_setting)
+    if not os.path.isfile(rootFileDummy):
+        print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
+        return {}
+
+    InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")
+
+    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Uncut_Kaon_Events")
+    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_noRF")
+    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_noRF")
+    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
+    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_RF")
+    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_RF")
+    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
+
     
     ################################################################################################################################################
     # Grabs PID cut string
@@ -499,6 +522,44 @@ def defineHists(phi_setting):
     P_hgcer_npeSum_DATA = ROOT.TH1D("P_hgcer_npeSum_DATA", "SHMS HGCer Npe Sum", 200, 0, 50)
     P_aero_npeSum_DATA = ROOT.TH1D("P_aero_npeSum_DATA", "SHMS Aero Npe Sum", 200, 0, 50)
 
+    H_hsdelta_DUMMY  = ROOT.TH1D("H_hsdelta_DUMMY","HMS Delta", 200, -20.0, 20.0)
+    H_hsxptar_DUMMY  = ROOT.TH1D("H_hsxptar_DUMMY","HMS xptar", 200, -0.1, 0.1)
+    H_hsyptar_DUMMY  = ROOT.TH1D("H_hsyptar_DUMMY","HMS yptar", 200, -0.1, 0.1)
+    H_ssxfp_DUMMY    = ROOT.TH1D("H_ssxfp_DUMMY","SHMS xfp", 200, -25.0, 25.0)
+    H_ssyfp_DUMMY    = ROOT.TH1D("H_ssyfp_DUMMY","SHMS yfp", 200, -25.0, 25.0)
+    H_ssxpfp_DUMMY   = ROOT.TH1D("H_ssxpfp_DUMMY","SHMS xpfp", 200, -0.09, 0.09)
+    H_ssypfp_DUMMY   = ROOT.TH1D("H_ssypfp_DUMMY","SHMS ypfp", 200, -0.05, 0.04)
+    H_hsxfp_DUMMY    = ROOT.TH1D("H_hsxfp_DUMMY","HMS xfp", 200, -40.0, 40.0)
+    H_hsyfp_DUMMY    = ROOT.TH1D("H_hsyfp_DUMMY","HMS yfp", 200, -20.0, 20.0)
+    H_hsxpfp_DUMMY   = ROOT.TH1D("H_hsxpfp_DUMMY","HMS xpfp", 200, -0.09, 0.05)
+    H_hsypfp_DUMMY   = ROOT.TH1D("H_hsypfp_DUMMY","HMS ypfp", 200, -0.05, 0.04)
+    H_ssdelta_DUMMY  = ROOT.TH1D("H_ssdelta_DUMMY","SHMS delta", 200, -20.0, 20.0)
+    H_ssxptar_DUMMY  = ROOT.TH1D("H_ssxptar_DUMMY","SHMS xptar", 200, -0.1, 0.1)
+    H_ssyptar_DUMMY  = ROOT.TH1D("H_ssyptar_DUMMY","SHMS yptar", 200, -0.04, 0.04)
+    H_q_DUMMY        = ROOT.TH1D("H_q_DUMMY","q", 200, 0.0, 10.0)
+    H_Q2_DUMMY       = ROOT.TH1D("H_Q2_DUMMY","Q2", 200, Q2min, Q2max)
+    H_W_DUMMY  = ROOT.TH1D("H_W_DUMMY","W ", 200, Wmin, Wmax)
+    H_t_DUMMY       = ROOT.TH1D("H_t_DUMMY","-t", 200, -1.0, 1.5)  
+    H_epsilon_DUMMY  = ROOT.TH1D("H_epsilon_DUMMY","epsilon", 200, 0., 1.0)
+    H_MM_DUMMY  = ROOT.TH1D("H_MM_DUMMY","MM_{K}", 200, 0.0, 2.0)
+    H_th_DUMMY  = ROOT.TH1D("H_th_DUMMY","X' tar", 200, -0.1, 0.1)
+    H_ph_DUMMY  = ROOT.TH1D("H_ph_DUMMY","Y' tar", 200, -0.1, 0.1)
+    H_ph_q_DUMMY  = ROOT.TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 200, -10.0, 10.0)
+    H_th_q_DUMMY  = ROOT.TH1D("H_th_q_DUMMY","Theta Detected (th_xq)", 200, -0.2, 0.2)
+    H_ph_recoil_DUMMY  = ROOT.TH1D("H_ph_recoil_DUMMY","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
+    H_th_recoil_DUMMY  = ROOT.TH1D("H_th_recoil_DUMMY","Theta Recoil (th_bq)", 200, -10.0, 10.0)
+    H_pmiss_DUMMY  = ROOT.TH1D("H_pmiss_DUMMY","pmiss", 200, 0.0, 10.0)
+    H_emiss_DUMMY  = ROOT.TH1D("H_emiss_DUMMY","emiss", 200, 0.0, 10.0)
+    H_pmx_DUMMY  = ROOT.TH1D("H_pmx_DUMMY","pmx", 200, -10.0, 10.0)
+    H_pmy_DUMMY  = ROOT.TH1D("H_pmy_DUMMY","pmy ", 200, -10.0, 10.0)
+    H_pmz_DUMMY  = ROOT.TH1D("H_pmz_DUMMY","pmz", 200, -10.0, 10.0)
+    H_ct_ep_DUMMY = ROOT.TH1D("H_ct_ep_DUMMY", "Electron-Proton CTime", 200, -10, 10)
+    H_cal_etottracknorm_DUMMY = ROOT.TH1D("H_cal_etottracknorm_DUMMY", "HMS Cal etottracknorm", 200, 0.2, 1.8)
+    H_cer_npeSum_DUMMY = ROOT.TH1D("H_cer_npeSum_DUMMY", "HMS Cer Npe Sum", 200, 0, 30)
+    P_cal_etottracknorm_DUMMY = ROOT.TH1D("P_cal_etottracknorm_DUMMY", "SHMS Cal etottracknorm", 200, 0, 1)
+    P_hgcer_npeSum_DUMMY = ROOT.TH1D("P_hgcer_npeSum_DUMMY", "SHMS HGCer Npe Sum", 200, 0, 50)
+    P_aero_npeSum_DUMMY = ROOT.TH1D("P_aero_npeSum_DUMMY", "SHMS Aero Npe Sum", 200, 0, 50)
+    
     H_hsdelta_RAND  = ROOT.TH1D("H_hsdelta_RAND","HMS Delta", 200, -20.0, 20.0)
     H_hsxptar_RAND  = ROOT.TH1D("H_hsxptar_RAND","HMS xptar", 200, -0.1, 0.1)
     H_hsyptar_RAND  = ROOT.TH1D("H_hsyptar_RAND","HMS yptar", 200, -0.1, 0.1)
@@ -542,7 +603,7 @@ def defineHists(phi_setting):
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
-    # Fill histograms for various trees called above
+    # Fill data histograms for various trees called above
     
     print("\nGrabbing %s simc..." % phi_setting)
     for i,evt in enumerate(TBRANCH_SIMC):
@@ -684,9 +745,92 @@ def defineHists(phi_setting):
           P_hgcer_npeSum_DATA.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)          
 
-    ###################################################################################################################################################
+    ################################################################################################################################################
+    # Fill dummy histograms for various trees called above
+
     
-    # Random subtraction
+    ibin = 1
+    print("\nGrabbing %s dummy..." % phi_setting)
+    for i,evt in enumerate(TBRANCH_DUMMY):
+
+        # Progress bar
+        Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
+        
+        #CUTs Definations 
+        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+
+        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+        HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+        if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
+            Diamond = True
+        else:
+            try:
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+            except ZeroDivisionError:
+                print("")
+        '''
+        if phi_setting == "Right":
+            ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
+        else:
+            ct_cut = True
+
+        #........................................
+                
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
+        '''
+
+            
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
+            
+          H_ct_ep_DUMMY.Fill(evt.CTime_ROC1)
+
+          H_ssxfp_DUMMY.Fill(evt.ssxfp)
+          H_ssyfp_DUMMY.Fill(evt.ssyfp)
+          H_ssxpfp_DUMMY.Fill(evt.ssxpfp)
+          H_ssypfp_DUMMY.Fill(evt.ssypfp)
+          H_ssdelta_DUMMY.Fill(evt.ssdelta)
+          H_ssxptar_DUMMY.Fill(evt.ssxptar)
+          H_ssyptar_DUMMY.Fill(evt.ssyptar)
+
+          H_hsxfp_DUMMY.Fill(evt.hsxfp)
+          H_hsyfp_DUMMY.Fill(evt.hsyfp)
+          H_hsxpfp_DUMMY.Fill(evt.hsxpfp)
+          H_hsypfp_DUMMY.Fill(evt.hsypfp)
+          H_hsdelta_DUMMY.Fill(evt.hsdelta)
+          H_hsxptar_DUMMY.Fill(evt.hsxptar)	
+          H_hsyptar_DUMMY.Fill(evt.hsyptar)
+
+          H_ph_q_DUMMY.Fill(evt.ph_q)
+          H_th_q_DUMMY.Fill(evt.th_q)
+          H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
+          H_th_recoil_DUMMY.Fill(evt.th_recoil)
+
+          H_pmiss_DUMMY.Fill(evt.pmiss)	
+          H_emiss_DUMMY.Fill(evt.emiss)	
+          #H_emiss_DUMMY.Fill(evt.emiss_nuc)
+          H_pmx_DUMMY.Fill(evt.pmx)
+          H_pmy_DUMMY.Fill(evt.pmy)
+          H_pmz_DUMMY.Fill(evt.pmz)
+          H_Q2_DUMMY.Fill(evt.Q2)
+          H_t_DUMMY.Fill(-evt.MandelT)
+          H_W_DUMMY.Fill(evt.W)
+          H_epsilon_DUMMY.Fill(evt.epsilon)
+          H_MM_DUMMY.Fill(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))
+          #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
+          #H_MM_DUMMY.Fill(evt.Mrecoil)
+
+          H_cal_etottracknorm_DUMMY.Fill(evt.H_cal_etottracknorm)
+          H_cer_npeSum_DUMMY.Fill(evt.H_cer_npeSum)
+
+          P_cal_etottracknorm_DUMMY.Fill(evt.P_cal_etottracknorm)
+          P_hgcer_npeSum_DUMMY.Fill(evt.P_hgcer_npeSum)
+          P_aero_npeSum_DUMMY.Fill(evt.P_aero_npeSum)          
+
+          
+    ###################################################################################################################################################    
+    # Fill random histograms for various trees called above
+    
     ibin = 1
     print("\nGrabbing %s random data..." % phi_setting)
     for i,evt in enumerate(TBRANCH_RAND):
@@ -754,6 +898,7 @@ def defineHists(phi_setting):
           
     ################################################################################################################################################
     # Normalize simc by normfactor/nevents
+    # Normalize dummy by effective charge and target correction
     # Normalize data by effective charge
 
     normfac_simc = (simc_normfactor)/(simc_nevents)
@@ -772,7 +917,7 @@ def defineHists(phi_setting):
     H_ssdelta_SIMC.Scale(normfac_simc)
     H_hsdelta_SIMC.Scale(normfac_simc)
     H_Q2_SIMC.Scale(normfac_simc)
-    H_t_SIMC.Scale(normfac_simc)
+    H_t_SIMC.Scale(normfac_simc)X
     H_epsilon_SIMC.Scale(normfac_simc)
     H_MM_SIMC.Scale(normfac_simc)
     H_ph_q_SIMC.Scale(normfac_simc)
@@ -785,13 +930,47 @@ def defineHists(phi_setting):
     #H_pmy_SIMC.Scale(normfac_simc)
     #H_pmz_SIMC.Scale(normfac_simc)
     H_W_SIMC.Scale(normfac_simc)
-          
+
+    dummy_target_corr = 4.8579
     if phi_setting == "Right":
+        normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
         normfac_data = 1/(data_charge_right)
     if phi_setting == "Left":
+        normfac_dummy = 1/(dummy_charge_left*dummy_target_corr)
         normfac_data = 1/(data_charge_left)
     if phi_setting == "Center":
-        normfac_data = 1/(data_charge_center)        
+        normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
+        normfac_data = 1/(data_charge_center)
+    H_ssxfp_DUMMY.Scale(normfac_dummy)
+    H_ssyfp_DUMMY.Scale(normfac_dummy)
+    H_ssxpfp_DUMMY.Scale(normfac_dummy)
+    H_ssypfp_DUMMY.Scale(normfac_dummy)
+    H_hsxfp_DUMMY.Scale(normfac_dummy)
+    H_hsyfp_DUMMY.Scale(normfac_dummy)
+    H_hsxpfp_DUMMY.Scale(normfac_dummy)
+    H_hsypfp_DUMMY.Scale(normfac_dummy)
+    H_ssxptar_DUMMY.Scale(normfac_dummy)
+    H_ssyptar_DUMMY.Scale(normfac_dummy)
+    H_hsxptar_DUMMY.Scale(normfac_dummy)
+    H_hsyptar_DUMMY.Scale(normfac_dummy)
+    H_ssdelta_DUMMY.Scale(normfac_dummy)
+    H_hsdelta_DUMMY.Scale(normfac_dummy)
+    H_Q2_DUMMY.Scale(normfac_dummy)
+    H_t_DUMMY.Scale(normfac_dummy)
+    H_epsilon_DUMMY.Scale(normfac_dummy)
+    H_MM_DUMMY.Scale(normfac_dummy)
+    H_ph_q_DUMMY.Scale(normfac_dummy)
+    H_th_q_DUMMY.Scale(normfac_dummy)
+    H_ph_recoil_DUMMY.Scale(normfac_dummy)
+    H_th_recoil_DUMMY.Scale(normfac_dummy)
+    H_pmiss_DUMMY.Scale(normfac_dummy)
+    H_emiss_DUMMY.Scale(normfac_dummy)
+    H_pmx_DUMMY.Scale(normfac_dummy)
+    H_pmy_DUMMY.Scale(normfac_dummy)
+    H_pmz_DUMMY.Scale(normfac_dummy)
+    H_W_DUMMY.Scale(normfac_dummy)
+    H_ct_ep_DUMMY.Scale(normfac_dummy)
+    
     H_ssxfp_DATA.Scale(normfac_data)
     H_ssyfp_DATA.Scale(normfac_data)
     H_ssxpfp_DATA.Scale(normfac_data)
@@ -877,6 +1056,34 @@ def defineHists(phi_setting):
     H_W_DATA.Add(H_W_RAND,-1)
     H_ct_ep_DATA.Add(H_ct_ep_RAND,-1)
 
+    ###
+    # Dummy Subtraction
+    H_ssxfp_DATA.Add(H_ssxfp_DUMMY,-1)
+    H_ssyfp_DATA.Add(H_ssyfp_DUMMY,-1)
+    H_ssxpfp_DATA.Add(H_ssxpfp_DUMMY,-1)
+    H_ssypfp_DATA.Add(H_ssypfp_DUMMY,-1)
+    H_hsxfp_DATA.Add(H_hsxfp_DUMMY,-1)
+    H_hsyfp_DATA.Add(H_hsyfp_DUMMY,-1)
+    H_hsxpfp_DATA.Add(H_hsxpfp_DUMMY,-1)
+    H_hsypfp_DATA.Add(H_hsypfp_DUMMY,-1)
+    H_ssxptar_DATA.Add(H_ssxptar_DUMMY,-1)
+    H_ssyptar_DATA.Add(H_ssyptar_DUMMY,-1)
+    H_hsxptar_DATA.Add(H_hsxptar_DUMMY,-1)
+    H_hsyptar_DATA.Add(H_hsyptar_DUMMY,-1)
+    H_ssdelta_DATA.Add(H_ssdelta_DUMMY,-1)
+    H_hsdelta_DATA.Add(H_hsdelta_DUMMY,-1)
+    H_Q2_DATA.Add(H_Q2_DUMMY,-1)
+    H_t_DATA.Add(H_t_DUMMY,-1)
+    H_epsilon_DATA.Add(H_epsilon_DUMMY,-1)
+    H_MM_DATA.Add(H_MM_DUMMY,-1)
+    H_pmiss_DATA.Add(H_pmiss_DUMMY,-1)
+    H_emiss_DATA.Add(H_emiss_DUMMY,-1)
+    H_pmx_DATA.Add(H_pmx_DUMMY,-1)
+    H_pmy_DATA.Add(H_pmy_DUMMY,-1)
+    H_pmz_DATA.Add(H_pmz_DUMMY,-1)
+    H_W_DATA.Add(H_W_DUMMY,-1)
+    H_ct_ep_DATA.Add(H_ct_ep_DUMMY,-1)
+    
     histDict = {
         "phi_setting" : phi_setting,
         "pid_text" : pid_text,
