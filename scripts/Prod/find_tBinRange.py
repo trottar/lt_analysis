@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 16:30:58 trottar"
+# Time-stamp: "2023-02-15 16:36:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -699,7 +699,7 @@ def defineHists(phi_setting):
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
         # Must be outside cuts to avoid weird overflow errors
-        #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
+        polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
@@ -728,12 +728,11 @@ def defineHists(phi_setting):
             
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
-          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
-            
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
+          #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1858,8 +1857,8 @@ Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
-    #hist["polar_phiq_vs_t_DATA"].SetMinimum(tmin)
-    #hist["polar_phiq_vs_t_DATA"].SetMaximum(tmax)
+    hist["polar_phiq_vs_t_DATA"].SetMinimum(0.0)
+    hist["polar_phiq_vs_t_DATA"].SetMaximum(2.0)
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     hist["polar_phiq_vs_t_DATA"].Draw("same, AP")
