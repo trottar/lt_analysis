@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 16:55:01 trottar"
+# Time-stamp: "2023-02-15 17:00:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1857,12 +1857,12 @@ Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
-    #hist["polar_phiq_vs_t_DATA"].SetMinRadial(0.0)
-    #hist["polar_phiq_vs_t_DATA"].SetMaxRadial(2.0)
-    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    hist["polar_phiq_vs_t_DATA"].Draw("same, AP")
+    hist["polar_phiq_vs_t_DATA"].Draw("same, AOP")
+    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetNdivPolar(4)
+    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetNdivRadial(4)
+    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     
 # Section for polar plotting
 gStyle.SetPalette(55)
