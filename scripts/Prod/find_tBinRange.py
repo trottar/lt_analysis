@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 17:55:16 trottar"
+# Time-stamp: "2023-02-15 18:09:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
 import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex
+from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
@@ -632,6 +632,7 @@ def defineHists(phi_setting):
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
     polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
+    poly_phiq_vs_t_DATA = ROOT.TH2Poly("poly_phiq_vs_t_DATA", "", -10, 10, -10, 10)
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
@@ -697,10 +698,6 @@ def defineHists(phi_setting):
 
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
-
-        # Must be outside cuts to avoid weird overflow errors
-        #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
-        polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
@@ -725,7 +722,9 @@ def defineHists(phi_setting):
                 
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
         '''
-
+        # Must be outside diamond cuts to avoid weird overflow errors
+        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance):
+            polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
             
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
@@ -733,7 +732,12 @@ def defineHists(phi_setting):
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
-          #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
+          #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
+          r = -evt.MandelT
+          phi = evt.ph_q
+          x = r * math.cos(phi)
+          y = r * math.sin(phi)
+          poly_phiq_vs_t_DATA.Fill(x, y, 1)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1307,6 +1311,7 @@ def defineHists(phi_setting):
         "MM_vs_beta_DATA" : MM_vs_beta_DATA,
         "phiq_vs_t_DATA" : phiq_vs_t_DATA,
         "polar_phiq_vs_t_DATA" : polar_phiq_vs_t_DATA,
+        "poly_phiq_vs_t_DATA" : poly_phiq_vs_t_DATA,
         "Q2_vs_W_DATA" : Q2_vs_W_DATA,
         "InFile_DATA" : InFile_DATA,
         "InFile_DUMMY" : InFile_DUMMY,
@@ -1868,15 +1873,24 @@ Cpht.Print(outputpdf)
 Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
+    h2poly.Draw("COLZ")
+
+    # Set the color scale for the density plot
+    gStyle.SetPalette(1+i)
+
+
+'''
+for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     hist["polar_phiq_vs_t_DATA"].Draw("same, AOP")
     Cphtsame.Update()
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
-    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelColor(0)
+    # Hide radial axis labels since redefined below
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelSize(0)
-    
+'''
+
 # Section for polar plotting
 gStyle.SetPalette(55)
 gPad.SetTheta(90)
