@@ -26,8 +26,8 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
-# Flag definitions (flags: h, a, o, s)
-while getopts 'hdat' flag; do
+# Flag definitions (flags: h, a, t)
+while getopts 'hat' flag; do
     case "${flag}" in
         h) 
         echo "--------------------------------------------------------------"
@@ -38,7 +38,6 @@ while getopts 'hdat' flag; do
         echo
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
-	echo "    -d, debug"	
         echo "    -a, combine data for each phi setting"	
         echo "    -t, set t-bin (!!!required for script!!!)"
 	echo "        EPSILON=arg1, Q2=arg2, W=arg3, target=arg4"
@@ -52,7 +51,6 @@ while getopts 'hdat' flag; do
 	echo "                      Q2=0p5, W=2p40"
         exit 0
         ;;
-	d) d_flag='true' ;;
 	a) a_flag='true' ;;
         t) t_flag='true' ;;
         *) print_usage
@@ -206,29 +204,7 @@ dummy_center=()
 declare -a PHI=("RIGHT" "LEFT" "CENTER")
 for i in "${PHI[@]}"
 do
-    if [[ $d_flag = "true" ]]; then
-	if [[ $i = "RIGHT" ]]; then
-	    file_right="Prod_Test"
-	    echo "Reading in run numbers for right file ${file_right}..."
-	    IFS=', ' read -r -a data_right <<< "$( grab_runs Prod_Test )"             # RIGHT, Q2=5p5, W=3p02
-	    echo "Run Numbers: [${data_right[@]}]"
-	    echo
-	elif [[ $i = "LEFT" ]]; then
-	    file_left="Prod_Test"
-	    echo "Reading in run numbers for left file ${file_left}..."
-	    IFS=', ' read -r -a data_left <<< "$( grab_runs Prod_Test )"		 # LEFT, Q2=5p5, W=3p02
-	    echo "Run Numbers: [${data_left[@]}]"
-	    echo	    
-	elif [[ $i = "CENTER" ]]; then
-	    file_center="Prod_Test"
-	    echo "Reading in run numbers for center file ${file_center}..."
-	    IFS=', ' read -r -a data_center <<< "$( grab_runs Prod_Test )"		 # CENTER, Q2=5p5, W=3p02
-	    echo "Run Numbers: [${data_center[@]}]"
-	    echo
-	fi
-	KIN="Prod_Test"	
-    fi
-
+    
     if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
 	if [[ $i = "RIGHT" ]]; then
 	    # Define run list based off kinematics selected
@@ -481,8 +457,8 @@ done
 
 # Define input and output file names
 InDATAFilename="Proc_Data_${KIN}.root"
-OutDATAFilename="Analysed_Data_${KIN}"
 InDUMMYFilename="Proc_Dummy_${KIN_dummy}.root"
+OutDATAFilename="Analysed_Data_${KIN}"
 OutDUMMYFilename="Analysed_Dummy_${KIN_dummy}"
 OutFullAnalysisFilename="FullAnalysis_${KIN}"
 
@@ -897,7 +873,7 @@ fi
 
 # Run the plotting script if t-flag enabled
 # Checks that array isn't empty
-if [[ $t_flag = "true" || $d_flag = "true" ]]; then
+if [[ $t_flag = "true" ]]; then
     echo
     echo
     echo
@@ -923,7 +899,7 @@ else
     python3 createPhysicsList.py ${Q2} ${POL} ${EPSVAL} ${TMIN} ${TMAX} ${NumtBins} ${KSet} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" "${DataChargeValRight[*]}" "${DataChargeValLeft[*]}" "${DataChargeValCenter[*]}" "${DataChargeErrRight[*]}" "${DataChargeErrLeft[*]}" "${DataChargeErrCenter[*]}" ${KIN}
 fi
 
-if [[ $t_flag = "true" || $d_flag = "true" ]]; then
+if [[ $t_flag = "true" ]]; then
     cd "${LTANAPATH}"
     evince "OUTPUT/Analysis/${ANATYPE}LT/${OutFullAnalysisFilename}.pdf"
 fi
