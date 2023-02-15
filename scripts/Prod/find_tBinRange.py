@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 14:48:06 trottar"
+# Time-stamp: "2023-02-15 14:52:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -631,7 +631,7 @@ def defineHists(phi_setting):
     CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 100, -2, 2, 100, 0, 2)
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
-    polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
+    polar_phiq_vs_t_DATA = ROOT.TGraphPolar(TBRANCH_DATA.GetEntries())
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
@@ -1864,33 +1864,6 @@ for i,hist in enumerate(histlist):
 gStyle.SetPalette(55)
 gPad.SetTheta(90)
 gPad.SetPhi(180)
-tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
-tvsphi_title.AddText("-t vs #phi")
-tvsphi_title.Draw()
-ptphizero = TPaveText(0.923951,0.513932,0.993778,0.574551,"NDC")
-ptphizero.AddText("#phi = 0")
-ptphizero.Draw()
-phihalfk = TLine(0,0,0,0.6)
-phihalfk.SetLineColor(kBlack)
-phihalfk.SetLineWidth(2)
-phihalfk.Draw()
-ptphihalfk = TPaveText(0.417855,0.901876,0.486574,0.996358,"NDC")
-ptphihalfk.AddText("#phi = #frac{K}{2}")
-ptphihalfk.Draw()
-phik = TLine(0,0,-0.6,0)
-phik.SetLineColor(kBlack)
-phik.SetLineWidth(2)
-phik.Draw()
-ptphik = TPaveText(0.0277092,0.514217,0.096428,0.572746,"NDC")
-ptphik.AddText("#phi = K")
-ptphik.Draw()
-phithreek = TLine(0,0,0,-0.6)
-phithreek.SetLineColor(kBlack)
-phithreek.SetLineWidth(2)
-phithreek.Draw()
-ptphithreek = TPaveText(0.419517,0.00514928,0.487128,0.0996315,"NDC")
-ptphithreek.AddText("#phi = #frac{3K}{2}")
-ptphithreek.Draw()
 Arc = TArc()
 for k in range(0, 10):
      Arc.SetFillStyle(0)
