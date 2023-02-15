@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 12:18:03 trottar"
+# Time-stamp: "2023-02-15 12:24:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1309,9 +1309,6 @@ def defineHists(phi_setting):
     return histDict
 
 ################################################################################################################################################
-# Removes stat box
-ROOT.gStyle.SetOptStat(0)
-################################################################################################################################################
 
 # Call histogram function above to define dictonaries for right, left, center settings
 # Put these all into an array so that if we are missing a setting it is easier to remove
@@ -1790,9 +1787,14 @@ Cqw.Print(outputpdf)
 
 Cpht = TCanvas()
 
+# Removes stat box
 ROOT.gStyle.SetOptStat(0)
 
 Cpht.Divide(2,2)
+
+gStyle.SetPalette(55)
+gPad.SetTheta(90)
+gPad.SetPhi(180)
 
 for i,hist in enumerate(histlist):
     Cpht.cd(i+1)
@@ -1801,9 +1803,6 @@ for i,hist in enumerate(histlist):
     hist["phiq_vs_t_DATA"].SetTitle(phisetlist[i])
     
     # Section for polar plotting
-    gStyle.SetPalette(55)
-    gPad.SetTheta(90)
-    gPad.SetPhi(180)
     tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
     tvsphi_title.AddText("-t vs #phi")
     tvsphi_title.Draw()
