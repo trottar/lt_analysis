@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 00:35:09 trottar"
+# Time-stamp: "2023-02-15 00:36:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,6 +101,7 @@ try:
     f_simc_right.close()
 except FileNotFoundError:
     print("No right simc file found...")
+    #sys.exit(1)
     
 simc_left_hist = "%s/OUTPUT/Analysis/%sLT/%s" % (LTANAPATH,ANATYPE,InSIMCFilenameLeft.replace('.root','.hist'))
 try:
@@ -122,7 +123,8 @@ try:
     f_simc_left.close()
 except FileNotFoundError:
     print("No left simc file found...")
-
+    sys.exit(1)
+    
 try:    
     simc_center_hist = "%s/OUTPUT/Analysis/%sLT/%s" % (LTANAPATH,ANATYPE,InSIMCFilenameCenter.replace('.root','.hist'))
     f_simc_center = open(simc_center_hist)
@@ -143,6 +145,7 @@ try:
     f_simc_center.close()
 except FileNotFoundError:
     print("No center simc file found...")
+    sys.exit(1)
     
 ################################################################################################################################################
 

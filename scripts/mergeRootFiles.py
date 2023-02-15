@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 00:31:08 trottar"
+# Time-stamp: "2023-02-15 00:36:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,7 +45,7 @@ for tree in input_tree_names.split():
         if len(arr_run_nums) > 1:
             Misc.progressBar(i, len(arr_run_nums)-1,bar_length=25)
         else:
-            Misc.progressBar(i, len(arr_run_nums),bar_length=25)
+            Misc.progressBar(len(arr_run_nums), len(arr_run_nums),bar_length=25)
         filepath = root_path + str(n) + input_file_name + ".root"
         if not os.path.isfile(filepath):
             print("WARNING: File {} not found.".format(filepath))
