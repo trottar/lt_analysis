@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 12:49:16 trottar"
+# Time-stamp: "2023-02-15 12:52:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -728,8 +728,8 @@ def defineHists(phi_setting):
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
-          phiq_vs_t_DATA.Fill(evt.ph_q, evt.MandelT)
-          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
+          phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
+          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
