@@ -36,7 +36,7 @@ while getopts 'h' flag; do
         echo "Description: Runs simc and updates simc input files"
         echo "----------------------------------------------------------"
         echo
-        echo "The following flags can be called for the heep analysis..."
+        echo "The following flags can be called for the production analysis..."
 	echo "    EPSILON=arg1, Q2=arg2, W=arg3"
         echo "    -h, help"
 	echo
