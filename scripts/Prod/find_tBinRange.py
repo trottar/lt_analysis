@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 14:52:39 trottar"
+# Time-stamp: "2023-02-15 14:58:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -631,7 +631,7 @@ def defineHists(phi_setting):
     CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 100, -2, 2, 100, 0, 2)
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
-    polar_phiq_vs_t_DATA = ROOT.TGraphPolar(TBRANCH_DATA.GetEntries())
+    polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
@@ -1854,8 +1854,7 @@ Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
-    #hist["polar_phiq_vs_t_DATA"].SetMinRadial(0.0)
-    #hist["polar_phiq_vs_t_DATA"].SetMaxRadial(2.0)
+    hist["polar_phiq_vs_t_DATA"].GetYaxis().SetRangeUser(tmin,tmax)
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     hist["polar_phiq_vs_t_DATA"].Draw("same, AP")
@@ -1864,6 +1863,21 @@ for i,hist in enumerate(histlist):
 gStyle.SetPalette(55)
 gPad.SetTheta(90)
 gPad.SetPhi(180)
+tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
+tvsphi_title.AddText("-t vs #phi")
+tvsphi_title.Draw()
+phihalfk = TLine(0,0,0,0.6)
+phihalfk.SetLineColor(kBlack)
+phihalfk.SetLineWidth(2)
+phihalfk.Draw()
+phik = TLine(0,0,-0.6,0)
+phik.SetLineColor(kBlack)
+phik.SetLineWidth(2)
+phik.Draw()
+phithreek = TLine(0,0,0,-0.6)
+phithreek.SetLineColor(kBlack)
+phithreek.SetLineWidth(2)
+phithreek.Draw()
 Arc = TArc()
 for k in range(0, 10):
      Arc.SetFillStyle(0)
@@ -1871,7 +1885,7 @@ for k in range(0, 10):
      # To change the arc radius we have to change number 0.6 in the lower line.
      Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
 for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
-     Arc.SetLineColor(3)
+     Arc.SetLineColor(7)
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number 0.6 in the lower line.
      Arc.DrawArc(0,0,0.6*b,0.,360.,"same")
