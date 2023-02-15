@@ -484,11 +484,11 @@ if [[ $a_flag = "true" ]]; then
 	    do       
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
 		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
+		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
@@ -542,11 +542,11 @@ if [[ $a_flag = "true" ]]; then
 	    do       
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
 		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
+		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
@@ -600,11 +600,11 @@ if [[ $a_flag = "true" ]]; then
 	    do       
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
 		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
+		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
