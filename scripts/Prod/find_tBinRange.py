@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 23:03:11 trottar"
+# Time-stamp: "2023-02-14 23:10:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -332,9 +332,6 @@ def defineHists(phi_setting):
 
     nEntries_TBRANCH_DATA  = TBRANCH_DATA.GetEntries()
     nEntries_TBRANCH_DUMMY  = TBRANCH_DUMMY.GetEntries()
-
-    print("\n\n~~~~~~~~~~~~~~~~~",nEntries_TBRANCH_DATA)
-    print("\n\n~~~~~~~~~~~~~~~~~",nEntries_TBRANCH_DUMMY)
     
     ################################################################################################################################################
     # Grabs PID cut string
@@ -655,7 +652,7 @@ def defineHists(phi_setting):
           try:
               Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
           except ZeroDivisionError:
-              Diamond = False
+              Diamond = True
               
       #........................................
 
@@ -713,7 +710,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                Diamond = False
+                Diamond = True
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -793,8 +790,13 @@ def defineHists(phi_setting):
 
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
         HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = True
+        if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
+            Diamond = True
+        else:
+            try:
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+            except ZeroDivisionError:
+                Diamond = True
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -861,8 +863,13 @@ def defineHists(phi_setting):
 
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
         HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = True
+        if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
+            Diamond = True
+        else:
+            try:
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+            except ZeroDivisionError:
+                Diamond = True
 
         '''
         if phi_setting == "Right":
@@ -921,8 +928,13 @@ def defineHists(phi_setting):
 
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
         HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = True
+        if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
+            Diamond = True
+        else:
+            try:
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+            except ZeroDivisionError:
+                Diamond = True
 
         '''
         if phi_setting == "Right":
@@ -1855,11 +1867,13 @@ Ctext.Print(outputpdf+')')
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
 
 outHistFile = ROOT.TFile.Open(foutname, "RECREATE")
-d_Right_Data = outHistFile.mkdir("Right")
-d_Left_Data = outHistFile.mkdir("Left")
-d_Center_Data = outHistFile.mkdir("Center")
+d_Right_Data = outHistFile.mkdir("Right Data")
+d_Left_Data = outHistFile.mkdir("Left Data")
+d_Center_Data = outHistFile.mkdir("Center Data")
+d_Right_Simc = outHistFile.mkdir("Right Simc")
+d_Left_Simc = outHistFile.mkdir("Left Simc")
+d_Center_Simc = outHistFile.mkdir("Center Simc")
 
-d_Right_Data.cd()
 for i,hist in enumerate(histlist):
     if bool(hist):
         continue
@@ -1902,6 +1916,48 @@ for i,hist in enumerate(histlist):
     hist["H_pmz_DATA"].Write()
     hist["H_ct_ep_DATA"].Write()
 
+for i,hist in enumerate(histlist):
+    if bool(hist):
+        continue
+    if hist["phi_setting"] == "Right":
+        d_Right_Simc.cd()
+    if hist["phi_setting"] == "Left":
+        d_Left_Simc.cd()
+    if hist["phi_setting"] == "Center":
+        d_Center_Simc.cd()
+    hist["H_hsdelta_SIMC"].Write()
+    hist["H_hsxptar_SIMC"].Write()
+    hist["H_hsyptar_SIMC"].Write()
+    hist["H_ssxfp_SIMC"].Write()
+    hist["H_ssyfp_SIMC"].Write()
+    hist["H_ssxpfp_SIMC"].Write()
+    hist["H_ssypfp_SIMC"].Write()
+    hist["H_hsxfp_SIMC"].Write()
+    hist["H_hsyfp_SIMC"].Write()
+    hist["H_hsxpfp_SIMC"].Write()
+    hist["H_hsypfp_SIMC"].Write()
+    hist["H_ssdelta_SIMC"].Write()
+    hist["H_ssxptar_SIMC"].Write()
+    hist["H_ssyptar_SIMC"].Write()
+    hist["H_q_SIMC"].Write()
+    hist["H_Q2_SIMC"].Write()
+    hist["H_W_SIMC"].Write()
+    hist["H_t_SIMC"].Write()
+    hist["H_epsilon_SIMC"].Write()
+    hist["H_MM_SIMC"].Write()
+    hist["H_th_SIMC"].Write()
+    hist["H_ph_SIMC"].Write()
+    hist["H_ph_q_SIMC"].Write()
+    hist["H_th_q_SIMC"].Write()
+    hist["H_ph_recoil_SIMC"].Write()
+    hist["H_th_recoil_SIMC"].Write()
+    hist["H_pmiss_SIMC"].Write()
+    hist["H_emiss_SIMC"].Write()
+    hist["H_pmx_SIMC"].Write()
+    hist["H_pmy_SIMC"].Write()
+    hist["H_pmz_SIMC"].Write()
+    hist["H_ct_ep_SIMC"].Write()
+    
 outHistFile.Close()
 
 for i,hist in enumerate(histlist):
