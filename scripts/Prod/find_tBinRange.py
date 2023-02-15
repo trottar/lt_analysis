@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 00:02:41 trottar"
+# Time-stamp: "2023-02-15 00:25:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -46,7 +46,7 @@ W = sys.argv[2]
 Q2 = sys.argv[3]
 EPSVAL = sys.argv[4]
 InDATAFilename = sys.argv[5]
-InDUMMYFilename = sys.argv[6] # HERE
+InDUMMYFilename = sys.argv[6]
 OutFilename = sys.argv[7]
 tmin = float(sys.argv[8])
 tmax = float(sys.argv[9])
@@ -55,12 +55,12 @@ NumPhiBins = int(sys.argv[11])
 runNumRight = sys.argv[12]
 runNumLeft = sys.argv[13]
 runNumCenter = sys.argv[14]
-data_charge_right = int(sys.argv[15])/1000
-data_charge_left = int(sys.argv[16])/1000
-data_charge_center = int(sys.argv[17])/1000
-dummy_charge_right = int(sys.argv[18])/1000 # HERE
-dummy_charge_left = int(sys.argv[19])/1000 # HERE
-dummy_charge_center = int(sys.argv[20])/1000 # HERE
+data_charge_right = int(sys.argv[15])/1000 # Convert from uC to C
+data_charge_left = int(sys.argv[16])/1000 # Convert from uC to C
+data_charge_center = int(sys.argv[17])/1000 # Convert from uC to C
+dummy_charge_right = int(sys.argv[18])/1000 # Convert from uC to C
+dummy_charge_left = int(sys.argv[19])/1000 # Convert from uC to C
+dummy_charge_center = int(sys.argv[20])/1000 # Convert from uC to C
 InData_efficiency_right = sys.argv[21]
 InData_efficiency_left = sys.argv[22]
 InData_efficiency_center = sys.argv[23]

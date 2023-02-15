@@ -101,7 +101,7 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax):
                 lenl = len(file)
 
     if (highe_input == False and mide_input == False and lowe_input == False):
-        print("!!!!! ERROR !!!!!\n Invalid Kinematic \n!!!!! ERROR !!!!!")
+        print("!!!!! ERROR !!!!!\n No valid file found! \n!!!!! ERROR !!!!!")
         sys.exit(1)
 
     ##############################################################################################################################################
