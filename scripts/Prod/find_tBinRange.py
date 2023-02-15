@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:50:01 trottar"
+# Time-stamp: "2023-02-15 18:51:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -247,6 +247,7 @@ def defineHists(phi_setting):
     ################################################################################################################################################
     # Call diamond cut script
 
+    '''
     paramDict = DiamondPlot(particle, Q2Val, WVal, phi_setting, tmin, tmax)
     
     a1 = paramDict["a1"]
@@ -257,7 +258,17 @@ def defineHists(phi_setting):
     b3 = paramDict["b3"]
     a4 = paramDict["a4"]
     b4 = paramDict["b4"]
+    '''
 
+    a1 = 0
+    b1 = 0
+    a2 = 0
+    b2 = 0
+    a3 = 0
+    b3 = 0
+    a4 = 0
+    b4 = 0
+    
     ################################################################################################################################################
     # Define simc root file trees of interest
 
