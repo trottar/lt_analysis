@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 13:11:47 trottar"
+# Time-stamp: "2023-02-15 13:16:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -729,7 +729,7 @@ def defineHists(phi_setting):
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
-          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), evt.MandelT)
+          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1856,6 +1856,7 @@ for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
+    hist["polar_phiq_vs_t_DATA"].SetRadialRange(0, 2)
     hist["polar_phiq_vs_t_DATA"].Draw("P")
 
 Cphtsame.Print(outputpdf)
