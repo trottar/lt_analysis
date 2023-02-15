@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 16:27:20 trottar"
+# Time-stamp: "2023-02-15 16:30:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -698,9 +698,8 @@ def defineHists(phi_setting):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
-        if -evt.MandelT >= 0 or -evt.MandelT <=2.0:
-            # Must be outside cuts to avoid weird overflow errors
-            polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
+        # Must be outside cuts to avoid weird overflow errors
+        #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
@@ -729,11 +728,12 @@ def defineHists(phi_setting):
             
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
+          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
+            
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
-          #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
