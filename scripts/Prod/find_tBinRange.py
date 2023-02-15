@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 14:42:11 trottar"
+# Time-stamp: "2023-02-15 14:48:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1854,13 +1854,58 @@ Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
-    print(hist["polar_phiq_vs_t_DATA"].GetXpol())
-    print(hist["polar_phiq_vs_t_DATA"].GetYpol())
-    hist["polar_phiq_vs_t_DATA"].SetMinRadial(0.0)
-    hist["polar_phiq_vs_t_DATA"].SetMaxRadial(2.0)
+    #hist["polar_phiq_vs_t_DATA"].SetMinRadial(0.0)
+    #hist["polar_phiq_vs_t_DATA"].SetMaxRadial(2.0)
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     hist["polar_phiq_vs_t_DATA"].Draw("same, AP")
+    
+# Section for polar plotting
+gStyle.SetPalette(55)
+gPad.SetTheta(90)
+gPad.SetPhi(180)
+tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
+tvsphi_title.AddText("-t vs #phi")
+tvsphi_title.Draw()
+ptphizero = TPaveText(0.923951,0.513932,0.993778,0.574551,"NDC")
+ptphizero.AddText("#phi = 0")
+ptphizero.Draw()
+phihalfk = TLine(0,0,0,0.6)
+phihalfk.SetLineColor(kBlack)
+phihalfk.SetLineWidth(2)
+phihalfk.Draw()
+ptphihalfk = TPaveText(0.417855,0.901876,0.486574,0.996358,"NDC")
+ptphihalfk.AddText("#phi = #frac{K}{2}")
+ptphihalfk.Draw()
+phik = TLine(0,0,-0.6,0)
+phik.SetLineColor(kBlack)
+phik.SetLineWidth(2)
+phik.Draw()
+ptphik = TPaveText(0.0277092,0.514217,0.096428,0.572746,"NDC")
+ptphik.AddText("#phi = K")
+ptphik.Draw()
+phithreek = TLine(0,0,0,-0.6)
+phithreek.SetLineColor(kBlack)
+phithreek.SetLineWidth(2)
+phithreek.Draw()
+ptphithreek = TPaveText(0.419517,0.00514928,0.487128,0.0996315,"NDC")
+ptphithreek.AddText("#phi = #frac{3K}{2}")
+ptphithreek.Draw()
+Arc = TArc()
+for k in range(0, 10):
+     Arc.SetFillStyle(0)
+     Arc.SetLineWidth(2)
+     # To change the arc radius we have to change number 0.6 in the lower line.
+     Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
+for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
+     Arc.SetLineColor(3)
+     Arc.SetLineWidth(2)
+     # To change the arc radius we have to change number 0.6 in the lower line.
+     Arc.DrawArc(0,0,0.6*b,0.,360.,"same")
+tradius = TGaxis(0,0,0.6,0,tmin,tmax,10,"-+")
+tradius.SetLineColor(2)
+tradius.SetLabelColor(2)
+tradius.Draw()
     
 Cphtsame.Print(outputpdf)
 
