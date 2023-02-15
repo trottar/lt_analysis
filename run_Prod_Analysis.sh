@@ -477,7 +477,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right dummy..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDUMMYFilename}_Right" "${dummy_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${OutDUMMYFilename}_Right" "${dummy_right[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Right.root" ]; then
 	    for i in "${dummy_right[@]}"
@@ -506,7 +506,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Right" "${data_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${OutDATAFilename}_Right" "${data_right[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Right.root" ]; then
 	    for i in "${data_right[@]}"
@@ -535,7 +535,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining left dummy..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDUMMYFilename}_Left" "${dummy_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${OutDUMMYFilename}_Left" "${dummy_left[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Left.root" ]; then
 	    for i in "${dummy_left[@]}"
@@ -564,7 +564,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining left data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${OutDATAFilename}_Left" "${data_left[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    for i in "${data_left[@]}"
@@ -593,7 +593,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining center dummy..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDUMMYFilename}_Center" "${dummy_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${OutDUMMYFilename}_Center" "${dummy_center[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Center.root" ]; then
 	    for i in "${dummy_center[@]}"
@@ -622,7 +622,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining center data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Center" "${data_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${OutDATAFilename}_Center" "${data_center[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 	    for i in "${data_center[@]}"
@@ -651,7 +651,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining left data..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDATAFilename}_Left" "${data_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${OutDATAFilename}_Left" "${data_left[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
 	    for i in "${data_left[@]}"
