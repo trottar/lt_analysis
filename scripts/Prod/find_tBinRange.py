@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:34:40 trottar"
+# Time-stamp: "2023-02-15 18:36:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -736,7 +736,7 @@ def defineHists(phi_setting):
           
           r = -evt.MandelT
           phi = evt.ph_q
-          bin_num = poly_phiq_vs_t_DATA.FindBin(r * ROOT.TMath.Cos(theta), r * ROOT.TMath.Sin(theta))
+          bin_num = poly_phiq_vs_t_DATA.FindBin(r * ROOT.TMath.Cos(phi), r * ROOT.TMath.Sin(phi))
           poly_phiq_vs_t_DATA.SetBinContent(bin_num, poly_phiq_vs_t_DATA.GetBinContent(bin_num) + 1)
           # set the color palette for the TH2Poly object
           palette = [ROOT.kWhite, ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kYellow, ROOT.kMagenta, ROOT.kCyan]
@@ -1882,7 +1882,10 @@ Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
     hist["poly_phiq_vs_t_DATA"].Draw("COLZ")
-
+    Cphtsame.Update()
+    hist["poly_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
+    # Hide radial axis labels since redefined below
+    hist["poly_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelSize(0)
 
 '''
 for i,hist in enumerate(histlist):
