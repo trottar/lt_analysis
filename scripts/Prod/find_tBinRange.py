@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:44:09 trottar"
+# Time-stamp: "2023-02-15 18:44:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1381,7 +1381,8 @@ for i,hist in enumerate(histlist):
 l_eff_plt.Draw()
 
 eff_plt.Print(outputpdf + '(')
-        
+
+'''
 # Plot histograms
 c_pid = TCanvas()
 
@@ -1804,6 +1805,8 @@ for i,hist in enumerate(histlist):
     hist["Q2_vs_W_DATA"].SetTitle(phisetlist[i])
 
 Cqw.Print(outputpdf)
+
+'''
 
 Cpht = TCanvas()
 
