@@ -477,16 +477,16 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining right dummy..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Dummy" ${TreeNames} "${OutDUMMYFilename}_Right" "${dummy_right[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDUMMYFilename}_Right" "${dummy_right[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Right.root" ]; then
 	    for i in "${dummy_right[@]}"
 	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Dummy.root" ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
 		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
-		    #mv ${i}_-1_Raw_Dummy.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
 		else
 		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
 		fi
@@ -535,16 +535,16 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining left dummy..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Dummy" ${TreeNames} "${OutDUMMYFilename}_Left" "${dummy_left[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDUMMYFilename}_Left" "${dummy_left[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Left.root" ]; then
 	    for i in "${dummy_left[@]}"
 	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Dummy.root" ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
 		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
-		    #mv ${i}_-1_Raw_Dummy.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
 		else
 		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
 		fi
@@ -593,16 +593,16 @@ if [[ $a_flag = "true" ]]; then
 	echo "Combining center dummy..."
 	echo
 	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Dummy" ${TreeNames} "${OutDUMMYFilename}_Center" "${dummy_center[*]}"
+	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" ${TreeNames} "${OutDUMMYFilename}_Center" "${dummy_center[*]}"
 	echo
 	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDUMMYFilename}_Center.root" ]; then
 	    for i in "${dummy_center[@]}"
 	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Dummy.root" ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
 		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    echo "Renaming ${i}_Raw_Dummy to ${i}_Proc_Dummy..."
-		    #mv ${i}_-1_Raw_Dummy.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Dummy.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
+		    #mv ${i}_-1_Proc_Dummy.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Dummy.root is used in later LT_analysis
 		else
 		    echo "WARNING: ${i}_Raw_Dummy.root does not exist!"
 		fi
