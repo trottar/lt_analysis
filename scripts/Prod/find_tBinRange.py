@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:30:00 trottar"
+# Time-stamp: "2023-02-15 18:34:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -733,6 +733,19 @@ def defineHists(phi_setting):
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
           #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
+          
+          r = -evt.MandelT
+          phi = evt.ph_q
+          bin_num = poly_phiq_vs_t_DATA.FindBin(r * ROOT.TMath.Cos(theta), r * ROOT.TMath.Sin(theta))
+          poly_phiq_vs_t_DATA.SetBinContent(bin_num, poly_phiq_vs_t_DATA.GetBinContent(bin_num) + 1)
+          # set the color palette for the TH2Poly object
+          palette = [ROOT.kWhite, ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kYellow, ROOT.kMagenta, ROOT.kCyan]
+          palette_size = len(palette)
+          for i in range(1, poly_phiq_vs_t_DATA.GetNumberOfBins() + 1):
+              bin_content = poly_phiq_vs_t_DATA.GetBinContent(i)
+              if bin_content > 0:
+                  poly_phiq_vs_t_DATA.SetFillColor(i, palette[bin_content % palette_size])
+        
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1867,44 +1880,9 @@ Cpht.Print(outputpdf)
 
 Cphtsame = TCanvas()
 
-# create a new TH2Poly object
-h2 = ROOT.TH2Poly("h2", "", -1, 1, -1, 1)
-h2.SetStats(False)
-h2.SetTitle("Density Plot")
+for i,hist in enumerate(histlist):
+    hist["poly_phiq_vs_t_DATA"].Draw("COLZ")
 
-# create a list of TGraphPolar objects
-gr_list = []
-
-for i, hist in enumerate(histlist):
-    # set colors for the TGraphPolar object
-    hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
-    hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    gr_list.append(hist["polar_phiq_vs_t_DATA"])
-
-# loop over the TGraphPolar objects and add their points to the TH2Poly object
-for gr in gr_list:
-    for i in range(gr.GetN()):
-        r = gr.GetYpol()[i]
-        theta = gr.GetXpol()[i]
-        bin_num = h2.FindBin(r * ROOT.TMath.Cos(theta), r * ROOT.TMath.Sin(theta))
-        h2.SetBinContent(bin_num, h2.GetBinContent(bin_num) + 1)
-
-# set the color palette for the TH2Poly object
-palette = [ROOT.kWhite, ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kYellow, ROOT.kMagenta, ROOT.kCyan]
-palette_size = len(palette)
-for i in range(1, h2.GetNumberOfBins() + 1):
-    bin_content = h2.GetBinContent(i)
-    if bin_content > 0:
-        h2.SetFillColor(i, palette[bin_content % palette_size])
-
-# draw the TH2Poly object
-h2.Draw("colz")
-
-# set radial range, label color, and label size for the TGraphPolargram object
-for gr in gr_list:
-    gr.GetPolargram().SetRangeRadial(0, 2.0)
-    gr.GetPolargram().SetRadialLabelColor(0)
-    gr.GetPolargram().SetRadialLabelSize(0)
 
 '''
 for i,hist in enumerate(histlist):
