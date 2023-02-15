@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 22:51:53 trottar"
+# Time-stamp: "2023-02-14 22:56:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1317,7 +1317,7 @@ ROOT.gStyle.SetOptStat(0)
 # Call histogram function above to define dictonaries for right, left, center settings
 # Put these all into an array so that if we are missing a setting it is easier to remove
 # Plus it makes the code below less repetitive
-phisetlist = ["Right","Left","Center"]
+phisetlist = ["Right","Left"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(defineHists(phiset))
