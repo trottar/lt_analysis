@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:09:03 trottar"
+# Time-stamp: "2023-02-15 18:13:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1873,7 +1873,7 @@ Cpht.Print(outputpdf)
 Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
-    h2poly.Draw("COLZ")
+    hist["poly_phiq_vs_t_DATA"].Draw("COLZ")
 
     # Set the color scale for the density plot
     gStyle.SetPalette(1+i)
