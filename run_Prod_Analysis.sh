@@ -40,7 +40,7 @@ while getopts 'hat' flag; do
         echo "    -h, help"
         echo "    -a, combine data for each phi setting"	
         echo "    -t, set t-bin (!!!required for script!!!)"
-	echo "        EPSILON=arg1, Q2=arg2, W=arg3, target=arg4"
+	echo "        EPSILON=arg1, Q2=arg2, W=arg3"
 	echo
 	echo " Avaliable Kinematics..."	
 	echo "                      Q2=5p5, W=3p02"
