@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 23:38:30 trottar"
+# Time-stamp: "2023-02-14 23:38:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -315,7 +315,7 @@ def defineHists(phi_setting):
     InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
     rootFileDummy = OUTPATH+"/"+InDUMMYFilename+"_%s.root" % (phi_setting)
-    print(rootFileDummy)
+    print("\n\n~~~~~~~~",rootFileDummy)
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(1)
