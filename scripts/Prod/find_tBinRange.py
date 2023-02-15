@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 20:39:52 trottar"
+# Time-stamp: "2023-02-14 20:49:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -550,11 +550,6 @@ def defineHists(phi_setting):
     H_pmy_DUMMY  = ROOT.TH1D("H_pmy_DUMMY","pmy ", 200, -10.0, 10.0)
     H_pmz_DUMMY  = ROOT.TH1D("H_pmz_DUMMY","pmz", 200, -10.0, 10.0)
     H_ct_ep_DUMMY = ROOT.TH1D("H_ct_ep_DUMMY", "Electron-Proton CTime", 200, -10, 10)
-    H_cal_etottracknorm_DUMMY = ROOT.TH1D("H_cal_etottracknorm_DUMMY", "HMS Cal etottracknorm", 200, 0.2, 1.8)
-    H_cer_npeSum_DUMMY = ROOT.TH1D("H_cer_npeSum_DUMMY", "HMS Cer Npe Sum", 200, 0, 30)
-    P_cal_etottracknorm_DUMMY = ROOT.TH1D("P_cal_etottracknorm_DUMMY", "SHMS Cal etottracknorm", 200, 0, 1)
-    P_hgcer_npeSum_DUMMY = ROOT.TH1D("P_hgcer_npeSum_DUMMY", "SHMS HGCer Npe Sum", 200, 0, 50)
-    P_aero_npeSum_DUMMY = ROOT.TH1D("P_aero_npeSum_DUMMY", "SHMS Aero Npe Sum", 200, 0, 50)
     
     H_hsdelta_RAND  = ROOT.TH1D("H_hsdelta_RAND","HMS Delta", 200, -20.0, 20.0)
     H_hsxptar_RAND  = ROOT.TH1D("H_hsxptar_RAND","HMS xptar", 200, -0.1, 0.1)
@@ -815,14 +810,6 @@ def defineHists(phi_setting):
           H_MM_DUMMY.Fill(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))
           #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
-
-          H_cal_etottracknorm_DUMMY.Fill(evt.H_cal_etottracknorm)
-          H_cer_npeSum_DUMMY.Fill(evt.H_cer_npeSum)
-
-          P_cal_etottracknorm_DUMMY.Fill(evt.P_cal_etottracknorm)
-          P_hgcer_npeSum_DUMMY.Fill(evt.P_hgcer_npeSum)
-          P_aero_npeSum_DUMMY.Fill(evt.P_aero_npeSum)          
-
           
     ###################################################################################################################################################    
     # Fill random histograms for various trees called above
