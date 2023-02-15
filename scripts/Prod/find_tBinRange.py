@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 14:04:11 trottar"
+# Time-stamp: "2023-02-15 14:08:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1854,11 +1854,11 @@ Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
-    hist["polar_phiq_vs_t_DATA"].SetMinRadial(0.0)
-    hist["polar_phiq_vs_t_DATA"].SetMaxRadial(2.0)
+    hist["polar_phiq_vs_t_DATA"].SetMinimum(0.0)
+    hist["polar_phiq_vs_t_DATA"].SetMaximum(2.0)
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    hist["polar_phiq_vs_t_DATA"].Draw("AP")
+    hist["polar_phiq_vs_t_DATA"].Draw("same, AP")
     Cphtsame.Update()
     
 Cphtsame.Print(outputpdf)
