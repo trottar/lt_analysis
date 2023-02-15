@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 19:56:48 trottar"
+# Time-stamp: "2023-02-15 00:34:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,43 +100,50 @@ try:
         #sys.exit(1)
     f_simc_right.close()
 except FileNotFoundError:
-    print("No right setting...")
+    print("No right setting found...")
     
 simc_left_hist = "%s/OUTPUT/Analysis/%sLT/%s" % (LTANAPATH,ANATYPE,InSIMCFilenameLeft.replace('.root','.hist'))
-f_simc_left = open(simc_left_hist)
-angle_flag = False
-for line in f_simc_left:
-    #print(line)
-    if "Ngen" in line:
-        val = line.split("=")
-        simc_left_nevents = int(val[1])
-    if "normfac" in line:
-        val = line.split("=")
-        simc_left_normfactor = float(val[1])
-if 'simc_left_nevents' and 'simc_left_normfactor' in locals():
-    print('\n\nsimc_left_nevents = ',simc_left_nevents,'\nsimc_left_normfactor = ',simc_left_normfactor,'\n\n')
-else:
-    print("ERROR: Invalid simc left hist file %s" % simc_left_hist)
-    #sys.exit(1)
-f_simc_left.close()
+try:
+    f_simc_left = open(simc_left_hist)
+    angle_flag = False
+    for line in f_simc_left:
+        #print(line)
+        if "Ngen" in line:
+            val = line.split("=")
+            simc_left_nevents = int(val[1])
+        if "normfac" in line:
+            val = line.split("=")
+            simc_left_normfactor = float(val[1])
+    if 'simc_left_nevents' and 'simc_left_normfactor' in locals():
+        print('\n\nsimc_left_nevents = ',simc_left_nevents,'\nsimc_left_normfactor = ',simc_left_normfactor,'\n\n')
+    else:
+        print("ERROR: Invalid simc left hist file %s" % simc_left_hist)
+        #sys.exit(1)
+    f_simc_left.close()
+except FileNotFoundError:
+    print("No left setting found...")
 
-simc_center_hist = "%s/OUTPUT/Analysis/%sLT/%s" % (LTANAPATH,ANATYPE,InSIMCFilenameCenter.replace('.root','.hist'))
-f_simc_center = open(simc_center_hist)
-angle_flag = False
-for line in f_simc_center:
-    #print(line)
-    if "Ngen" in line:
-        val = line.split("=")
-        simc_center_nevents = int(val[1])
-    if "normfac" in line:
-        val = line.split("=")
-        simc_center_normfactor = float(val[1])
-if 'simc_center_nevents' and 'simc_center_normfactor' in locals():
-    print('\n\nsimc_center_nevents = ',simc_center_nevents,'\nsimc_center_normfactor = ',simc_center_normfactor,'\n\n')
-else:
-    print("ERROR: Invalid simc center hist file %s" % simc_center_hist)
-    #sys.exit(1)
-f_simc_center.close()
+try:    
+    simc_center_hist = "%s/OUTPUT/Analysis/%sLT/%s" % (LTANAPATH,ANATYPE,InSIMCFilenameCenter.replace('.root','.hist'))
+    f_simc_center = open(simc_center_hist)
+    angle_flag = False
+    for line in f_simc_center:
+        #print(line)
+        if "Ngen" in line:
+            val = line.split("=")
+            simc_center_nevents = int(val[1])
+        if "normfac" in line:
+            val = line.split("=")
+            simc_center_normfactor = float(val[1])
+    if 'simc_center_nevents' and 'simc_center_normfactor' in locals():
+        print('\n\nsimc_center_nevents = ',simc_center_nevents,'\nsimc_center_normfactor = ',simc_center_normfactor,'\n\n')
+    else:
+        print("ERROR: Invalid simc center hist file %s" % simc_center_hist)
+        #sys.exit(1)
+    f_simc_center.close()
+except FileNotFoundError:
+    print("No center setting found...")
+    
 ################################################################################################################################################
 
 def write_to_file(f_out,line):
