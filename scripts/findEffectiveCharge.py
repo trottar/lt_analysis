@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 17:40:28 trottar"
+# Time-stamp: "2023-02-14 19:51:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,7 +18,10 @@ import sys, os
 User Inputs
 '''
 efficiency_table = sys.argv[1]
-RUNLIST = sys.argv[2].split(" ")
+RUNLIST = sys.argv[2]
+
+if len(RUNLIST) > 4:
+    RUNLIST = RUNLIST.split(" ")
 
 ################################################################################################################################################
 '''
