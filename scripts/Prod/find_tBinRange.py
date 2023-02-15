@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 13:52:34 trottar"
+# Time-stamp: "2023-02-15 13:56:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -730,7 +730,6 @@ def defineHists(phi_setting):
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
           polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
-          print(i, " ",evt.ph_q*(180/math.pi), " ", -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1317,7 +1316,7 @@ def defineHists(phi_setting):
 # Call histogram function above to define dictonaries for right, left, center settings
 # Put these all into an array so that if we are missing a setting it is easier to remove
 # Plus it makes the code below less repetitive
-phisetlist = ["Right","Left","Center"]
+phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(defineHists(phiset))
