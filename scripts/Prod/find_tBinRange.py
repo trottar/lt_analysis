@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 17:29:11 trottar"
+# Time-stamp: "2023-02-15 17:33:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -699,7 +699,7 @@ def defineHists(phi_setting):
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
         # Must be outside cuts to avoid weird overflow errors
-        polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
+        #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
@@ -732,7 +732,7 @@ def defineHists(phi_setting):
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
-          #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
+          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1811,45 +1811,56 @@ for i,hist in enumerate(histlist):
     tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
     tvsphi_title.AddText("-t vs #phi")
     tvsphi_title.Draw()
+    Cpht.Update()
     ptphizero = TPaveText(0.923951,0.513932,0.993778,0.574551,"NDC")
     ptphizero.AddText("#phi = 0")
     ptphizero.Draw()
+    Cpht.Update()
     phihalfk = TLine(0,0,0,0.6)
     phihalfk.SetLineColor(kBlack)
     phihalfk.SetLineWidth(2)
     phihalfk.Draw()
+    Cpht.Update()
     ptphihalfk = TPaveText(0.417855,0.901876,0.486574,0.996358,"NDC")
     ptphihalfk.AddText("#phi = #frac{K}{2}")
     ptphihalfk.Draw()
+    Cpht.Update()
     phik = TLine(0,0,-0.6,0)
     phik.SetLineColor(kBlack)
     phik.SetLineWidth(2)
     phik.Draw()
+    Cpht.Update()
     ptphik = TPaveText(0.0277092,0.514217,0.096428,0.572746,"NDC")
     ptphik.AddText("#phi = K")
     ptphik.Draw()
+    Cpht.Update()
     phithreek = TLine(0,0,0,-0.6)
     phithreek.SetLineColor(kBlack)
     phithreek.SetLineWidth(2)
     phithreek.Draw()
+    Cpht.Update()
     ptphithreek = TPaveText(0.419517,0.00514928,0.487128,0.0996315,"NDC")
     ptphithreek.AddText("#phi = #frac{3K}{2}")
     ptphithreek.Draw()
+    Cpht.Update()
     Arc = TArc()
     for k in range(0, 10):
          Arc.SetFillStyle(0)
          Arc.SetLineWidth(2)
          # To change the arc radius we have to change number 0.6 in the lower line.
          Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
+         Cpht.Update()
     for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
          Arc.SetLineColor(3)
          Arc.SetLineWidth(2)
          # To change the arc radius we have to change number 0.6 in the lower line.
          Arc.DrawArc(0,0,0.6*b,0.,360.,"same")
+         Cpht.Update()
     tradius = TGaxis(0,0,0.6,0,tmin,tmax,10,"-+")
     tradius.SetLineColor(2)
     tradius.SetLabelColor(2)
     tradius.Draw()
+    Cpht.Update()
 
 Cpht.Print(outputpdf)
 
