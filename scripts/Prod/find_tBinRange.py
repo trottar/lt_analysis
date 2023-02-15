@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 23:10:10 trottar"
+# Time-stamp: "2023-02-14 23:15:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -652,7 +652,7 @@ def defineHists(phi_setting):
           try:
               Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
           except ZeroDivisionError:
-              Diamond = True
+              Diamond = False
               
       #........................................
 
@@ -710,7 +710,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                Diamond = True
+                Diamond = False
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -774,79 +774,6 @@ def defineHists(phi_setting):
           P_cal_etottracknorm_DATA.Fill(evt.P_cal_etottracknorm)
           P_hgcer_npeSum_DATA.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)          
-
-    ################################################################################################################################################
-    # Fill dummy histograms for various trees called above
-
-    print("\nGrabbing %s dummy..." % phi_setting)
-    for i,evt in enumerate(TBRANCH_DUMMY):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
-        
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-        if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
-            Diamond = True
-        else:
-            try:
-                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-            except ZeroDivisionError:
-                Diamond = True
-        '''
-        if phi_setting == "Right":
-            ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-        else:
-            ct_cut = True
-
-        #........................................
-                
-        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-        '''
-
-            
-        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
-            
-          H_ct_ep_DUMMY.Fill(evt.CTime_ROC1)
-
-          H_ssxfp_DUMMY.Fill(evt.ssxfp)
-          H_ssyfp_DUMMY.Fill(evt.ssyfp)
-          H_ssxpfp_DUMMY.Fill(evt.ssxpfp)
-          H_ssypfp_DUMMY.Fill(evt.ssypfp)
-          H_ssdelta_DUMMY.Fill(evt.ssdelta)
-          H_ssxptar_DUMMY.Fill(evt.ssxptar)
-          H_ssyptar_DUMMY.Fill(evt.ssyptar)
-
-          H_hsxfp_DUMMY.Fill(evt.hsxfp)
-          H_hsyfp_DUMMY.Fill(evt.hsyfp)
-          H_hsxpfp_DUMMY.Fill(evt.hsxpfp)
-          H_hsypfp_DUMMY.Fill(evt.hsypfp)
-          H_hsdelta_DUMMY.Fill(evt.hsdelta)
-          H_hsxptar_DUMMY.Fill(evt.hsxptar)	
-          H_hsyptar_DUMMY.Fill(evt.hsyptar)
-
-          H_ph_q_DUMMY.Fill(evt.ph_q)
-          H_th_q_DUMMY.Fill(evt.th_q)
-          H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
-          H_th_recoil_DUMMY.Fill(evt.th_recoil)
-
-          H_pmiss_DUMMY.Fill(evt.pmiss)	
-          H_emiss_DUMMY.Fill(evt.emiss)	
-          #H_emiss_DUMMY.Fill(evt.emiss_nuc)
-          H_pmx_DUMMY.Fill(evt.pmx)
-          H_pmy_DUMMY.Fill(evt.pmy)
-          H_pmz_DUMMY.Fill(evt.pmz)
-          H_Q2_DUMMY.Fill(evt.Q2)
-          H_t_DUMMY.Fill(-evt.MandelT)
-          H_W_DUMMY.Fill(evt.W)
-          H_epsilon_DUMMY.Fill(evt.epsilon)
-          H_MM_DUMMY.Fill(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))
-          #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
-          #H_MM_DUMMY.Fill(evt.Mrecoil)
           
     ###################################################################################################################################################    
     # Fill random histograms for various trees called above
@@ -869,7 +796,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                Diamond = True
+                Diamond = False
 
         '''
         if phi_setting == "Right":
@@ -912,73 +839,6 @@ def defineHists(phi_setting):
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))  )
-
-    ###################################################################################################################################################    
-    # Fill dummy random histograms for various trees called above
-    
-    print("\nGrabbing %s dummy random data..." % phi_setting)
-    for i,evt in enumerate(TBRANCH_DUMMY_RAND):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
-        
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-        if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
-            Diamond = True
-        else:
-            try:
-                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-            except ZeroDivisionError:
-                Diamond = True
-
-        '''
-        if phi_setting == "Right":
-            ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-        else:
-            ct_cut = True
-
-        #........................................
-                
-        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-        '''
-
-            
-        if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
-
-          H_ssxfp_DUMMY_RAND.Fill(evt.ssxfp)
-          H_ssyfp_DUMMY_RAND.Fill(evt.ssyfp)
-          H_ssxpfp_DUMMY_RAND.Fill(evt.ssxpfp)
-          H_ssypfp_DUMMY_RAND.Fill(evt.ssypfp)
-          H_ssdelta_DUMMY_RAND.Fill(evt.ssdelta)
-          H_ssxptar_DUMMY_RAND.Fill(evt.ssxptar)
-          H_ssyptar_DUMMY_RAND.Fill(evt.ssyptar)
-
-          H_hsxfp_DUMMY_RAND.Fill(evt.hsxfp)
-          H_hsyfp_DUMMY_RAND.Fill(evt.hsyfp)
-          H_hsxpfp_DUMMY_RAND.Fill(evt.hsxpfp)
-          H_hsypfp_DUMMY_RAND.Fill(evt.hsypfp)
-          H_hsdelta_DUMMY_RAND.Fill(evt.hsdelta)
-          H_hsxptar_DUMMY_RAND.Fill(evt.hsxptar)	
-          H_hsyptar_DUMMY_RAND.Fill(evt.hsyptar)
-
-          H_pmiss_DUMMY_RAND.Fill(evt.pmiss)	
-          H_emiss_DUMMY_RAND.Fill(evt.emiss)	
-          #H_emiss_DUMMY_RAND.Fill(evt.emiss_nuc)
-          H_pmx_DUMMY_RAND.Fill(evt.pmx)
-          H_pmy_DUMMY_RAND.Fill(evt.pmy)
-          H_pmz_DUMMY_RAND.Fill(evt.pmz)
-          H_Q2_DUMMY_RAND.Fill(evt.Q2)
-          H_t_DUMMY_RAND.Fill(-evt.MandelT)
-          H_W_DUMMY_RAND.Fill(evt.W)
-          H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-          H_MM_DUMMY_RAND.Fill(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))  )
-
-          
     ################################################################################################################################################
     # Normalize simc by normfactor/nevents
     # Normalize dummy by effective charge and target correction
@@ -1024,35 +884,6 @@ def defineHists(phi_setting):
     if phi_setting == "Center":
         normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
         normfac_data = 1/(data_charge_center)
-    H_ssxfp_DUMMY.Scale(normfac_dummy)
-    H_ssyfp_DUMMY.Scale(normfac_dummy)
-    H_ssxpfp_DUMMY.Scale(normfac_dummy)
-    H_ssypfp_DUMMY.Scale(normfac_dummy)
-    H_hsxfp_DUMMY.Scale(normfac_dummy)
-    H_hsyfp_DUMMY.Scale(normfac_dummy)
-    H_hsxpfp_DUMMY.Scale(normfac_dummy)
-    H_hsypfp_DUMMY.Scale(normfac_dummy)
-    H_ssxptar_DUMMY.Scale(normfac_dummy)
-    H_ssyptar_DUMMY.Scale(normfac_dummy)
-    H_hsxptar_DUMMY.Scale(normfac_dummy)
-    H_hsyptar_DUMMY.Scale(normfac_dummy)
-    H_ssdelta_DUMMY.Scale(normfac_dummy)
-    H_hsdelta_DUMMY.Scale(normfac_dummy)
-    H_Q2_DUMMY.Scale(normfac_dummy)
-    H_t_DUMMY.Scale(normfac_dummy)
-    H_epsilon_DUMMY.Scale(normfac_dummy)
-    H_MM_DUMMY.Scale(normfac_dummy)
-    H_ph_q_DUMMY.Scale(normfac_dummy)
-    H_th_q_DUMMY.Scale(normfac_dummy)
-    H_ph_recoil_DUMMY.Scale(normfac_dummy)
-    H_th_recoil_DUMMY.Scale(normfac_dummy)
-    H_pmiss_DUMMY.Scale(normfac_dummy)
-    H_emiss_DUMMY.Scale(normfac_dummy)
-    H_pmx_DUMMY.Scale(normfac_dummy)
-    H_pmy_DUMMY.Scale(normfac_dummy)
-    H_pmz_DUMMY.Scale(normfac_dummy)
-    H_W_DUMMY.Scale(normfac_dummy)
-    H_ct_ep_DUMMY.Scale(normfac_dummy)
     
     H_ssxfp_DATA.Scale(normfac_data)
     H_ssyfp_DATA.Scale(normfac_data)
@@ -1110,33 +941,6 @@ def defineHists(phi_setting):
     H_pmz_RAND.Scale(normfac_data/nWindows)
     H_W_RAND.Scale(normfac_data/nWindows)
     #H_ct_ep_RAND.Scale(normfac_data/nWindows)
-
-    # Dummy Random subtraction
-    H_ssxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_ssyfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_ssxpfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_ssypfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_hsxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_hsyfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_hsxpfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_hsypfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_ssxptar_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_ssyptar_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_hsxptar_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_hsyptar_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_ssdelta_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_hsdelta_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_Q2_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_t_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_epsilon_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_MM_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_pmiss_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_emiss_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_pmx_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_pmy_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_pmz_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    H_W_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-    #H_ct_ep_DUMMY_RAND.Scale(normfac_dummy/nWindows)
     
     ###
     # Data Random subtraction
@@ -1165,62 +969,6 @@ def defineHists(phi_setting):
     H_pmz_DATA.Add(H_pmz_RAND,-1)
     H_W_DATA.Add(H_W_RAND,-1)
     H_ct_ep_DATA.Add(H_ct_ep_RAND,-1)
-
-    ###
-    # Dummy Random subtraction
-    H_ssxfp_DUMMY.Add(H_ssxfp_DUMMY_RAND,-1)
-    H_ssyfp_DUMMY.Add(H_ssyfp_DUMMY_RAND,-1)
-    H_ssxpfp_DUMMY.Add(H_ssxpfp_DUMMY_RAND,-1)
-    H_ssypfp_DUMMY.Add(H_ssypfp_DUMMY_RAND,-1)
-    H_hsxfp_DUMMY.Add(H_hsxfp_DUMMY_RAND,-1)
-    H_hsyfp_DUMMY.Add(H_hsyfp_DUMMY_RAND,-1)
-    H_hsxpfp_DUMMY.Add(H_hsxpfp_DUMMY_RAND,-1)
-    H_hsypfp_DUMMY.Add(H_hsypfp_DUMMY_RAND,-1)
-    H_ssxptar_DUMMY.Add(H_ssxptar_DUMMY_RAND,-1)
-    H_ssyptar_DUMMY.Add(H_ssyptar_DUMMY_RAND,-1)
-    H_hsxptar_DUMMY.Add(H_hsxptar_DUMMY_RAND,-1)
-    H_hsyptar_DUMMY.Add(H_hsyptar_DUMMY_RAND,-1)
-    H_ssdelta_DUMMY.Add(H_ssdelta_DUMMY_RAND,-1)
-    H_hsdelta_DUMMY.Add(H_hsdelta_DUMMY_RAND,-1)
-    H_Q2_DUMMY.Add(H_Q2_DUMMY_RAND,-1)
-    H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
-    H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
-    H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
-    H_pmiss_DUMMY.Add(H_pmiss_DUMMY_RAND,-1)
-    H_emiss_DUMMY.Add(H_emiss_DUMMY_RAND,-1)
-    H_pmx_DUMMY.Add(H_pmx_DUMMY_RAND,-1)
-    H_pmy_DUMMY.Add(H_pmy_DUMMY_RAND,-1)
-    H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
-    H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
-    H_ct_ep_DUMMY.Add(H_ct_ep_DUMMY_RAND,-1)
-    
-    ###
-    # Dummy Subtraction
-    H_ssxfp_DATA.Add(H_ssxfp_DUMMY,-1)
-    H_ssyfp_DATA.Add(H_ssyfp_DUMMY,-1)
-    H_ssxpfp_DATA.Add(H_ssxpfp_DUMMY,-1)
-    H_ssypfp_DATA.Add(H_ssypfp_DUMMY,-1)
-    H_hsxfp_DATA.Add(H_hsxfp_DUMMY,-1)
-    H_hsyfp_DATA.Add(H_hsyfp_DUMMY,-1)
-    H_hsxpfp_DATA.Add(H_hsxpfp_DUMMY,-1)
-    H_hsypfp_DATA.Add(H_hsypfp_DUMMY,-1)
-    H_ssxptar_DATA.Add(H_ssxptar_DUMMY,-1)
-    H_ssyptar_DATA.Add(H_ssyptar_DUMMY,-1)
-    H_hsxptar_DATA.Add(H_hsxptar_DUMMY,-1)
-    H_hsyptar_DATA.Add(H_hsyptar_DUMMY,-1)
-    H_ssdelta_DATA.Add(H_ssdelta_DUMMY,-1)
-    H_hsdelta_DATA.Add(H_hsdelta_DUMMY,-1)
-    H_Q2_DATA.Add(H_Q2_DUMMY,-1)
-    H_t_DATA.Add(H_t_DUMMY,-1)
-    H_epsilon_DATA.Add(H_epsilon_DUMMY,-1)
-    H_MM_DATA.Add(H_MM_DUMMY,-1)
-    H_pmiss_DATA.Add(H_pmiss_DUMMY,-1)
-    H_emiss_DATA.Add(H_emiss_DUMMY,-1)
-    H_pmx_DATA.Add(H_pmx_DUMMY,-1)
-    H_pmy_DATA.Add(H_pmy_DUMMY,-1)
-    H_pmz_DATA.Add(H_pmz_DUMMY,-1)
-    H_W_DATA.Add(H_W_DUMMY,-1)
-    H_ct_ep_DATA.Add(H_ct_ep_DUMMY,-1)
     
     histDict = {
         "phi_setting" : phi_setting,
