@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 12:24:15 trottar"
+# Time-stamp: "2023-02-15 12:40:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -631,6 +631,7 @@ def defineHists(phi_setting):
     CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 100, -2, 2, 100, 0, 2)
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
+    polar_phiq_vs_t_DATA = ROOT.TGraphPolar(TBRANCH_DATA.GetEntries())
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
@@ -728,6 +729,7 @@ def defineHists(phi_setting):
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
+          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1300,6 +1302,7 @@ def defineHists(phi_setting):
         "CoinTime_vs_beta_DATA" : CoinTime_vs_beta_DATA,
         "MM_vs_beta_DATA" : MM_vs_beta_DATA,
         "phiq_vs_t_DATA" : phiq_vs_t_DATA,
+        "polar_phiq_vs_t_DATA" : polar_phiq_vs_t_DATA,
         "Q2_vs_W_DATA" : Q2_vs_W_DATA,
         "InFile_DATA" : InFile_DATA,
         "InFile_DUMMY" : InFile_DUMMY,
@@ -1792,10 +1795,6 @@ ROOT.gStyle.SetOptStat(0)
 
 Cpht.Divide(2,2)
 
-gStyle.SetPalette(55)
-gPad.SetTheta(90)
-gPad.SetPhi(180)
-
 for i,hist in enumerate(histlist):
     Cpht.cd(i+1)
     hist["phiq_vs_t_DATA"].GetYaxis().SetRangeUser(tmin,tmax)
@@ -1803,6 +1802,9 @@ for i,hist in enumerate(histlist):
     hist["phiq_vs_t_DATA"].SetTitle(phisetlist[i])
     
     # Section for polar plotting
+    gStyle.SetPalette(55)
+    gPad.SetTheta(90)
+    gPad.SetPhi(180)
     tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
     tvsphi_title.AddText("-t vs #phi")
     tvsphi_title.Draw()
@@ -1847,6 +1849,15 @@ for i,hist in enumerate(histlist):
     tradius.Draw()
 
 Cpht.Print(outputpdf)
+
+Cphtsame = TCanvas()
+
+for i,hist in enumerate(histlist):
+    # set colors for the TGraphPolar object
+    hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
+    hist["polar_phiq_vs_t_DATA"].Draw("AP")
+
+Cphtsame.Print(outputpdf)
 
 Ctext = TCanvas()
 
