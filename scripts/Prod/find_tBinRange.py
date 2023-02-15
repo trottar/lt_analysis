@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 12:40:42 trottar"
+# Time-stamp: "2023-02-15 12:46:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -631,7 +631,7 @@ def defineHists(phi_setting):
     CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 100, -2, 2, 100, 0, 2)
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
-    polar_phiq_vs_t_DATA = ROOT.TGraphPolar(TBRANCH_DATA.GetEntries())
+    polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
@@ -1854,8 +1854,9 @@ Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
+    hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    hist["polar_phiq_vs_t_DATA"].Draw("AP")
+    hist["polar_phiq_vs_t_DATA"].Draw("P")
 
 Cphtsame.Print(outputpdf)
 
