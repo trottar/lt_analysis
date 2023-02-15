@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 23:24:05 trottar"
+# Time-stamp: "2023-02-14 23:30:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,7 +266,7 @@ def defineHists(phi_setting):
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
-        return {}
+        sys.exit(1)
 
     InFile_SIMC = ROOT.TFile.Open(rootFileSimc, "OPEN")
 
@@ -296,16 +296,7 @@ def defineHists(phi_setting):
     rootFileData = OUTPATH+"/"+InDATAFilename+"_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
-        return {}
-
-    InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
-
-    rootFileDummy = OUTPATH+"/"+InDUMMYFilename+"_%s.root" % (phi_setting)
-    if not os.path.isfile(rootFileDummy):
-        print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
-        return {}
-
-    InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")    
+        sys.exit(1)  
     
     #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
@@ -318,6 +309,18 @@ def defineHists(phi_setting):
     #TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
     TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
 
+    ################################################################################################################################################
+    # Define dummy root file trees of interest
+    
+    InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
+
+    rootFileDummy = OUTPATH+"/"+InDUMMYFilename+"_%s.root" % (phi_setting)
+    if not os.path.isfile(rootFileDummy):
+        print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
+        sys.exit(1)
+
+    InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")  
+    
     #TBRANCH_DUMMY  = InFile_DUMMY.Get("Uncut_Kaon_Events")
     #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_noRF")
     #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_noRF")
@@ -1299,10 +1302,9 @@ def defineHists(phi_setting):
         "phiq_vs_t_DATA" : phiq_vs_t_DATA,
         "Q2_vs_W_DATA" : Q2_vs_W_DATA,
         "InFile_DATA" : InFile_DATA,
+        "InFile_DUMMY" : InFile_DUMMY,
         "InFile_SIMC" : InFile_SIMC,
     }
-
-    InFile_DUMMY.Close()
     
     return histDict
 
@@ -1961,8 +1963,9 @@ for i,hist in enumerate(histlist):
 outHistFile.Close()
 
 for i,hist in enumerate(histlist):
-    hist["InFile_SIMC"].Close()
     hist["InFile_DATA"].Close()
+    hist["InFile_DUMMY"].Close()
+    hist["InFile_SIMC"].Close()
     
 print ("Processing Complete")
 
