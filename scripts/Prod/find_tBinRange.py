@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 23:40:59 trottar"
+# Time-stamp: "2023-02-14 23:58:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -315,7 +315,6 @@ def defineHists(phi_setting):
     # Define dummy root file trees of interest
 
     rootFileDummy = OUTPATH+"/"+InDUMMYFilename+"_%s.root" % (phi_setting)
-    print("\n\n~~~~~~~~",rootFileDummy)
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(1)
@@ -1326,7 +1325,6 @@ print("\n\n")
 
 settingList = []
 for i,hist in enumerate(histlist):
-    print("~~~~",hist)
     if not bool(hist): # If hist is empty
         histlist.remove(hist)
     else:

@@ -244,7 +244,6 @@ do
 	else
 	    EPSVAL=0.5291
 	fi
-	KIN_dummy="Q5p5W3p02_${EPSILON}e_dummy"
 	KIN="Q5p5W3p02_${EPSILON}e"
     fi
     
@@ -285,7 +284,6 @@ do
 	else
 	    EPSVAL=0.7148
 	fi
-	KIN_dummy="Q4p4W2p74_${EPSILON}e_dummy"
 	KIN="Q4p4W2p74_${EPSILON}e"
     fi
     
@@ -326,7 +324,6 @@ do
 	else
 	    EPSVAL=0.6668
 	fi
-	KIN_dummy="Q3p0W3p14_${EPSILON}e_dummy"
 	KIN="Q3p0W3p14_${EPSILON}e"
     fi
     
@@ -367,7 +364,6 @@ do
 	else
 	    EPSVAL=0.8791
 	fi
-	KIN_dummy="Q3p0W2p32_${EPSILON}e_dummy"
 	KIN="Q3p0W2p32_${EPSILON}e"
     fi
     
@@ -408,7 +404,6 @@ do
 	else
 	    EPSVAL=0.7864
 	fi
-	KIN_dummy="Q2p1W2p95_${EPSILON}e_dummy"
 	KIN="Q2p1W2p95_${EPSILON}e"
     fi
     
@@ -449,17 +444,14 @@ do
 	else
 	    EPSVAL=0.6979
 	fi
-	KIN_dummy="Q0p5W2p40_${EPSILON}e_dummy"
 	KIN="Q0p5W2p40_${EPSILON}e"
     fi
     
 done
 
 # Define input and output file names
-InDATAFilename="Proc_Data_${KIN}.root"
-InDUMMYFilename="Proc_Dummy_${KIN_dummy}.root"
 OutDATAFilename="Analysed_Data_${KIN}"
-OutDUMMYFilename="Analysed_Dummy_${KIN_dummy}"
+OutDUMMYFilename="Analysed_Dummy_${KIN}"
 OutFullAnalysisFilename="FullAnalysis_${KIN}"
 
 # When analysis flag is used then the analysis script (Analysed_Prod.py)

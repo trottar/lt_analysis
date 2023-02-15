@@ -342,7 +342,7 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax):
         
 
         if (lowe_input != False and k>0):
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print("\n\n")
             if (k==2):
                 for event in Cut_Events_all_RF_tree:
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
