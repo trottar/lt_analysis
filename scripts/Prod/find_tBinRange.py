@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 22:38:10 trottar"
+# Time-stamp: "2023-02-14 22:41:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -647,7 +647,7 @@ def defineHists(phi_setting):
           try:
               Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
           except ZeroDivisionError:
-              print("")
+              Diamond = True
               
       #........................................
 
@@ -705,7 +705,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                print("")
+                Diamond = True
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -791,7 +791,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                print("")
+                Diamond = True
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -864,7 +864,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                print("")
+                Diamond = True
 
         '''
         if phi_setting == "Right":
@@ -929,7 +929,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                print("")
+                Diamond = True
 
         '''
         if phi_setting == "Right":
