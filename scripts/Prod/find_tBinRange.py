@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 16:13:22 trottar"
+# Time-stamp: "2023-02-15 16:18:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -697,6 +697,8 @@ def defineHists(phi_setting):
 
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
+
+        # Must be outside cuts to avoid weird overflow errors
         polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
         
         #CUTs Definations 
@@ -1855,8 +1857,8 @@ Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
-    hist["polar_phiq_vs_t_DATA"].SetMinimum(tmin)
-    hist["polar_phiq_vs_t_DATA"].SetMaximum(tmax)
+    hist["polar_phiq_vs_t_DATA"].SetMinRadial(tmin)
+    hist["polar_phiq_vs_t_DATA"].SetMaxRadial(tmax)
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     hist["polar_phiq_vs_t_DATA"].Draw("same, AP")
