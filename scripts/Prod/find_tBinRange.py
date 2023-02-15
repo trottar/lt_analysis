@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 17:39:48 trottar"
+# Time-stamp: "2023-02-15 17:51:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -700,6 +700,7 @@ def defineHists(phi_setting):
 
         # Must be outside cuts to avoid weird overflow errors
         #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
+        polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
@@ -733,7 +734,6 @@ def defineHists(phi_setting):
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
           #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q*(180/math.pi), -evt.MandelT)
-          polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1902,13 +1902,13 @@ for k in range(0, 10):
      # To change the arc radius we have to change number tmax in the lower line.
      Arc.DrawArc(0,0,tmax*(k+1)/(10),0.,360.,"same")
 for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
-     Arc.SetLineColor(7)
+     Arc.SetLineColor(9)
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number tmax in the lower line.
      Arc.DrawArc(0,0,tmax*b,0.,360.,"same")
 tradius = TGaxis(0,0,tmax,0,tmin,tmax,10,"-+")
-tradius.SetLineColor(7)
-tradius.SetLabelColor(7)
+tradius.SetLineColor(9)
+tradius.SetLabelColor(9)
 tradius.Draw()
     
 Cphtsame.Print(outputpdf)
