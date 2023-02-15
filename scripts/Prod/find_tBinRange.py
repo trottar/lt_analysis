@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 17:19:57 trottar"
+# Time-stamp: "2023-02-15 17:24:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1862,7 +1862,7 @@ for i,hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].Draw("same, AOP")
     Cphtsame.Update()
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
-    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetLabelOffset(100)
+    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelColor(1)
     
 # Section for polar plotting
 gStyle.SetPalette(55)
