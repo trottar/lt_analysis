@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:39:13 trottar"
+# Time-stamp: "2023-02-15 18:44:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -632,7 +632,7 @@ def defineHists(phi_setting):
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
     polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
-    poly_phiq_vs_t_DATA = ROOT.TH2Poly("poly_phiq_vs_t_DATA", "", -1, 1, -1, 1)
+    poly_phiq_vs_t_DATA = ROOT.TH2Poly("poly_phiq_vs_t_DATA", "")
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
