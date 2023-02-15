@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 15:26:13 trottar"
+# Time-stamp: "2023-02-15 15:29:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1870,15 +1870,15 @@ gPad.SetPhi(180)
 tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
 tvsphi_title.AddText("-t vs #phi")
 tvsphi_title.Draw()
-phihalfk = TLine(0,0,0,1.1)
+phihalfk = TLine(0,0,0,1.0)
 phihalfk.SetLineColor(kBlack)
 phihalfk.SetLineWidth(2)
 phihalfk.Draw()
-phik = TLine(0,0,-1.1,0)
+phik = TLine(0,0,-1.0,0)
 phik.SetLineColor(kBlack)
 phik.SetLineWidth(2)
 phik.Draw()
-phithreek = TLine(0,0,0,-1.1)
+phithreek = TLine(0,0,0,-1.0)
 phithreek.SetLineColor(kBlack)
 phithreek.SetLineWidth(2)
 phithreek.Draw()
@@ -1886,14 +1886,14 @@ Arc = TArc()
 for k in range(0, 10):
      Arc.SetFillStyle(0)
      Arc.SetLineWidth(2)
-     # To change the arc radius we have to change number 1.1 in the lower line.
-     Arc.DrawArc(0,0,1.1*(k+1)/(10),0.,360.,"same")
+     # To change the arc radius we have to change number 1.0 in the lower line.
+     Arc.DrawArc(0,0,1.0*(k+1)/(10),0.,360.,"same")
 for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
      Arc.SetLineColor(7)
      Arc.SetLineWidth(2)
-     # To change the arc radius we have to change number 1.1 in the lower line.
-     Arc.DrawArc(0,0,1.1*b,0.,360.,"same")
-tradius = TGaxis(0,0,1.1,0,tmin,tmax,10,"-+")
+     # To change the arc radius we have to change number 1.0 in the lower line.
+     Arc.DrawArc(0,0,1.0*b,0.,360.,"same")
+tradius = TGaxis(0,0,1.0,0,tmin,tmax,10,"-+")
 tradius.SetLineColor(2)
 tradius.SetLabelColor(2)
 tradius.Draw()
