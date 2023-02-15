@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 20:30:17 trottar"
+# Time-stamp: "2023-02-14 20:32:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,12 +18,6 @@ input_file_name = sys.argv[2]
 input_tree_names = sys.argv[3]
 output_file_name = sys.argv[4]
 string_run_nums = sys.argv[5]
-
-print(root_path)
-print(input_file_name)
-print(input_tree_names)
-print(output_file_name)
-print(string_run_nums)
 
 ###############################################################################################################################################
 '''

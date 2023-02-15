@@ -710,7 +710,7 @@ fi
 if [[ ${#dummy_right[@]} -ne 0 ]]; then
     echo
     echo "Calculating dummy total effective charge right..."
-    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_right[*]}")
+    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_right[*]}")
     arr1=()
     arr2=()
     arr3=()
@@ -776,7 +776,7 @@ fi
 if [[ ${#dummy_left[@]} -ne 0 ]]; then
     echo
     echo "Calculating dummy total effective charge left..."
-    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_left[*]}")
+    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_left[*]}")
     arr1=()
     arr2=()
     arr3=()
@@ -842,7 +842,7 @@ fi
 if [[ ${#dummy_center[@]} -ne 0 ]]; then
     echo
     echo "Calculating dummy total effective charge center..."
-    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_center[*]}")
+    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_center[*]}")
     arr1=()
     arr2=()
     arr3=()
