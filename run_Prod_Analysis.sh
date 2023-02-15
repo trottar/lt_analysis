@@ -880,9 +880,9 @@ if [[ $t_flag = "true" ]]; then
     echo "Finding t-bins..."
     cd "${LTANAPATH}/scripts/Prod"    
     if [ ${#data_right[@]} -eq 0 ]; then
-	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" "${dummy_left[*]}" "${dummy_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData}
+	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData}
     else
-	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" "${dummy_right[*]}" "${dummy_left[*]}" "${dummy_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData}
+	python3 find_tBinRange.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData}
     fi
 fi
 
