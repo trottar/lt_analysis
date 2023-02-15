@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 23:30:57 trottar"
+# Time-stamp: "2023-02-14 23:32:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,7 +266,7 @@ def defineHists(phi_setting):
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
-        sys.exit(1)
+        return {}
 
     InFile_SIMC = ROOT.TFile.Open(rootFileSimc, "OPEN")
 
@@ -296,7 +296,7 @@ def defineHists(phi_setting):
     rootFileData = OUTPATH+"/"+InDATAFilename+"_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
-        sys.exit(1)  
+        return {}  
     
     #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
