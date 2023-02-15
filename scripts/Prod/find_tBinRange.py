@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:46:37 trottar"
+# Time-stamp: "2023-02-15 18:50:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1806,8 +1806,6 @@ for i,hist in enumerate(histlist):
 
 Cqw.Print(outputpdf)
 
-'''
-
 Cpht = TCanvas()
 
 # Removes stat box
@@ -1881,6 +1879,8 @@ for i,hist in enumerate(histlist):
 
 Cpht.Print(outputpdf)
 
+'''
+
 Cphtsame = TCanvas()
 
 for i,hist in enumerate(histlist):
@@ -1932,7 +1932,6 @@ tradius = TGaxis(0,0,tmax,0,tmin,tmax,10,"-+")
 tradius.SetLineColor(9)
 tradius.SetLabelColor(9)
 tradius.Draw()
-'''
 
 Cphtsame.Print(outputpdf)
 
