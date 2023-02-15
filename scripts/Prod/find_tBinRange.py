@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 20:34:59 trottar"
+# Time-stamp: "2023-02-14 20:39:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,8 +32,8 @@ from functools import reduce
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=27:
-    print("!!!!! ERROR !!!!!\n Expected 27 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InDummy_efficiency_right InDummy_efficiency_left InDummy_efficiency_center efficiency_table\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=24:
+    print("!!!!! ERROR !!!!!\n Expected 24 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -64,10 +64,7 @@ dummy_charge_center = int(sys.argv[20])/1000 # HERE
 InData_efficiency_right = sys.argv[21]
 InData_efficiency_left = sys.argv[22]
 InData_efficiency_center = sys.argv[23]
-InDummy_efficiency_right = sys.argv[24] # HERE
-InDummy_efficiency_left = sys.argv[25] # HERE
-InDummy_efficiency_center = sys.argv[26] # HERE
-efficiency_table = sys.argv[27]
+efficiency_table = sys.argv[24]
 
 particle = "kaon"
 
