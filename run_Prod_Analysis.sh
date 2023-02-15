@@ -632,34 +632,6 @@ if [[ $a_flag = "true" ]]; then
 	echo
     fi
     
-    # Checks that array isn't empty
-    if [ ${#data_left[@]} -ne 0 ]; then
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
-	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root exists already, deleting..."
-	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root"
-	fi
-	echo
-	echo "Combining left data..."
-	echo
-	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${OutDATAFilename}_Left" "${data_left[*]}"
-	echo
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Left.root" ]; then
-	    for i in "${data_left[@]}"
-	    do
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		else
-		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
-		fi
-	    done	 
-	fi
-	echo
-    fi    
     
 fi
 
