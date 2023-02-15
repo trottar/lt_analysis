@@ -3,14 +3,14 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 00:07:09 trottar"
+# Time-stamp: "2023-02-15 00:09:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
-import sys
+import sys, os
 import ROOT
 
 root_path = sys.argv[1]
@@ -44,10 +44,13 @@ for tree in input_tree_names.split():
         # Progress bar
         Misc.progressBar(i, len(arr_run_nums)-1,bar_length=25)
         filepath = root_path + str(n) + input_file_name + ".root"
-        if not filepath.IsOpen():
-            print("WARNING: File {} not found or not opened or corrupted. Skipping this file.".format(filepath))
+        if not os.path.isfile(filepath):
+            print("WARNING: File {} not found.".format(filepath))
             continue
         tempfile = ROOT.TFile.Open(filepath)
+        if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
+            print("WARNING: File {} not found or not opened or corrupted.".format(filepath))
+            continue
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
         
