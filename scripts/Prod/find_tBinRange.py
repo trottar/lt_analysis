@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 12:09:57 trottar"
+# Time-stamp: "2023-02-15 12:18:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1790,6 +1790,8 @@ Cqw.Print(outputpdf)
 
 Cpht = TCanvas()
 
+ROOT.gStyle.SetOptStat(0)
+
 Cpht.Divide(2,2)
 
 for i,hist in enumerate(histlist):
@@ -1835,7 +1837,7 @@ for i,hist in enumerate(histlist):
          Arc.SetLineWidth(2)
          # To change the arc radius we have to change number 0.6 in the lower line.
          Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
-    for i,(n,b) in enumerate(zip(binned_t0,binned_t[1])):
+    for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
          Arc.SetLineColor(3)
          Arc.SetLineWidth(2)
          # To change the arc radius we have to change number 0.6 in the lower line.
