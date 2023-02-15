@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:18:19 trottar"
+# Time-stamp: "2023-02-15 18:20:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1898,17 +1898,13 @@ for i in range(1, h2.GetNumberOfBins() + 1):
         h2.SetFillColor(i, palette[bin_content % palette_size])
 
 # draw the TH2Poly object
-c = ROOT.TCanvas("c", "c", 800, 800)
 h2.Draw("colz")
-c.Update()
 
 # set radial range, label color, and label size for the TGraphPolargram object
 for gr in gr_list:
     gr.GetPolargram().SetRangeRadial(0, 2.0)
     gr.GetPolargram().SetRadialLabelColor(0)
     gr.GetPolargram().SetRadialLabelSize(0)
-
-
 
 '''
 for i,hist in enumerate(histlist):
