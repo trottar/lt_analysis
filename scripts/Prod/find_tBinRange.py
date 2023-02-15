@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 22:41:58 trottar"
+# Time-stamp: "2023-02-14 22:51:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -204,6 +204,8 @@ def find_tbins():
         # In this case, this returns a sorted copy of the array
         return np.interp(np.linspace(0, npt, nbin + 1),np.arange(npt),np.sort(x))
 
+    ################################################################################################################################################
+    
     H_t_BinTest = []
     for val in settingList:
         if val == "Right":
@@ -245,7 +247,7 @@ def defineHists(phi_setting):
     ################################################################################################################################################
     # Call diamond cut script
 
-    paramDict = DiamondPlot(particle, Q2Val, WVal, phi_setting,tmin,tmax)
+    paramDict = DiamondPlot(particle, Q2Val, WVal, phi_setting, tmin, tmax)
     
     a1 = paramDict["a1"]
     b1 = paramDict["b1"]
@@ -327,6 +329,12 @@ def defineHists(phi_setting):
     #TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
     TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
 
+
+    nEntries_TBRANCH_DATA  = TBRANCH_DATA.GetEntries()
+    nEntries_TBRANCH_DUMMY  = TBRANCH_DUMMY.GetEntries()
+
+    print("\n\n~~~~~~~~~~~~~~~~~",nEntries_TBRANCH_DATA)
+    print("\n\n~~~~~~~~~~~~~~~~~",nEntries_TBRANCH_DUMMY)
     
     ################################################################################################################################################
     # Grabs PID cut string
@@ -647,7 +655,7 @@ def defineHists(phi_setting):
           try:
               Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
           except ZeroDivisionError:
-              Diamond = True
+              Diamond = False
               
       #........................................
 
@@ -705,7 +713,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                Diamond = True
+                Diamond = False
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -791,7 +799,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                Diamond = True
+                Diamond = False
         '''
         if phi_setting == "Right":
             ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
@@ -864,7 +872,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                Diamond = True
+                Diamond = False
 
         '''
         if phi_setting == "Right":
@@ -929,7 +937,7 @@ def defineHists(phi_setting):
             try:
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
             except ZeroDivisionError:
-                Diamond = True
+                Diamond = False
 
         '''
         if phi_setting == "Right":
@@ -1106,7 +1114,7 @@ def defineHists(phi_setting):
     H_W_RAND.Scale(normfac_data/nWindows)
     #H_ct_ep_RAND.Scale(normfac_data/nWindows)
 
-    # Dummy_Random subtraction
+    # Dummy Random subtraction
     H_ssxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
     H_ssyfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
     H_ssxpfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
