@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 13:33:12 trottar"
+# Time-stamp: "2023-02-15 13:37:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1316,7 +1316,7 @@ def defineHists(phi_setting):
 # Call histogram function above to define dictonaries for right, left, center settings
 # Put these all into an array so that if we are missing a setting it is easier to remove
 # Plus it makes the code below less repetitive
-phisetlist = ["Center","Left","Right"]
+phisetlist = ["Right","Left","Center"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(defineHists(phiset))
