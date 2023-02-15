@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 17:24:18 trottar"
+# Time-stamp: "2023-02-15 17:29:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1862,7 +1862,7 @@ for i,hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].Draw("same, AOP")
     Cphtsame.Update()
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
-    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelColor(1)
+    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelColor(0)
     
 # Section for polar plotting
 gStyle.SetPalette(55)
@@ -1896,7 +1896,7 @@ for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
      Arc.DrawArc(0,0,tmax*b,0.,360.,"same")
 tradius = TGaxis(0,0,tmax,0,tmin,tmax,10,"-+")
 tradius.SetLineColor(7)
-tradius.SetLabelColor(2)
+tradius.SetLabelColor(7)
 tradius.Draw()
     
 Cphtsame.Print(outputpdf)
