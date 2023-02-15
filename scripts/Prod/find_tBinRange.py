@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 23:15:53 trottar"
+# Time-stamp: "2023-02-14 23:18:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -311,28 +311,6 @@ def defineHists(phi_setting):
     #TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
     TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
 
-    rootFileDummy = OUTPATH+"/"+InDUMMYFilename+"_%s.root" % (phi_setting)
-    if not os.path.isfile(rootFileDummy):
-        print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
-        return {}
-
-    InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")
-
-    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Uncut_Kaon_Events")
-    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_noRF")
-    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_noRF")
-    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
-    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_RF")
-    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_RF")
-    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
-
-    #TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
-    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
-
-
-    nEntries_TBRANCH_DATA  = TBRANCH_DATA.GetEntries()
-    nEntries_TBRANCH_DUMMY  = TBRANCH_DUMMY.GetEntries()
-    
     ################################################################################################################################################
     # Grabs PID cut string
     
