@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-01-24 17:50:39 trottar"
+# Time-stamp: "2023-02-14 19:56:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,8 +15,8 @@ import sys, os
 ##################################################################################################################################################
 
 # Check the number of arguments provided to the script
-if len(sys.argv)-1!=30:
-    print("!!!!! ERROR !!!!!\n Expected 30 arguments\n Usage is with - Q2 POL EPSVAL TMIN TMAX NumtBins Kset runNumRight runNumLeft runNumCenter pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter EffValRight EffValLeft EffValCenter EffErrRight EffErrLeft EffErrCenter ChargeValRight ChargeValLeft ChargeValCenter ChargeErrRight ChargeErrLeft ChargeErrCenter kinematics\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=29:
+    print("!!!!! ERROR !!!!!\n Expected 29 arguments\n Usage is with - Q2 POL EPSVAL TMIN TMAX NumtBins Kset runNumRight runNumLeft runNumCenter pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter EffValRight EffValLeft EffValCenter EffErrRight EffErrLeft EffErrCenter ChargeValRight ChargeValLeft ChargeValCenter ChargeErrRight ChargeErrLeft ChargeErrCenter kinematics\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ################################################################################################################################################
@@ -58,9 +58,7 @@ ChargeErrRight = list(sys.argv[26].split(" "))
 ChargeErrLeft = list(sys.argv[27].split(" "))
 ChargeErrCenter = list(sys.argv[28].split(" "))
 
-TargetType = sys.argv[29]
-
-kinematics = sys.argv[30].split("_")
+kinematics = sys.argv[29].split("_")
 
 InSIMCFilenameRight = "Prod_Coin_{}.root".format(kinematics[0]+"right_"+kinematics[1])
 InSIMCFilenameLeft = "Prod_Coin_{}.root".format(kinematics[0]+"left_"+kinematics[1])
@@ -205,10 +203,7 @@ with open(f_list_settings, 'r') as f:
             
 ################################################################################################################################################
             
-if TargetType == "dummy":
-    f_list = '{}/src/lists/list.dummy_{}_{:.0f}'.format(LTANAPATH,Q2.replace(".",""),float(EPSVAL)*100)
-else:
-    f_list = '{}/src/lists/list.{}_{:.0f}'.format(LTANAPATH,Q2.replace(".",""),float(EPSVAL)*100)
+f_list = '{}/src/lists/list.{}_{:.0f}'.format(LTANAPATH,Q2.replace(".",""),float(EPSVAL)*100)
 
 if not os.path.exists(f_list):
     open(f_list, "w").close()    

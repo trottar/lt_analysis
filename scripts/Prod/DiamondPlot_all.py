@@ -48,7 +48,7 @@ print("\n\n!!! Ensure all relevant Analysed_Data.root file names have same preci
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
-def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax,target):
+def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax):
 
     Q2min = Q2Val - (2/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
     Q2max = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
