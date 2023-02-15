@@ -39,6 +39,14 @@ while getopts 'h' flag; do
         echo "The following flags can be called for the heep analysis..."
 	echo "    EPSILON=arg1, Q2=arg2, W=arg3"
         echo "    -h, help"
+	echo
+	echo " Avaliable Kinematics..."	
+	echo "                      Q2=5p5, W=3p02"
+	echo "                      Q2=4p4, W=2p74"
+	echo "                      Q2=3p0, W=3p14"
+	echo "                      Q2=3p0, W=2p32"
+	echo "                      Q2=2p1, W=2p95"
+	echo "                      Q2=0p5, W=2p40"	
         exit 0
         ;;
         *) print_usage
