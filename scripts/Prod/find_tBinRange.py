@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 23:38:44 trottar"
+# Time-stamp: "2023-02-14 23:40:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -297,6 +297,8 @@ def defineHists(phi_setting):
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         return {}  
+
+    InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
     
     #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
@@ -311,8 +313,6 @@ def defineHists(phi_setting):
 
     ################################################################################################################################################
     # Define dummy root file trees of interest
-    
-    InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
     rootFileDummy = OUTPATH+"/"+InDUMMYFilename+"_%s.root" % (phi_setting)
     print("\n\n~~~~~~~~",rootFileDummy)
