@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 20:49:07 trottar"
+# Time-stamp: "2023-02-14 20:57:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1168,6 +1168,7 @@ print("\n\n")
 
 settingList = []
 for i,hist in enumerate(histlist):
+    print("~~~~",hist)
     if not bool(hist): # If hist is empty
         histlist.remove(hist)
     else:
