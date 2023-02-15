@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 19:55:54 trottar"
+# Time-stamp: "2023-02-14 20:34:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -916,7 +916,7 @@ def defineHists(phi_setting):
     H_ssdelta_SIMC.Scale(normfac_simc)
     H_hsdelta_SIMC.Scale(normfac_simc)
     H_Q2_SIMC.Scale(normfac_simc)
-    H_t_SIMC.Scale(normfac_simc)X
+    H_t_SIMC.Scale(normfac_simc)
     H_epsilon_SIMC.Scale(normfac_simc)
     H_MM_SIMC.Scale(normfac_simc)
     H_ph_q_SIMC.Scale(normfac_simc)
