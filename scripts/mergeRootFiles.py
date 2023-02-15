@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 20:32:16 trottar"
+# Time-stamp: "2023-02-15 00:07:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,10 +44,10 @@ for tree in input_tree_names.split():
         # Progress bar
         Misc.progressBar(i, len(arr_run_nums)-1,bar_length=25)
         filepath = root_path + str(n) + input_file_name + ".root"
-        tempfile = ROOT.TFile.Open(filepath)
-        if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
+        if not filepath.IsOpen():
             print("WARNING: File {} not found or not opened or corrupted. Skipping this file.".format(filepath))
             continue
+        tempfile = ROOT.TFile.Open(filepath)
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
         
