@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:20:24 trottar"
+# Time-stamp: "2023-02-15 18:30:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1884,8 +1884,8 @@ for i, hist in enumerate(histlist):
 # loop over the TGraphPolar objects and add their points to the TH2Poly object
 for gr in gr_list:
     for i in range(gr.GetN()):
-        r = gr.GetRadius()[i]
-        theta = gr.GetTheta()[i]
+        r = gr.GetYpol()[i]
+        theta = gr.GetXpol()[i]
         bin_num = h2.FindBin(r * ROOT.TMath.Cos(theta), r * ROOT.TMath.Sin(theta))
         h2.SetBinContent(bin_num, h2.GetBinContent(bin_num) + 1)
 
