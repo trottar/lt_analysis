@@ -326,7 +326,7 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                         countA +=1
                 if (1.0*(countB-countA)/countB<0.1):
-                    #badfit=False
+                    badfit=False
                     print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
                 else:
                     print ("\n!!!!! Bad Diamond Fit!! Try Reducing fitrange or Increasing minbin and Retrying !!!!!\n")
