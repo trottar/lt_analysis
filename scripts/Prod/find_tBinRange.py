@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 19:13:32 trottar"
+# Time-stamp: "2023-02-15 19:18:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1807,7 +1807,7 @@ for i,hist in enumerate(histlist):
     #hist["phiq_vs_t_DATA"].SetTitle(phisetlist[i])
     h2d.Add(hist["phiq_vs_t_DATA"])
 
-h2d..GetYaxis().SetRangeUser(tmin,tmax)
+h2d.GetYaxis().SetRangeUser(tmin,tmax)
 h2d.Draw("SURF2 POL")
 h2d..SetTitle(phisetlist[i])
 
