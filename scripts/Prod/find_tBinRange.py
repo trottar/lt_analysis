@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 15:45:14 trottar"
+# Time-stamp: "2023-02-16 15:50:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,11 +337,11 @@ for i,hist in enumerate(histlist):
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
-            tbin_index = np.digitize(val, tbinvals)
+            tbin_index = np.digitize(val, np.sort(tbinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
-                phibin_index = np.digitize(val, phibinvals)
+                phibin_index = np.digitize(val, np.sort(phibinvals))
                 # Check if the bin index is within the bounds of the bin edges list
                 if phibin_index > 0 and phibin_index < len(phibinvals):
                     phibinedge = phibinvals[phibin_index]
@@ -398,11 +398,11 @@ for i,hist in enumerate(histlist):
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
-            tbin_index = np.digitize(val, tbinvals)
+            tbin_index = np.digitize(val, np.sort(tbinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
-                phibin_index = np.digitize(val, phibinvals)
+                phibin_index = np.digitize(val, np.sort(phibinvals))
                 # Check if the bin index is within the bounds of the bin edges list
                 if phibin_index > 0 and phibin_index < len(phibinvals):
                     phibinedge = phibinvals[phibin_index]
