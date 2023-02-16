@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:34:49 trottar"
+# Time-stamp: "2023-02-16 14:38:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -210,6 +210,7 @@ def bin_data(histlist):
 
 def find_phibins(H_phi_BinTest):
 
+    print("\nFinding phi bins...")
     phi_arr = np.linspace(0.0, 360.0, NumPhiBins)
 
     n, bins, patches = plt.hist(H_phi_BinTest, phi_arr)
@@ -237,6 +238,7 @@ def find_tbins(H_t_BinTest):
         # In this case, this returns a sorted copy of the array
         return np.interp(np.linspace(0, npt, nbin + 1),np.arange(npt),np.sort(x))
 
+    print("\nFinding t bins...")
     # Histogram takes the array data set and the bins as input
     # The bins are determined by a linear interpolation (see function above)
     # This returns the binned data with equal number of events per bin
