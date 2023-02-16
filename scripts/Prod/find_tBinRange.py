@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:43:38 trottar"
+# Time-stamp: "2023-02-16 16:51:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -346,20 +346,24 @@ for i,hist in enumerate(histlist):
         
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
-        tbin_index = np.searchsorted(TBRANCH_RIGHT_DATA, np.sort(tbinvals))
-        phibin_index = np.searchsorted(TBRANCH_RIGHT_DATA, np.sort(phibinvals))
         for i,evt in enumerate(TBRANCH_RIGHT_DATA):
+            tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
+            phibin_index = np.searchsorted(np.sort(tbinvals), (evt.ph_q+math.pi)*(180/math.pi))
             print(-evt.MandelT, " ", tbin_index)
             print((evt.ph_q+math.pi)*(180/math.pi)," ", phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index[i] > 0 and -evt.MandelT <= tbinvals[tbin_index[i]-1]:
-                tbinedge = tbin_index[i]-1
-            if tbin_index[i] < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index[i]]:
-                tbinedge = tbin_index[i]
-            if phibin_index[i] > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index[i]-1]:
-                phibinedge = phibin_index[i]-1
-            if phibin_index[i] < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index[i]]:
-                phibinedge = phibin_index[i]
+            if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
+                tbinedge = tbin_index-1
+            if tbin_index < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index]:
+                tbinedge = tbin_index
+            else:
+                continue
+            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index-1]:
+                phibinedge = phibin_index-1
+            if phibin_index < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index]:
+                phibinedge = phibin_index
+            else:
+                continue                
             MM_Right_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
@@ -390,20 +394,24 @@ for i,hist in enumerate(histlist):
         
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
-        tbin_index = np.searchsorted(TBRANCH_LEFT_DATA, np.sort(tbinvals))
-        phibin_index = np.searchsorted(TBRANCH_LEFT_DATA, np.sort(phibinvals))
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
+            tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
+            phibin_index = np.searchsorted(np.sort(tbinvals), (evt.ph_q+math.pi)*(180/math.pi))
             print(-evt.MandelT, " ", tbin_index)
             print((evt.ph_q+math.pi)*(180/math.pi)," ", phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index[i] > 0 and -evt.MandelT <= tbinvals[tbin_index[i]-1]:
-                tbinedge = tbin_index[i]-1
-            if tbin_index[i] < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index[i]]:
-                tbinedge = tbin_index[i]
-            if phibin_index[i] > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index[i]-1]:
-                phibinedge = phibin_index[i]-1
-            if phibin_index[i] < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index[i]]:
-                phibinedge = phibin_index[i]
+            if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
+                tbinedge = tbin_index-1
+            if tbin_index < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index]:
+                tbinedge = tbin_index
+            else:
+                continue
+            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index-1]:
+                phibinedge = phibin_index-1
+            if phibin_index < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index]:
+                phibinedge = phibin_index
+            else:
+                continue                
             MM_Left_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
@@ -434,20 +442,24 @@ for i,hist in enumerate(histlist):
         
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
-        tbin_index = np.searchsorted(TBRANCH_CENTER_DATA, np.sort(tbinvals))
-        phibin_index = np.searchsorted(TBRANCH_CENTER_DATA, np.sort(phibinvals))
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
+            tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
+            phibin_index = np.searchsorted(np.sort(tbinvals), (evt.ph_q+math.pi)*(180/math.pi))
             print(-evt.MandelT, " ", tbin_index)
             print((evt.ph_q+math.pi)*(180/math.pi)," ", phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index[i] > 0 and -evt.MandelT <= tbinvals[tbin_index[i]-1]:
-                tbinedge = tbin_index[i]-1
-            if tbin_index[i] < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index[i]]:
-                tbinedge = tbin_index[i]
-            if phibin_index[i] > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index[i]-1]:
-                phibinedge = phibin_index[i]-1
-            if phibin_index[i] < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index[i]]:
-                phibinedge = phibin_index[i]
+            if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
+                tbinedge = tbin_index-1
+            if tbin_index < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index]:
+                tbinedge = tbin_index
+            else:
+                continue
+            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index-1]:
+                phibinedge = phibin_index-1
+            if phibin_index < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index]:
+                phibinedge = phibin_index
+            else:
+                continue                
             MM_Center_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
