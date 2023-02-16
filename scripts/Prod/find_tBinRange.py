@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:51:11 trottar"
+# Time-stamp: "2023-02-16 16:52:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -348,7 +348,7 @@ for i,hist in enumerate(histlist):
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_RIGHT_DATA):
             tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
-            phibin_index = np.searchsorted(np.sort(tbinvals), (evt.ph_q+math.pi)*(180/math.pi))
+            phibin_index = np.searchsorted(np.sort(phibinvals), (evt.ph_q+math.pi)*(180/math.pi))
             print(-evt.MandelT, " ", tbin_index)
             print((evt.ph_q+math.pi)*(180/math.pi)," ", phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
@@ -396,7 +396,7 @@ for i,hist in enumerate(histlist):
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
             tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
-            phibin_index = np.searchsorted(np.sort(tbinvals), (evt.ph_q+math.pi)*(180/math.pi))
+            phibin_index = np.searchsorted(np.sort(phibinvals), (evt.ph_q+math.pi)*(180/math.pi))
             print(-evt.MandelT, " ", tbin_index)
             print((evt.ph_q+math.pi)*(180/math.pi)," ", phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
@@ -444,7 +444,7 @@ for i,hist in enumerate(histlist):
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
             tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
-            phibin_index = np.searchsorted(np.sort(tbinvals), (evt.ph_q+math.pi)*(180/math.pi))
+            phibin_index = np.searchsorted(np.sort(phibinvals), (evt.ph_q+math.pi)*(180/math.pi))
             print(-evt.MandelT, " ", tbin_index)
             print((evt.ph_q+math.pi)*(180/math.pi)," ", phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
