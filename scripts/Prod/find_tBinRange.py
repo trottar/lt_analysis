@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 20:42:45 trottar"
+# Time-stamp: "2023-02-15 20:59:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1797,38 +1797,26 @@ ROOT.gStyle.SetOptStat(0)
 
 #Cpht.Divide(2,2)
 
-# Create a TGraphPolar object to serve as the template for the polar plot
-polar_template = ROOT.TGraphPolar()
+polargraph = TGraphPolar()
 
-# Create a TH2Poly object to hold the TGraphPolar objects
-histogram = ROOT.TH2Poly("histogram", "", 0, 2 * ROOT.TMath.Pi(), 0, 1)
+# Loop over the histograms
+for i, hist in enumerate(histlist):
+    # Project the histogram into a polar histogram
+    polarhist = hist["phiq_vs_t_DATA"].ProjectionY("{}_polar".format(hist["phiq_vs_t_DATA"].GetName()), 1, -1, "e")
+    
+    # Set the color of the polar histogram
+    color = TColor.GetColorPalette(50 + i*5)
+    polarhist.SetLineColor(color)
+    
+    # Add the polar histogram to the TGraphPolar object
+    polargraph.Add(polarhist, "P")
+    
+# Set the maximum radial range of the polar graph
+polargraph.GetPolargram().SetRangeRadial(0, 1.1*polargraph.GetRadialMaximum())
 
-# Create a list to hold the TH2Poly objects
-histogram_list = []
+# Draw the polar graph
+polargraph.Draw("AOP")
 
-# Loop over the TH2D histograms and fill a TGraphPolar object for each one
-for i,hist in enumerate(histlist):
-    polar_hist = ROOT.TGraphPolar()
-    for binx in range(1, hist["phiq_vs_t_DATA"].GetNbinsX()+1):
-        for biny in range(1, hist["phiq_vs_t_DATA"].GetNbinsY()+1):
-            radius = hist["phiq_vs_t_DATA"].GetBinContent(binx, biny)
-            if radius > 0:
-                theta = hist["phiq_vs_t_DATA"].GetXaxis().GetBinCenter(binx)
-                polar_hist.SetPoint(polar_hist.GetN(), theta, radius)
-    polar_hist.SetLineColor(i+1)
-    histogram.Add(ROOT.TH1(polar_hist))
-
-# Draw the TH2Poly object on the TCanvas
-histogram.Draw("COLZ POL SAME")
-polar_template.Draw("L SAME")
-
-# Set the canvas range and labels
-histogram.GetXaxis().SetTitle("Phi")
-histogram.GetYaxis().SetTitle("Radius")
-histogram.SetStats(0)
-histogram.GetYaxis().SetTitleOffset(1.4)
-histogram.GetYaxis().SetTitleSize(0.05)
-histogram.GetXaxis().SetTitleSize(0.05)
 
 '''
 # Section for polar plotting
