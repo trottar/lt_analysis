@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 23:21:14 trottar"
+# Time-stamp: "2023-02-15 23:24:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1802,6 +1802,7 @@ multi_graph = ROOT.TMultiGraph()
 
 # Loop over each TGraphPolar object and add it to the TMultiGraph
 for i, hist in enumerate(histlist):
+    print(hist["polar_phiq_vs_t_DATA"])
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
