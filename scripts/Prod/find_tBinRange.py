@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:14:58 trottar"
+# Time-stamp: "2023-02-16 16:19:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,8 +347,8 @@ for i,hist in enumerate(histlist):
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_RIGHT_DATA):
-            tbin_index = np.digitize(evt.MM, np.sort(tbinvals))
-            phibin_index = np.digitize(evt.MM, np.sort(phibinvals))
+            tbin_index = np.digitize(-evt.MandelT, np.sort(tbinvals))
+            phibin_index = np.digitize((evt.ph_q+math.pi)*(180/math.pi), np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
@@ -371,7 +371,7 @@ for i,hist in enumerate(histlist):
             MM_Right.append(integrate.simps(val))            
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
-        
+    
     if hist["phi_setting"] == 'Left':
         InFile_LEFT_DATA = hist["InFile_DATA"]
         #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Uncut_Kaon_Events")
@@ -385,8 +385,8 @@ for i,hist in enumerate(histlist):
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
-            tbin_index = np.digitize(evt.MM, np.sort(tbinvals))
-            phibin_index = np.digitize(evt.MM, np.sort(phibinvals))
+            tbin_index = np.digitize(-evt.MandelT, np.sort(tbinvals))
+            phibin_index = np.digitize((evt.ph_q+math.pi)*(180/math.pi), np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
@@ -409,7 +409,7 @@ for i,hist in enumerate(histlist):
             MM_Left.append(integrate.simps(val))            
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
-
+        
     if hist["phi_setting"] == 'Center':
         InFile_CENTER_DATA = hist["InFile_DATA"]
         #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Uncut_Kaon_Events")
@@ -423,8 +423,8 @@ for i,hist in enumerate(histlist):
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
-            tbin_index = np.digitize(evt.MM, np.sort(tbinvals))
-            phibin_index = np.digitize(evt.MM, np.sort(phibinvals))
+            tbin_index = np.digitize(-evt.MandelT, np.sort(tbinvals))
+            phibin_index = np.digitize((evt.ph_q+math.pi)*(180/math.pi), np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
