@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:04:56 trottar"
+# Time-stamp: "2023-02-16 16:10:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -335,18 +335,26 @@ tbinvals.append(binned_t[0][0])
 for i,hist in enumerate(histlist):
 
     if hist["phi_setting"] == 'Right':
+        InFile_RIGHT_DATA = hist["InFile_DATA"]
+        #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Uncut_Kaon_Events")
+        #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_noRF")
+        #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_noRF")
+        #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_noRF")
+        TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_RF")
+        #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_RF")
+        #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
+        
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
-            print(val)
-            tbin_index = np.digitize(val, np.sort(tbinvals))
-            phibin_index = np.digitize(val, np.sort(phibinvals))
+        for i,evt in enumerate(TBRANCH_RIGHT_DATA)
+            tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
+            phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and tbin_index < len(tbinvals):
-                tbinedge = tbinvals[tbin_index]
-            if phibin_index > 0 and phibin_index < len(phibinvals):
-                phibinedge = phibinvals[phibin_index]
-            MM_Right_tmp.append((tbinedge, phibinedge, val))
+            if tbin_index > 0 and tbin_index < len(tbinevt.MMs):
+                tbinedge = tbinevt.MMs[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinevt.MMs):
+                phibinedge = phibinevt.MMs[phibin_index]
+            MM_Right_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -362,21 +370,29 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             MM_Right.append(integrate.simps(val))            
 
-        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)    
+        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
         
     if hist["phi_setting"] == 'Left':
+        InFile_LEFT_DATA = hist["InFile_DATA"]
+        #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Uncut_Kaon_Events")
+        #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_all_noRF")
+        #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_prompt_noRF")
+        #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_noRF")
+        TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_all_RF")
+        #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_prompt_RF")
+        #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
+        
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
-            print(val)
-            tbin_index = np.digitize(val, np.sort(tbinvals))
-            phibin_index = np.digitize(val, np.sort(phibinvals))
+        for i,evt in enumerate(TBRANCH_LEFT_DATA)
+            tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
+            phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and tbin_index < len(tbinvals):
-                tbinedge = tbinvals[tbin_index]
-            if phibin_index > 0 and phibin_index < len(phibinvals):
-                phibinedge = phibinvals[phibin_index]
-            MM_Left_tmp.append((tbinedge, phibinedge, val))
+            if tbin_index > 0 and tbin_index < len(tbinevt.MMs):
+                tbinedge = tbinevt.MMs[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinevt.MMs):
+                phibinedge = phibinevt.MMs[phibin_index]
+            MM_Left_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -393,20 +409,28 @@ for i,hist in enumerate(histlist):
             MM_Left.append(integrate.simps(val))            
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
-        
+
     if hist["phi_setting"] == 'Center':
+        InFile_CENTER_DATA = hist["InFile_DATA"]
+        #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Uncut_Kaon_Events")
+        #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_all_noRF")
+        #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_prompt_noRF")
+        #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_noRF")
+        TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_all_RF")
+        #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_prompt_RF")
+        #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
+        
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
-            print(val)
-            tbin_index = np.digitize(val, np.sort(tbinvals))
-            phibin_index = np.digitize(val, np.sort(phibinvals))
+        for i,evt in enumerate(TBRANCH_CENTER_DATA)
+            tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
+            phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and tbin_index < len(tbinvals):
-                tbinedge = tbinvals[tbin_index]
-            if phibin_index > 0 and phibin_index < len(phibinvals):
-                phibinedge = phibinvals[phibin_index]
-            MM_Center_tmp.append((tbinedge, phibinedge, val))
+            if tbin_index > 0 and tbin_index < len(tbinevt.MMs):
+                tbinedge = tbinevt.MMs[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinevt.MMs):
+                phibinedge = phibinevt.MMs[phibin_index]
+            MM_Center_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
