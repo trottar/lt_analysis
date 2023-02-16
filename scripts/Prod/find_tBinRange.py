@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 12:50:27 trottar"
+# Time-stamp: "2023-02-16 12:55:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,14 +217,14 @@ def bin_data(histlist):
 
     for i,hist in enumerate(histlist):
         if hist["phi_setting"] == "Right":
-            H_t_Right = hist["H_t_DATA"].to_numpy()
-            H_phi_Righphi = hist["H_ph_q_DATA"].to_numpy()
+            H_t_Right = np.array(hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX()))
+            H_phi_Right = np.array(hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX()))
         if hist["phi_setting"] == "Left":
-            H_t_Left = hist["H_t_DATA"].to_numpy()
-            H_phi_Righphi = hist["H_ph_q_DATA"].to_numpy()
+            H_t_Left = np.array(hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX()))
+            H_phi_Left = np.array(hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX()))
         if hist["phi_setting"] == "Center":
-            H_t_Center = hist["H_t_DATA"].to_numpy()
-            H_phi_Righphi = hist["H_ph_q_DATA"].to_numpy()
+            H_t_Center = np.array(hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX()))
+            H_phi_Center = np.array(hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX()))
             
     for val in settingList:
         if val == "Right":
