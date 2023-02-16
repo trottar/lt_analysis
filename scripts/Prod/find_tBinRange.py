@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 00:10:02 trottar"
+# Time-stamp: "2023-02-16 00:14:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -632,7 +632,6 @@ def defineHists(phi_setting):
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
     polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
-    poly_phiq_vs_t_DATA = ROOT.TH2Poly()
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
@@ -698,10 +697,6 @@ def defineHists(phi_setting):
 
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
-
-        # Must be outside diamond cuts to avoid weird overflow errors
-        polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
-        poly_phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
@@ -726,6 +721,8 @@ def defineHists(phi_setting):
                 
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
         '''
+       # Must be outside diamond cuts to avoid weird overflow errors
+        polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
             
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
@@ -1307,13 +1304,13 @@ def defineHists(phi_setting):
         "MM_vs_beta_DATA" : MM_vs_beta_DATA,
         "phiq_vs_t_DATA" : phiq_vs_t_DATA,
         "polar_phiq_vs_t_DATA" : polar_phiq_vs_t_DATA,
-        "poly_phiq_vs_t_DATA" : poly_phiq_vs_t_DATA,
         "Q2_vs_W_DATA" : Q2_vs_W_DATA,
         "InFile_DATA" : InFile_DATA,
         "InFile_DUMMY" : InFile_DUMMY,
         "InFile_SIMC" : InFile_SIMC,
     }
-    
+
+    print("\n\n~~~~~~~~~~~~~~~~~~~~",polar_phiq_vs_t_DATA)
     return histDict
 
 ################################################################################################################################################
