@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:01:16 trottar"
+# Time-stamp: "2023-02-16 16:03:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -344,10 +344,10 @@ for i,hist in enumerate(histlist):
             print(phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
-                if phibin_index > 0 and phibin_index < len(phibinvals):
-                    tbinedge = tbinvals[tbin_index]
-                    phibinedge = phibinvals[phibin_index]
-                    MM_Right_tmp.append((tbinedge, phibinedge, val))
+                tbinedge = tbinvals[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinvals):
+                phibinedge = phibinvals[phibin_index]
+            MM_Right_tmp.append((tbinedge, phibinedge, val))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -375,10 +375,10 @@ for i,hist in enumerate(histlist):
             print(phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
-                if phibin_index > 0 and phibin_index < len(phibinvals):
-                    tbinedge = tbinvals[tbin_index]
-                    phibinedge = phibinvals[phibin_index]
-                    MM_Left_tmp.append((tbinedge, phibinedge, val))
+                tbinedge = tbinvals[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinvals):
+                phibinedge = phibinvals[phibin_index]
+            MM_Left_tmp.append((tbinedge, phibinedge, val))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -406,10 +406,10 @@ for i,hist in enumerate(histlist):
             print(phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
-                if phibin_index > 0 and phibin_index < len(phibinvals):
-                    tbinedge = tbinvals[tbin_index]
-                    phibinedge = phibinvals[phibin_index]
-                    MM_Center_tmp.append((tbinedge, phibinedge, val))
+                tbinedge = tbinvals[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinvals):
+                phibinedge = phibinvals[phibin_index]
+            MM_Center_tmp.append((tbinedge, phibinedge, val))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
