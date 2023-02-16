@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 20:59:00 trottar"
+# Time-stamp: "2023-02-15 21:06:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1797,7 +1797,8 @@ ROOT.gStyle.SetOptStat(0)
 
 #Cpht.Divide(2,2)
 
-polargraph = TGraphPolar()
+#polargraph = TGraphPolar()
+polargraph = ROOT.TMultiGraph()
 
 # Loop over the histograms
 for i, hist in enumerate(histlist):
@@ -1812,7 +1813,7 @@ for i, hist in enumerate(histlist):
     polargraph.Add(polarhist, "P")
     
 # Set the maximum radial range of the polar graph
-polargraph.GetPolargram().SetRangeRadial(0, 1.1*polargraph.GetRadialMaximum())
+#polargraph.GetPolargram().SetRangeRadial(0, 1.1*polargraph.GetRadialMaximum())
 
 # Draw the polar graph
 polargraph.Draw("AOP")
