@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:10:40 trottar"
+# Time-stamp: "2023-02-16 16:11:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -346,7 +346,7 @@ for i,hist in enumerate(histlist):
         
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,evt in enumerate(TBRANCH_RIGHT_DATA)
+        for i,evt in enumerate(TBRANCH_RIGHT_DATA):
             tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
             phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
             # Check if the bin index is within the bounds of the bin edges list
@@ -384,7 +384,7 @@ for i,hist in enumerate(histlist):
         
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,evt in enumerate(TBRANCH_LEFT_DATA)
+        for i,evt in enumerate(TBRANCH_LEFT_DATA):
             tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
             phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
             # Check if the bin index is within the bounds of the bin edges list
@@ -422,7 +422,7 @@ for i,hist in enumerate(histlist):
         
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,evt in enumerate(TBRANCH_CENTER_DATA)
+        for i,evt in enumerate(TBRANCH_CENTER_DATA):
             tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
             phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
             # Check if the bin index is within the bounds of the bin edges list
