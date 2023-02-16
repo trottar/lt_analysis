@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 19:59:42 trottar"
+# Time-stamp: "2023-02-15 20:05:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1797,35 +1797,18 @@ ROOT.gStyle.SetOptStat(0)
 
 #Cpht.Divide(2,2)
 
-# Create a TGraphPolar object to serve as the template for the polar plot
-polar_template = ROOT.TGraphPolar()
+# Create an empty TH2Poly object with the desired polar axis ranges and binning
+histogram = ROOT.TH2Poly("polar_density", "", -2.0*ROOT.TMath.Pi(), 2.0*ROOT.TMath.Pi(), 0.0, 2.0)
 
-# Create a TH2Poly object to hold the TGraphPolar objects
-histogram = ROOT.TH2Poly("histogram", "", 0, 2 * ROOT.TMath.Pi(), 0, 2.0)
+# Loop over the input histograms and add their contents to the TH2Poly object
+for i, hist in enumerate(histlist):
+    polar_hist = hist["polar_phiq_vs_t_DATA"].GetPolargram().GetHistogram()
+    polar_hist.Scale(1.0 / polar_hist.Integral())
+    histogram.Add(polar_hist)
 
-# Loop over the TH2D histograms and fill a TGraphPolar object for each one
-for i,hist in enumerate(histlist):
-    polar_hist = ROOT.TGraphPolar()
-    for binx in range(1, hist["phiq_vs_t_DATA"].GetNbinsX()+1):
-        for biny in range(1, hist["phiq_vs_t_DATA"].GetNbinsY()+1):
-            radius = hist["phiq_vs_t_DATA"].GetBinContent(binx, biny)
-            if radius > 0:
-                theta = hist["phiq_vs_t_DATA"].GetXaxis().GetBinCenter(binx)
-                polar_hist.SetPoint(polar_hist.GetN(), theta, radius)
-    polar_hist.SetLineColor(i+1)
-    histogram.Add(polar_hist, 1)
-
-# Draw the TH2Poly object on the TCanvas
-histogram.Draw("COLZ POL SAME")
-polar_template.Draw("L SAME")
-
-# Set the canvas range and labels
-histogram.GetXaxis().SetTitle("Phi")
-histogram.GetYaxis().SetTitle("Radius")
-histogram.SetStats(0)
-histogram.GetYaxis().SetTitleOffset(1.4)
-histogram.GetYaxis().SetTitleSize(0.05)
-histogram.GetXaxis().SetTitleSize(0.05)
+# Set the color map and draw the histogram
+ROOT.gStyle.SetPalette(ROOT.kRainBow)
+histogram.Draw("lego1")
 
 '''
 # Section for polar plotting
