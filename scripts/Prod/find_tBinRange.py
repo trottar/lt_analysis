@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 01:59:40 trottar"
+# Time-stamp: "2023-02-16 02:00:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1796,8 +1796,8 @@ Cpht = TCanvas()
 ROOT.gStyle.SetOptStat(0)
 
 for i,hist in enumerate(histlist):
-    # create a THist["Polar_Phiq_Vs_T_DATA"]2D to hold the cartesian data
-    cartesian = ROOT.THist["Polar_Phiq_Vs_T_DATA"]2D()
+    # create a TGraph2D to hold the cartesian data
+    cartesian = ROOT.TGraph2D()
 
     # convert the polar data to cartesian
     for i in range(hist["polar_phiq_vs_t_DATA"].GetN()):
@@ -1811,8 +1811,8 @@ for i,hist in enumerate(histlist):
     # create a TCanvas to draw on
     canvas = ROOT.TCanvas()
 
-    # create a THist["Polar_Phiq_Vs_T_DATA"]2DSurf to draw the surface
-    surf = ROOT.THist["Polar_Phiq_Vs_T_DATA"]2DSurf(cartesian)
+    # create a TGraph2DSurf to draw the surface
+    surf = ROOT.TGraph2DSurf(cartesian)
     surf.Draw("SURF1")
 
     # draw the polar plot on top
