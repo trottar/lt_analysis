@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 23:11:46 trottar"
+# Time-stamp: "2023-02-15 23:14:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1333,6 +1333,8 @@ for i,hist in enumerate(histlist):
         histlist.remove(hist)
     else:
         settingList.append(hist["phi_setting"])
+
+print("~~~~~~~",histlist)
         
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()
