@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:07:30 trottar"
+# Time-stamp: "2023-02-16 14:10:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -146,7 +146,7 @@ def bin_data(histlist):
     
     for i,hist in enumerate(histlist):
         if hist["phi_setting"] == 'Right':
-            InFile_RIGHT_DATA = InFile_DATA
+            InFile_RIGHT_DATA = hist["InFile_DATA"]
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Uncut_Kaon_Events")
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_noRF")
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_noRF")
@@ -165,7 +165,7 @@ def bin_data(histlist):
             #rbins,H_t_Right = np.histogram(H_t_Right,bins=200)
 
         if hist["phi_setting"] == 'Left':
-            InFile_LEFT_DATA = InFile_DATA
+            InFile_LEFT_DATA = hist["InFile_DATA"]
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Uncut_Kaon_Events")
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_all_noRF")
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_prompt_noRF")
@@ -184,7 +184,7 @@ def bin_data(histlist):
             #lbins,H_t_Left = np.histogram(H_t_Left,bins=200)
 
         if hist["phi_setting"] == 'Center':
-            InFile_CENTER_DATA = InFile_DATA
+            InFile_CENTER_DATA = hist["InFile_DATA"]
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Uncut_Kaon_Events")
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_all_noRF")
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_prompt_noRF")
