@@ -205,9 +205,9 @@ def DiamondPlot(particle,Q2Val,WVal,phi_setting,tmin,tmax):
 
 	# Assumes 2021 trees do not have Prompt MM cut, as some do not right now. *** NEED TO BE REPLAYED AGAIN WITH THIS BRANCH ***
         if particle == "kaon":
-            Cut_Events_all_RF_tree = infile.Get("Cut_Kaon_Events_all_RF")
+            Cut_Events_all_RF_tree = infile.Get("Cut_Kaon_Events_prompt_RF")
         if particle == "pion":
-            Cut_Events_all_RF_tree = infile.Get("Cut_Pion_Events_all_RF")
+            Cut_Events_all_RF_tree = infile.Get("Cut_Pion_Events_prompt_RF")
 
 	##############################################################################################################################################
         countB = 0

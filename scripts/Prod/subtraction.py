@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:43:50 trottar"
+# Time-stamp: "2023-02-16 17:27:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,8 +161,8 @@ def defineHists(phi_setting, inpDict):
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
 
     #TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
@@ -182,8 +182,8 @@ def defineHists(phi_setting, inpDict):
     #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_noRF")
     #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_noRF")
     #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
-    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_RF")
-    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_RF")
+    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_RF")
+    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_RF")
     #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
 
     #TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
