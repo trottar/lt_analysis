@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 18:38:01 trottar"
+# Time-stamp: "2023-02-16 18:46:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,8 +152,8 @@ def bin_data(histlist):
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_noRF")
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_noRF")
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_noRF")
-            #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_RF")
-            TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_RF")
+            TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_RF")
+            #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_RF")
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("Creating right t-bin histogram...")
             # Grab t bin range
@@ -167,8 +167,8 @@ def bin_data(histlist):
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_all_noRF")
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_prompt_noRF")
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_noRF")
-            #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_all_RF")
-            TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_prompt_RF")
+            TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_all_RF")
+            #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_prompt_RF")
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("\nCreating left t-bin histogram...")
             # Grab t bin range
@@ -182,8 +182,8 @@ def bin_data(histlist):
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_all_noRF")
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_prompt_noRF")
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_noRF")
-            #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_all_RF")
-            TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_prompt_RF")
+            TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_all_RF")
+            #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_prompt_RF")
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("\nCreating center t-bin histogram...")
             # Grab t bin range
@@ -319,10 +319,18 @@ c_yield = TCanvas()
 binned_data = bin_data(histlist)
 
 binned_phi = binned_data[0]
-phibinvals = np.sort(list(binned_phi[1]))
+# binned_phi[0] is missing a value for the final bin
+# so adding the first element allows the zip to include all bins
+# this is okay because the number of events per bin should be the same
+phibinvals = list(binned_phi[0])
+phibinvals.append(binned_phi[0][0])
 
 binned_t = binned_data[1]
-tbinvals = np.sort(list(binned_t[1]))
+# binned_t[0] is missing a value for the final bin
+# so adding the first element allows the zip to include all bins
+# this is okay because the number of events per bin should be the same
+tbinvals = list(binned_t[0])
+tbinvals.append(binned_t[0][0])
 
 for i,hist in enumerate(histlist):
 
@@ -339,18 +347,18 @@ for i,hist in enumerate(histlist):
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_RIGHT_DATA):
-            tbin_index = np.searchsorted(tbinvals, -evt.MandelT)
-            phibin_index = np.searchsorted(phibinvals, (evt.ph_q+math.pi)*(180/math.pi))
+            tbin_index = np.searchsorted(binned_t[1], -evt.MandelT)
+            phibin_index = np.searchsorted(binned_phi[1], (evt.ph_q+math.pi)*(180/math.pi))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
+            if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
-            if tbin_index < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index]:
+            if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
                 continue
-            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index-1]:
+            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
                 phibinedge = phibin_index-1
-            if phibin_index < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index]:
+            if phibin_index < len(binned_phi[1]) and (evt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
                 phibinedge = phibin_index
             else:
                 continue
@@ -386,20 +394,20 @@ for i,hist in enumerate(histlist):
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
-            tbin_index = np.searchsorted(tbinvals, -evt.MandelT)
-            phibin_index = np.searchsorted(phibinvals, (evt.ph_q+math.pi)*(180/math.pi))
-            print("if {} > 0 and {} <= {}".format(tbin_index,-evt.MandelT,tbinvals[tbin_index-1]))
-            print("if {} < {} and {} >= {}".format(tbin_index,len(tbinvals),-evt.MandelT,tbinvals[tbin_index]))
+            tbin_index = np.searchsorted(binned_t[1], -evt.MandelT)
+            phibin_index = np.searchsorted(binned_phi[1], (evt.ph_q+math.pi)*(180/math.pi))
+            print("if {} > 0 and {} <= {}".format(tbin_index,-evt.MandelT,binned_t[1][tbin_index-1]))
+            print("if {} < {} and {} >= {}".format(tbin_index,len(binned_t[1]),-evt.MandelT,binned_t[1][tbin_index]))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
+            if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
-            if tbin_index < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index]:
+            if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
                 continue
-            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index-1]:
+            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
                 phibinedge = phibin_index-1
-            if phibin_index < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index]:
+            if phibin_index < len(binned_phi[1]) and (evt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
                 phibinedge = phibin_index
             else:
                 continue
@@ -435,18 +443,18 @@ for i,hist in enumerate(histlist):
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
-            tbin_index = np.searchsorted(tbinvals, -evt.MandelT)
-            phibin_index = np.searchsorted(phibinvals, (evt.ph_q+math.pi)*(180/math.pi))
+            tbin_index = np.searchsorted(binned_t[1], -evt.MandelT)
+            phibin_index = np.searchsorted(binned_phi[1], (evt.ph_q+math.pi)*(180/math.pi))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
+            if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
-            if tbin_index < len(tbinvals) and -evt.MandelT >= tbinvals[tbin_index]:
+            if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
                 continue
-            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= phibinvals[phibin_index-1]:
+            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
                 phibinedge = phibin_index-1
-            if phibin_index < len(phibinvals) and (evt.ph_q+math.pi)*(180/math.pi) >= phibinvals[phibin_index]:
+            if phibin_index < len(binned_phi[1]) and (evt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
                 phibinedge = phibin_index
             else:
                 continue
@@ -468,7 +476,7 @@ for i,hist in enumerate(histlist):
             MM_Center.append(integrate.simps(val))            
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
-        
+
 c_yield.Print(outputpdf)
 
 # Plot histograms
