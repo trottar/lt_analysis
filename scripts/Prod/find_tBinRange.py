@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 15:50:43 trottar"
+# Time-stamp: "2023-02-16 15:57:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,17 +333,17 @@ tbinvals = list(binned_t[0])
 tbinvals.append(binned_t[0][0])
 
 for i,hist in enumerate(histlist):
+
     if hist["phi_setting"] == 'Right':
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
             tbin_index = np.digitize(val, np.sort(tbinvals))
+            phibin_index = np.digitize(val, np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
-                tbinedge = tbinvals[tbin_index]
-                phibin_index = np.digitize(val, np.sort(phibinvals))
-                # Check if the bin index is within the bounds of the bin edges list
                 if phibin_index > 0 and phibin_index < len(phibinvals):
+                    tbinedge = tbinvals[tbin_index]
                     phibinedge = phibinvals[phibin_index]
                     MM_Right_tmp.append((tbinedge, phibinedge, val))
 
@@ -359,22 +359,20 @@ for i,hist in enumerate(histlist):
         # Extract the desired values from each group
         MM_Right = []
         for key, val in groups.items():
-            MM_Right.append(integrate.simps(val))
-            
+            MM_Right.append(integrate.simps(val))            
 
-        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
+        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)    
         
     if hist["phi_setting"] == 'Left':
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
             tbin_index = np.digitize(val, np.sort(tbinvals))
+            phibin_index = np.digitize(val, np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
-                tbinedge = tbinvals[tbin_index]
-                phibin_index = np.digitize(val, np.sort(phibinvals))
-                # Check if the bin index is within the bounds of the bin edges list
                 if phibin_index > 0 and phibin_index < len(phibinvals):
+                    tbinedge = tbinvals[tbin_index]
                     phibinedge = phibinvals[phibin_index]
                     MM_Left_tmp.append((tbinedge, phibinedge, val))
 
@@ -390,8 +388,8 @@ for i,hist in enumerate(histlist):
         # Extract the desired values from each group
         MM_Left = []
         for key, val in groups.items():
-            MM_Left.append(integrate.simps(val))
-            
+            MM_Left.append(integrate.simps(val))            
+
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
         
     if hist["phi_setting"] == 'Center':
@@ -399,12 +397,11 @@ for i,hist in enumerate(histlist):
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
             tbin_index = np.digitize(val, np.sort(tbinvals))
+            phibin_index = np.digitize(val, np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
-                tbinedge = tbinvals[tbin_index]
-                phibin_index = np.digitize(val, np.sort(phibinvals))
-                # Check if the bin index is within the bounds of the bin edges list
                 if phibin_index > 0 and phibin_index < len(phibinvals):
+                    tbinedge = tbinvals[tbin_index]
                     phibinedge = phibinvals[phibin_index]
                     MM_Center_tmp.append((tbinedge, phibinedge, val))
 
