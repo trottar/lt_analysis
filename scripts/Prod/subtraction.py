@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 12:44:49 trottar"
+# Time-stamp: "2023-02-16 13:12:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,8 +17,6 @@
 import uproot as up
 import numpy as np
 import root_numpy as rnp
-import pandas as pd
-import root_pandas as rpd
 import ROOT
 import scipy
 import scipy.integrate as integrate

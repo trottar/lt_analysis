@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 12:55:17 trottar"
+# Time-stamp: "2023-02-16 13:15:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,8 +17,6 @@
 import uproot as up
 import numpy as np
 import root_numpy as rnp
-import pandas as pd
-import root_pandas as rpd
 import ROOT
 import scipy
 import scipy.integrate as integrate
@@ -217,26 +215,34 @@ def bin_data(histlist):
 
     for i,hist in enumerate(histlist):
         if hist["phi_setting"] == "Right":
-            H_t_Right = np.array(hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX()))
-            H_phi_Right = np.array(hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX()))
+            H_t_Right = rnp.hist2numpy(hist["H_t_DATA"],return_edges=True)
+            H_phi_Right = rnp.hist2numpy(hist["H_ph_q_DATA"],return_edges=True)
         if hist["phi_setting"] == "Left":
-            H_t_Left = np.array(hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX()))
-            H_phi_Left = np.array(hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX()))
+            H_t_Left = rnp.hist2numpy(hist["H_t_DATA"],return_edges=True)
+            H_phi_Left = rnp.hist2numpy(hist["H_ph_q_DATA"],return_edges=True)
         if hist["phi_setting"] == "Center":
-            H_t_Center = np.array(hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX()))
-            H_phi_Center = np.array(hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX()))
+            H_t_Center = rnp.hist2numpy(hist["H_t_DATA"],return_edges=True)
+            H_phi_Center = rnp.hist2numpy(hist["H_ph_q_DATA"],return_edges=True)            
             
+    H_t_BinTest = []
+    H_phi_BinTest = []
     for val in settingList:
         if val == "Right":
-            H_t_BinTest = [r for r in H_t_Right]
-            H_phi_BinTest = [r for r in H_phi_Right]
+            for r in H_t_Right:
+                H_t_BinTest.append(r)
+            for r in H_phi_Right:                
+                H_phi_BinTest.append(r)
         if val == "Left":
-            H_t_BinTest = [l for l in H_t_Left]
-            H_phi_BinTest = [l for l in H_phi_Left]
+            for l in H_t_Left:
+                H_t_BinTest.append(l)
+            for l in H_phi_Left:
+                H_phi_BinTest.append(l)
         if val == "Center":
-            H_t_BinTest = [c for c in H_t_Center]
-            H_phi_BinTest = [c for c in H_phi_Center]
-            
+            for c in H_t_Center:
+                H_t_BinTest.append(c)
+            for c in H_phi_Center:                
+                H_phi_BinTest.append(c)                
+                
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
 
 
