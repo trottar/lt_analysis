@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 01:46:13 trottar"
+# Time-stamp: "2023-02-16 01:53:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1795,28 +1795,18 @@ Cpht = TCanvas()
 # Removes stat box
 ROOT.gStyle.SetOptStat(0)
 
-# Create a new TMultiGraph object
-multi_graph = ROOT.TMultiGraph()
+for i,hist in enumerate(histlist):
+    histogram = ROOT.TH2D("hist", "hist", 100, 0, 360, 100, 0, 2.0)
 
-for i, hist in enumerate(histlist):
-    print("~~~~~~~~~~~~~~~~~~",hist["polar_phiq_vs_t_DATA"])
-    
-# Loop over each TGraphPolar object and add it to the TMultiGraph
-for i, hist in enumerate(histlist):
-    hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
-    hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    multi_graph.Add(hist["polar_phiq_vs_t_DATA"])
-    Cpht.Update()
-    #hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
+    for i in range(hist["polar_phiq_vs_t_DATA"].GetN()):
+        x, y = ROOT.Double(0), ROOT.Double(0)
+        hist["polar_phiq_vs_t_DATA"].GetPolar(i, x, y)
+        histogram.Fill(x, y)
 
-multi_graph.Draw("AOP")
-
-# Customize the polar surface plot
-multi_graph.GetXaxis().SetTitle("p_{T} (GeV/c)")
-multi_graph.GetYaxis().SetTitle("#phi")
-multi_graph.GetYaxis().SetTitleOffset(1.2)
-#multi_graph.GetZaxis().SetTitle("Counts")
-#multi_graph.GetZaxis().SetTitleOffset(1.5)
+# create the surface plot from the TH2D histogram
+surf = ROOT.TSurface("surf", "Surface plot", histogram)
+surf.SetContour(50)  # set the number of contours
+surf.Draw("SURF2 POL")  # draw the surface plot
 
 Cpht.Update()
     
