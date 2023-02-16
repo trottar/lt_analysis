@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 12:33:08 trottar"
+# Time-stamp: "2023-02-16 12:50:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,25 +217,25 @@ def bin_data(histlist):
 
     for i,hist in enumerate(histlist):
         if hist["phi_setting"] == "Right":
-            H_t_Right = hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX())
-            H_phi_Righphi = hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX())
+            H_t_Right = hist["H_t_DATA"].to_numpy()
+            H_phi_Righphi = hist["H_ph_q_DATA"].to_numpy()
         if hist["phi_setting"] == "Left":
-            H_t_Left = hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX())
-            H_phi_Righphi = hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX())
+            H_t_Left = hist["H_t_DATA"].to_numpy()
+            H_phi_Righphi = hist["H_ph_q_DATA"].to_numpy()
         if hist["phi_setting"] == "Center":
-            H_t_Center = hist["H_t_DATA"].GetArray().SetSize(hist["H_t_DATA"].GetNbinsX())
-            H_phi_Righphi = hist["H_ph_q_DATA"].GetArray().SetSize(hist["H_ph_q_DATA"].GetNbinsX())
+            H_t_Center = hist["H_t_DATA"].to_numpy()
+            H_phi_Righphi = hist["H_ph_q_DATA"].to_numpy()
             
     for val in settingList:
         if val == "Right":
             H_t_BinTest = [r for r in H_t_Right]
             H_phi_BinTest = [r for r in H_phi_Right]
         if val == "Left":
-            H_t_BinTest = [r for r in H_t_Left]
-            H_phi_BinTest = [r for r in H_phi_Left]
+            H_t_BinTest = [l for l in H_t_Left]
+            H_phi_BinTest = [l for l in H_phi_Left]
         if val == "Center":
-            H_t_BinTest = [r for r in H_t_Center]
-            H_phi_BinTest = [r for r in H_phi_Center]
+            H_t_BinTest = [c for c in H_t_Center]
+            H_phi_BinTest = [c for c in H_phi_Center]
             
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
 
