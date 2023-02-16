@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 18:58:00 trottar"
+# Time-stamp: "2023-02-15 19:05:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -247,7 +247,6 @@ def defineHists(phi_setting):
     ################################################################################################################################################
     # Call diamond cut script
 
-    '''
     paramDict = DiamondPlot(particle, Q2Val, WVal, phi_setting, tmin, tmax)
     
     a1 = paramDict["a1"]
@@ -258,17 +257,7 @@ def defineHists(phi_setting):
     b3 = paramDict["b3"]
     a4 = paramDict["a4"]
     b4 = paramDict["b4"]
-    '''
 
-    a1 = 0
-    b1 = 0
-    a2 = 0
-    b2 = 0
-    a3 = 0
-    b3 = 0
-    a4 = 0
-    b4 = 0
-    
     ################################################################################################################################################
     # Define simc root file trees of interest
 
@@ -643,7 +632,6 @@ def defineHists(phi_setting):
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
     phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
     polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
-    poly_phiq_vs_t_DATA = ROOT.TH2Poly("poly_phiq_vs_t_DATA", "", -360, 360, -360, 360)
     Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     ################################################################################################################################################
@@ -744,19 +732,6 @@ def defineHists(phi_setting):
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
           #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
-          
-          r = -evt.MandelT
-          phi = evt.ph_q
-          bin_num = poly_phiq_vs_t_DATA.FindBin(r * ROOT.TMath.Cos(phi), r * ROOT.TMath.Sin(phi))
-          poly_phiq_vs_t_DATA.SetBinContent(bin_num, poly_phiq_vs_t_DATA.GetBinContent(bin_num) + 1)
-          # set the color palette for the TH2Poly object
-          palette = [ROOT.kWhite, ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kYellow, ROOT.kMagenta, ROOT.kCyan]
-          palette_size = len(palette)
-          for i in range(1, poly_phiq_vs_t_DATA.GetNumberOfBins() + 1):
-              bin_content = poly_phiq_vs_t_DATA.GetBinContent(i)
-              if bin_content > 0:
-                  poly_phiq_vs_t_DATA.SetFillColor(i, palette[bin_content % palette_size])
-        
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
             
           H_ct_ep_DATA.Fill(evt.CTime_ROC1)
@@ -1330,7 +1305,6 @@ def defineHists(phi_setting):
         "MM_vs_beta_DATA" : MM_vs_beta_DATA,
         "phiq_vs_t_DATA" : phiq_vs_t_DATA,
         "polar_phiq_vs_t_DATA" : polar_phiq_vs_t_DATA,
-        "poly_phiq_vs_t_DATA" : poly_phiq_vs_t_DATA,
         "Q2_vs_W_DATA" : Q2_vs_W_DATA,
         "InFile_DATA" : InFile_DATA,
         "InFile_DUMMY" : InFile_DUMMY,
@@ -1392,8 +1366,7 @@ for i,hist in enumerate(histlist):
 l_eff_plt.Draw()
 
 eff_plt.Print(outputpdf + '(')
-
-'''
+        
 # Plot histograms
 c_pid = TCanvas()
 
@@ -1822,81 +1795,81 @@ Cpht = TCanvas()
 # Removes stat box
 ROOT.gStyle.SetOptStat(0)
 
-Cpht.Divide(2,2)
+#Cpht.Divide(2,2)
+
+h2d = ROOT.TH2D("h2d","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
+
 
 for i,hist in enumerate(histlist):
-    Cpht.cd(i+1)
-    hist["phiq_vs_t_DATA"].GetYaxis().SetRangeUser(tmin,tmax)
-    hist["phiq_vs_t_DATA"].Draw("SURF2 POL")
-    hist["phiq_vs_t_DATA"].SetTitle(phisetlist[i])
-    
-    # Section for polar plotting
-    gStyle.SetPalette(55)
-    gPad.SetTheta(90)
-    gPad.SetPhi(180)
-    tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
-    tvsphi_title.AddText("-t vs #phi")
-    tvsphi_title.Draw()
-    Cpht.Update()
-    ptphizero = TPaveText(0.923951,0.513932,0.993778,0.574551,"NDC")
-    ptphizero.AddText("#phi = 0")
-    ptphizero.Draw()
-    Cpht.Update()
-    phihalfk = TLine(0,0,0,0.6)
-    phihalfk.SetLineColor(kBlack)
-    phihalfk.SetLineWidth(2)
-    phihalfk.Draw()
-    Cpht.Update()
-    ptphihalfk = TPaveText(0.417855,0.901876,0.486574,0.996358,"NDC")
-    ptphihalfk.AddText("#phi = #frac{K}{2}")
-    ptphihalfk.Draw()
-    Cpht.Update()
-    phik = TLine(0,0,-0.6,0)
-    phik.SetLineColor(kBlack)
-    phik.SetLineWidth(2)
-    phik.Draw()
-    Cpht.Update()
-    ptphik = TPaveText(0.0277092,0.514217,0.096428,0.572746,"NDC")
-    ptphik.AddText("#phi = K")
-    ptphik.Draw()
-    Cpht.Update()
-    phithreek = TLine(0,0,0,-0.6)
-    phithreek.SetLineColor(kBlack)
-    phithreek.SetLineWidth(2)
-    phithreek.Draw()
-    Cpht.Update()
-    ptphithreek = TPaveText(0.419517,0.00514928,0.487128,0.0996315,"NDC")
-    ptphithreek.AddText("#phi = #frac{3K}{2}")
-    ptphithreek.Draw()
-    Cpht.Update()
-    Arc = TArc()
-    for k in range(0, 10):
-         Arc.SetFillStyle(0)
-         Arc.SetLineWidth(2)
-         # To change the arc radius we have to change number 0.6 in the lower line.
-         Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
-         Cpht.Update()
-    for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
-         Arc.SetLineColor(3)
-         Arc.SetLineWidth(2)
-         # To change the arc radius we have to change number 0.6 in the lower line.
-         Arc.DrawArc(0,0,0.6*b,0.,360.,"same")
-         Cpht.Update()
-    tradius = TGaxis(0,0,0.6,0,tmin,tmax,10,"-+")
-    tradius.SetLineColor(2)
-    tradius.SetLabelColor(2)
-    tradius.Draw()
-    Cpht.Update()
+    #Cpht.cd(i+1)
+    #hist["phiq_vs_t_DATA"].GetYaxis().SetRangeUser(tmin,tmax)
+    #hist["phiq_vs_t_DATA"].Draw("SURF2 POL")
+    #hist["phiq_vs_t_DATA"].SetTitle(phisetlist[i])
+    h2d.Add(hist["phiq_vs_t_DATA"])
+
+h2d.Draw("colz")
+
+# Section for polar plotting
+gStyle.SetPalette(55)
+gPad.SetTheta(90)
+gPad.SetPhi(180)
+tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
+tvsphi_title.AddText("-t vs #phi")
+tvsphi_title.Draw()
+Cpht.Update()
+ptphizero = TPaveText(0.923951,0.513932,0.993778,0.574551,"NDC")
+ptphizero.AddText("#phi = 0")
+ptphizero.Draw()
+Cpht.Update()
+phihalfk = TLine(0,0,0,0.6)
+phihalfk.SetLineColor(kBlack)
+phihalfk.SetLineWidth(2)
+phihalfk.Draw()
+Cpht.Update()
+ptphihalfk = TPaveText(0.417855,0.901876,0.486574,0.996358,"NDC")
+ptphihalfk.AddText("#phi = #frac{K}{2}")
+ptphihalfk.Draw()
+Cpht.Update()
+phik = TLine(0,0,-0.6,0)
+phik.SetLineColor(kBlack)
+phik.SetLineWidth(2)
+phik.Draw()
+Cpht.Update()
+ptphik = TPaveText(0.0277092,0.514217,0.096428,0.572746,"NDC")
+ptphik.AddText("#phi = K")
+ptphik.Draw()
+Cpht.Update()
+phithreek = TLine(0,0,0,-0.6)
+phithreek.SetLineColor(kBlack)
+phithreek.SetLineWidth(2)
+phithreek.Draw()
+Cpht.Update()
+ptphithreek = TPaveText(0.419517,0.00514928,0.487128,0.0996315,"NDC")
+ptphithreek.AddText("#phi = #frac{3K}{2}")
+ptphithreek.Draw()
+Cpht.Update()
+Arc = TArc()
+for k in range(0, 10):
+     Arc.SetFillStyle(0)
+     Arc.SetLineWidth(2)
+     # To change the arc radius we have to change number 0.6 in the lower line.
+     Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
+     Cpht.Update()
+for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
+     Arc.SetLineColor(3)
+     Arc.SetLineWidth(2)
+     # To change the arc radius we have to change number 0.6 in the lower line.
+     Arc.DrawArc(0,0,0.6*b,0.,360.,"same")
+     Cpht.Update()
+tradius = TGaxis(0,0,0.6,0,tmin,tmax,10,"-+")
+tradius.SetLineColor(2)
+tradius.SetLabelColor(2)
+tradius.Draw()
+Cpht.Update()
 
 Cpht.Print(outputpdf)
 
-'''
-
 Cphtsame = TCanvas()
-
-for i,hist in enumerate(histlist):
-    hist["poly_phiq_vs_t_DATA"].Draw("COLZ")
-    Cphtsame.Update()
 
 '''
 for i,hist in enumerate(histlist):
@@ -1908,6 +1881,7 @@ for i,hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     # Hide radial axis labels since redefined below
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelSize(0)
+'''
 
 # Section for polar plotting
 gStyle.SetPalette(55)
@@ -1943,8 +1917,7 @@ tradius = TGaxis(0,0,tmax,0,tmin,tmax,10,"-+")
 tradius.SetLineColor(9)
 tradius.SetLabelColor(9)
 tradius.Draw()
-'''
-
+    
 Cphtsame.Print(outputpdf)
 
 Ctext = TCanvas()
