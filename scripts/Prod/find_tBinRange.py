@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 20:27:36 trottar"
+# Time-stamp: "2023-02-15 20:39:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1813,17 +1813,9 @@ for i,hist in enumerate(histlist):
                 theta = hist["phiq_vs_t_DATA"].GetXaxis().GetBinCenter(binx)
                 polar_hist.SetPoint(polar_hist.GetN(), theta, radius)
     polar_hist.SetLineColor(i+1)
-    histogram = ROOT.TH2Poly("histogram{}".format(i), "", 0, 2 * ROOT.TMath.Pi(), 0, 2.0)
-    for j in range(polar_hist.GetN()):
-        x, y = ROOT.Double(0), ROOT.Double(0)
-        polar_hist.GetPoint(j, x, y)
-        histogram.Fill(x, y)
-    histogram_list.append(histogram)
+    histogram.Add(ROOT.TH1(polar_hist))
 
-# Merge the TH2Poly objects and draw the resulting object on the TCanvas
-histogram = histogram_list[0]
-histogram_list.remove(histogram) # Remove first element from list
-histogram.Merge(ROOT.TList(histogram_list)) # Merge remaining elements
+# Draw the TH2Poly object on the TCanvas
 histogram.Draw("COLZ POL SAME")
 polar_template.Draw("L SAME")
 
