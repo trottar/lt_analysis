@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 21:06:16 trottar"
+# Time-stamp: "2023-02-15 21:09:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1810,7 +1810,7 @@ for i, hist in enumerate(histlist):
     polarhist.SetLineColor(color)
     
     # Add the polar histogram to the TGraphPolar object
-    polargraph.Add(polarhist, "P")
+    polargraph.Add(polarhist)
     
 # Set the maximum radial range of the polar graph
 #polargraph.GetPolargram().SetRangeRadial(0, 1.1*polargraph.GetRadialMaximum())
