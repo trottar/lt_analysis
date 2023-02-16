@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:11:36 trottar"
+# Time-stamp: "2023-02-16 16:14:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,13 +347,13 @@ for i,hist in enumerate(histlist):
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_RIGHT_DATA):
-            tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
-            phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
+            tbin_index = np.digitize(evt.MM, np.sort(tbinvals))
+            phibin_index = np.digitize(evt.MM, np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and tbin_index < len(tbinevt.MMs):
-                tbinedge = tbinevt.MMs[tbin_index]
-            if phibin_index > 0 and phibin_index < len(phibinevt.MMs):
-                phibinedge = phibinevt.MMs[phibin_index]
+            if tbin_index > 0 and tbin_index < len(tbinvals):
+                tbinedge = tbinvals[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinvals):
+                phibinedge = phibinvals[phibin_index]
             MM_Right_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
@@ -385,13 +385,13 @@ for i,hist in enumerate(histlist):
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
-            tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
-            phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
+            tbin_index = np.digitize(evt.MM, np.sort(tbinvals))
+            phibin_index = np.digitize(evt.MM, np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and tbin_index < len(tbinevt.MMs):
-                tbinedge = tbinevt.MMs[tbin_index]
-            if phibin_index > 0 and phibin_index < len(phibinevt.MMs):
-                phibinedge = phibinevt.MMs[phibin_index]
+            if tbin_index > 0 and tbin_index < len(tbinvals):
+                tbinedge = tbinvals[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinvals):
+                phibinedge = phibinvals[phibin_index]
             MM_Left_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
@@ -423,13 +423,13 @@ for i,hist in enumerate(histlist):
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
-            tbin_index = np.digitize(evt.MM, np.sort(tbinevt.MMs))
-            phibin_index = np.digitize(evt.MM, np.sort(phibinevt.MMs))
+            tbin_index = np.digitize(evt.MM, np.sort(tbinvals))
+            phibin_index = np.digitize(evt.MM, np.sort(phibinvals))
             # Check if the bin index is within the bounds of the bin edges list
-            if tbin_index > 0 and tbin_index < len(tbinevt.MMs):
-                tbinedge = tbinevt.MMs[tbin_index]
-            if phibin_index > 0 and phibin_index < len(phibinevt.MMs):
-                phibinedge = phibinevt.MMs[phibin_index]
+            if tbin_index > 0 and tbin_index < len(tbinvals):
+                tbinedge = tbinvals[tbin_index]
+            if phibin_index > 0 and phibin_index < len(phibinvals):
+                phibinedge = phibinvals[phibin_index]
             MM_Center_tmp.append((tbinedge, phibinedge, evt.MM))
 
         groups = {}
