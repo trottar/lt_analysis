@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 02:00:33 trottar"
+# Time-stamp: "2023-02-16 02:05:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1795,28 +1795,13 @@ Cpht = TCanvas()
 # Removes stat box
 ROOT.gStyle.SetOptStat(0)
 
-for i,hist in enumerate(histlist):
-    # create a TGraph2D to hold the cartesian data
-    cartesian = ROOT.TGraph2D()
 
-    # convert the polar data to cartesian
-    for i in range(hist["polar_phiq_vs_t_DATA"].GetN()):
-        theta, radius = ROOT.Double(0), ROOT.Double(0)
-        hist["polar_phiq_vs_t_DATA"].GetPolar(i, theta, radius)
-        x = radius * ROOT.TMath.Cos(theta)
-        y = radius * ROOT.TMath.Sin(theta)
-        z = i
-        cartesian.SetPoint(i, x, y, z)
-
-    # create a TCanvas to draw on
-    canvas = ROOT.TCanvas()
-
-    # create a TGraph2DSurf to draw the surface
-    surf = ROOT.TGraph2DSurf(cartesian)
-    surf.Draw("SURF1")
-
-    # draw the polar plot on top
-    hist["polar_phiq_vs_t_DATA"].Draw("SAME")
+# Customize the polar surface plot
+multi_graph.GetXaxis().SetTitle("p_{T} (GeV/c)")
+multi_graph.GetYaxis().SetTitle("#phi")
+multi_graph.GetYaxis().SetTitleOffset(1.2)
+#multi_graph.GetZaxis().SetTitle("Counts")
+#multi_graph.GetZaxis().SetTitleOffset(1.5)
 
 Cpht.Update()
     
