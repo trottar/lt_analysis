@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 23:57:27 trottar"
+# Time-stamp: "2023-02-16 00:10:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -698,6 +698,10 @@ def defineHists(phi_setting):
 
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
+
+        # Must be outside diamond cuts to avoid weird overflow errors
+        polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
+        poly_phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
         
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
@@ -722,9 +726,6 @@ def defineHists(phi_setting):
                 
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
         '''
-        # Must be outside diamond cuts to avoid weird overflow errors
-        polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)
-        poly_phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
             
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
