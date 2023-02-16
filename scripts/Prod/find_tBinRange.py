@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:16:27 trottar"
+# Time-stamp: "2023-02-16 14:24:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,12 +156,9 @@ def bin_data(histlist):
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("Creating right t-bin histogram...")
             # Grab t bin range
-            for i,evt in enumerate(TBRANCH_RIGHT_DATA):
-                # Progress bar
-                Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries(),bar_length=25)
-                if (tmin <= -evt.MandelT <= tmax):
-                    H_t_Right.append(-evt.MandelT)
-                    H_phi_Right.append((evt.ph_q+math.pi)*(180/math.pi))
+            H_list_Right = [[-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)] for i,evt in enumerate(TBRANCH_RIGHT_DATA) if (tmin <= -evt.MandelT <= tmax)]
+            H_t_Right = H_list_Right[0]
+            H_phi_Right = H_list_Right[1]
 
         if hist["phi_setting"] == 'Left':
             InFile_LEFT_DATA = hist["InFile_DATA"]
@@ -174,13 +171,10 @@ def bin_data(histlist):
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("\nCreating left t-bin histogram...")
             # Grab t bin range
-            for i,evt in enumerate(TBRANCH_LEFT_DATA):
-                # Progress bar
-                Misc.progressBar(i, TBRANCH_LEFT_DATA.GetEntries(),bar_length=25)
-                if (tmin <= -evt.MandelT <= tmax):
-                    H_t_Left.append(-evt.MandelT)
-                    H_phi_Left.append((evt.ph_q+math.pi)*(180/math.pi))
-
+            H_list_Left = [[-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)] for i,evt in enumerate(TBRANCH_LEFT_DATA) if (tmin <= -evt.MandelT <= tmax)]
+            H_t_Left = H_list_Left[0]
+            H_phi_Left = H_list_Left[1]
+            
         if hist["phi_setting"] == 'Center':
             InFile_CENTER_DATA = hist["InFile_DATA"]
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Uncut_Kaon_Events")
@@ -192,13 +186,10 @@ def bin_data(histlist):
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("\nCreating center t-bin histogram...")
             # Grab t bin range
-            for i,evt in enumerate(TBRANCH_CENTER_DATA):
-                # Progress bar
-                Misc.progressBar(i, TBRANCH_CENTER_DATA.GetEntries(),bar_length=25)
-                if (tmin <= -evt.MandelT <= tmax):
-                    H_t_Center.append(-evt.MandelT)
-                    H_phi_Right.append((evt.ph_q+math.pi)*(180/math.pi))
-
+            H_list_Center = [[-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)] for i,evt in enumerate(TBRANCH_CENTER_DATA) if (tmin <= -evt.MandelT <= tmax)]
+            H_t_Center = H_list_Center[0]
+            H_phi_Center = H_list_Center[1]
+            
     ################################################################################################################################################
 
     H_t_BinTest = []
