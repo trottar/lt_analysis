@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 00:56:48 trottar"
+# Time-stamp: "2023-02-16 01:00:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -723,8 +723,6 @@ def defineHists(phi_setting):
         '''
        # Must be outside diamond cuts to avoid weird overflow errors
         polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
-
-        print((polar_phiq_vs_t_DATA.GetN(), " ", (evt.ph_q+math.pi)*(180/math.pi), " ", -evt.MandelT))
             
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
@@ -1809,7 +1807,7 @@ for i, hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     multi_graph.Add(hist["polar_phiq_vs_t_DATA"])
     Cpht.Update()
-    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
+    #hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
 
 multi_graph.Draw("AOP")
 
@@ -1898,7 +1896,7 @@ for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    hist["polar_phiq_vs_t_DATA"].Draw("same, AOP")
+    hist["polar_phiq_vs_t_DATA"].Draw("AOP")
     Cphtsame.Update()
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     # Hide radial axis labels since redefined below
