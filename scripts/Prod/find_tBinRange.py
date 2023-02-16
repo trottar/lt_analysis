@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:27:55 trottar"
+# Time-stamp: "2023-02-16 14:34:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,9 +156,9 @@ def bin_data(histlist):
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("Creating right t-bin histogram...")
             # Grab t bin range
-            H_list_Right = [[-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)] for i,evt in enumerate(TBRANCH_RIGHT_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            H_t_Right = H_list_Right[0]
-            H_phi_Right = H_list_Right[1]
+            H_list_Right = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_RIGHT_DATA) if (tmin <= -evt.MandelT <= tmax)]
+            H_t_Right = [tuple[0] for tuple in H_list_Right]
+            H_phi_Right = [tuple[1] for tuple in H_list_Right]
 
         if hist["phi_setting"] == 'Left':
             InFile_LEFT_DATA = hist["InFile_DATA"]
@@ -171,10 +171,9 @@ def bin_data(histlist):
             #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("\nCreating left t-bin histogram...")
             # Grab t bin range
-            H_list_Left = [[-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)] for i,evt in enumerate(TBRANCH_LEFT_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            print("\n\n~~~~~~~~",H_list_Left)
-            H_t_Left = H_list_Left[0]
-            H_phi_Left = H_list_Left[1]
+            H_list_Left = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_LEFT_DATA) if (tmin <= -evt.MandelT <= tmax)]
+            H_t_Left = [tuple[0] for tuple in H_list_Left]
+            H_phi_Left = [tuple[1] for tuple in H_list_Left]
             
         if hist["phi_setting"] == 'Center':
             InFile_CENTER_DATA = hist["InFile_DATA"]
@@ -187,9 +186,9 @@ def bin_data(histlist):
             #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
             print("\nCreating center t-bin histogram...")
             # Grab t bin range
-            H_list_Center = [[-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)] for i,evt in enumerate(TBRANCH_CENTER_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            H_t_Center = H_list_Center[0]
-            H_phi_Center = H_list_Center[1]
+            H_list_Center = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_CENTER_DATA) if (tmin <= -evt.MandelT <= tmax)]
+            H_t_Center = [tuple[0] for tuple in H_list_Center]
+            H_phi_Center = [tuple[1] for tuple in H_list_Center]
             
     ################################################################################################################################################
 
