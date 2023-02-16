@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 21:32:26 trottar"
+# Time-stamp: "2023-02-15 21:36:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1801,7 +1801,7 @@ ROOT.gStyle.SetOptStat(0)
 #Cpht.Divide(2,2)
 
 for i,hist in enumerate(histlist):
-    hist["poly_phiq_vs_t_DATA"].Draw("COLZ")
+    hist["poly_phiq_vs_t_DATA"].Draw("SURF2 POL")
     
 '''
 for i,hist in enumerate(histlist):
