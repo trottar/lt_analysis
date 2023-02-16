@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:24:16 trottar"
+# Time-stamp: "2023-02-16 14:27:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -172,6 +172,7 @@ def bin_data(histlist):
             print("\nCreating left t-bin histogram...")
             # Grab t bin range
             H_list_Left = [[-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)] for i,evt in enumerate(TBRANCH_LEFT_DATA) if (tmin <= -evt.MandelT <= tmax)]
+            print("\n\n~~~~~~~~",H_list_Left)
             H_t_Left = H_list_Left[0]
             H_phi_Left = H_list_Left[1]
             
