@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 21:57:45 trottar"
+# Time-stamp: "2023-02-15 22:16:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1803,10 +1803,10 @@ ROOT.gStyle.SetOptStat(0)
 mg = ROOT.TMultiGraph()
 
 for i,hist in enumerate(histlist):
-    mg.Add(hist["poly_phiq_vs_t_DATA"])
+    mg.Add(hist["polar_phiq_vs_t_DATA"])
 
 #mg.Draw("SURF2 POL")
-mg.Draw()
+mg.Draw("AOP")
     
 '''
 for i,hist in enumerate(histlist):
@@ -1878,7 +1878,7 @@ Cpht.Print(outputpdf)
 
 Cphtsame = TCanvas()
 
-'''
+
 for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
@@ -1888,7 +1888,6 @@ for i,hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     # Hide radial axis labels since redefined below
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelSize(0)
-'''
 
 # Section for polar plotting
 gStyle.SetPalette(55)
