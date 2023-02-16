@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:23:35 trottar"
+# Time-stamp: "2023-02-16 16:27:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -389,6 +389,8 @@ for i,hist in enumerate(histlist):
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
             tbin_index = np.digitize(-evt.MandelT, np.sort(tbinvals))
             phibin_index = np.digitize((evt.ph_q+math.pi)*(180/math.pi), np.sort(phibinvals))
+            print(-evt.MandelT, " ", tbin_index)
+            print((evt.ph_q+math.pi)*(180/math.pi)," ", phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
@@ -411,7 +413,7 @@ for i,hist in enumerate(histlist):
             MM_Left.append(integrate.simps(val))            
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
-        
+
     if hist["phi_setting"] == 'Center':
         InFile_CENTER_DATA = hist["InFile_DATA"]
         #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Uncut_Kaon_Events")
@@ -427,6 +429,8 @@ for i,hist in enumerate(histlist):
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
             tbin_index = np.digitize(-evt.MandelT, np.sort(tbinvals))
             phibin_index = np.digitize((evt.ph_q+math.pi)*(180/math.pi), np.sort(phibinvals))
+            print(-evt.MandelT, " ", tbin_index)
+            print((evt.ph_q+math.pi)*(180/math.pi)," ", phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
