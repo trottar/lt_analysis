@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 19:05:34 trottar"
+# Time-stamp: "2023-02-15 19:08:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1809,6 +1809,7 @@ for i,hist in enumerate(histlist):
 
 h2d.Draw("colz")
 
+'''
 # Section for polar plotting
 gStyle.SetPalette(55)
 gPad.SetTheta(90)
@@ -1866,6 +1867,7 @@ tradius.SetLineColor(2)
 tradius.SetLabelColor(2)
 tradius.Draw()
 Cpht.Update()
+'''
 
 Cpht.Print(outputpdf)
 
