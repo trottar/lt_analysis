@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 15:33:12 trottar"
+# Time-stamp: "2023-02-16 15:37:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -362,9 +362,70 @@ for i,hist in enumerate(histlist):
             MM_Right.append(integrate.simps(val))
             
 
-print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
+        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
+        
+    if hist["phi_setting"] == 'Left':
+        MM_Left_tmp = []
+        yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
+        for i,val in enumerate(npr.hist2array(hist["H_t_DATA"])):
+            tbin_index = np.digitize(val, tbinvals)
+            # Check if the bin index is within the bounds of the bin edges list
+            if tbin_index > 0 and tbin_index < len(tbinvals):
+                tbinedge = tbinvals[tbin_index]
+                phibin_index = np.digitize(val, phibinvals)
+                # Check if the bin index is within the bounds of the bin edges list
+                if phibin_index > 0 and phibin_index < len(phibinvals):
+                    phibinedge = phibinvals[phibin_index]
+                    MM_Left_tmp.append((tbinedge, phibinedge, val))
 
+        groups = {}
+        # Group the tuples by the first two elements using a dictionary
+        for t in MM_Left_tmp:
+            key = (t[0], t[1])
+            if key in groups:
+                groups[key].append(t[2])
+            else:
+                groups[key] = [t[2]]
 
+        # Extract the desired values from each group
+        MM_Left = []
+        for key, val in groups.items():
+            MM_Left.append(integrate.simps(val))
+            
+
+        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
+        
+    if hist["phi_setting"] == 'Center':
+        MM_Center_tmp = []
+        yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
+        for i,val in enumerate(npr.hist2array(hist["H_t_DATA"])):
+            tbin_index = np.digitize(val, tbinvals)
+            # Check if the bin index is within the bounds of the bin edges list
+            if tbin_index > 0 and tbin_index < len(tbinvals):
+                tbinedge = tbinvals[tbin_index]
+                phibin_index = np.digitize(val, phibinvals)
+                # Check if the bin index is within the bounds of the bin edges list
+                if phibin_index > 0 and phibin_index < len(phibinvals):
+                    phibinedge = phibinvals[phibin_index]
+                    MM_Center_tmp.append((tbinedge, phibinedge, val))
+
+        groups = {}
+        # Group the tuples by the first two elements using a dictionary
+        for t in MM_Center_tmp:
+            key = (t[0], t[1])
+            if key in groups:
+                groups[key].append(t[2])
+            else:
+                groups[key] = [t[2]]
+
+        # Extract the desired values from each group
+        MM_Center = []
+        for key, val in groups.items():
+            MM_Center.append(integrate.simps(val))
+            
+
+        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
+        
 c_yield.Print(outputpdf)
 
 # Plot histograms
