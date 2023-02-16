@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 19:35:29 trottar"
+# Time-stamp: "2023-02-15 19:49:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1806,11 +1806,11 @@ histogram = ROOT.TH2Poly("histogram", "", 0, 2 * ROOT.TMath.Pi(), 0, 2.0)
 # Loop over the TH2D histograms and fill a TGraphPolar object for each one
 for i,hist in enumerate(histlist):
     polar_hist = ROOT.TGraphPolar()
-    for binx in range(1, hist.GetNbinsX()+1):
-        for biny in range(1, hist.GetNbinsY()+1):
-            radius = hist.GetBinContent(binx, biny)
+    for binx in range(1, hist["phiq_vs_t_DATA"].GetNbinsX()+1):
+        for biny in range(1, hist["phiq_vs_t_DATA"].GetNbinsY()+1):
+            radius = hist["phiq_vs_t_DATA"].GetBinContent(binx, biny)
             if radius > 0:
-                theta = hist.GetXaxis().GetBinCenter(binx)
+                theta = hist["phiq_vs_t_DATA"].GetXaxis().GetBinCenter(binx)
                 polar_hist.SetPoint(polar_hist.GetN(), theta, radius)
     polar_hist.SetLineColor(i+1)
     histogram.Add(polar_hist)
