@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 22:36:46 trottar"
+# Time-stamp: "2023-02-15 22:41:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1800,13 +1800,26 @@ ROOT.gStyle.SetOptStat(0)
 
 #Cpht.Divide(2,2)
 
-mg = ROOT.TMultiGraph()
+# Create a new TMultiGraph object
+multi_graph = ROOT.TMultiGraph()
 
-for i,hist in enumerate(histlist):
-    mg.Add(hist["polar_phiq_vs_t_DATA"])
+# Loop over each TGraphPolar object and add it to the TMultiGraph
+for i, hist in enumerate(histlist):
+    graph = hist["polar_phiq_vs_t_DATA"]
+    graph.SetMarkerSize(2)
+    graph.SetMarkerColor(i+1)
+    multi_graph.Add(graph)
 
-#mg.Draw("SURF2 POL")
-mg.Draw("AOP")
+multi_graph.Draw("PES")
+
+# Customize the polar surface plot
+multi_graph.GetXaxis().SetTitle("p_{T} (GeV/c)")
+multi_graph.GetYaxis().SetTitle("#phi")
+multi_graph.GetYaxis().SetTitleOffset(1.2)
+multi_graph.GetZaxis().SetTitle("Counts")
+multi_graph.GetZaxis().SetTitleOffset(1.5)
+
+Cpht.Update()
     
 '''
 for i,hist in enumerate(histlist):
