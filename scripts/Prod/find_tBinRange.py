@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 13:43:29 trottar"
+# Time-stamp: "2023-02-16 13:52:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -228,14 +228,14 @@ def bin_data(histlist):
     H_phi_BinTest = []
     for val in settingList:
         if val == "Right":
-            np.concatenate(H_t_BinTest, H_t_Right)
-            np.concatenate(H_phi_BinTest, H_phi_Right)
+            H_t_BinTest = np.concatenate(H_t_BinTest, H_t_Right)
+            H_phi_BinTest = np.concatenate(H_phi_BinTest, H_phi_Right)
         if val == "Left":
-            np.concatenate(H_t_BinTest, H_t_Left)
-            np.concatenate(H_phi_BinTest, H_phi_Left)
+            H_t_BinTest = np.concatenate(H_t_BinTest, H_t_Left)
+            H_phi_BinTest = np.concatenate(H_phi_BinTest, H_phi_Left)
         if val == "Center":
-            np.concatenate(H_t_BinTest, H_t_Center)
-            np.concatenate(H_phi_BinTest, H_phi_Center)
+            H_t_BinTest = np.concatenate(H_t_BinTest, H_t_Center)
+            H_phi_BinTest = np.concatenate(H_phi_BinTest, H_phi_Center)
             
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
 
