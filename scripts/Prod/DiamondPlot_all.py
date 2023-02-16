@@ -329,7 +329,7 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
                     badfit=False
                     print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
                 else:
-                    print ("\n!!!!! Bad Diamond Fit!! Try Reducing fitrange or Increasing minbin and Retrying !!!!!\n")
+                    #print ("\n!!!!! Bad Diamond Fit!! Try Reducing fitrange or Increasing minbin and Retrying !!!!!\n")
                     fitrange -= 5
                     #minbin -= 1
                 #badfit=False

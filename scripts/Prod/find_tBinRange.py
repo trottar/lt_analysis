@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 17:25:07 trottar"
+# Time-stamp: "2023-02-16 18:24:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -324,6 +324,7 @@ phibinvals = list(binned_phi[1])
 binned_t = binned_data[1]
 tbinvals = list(binned_t[1])
 
+print("\n\n~~~~~~~~~~~~~~", tbinvals, phibinvals)
 for i,hist in enumerate(histlist):
 
     if hist["phi_setting"] == 'Right':
