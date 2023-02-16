@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 15:37:31 trottar"
+# Time-stamp: "2023-02-16 15:40:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -336,7 +336,7 @@ for i,hist in enumerate(histlist):
     if hist["phi_setting"] == 'Right':
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,val in enumerate(npr.hist2array(hist["H_t_DATA"])):
+        for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
             tbin_index = np.digitize(val, tbinvals)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
@@ -367,7 +367,7 @@ for i,hist in enumerate(histlist):
     if hist["phi_setting"] == 'Left':
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,val in enumerate(npr.hist2array(hist["H_t_DATA"])):
+        for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
             tbin_index = np.digitize(val, tbinvals)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
@@ -398,7 +398,7 @@ for i,hist in enumerate(histlist):
     if hist["phi_setting"] == 'Center':
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
-        for i,val in enumerate(npr.hist2array(hist["H_t_DATA"])):
+        for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
             tbin_index = np.digitize(val, tbinvals)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
