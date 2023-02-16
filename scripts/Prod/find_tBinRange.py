@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 23:06:57 trottar"
+# Time-stamp: "2023-02-15 23:11:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1807,6 +1807,7 @@ for i, hist in enumerate(histlist):
     graph = hist["polar_phiq_vs_t_DATA"]
     graph.SetMarkerSize(2)
     graph.SetMarkerColor(i+1)
+    graph.GetPolargram().SetRangeRadial(0, 2.0)
     multi_graph.Add(graph)
 
 multi_graph.Draw("AOP")
@@ -1895,11 +1896,11 @@ for i,hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     hist["polar_phiq_vs_t_DATA"].Draw("same, AOP")
-    #Cphtsame.Update()
+    Cphtsame.Update()
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     # Hide radial axis labels since redefined below
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelSize(0)
-    Cphtsame.Update()    
+    Cphtsame.Update()
 
 # Section for polar plotting
 gStyle.SetPalette(55)
