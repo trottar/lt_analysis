@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 22:45:29 trottar"
+# Time-stamp: "2023-02-15 22:52:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1819,7 +1819,7 @@ multi_graph.GetYaxis().SetTitleOffset(1.2)
 #multi_graph.GetZaxis().SetTitle("Counts")
 #multi_graph.GetZaxis().SetTitleOffset(1.5)
 
-Cpht.Update()
+#Cpht.Update()
     
 '''
 for i,hist in enumerate(histlist):
@@ -1896,7 +1896,7 @@ for i,hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
     hist["polar_phiq_vs_t_DATA"].Draw("same, AOP")
-    Cphtsame.Update()
+    #Cphtsame.Update()
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     # Hide radial axis labels since redefined below
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelSize(0)
