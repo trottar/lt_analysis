@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:56:49 trottar"
+# Time-stamp: "2023-02-16 17:00:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,20 +317,12 @@ eff_plt.Print(outputpdf + '(')
 c_yield = TCanvas()
 
 binned_data = bin_data(histlist)
-binned_phi = binned_data[0]
 
-# binned_phi[0] is missing a value for the final bin
-# so adding the first element allows the zip to include all bins
-# this is okay because the number of events per bin should be the same
-phibinvals = list(binned_phi[0])
-phibinvals.append(binned_phi[0][0])
+binned_phi = binned_data[0]
+phibinvals = list(binned_phi[1])
 
 binned_t = binned_data[1]
-# binned_t[0] is missing a value for the final bin
-# so adding the first element allows the zip to include all bins
-# this is okay because the number of events per bin should be the same
-tbinvals = list(binned_t[0])
-tbinvals.append(binned_t[0][0])
+tbinvals = list(binned_t[1])
 
 for i,hist in enumerate(histlist):
 
