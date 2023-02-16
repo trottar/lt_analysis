@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 20:15:19 trottar"
+# Time-stamp: "2023-02-15 20:20:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1814,7 +1814,10 @@ for i,hist in enumerate(histlist):
                 polar_hist.SetPoint(polar_hist.GetN(), theta, radius)
     polar_hist.SetLineColor(i+1)
     histogram = ROOT.TH2Poly("histogram{}".format(i), "", 0, 2 * ROOT.TMath.Pi(), 0, 2.0)
-    histogram.Fill(polar_hist)
+    for j in range(polar_hist.GetN()):
+        x, y = ROOT.Double(0), ROOT.Double(0)
+        polar_hist.GetPoint(j, x, y)
+        histogram.Fill(x, y)
     histogram_list.append(histogram)
 
 # Merge the TH2Poly objects and draw the resulting object on the TCanvas
