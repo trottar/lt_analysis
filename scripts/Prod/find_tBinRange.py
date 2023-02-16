@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 12:14:01 trottar"
+# Time-stamp: "2023-02-16 12:18:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,7 +113,7 @@ Wmax = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 
 ################################################################################################################################################
 
-def bin_data():
+def bin_data(histlist):
 
     ################################################################################################################################################
     # Define root file trees of interest
@@ -1471,7 +1471,7 @@ Ct = TCanvas()
 l_t = ROOT.TLegend(0.115,0.45,0.33,0.95)
 l_t.SetTextSize(0.0235)
 
-binned_data = bin_data()
+binned_data = bin_data(histlist)
 binned_phi = binned_data[0]
 binned_t = binned_data[1]
 
