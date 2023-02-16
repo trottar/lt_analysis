@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 19:30:03 trottar"
+# Time-stamp: "2023-02-15 19:35:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1798,7 +1798,7 @@ ROOT.gStyle.SetOptStat(0)
 #Cpht.Divide(2,2)
 
 # Create a TGraphPolar object to serve as the template for the polar plot
-polar_template = ROOT.TGraphPolar(360, 0, 2 * ROOT.TMath.Pi(), 0, 2.0)
+polar_template = ROOT.TGraphPolar()
 
 # Create a TH2Poly object to hold the TGraphPolar objects
 histogram = ROOT.TH2Poly("histogram", "", 0, 2 * ROOT.TMath.Pi(), 0, 2.0)
