@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 13:30:45 trottar"
+# Time-stamp: "2023-02-16 14:43:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,8 +41,7 @@ lt=Root(os.path.realpath(__file__),"Plot_Prod")
 
 ################################################################################################################################################
 
-def defineHists(phi_setting, inpDict):
-    
+def defineHists(phi_setting, inpDict):    
 
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 

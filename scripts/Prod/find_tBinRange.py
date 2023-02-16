@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:38:07 trottar"
+# Time-stamp: "2023-02-16 15:33:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,6 +20,7 @@ import root_numpy as rnp
 import ROOT
 import scipy
 import scipy.integrate as integrate
+from scipy.integrate import quad
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
 import array
@@ -157,8 +158,8 @@ def bin_data(histlist):
             print("Creating right t-bin histogram...")
             # Grab t bin range
             H_list_Right = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_RIGHT_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            H_t_Right = [tuple[0] for tuple in H_list_Right]
-            H_phi_Right = [tuple[1] for tuple in H_list_Right]
+            H_t_Right = [t[0] for t in H_list_Right]
+            H_phi_Right = [t[1] for t in H_list_Right]
 
         if hist["phi_setting"] == 'Left':
             InFile_LEFT_DATA = hist["InFile_DATA"]
@@ -172,8 +173,8 @@ def bin_data(histlist):
             print("\nCreating left t-bin histogram...")
             # Grab t bin range
             H_list_Left = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_LEFT_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            H_t_Left = [tuple[0] for tuple in H_list_Left]
-            H_phi_Left = [tuple[1] for tuple in H_list_Left]
+            H_t_Left = [t[0] for t in H_list_Left]
+            H_phi_Left = [t[1] for t in H_list_Left]
             
         if hist["phi_setting"] == 'Center':
             InFile_CENTER_DATA = hist["InFile_DATA"]
@@ -187,8 +188,8 @@ def bin_data(histlist):
             print("\nCreating center t-bin histogram...")
             # Grab t bin range
             H_list_Center = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_CENTER_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            H_t_Center = [tuple[0] for tuple in H_list_Center]
-            H_phi_Center = [tuple[1] for tuple in H_list_Center]
+            H_t_Center = [t[0] for t in H_list_Center]
+            H_phi_Center = [t[1] for t in H_list_Center]
             
     ################################################################################################################################################
 
@@ -312,7 +313,60 @@ for i,hist in enumerate(histlist):
 l_eff_plt.Draw()
 
 eff_plt.Print(outputpdf + '(')
-        
+
+c_yield = TCanvas()
+
+binned_data = bin_data(histlist)
+binned_phi = binned_data[0]
+
+# binned_phi[0] is missing a value for the final bin
+# so adding the first element allows the zip to include all bins
+# this is okay because the number of events per bin should be the same
+phibinvals = list(binned_phi[0])
+phibinvals.append(binned_phi[0][0])
+
+binned_t = binned_data[1]
+# binned_t[0] is missing a value for the final bin
+# so adding the first element allows the zip to include all bins
+# this is okay because the number of events per bin should be the same
+tbinvals = list(binned_t[0])
+tbinvals.append(binned_t[0][0])
+
+for i,hist in enumerate(histlist):
+    if hist["phi_setting"] == 'Right':
+        MM_Right_tmp = []
+        yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
+        for i,val in enumerate(npr.hist2array(hist["H_t_DATA"])):
+            tbin_index = np.digitize(val, tbinvals)
+            # Check if the bin index is within the bounds of the bin edges list
+            if tbin_index > 0 and tbin_index < len(tbinvals):
+                tbinedge = tbinvals[tbin_index]
+                phibin_index = np.digitize(val, phibinvals)
+                # Check if the bin index is within the bounds of the bin edges list
+                if phibin_index > 0 and phibin_index < len(phibinvals):
+                    phibinedge = phibinvals[phibin_index]
+                    MM_Right_tmp.append((tbinedge, phibinedge, val))
+
+        groups = {}
+        # Group the tuples by the first two elements using a dictionary
+        for t in MM_Right_tmp:
+            key = (t[0], t[1])
+            if key in groups:
+                groups[key].append(t[2])
+            else:
+                groups[key] = [t[2]]
+
+        # Extract the desired values from each group
+        MM_Right = []
+        for key, val in groups.items():
+            MM_Right.append(integrate.simps(val))
+            
+
+print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
+
+
+c_yield.Print(outputpdf)
+
 # Plot histograms
 c_pid = TCanvas()
 
@@ -389,10 +443,6 @@ Ct = TCanvas()
 l_t = ROOT.TLegend(0.115,0.45,0.33,0.95)
 l_t.SetTextSize(0.0235)
 
-binned_data = bin_data(histlist)
-binned_phi = binned_data[0]
-binned_t = binned_data[1]
-
 binmax = []
 for i,hist in enumerate(histlist):
     hist["H_t_DATA"].SetLineColor(i+1)
@@ -405,12 +455,7 @@ for i,hist in enumerate(histlist):
 binmax = max(binmax)
     
 tBin_line = TLine()
-# binned_t[0] is missing a value for the final bin
-# so adding the first element allows the zip to include all bins
-# this is okay because the number of events per bin should be the same
-binned_t0 = list(binned_t[0])
-binned_t0.append(binned_t[0][0])
-for i,(n,b) in enumerate(zip(binned_t0,binned_t[1])):
+for i,(n,b) in enumerate(zip(tbinvals,binned_t[1])):
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
     tBin_line.DrawLine(b,0,b,binmax)
@@ -823,7 +868,7 @@ for k in range(0, 10):
      # To change the arc radius we have to change number 0.6 in the lower line.
      Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
      Cpht.Update()
-for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
+for i,(n,b) in enumerate(zip(tbinvals,binned_t[1])):
      Arc.SetLineColor(3)
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number 0.6 in the lower line.
@@ -878,7 +923,7 @@ for k in range(0, 10):
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number tmax in the lower line.
      Arc.DrawArc(0,0,tmax*(k+1)/(10),0.,360.,"same")
-for i,(n,b) in enumerate(zip(binned_t[0],binned_t[1])):
+for i,(n,b) in enumerate(zip(tbinvals,binned_t[1])):
      Arc.SetLineColor(9)
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number tmax in the lower line.
