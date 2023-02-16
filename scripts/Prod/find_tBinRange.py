@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 16:03:37 trottar"
+# Time-stamp: "2023-02-16 16:04:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -338,10 +338,9 @@ for i,hist in enumerate(histlist):
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
+            print(val)
             tbin_index = np.digitize(val, np.sort(tbinvals))
             phibin_index = np.digitize(val, np.sort(phibinvals))
-            print(tbin_index)
-            print(phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
@@ -369,10 +368,9 @@ for i,hist in enumerate(histlist):
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
+            print(val)
             tbin_index = np.digitize(val, np.sort(tbinvals))
             phibin_index = np.digitize(val, np.sort(phibinvals))
-            print(tbin_index)
-            print(phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
@@ -400,10 +398,9 @@ for i,hist in enumerate(histlist):
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
+            print(val)
             tbin_index = np.digitize(val, np.sort(tbinvals))
             phibin_index = np.digitize(val, np.sort(phibinvals))
-            print(tbin_index)
-            print(phibin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
