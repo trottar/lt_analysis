@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 12:26:50 trottar"
+# Time-stamp: "2023-02-16 12:33:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,6 +67,34 @@ InData_efficiency_center = sys.argv[23]
 efficiency_table = sys.argv[24]
 
 particle = "kaon"
+
+inpDict = {
+    "kinematics" : kinematics,
+    "W" : W,
+    "Q2" : Q2,
+    "EPSVAL" : EPSVAL,
+    "InDATAFilename" : InDATAFilename,
+    "InDUMMYFilename" : InDUMMYFilename,
+    "OutFilename" : OutFilename,
+    "tmin" : tmin,
+    "tmax" : tmax,
+    "NumtBins" : NumtBins,
+    "NumPhiBins" : NumPhiBins,
+    "runNumRight" : runNumRight,
+    "runNumLeft" : runNumLeft,
+    "runNumCenter" : runNumCenter,
+    "data_charge_right" : data_charge_right,
+    "data_charge_left" : data_charge_left,
+    "data_charge_center" : data_charge_center,
+    "dummy_charge_right" : dummy_charge_right,
+    "dummy_charge_left" : dummy_charge_left,
+    "dummy_charge_center" : dummy_charge_center,
+    "InData_efficiency_right" : InData_efficiency_right,
+    "InData_efficiency_left" : InData_efficiency_left,
+    "InData_efficiency_center" : InData_efficiency_center,
+    "efficiency_table" : efficiency_table,
+    "particle" : particle,
+}
 
 ###############################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
@@ -269,7 +297,7 @@ def find_tbins(H_t_BinTest):
 phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
-    histlist.append(defineHists(phiset))
+    histlist.append(defineHists(phiset,inpDict))
 
 print("\n\n")
 

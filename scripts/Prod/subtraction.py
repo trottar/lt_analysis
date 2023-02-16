@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 12:23:36 trottar"
+# Time-stamp: "2023-02-16 12:43:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,37 +41,68 @@ from ltsep import Misc
 
 lt=Root(os.path.realpath(__file__),"Plot_Prod")
 
-# Add this to all files for more dynamic pathing
-USER=lt.USER # Grab user info for file finding
-HOST=lt.HOST
-REPLAYPATH=lt.REPLAYPATH
-UTILPATH=lt.UTILPATH
-LTANAPATH=lt.LTANAPATH
-ANATYPE=lt.ANATYPE
-OUTPATH=lt.OUTPATH
-
-foutname = OUTPATH+"/" + OutFilename + ".root"
-fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
-outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
-
-################################################################################################################################################
-'''
-Importing diamond cut script
-'''
-
-from DiamondPlot_all import DiamondPlot
-
-Q2Val = float(Q2.replace("p","."))
-WVal = float(W.replace("p","."))
-
-Q2min = Q2Val - (2/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
-Q2max = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
-Wmin = WVal - (2/7)*WVal # min y-range for Q2vsW plot
-Wmax = WVal + (2/7)*WVal # max y-range for Q2vsW plot
-
 ################################################################################################################################################
 
-def defineHists(phi_setting):
+def defineHists(phi_setting, inpDict):
+    
+
+    kinematics = inpDict["kinematicsinpDict"] 
+    W = inpDict["WinpDict"] 
+    Q2 = inpDict["Q2inpDict"] 
+    EPSVAL = inpDict["EPSVALinpDict"] 
+    InDATAFilename = inpDict["InDATAFilenameinpDict"] 
+    InDUMMYFilename = inpDict["InDUMMYFilenameinpDict"] 
+    OutFilename = inpDict["OutFilenameinpDict"] 
+    tmin = inpDict["tmininpDict"] 
+    tmax = inpDict["tmaxinpDict"] 
+    NumtBins = inpDict["NumtBinsinpDict"] 
+    NumPhiBins = inpDict["NumPhiBinsinpDict"] 
+    runNumRight = inpDict["runNumRightinpDict"] 
+    runNumLeft = inpDict["runNumLeftinpDict"] 
+    runNumCenter = inpDict["runNumCenterinpDict"] 
+    data_charge_right = inpDict["data_charge_rightinpDict"] 
+    data_charge_left = inpDict["data_charge_leftinpDict"] 
+    data_charge_center = inpDict["data_charge_centerinpDict"] 
+    dummy_charge_right = inpDict["dummy_charge_rightinpDict"] 
+    dummy_charge_left = inpDict["dummy_charge_leftinpDict"] 
+    dummy_charge_center = inpDict["dummy_charge_centerinpDict"] 
+    InData_efficiency_right = inpDict["InData_efficiency_rightinpDict"] 
+    InData_efficiency_left = inpDict["InData_efficiency_leftinpDict"] 
+    InData_efficiency_center = inpDict["InData_efficiency_centerinpDict"] 
+    efficiency_table = inpDict["efficiency_tableinpDict"] 
+    particle = inpDict["particleinpDict"] 
+    
+    ################################################################################################################################################
+    
+    # Add this to all files for more dynamic pathing
+    USER=lt.USER # Grab user info for file finding
+    HOST=lt.HOST
+    REPLAYPATH=lt.REPLAYPATH
+    UTILPATH=lt.UTILPATH
+    LTANAPATH=lt.LTANAPATH
+    ANATYPE=lt.ANATYPE
+    OUTPATH=lt.OUTPATH
+
+    foutname = OUTPATH+"/" + OutFilename + ".root"
+    fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
+    outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
+
+    ################################################################################################################################################
+    '''
+    Importing diamond cut script
+    '''
+
+    from DiamondPlot_all import DiamondPlot
+
+    Q2Val = float(Q2.replace("p","."))
+    WVal = float(W.replace("p","."))
+
+    Q2min = Q2Val - (2/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
+    Q2max = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
+    Wmin = WVal - (2/7)*WVal # min y-range for Q2vsW plot
+    Wmax = WVal + (2/7)*WVal # max y-range for Q2vsW plot
+
+    ################################################################################################################################################    
 
     ################################################################################################################################################
     # Call diamond cut script
