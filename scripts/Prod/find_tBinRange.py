@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 21:52:45 trottar"
+# Time-stamp: "2023-02-15 21:57:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1803,7 +1803,7 @@ ROOT.gStyle.SetOptStat(0)
 mg = ROOT.TMultiGraph()
 
 for i,hist in enumerate(histlist):
-    mg.Add(hist["phiq_vs_t_DATA"])
+    mg.Add(hist["poly_phiq_vs_t_DATA"])
 
 #mg.Draw("SURF2 POL")
 mg.Draw()
