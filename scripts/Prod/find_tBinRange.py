@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 00:53:48 trottar"
+# Time-stamp: "2023-02-16 00:56:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -722,9 +722,9 @@ def defineHists(phi_setting):
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
         '''
        # Must be outside diamond cuts to avoid weird overflow errors
-        polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
+        polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
 
-        print((polar_phiq_vs_t_DATA.GetN(), " ", evt.ph_q, " ", -evt.MandelT))
+        print((polar_phiq_vs_t_DATA.GetN(), " ", (evt.ph_q+math.pi)*(180/math.pi), " ", -evt.MandelT))
             
         if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
