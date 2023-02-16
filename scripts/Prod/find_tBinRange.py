@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 01:53:44 trottar"
+# Time-stamp: "2023-02-16 01:59:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1796,17 +1796,27 @@ Cpht = TCanvas()
 ROOT.gStyle.SetOptStat(0)
 
 for i,hist in enumerate(histlist):
-    histogram = ROOT.TH2D("hist", "hist", 100, 0, 360, 100, 0, 2.0)
+    # create a THist["Polar_Phiq_Vs_T_DATA"]2D to hold the cartesian data
+    cartesian = ROOT.THist["Polar_Phiq_Vs_T_DATA"]2D()
 
+    # convert the polar data to cartesian
     for i in range(hist["polar_phiq_vs_t_DATA"].GetN()):
-        x, y = ROOT.Double(0), ROOT.Double(0)
-        hist["polar_phiq_vs_t_DATA"].GetPolar(i, x, y)
-        histogram.Fill(x, y)
+        theta, radius = ROOT.Double(0), ROOT.Double(0)
+        hist["polar_phiq_vs_t_DATA"].GetPolar(i, theta, radius)
+        x = radius * ROOT.TMath.Cos(theta)
+        y = radius * ROOT.TMath.Sin(theta)
+        z = i
+        cartesian.SetPoint(i, x, y, z)
 
-# create the surface plot from the TH2D histogram
-surf = ROOT.TSurface("surf", "Surface plot", histogram)
-surf.SetContour(50)  # set the number of contours
-surf.Draw("SURF2 POL")  # draw the surface plot
+    # create a TCanvas to draw on
+    canvas = ROOT.TCanvas()
+
+    # create a THist["Polar_Phiq_Vs_T_DATA"]2DSurf to draw the surface
+    surf = ROOT.THist["Polar_Phiq_Vs_T_DATA"]2DSurf(cartesian)
+    surf.Draw("SURF1")
+
+    # draw the polar plot on top
+    hist["polar_phiq_vs_t_DATA"].Draw("SAME")
 
 Cpht.Update()
     
