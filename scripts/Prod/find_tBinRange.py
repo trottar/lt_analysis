@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 15:40:20 trottar"
+# Time-stamp: "2023-02-16 15:45:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -368,11 +368,11 @@ for i,hist in enumerate(histlist):
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,val in enumerate(rnp.hist2array(hist["H_t_DATA"])):
-            tbin_index = np.digitize(val, tbinvals)
+            tbin_index = np.digitize(val, np.sort(tbinvals))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and tbin_index < len(tbinvals):
                 tbinedge = tbinvals[tbin_index]
-                phibin_index = np.digitize(val, phibinvals)
+                phibin_index = np.digitize(val, np.sort(phibinvals))
                 # Check if the bin index is within the bounds of the bin edges list
                 if phibin_index > 0 and phibin_index < len(phibinvals):
                     phibinedge = phibinvals[phibin_index]
@@ -392,7 +392,6 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             MM_Left.append(integrate.simps(val))
             
-
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
         
     if hist["phi_setting"] == 'Center':
@@ -421,8 +420,7 @@ for i,hist in enumerate(histlist):
         # Extract the desired values from each group
         MM_Center = []
         for key, val in groups.items():
-            MM_Center.append(integrate.simps(val))
-            
+            MM_Center.append(integrate.simps(val))            
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
         
