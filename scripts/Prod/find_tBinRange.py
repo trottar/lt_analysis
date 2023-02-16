@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 13:15:21 trottar"
+# Time-stamp: "2023-02-16 13:18:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -215,14 +215,14 @@ def bin_data(histlist):
 
     for i,hist in enumerate(histlist):
         if hist["phi_setting"] == "Right":
-            H_t_Right = rnp.hist2numpy(hist["H_t_DATA"],return_edges=True)
-            H_phi_Right = rnp.hist2numpy(hist["H_ph_q_DATA"],return_edges=True)
+            H_t_Right = rnp.hist2array(hist["H_t_DATA"],return_edges=True)
+            H_phi_Right = rnp.hist2array(hist["H_ph_q_DATA"],return_edges=True)
         if hist["phi_setting"] == "Left":
-            H_t_Left = rnp.hist2numpy(hist["H_t_DATA"],return_edges=True)
-            H_phi_Left = rnp.hist2numpy(hist["H_ph_q_DATA"],return_edges=True)
+            H_t_Left = rnp.hist2array(hist["H_t_DATA"],return_edges=True)
+            H_phi_Left = rnp.hist2array(hist["H_ph_q_DATA"],return_edges=True)
         if hist["phi_setting"] == "Center":
-            H_t_Center = rnp.hist2numpy(hist["H_t_DATA"],return_edges=True)
-            H_phi_Center = rnp.hist2numpy(hist["H_ph_q_DATA"],return_edges=True)            
+            H_t_Center = rnp.hist2array(hist["H_t_DATA"],return_edges=True)
+            H_phi_Center = rnp.hist2array(hist["H_ph_q_DATA"],return_edges=True)            
             
     H_t_BinTest = []
     H_phi_BinTest = []
