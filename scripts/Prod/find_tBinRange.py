@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 22:52:04 trottar"
+# Time-stamp: "2023-02-15 22:52:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1810,7 +1810,7 @@ for i, hist in enumerate(histlist):
     graph.SetMarkerColor(i+1)
     multi_graph.Add(graph)
 
-multi_graph.Draw("PES")
+multi_graph.Draw("AOP")
 
 # Customize the polar surface plot
 multi_graph.GetXaxis().SetTitle("p_{T} (GeV/c)")
@@ -1819,7 +1819,7 @@ multi_graph.GetYaxis().SetTitleOffset(1.2)
 #multi_graph.GetZaxis().SetTitle("Counts")
 #multi_graph.GetZaxis().SetTitleOffset(1.5)
 
-#Cpht.Update()
+Cpht.Update()
     
 '''
 for i,hist in enumerate(histlist):
