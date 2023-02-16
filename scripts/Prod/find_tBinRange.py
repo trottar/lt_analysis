@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 19:20:45 trottar"
+# Time-stamp: "2023-02-15 19:30:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1797,19 +1797,35 @@ ROOT.gStyle.SetOptStat(0)
 
 #Cpht.Divide(2,2)
 
-h2d = ROOT.TH2D("h2d","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
+# Create a TGraphPolar object to serve as the template for the polar plot
+polar_template = ROOT.TGraphPolar(360, 0, 2 * ROOT.TMath.Pi(), 0, 2.0)
 
+# Create a TH2Poly object to hold the TGraphPolar objects
+histogram = ROOT.TH2Poly("histogram", "", 0, 2 * ROOT.TMath.Pi(), 0, 2.0)
 
+# Loop over the TH2D histograms and fill a TGraphPolar object for each one
 for i,hist in enumerate(histlist):
-    #Cpht.cd(i+1)
-    #hist["phiq_vs_t_DATA"].GetYaxis().SetRangeUser(tmin,tmax)
-    #hist["phiq_vs_t_DATA"].Draw("SURF2 POL")
-    #hist["phiq_vs_t_DATA"].SetTitle(phisetlist[i])
-    h2d.Add(hist["phiq_vs_t_DATA"])
+    polar_hist = ROOT.TGraphPolar()
+    for binx in range(1, hist.GetNbinsX()+1):
+        for biny in range(1, hist.GetNbinsY()+1):
+            radius = hist.GetBinContent(binx, biny)
+            if radius > 0:
+                theta = hist.GetXaxis().GetBinCenter(binx)
+                polar_hist.SetPoint(polar_hist.GetN(), theta, radius)
+    polar_hist.SetLineColor(i+1)
+    histogram.Add(polar_hist)
 
-h2d.GetYaxis().SetRangeUser(tmin,tmax)
-h2d.Draw("SURF2 POL")
-h2d.SetTitle(phisetlist[i])
+# Draw the TH2Poly object on the TCanvas
+histogram.Draw("COLZ POL SAME")
+polar_template.Draw("L SAME")
+
+# Set the canvas range and labels
+histogram.GetXaxis().SetTitle("Phi")
+histogram.GetYaxis().SetTitle("Radius")
+histogram.SetStats(0)
+histogram.GetYaxis().SetTitleOffset(1.4)
+histogram.GetYaxis().SetTitleSize(0.05)
+histogram.GetXaxis().SetTitleSize(0.05)
 
 '''
 # Section for polar plotting
