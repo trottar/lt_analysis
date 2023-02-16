@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 23:27:45 trottar"
+# Time-stamp: "2023-02-15 23:57:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1807,9 +1807,9 @@ for i, hist in enumerate(histlist):
 for i, hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     multi_graph.Add(hist["polar_phiq_vs_t_DATA"])
     Cpht.Update()
+    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
 
 multi_graph.Draw("AOP")
 
