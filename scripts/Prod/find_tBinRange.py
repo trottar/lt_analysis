@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 02:55:51 trottar"
+# Time-stamp: "2023-02-16 12:14:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,15 +113,19 @@ Wmax = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 
 ################################################################################################################################################
 
-def find_tbins():
+def bin_data():
 
     ################################################################################################################################################
     # Define root file trees of interest
-    
+    '''
     H_t_Right = []
     H_t_Left = []
     H_t_Center = []
 
+    H_phi_Righphi = []
+    H_phi_Lefphi = []
+    H_phi_Cenphier = []
+    
     #for val in ['Right', 'Left', 'Center']:
     for val in settingList:
         rootFile = OUTPATH+"/"+InDATAFilename+"_%s.root" % val
@@ -143,7 +147,8 @@ def find_tbins():
                     # Progress bar
                     Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries(),bar_length=25)
                     if (tmin <= -evt.MandelT <= tmax):
-                        H_t_Right.append(-evt.MandelT)   
+                        H_t_Right.append(-evt.MandelT)
+                        H_phi_Right.append((evt.ph_q+math.pi)*(180/math.pi))
                 #rbins,H_t_Right = np.histogram(H_t_Right,bins=200)
                 
                 InFile_RIGHT_DATA.Close()            
@@ -164,6 +169,7 @@ def find_tbins():
                     Misc.progressBar(i, TBRANCH_LEFT_DATA.GetEntries(),bar_length=25)
                     if (tmin <= -evt.MandelT <= tmax):
                         H_t_Left.append(-evt.MandelT)
+                        H_phi_Left.append((evt.ph_q+math.pi)*(180/math.pi))
                 #lbins,H_t_Left = np.histogram(H_t_Left,bins=200)
                 InFile_LEFT_DATA.Close()
                 
@@ -183,8 +189,49 @@ def find_tbins():
                     Misc.progressBar(i, TBRANCH_CENTER_DATA.GetEntries(),bar_length=25)
                     if (tmin <= -evt.MandelT <= tmax):
                         H_t_Center.append(-evt.MandelT)
+                        H_phi_Right.append((evt.ph_q+math.pi)*(180/math.pi))
                 #cbins,H_t_Center = np.histogram(H_t_Center,bins=200)
                 InFile_CENTER_DATA.Close()        
+    '''
+    ################################################################################################################################################
+
+    for i,hist in enumerate(histlist):
+        if hist["phi_setting"] == "Right":
+            H_t_Right = hist["H_t_DATA"].GetArray()
+            H_phi_Righphi = hist["H_ph_q_DATA"].GetArray()
+
+        if hist["phi_setting"] == "Left":
+            H_t_Left = hist["H_t_DATA"].GetArray()
+            H_phi_Lefphi = hist["H_ph_q_DATA"].GetArray()
+
+        if hist["phi_setting"] == "Center":
+            H_t_Center = hist["H_t_DATA"].GetArray()
+            H_phi_Cenphier = hist["H_ph_q_DATA"].GetArray()
+
+    for val in settingList:
+        if val == "Right":
+            H_t_BinTest = [r for r in H_t_Right]
+            H_phi_BinTest = [r for r in H_phi_Right]
+        if val == "Left":
+            H_t_BinTest = [r for r in H_t_Left]
+            H_phi_BinTest = [r for r in H_phi_Left]
+        if val == "Center":
+            H_t_BinTest = [r for r in H_t_Center]
+            H_phi_BinTest = [r for r in H_phi_Center]
+            
+    return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
+
+
+def find_phibins(H_phi_BinTest):
+
+    phi_arr = np.linspace(0.0, 360.0, NumPhiBins)
+
+    n, bins, patches = plt.hist(H_phi_BinTest, phi_arr)
+
+    return [n,bins]
+
+def find_tbins(H_t_BinTest):
+
                 
     ################################################################################################################################################
 
@@ -204,20 +251,6 @@ def find_tbins():
         # In this case, this returns a sorted copy of the array
         return np.interp(np.linspace(0, npt, nbin + 1),np.arange(npt),np.sort(x))
 
-    ################################################################################################################################################
-    
-    H_t_BinTest = []
-    for val in settingList:
-        if val == "Right":
-            for r in H_t_Right:
-                H_t_BinTest.append(r)
-        if val == "Left":
-            for l in H_t_Left:
-                H_t_BinTest.append(l)
-        if val == "Center":
-            for c in H_t_Center:
-                H_t_BinTest.append(c)
-
     # Histogram takes the array data set and the bins as input
     # The bins are determined by a linear interpolation (see function above)
     # This returns the binned data with equal number of events per bin
@@ -228,10 +261,6 @@ def find_tbins():
     # such containers if there are multiple input datasets.
     n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, NumtBins))
     
-    rn, rbins = np.histogram(H_t_Right, bins=bins)
-    ln, lbins = np.histogram(H_t_Left, bins=bins)
-    cn, cbins = np.histogram(H_t_Center, bins=bins)
-
     # Write t_bin_interval for lt_analysis scripts
     lines = []
     with open("{}/src/t_bin_interval_{}_{:.0f}".format(LTANAPATH,Q2.replace("p",""),float(EPSVAL)*100), "w") as file:
@@ -1442,7 +1471,10 @@ Ct = TCanvas()
 l_t = ROOT.TLegend(0.115,0.45,0.33,0.95)
 l_t.SetTextSize(0.0235)
 
-binned_t = find_tbins()
+binned_data = bin_data()
+binned_phi = binned_data[0]
+binned_t = binned_data[1]
+
 binmax = []
 for i,hist in enumerate(histlist):
     hist["H_t_DATA"].SetLineColor(i+1)
