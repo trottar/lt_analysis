@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 02:13:26 trottar"
+# Time-stamp: "2023-02-16 02:19:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1310,7 +1310,6 @@ def defineHists(phi_setting):
         "InFile_SIMC" : InFile_SIMC,
     }
 
-    print("\n\n~~~~~~~~~~~~~~~~~~~~",type(polar_phiq_vs_t_DATA))
     return histDict
 
 ################################################################################################################################################
@@ -1798,9 +1797,6 @@ ROOT.gStyle.SetOptStat(0)
 # Create a new TMultiGraph object
 multi_graph = ROOT.TMultiGraph()
 
-for i, hist in enumerate(histlist):
-    print("~~~~~~~~~~~~~~~~~~",hist["polar_phiq_vs_t_DATA"])
-    
 # Loop over each TGraphPolar object and add it to the TMultiGraph
 for i, hist in enumerate(histlist):
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
@@ -1896,7 +1892,7 @@ for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    hist["polar_phiq_vs_t_DATA"].Draw("AOP")
+    hist["polar_phiq_vs_t_DATA"].Draw("COLZ, same")
     Cphtsame.Update()
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     # Hide radial axis labels since redefined below
