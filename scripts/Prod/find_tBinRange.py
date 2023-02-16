@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 22:41:27 trottar"
+# Time-stamp: "2023-02-15 22:45:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1816,8 +1816,8 @@ multi_graph.Draw("PES")
 multi_graph.GetXaxis().SetTitle("p_{T} (GeV/c)")
 multi_graph.GetYaxis().SetTitle("#phi")
 multi_graph.GetYaxis().SetTitleOffset(1.2)
-multi_graph.GetZaxis().SetTitle("Counts")
-multi_graph.GetZaxis().SetTitleOffset(1.5)
+#multi_graph.GetZaxis().SetTitle("Counts")
+#multi_graph.GetZaxis().SetTitleOffset(1.5)
 
 Cpht.Update()
     
