@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 02:08:39 trottar"
+# Time-stamp: "2023-02-16 02:13:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1809,7 +1809,7 @@ for i, hist in enumerate(histlist):
     Cpht.Update()
     #hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
 
-multi_graph.Draw("AOP")
+multi_graph.Draw("SURF2 POL")
 
 # Customize the polar surface plot
 multi_graph.GetXaxis().SetTitle("p_{T} (GeV/c)")
@@ -1896,8 +1896,7 @@ for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    #hist["polar_phiq_vs_t_DATA"].Draw("AOP")
-    hist["polar_phiq_vs_t_DATA"].Draw("COLZ")
+    hist["polar_phiq_vs_t_DATA"].Draw("AOP")
     Cphtsame.Update()
     hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
     # Hide radial axis labels since redefined below
