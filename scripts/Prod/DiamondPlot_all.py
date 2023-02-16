@@ -288,7 +288,8 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
                             print("!!!!! ERROR !!!!!\n Bad Fit! Check lowe file or change Q2min/Q2max range! \n!!!!! ERROR !!!!!")
                             lowe_input = False
                             badfile = True
-                            break
+                            #break
+                            sys.exit(1)
                     if (badfile == True):
                         break
                     #print("Bins",b,"good")
