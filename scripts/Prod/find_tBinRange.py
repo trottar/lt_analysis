@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 02:45:12 trottar"
+# Time-stamp: "2023-02-16 02:51:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1894,6 +1894,7 @@ for i,hist in enumerate(histlist):
     # set colors for the TGraphPolar object
     hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
     hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
+    hist["polar_phiq_vs_t_DATA"].SetMarkerStyle(ROOT.kFullCircle)
     hist["polar_phiq_vs_t_DATA"].SetLineColor(i+1)
     hist["polar_phiq_vs_t_DATA"].Draw("SURF2 AOP")
     Cphtsame.Update()
