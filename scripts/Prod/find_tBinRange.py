@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 20:20:37 trottar"
+# Time-stamp: "2023-02-15 20:27:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1822,8 +1822,8 @@ for i,hist in enumerate(histlist):
 
 # Merge the TH2Poly objects and draw the resulting object on the TCanvas
 histogram = histogram_list[0]
-for i in range(1, len(histogram_list)):
-    histogram.Merge(histogram_list[i])
+histogram_list.remove(histogram) # Remove first element from list
+histogram.Merge(ROOT.TList(histogram_list)) # Merge remaining elements
 histogram.Draw("COLZ POL SAME")
 polar_template.Draw("L SAME")
 
