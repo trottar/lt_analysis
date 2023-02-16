@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:13:49 trottar"
+# Time-stamp: "2023-02-16 14:16:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,8 +141,8 @@ def bin_data(histlist):
     H_t_Center = []
 
     H_phi_Right = []
-    H_phi_Lefphi = []
-    H_phi_Cenphier = []
+    H_phi_Left = []
+    H_phi_Center = []
     
     for i,hist in enumerate(histlist):
         if hist["phi_setting"] == 'Right':
