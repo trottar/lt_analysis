@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 23:14:52 trottar"
+# Time-stamp: "2023-02-15 23:21:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1333,8 +1333,6 @@ for i,hist in enumerate(histlist):
         histlist.remove(hist)
     else:
         settingList.append(hist["phi_setting"])
-
-print("~~~~~~~",histlist)
         
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()
@@ -1799,18 +1797,16 @@ Cpht = TCanvas()
 # Removes stat box
 ROOT.gStyle.SetOptStat(0)
 
-#Cpht.Divide(2,2)
-
 # Create a new TMultiGraph object
 multi_graph = ROOT.TMultiGraph()
 
 # Loop over each TGraphPolar object and add it to the TMultiGraph
 for i, hist in enumerate(histlist):
-    graph = hist["polar_phiq_vs_t_DATA"]
-    graph.SetMarkerSize(2)
-    graph.SetMarkerColor(i+1)
-    graph.GetPolargram().SetRangeRadial(0, 2.0)
-    multi_graph.Add(graph)
+    hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
+    hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
+    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
+    multi_graph.Add(hist["polar_phiq_vs_t_DATA"])
+    Cpht.Update()
 
 multi_graph.Draw("AOP")
 
@@ -1824,8 +1820,10 @@ multi_graph.GetYaxis().SetTitleOffset(1.2)
 Cpht.Update()
     
 '''
+Cpht.Divide(2,2)
+
 for i,hist in enumerate(histlist):
-    #Cpht.cd(i+1)
+    Cpht.cd(i+1)
     hist["phiq_vs_t_DATA"].GetYaxis().SetRangeUser(tmin,tmax)
     hist["phiq_vs_t_DATA"].Draw("SURF2 POL")
     hist["phiq_vs_t_DATA"].SetTitle(phisetlist[i])
