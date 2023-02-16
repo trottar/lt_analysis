@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 14:10:20 trottar"
+# Time-stamp: "2023-02-16 14:13:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,7 +140,7 @@ def bin_data(histlist):
     H_t_Left = []
     H_t_Center = []
 
-    H_phi_Righphi = []
+    H_phi_Right = []
     H_phi_Lefphi = []
     H_phi_Cenphier = []
     
@@ -162,7 +162,6 @@ def bin_data(histlist):
                 if (tmin <= -evt.MandelT <= tmax):
                     H_t_Right.append(-evt.MandelT)
                     H_phi_Right.append((evt.ph_q+math.pi)*(180/math.pi))
-            #rbins,H_t_Right = np.histogram(H_t_Right,bins=200)
 
         if hist["phi_setting"] == 'Left':
             InFile_LEFT_DATA = hist["InFile_DATA"]
@@ -181,7 +180,6 @@ def bin_data(histlist):
                 if (tmin <= -evt.MandelT <= tmax):
                     H_t_Left.append(-evt.MandelT)
                     H_phi_Left.append((evt.ph_q+math.pi)*(180/math.pi))
-            #lbins,H_t_Left = np.histogram(H_t_Left,bins=200)
 
         if hist["phi_setting"] == 'Center':
             InFile_CENTER_DATA = hist["InFile_DATA"]
@@ -200,8 +198,6 @@ def bin_data(histlist):
                 if (tmin <= -evt.MandelT <= tmax):
                     H_t_Center.append(-evt.MandelT)
                     H_phi_Right.append((evt.ph_q+math.pi)*(180/math.pi))
-            #cbins,H_t_Center = np.histogram(H_t_Center,bins=200)
-
 
     ################################################################################################################################################
 
