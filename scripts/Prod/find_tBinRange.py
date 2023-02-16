@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 02:29:26 trottar"
+# Time-stamp: "2023-02-16 02:34:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1794,30 +1794,27 @@ Cpht = TCanvas()
 # Removes stat box
 ROOT.gStyle.SetOptStat(0)
 
-# Create a TH2D histogram to hold the plot data
-histogram = ROOT.TH2D("hist", "", 100, -1.0, 1.0, 100, -1.0, 1.0)
+# Create a new TMultiGraph object
+multi_graph = ROOT.TMultiGraph()
 
 # Loop over each TGraphPolar object and add it to the TMultiGraph
 for i, hist in enumerate(histlist):
+    hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
+    hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
+    hist["polar_phiq_vs_t_DATA"].SetMarkerStyle(ROOT.kFullCircle)
     hist["polar_phiq_vs_t_DATA"].SetLineColor(i+1)
+    multi_graph.Add(hist["polar_phiq_vs_t_DATA"])
+    Cpht.Update()
+    #hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
 
-for i, hist in enumerate(histlist):    
-    for i in range(hist["polar_phiq_vs_t_DATA"].GetN()):
-        r = hist["polar_phiq_vs_t_DATA"].GetR()[i]
-        theta = hist["polar_phiq_vs_t_DATA"].GetPolar()[i]
-        histogram.Fill(r * ROOT.TMath.Cos(theta), r * ROOT.TMath.Sin(theta), graph2.GetW()[i])
+multi_graph.Draw("COLZ")
 
-# Draw the TH2D histogram with the COLZ option to display the plot as a color map
-histogram.Draw("COLZ")
-
-# Draw each TGraphPolar plot on top of the color map
-for i, hist in enumerate(histlist):
-    hist["polar_phiq_vs_t_DATA"].Draw("same")
-
-# Set the title and axis labels for the plot
-histogram.SetTitle("My Plot Title")
-histogram.GetXaxis().SetTitle("X Axis Label")
-histogram.GetYaxis().SetTitle("Y Axis Label")
+# Customize the polar surface plot
+multi_graph.GetXaxis().SetTitle("p_{T} (GeV/c)")
+multi_graph.GetYaxis().SetTitle("#phi")
+multi_graph.GetYaxis().SetTitleOffset(1.2)
+#multi_graph.GetZaxis().SetTitle("Counts")
+#multi_graph.GetZaxis().SetTitleOffset(1.5)
 
 Cpht.Update()
     
