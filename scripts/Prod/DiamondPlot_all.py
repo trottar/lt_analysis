@@ -233,7 +233,7 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
             maxQ = Q2_cut.FindLastBinAbove(0)
             fitrange = int((maxQ-minQ)/8)
             #print("fitrange: ",fitrange)
-            minbin = 3
+            minbin = 1
             badfile = False
             #print (minQ, minQ/400*(Q2max-Q2min)+Q2min,maxQ,maxQ/400*(Q2max-Q2min)+Q2min,fitrange)
             print("Q2Val Bin Val: ",Q2vsW_lowe_cut.FindBin(Q2Val))
@@ -288,8 +288,7 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
                             print("!!!!! ERROR !!!!!\n Bad Fit! Check lowe file or change Q2min/Q2max range! \n!!!!! ERROR !!!!!")
                             lowe_input = False
                             badfile = True
-                            #break
-                            sys.exit(1)
+                            break
                     if (badfile == True):
                         break
                     #print("Bins",b,"good")
@@ -331,7 +330,7 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
                     print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
                 else:
                     print ("\n!!!!! Bad Diamond Fit!! Try Reducing fitrange or Increasing minbin and Retrying !!!!!\n")
-                    #fitrange -= 5
+                    fitrange -= 5
                     #minbin -= 1
                 badfit=False
         
