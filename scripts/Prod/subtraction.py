@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 17:36:33 trottar"
+# Time-stamp: "2023-02-16 17:39:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -94,10 +94,10 @@ def defineHists(phi_setting, inpDict):
     Q2Val = float(Q2.replace("p","."))
     WVal = float(W.replace("p","."))
 
-    Q2min = Q2Val - (1/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
-    Q2max = Q2Val + (1/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
-    Wmin = WVal - (1/7)*WVal # min y-range for Q2vsW plot
-    Wmax = WVal + (1/7)*WVal # max y-range for Q2vsW plot
+    Q2min = Q2Val - (3/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
+    Q2max = Q2Val + (3/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
+    Wmin = WVal - (3/7)*WVal # min y-range for Q2vsW plot
+    Wmax = WVal + (3/7)*WVal # max y-range for Q2vsW plot
 
     ################################################################################################################################################    
 
