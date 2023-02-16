@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 18:28:18 trottar"
+# Time-stamp: "2023-02-16 18:33:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -388,8 +388,8 @@ for i,hist in enumerate(histlist):
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
             tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
             phibin_index = np.searchsorted(np.sort(phibinvals), (evt.ph_q+math.pi)*(180/math.pi))
-            print("if {tbin_index} > 0 and {-evt.MandelT} <= {tbinvals[tbin_index-1]}")
-            print("if {tbin_index} < {len(tbinvals)} and {-evt.MandelT} >= {tbinvals[tbin_index]}")
+            print("if {} > 0 and {} <= {}".format(tbin_index,-evt.MandelT,tbinvals[tbin_index-1]))
+            print("if {} < {} and {} >= {}".format(tbin_index,len(tbinvals),-evt.MandelT,tbinvals[tbin_index]))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
                 tbinedge = tbin_index-1
