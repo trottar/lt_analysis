@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 19:18:01 trottar"
+# Time-stamp: "2023-02-15 19:20:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1809,7 +1809,7 @@ for i,hist in enumerate(histlist):
 
 h2d.GetYaxis().SetRangeUser(tmin,tmax)
 h2d.Draw("SURF2 POL")
-h2d..SetTitle(phisetlist[i])
+h2d.SetTitle(phisetlist[i])
 
 '''
 # Section for polar plotting
