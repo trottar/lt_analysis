@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 19:49:26 trottar"
+# Time-stamp: "2023-02-15 19:59:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1813,7 +1813,7 @@ for i,hist in enumerate(histlist):
                 theta = hist["phiq_vs_t_DATA"].GetXaxis().GetBinCenter(binx)
                 polar_hist.SetPoint(polar_hist.GetN(), theta, radius)
     polar_hist.SetLineColor(i+1)
-    histogram.Add(polar_hist)
+    histogram.Add(polar_hist, 1)
 
 # Draw the TH2Poly object on the TCanvas
 histogram.Draw("COLZ POL SAME")
