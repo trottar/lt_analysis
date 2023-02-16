@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 18:33:24 trottar"
+# Time-stamp: "2023-02-16 18:38:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -319,10 +319,10 @@ c_yield = TCanvas()
 binned_data = bin_data(histlist)
 
 binned_phi = binned_data[0]
-phibinvals = list(binned_phi[1])
+phibinvals = np.sort(list(binned_phi[1]))
 
 binned_t = binned_data[1]
-tbinvals = list(binned_t[1])
+tbinvals = np.sort(list(binned_t[1]))
 
 for i,hist in enumerate(histlist):
 
@@ -339,8 +339,8 @@ for i,hist in enumerate(histlist):
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_RIGHT_DATA):
-            tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
-            phibin_index = np.searchsorted(np.sort(phibinvals), (evt.ph_q+math.pi)*(180/math.pi))
+            tbin_index = np.searchsorted(tbinvals, -evt.MandelT)
+            phibin_index = np.searchsorted(phibinvals, (evt.ph_q+math.pi)*(180/math.pi))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
                 tbinedge = tbin_index-1
@@ -386,8 +386,8 @@ for i,hist in enumerate(histlist):
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
-            tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
-            phibin_index = np.searchsorted(np.sort(phibinvals), (evt.ph_q+math.pi)*(180/math.pi))
+            tbin_index = np.searchsorted(tbinvals, -evt.MandelT)
+            phibin_index = np.searchsorted(phibinvals, (evt.ph_q+math.pi)*(180/math.pi))
             print("if {} > 0 and {} <= {}".format(tbin_index,-evt.MandelT,tbinvals[tbin_index-1]))
             print("if {} < {} and {} >= {}".format(tbin_index,len(tbinvals),-evt.MandelT,tbinvals[tbin_index]))
             # Check if the bin index is within the bounds of the bin edges list
@@ -435,8 +435,8 @@ for i,hist in enumerate(histlist):
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
-            tbin_index = np.searchsorted(np.sort(tbinvals), -evt.MandelT)
-            phibin_index = np.searchsorted(np.sort(phibinvals), (evt.ph_q+math.pi)*(180/math.pi))
+            tbin_index = np.searchsorted(tbinvals, -evt.MandelT)
+            phibin_index = np.searchsorted(phibinvals, (evt.ph_q+math.pi)*(180/math.pi))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= tbinvals[tbin_index-1]:
                 tbinedge = tbin_index-1
