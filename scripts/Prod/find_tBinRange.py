@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 13:32:38 trottar"
+# Time-stamp: "2023-02-16 13:37:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,9 +224,19 @@ def bin_data(histlist):
             H_t_Center = rnp.hist2array(hist["H_t_DATA"])
             H_phi_Center = rnp.hist2array(hist["H_ph_q_DATA"])            
             
-    H_t_BinTest = H_t_Right+H_t_Left+H_t_Center
-    H_phi_BinTest = H_phi_Right+H_phi_Left+H_phi_Center
-    
+    H_t_BinTest = []
+    H_phi_BinTest = []
+    for val in settingList:
+        if val == "Right":
+            H_t_BinTest += H_t_Right
+            H_phi_BinTest += H_phi_Right
+        if val == "Left":
+            H_t_BinTest += H_t_Left
+            H_phi_BinTest += H_phi_Left
+        if val == "Center":
+            H_t_BinTest += H_t_Center
+            H_phi_BinTest += H_phi_Center
+            
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
 
 
