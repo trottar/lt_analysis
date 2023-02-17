@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:02:51 trottar"
+# Time-stamp: "2023-02-17 02:08:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -494,13 +494,13 @@ for i,hist in enumerate(histlist):
         H_yield_SIMC = ROOT.TH1D("H_yieldRight_SIMC", "Simc Yield", NumtBins*NumPhiBins, -100.0, 100.0)
         for evt in TBRANCH_RIGHT_SIMC:
             for j in range(len(tbinedges) - 1):
-                if tbinedges[j] <= evt.t*evt.Weight < tbinedges[j+1]:
+                if tbinedges[j] <= evt.t < tbinedges[j+1]:
                     tbin_index = j
                 else:
                     tbin_index = None
                 if tbin_index != None:
                     for k in range(len(phibinedges) - 1):
-                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi)*evt.Weight < phibinedges[k+1]:
+                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi) < phibinedges[k+1]:
                             phibin_index = k
                         else:
                             phibin_index = None
@@ -536,18 +536,18 @@ for i,hist in enumerate(histlist):
         H_yield_SIMC = ROOT.TH1D("H_yieldLeft_SIMC", "Simc Yield", NumtBins*NumPhiBins, -100.0, 100.0)
         for evt in TBRANCH_LEFT_SIMC:
             for j in range(len(tbinedges) - 1):
-                if tbinedges[j] <= evt.t*evt.Weight < tbinedges[j+1]:
+                if tbinedges[j] <= evt.t < tbinedges[j+1]:
                     tbin_index = j
                 else:
                     tbin_index = None
                 if tbin_index != None:
                     for k in range(len(phibinedges) - 1):
-                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi)*evt.Weight < phibinedges[k+1]:
+                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi) < phibinedges[k+1]:
                             phibin_index = k
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            MM_Left_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))))
+                            MM_Left_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))*evt.Weight))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -578,18 +578,18 @@ for i,hist in enumerate(histlist):
         H_yield_SIMC = ROOT.TH1D("H_yieldCenter_SIMC", "Simc Yield", NumtBins*NumPhiBins, -100.0, 100.0)
         for evt in TBRANCH_CENTER_SIMC:
             for j in range(len(tbinedges) - 1):
-                if tbinedges[j] <= evt.t*evt.Weight < tbinedges[j+1]:
+                if tbinedges[j] <= evt.t < tbinedges[j+1]:
                     tbin_index = j
                 else:
                     tbin_index = None
                 if tbin_index != None:
                     for k in range(len(phibinedges) - 1):
-                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi)*evt.Weight < phibinedges[k+1]:
+                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi) < phibinedges[k+1]:
                             phibin_index = k
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            MM_Center_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))))
+                            MM_Center_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))*evt.Weight))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
