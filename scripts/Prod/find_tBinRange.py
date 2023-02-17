@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 20:12:52 trottar"
+# Time-stamp: "2023-02-16 20:16:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -351,7 +351,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Right_tmp = []
-        yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
+        yield_Right = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_RIGHT_DATA):
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -383,7 +383,7 @@ for i,hist in enumerate(histlist):
             MM_Right.append(integrate.simps(val))
             yield_Right.Fill(integrate.simps(val))
             
-        yield_Right.Draw("smae")        
+        yield_Right.Draw("same")        
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
     
     if hist["phi_setting"] == 'Left':
@@ -397,7 +397,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Left_tmp = []
-        yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
+        yield_Left = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -429,7 +429,7 @@ for i,hist in enumerate(histlist):
             MM_Left.append(integrate.simps(val))
             yield_Left.Fill(integrate.simps(val))
             
-        yield_Left.Draw("smae")        
+        yield_Left.Draw("same")        
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
 
     if hist["phi_setting"] == 'Center':
@@ -443,7 +443,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Center_tmp = []
-        yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
+        yield_Center = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -475,7 +475,7 @@ for i,hist in enumerate(histlist):
             MM_Center.append(integrate.simps(val))
             yield_Center.Fill(integrate.simps(val))
             
-        yield_Center.Draw("smae")        
+        yield_Center.Draw("same")        
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
         
 c_yield.Print(outputpdf)
