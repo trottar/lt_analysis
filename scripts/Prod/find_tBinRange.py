@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 20:45:15 trottar"
+# Time-stamp: "2023-02-16 23:24:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,7 +337,6 @@ tbinedges = np.append(binned_t[1],tmin)
 tbinedges = np.append(tbinedges, tmax)
 phibinedges = binned_phi[1]
 
-print("\n\n~~~~~~~~~~~~~~",phibinedges,"\n",tbinedges)
 for i,hist in enumerate(histlist):
 
     if hist["phi_setting"] == 'Right':
@@ -377,15 +376,15 @@ for i,hist in enumerate(histlist):
                 groups[key] = [t[2]]
 
         # Extract the desired values from each group
-        MM_Right = []
+        yieldRightDict = {}
         for key, val in groups.items():
-            print(key, " -> ", val)
-            MM_Right.append(integrate.simps(val)/(data_charge_right))
-            yield_Right.Fill(integrate.simps(val)/(data_charge_right))
+            yieldRightDict[key] = integrate.simps(val)/data_charge_right
+            yield_Right.Fill(integrate.simps(val)/data_charge_right)
+        hist["yieldDict"] = yieldRightDict
+        hist["yield"] = yield_Right
 
         yield_Right.SetLineColor(i+1)            
         yield_Right.Draw("same")
-        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
     
     if hist["phi_setting"] == 'Left':
         InFile_LEFT_DATA = hist["InFile_DATA"]
@@ -424,15 +423,15 @@ for i,hist in enumerate(histlist):
                 groups[key] = [t[2]]
 
         # Extract the desired values from each group
-        MM_Left = []
+        yieldLeftDict = {}
         for key, val in groups.items():
-            print(key, " -> ", val)
-            MM_Left.append(integrate.simps(val)/(data_charge_left))
-            yield_Left.Fill(integrate.simps(val)/(data_charge_left))
+            yieldLeftDict[key] = integrate.simps(val)/data_charge_left
+            yield_Left.Fill(integrate.simps(val)/data_charge_left)
+        hist["yieldDict"] = yieldLeftDict
+        hist["yield"] = yield_Left
 
         yield_Left.SetLineColor(i+1)            
         yield_Left.Draw("same")
-        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
 
     if hist["phi_setting"] == 'Center':
         InFile_CENTER_DATA = hist["InFile_DATA"]
@@ -471,17 +470,32 @@ for i,hist in enumerate(histlist):
                 groups[key] = [t[2]]
 
         # Extract the desired values from each group
-        MM_Center = []
+        yieldCenterDict = {}
         for key, val in groups.items():
-            print(key, " -> ", val)
-            MM_Center.append(integrate.simps(val)/(data_charge_center))
-            yield_Center.Fill(integrate.simps(val)/(data_charge_center))
+            yieldCenterDict[key] = integrate.simps(val)/data_charge_center
+            yield_Center.Fill(integrate.simps(val)/data_charge_center)
+        hist["yieldDict"] = yieldCenterDict
+        hist["yield"] = yield_Center
 
         yield_Center.SetLineColor(i+1)            
         yield_Center.Draw("same")
-        print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
         
 c_yield.Print(outputpdf)
+
+c_yieldbin = TCanvas()
+
+c_yieldbin.Divide(len(hist["yieldDict"])/2, len(hist["yieldDict"])/2)
+
+for i,hist in enumerate(histlist):
+    for j in range(hist["yield"].GetNbinsX()):
+        yieldbin = ROOT.TH1D()
+        bin_content = hist.GetBinContent(j)
+        for k, (key, value) in enumerate(hist["yieldDict"].items()):
+            if value == bin_content:
+                yieldbin.Fill(bin_content)
+                yieldbin.Draw("same")
+                c_yieldbin.cd(k+1)
+c_yieldbin.Print(outputpdf)
 
 # Plot histograms
 c_pid = TCanvas()
