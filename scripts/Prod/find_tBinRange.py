@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 01:36:27 trottar"
+# Time-stamp: "2023-02-17 01:41:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -380,7 +380,7 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldRightDict[key] = integrate.simps(val)*hist["normfac_data"]
             H_yield_DATA.Fill(integrate.simps(val)*hist["normfac_data"])
-        hist["yieldDict"] = yieldRightDict
+        hist["yieldDictData"] = yieldRightDict
         hist["H_yield_DATA"] = H_yield_DATA
 
         H_yield_DATA.SetLineColor(i+1)            
@@ -427,7 +427,7 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldLeftDict[key] = integrate.simps(val)*hist["normfac_data"]
             H_yield_DATA.Fill(integrate.simps(val)*hist["normfac_data"])
-        hist["yieldDict"] = yieldLeftDict
+        hist["yieldDictData"] = yieldLeftDict
         hist["H_yield_DATA"] = H_yield_DATA
 
         H_yield_DATA.SetLineColor(i+1)            
@@ -474,7 +474,7 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldCenterDict[key] = integrate.simps(val)*hist["normfac_data"]
             H_yield_DATA.Fill(integrate.simps(val)*hist["normfac_data"])
-        hist["yieldDict"] = yieldCenterDict
+        hist["yieldDictData"] = yieldCenterDict
         hist["H_yield_DATA"] = H_yield_DATA
 
         H_yield_DATA.SetLineColor(i+1)            
@@ -521,7 +521,7 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldRightDict[key] = integrate.simps(val)*hist["normfac_simc"]
             H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
-        hist["yieldDict"] = yieldRightDict
+        hist["yieldDictSimc"] = yieldRightDict
         hist["H_yield_SIMC"] = H_yield_SIMC
 
         H_yield_SIMC.SetLineColor(i+1)            
@@ -562,7 +562,7 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldLeftDict[key] = integrate.simps(val)*hist["normfac_simc"]
             H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
-        hist["yieldDict"] = yieldLeftDict
+        hist["yieldDictSimc"] = yieldLeftDict
         hist["H_yield_SIMC"] = H_yield_SIMC
 
         H_yield_SIMC.SetLineColor(i+1)            
@@ -603,7 +603,7 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldCenterDict[key] = integrate.simps(val)*hist["normfac_simc"]
             H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
-        hist["yieldDict"] = yieldCenterDict
+        hist["yieldDictSimc"] = yieldCenterDict
         hist["H_yield_SIMC"] = H_yield_SIMC
 
         H_yield_SIMC.SetLineColor(i+1)            
@@ -614,13 +614,13 @@ c_yield_simc.Print(outputpdf)
 '''
 c_yieldbin = TCanvas()
 
-c_yieldbin.Divide(int(len(hist["yieldDict"])/3), 3)
+c_yieldbin.Divide(int(len(hist["yieldDictData"])/3), 3)
 
 for i,hist in enumerate(histlist):
     for j in range(hist["H_yield_DATA"].GetNbinsX()):
         yieldbin = ROOT.TH1D()
         bin_content = hist["H_yield_DATA"].GetBinContent(j)
-        for k, (key, value) in enumerate(hist["yieldDict"].items()):
+        for k, (key, value) in enumerate(hist["yieldDictData"].items()):
             if value == bin_content:
                 yieldbin.Fill(bin_content)
                 c_yieldbin.cd(k+1)
