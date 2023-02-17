@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:42:22 trottar"
+# Time-stamp: "2023-02-17 02:50:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,7 +350,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Right_tmp = []
-        H_yield_DATA = ROOT.TH1D("H_yieldRight_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
+        H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_RIGHT_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -397,7 +397,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Left_tmp = []
-        H_yield_DATA = ROOT.TH1D("H_yieldLeft_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
+        H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_LEFT_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -444,7 +444,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Center_tmp = []
-        H_yield_DATA = ROOT.TH1D("H_yieldCenter_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
+        H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_CENTER_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -491,7 +491,7 @@ for i,hist in enumerate(histlist):
         TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("h10")
         
         MM_Right_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yieldRight_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
+        H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_RIGHT_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
@@ -532,7 +532,7 @@ for i,hist in enumerate(histlist):
         TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("h10")
         
         MM_Left_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yieldLeft_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
+        H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_LEFT_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
@@ -573,7 +573,7 @@ for i,hist in enumerate(histlist):
         TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("h10")
         
         MM_Center_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yieldCenter_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
+        H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_CENTER_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
@@ -1224,22 +1224,24 @@ Ctext.Print(outputpdf+')')
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
 
 outHistFile = ROOT.TFile.Open(foutname, "RECREATE")
-d_Right_Data = outHistFile.mkdir("Right Data")
-d_Left_Data = outHistFile.mkdir("Left Data")
-d_Center_Data = outHistFile.mkdir("Center Data")
-d_Right_Simc = outHistFile.mkdir("Right Simc")
-d_Left_Simc = outHistFile.mkdir("Left Simc")
-d_Center_Simc = outHistFile.mkdir("Center Simc")
 
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
-        print(hist["phi_setting"])
+        d_Right_Data = outHistFile.mkdir("Right Data")
+        d_Right_Simc = outHistFile.mkdir("Right Simc")
+    if hist["phi_setting"] == "Left":
+        d_Left_Data = outHistFile.mkdir("Left Data")
+        d_Left_Simc = outHistFile.mkdir("Left Simc")
+    if hist["phi_setting"] == "Center":
+        d_Center_Data = outHistFile.mkdir("Center Data")
+        d_Center_Simc = outHistFile.mkdir("Center Simc")
+
+for i,hist in enumerate(histlist):
+    if hist["phi_setting"] == "Right":
         d_Right_Data.cd()
     elif hist["phi_setting"] == "Left":
-        print(hist["phi_setting"])
         d_Left_Data.cd()
     elif hist["phi_setting"] == "Center":
-        print(hist["phi_setting"])
         d_Center_Data.cd()
     else:
         continue
@@ -1279,13 +1281,10 @@ for i,hist in enumerate(histlist):
 
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
-        print(hist["phi_setting"])
         d_Right_Simc.cd()
     elif hist["phi_setting"] == "Left":
-        print(hist["phi_setting"])
         d_Left_Simc.cd()
     elif hist["phi_setting"] == "Center":
-        print(hist["phi_setting"])
         d_Center_Simc.cd()
     else:
         continue        
