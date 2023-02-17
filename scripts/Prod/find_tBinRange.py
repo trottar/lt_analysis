@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 20:16:57 trottar"
+# Time-stamp: "2023-02-16 20:22:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -352,7 +352,7 @@ for i,hist in enumerate(histlist):
         
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 100.0)
-        for i,evt in enumerate(TBRANCH_RIGHT_DATA):
+        for evt in TBRANCH_RIGHT_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
                     tbin_index = j
@@ -382,8 +382,9 @@ for i,hist in enumerate(histlist):
             print(key, " -> ", val)
             MM_Right.append(integrate.simps(val))
             yield_Right.Fill(integrate.simps(val))
-            
-        yield_Right.Draw("same")        
+
+        yield_Right.SetLineColor(i+1)            
+        yield_Right.Draw("same")
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
     
     if hist["phi_setting"] == 'Left':
@@ -398,7 +399,7 @@ for i,hist in enumerate(histlist):
         
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 100.0)
-        for i,evt in enumerate(TBRANCH_LEFT_DATA):
+        for evt in TBRANCH_LEFT_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
                     tbin_index = j
@@ -428,8 +429,9 @@ for i,hist in enumerate(histlist):
             print(key, " -> ", val)
             MM_Left.append(integrate.simps(val))
             yield_Left.Fill(integrate.simps(val))
-            
-        yield_Left.Draw("same")        
+
+        yield_Left.SetLineColor(i+1)            
+        yield_Left.Draw("same")
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
 
     if hist["phi_setting"] == 'Center':
@@ -444,7 +446,7 @@ for i,hist in enumerate(histlist):
         
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 100.0)
-        for i,evt in enumerate(TBRANCH_CENTER_DATA):
+        for evt in TBRANCH_CENTER_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
                     tbin_index = j
@@ -474,8 +476,9 @@ for i,hist in enumerate(histlist):
             print(key, " -> ", val)
             MM_Center.append(integrate.simps(val))
             yield_Center.Fill(integrate.simps(val))
-            
-        yield_Center.Draw("same")        
+
+        yield_Center.SetLineColor(i+1)            
+        yield_Center.Draw("same")
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
         
 c_yield.Print(outputpdf)
