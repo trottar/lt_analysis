@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:13:37 trottar"
+# Time-stamp: "2023-02-17 02:21:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -500,7 +500,7 @@ for i,hist in enumerate(histlist):
                     tbin_index = None
                 if tbin_index != None:
                     for k in range(len(phibinedges) - 1):
-                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi) < phibinedges[k+1]:
+                        if phibinedges[k] <= (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
                             phibin_index = k
                         else:
                             phibin_index = None
@@ -542,7 +542,7 @@ for i,hist in enumerate(histlist):
                     tbin_index = None
                 if tbin_index != None:
                     for k in range(len(phibinedges) - 1):
-                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi) < phibinedges[k+1]:
+                        if phibinedges[k] <= (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
                             phibin_index = k
                         else:
                             phibin_index = None
@@ -584,7 +584,7 @@ for i,hist in enumerate(histlist):
                     tbin_index = None
                 if tbin_index != None:
                     for k in range(len(phibinedges) - 1):
-                        if phibinedges[k] <= (evt.phipq+math.pi)*(180/math.pi) < phibinedges[k+1]:
+                        if phibinedges[k] <= (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
                             phibin_index = k
                         else:
                             phibin_index = None
