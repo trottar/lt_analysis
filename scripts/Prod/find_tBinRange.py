@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 20:42:34 trottar"
+# Time-stamp: "2023-02-16 20:45:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -351,7 +351,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Right_tmp = []
-        yield_Right = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 5.0)
+        yield_Right = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_RIGHT_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -398,7 +398,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Left_tmp = []
-        yield_Left = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 5.0)
+        yield_Left = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_LEFT_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -445,7 +445,7 @@ for i,hist in enumerate(histlist):
         #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Center_tmp = []
-        yield_Center = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 5.0)
+        yield_Center = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_CENTER_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
