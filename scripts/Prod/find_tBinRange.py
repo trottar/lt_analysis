@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 04:34:32 trottar"
+# Time-stamp: "2023-02-17 04:39:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1203,10 +1203,11 @@ for i,hist in enumerate(histlist):
 
     for j, tex in enumerate(texlist):
         tex.Draw()
-        if j == len(texlist)-1:
-            Ctext.Print(outputpdf+')')
-        else:
-            Ctext.Print(outputpdf)
+        
+    if i == len(histlist)-1:
+        Ctext.Print(outputpdf+')')
+    else:
+        Ctext.Print(outputpdf)
         
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
