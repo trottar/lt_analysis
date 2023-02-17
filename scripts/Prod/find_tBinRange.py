@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 04:25:33 trottar"
+# Time-stamp: "2023-02-17 04:30:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1187,8 +1187,8 @@ tradius.Draw()
     
 Cphtsame.Print(outputpdf)
 
-texlist = []
 for i,hist in enumerate(histlist):
+    texlist = []
     Ctext = TCanvas()
     for j,line in enumerate(hist["pid_text"]):
         if j == 0:
@@ -1201,12 +1201,12 @@ for i,hist in enumerate(histlist):
         tex.SetTextColor(i+1)
         texlist.append(tex)
 
-for i, tex in enumerate(texlist):
-    tex.Draw()
-    if i == len(texlist)-1:
-        Ctext.Print(outputpdf+')')
-    else:
-        Ctext.Print(outputpdf)
+    for j, tex in enumerate(texlist):
+        tex.Draw()
+        if j == len(texlist)-1:
+            Ctext.Print(outputpdf+')')
+        else:
+            Ctext.Print(outputpdf)
         
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
