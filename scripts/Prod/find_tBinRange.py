@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:32:32 trottar"
+# Time-stamp: "2023-02-17 02:38:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -521,7 +521,6 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldRightDict[key] = integrate.simps(val)*hist["normfac_simc"]
             H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
-        print(yieldRightDict)
         hist["yieldDictSimc"] = yieldRightDict
         hist["H_yield_SIMC"] = H_yield_SIMC
 
@@ -563,7 +562,6 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldLeftDict[key] = integrate.simps(val)*hist["normfac_simc"]
             H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
-        print(yieldLeftDict)
         hist["yieldDictSimc"] = yieldLeftDict
         hist["H_yield_SIMC"] = H_yield_SIMC
 
@@ -605,7 +603,6 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             yieldCenterDict[key] = integrate.simps(val)*hist["normfac_simc"]
             H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
-        print(yieldCenterDict)
         hist["yieldDictSimc"] = yieldCenterDict
         hist["H_yield_SIMC"] = H_yield_SIMC
 
@@ -1226,11 +1223,6 @@ Ctext.Print(outputpdf+')')
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
 
-for i,hist in enumerate(histlist):
-    hist["InFile_DATA"].Close()
-    hist["InFile_DUMMY"].Close()
-    hist["InFile_SIMC"].Close()
-
 outHistFile = ROOT.TFile.Open(foutname, "RECREATE")
 d_Right_Data = outHistFile.mkdir("Right Data")
 d_Left_Data = outHistFile.mkdir("Left Data")
@@ -1332,6 +1324,11 @@ for i,hist in enumerate(histlist):
     hist["H_yield_SIMC"].Write()
     
 outHistFile.Close()
-    
+
+for i,hist in enumerate(histlist):
+    hist["InFile_DATA"].Close()
+    hist["InFile_DUMMY"].Close()
+    hist["InFile_SIMC"].Close()
+
 print ("Processing Complete")
 
