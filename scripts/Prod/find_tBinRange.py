@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 20:09:48 trottar"
+# Time-stamp: "2023-02-16 20:12:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -381,8 +381,9 @@ for i,hist in enumerate(histlist):
         for key, val in groups.items():
             print(key, " -> ", val)
             MM_Right.append(integrate.simps(val))
-            yield_Right.Fill(integrate.simps(val))        
-        
+            yield_Right.Fill(integrate.simps(val))
+            
+        yield_Right.Draw("smae")        
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
     
     if hist["phi_setting"] == 'Left':
@@ -427,7 +428,8 @@ for i,hist in enumerate(histlist):
             print(key, " -> ", val)
             MM_Left.append(integrate.simps(val))
             yield_Left.Fill(integrate.simps(val))
-
+            
+        yield_Left.Draw("smae")        
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
 
     if hist["phi_setting"] == 'Center':
@@ -472,12 +474,9 @@ for i,hist in enumerate(histlist):
             print(key, " -> ", val)
             MM_Center.append(integrate.simps(val))
             yield_Center.Fill(integrate.simps(val))
-
+            
+        yield_Center.Draw("smae")        
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
-
-yield_Right.Draw("")
-yield_Left.Draw("same")
-yield_Center.Draw("same")
         
 c_yield.Print(outputpdf)
 
