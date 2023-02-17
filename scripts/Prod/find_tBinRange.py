@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 19:34:47 trottar"
+# Time-stamp: "2023-02-16 19:41:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -332,7 +332,12 @@ binned_t = binned_data[1]
 tbinvals = list(binned_t[0])
 tbinvals.append(binned_t[0][0])
 
-print("\n\n~~~~~~~~~~~~~~",binned_phi[1],"\n",binned_t[1])
+tbinedges = binned_t[1]
+tbinedges.append(tmin)
+tbinedges.append(tmax)
+phibinedges = binned_phi[1]
+
+print("\n\n~~~~~~~~~~~~~~",phibinedges,"\n",tbinedges)
 for i,hist in enumerate(histlist):
 
     if hist["phi_setting"] == 'Right':
@@ -348,20 +353,20 @@ for i,hist in enumerate(histlist):
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield_Right", "Yield (Right)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_RIGHT_DATA):
-            for j in range(len(binned_t[1]) - 1):
-                if binned_t[1][j] <= -evt.MandelT < binned_t[1][j+1]:
-                    tbinedge = j
+            for j in range(len(tbinedges) - 1):
+                if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
+                    tbin_index = j
                 else:
-                    tbinedge = None
-                if tbinedge != None:
-                    for k in range(len(binned_phi[1]) - 1):
-                        if binned_phi[1][k] <= (evt.ph_q+math.pi)*(180/math.pi) < binned_phi[1][k+1]:
-                            phibinedge = k
+                    tbin_index = None
+                if tbin_index != None:
+                    for k in range(len(phibinedges) - 1):
+                        if phibinedges[k] <= (evt.ph_q+math.pi)*(180/math.pi) < phibinedges[k+1]:
+                            phibin_index = k
                         else:
-                            phibinedge = None
-                        if phibinedge != None:
-                            print(tbinedge, phibinedge)
-                            MM_Right_tmp.append((tbinedge, phibinedge, jevt.MM))
+                            phibin_index = None
+                        if phibin_index != None:
+                            print(tbin_index, phibin_index)
+                            MM_Right_tmp.append((tbin_index, phibin_index, evt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -392,20 +397,20 @@ for i,hist in enumerate(histlist):
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
-            for j in range(len(binned_t[1]) - 1):
-                if binned_t[1][j] <= -evt.MandelT < binned_t[1][j+1]:
-                    tbinedge = j
+            for j in range(len(tbinedges) - 1):
+                if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
+                    tbin_index = j
                 else:
-                    tbinedge = None
-                if tbinedge != None:
-                    for k in range(len(binned_phi[1]) - 1):
-                        if binned_phi[1][k] <= (evt.ph_q+math.pi)*(180/math.pi) < binned_phi[1][k+1]:
-                            phibinedge = k
+                    tbin_index = None
+                if tbin_index != None:
+                    for k in range(len(phibinedges) - 1):
+                        if phibinedges[k] <= (evt.ph_q+math.pi)*(180/math.pi) < phibinedges[k+1]:
+                            phibin_index = k
                         else:
-                            phibinedge = None
-                        if phibinedge != None:
-                            print(tbinedge, phibinedge)
-                            MM_Left_tmp.append((tbinedge, phibinedge, jevt.MM))
+                            phibin_index = None
+                        if phibin_index != None:
+                            print(tbin_index, phibin_index)
+                            MM_Left_tmp.append((tbin_index, phibin_index, jevt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -436,20 +441,20 @@ for i,hist in enumerate(histlist):
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
-            for j in range(len(binned_t[1]) - 1):
-                if binned_t[1][j] <= -evt.MandelT < binned_t[1][j+1]:
-                    tbinedge = j
+            for j in range(len(tbinedges) - 1):
+                if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
+                    tbin_index = j
                 else:
-                    tbinedge = None
-                if tbinedge != None:
-                    for k in range(len(binned_phi[1]) - 1):
-                        if binned_phi[1][k] <= (evt.ph_q+math.pi)*(180/math.pi) < binned_phi[1][k+1]:
-                            phibinedge = k
+                    tbin_index = None
+                if tbin_index != None:
+                    for k in range(len(phibinedges) - 1):
+                        if phibinedges[k] <= (evt.ph_q+math.pi)*(180/math.pi) < phibinedges[k+1]:
+                            phibin_index = k
                         else:
-                            phibinedge = None
-                        if phibinedge != None:
-                            print(tbinedge, phibinedge)
-                            MM_Center_tmp.append((tbinedge, phibinedge, jevt.MM))
+                            phibin_index = None
+                        if phibin_index != None:
+                            print(tbin_index, phibin_index)
+                            MM_Center_tmp.append((tbin_index, phibin_index, jevt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
