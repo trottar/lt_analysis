@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 19:17:36 trottar"
+# Time-stamp: "2023-02-16 19:22:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -398,6 +398,7 @@ for i,hist in enumerate(histlist):
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
             tbin_index = np.searchsorted(binned_t[1], -evt.MandelT)
+            print(tbin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
@@ -408,6 +409,7 @@ for i,hist in enumerate(histlist):
             if tbinedge != None:
                 for j,jevt in enumerate(TBRANCH_LEFT_DATA):
                     phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
+                    print(phibin_index)
                     if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
                         phibinedge = phibin_index-1
                     elif phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
@@ -447,6 +449,7 @@ for i,hist in enumerate(histlist):
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
             tbin_index = np.searchsorted(binned_t[1], -evt.MandelT)
+            print(tbin_index)
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
@@ -457,6 +460,7 @@ for i,hist in enumerate(histlist):
             if tbinedge != None:
                 for j,jevt in enumerate(TBRANCH_CENTER_DATA):
                     phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
+                    print(phibin_index)
                     if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
                         phibinedge = phibin_index-1
                     elif phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
