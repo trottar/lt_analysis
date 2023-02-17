@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 23:39:38 trottar"
+# Time-stamp: "2023-02-16 23:43:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -477,7 +477,7 @@ for i,hist in enumerate(histlist):
         hist["yieldDict"] = yieldCenterDict
         hist["yield"] = yield_Center
 
-        yield_Center.SetLineColor(i+1)            
+        yield_Center.SetLineColor(i+1)
         yield_Center.Draw("same")
         
 c_yield.Print(outputpdf)
@@ -488,13 +488,15 @@ c_yieldbin.Divide(int(len(hist["yieldDict"])/2), int(len(hist["yieldDict"])/2))
 
 for i,hist in enumerate(histlist):
     for j in range(hist["yield"].GetNbinsX()):
-        yieldbin = ROOT.TH1D("yield", "Yield", 10, 0, 1.0)
+        yieldbin = ROOT.TH1D()
         bin_content = hist["yield"].GetBinContent(j)
         for k, (key, value) in enumerate(hist["yieldDict"].items()):
             if value == bin_content:
                 yieldbin.Fill(bin_content)
                 c_yieldbin.cd(k+1)
-                yieldbin.Draw("same")
+                yieldbin.SetLineColor(i+1)            
+                yieldbin.Draw()
+    c_yieldbin.Update()
 
 c_yieldbin.Print(outputpdf)
 
