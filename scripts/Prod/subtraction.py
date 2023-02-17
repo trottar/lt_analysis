@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 03:07:59 trottar"
+# Time-stamp: "2023-02-17 03:39:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,7 +200,7 @@ def defineHists(phi_setting, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_all_RF" in line:
+                            if "coin_ek_cut_prompt_RF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
                                 break
             else:
@@ -216,7 +216,7 @@ def defineHists(phi_setting, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_all_RF" in line:
+                            if "coin_ek_cut_prompt_RF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
                                 break
             else:
@@ -231,7 +231,7 @@ def defineHists(phi_setting, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_all_RF" in line:
+                            if "coin_ek_cut_prompt_RF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("'","").split(",")
                                 break
             else:

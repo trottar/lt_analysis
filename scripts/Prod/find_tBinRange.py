@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 03:03:10 trottar"
+# Time-stamp: "2023-02-17 03:23:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -155,7 +155,7 @@ def bin_data(histlist):
             TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_RF")
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_RF")
             #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
-            print("Creating right t-bin histogram...")
+            print("\nCreating right t-bin histogram...")
             # Grab t bin range
             H_list_Right = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_RIGHT_DATA) if (tmin <= -evt.MandelT <= tmax)]
             H_t_Right = [t[0] for t in H_list_Right]
