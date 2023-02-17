@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 20:03:18 trottar"
+# Time-stamp: "2023-02-16 20:09:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -371,7 +371,6 @@ for i,hist in enumerate(histlist):
         # Group the tuples by the first two elements using a dictionary
         for t in MM_Right_tmp:
             key = (t[0], t[1])
-            print(key)
             if key in groups:
                 groups[key].append(t[2])
             else:
@@ -380,8 +379,10 @@ for i,hist in enumerate(histlist):
         # Extract the desired values from each group
         MM_Right = []
         for key, val in groups.items():
-            MM_Right.append(integrate.simps(val))            
-
+            print(key, " -> ", val)
+            MM_Right.append(integrate.simps(val))
+            yield_Right.Fill(integrate.simps(val))        
+        
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Right)
     
     if hist["phi_setting"] == 'Left':
@@ -415,7 +416,6 @@ for i,hist in enumerate(histlist):
         # Group the tuples by the first two elements using a dictionary
         for t in MM_Left_tmp:
             key = (t[0], t[1])
-            print(key)
             if key in groups:
                 groups[key].append(t[2])
             else:
@@ -424,7 +424,9 @@ for i,hist in enumerate(histlist):
         # Extract the desired values from each group
         MM_Left = []
         for key, val in groups.items():
-            MM_Left.append(integrate.simps(val))            
+            print(key, " -> ", val)
+            MM_Left.append(integrate.simps(val))
+            yield_Left.Fill(integrate.simps(val))
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Left)
 
@@ -459,7 +461,6 @@ for i,hist in enumerate(histlist):
         # Group the tuples by the first two elements using a dictionary
         for t in MM_Center_tmp:
             key = (t[0], t[1])
-            print(key)
             if key in groups:
                 groups[key].append(t[2])
             else:
@@ -468,9 +469,15 @@ for i,hist in enumerate(histlist):
         # Extract the desired values from each group
         MM_Center = []
         for key, val in groups.items():
-            MM_Center.append(integrate.simps(val))            
+            print(key, " -> ", val)
+            MM_Center.append(integrate.simps(val))
+            yield_Center.Fill(integrate.simps(val))
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
+
+yield_Right.Draw("")
+yield_Left.Draw("same")
+yield_Center.Draw("same")
         
 c_yield.Print(outputpdf)
 
