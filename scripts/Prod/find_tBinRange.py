@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:50:35 trottar"
+# Time-stamp: "2023-02-17 02:55:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -384,7 +384,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_DATA"] = H_yield_DATA
 
         H_yield_DATA.SetLineColor(i+1)            
-        H_yield_DATA.Draw("same")
+        H_yield_DATA.Draw("same, E1")
 
     if hist["phi_setting"] == 'Left':
         InFile_LEFT_DATA = hist["InFile_DATA"]
@@ -431,7 +431,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_DATA"] = H_yield_DATA
 
         H_yield_DATA.SetLineColor(i+1)            
-        H_yield_DATA.Draw("same")
+        H_yield_DATA.Draw("same, E1")
 
     if hist["phi_setting"] == 'Center':
         InFile_CENTER_DATA = hist["InFile_DATA"]
@@ -478,7 +478,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_DATA"] = H_yield_DATA
 
         H_yield_DATA.SetLineColor(i+1)            
-        H_yield_DATA.Draw("same")
+        H_yield_DATA.Draw("same, E1")
         
 c_yield_data.Print(outputpdf)
 
@@ -525,7 +525,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_SIMC"] = H_yield_SIMC
 
         H_yield_SIMC.SetLineColor(i+1)            
-        H_yield_SIMC.Draw("same")
+        H_yield_SIMC.Draw("same, E1")
     
     if hist["phi_setting"] == 'Left':
         InFile_LEFT_SIMC = hist["InFile_SIMC"]
@@ -566,7 +566,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_SIMC"] = H_yield_SIMC
 
         H_yield_SIMC.SetLineColor(i+1)            
-        H_yield_SIMC.Draw("same")
+        H_yield_SIMC.Draw("same, E1")
 
     if hist["phi_setting"] == 'Center':
         InFile_CENTER_SIMC = hist["InFile_SIMC"]
@@ -607,7 +607,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_SIMC"] = H_yield_SIMC
 
         H_yield_SIMC.SetLineColor(i+1)            
-        H_yield_SIMC.Draw("same")
+        H_yield_SIMC.Draw("same, E1")
         
 c_yield_simc.Print(outputpdf)
 
