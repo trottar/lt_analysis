@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:55:08 trottar"
+# Time-stamp: "2023-02-17 03:03:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,7 +350,6 @@ for i,hist in enumerate(histlist):
         #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Right_tmp = []
-        H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_RIGHT_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -379,12 +378,11 @@ for i,hist in enumerate(histlist):
         yieldRightDict = {}
         for key, val in groups.items():
             yieldRightDict[key] = integrate.simps(val)*hist["normfac_data"]
-            H_yield_DATA.Fill(integrate.simps(val)*hist["normfac_data"])
+            hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
         hist["yieldDictData"] = yieldRightDict
-        hist["H_yield_DATA"] = H_yield_DATA
 
-        H_yield_DATA.SetLineColor(i+1)            
-        H_yield_DATA.Draw("same, E1")
+        hist["H_yield_DATA"].SetLineColor(i+1)            
+        hist["H_yield_DATA"].Draw("same, E1")
 
     if hist["phi_setting"] == 'Left':
         InFile_LEFT_DATA = hist["InFile_DATA"]
@@ -397,7 +395,6 @@ for i,hist in enumerate(histlist):
         #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Left_tmp = []
-        H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_LEFT_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -426,12 +423,11 @@ for i,hist in enumerate(histlist):
         yieldLeftDict = {}
         for key, val in groups.items():
             yieldLeftDict[key] = integrate.simps(val)*hist["normfac_data"]
-            H_yield_DATA.Fill(integrate.simps(val)*hist["normfac_data"])
+            hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
         hist["yieldDictData"] = yieldLeftDict
-        hist["H_yield_DATA"] = H_yield_DATA
 
-        H_yield_DATA.SetLineColor(i+1)            
-        H_yield_DATA.Draw("same, E1")
+        hist["H_yield_DATA"].SetLineColor(i+1)            
+        hist["H_yield_DATA"].Draw("same, E1")
 
     if hist["phi_setting"] == 'Center':
         InFile_CENTER_DATA = hist["InFile_DATA"]
@@ -444,7 +440,6 @@ for i,hist in enumerate(histlist):
         #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
         
         MM_Center_tmp = []
-        H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_CENTER_DATA:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -473,12 +468,11 @@ for i,hist in enumerate(histlist):
         yieldCenterDict = {}
         for key, val in groups.items():
             yieldCenterDict[key] = integrate.simps(val)*hist["normfac_data"]
-            H_yield_DATA.Fill(integrate.simps(val)*hist["normfac_data"])
+            hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
         hist["yieldDictData"] = yieldCenterDict
-        hist["H_yield_DATA"] = H_yield_DATA
 
-        H_yield_DATA.SetLineColor(i+1)            
-        H_yield_DATA.Draw("same, E1")
+        hist["H_yield_DATA"].SetLineColor(i+1)            
+        hist["H_yield_DATA"].Draw("same, E1")
         
 c_yield_data.Print(outputpdf)
 
@@ -491,7 +485,6 @@ for i,hist in enumerate(histlist):
         TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("h10")
         
         MM_Right_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_RIGHT_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
@@ -520,19 +513,17 @@ for i,hist in enumerate(histlist):
         yieldRightDict = {}
         for key, val in groups.items():
             yieldRightDict[key] = integrate.simps(val)*hist["normfac_simc"]
-            H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
+            hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
         hist["yieldDictSimc"] = yieldRightDict
-        hist["H_yield_SIMC"] = H_yield_SIMC
 
-        H_yield_SIMC.SetLineColor(i+1)            
-        H_yield_SIMC.Draw("same, E1")
+        hist["H_yield_SIMC"].SetLineColor(i+1)            
+        hist["H_yield_SIMC"].Draw("same, E1")
     
     if hist["phi_setting"] == 'Left':
         InFile_LEFT_SIMC = hist["InFile_SIMC"]
         TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("h10")
         
         MM_Left_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_LEFT_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
@@ -561,19 +552,17 @@ for i,hist in enumerate(histlist):
         yieldLeftDict = {}
         for key, val in groups.items():
             yieldLeftDict[key] = integrate.simps(val)*hist["normfac_simc"]
-            H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
+            hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
         hist["yieldDictSimc"] = yieldLeftDict
-        hist["H_yield_SIMC"] = H_yield_SIMC
 
-        H_yield_SIMC.SetLineColor(i+1)            
-        H_yield_SIMC.Draw("same, E1")
+        hist["H_yield_SIMC"].SetLineColor(i+1)            
+        hist["H_yield_SIMC"].Draw("same, E1")
 
     if hist["phi_setting"] == 'Center':
         InFile_CENTER_SIMC = hist["InFile_SIMC"]
         TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("h10")
         
         MM_Center_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_CENTER_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
@@ -602,12 +591,11 @@ for i,hist in enumerate(histlist):
         yieldCenterDict = {}
         for key, val in groups.items():
             yieldCenterDict[key] = integrate.simps(val)*hist["normfac_simc"]
-            H_yield_SIMC.Fill(integrate.simps(val)*hist["normfac_simc"])
+            hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
         hist["yieldDictSimc"] = yieldCenterDict
-        hist["H_yield_SIMC"] = H_yield_SIMC
 
-        H_yield_SIMC.SetLineColor(i+1)            
-        H_yield_SIMC.Draw("same, E1")
+        hist["H_yield_SIMC"].SetLineColor(i+1)            
+        hist["H_yield_SIMC"].Draw("same, E1")
         
 c_yield_simc.Print(outputpdf)
 
