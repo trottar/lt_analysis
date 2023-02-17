@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 18:58:35 trottar"
+# Time-stamp: "2023-02-16 19:05:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -354,17 +354,18 @@ for i,hist in enumerate(histlist):
             if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
-                continue
-            for j,jevt in enumerate(TBRANCH_RIGHT_DATA):
-                phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
-                if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
-                    phibinedge = phibin_index-1
-                if phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
-                    phibinedge = phibin_index
-                else:
-                    continue
-                print(tbinedge, phibinedge)
-                MM_Right_tmp.append((tbinedge, phibinedge, jevt.MM))
+                tbinedge = None
+            if tbinedge != None:
+                for j,jevt in enumerate(TBRANCH_RIGHT_DATA):
+                    phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
+                    if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
+                        phibinedge = phibin_index-1
+                    if phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
+                        phibinedge = phibin_index
+                    else:
+                        continue
+                    print(tbinedge, phibinedge)
+                    MM_Right_tmp.append((tbinedge, phibinedge, jevt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -396,24 +397,24 @@ for i,hist in enumerate(histlist):
         yield_Left = ROOT.TH1D("yield_Left", "Yield (Left)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_LEFT_DATA):
             tbin_index = np.searchsorted(binned_t[1], -evt.MandelT)
-            phibin_index = np.searchsorted(binned_phi[1], (evt.ph_q+math.pi)*(180/math.pi))
-            #print("if {} > 0 and {} <= {}".format(tbin_index, -evt.MandelT, binned_t[1][tbin_index-1]))
-            #print("if {} < {} and {} >= {}".format(tbin_index, len(binned_t[1]), -evt.MandelT, binned_t[1][tbin_index]))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
             if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
-                continue
-            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
-                phibinedge = phibin_index-1
-            if phibin_index < len(binned_phi[1]) and (evt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
-                phibinedge = phibin_index
-            else:
-                continue
-            print(tbinedge, phibinedge)
-            MM_Left_tmp.append((tbinedge, phibinedge, evt.MM))
+                tbinedge = None
+            if tbinedge != None:
+                for j,jevt in enumerate(TBRANCH_LEFT_DATA):
+                    phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
+                    if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
+                        phibinedge = phibin_index-1
+                    if phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
+                        phibinedge = phibin_index
+                    else:
+                        continue
+                    print(tbinedge, phibinedge)
+                    MM_Left_tmp.append((tbinedge, phibinedge, jevt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -445,22 +446,24 @@ for i,hist in enumerate(histlist):
         yield_Center = ROOT.TH1D("yield_Center", "Yield (Center)", NumtBins*NumPhiBins, 0, 100.0)
         for i,evt in enumerate(TBRANCH_CENTER_DATA):
             tbin_index = np.searchsorted(binned_t[1], -evt.MandelT)
-            phibin_index = np.searchsorted(binned_phi[1], (evt.ph_q+math.pi)*(180/math.pi))
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
             if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
-                continue
-            if phibin_index > 0 and (evt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
-                phibinedge = phibin_index-1
-            if phibin_index < len(binned_phi[1]) and (evt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
-                phibinedge = phibin_index
-            else:
-                continue
-            print(tbinedge, phibinedge)
-            MM_Center_tmp.append((tbinedge, phibinedge, evt.MM))
+                tbinedge = None
+            if tbinedge != None:
+                for j,jevt in enumerate(TBRANCH_CENTER_DATA):
+                    phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
+                    if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
+                        phibinedge = phibin_index-1
+                    if phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
+                        phibinedge = phibin_index
+                    else:
+                        continue
+                    print(tbinedge, phibinedge)
+                    MM_Center_tmp.append((tbinedge, phibinedge, jevt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -477,7 +480,7 @@ for i,hist in enumerate(histlist):
             MM_Center.append(integrate.simps(val))            
 
         print("\n\n~~~~~~~~~~~~~~~~~~~",MM_Center)
-
+        
 c_yield.Print(outputpdf)
 
 # Plot histograms
