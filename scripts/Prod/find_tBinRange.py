@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:26:41 trottar"
+# Time-stamp: "2023-02-17 02:32:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1241,10 +1241,13 @@ d_Center_Simc = outHistFile.mkdir("Center Simc")
 
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
+        print(hist["phi_setting"])
         d_Right_Data.cd()
     elif hist["phi_setting"] == "Left":
+        print(hist["phi_setting"])
         d_Left_Data.cd()
     elif hist["phi_setting"] == "Center":
+        print(hist["phi_setting"])
         d_Center_Data.cd()
     else:
         continue
@@ -1284,10 +1287,13 @@ for i,hist in enumerate(histlist):
 
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
+        print(hist["phi_setting"])
         d_Right_Simc.cd()
     elif hist["phi_setting"] == "Left":
+        print(hist["phi_setting"])
         d_Left_Simc.cd()
     elif hist["phi_setting"] == "Center":
+        print(hist["phi_setting"])
         d_Center_Simc.cd()
     else:
         continue        
