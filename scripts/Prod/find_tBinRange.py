@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:38:51 trottar"
+# Time-stamp: "2023-02-17 02:42:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1320,7 +1320,6 @@ for i,hist in enumerate(histlist):
     hist["H_pmx_SIMC"].Write()
     hist["H_pmy_SIMC"].Write()
     hist["H_pmz_SIMC"].Write()
-    hist["H_ct_ep_SIMC"].Write()
     hist["H_yield_SIMC"].Write()
     
 outHistFile.Close()
