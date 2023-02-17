@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:21:17 trottar"
+# Time-stamp: "2023-02-17 02:26:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1240,14 +1240,14 @@ d_Left_Simc = outHistFile.mkdir("Left Simc")
 d_Center_Simc = outHistFile.mkdir("Center Simc")
 
 for i,hist in enumerate(histlist):
-    if bool(hist):
-        continue
     if hist["phi_setting"] == "Right":
         d_Right_Data.cd()
-    if hist["phi_setting"] == "Left":
+    elif hist["phi_setting"] == "Left":
         d_Left_Data.cd()
-    if hist["phi_setting"] == "Center":
+    elif hist["phi_setting"] == "Center":
         d_Center_Data.cd()
+    else:
+        continue
     hist["H_hsdelta_DATA"].Write()
     hist["H_hsxptar_DATA"].Write()
     hist["H_hsyptar_DATA"].Write()
@@ -1283,14 +1283,14 @@ for i,hist in enumerate(histlist):
     hist["H_yield_DATA"].Write()
 
 for i,hist in enumerate(histlist):
-    if bool(hist):
-        continue
     if hist["phi_setting"] == "Right":
         d_Right_Simc.cd()
-    if hist["phi_setting"] == "Left":
+    elif hist["phi_setting"] == "Left":
         d_Left_Simc.cd()
-    if hist["phi_setting"] == "Center":
+    elif hist["phi_setting"] == "Center":
         d_Center_Simc.cd()
+    else:
+        continue        
     hist["H_hsdelta_SIMC"].Write()
     hist["H_hsxptar_SIMC"].Write()
     hist["H_hsyptar_SIMC"].Write()
