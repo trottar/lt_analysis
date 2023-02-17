@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 19:59:16 trottar"
+# Time-stamp: "2023-02-16 20:03:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -365,13 +365,13 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            print(tbin_index, phibin_index)
                             MM_Right_tmp.append((tbin_index, phibin_index, evt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
         for t in MM_Right_tmp:
             key = (t[0], t[1])
+            print(key)
             if key in groups:
                 groups[key].append(t[2])
             else:
@@ -409,13 +409,13 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            print(tbin_index, phibin_index)
                             MM_Left_tmp.append((tbin_index, phibin_index, evt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
         for t in MM_Left_tmp:
             key = (t[0], t[1])
+            print(key)
             if key in groups:
                 groups[key].append(t[2])
             else:
@@ -453,13 +453,13 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            print(tbin_index, phibin_index)
                             MM_Center_tmp.append((tbin_index, phibin_index, evt.MM))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
         for t in MM_Center_tmp:
             key = (t[0], t[1])
+            print(key)
             if key in groups:
                 groups[key].append(t[2])
             else:
