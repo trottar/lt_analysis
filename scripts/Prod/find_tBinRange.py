@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 23:31:53 trottar"
+# Time-stamp: "2023-02-16 23:35:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -493,8 +493,8 @@ for i,hist in enumerate(histlist):
         for k, (key, value) in enumerate(hist["yieldDict"].items()):
             if value == bin_content:
                 yieldbin.Fill(bin_content)
-                yieldbin.Draw("same")
                 c_yieldbin.cd(k+1)
+                yieldbin.Draw("same")
 c_yieldbin.Print(outputpdf)
 
 # Plot histograms
