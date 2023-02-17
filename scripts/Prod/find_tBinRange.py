@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 23:35:05 trottar"
+# Time-stamp: "2023-02-16 23:39:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -488,13 +488,14 @@ c_yieldbin.Divide(int(len(hist["yieldDict"])/2), int(len(hist["yieldDict"])/2))
 
 for i,hist in enumerate(histlist):
     for j in range(hist["yield"].GetNbinsX()):
-        yieldbin = ROOT.TH1D()
+        yieldbin = ROOT.TH1D("yield", "Yield", 10, 0, 1.0)
         bin_content = hist["yield"].GetBinContent(j)
         for k, (key, value) in enumerate(hist["yieldDict"].items()):
             if value == bin_content:
                 yieldbin.Fill(bin_content)
                 c_yieldbin.cd(k+1)
                 yieldbin.Draw("same")
+
 c_yieldbin.Print(outputpdf)
 
 # Plot histograms
