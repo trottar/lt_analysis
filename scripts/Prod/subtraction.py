@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 03:04:10 trottar"
+# Time-stamp: "2023-02-17 03:07:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1122,6 +1122,7 @@ def defineHists(phi_setting, inpDict):
         "H_pmy_DATA" :     H_pmy_DATA,
         "H_pmz_DATA" :     H_pmz_DATA,
         "H_W_DATA" :     H_W_DATA,
+        "H_yield_DATA" : H_yield_DATA,
         "normfac_simc" : normfac_simc,
         "H_hsdelta_SIMC" :     H_hsdelta_SIMC,
         "H_hsxptar_SIMC" :     H_hsxptar_SIMC,
@@ -1153,7 +1154,8 @@ def defineHists(phi_setting, inpDict):
         "H_pmx_SIMC" :     H_pmx_SIMC,
         "H_pmy_SIMC" :     H_pmy_SIMC,
         "H_pmz_SIMC" :     H_pmz_SIMC,
-        "H_W_SIMC" :     H_W_SIMC,        
+        "H_W_SIMC" :     H_W_SIMC,
+        "H_yield_SIMC" : H_yield_SIMC,
         "H_ct_ep_DATA" :     H_ct_ep_DATA,
         "H_cal_etottracknorm_DATA" :     H_cal_etottracknorm_DATA,
         "H_cer_npeSum_DATA" :     H_cer_npeSum_DATA,
