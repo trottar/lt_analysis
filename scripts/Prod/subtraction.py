@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:59:51 trottar"
+# Time-stamp: "2023-02-17 03:04:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,7 +56,7 @@ def defineHists(phi_setting, inpDict):
     NumPhiBins = inpDict["NumPhiBins"] 
     runNumRight = inpDict["runNumRight"] 
     runNumLeft = inpDict["runNumLeft"] 
-    runNumCenter = inpDict["runNumCenter"] 
+    runNumCenter = inpDict["runNumCenter"]
     data_charge_right = inpDict["data_charge_right"] 
     data_charge_left = inpDict["data_charge_left"] 
     data_charge_center = inpDict["data_charge_center"] 
