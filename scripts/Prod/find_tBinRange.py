@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 01:16:51 trottar"
+# Time-stamp: "2023-02-17 01:21:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -364,7 +364,7 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            MM_Right_tmp.append((tbin_index, phibin_index, evt.MM))
+                            MM_Right_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -411,7 +411,7 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            MM_Left_tmp.append((tbin_index, phibin_index, evt.MM))
+                            MM_Left_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -458,7 +458,7 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            MM_Center_tmp.append((tbin_index, phibin_index, evt.MM))
+                            MM_Center_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -505,7 +505,7 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            MM_Right_tmp.append((tbin_index, phibin_index, evt.MM))
+                            MM_Right_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -546,7 +546,7 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            MM_Left_tmp.append((tbin_index, phibin_index, evt.MM))
+                            MM_Left_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
@@ -576,7 +576,7 @@ for i,hist in enumerate(histlist):
         yield_Center = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_CENTER_SIMC:
             for j in range(len(tbinedges) - 1):
-                if tbinedges[j] <= evt.t < tbinedges[j+1]:
+                if tbinedges[j] <= -evt.t < tbinedges[j+1]:
                     tbin_index = j
                 else:
                     tbin_index = None
@@ -587,7 +587,7 @@ for i,hist in enumerate(histlist):
                         else:
                             phibin_index = None
                         if phibin_index != None:
-                            MM_Center_tmp.append((tbin_index, phibin_index, evt.MM))
+                            MM_Center_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))))
 
         groups = {}
         # Group the tuples by the first two elements using a dictionary
