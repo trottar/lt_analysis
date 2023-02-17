@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 23:43:56 trottar"
+# Time-stamp: "2023-02-16 23:46:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -484,7 +484,7 @@ c_yield.Print(outputpdf)
 
 c_yieldbin = TCanvas()
 
-c_yieldbin.Divide(int(len(hist["yieldDict"])/2), int(len(hist["yieldDict"])/2))
+c_yieldbin.Divide(int(len(hist["yieldDict"])/3), 3)
 
 for i,hist in enumerate(histlist):
     for j in range(hist["yield"].GetNbinsX()):
