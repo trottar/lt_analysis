@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 04:21:35 trottar"
+# Time-stamp: "2023-02-17 04:25:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1203,7 +1203,7 @@ for i,hist in enumerate(histlist):
 
 for i, tex in enumerate(texlist):
     tex.Draw()
-    if i == len(texlist-1):
+    if i == len(texlist)-1:
         Ctext.Print(outputpdf+')')
     else:
         Ctext.Print(outputpdf)
