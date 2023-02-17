@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 02:08:58 trottar"
+# Time-stamp: "2023-02-17 02:13:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -491,7 +491,7 @@ for i,hist in enumerate(histlist):
         TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("h10")
         
         MM_Right_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yieldRight_SIMC", "Simc Yield", NumtBins*NumPhiBins, -100.0, 100.0)
+        H_yield_SIMC = ROOT.TH1D("H_yieldRight_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_RIGHT_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
@@ -533,7 +533,7 @@ for i,hist in enumerate(histlist):
         TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("h10")
         
         MM_Left_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yieldLeft_SIMC", "Simc Yield", NumtBins*NumPhiBins, -100.0, 100.0)
+        H_yield_SIMC = ROOT.TH1D("H_yieldLeft_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_LEFT_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
@@ -575,7 +575,7 @@ for i,hist in enumerate(histlist):
         TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("h10")
         
         MM_Center_tmp = []
-        H_yield_SIMC = ROOT.TH1D("H_yieldCenter_SIMC", "Simc Yield", NumtBins*NumPhiBins, -100.0, 100.0)
+        H_yield_SIMC = ROOT.TH1D("H_yieldCenter_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0.0, 1.0)
         for evt in TBRANCH_CENTER_SIMC:
             for j in range(len(tbinedges) - 1):
                 if tbinedges[j] <= evt.t < tbinedges[j+1]:
