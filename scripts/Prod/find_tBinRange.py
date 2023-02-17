@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 01:13:47 trottar"
+# Time-stamp: "2023-02-17 01:16:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -576,7 +576,7 @@ for i,hist in enumerate(histlist):
         yield_Center = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_CENTER_SIMC:
             for j in range(len(tbinedges) - 1):
-                if tbinedges[j] <= -evt.t < tbinedges[j+1]:
+                if tbinedges[j] <= evt.t < tbinedges[j+1]:
                     tbin_index = j
                 else:
                     tbin_index = None
