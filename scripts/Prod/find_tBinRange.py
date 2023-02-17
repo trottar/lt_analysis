@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 19:45:43 trottar"
+# Time-stamp: "2023-02-16 19:51:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,8 +333,8 @@ tbinvals = list(binned_t[0])
 tbinvals.append(binned_t[0][0])
 
 tbinedges = binned_t[1]
-tbinedges = np.append(tmin)
-tbinedges = np.append(tmax)
+tbinedges = np.append(binned_t[1],tmin)
+tbinedges = np.append(tbinedges, tmax)
 phibinedges = binned_phi[1]
 
 print("\n\n~~~~~~~~~~~~~~",phibinedges,"\n",tbinedges)
