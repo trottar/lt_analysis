@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 19:09:05 trottar"
+# Time-stamp: "2023-02-16 19:14:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -352,7 +352,7 @@ for i,hist in enumerate(histlist):
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
-            if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
+            elif tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
                 tbinedge = None
@@ -361,7 +361,7 @@ for i,hist in enumerate(histlist):
                     phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
                     if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
                         phibinedge = phibin_index-1
-                    if phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
+                    elif phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
                         phibinedge = phibin_index
                     else:
                         continue
@@ -401,7 +401,7 @@ for i,hist in enumerate(histlist):
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
-            if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
+            elif tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
                 tbinedge = None
@@ -410,7 +410,7 @@ for i,hist in enumerate(histlist):
                     phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
                     if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
                         phibinedge = phibin_index-1
-                    if phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
+                    elif phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
                         phibinedge = phibin_index
                     else:
                         continue
@@ -450,7 +450,7 @@ for i,hist in enumerate(histlist):
             # Check if the bin index is within the bounds of the bin edges list
             if tbin_index > 0 and -evt.MandelT <= binned_t[1][tbin_index-1]:
                 tbinedge = tbin_index-1
-            if tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
+            elif tbin_index < len(binned_t[1]) and -evt.MandelT >= binned_t[1][tbin_index]:
                 tbinedge = tbin_index
             else:
                 tbinedge = None
@@ -459,7 +459,7 @@ for i,hist in enumerate(histlist):
                     phibin_index = np.searchsorted(binned_phi[1], (jevt.ph_q+math.pi)*(180/math.pi))
                     if phibin_index > 0 and (jevt.ph_q+math.pi)*(180/math.pi) <= binned_phi[1][phibin_index-1]:
                         phibinedge = phibin_index-1
-                    if phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
+                    elif phibin_index < len(binned_phi[1]) and (jevt.ph_q+math.pi)*(180/math.pi) >= binned_phi[1][phibin_index]:
                         phibinedge = phibin_index
                     else:
                         continue
