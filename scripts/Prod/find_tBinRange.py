@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 01:10:20 trottar"
+# Time-stamp: "2023-02-17 01:13:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -488,13 +488,7 @@ for i,hist in enumerate(histlist):
 
     if hist["phi_setting"] == 'Right':
         InFile_RIGHT_SIMC = hist["InFile_SIMC"]
-        #TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Uncut_Kaon_Events")
-        #TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Cut_Kaon_Events_all_noRF")
-        #TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Cut_Kaon_Events_prompt_noRF")
-        #TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Cut_Kaon_Events_rand_noRF")
-        #TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Cut_Kaon_Events_all_RF")
-        TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Cut_Kaon_Events_prompt_RF")
-        #TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Cut_Kaon_Events_rand_RF")
+        TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("h10")
         
         MM_Right_tmp = []
         yield_Right = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
@@ -535,13 +529,7 @@ for i,hist in enumerate(histlist):
     
     if hist["phi_setting"] == 'Left':
         InFile_LEFT_SIMC = hist["InFile_SIMC"]
-        #TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Uncut_Kaon_Events")
-        #TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Cut_Kaon_Events_all_noRF")
-        #TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Cut_Kaon_Events_prompt_noRF")
-        #TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Cut_Kaon_Events_rand_noRF")
-        #TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Cut_Kaon_Events_all_RF")
-        TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Cut_Kaon_Events_prompt_RF")
-        #TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Cut_Kaon_Events_rand_RF")
+        TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("h10")
         
         MM_Left_tmp = []
         yield_Left = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
@@ -582,13 +570,7 @@ for i,hist in enumerate(histlist):
 
     if hist["phi_setting"] == 'Center':
         InFile_CENTER_SIMC = hist["InFile_SIMC"]
-        #TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Uncut_Kaon_Events")
-        #TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Cut_Kaon_Events_all_noRF")
-        #TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Cut_Kaon_Events_prompt_noRF")
-        #TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Cut_Kaon_Events_rand_noRF")
-        #TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Cut_Kaon_Events_all_RF")
-        TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Cut_Kaon_Events_prompt_RF")
-        #TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Cut_Kaon_Events_rand_RF")
+        TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("h10")
         
         MM_Center_tmp = []
         yield_Center = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
