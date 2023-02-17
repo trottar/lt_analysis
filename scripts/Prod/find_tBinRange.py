@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-16 20:31:09 trottar"
+# Time-stamp: "2023-02-16 20:34:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -380,8 +380,8 @@ for i,hist in enumerate(histlist):
         MM_Right = []
         for key, val in groups.items():
             print(key, " -> ", val)
-            MM_Right.append(integrate.simps(val)/sum(data_charge_right))
-            yield_Right.Fill(integrate.simps(val)/sum(data_charge_right))
+            MM_Right.append(integrate.simps(val)/(data_charge_right))
+            yield_Right.Fill(integrate.simps(val)/(data_charge_right))
 
         yield_Right.SetLineColor(i+1)            
         yield_Right.Draw("same")
@@ -427,8 +427,8 @@ for i,hist in enumerate(histlist):
         MM_Left = []
         for key, val in groups.items():
             print(key, " -> ", val)
-            MM_Left.append(integrate.simps(val)/sum(data_charge_left))
-            yield_Left.Fill(integrate.simps(val)/sum(data_charge_left))
+            MM_Left.append(integrate.simps(val)/(data_charge_left))
+            yield_Left.Fill(integrate.simps(val)/(data_charge_left))
 
         yield_Left.SetLineColor(i+1)            
         yield_Left.Draw("same")
@@ -474,8 +474,8 @@ for i,hist in enumerate(histlist):
         MM_Center = []
         for key, val in groups.items():
             print(key, " -> ", val)
-            MM_Center.append(integrate.simps(val)/sum(data_charge_center))
-            yield_Center.Fill(integrate.simps(val)/sum(data_charge_center))
+            MM_Center.append(integrate.simps(val)/(data_charge_center))
+            yield_Center.Fill(integrate.simps(val)/(data_charge_center))
 
         yield_Center.SetLineColor(i+1)            
         yield_Center.Draw("same")
