@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 01:21:44 trottar"
+# Time-stamp: "2023-02-17 01:22:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -494,7 +494,7 @@ for i,hist in enumerate(histlist):
         yield_Right = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_RIGHT_SIMC:
             for j in range(len(tbinedges) - 1):
-                if tbinedges[j] <= -evt.t < tbinedges[j+1]:
+                if tbinedges[j] <= evt.t < tbinedges[j+1]:
                     tbin_index = j
                 else:
                     tbin_index = None
@@ -535,7 +535,7 @@ for i,hist in enumerate(histlist):
         yield_Left = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_LEFT_SIMC:
             for j in range(len(tbinedges) - 1):
-                if tbinedges[j] <= -evt.t < tbinedges[j+1]:
+                if tbinedges[j] <= evt.t < tbinedges[j+1]:
                     tbin_index = j
                 else:
                     tbin_index = None
@@ -576,7 +576,7 @@ for i,hist in enumerate(histlist):
         yield_Center = ROOT.TH1D("yield", "Yield", NumtBins*NumPhiBins, 0, 1.0)
         for evt in TBRANCH_CENTER_SIMC:
             for j in range(len(tbinedges) - 1):
-                if tbinedges[j] <= -evt.t < tbinedges[j+1]:
+                if tbinedges[j] <= evt.t < tbinedges[j+1]:
                     tbin_index = j
                 else:
                     tbin_index = None
