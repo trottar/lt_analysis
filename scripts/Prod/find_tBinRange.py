@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 22:17:07 trottar"
+# Time-stamp: "2023-02-17 22:21:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -910,7 +910,7 @@ binmax = max(binmax)
 
 binned_phi_tmp = []
 for val in binned_phi[1]:
-    binned_phi_tmp.append(val)
+    binned_phi_tmp.append(((val/180)-1)*math.pi)
 phiBin_line = TLine()
 for i,(n,b) in enumerate(zip(phibinvals,binned_phi_tmp)):
     phiBin_line.SetLineColor(4)
