@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 22:06:33 trottar"
+# Time-stamp: "2023-02-17 22:11:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -908,19 +908,14 @@ for i,hist in enumerate(histlist):
     binmax.append(hist["H_ph_q_DATA"].GetMaximum())
 binmax = max(binmax)
     
-tBin_line = TLine()
-phibinvals_tmp = []
-for phi in phibinvals:
-    phibinvals_tmp.append((((phi/180)-1)*math.pi))
-print("\n\n~~~~~~~~~~~~~",phibinvals)    
-print("\n\n~~~~~~~~~~~~~",phibinvals_tmp)
-for i,(n,b) in enumerate(zip(phibinvals_tmp,binned_t[1])):
-    tBin_line.SetLineColor(4)
-    tBin_line.SetLineWidth(4)
-    tBin_line.DrawLine(b,0,b,binmax)
-    l_t.AddEntry(tBin_line,"Bin Edge %s" % i )
-    l_t.AddEntry(tBin_line,"Evts = %.0f" % n)
-    l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
+phiBin_line = TLine()
+for i,(n,b) in enumerate(zip(phibinvals,binned_phi[1])):
+    phiBin_line.SetLineColor(4)
+    phiBin_line.SetLineWidth(4)
+    phiBin_line.DrawLine(b,0,b,binmax)
+    l_t.AddEntry(phiBin_line,"Bin Edge %s" % i )
+    l_t.AddEntry(phiBin_line,"Evts = %.0f" % n)
+    l_t.AddEntry(phiBin_line,"BinCenter = %.2f" % b)
     
 Cph_q.Print(outputpdf)
 
