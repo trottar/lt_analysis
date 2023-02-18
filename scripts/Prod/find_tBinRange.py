@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 21:39:11 trottar"
+# Time-stamp: "2023-02-17 21:43:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -909,7 +909,10 @@ for i,hist in enumerate(histlist):
 binmax = max(binmax)
     
 tBin_line = TLine()
-for i,(n,b) in enumerate(zip((((phibinvals/180)-1)*math.pi),binned_t[1])):
+phibinvals_tmp = []
+for phi in phibinvals:
+    phibinvals_tmp.append((((phi/180)-1)*math.pi))
+for i,(n,b) in enumerate(zip(,binned_t[1])):
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
     tBin_line.DrawLine(b,0,b,binmax)
