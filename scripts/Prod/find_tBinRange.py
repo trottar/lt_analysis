@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 22:11:47 trottar"
+# Time-stamp: "2023-02-17 22:17:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -907,9 +907,12 @@ for i,hist in enumerate(histlist):
     hist["H_ph_q_SIMC"].Draw("same, E1")
     binmax.append(hist["H_ph_q_DATA"].GetMaximum())
 binmax = max(binmax)
-    
+
+binned_phi_tmp = []
+for val in binned_phi[1]:
+    binned_phi_tmp.append(val)
 phiBin_line = TLine()
-for i,(n,b) in enumerate(zip(phibinvals,binned_phi[1])):
+for i,(n,b) in enumerate(zip(phibinvals,binned_phi_tmp)):
     phiBin_line.SetLineColor(4)
     phiBin_line.SetLineWidth(4)
     phiBin_line.DrawLine(b,0,b,binmax)
