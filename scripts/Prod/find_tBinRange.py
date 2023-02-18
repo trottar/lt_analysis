@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 21:50:01 trottar"
+# Time-stamp: "2023-02-17 22:01:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -912,6 +912,7 @@ tBin_line = TLine()
 phibinvals_tmp = []
 for phi in phibinvals:
     phibinvals_tmp.append((((phi/180)-1)*math.pi))
+print(phibinvals_tmp)
 for i,(n,b) in enumerate(zip(phibinvals_tmp,binned_t[1])):
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
