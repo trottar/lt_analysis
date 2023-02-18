@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-17 04:39:24 trottar"
+# Time-stamp: "2023-02-17 21:20:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -897,12 +897,25 @@ hDelta.Print(outputpdf)
 
 Cph_q = TCanvas()
 
+binmax = []
 for i,hist in enumerate(histlist):
     hist["H_ph_q_DATA"].SetLineColor(i+1)
+    l_t.AddEntry(hist["H_ph_q_DATA"],hist["phi_setting"])
     hist["H_ph_q_DATA"].Draw("same, E1")
     hist["H_ph_q_SIMC"].SetLineColor(40)
     hist["H_ph_q_SIMC"].SetLineStyle(10-i)
     hist["H_ph_q_SIMC"].Draw("same, E1")
+    binmax.append(hist["H_ph_q_DATA"].GetMaximum())
+binmax = max(binmax)
+    
+tBin_line = TLine()
+for i,(n,b) in enumerate(zip(tbinvals,binned_t[1])):
+    tBin_line.SetLineColor(4)
+    tBin_line.SetLineWidth(4)
+    tBin_line.DrawLine(b,0,b,binmax)
+    l_t.AddEntry(tBin_line,"Bin Edge %s" % i )
+    l_t.AddEntry(tBin_line,"Evts = %.0f" % n)
+    l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
     
 Cph_q.Print(outputpdf)
 
