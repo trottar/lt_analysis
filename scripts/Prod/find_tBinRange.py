@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 17:05:32 trottar"
+# Time-stamp: "2023-02-19 17:08:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -348,12 +348,12 @@ c_bins.Divide(2,1)
 for i,hist in enumerate(histlist):
     c_bins.cd(1)
     hist["H_phibins_DATA"].SetLineColor(i+1)
-    hist["H_phibins_DATA"].Draw("same, E1")
+    hist["H_phibins_DATA"].Draw("same")
     
 for i,hist in enumerate(histlist):
     c_bins.cd(2)
     hist["H_tbins_DATA"].SetLineColor(i+1)
-    hist["H_tbins_DATA"].Draw("same, E1")
+    hist["H_tbins_DATA"].Draw("same")
     
 c_bins.Print(outputpdf)
         
