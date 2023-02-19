@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 17:57:33 trottar"
+# Time-stamp: "2023-02-19 18:09:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,8 +333,6 @@ tbinvals = list(binned_t[0])
 tbinvals.append(binned_t[0][0])
 
 tbinedges = binned_t[1]
-#tbinedges = np.append(binned_t[1],tmin)
-#tbinedges = np.append(tbinedges, tmax)
 phibinedges = binned_phi[1]
 
 for i,hist in enumerate(histlist):
@@ -729,7 +727,7 @@ for i,hist in enumerate(histlist):
 binmax = max(binmax)
     
 tBin_line = TLine()
-for i,(n,b) in enumerate(zip(tbinvals,binned_t[1])):
+for i,(n,b) in enumerate(zip(tbinvals,tbinedges)):
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
     tBin_line.DrawLine(b,0,b,binmax)
@@ -1158,7 +1156,7 @@ for k in range(0, 10):
      # To change the arc radius we have to change number 0.6 in the lower line.
      Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
      Cpht.Update()
-for i,(n,b) in enumerate(zip(tbinvals,binned_t[1])):
+for i,(n,b) in enumerate(zip(tbinvals,tbinedges)):
      Arc.SetLineColor(3)
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number 0.6 in the lower line.
@@ -1213,7 +1211,7 @@ for k in range(0, 10):
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number tmax in the lower line.
      Arc.DrawArc(0,0,tmax*(k+1)/(10),0.,360.,"same")
-for i,(n,b) in enumerate(zip(tbinvals,binned_t[1])):
+for i,(n,b) in enumerate(zip(tbinvals,tbinedges)):
      Arc.SetLineColor(9)
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number tmax in the lower line.
