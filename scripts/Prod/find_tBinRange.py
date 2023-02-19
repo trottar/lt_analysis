@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 16:34:03 trottar"
+# Time-stamp: "2023-02-19 16:37:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,14 +337,13 @@ tbinedges = np.append(binned_t[1],tmin)
 tbinedges = np.append(tbinedges, tmax)
 phibinedges = binned_phi[1]
 
-numphi = [NumPhiBins]*len(phibinedges)
-numt = [NumtBins]*len(tbinedges)
-
 for i,hist in enumerate(histlist):
-    for phi in phibinedges:
-        hist["H_phibins_DATA"].SetBinContent(phi, numphi[i])
-    for t in tbinedges:
-        hist["H_tbins_DATA"].SetBinContent(t, numt[i])
+    for j,phi in enumerate(phibinedges):
+        hist["H_phibins_DATA"].SetBinContent(phibinvals[j])
+        hist["H_phibins_DATA"].Fill(phi)
+    for j,t in enumerate(tbinedges):
+        hist["H_tbins_DATA"].SetBinContent(tbinvals[j])
+        hist["H_tbins_DATA"].Fill(t)
         
 c_bins.Divide(2,1)
         
