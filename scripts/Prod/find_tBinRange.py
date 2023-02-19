@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 17:43:33 trottar"
+# Time-stamp: "2023-02-19 17:47:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -212,7 +212,7 @@ def bin_data(histlist):
 def find_phibins(H_phi_BinTest):
 
     print("\nFinding phi bins...")
-    phi_arr = np.linspace(0.0, 360.0, NumPhiBins)
+    phi_arr = np.linspace(0.0, 360.0, NumPhiBins+1)
 
     n, bins, patches = plt.hist(H_phi_BinTest, phi_arr)
 
@@ -237,7 +237,7 @@ def find_tbins(H_t_BinTest):
         # In this case, this returns evenly spaced values within a given interval
         # yp -> np.sort(x) : he y-coordinates of the data points
         # In this case, this returns a sorted copy of the array
-        return np.interp(np.linspace(0, npt, nbin),np.arange(npt),np.sort(x))
+        return np.interp(np.linspace(0, npt, nbin + 1),np.arange(npt),np.sort(x))
 
     print("\nFinding t bins...")
     # Histogram takes the array data set and the bins as input
