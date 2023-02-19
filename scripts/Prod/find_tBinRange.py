@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 15:58:46 trottar"
+# Time-stamp: "2023-02-19 16:02:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -339,6 +339,9 @@ phibinedges = binned_phi[1]
 
 phibins = [list(i) for i in zip(phibinedges, phibinvals)]
 tbins = [list(i) for i in zip(tbinedges, tbinvals)]
+
+print(phibins)
+print(tbins)
 
 for i,hist in enumerate(histlist):
     for phi in phibins:
