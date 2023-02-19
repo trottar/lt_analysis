@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 00:36:53 trottar"
+# Time-stamp: "2023-02-19 15:39:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,12 +11,13 @@
 # Copyright (c) trottar
 #
 import sys, os
+import ROOT
 
 ##################################################################################################################################################
 
 # Check the number of arguments provided to the script
-if len(sys.argv)-1!=29:
-    print("!!!!! ERROR !!!!!\n Expected 29 arguments\n Usage is with - Q2 POL EPSVAL TMIN TMAX NumtBins Kset runNumRight runNumLeft runNumCenter pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter EffValRight EffValLeft EffValCenter EffErrRight EffErrLeft EffErrCenter ChargeValRight ChargeValLeft ChargeValCenter ChargeErrRight ChargeErrLeft ChargeErrCenter kinematics\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=30:
+    print("!!!!! ERROR !!!!!\n Expected 29 arguments\n Usage is with - Q2 POL EPSVAL TMIN TMAX NumtBins Kset runNumRight runNumLeft runNumCenter pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter EffValRight EffValLeft EffValCenter EffErrRight EffErrLeft EffErrCenter ChargeValRight ChargeValLeft ChargeValCenter ChargeErrRight ChargeErrLeft ChargeErrCenter kinematics OutFullAnalysisFilename\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ################################################################################################################################################
@@ -60,6 +61,8 @@ ChargeErrCenter = list(sys.argv[28].split(" "))
 
 kinematics = sys.argv[29].split("_")
 
+OutFilename = sys.argv[30]
+
 InSIMCFilenameRight = "Prod_Coin_{}.root".format(kinematics[0]+"right_"+kinematics[1])
 InSIMCFilenameLeft = "Prod_Coin_{}.root".format(kinematics[0]+"left_"+kinematics[1])
 InSIMCFilenameCenter = "Prod_Coin_{}.root".format(kinematics[0]+"center_"+kinematics[1])
@@ -78,6 +81,34 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+###############################################################################################################################################
+
+'''
+InDATAFilename = OUTPATH+"/" + OutFilename + ".root"
+
+InFile_DATA = ROOT.TFile.Open(InDATAFilename, "OPEN")
+
+TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Right Data")
+TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Right Simc")
+
+TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Left Data")
+TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Left Simc")
+
+TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Center Data")
+TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Center Simc")
+
+###############################################################################################################################################
+
+yield_right_data = []
+print("\nGrabbing right data yield...")
+for i,evt in enumerate(TBRANCH_RIGHT_DATA):
+    # Progress bar
+      Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries(),bar_length=25)
+      
+      yield_right_data.append(evt.H_yield_DATA)
+'''
+      
 ###############################################################################################################################################
 
 # Grabs simc number of events and normalizaton factor
