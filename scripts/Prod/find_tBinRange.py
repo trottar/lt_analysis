@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 16:51:59 trottar"
+# Time-stamp: "2023-02-19 16:55:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -346,8 +346,10 @@ for j,t in enumerate(tbinedges):
     tbins.append([t,[1]*NumPhiBins])
     
 for i,hist in enumerate(histlist):
-    hist["H_phibins_DATA"].Fill(phibins)
-    hist["H_tbins_DATA"].Fill(tbins)
+    for phi in phibins:
+    hist["H_phibins_DATA"].Fill(phi)
+    for t in tbins:
+    hist["H_tbins_DATA"].Fill(t)
         
 c_bins.Divide(2,1)
         
