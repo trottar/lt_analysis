@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 17:47:36 trottar"
+# Time-stamp: "2023-02-19 17:52:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -338,8 +338,8 @@ tbinedges = binned_t[1]
 phibinedges = binned_phi[1]
 
 for i,hist in enumerate(histlist):
-    for j in range(NumtBins):
-        for k in range(NumPhiBins):
+    for j in range(NumtBins+1):
+        for k in range(NumPhiBins+1):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
         
