@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 16:02:08 trottar"
+# Time-stamp: "2023-02-19 16:07:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -345,9 +345,9 @@ print(tbins)
 
 for i,hist in enumerate(histlist):
     for phi in phibins:
-        hist["H_phibins_DATA"].SetBinContent(phi[0],phi[1])
+        hist["H_phibins_DATA"].SetBinContent(i+1,phi[i][1])
     for t in tbins:
-        hist["H_tbins_DATA"].SetBinContent(t[0],t[1])
+        hist["H_tbins_DATA"].SetBinContent(i+1,t[i][1])
         
 c_bins.Divide(2,1)
         
