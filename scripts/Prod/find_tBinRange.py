@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 16:10:43 trottar"
+# Time-stamp: "2023-02-19 16:12:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -361,7 +361,7 @@ for i,hist in enumerate(histlist):
     hist["H_tbins_DATA"].SetLineColor(i+1)
     hist["H_tbins_DATA"].Draw("same, E1")
     
-c_yield_data.Print(outputpdf)
+c_bins.Print(outputpdf)
         
 c_yield_data = TCanvas()
         
