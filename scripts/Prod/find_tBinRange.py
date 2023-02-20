@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 21:10:18 trottar"
+# Time-stamp: "2023-02-19 21:13:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -401,7 +401,7 @@ for i,hist in enumerate(histlist):
     hist["yieldDictData"] = yieldDict
 
     hist["H_yield_DATA"].SetLineColor(i+1)            
-    hist["H_yield_DATA"].Draw("same, E1")
+    hist["H_yield_DATA"].Draw("same")
         
 c_yield_data.Print(outputpdf)
 
@@ -445,7 +445,7 @@ for i,hist in enumerate(histlist):
     hist["yieldDictSimc"] = yieldDict
 
     hist["H_yield_SIMC"].SetLineColor(i+1)            
-    hist["H_yield_SIMC"].Draw("same, E1")
+    hist["H_yield_SIMC"].Draw("same")
         
 c_yield_simc.Print(outputpdf)
 
@@ -462,7 +462,7 @@ for i,hist in enumerate(histlist):
 
 for i,hist in enumerate(histlist):
     hist["H_relyield_DATA"].SetLineColor(i+1)
-    hist["H_relyield_DATA"].Draw("same, E1")
+    hist["H_relyield_DATA"].Draw("same")
     
 c_relyield_data.Print(outputpdf)
 
