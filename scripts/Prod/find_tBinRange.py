@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 03:31:29 trottar"
+# Time-stamp: "2023-02-20 03:35:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -463,6 +463,7 @@ for i,hist in enumerate(histlist):
             relyield = 0.0
         else:
             relyield = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
+        print("!!!!!!!!!!",relyield)
         hist["H_relyield_DATA"].Fill(relyield)
     #hist["H_relyield_DATA"].Add(yieldClone)
             
