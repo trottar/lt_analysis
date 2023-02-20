@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 21:18:10 trottar"
+# Time-stamp: "2023-02-19 21:25:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -451,11 +451,15 @@ c_yield_simc.Print(outputpdf)
 
 c_relyield_data = TCanvas()
 
-x = np.array([hist["H_yield_DATA"].GetBinContent(i) for i in range(1, hist["H_yield_DATA"].GetNbinsX()+1)])
-y = np.array([hist["H_yield_SIMC"].GetBinContent(i) for i in range(1, hist["H_yield_SIMC"].GetNbinsX()+1)])
-
-z = x/y
-
+for i,hist in enumerate(histlist):
+    yieldClone = hist["H_yield_DATA"].Clone("yieldClone")
+    for i in range(1, hist["H_yield_DATA"].GetNbinsX()+1):
+        if hist["H_yield_SIMC"].GetBinContent(i) == 0:
+            yieldClone.SetBinContent(i, 0)
+        else:
+            yieldClone.SetBinContent(i, hist["H_yield_DATA"].GetBinContent(i) / hist["H_yield_SIMC"].GetBinContent(i))
+    hist["H_relyield_DATA"].Add(yieldClone)
+            
 for i,hist in enumerate(histlist):
     for j,val in enumerate(hist["H_yield_DATA"]):
         hist["H_relyield_DATA"].SetBinContent(j+1,z[i])
