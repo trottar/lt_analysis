@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 20:49:47 trottar"
+# Time-stamp: "2023-02-19 20:53:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -396,6 +396,8 @@ for i,hist in enumerate(histlist):
     # Extract the desired values from each group
     yieldDict = {}
     for key, val in groups.items():
+        if integrate.simps(val)*hist["normfac_data"] <= 1e-9:
+            print("\n\n~~~~~~~~~~~~~~~~~",integrate.simps(val)*hist["normfac_data"])
         yieldDict[key] = integrate.simps(val)*hist["normfac_data"]
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
     hist["yieldDictData"] = yieldDict
