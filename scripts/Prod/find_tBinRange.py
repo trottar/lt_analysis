@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 17:29:39 trottar"
+# Time-stamp: "2023-02-20 17:34:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,18 +337,16 @@ phibinedges = binned_phi[1]
 
 for i,hist in enumerate(histlist):
     
-    tval = array('d', NumtBins*NumPhiBins*[0])
-    phival = array('d', NumtBins*NumPhiBins*[0])
-    
-    hist["yieldTree"].Branch("tbins", tval, "tbins/D")
-    hist["yieldTree"].Branch("phibins", phival, "phibins/D")
+
     
     for j in range(NumtBins):
         for k in range(NumPhiBins):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
-            tval[0] = tbinedges[j]
-            phival[0] = phibinedges[k]
+            tval = array('d', [tbinedges[j]])
+            phival = array('d', [phibinedges[k]])            
+            hist["yieldTree"].Branch("tbins", tval, "tbins/D")
+            hist["yieldTree"].Branch("phibins", phival, "phibins/D")
             hist["yieldTree"].Fill()
 
     print("\n\n!!!!!!!!!!!!!!!!!!!",hist["yieldTree"].tbins)
@@ -404,7 +402,7 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [t[2]]
 
-    yieldValData = array('d', NumtBins*NumPhiBins*[0])
+    yieldValData = array('d', [0])
     hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
     # Extract the desired values from each group
     for key, val in groups.items():
@@ -452,7 +450,7 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [t[2]]
 
-    yieldValSimc = array('d', NumtBins*NumPhiBins*[0])
+    yieldValSimc = array('d', [0])
     hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
     # Extract the desired values from each group
     for key, val in groups.items():
@@ -471,7 +469,7 @@ c_yield_simc.Print(outputpdf)
 c_relyield_data = TCanvas()
 
 for i,hist in enumerate(histlist):
-    relyieldval = array('d', NumtBins*NumPhiBins*[0])
+    relyieldval = array('d', [0])
     hist["yieldTree"].Branch("rel_yield", relyieldval, "rel_yield/D")
     for j in range(1, hist["H_yield_DATA"].GetNbinsX()+1):
         
