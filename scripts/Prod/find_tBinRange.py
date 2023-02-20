@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 06:31:42 trottar"
+# Time-stamp: "2023-02-20 06:36:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -393,13 +393,13 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [t[2]]
 
-    yieldVal = 0
-    hist["yieldTree"].Branch("yield", yieldVal, "yield/D")
+    yieldValData = 0
+    hist["yieldTree"].Branch("yield", yieldValData, "yield/D")
     # Extract the desired values from each group
     for key, val in groups.items():
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(val)*hist["normfac_data"]
-        yieldVal = integrate.simps(val)*hist["normfac_data"]
+        yieldValData = integrate.simps(val)*hist["normfac_data"]
         hist["yieldTree"].Fill()
             
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
@@ -441,10 +441,14 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [t[2]]
 
+    yieldValSimc = 0
+    hist["yieldTree"].Branch("yield", yieldValSimc, "yield/D")
     # Extract the desired values from each group
     for key, val in groups.items():
         hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
         hist["yieldDictSimc"][key] = integrate.simps(val)*hist["normfac_simc"]
+        yieldValSimc = integrate.simps(val)*hist["normfac_simc"]
+        hist["yieldTree"].Fill()
         
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictSimc"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
