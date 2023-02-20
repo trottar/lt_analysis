@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 05:27:28 trottar"
+# Time-stamp: "2023-02-20 05:30:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,6 +104,16 @@ if float(runNumRight[0]) != 0:
     phibin_right_data = rnp.hist2array(InFile_DATA.Get("Right Data/H_phibins_DATA"))
     tbin_right_data = rnp.hist2array(InFile_DATA.Get("Right Data/H_tbins_DATA"))
 
+if float(runNumLeft[0]) != 0:
+    yield_left_data = rnp.hist2array(InFile_DATA.Get("Left Data/H_yield_DATA"))
+    phibin_left_data = rnp.hist2array(InFile_DATA.Get("Left Data/H_phibins_DATA"))
+    tbin_left_data = rnp.hist2array(InFile_DATA.Get("Left Data/H_tbins_DATA"))
+
+if float(runNumCenter[0]) != 0:
+    yield_center_data = rnp.hist2array(InFile_DATA.Get("Center Data/H_yield_DATA"))
+    phibin_center_data = rnp.hist2array(InFile_DATA.Get("Center Data/H_phibins_DATA"))
+    tbin_center_data = rnp.hist2array(InFile_DATA.Get("Center Data/H_tbins_DATA"))
+
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
@@ -115,6 +125,8 @@ print("~~~~~~~~~",len(phibin_left_data))
 print("\n\n~~~~~~~~~",yield_center_data)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
+
+InFile_DATA.Close()
 
 ################################################################################################################################################
 
