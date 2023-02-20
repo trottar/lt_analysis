@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 14:52:19 trottar"
+# Time-stamp: "2023-02-20 14:53:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -344,10 +344,8 @@ for i,hist in enumerate(histlist):
         for k in range(NumPhiBins):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
-            tval = tbinedges[j]
-            phival = phibinedges[k]
-            tval.append(j)
-            phival.append(k)
+            tval.push_back(tbinedges[j])
+            phival.push_back(phibinedges[k])
         
 c_bins.Divide(2,1)
         
