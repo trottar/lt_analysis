@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 02:13:15 trottar"
+# Time-stamp: "2023-02-20 02:17:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -401,7 +401,7 @@ for i,hist in enumerate(histlist):
     hist["yieldDictData"] = yieldDict
 
     print("\n\n~~~~~~~~~~~~~~~",len(groups))
-    print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"].GetEntries())
+    print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
     hist["H_yield_DATA"].SetLineColor(i+1)            
     hist["H_yield_DATA"].Draw("same")
         
@@ -447,7 +447,7 @@ for i,hist in enumerate(histlist):
     hist["yieldDictSimc"] = yieldDict
 
     print("\n\n~~~~~~~~~~~~~~~",len(groups))
-    print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"].GetEntries())
+    print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
     hist["H_yield_SIMC"].SetLineColor(i+1)            
     hist["H_yield_SIMC"].Draw("same")
         
@@ -465,7 +465,7 @@ for i,hist in enumerate(histlist):
     hist["H_relyield_DATA"].Add(yieldClone)
             
 for i,hist in enumerate(histlist):
-    print("\n\n~~~~~~~~~~~~~~~",hist["H_relyield_DATA"].GetEntries())
+    print("\n\n~~~~~~~~~~~~~~~",hist["H_relyield_DATA"])
     hist["H_relyield_DATA"].SetLineColor(i+1)
     hist["H_relyield_DATA"].Draw("same")
     
