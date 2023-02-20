@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 05:13:40 trottar"
+# Time-stamp: "2023-02-20 05:17:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,29 +99,29 @@ InFile_DATA = ROOT.TFile.Open(InDATAFilename,"READ")
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    yield_right_data = [InFile_DATA.Get("Right Data/H_yield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Right Data/H_yield_DATA").GetNbinsX()+2)]
+    relyield_right_data = [InFile_DATA.Get("Right Data/H_relyield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Right Data/H_relyield_DATA").GetNbinsX()+2)]
     phibin_right_data = [InFile_DATA.Get("Right Data/H_phibins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Right Data/H_phibins_DATA").GetNbinsX()+2)]
     tbin_right_data = [InFile_DATA.Get("Right Data/H_tbins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Right Data/H_tbins_DATA").GetNbinsX()+2)]
 
 if float(runNumLeft[0]) != 0:
-    yield_left_data = [InFile_DATA.Get("Left Data/H_yield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Left Data/H_yield_DATA").GetNbinsX()+2)]
+    relyield_left_data = [InFile_DATA.Get("Left Data/H_relyield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Left Data/H_relyield_DATA").GetNbinsX()+2)]
     phibin_left_data = [InFile_DATA.Get("Left Data/H_phibins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Left Data/H_phibins_DATA").GetNbinsX()+2)]
     tbin_left_data = [InFile_DATA.Get("Left Data/H_tbins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Left Data/H_tbins_DATA").GetNbinsX()+2)]
 
 if float(runNumCenter[0]) != 0:
-    yield_center_data = [InFile_DATA.Get("Center Data/H_yield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Center Data/H_yield_DATA").GetNbinsX()+2)]
+    relyield_center_data = [InFile_DATA.Get("Center Data/H_relyield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Center Data/H_relyield_DATA").GetNbinsX()+2)]
     phibin_center_data = [InFile_DATA.Get("Center Data/H_phibins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Center Data/H_phibins_DATA").GetNbinsX()+2)]
     tbin_center_data = [InFile_DATA.Get("Center Data/H_tbins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Center Data/H_tbins_DATA").GetNbinsX()+2)]
 
-print("\n\n~~~~~~~~~",yield_left_data)
+print("\n\n~~~~~~~~~",relyield_left_data)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
 
-print("\n\n~~~~~~~~~",len(yield_left_data))
+print("\n\n~~~~~~~~~",len(relyield_left_data))
 print("~~~~~~~~~",len(tbin_left_data))
 print("~~~~~~~~~",len(phibin_left_data))
 
-print("\n\n~~~~~~~~~",yield_center_data)
+print("\n\n~~~~~~~~~",relyield_center_data)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
 
