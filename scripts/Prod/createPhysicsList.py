@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 01:53:13 trottar"
+# Time-stamp: "2023-02-20 01:57:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,19 +108,19 @@ if float(runNumCenter[0]) != 0:
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    relyield_right_data = TBRANCH_RIGHT_DATA.Get("H_relyield_DATA")
-    phibin_right_data = TBRANCH_RIGHT_DATA.Get("H_phibins_DATA")
-    tbin_right_data = TBRANCH_RIGHT_DATA.Get("H_tbins_DATA")
+    relyield_right_data = [TBRANCH_RIGHT_DATA.Get("H_relyield_DATA")]
+    phibin_right_data = [TBRANCH_RIGHT_DATA.Get("H_phibins_DATA")]
+    tbin_right_data = [TBRANCH_RIGHT_DATA.Get("H_tbins_DATA")]
 
 if float(runNumLeft[0]) != 0:
-    relyield_left_data = TBRANCH_LEFT_DATA.Get("H_relyield_DATA")
-    phibin_left_data = TBRANCH_LEFT_DATA.Get("H_phibins_DATA")
-    tbin_left_data = TBRANCH_LEFT_DATA.Get("H_tbins_DATA")
+    relyield_left_data = [TBRANCH_LEFT_DATA.Get("H_relyield_DATA")]
+    phibin_left_data = [TBRANCH_LEFT_DATA.Get("H_phibins_DATA")]
+    tbin_left_data = [TBRANCH_LEFT_DATA.Get("H_tbins_DATA")]
 
 if float(runNumCenter[0]) != 0:
-    relyield_center_data = TBRANCH_CENTER_DATA.Get("H_relyield_DATA")
-    phibin_center_data = TBRANCH_CENTER_DATA.Get("H_phibins_DATA")
-    tbin_center_data = TBRANCH_CENTER_DATA.Get("H_tbins_DATA")
+    relyield_center_data = [TBRANCH_CENTER_DATA.Get("H_relyield_DATA")]
+    phibin_center_data = [TBRANCH_CENTER_DATA.Get("H_phibins_DATA")]
+    tbin_center_data = [TBRANCH_CENTER_DATA.Get("H_tbins_DATA")]
 
 InFile_DATA.Close()
 
