@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 02:13:31 trottar"
+# Time-stamp: "2023-02-20 02:21:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,34 +108,34 @@ if float(runNumCenter[0]) != 0:
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    relyield_right_data = [TBRANCH_RIGHT_DATA.Get("H_relyield_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_relyield_DATA").GetNbinsX()+1)]
+    yield_right_data = [TBRANCH_RIGHT_DATA.Get("H_yield_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_yield_DATA").GetNbinsX()+1)]
     phibin_right_data = [TBRANCH_RIGHT_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
     tbin_right_data = [TBRANCH_RIGHT_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
 
 if float(runNumLeft[0]) != 0:
-    relyield_left_data = [TBRANCH_LEFT_DATA.Get("H_relyield_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_relyield_DATA").GetNbinsX()+1)]
+    yield_left_data = [TBRANCH_LEFT_DATA.Get("H_yield_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_yield_DATA").GetNbinsX()+1)]
     phibin_left_data = [TBRANCH_LEFT_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
     tbin_left_data = [TBRANCH_LEFT_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
 
 if float(runNumCenter[0]) != 0:
-    relyield_center_data = [TBRANCH_CENTER_DATA.Get("H_relyield_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_relyield_DATA").GetNbinsX()+1)]
+    yield_center_data = [TBRANCH_CENTER_DATA.Get("H_yield_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_yield_DATA").GetNbinsX()+1)]
     phibin_center_data = [TBRANCH_CENTER_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
     tbin_center_data = [TBRANCH_CENTER_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
 
 InFile_DATA.Close()
-'''
-print("\n\n~~~~~~~~~",relyield_left_data)
+
+print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
 
-print("\n\n~~~~~~~~~",len(relyield_left_data))
+print("\n\n~~~~~~~~~",len(yield_left_data))
 print("~~~~~~~~~",len(tbin_left_data))
 print("~~~~~~~~~",len(phibin_left_data))
 
-print("\n\n~~~~~~~~~",relyield_center_data)
+print("\n\n~~~~~~~~~",yield_center_data)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
-'''
+
 ################################################################################################################################################
 
 def write_to_file(f_out,line):
@@ -186,10 +186,10 @@ if float(runNumRight[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, relyield in enumerate(relyield_right_data):
-            if relyield == 0.0:
+        for i, yield in enumerate(yield_right_data):
+            if yield == 0.0:
                 # convert uC to C (10^-6C=1uC)
-                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield, 1.0000, phibin_right_data[i], tbin_right_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -202,10 +202,10 @@ if float(runNumLeft[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, relyield in enumerate(relyield_left_data):
-            if relyield == 0.0:
+        for i, yield in enumerate(yield_left_data):
+            if yield == 0.0:
                 # convert uC to C (10^-6C=1uC)
-                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield, 1.0000, phibin_left_data[i], tbin_left_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -218,10 +218,10 @@ if float(runNumCenter[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, relyield in enumerate(relyield_center_data):
-            if relyield == 0.0:
+        for i, yield in enumerate(yield_center_data):
+            if yield == 0.0:
                 # convert uC to C (10^-6C=1uC)
-                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield, 1.0000, phibin_center_data[i], tbin_center_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
