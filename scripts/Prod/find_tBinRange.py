@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 17:34:19 trottar"
+# Time-stamp: "2023-02-20 17:37:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,19 +337,21 @@ phibinedges = binned_phi[1]
 
 for i,hist in enumerate(histlist):
     
-
+    tval = array('d', [0])
+    phival = array('d', [0])
+    
+    hist["yieldTree"].Branch("tbins", tval, "tbins/D")
+    hist["yieldTree"].Branch("phibins", phival, "phibins/D")
     
     for j in range(NumtBins):
         for k in range(NumPhiBins):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
-            tval = array('d', [tbinedges[j]])
-            phival = array('d', [phibinedges[k]])            
-            hist["yieldTree"].Branch("tbins", tval, "tbins/D")
-            hist["yieldTree"].Branch("phibins", phival, "phibins/D")
+            tval[0] = tbinedges[j]
+            phival[0] = phibinedges[k]
             hist["yieldTree"].Fill()
 
-    print("\n\n!!!!!!!!!!!!!!!!!!!",hist["yieldTree"].tbins)
+    print("\n\n!!!!!!!!!!!!!!!!!!!",hist["yieldTree"].GetEntries())
 c_bins.Divide(2,1)
         
 for i,hist in enumerate(histlist):
