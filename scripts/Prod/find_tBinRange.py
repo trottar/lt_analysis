@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 05:48:21 trottar"
+# Time-stamp: "2023-02-20 05:53:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -397,14 +397,7 @@ for i,hist in enumerate(histlist):
     for key, val in groups.items():
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(val)*hist["normfac_data"]
-        
-    # create a TNamed object with the dictionary name
-    rootDictData = ROOT.TNamed("{}".format(hist["yieldDictData"]), "")
-
-    # convert the dictionary to a TObjString and set it as the object of the TNamed
-    string = ROOT.TObjString(str(hist["yieldDictData"]))
-    rootDictData.SetObject(string)
-    
+            
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
     hist["H_yield_DATA"].SetLineColor(i+1)            
@@ -448,13 +441,6 @@ for i,hist in enumerate(histlist):
     for key, val in groups.items():
         hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
         hist["yieldDictSimc"][key] = integrate.simps(val)*hist["normfac_simc"]
-
-    # create a TNamed object with the dictionary name
-    rootDictSimc = ROOT.TNamed("{}".format(hist["yieldDictSimc"]), "")
-
-    # convert the dictionary to a TObjString and set it as the object of the TNamed
-    string = ROOT.TObjString(str(hist["yieldDictSimc"]))
-    rootDictSimc.SetObject(string)
         
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictSimc"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
@@ -1120,11 +1106,18 @@ for i,hist in enumerate(histlist):
 outHistFile = ROOT.TFile.Open(foutname, "RECREATE")
 
 for i,hist in enumerate(histlist):
-    
-    # write the TNamed to the ROOT file
-    outHistFile.WriteObject(rootDictData, "yieldDictData")
-    outHistFile.WriteObject(rootDictSimc, "yieldDictSimc")
 
+    # create a TTree with a branch for each key in the dictionary
+    output_tree = ROOT.TTree("my_tree", "My Tree")
+    for key in hist["yieldDictData"].keys():
+        output_tree.Branch(key, ROOT.AddressOf(ROOT.Double(), key), key+"/D")
+
+    # fill the branches with the values from the dictionary
+    output_tree.Fill()
+        
+    # write the tree to the file and close it
+    output_tree.Write()
+    
     if hist["phi_setting"] == "Right":
         d_Right_Data = outHistFile.mkdir("Right Data")
         d_Right_Simc = outHistFile.mkdir("Right Simc")
