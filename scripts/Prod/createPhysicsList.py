@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 01:19:04 trottar"
+# Time-stamp: "2023-02-20 01:19:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,19 +108,16 @@ if float(runNumCenter[0]) != 0:
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    print("\nGrabbing right data yield...")
     relyield_right_data = [evt for evt in TBRANCH_RIGHT_DATA.Get("H_relyield_DATA")]
     phibin_right_data = [evt for evt in TBRANCH_RIGHT_DATA.Get("H_phibins_DATA")]
     tbin_right_data = [evt for evt in TBRANCH_RIGHT_DATA.Get("H_tbins_DATA")]
 
 if float(runNumLeft[0]) != 0:
-    print("\nGrabbing left data yield...")
     relyield_left_data = [evt for evt in TBRANCH_LEFT_DATA.Get("H_relyield_DATA")]
     phibin_left_data = [evt for evt in TBRANCH_LEFT_DATA.Get("H_phibins_DATA")]
     tbin_left_data = [evt for evt in TBRANCH_LEFT_DATA.Get("H_tbins_DATA")]
 
 if float(runNumCenter[0]) != 0:
-    print("\nGrabbing center data yield...")
     relyield_center_data = [evt for evt in TBRANCH_CENTER_DATA.Get("H_relyield_DATA")]
     phibin_center_data = [evt for evt in TBRANCH_CENTER_DATA.Get("H_phibins_DATA")]
     tbin_center_data = [evt for evt in TBRANCH_CENTER_DATA.Get("H_tbins_DATA")]
