@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 05:03:55 trottar"
+# Time-stamp: "2023-02-20 05:07:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,6 +102,16 @@ if float(runNumRight[0]) != 0:
     yield_right_data = InFile_DATA.Get("Right Data/H_yield_DATA").GetArray()
     phibin_right_data = InFile_DATA.Get("Right Data/H_phibin_DATA").GetArray()
     tbin_right_data = InFile_DATA.Get("Right Data/H_tbin_DATA").GetArray()
+
+if float(runNumLeft[0]) != 0:
+    yield_left_data = InFile_DATA.Get("Left Data/H_yield_DATA").GetArray()
+    phibin_left_data = InFile_DATA.Get("Left Data/H_phibin_DATA").GetArray()
+    tbin_left_data = InFile_DATA.Get("Left Data/H_tbin_DATA").GetArray()
+
+if float(runNumCenter[0]) != 0:
+    yield_center_data = InFile_DATA.Get("Center Data/H_yield_DATA").GetArray()
+    phibin_center_data = InFile_DATA.Get("Center Data/H_phibin_DATA").GetArray()
+    tbin_center_data = InFile_DATA.Get("Center Data/H_tbin_DATA").GetArray()
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
