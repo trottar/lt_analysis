@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 18:15:48 trottar"
+# Time-stamp: "2023-02-20 18:22:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,8 +18,8 @@ import root_numpy as rnp
 ##################################################################################################################################################
 
 # Check the number of arguments provided to the script
-if len(sys.argv)-1!=30:
-    print("!!!!! ERROR !!!!!\n Expected 29 arguments\n Usage is with - Q2 POL EPSVAL TMIN TMAX NumtBins Kset runNumRight runNumLeft runNumCenter pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter EffValRight EffValLeft EffValCenter EffErrRight EffErrLeft EffErrCenter ChargeValRight ChargeValLeft ChargeValCenter ChargeErrRight ChargeErrLeft ChargeErrCenter kinematics OutFullAnalysisFilename\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=31:
+    print("!!!!! ERROR !!!!!\n Expected 31 arguments\n Usage is with - Q2 POL EPSVAL TMIN TMAX NumtBins NumPhiBins Kset runNumRight runNumLeft runNumCenter pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter EffValRight EffValLeft EffValCenter EffErrRight EffErrLeft EffErrCenter ChargeValRight ChargeValLeft ChargeValCenter ChargeErrRight ChargeErrLeft ChargeErrCenter kinematics OutFullAnalysisFilename\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ################################################################################################################################################
@@ -33,37 +33,38 @@ EPSVAL = sys.argv[3]
 TMIN = sys.argv[4]
 TMAX = sys.argv[5]
 NumtBins = sys.argv[6]
-Kset = sys.argv[7]
+NumPhiBins = sys.argv[7]
+Kset = sys.argv[8]
 
-runNumRight = list(sys.argv[8].split(" "))
-runNumLeft = list(sys.argv[9].split(" "))
-runNumCenter = list(sys.argv[10].split(" "))
+runNumRight = list(sys.argv[9].split(" "))
+runNumLeft = list(sys.argv[10].split(" "))
+runNumCenter = list(sys.argv[11].split(" "))
 
-pThetaValRight = list(sys.argv[11].split(" "))
-pThetaValLeft = list(sys.argv[12].split(" "))
-pThetaValCenter = list(sys.argv[13].split(" "))
+pThetaValRight = list(sys.argv[12].split(" "))
+pThetaValLeft = list(sys.argv[13].split(" "))
+pThetaValCenter = list(sys.argv[14].split(" "))
 
-EbeamValRight = list(sys.argv[14].split(" "))
-EbeamValLeft = list(sys.argv[15].split(" "))
-EbeamValCenter = list(sys.argv[16].split(" "))
+EbeamValRight = list(sys.argv[15].split(" "))
+EbeamValLeft = list(sys.argv[16].split(" "))
+EbeamValCenter = list(sys.argv[17].split(" "))
 
-EffValRight = list(sys.argv[17].split(" "))
-EffValLeft = list(sys.argv[18].split(" "))
-EffValCenter = list(sys.argv[19].split(" "))
-EffErrRight = list(sys.argv[20].split(" "))
-EffErrLeft = list(sys.argv[21].split(" "))
-EffErrCenter = list(sys.argv[22].split(" "))
+EffValRight = list(sys.argv[18].split(" "))
+EffValLeft = list(sys.argv[19].split(" "))
+EffValCenter = list(sys.argv[20].split(" "))
+EffErrRight = list(sys.argv[21].split(" "))
+EffErrLeft = list(sys.argv[22].split(" "))
+EffErrCenter = list(sys.argv[23].split(" "))
 
-ChargeValRight = list(sys.argv[23].split(" "))
-ChargeValLeft = list(sys.argv[24].split(" "))
-ChargeValCenter = list(sys.argv[25].split(" "))
-ChargeErrRight = list(sys.argv[26].split(" "))
-ChargeErrLeft = list(sys.argv[27].split(" "))
-ChargeErrCenter = list(sys.argv[28].split(" "))
+ChargeValRight = list(sys.argv[24].split(" "))
+ChargeValLeft = list(sys.argv[25].split(" "))
+ChargeValCenter = list(sys.argv[26].split(" "))
+ChargeErrRight = list(sys.argv[27].split(" "))
+ChargeErrLeft = list(sys.argv[28].split(" "))
+ChargeErrCenter = list(sys.argv[29].split(" "))
 
-kinematics = sys.argv[29].split("_")
+kinematics = sys.argv[30].split("_")
 
-OutFilename = sys.argv[30]
+OutFilename = sys.argv[31]
 
 InSIMCFilenameRight = "Prod_Coin_{}.root".format(kinematics[0]+"right_"+kinematics[1])
 InSIMCFilenameLeft = "Prod_Coin_{}.root".format(kinematics[0]+"left_"+kinematics[1])
@@ -101,21 +102,21 @@ InFile_DATA = ROOT.TFile.Open(InDATAFilename,"READ")
 
 if float(runNumRight[0]) != 0:
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
-    yield_right_data = [evt.yield_data for i, evt in enumerate(TBRANCH_RIGHT) if i <= 80]
-    phibin_right_data = [evt.phibins for i, evt in enumerate(TBRANCH_RIGHT) if i <= 80]
-    tbin_right_data = [evt.tbins for i, evt in enumerate(TBRANCH_RIGHT) if i <= 80]
+    yield_right_data = [evt.yield_data for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
+    phibin_right_data = [evt.phibins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
+    tbin_right_data = [evt.tbins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
 
 if float(runNumLeft[0]) != 0:
     TBRANCH_LEFT = InFile_DATA.Get("Left")
-    yield_left_data = [evt.yield_data for i, evt in enumerate(TBRANCH_LEFT) if i <= 80]
-    phibin_left_data = [evt.phibins for i, evt in enumerate(TBRANCH_LEFT) if i <= 80]
-    tbin_left_data = [evt.tbins for i, evt in enumerate(TBRANCH_LEFT) if i <= 80]
+    yield_left_data = [evt.yield_data for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
+    phibin_left_data = [evt.phibins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
+    tbin_left_data = [evt.tbins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
 
 if float(runNumCenter[0]) != 0:
     TBRANCH_CENTER = InFile_DATA.Get("Center")
-    yield_center_data = [evt.yield_data for i, evt in enumerate(TBRANCH_CENTER) if i <= 80]
-    phibin_center_data = [evt.phibins for i, evt in enumerate(TBRANCH_CENTER) if i <= 80]
-    tbin_center_data = [evt.tbins for i, evt in enumerate(TBRANCH_CENTER) if i <= 80]
+    yield_center_data = [evt.yield_data for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
+    phibin_center_data = [evt.phibins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
+    tbin_center_data = [evt.tbins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
