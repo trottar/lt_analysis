@@ -159,8 +159,7 @@ NumPhiBins=16
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity
 TMIN=0.010
-#TMAX=0.990
-TMAX=1.990
+TMAX=0.990
 KSet=1 # Arbitrary value
 
 # Efficiency csv file
