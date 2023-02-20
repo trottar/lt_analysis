@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 02:58:21 trottar"
+# Time-stamp: "2023-02-20 03:04:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -396,7 +396,7 @@ for i,hist in enumerate(histlist):
     # Extract the desired values from each group
     yieldDict = {}
     for key, val in groups.items():
-        yieldDict[key] = integrate.simps(val)*hist["normfac_data"]
+        yieldDict[key].append(integrate.simps(val)*hist["normfac_data"])
         hist["H_yield_DATA"].Fill(integrate.simps(val),hist["normfac_data"])
     hist["yieldDictData"] = yieldDict
 
@@ -442,7 +442,7 @@ for i,hist in enumerate(histlist):
     # Extract the desired values from each group
     yieldDict = {}
     for key, val in groups.items():
-        yieldDict[key] = integrate.simps(val)*hist["normfac_simc"]
+        yieldDict[key].append(integrate.simps(val)*hist["normfac_simc"])
         hist["H_yield_SIMC"].Fill(integrate.simps(val),hist["normfac_simc"])
     hist["yieldDictSimc"] = yieldDict
 
