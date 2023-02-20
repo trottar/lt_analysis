@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 20:15:11 trottar"
+# Time-stamp: "2023-02-19 20:35:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -453,14 +453,12 @@ c_relyield_data = TCanvas()
 
 for i,hist in enumerate(histlist):
     yieldClone = hist["H_yield_DATA"].Clone()
-    yieldClone.Divide(hist["H_yield_SIMC"])
-    hist["H_relyield_DATA"].Add(yieldClone)
+    yieldClone.Divide(hist["H_yield_SIMC"]*10000)
+    hist["H_relyield_DATA"].Add(yieldClone*10000)
 
 for i,hist in enumerate(histlist):
     hist["H_relyield_DATA"].SetLineColor(i+1)
     hist["H_relyield_DATA"].Draw("same, E1")
-    yieldClone.SetLineColor(7)
-    yieldClone.Draw("same, E1")
     
 c_relyield_data.Print(outputpdf)
 
