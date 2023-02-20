@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 18:07:25 trottar"
+# Time-stamp: "2023-02-20 18:11:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -343,8 +343,8 @@ for i,hist in enumerate(histlist):
     hist["yieldTree"].Branch("tbins", tval, "tbins/D")
     hist["yieldTree"].Branch("phibins", phival, "phibins/D")
     
-    for j in range(NumtBins):
-        for k in range(NumPhiBins):
+    for j in range(NumtBins+1):
+        for k in range(NumPhiBins+1):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
             tval[0] = tbinedges[j]
@@ -414,6 +414,8 @@ for i,hist in enumerate(histlist):
         hist["yieldDictData"][key] = integrate.simps(val)*hist["normfac_data"]
         yieldValData[0] = integrate.simps(val)*hist["normfac_data"]
         hist["yieldTree"].Fill()
+
+    hist["yieldTree"].ResetBranchAddresses()
             
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
@@ -462,6 +464,8 @@ for i,hist in enumerate(histlist):
         hist["yieldDictSimc"][key] = integrate.simps(val)*hist["normfac_simc"]
         yieldValSimc[0] = integrate.simps(val)*hist["normfac_simc"]
         hist["yieldTree"].Fill()
+
+    hist["yieldTree"].ResetBranchAddresses()
         
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictSimc"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
