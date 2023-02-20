@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 01:21:20 trottar"
+# Time-stamp: "2023-02-20 01:31:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,6 +124,14 @@ if float(runNumCenter[0]) != 0:
 
 InFile_DATA.Close()
 
+print("\n\n~~~~~~~~~",relyield_left_data)
+print("~~~~~~~~~",tbin_left_data)
+print("~~~~~~~~~",phibin_left_data)
+
+print("\n\n~~~~~~~~~",relyield_center_data)
+print("~~~~~~~~~",tbin_center_data)
+print("~~~~~~~~~",phibin_center_data)
+
 ################################################################################################################################################
 
 def write_to_file(f_out,line):
@@ -137,8 +145,10 @@ def write_to_file(f_out,line):
 # Define thpq vector relative to middle setting
 if float(runNumRight[0]) != 0:
     thpq_right = abs(float(pThetaValCenter[0])-float(pThetaValRight[0]))
-thpq_left = abs(float(pThetaValCenter[0])-float(pThetaValLeft[0]))
-thpq_center = 0.000
+if float(runNumLeft[0]) != 0:
+    thpq_left = abs(float(pThetaValCenter[0])-float(pThetaValLeft[0]))
+if float(runNumCenter[0]) != 0:
+    thpq_center = 0.000
 
 ################################################################################################################################################
             
@@ -165,7 +175,7 @@ with open(f_list_settings, 'r') as f:
 ################################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_right)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{:.3f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_right)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
@@ -173,14 +183,15 @@ if float(runNumRight[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_right_data):
-            # convert uC to C (10^-6C=1uC)
-            check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
-            # Check if the line already exists
-            if check_line not in lines:
-                write_to_file(f_list,check_line)
+            if relyield == 0.0:
+                # convert uC to C (10^-6C=1uC)
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
 
 if float(runNumLeft[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_left)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{:.3f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_left)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
@@ -188,14 +199,15 @@ if float(runNumLeft[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_left_data):
-            # convert uC to C (10^-6C=1uC)
-            check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
-            # Check if the line already exists
-            if check_line not in lines:
-                write_to_file(f_list,check_line)
+            if relyield == 0.0:
+                # convert uC to C (10^-6C=1uC)
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
 
 if float(runNumCenter[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_center)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{:.3f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_center)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
@@ -203,10 +215,11 @@ if float(runNumCenter[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_center_data):
-            # convert uC to C (10^-6C=1uC)
-            check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
-            # Check if the line already exists
-            if check_line not in lines:
-                write_to_file(f_list,check_line)
+            if relyield == 0.0:
+                # convert uC to C (10^-6C=1uC)
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
                 
 ################################################################################################################################################
