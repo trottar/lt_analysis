@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 00:17:12 trottar"
+# Time-stamp: "2023-02-20 00:24:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -416,13 +416,13 @@ for i,hist in enumerate(histlist):
     MM_tmp = []
     for evt in TBRANCH_SIMC:
         for j in range(len(tbinedges) - 1):
-            if tbinedges[j] < evt.t < tbinedges[j+1]:
+            if tbinedges[j] < evt.t*evt.Weight < tbinedges[j+1]:
                 tbin_index = j
             else:
                 tbin_index = None
             if tbin_index != None:
                 for k in range(len(phibinedges) - 1):
-                    if phibinedges[k] < (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
+                    if phibinedges[k] < (evt.phipq*evt.Weight)*(180/math.pi) < phibinedges[k+1]:
                         phibin_index = k
                     else:
                         phibin_index = None
