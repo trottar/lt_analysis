@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 04:18:11 trottar"
+# Time-stamp: "2023-02-20 04:19:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,19 +99,19 @@ InFile_DATA = up.open(InDATAFilename)
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    yield_right_data = InFile_DATA["Right Data/H_yield_DATA"].values
-    phibin_right_data = InFile_DATA["Right Data/H_phibins_DATA"].values
-    tbin_right_data = InFile_DATA["Right Data/H_tbins_DATA"].values
+    yield_right_data = InFile_DATA["Right Data/H_yield_DATA"].to_numpy()
+    phibin_right_data = InFile_DATA["Right Data/H_phibins_DATA"].to_numpy()
+    tbin_right_data = InFile_DATA["Right Data/H_tbins_DATA"].to_numpy()
 
 if float(runNumLeft[0]) != 0:
-    yield_left_data = InFile_DATA["Left Data/H_yield_DATA"].values
-    phibin_left_data = InFile_DATA["Left Data/H_phibins_DATA"].values
-    tbin_left_data = InFile_DATA["Left Data/H_tbins_DATA"].values
+    yield_left_data = InFile_DATA["Left Data/H_yield_DATA"].to_numpy()
+    phibin_left_data = InFile_DATA["Left Data/H_phibins_DATA"].to_numpy()
+    tbin_left_data = InFile_DATA["Left Data/H_tbins_DATA"].to_numpy()
 
 if float(runNumCenter[0]) != 0:
-    yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].values
-    phibin_center_data = InFile_DATA["Center Data/H_phibins_DATA"].values
-    tbin_center_data = InFile_DATA["Center Data/H_tbins_DATA"].values
+    yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].to_numpy()
+    phibin_center_data = InFile_DATA["Center Data/H_phibins_DATA"].to_numpy()
+    tbin_center_data = InFile_DATA["Center Data/H_tbins_DATA"].to_numpy()
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
