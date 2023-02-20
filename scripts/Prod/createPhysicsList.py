@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 01:57:26 trottar"
+# Time-stamp: "2023-02-20 02:04:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,25 +108,29 @@ if float(runNumCenter[0]) != 0:
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    relyield_right_data = [TBRANCH_RIGHT_DATA.Get("H_relyield_DATA")]
-    phibin_right_data = [TBRANCH_RIGHT_DATA.Get("H_phibins_DATA")]
-    tbin_right_data = [TBRANCH_RIGHT_DATA.Get("H_tbins_DATA")]
+    relyield_right_data = [TBRANCH_RIGHT_DATA.Get("H_relyield_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_relyield_DATA").GetNbinsX()+1)]
+    phibin_right_data = [TBRANCH_RIGHT_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
+    tbin_right_data = [TBRANCH_RIGHT_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
 
 if float(runNumLeft[0]) != 0:
-    relyield_left_data = [TBRANCH_LEFT_DATA.Get("H_relyield_DATA")]
-    phibin_left_data = [TBRANCH_LEFT_DATA.Get("H_phibins_DATA")]
-    tbin_left_data = [TBRANCH_LEFT_DATA.Get("H_tbins_DATA")]
+    relyield_left_data = [TBRANCH_LEFT_DATA.Get("H_relyield_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_relyield_DATA").GetNbinsX()+1)]
+    phibin_left_data = [TBRANCH_LEFT_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
+    tbin_left_data = [TBRANCH_LEFT_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
 
 if float(runNumCenter[0]) != 0:
-    relyield_center_data = [TBRANCH_CENTER_DATA.Get("H_relyield_DATA")]
-    phibin_center_data = [TBRANCH_CENTER_DATA.Get("H_phibins_DATA")]
-    tbin_center_data = [TBRANCH_CENTER_DATA.Get("H_tbins_DATA")]
+    relyield_center_data = [TBRANCH_CENTER_DATA.Get("H_relyield_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_relyield_DATA").GetNbinsX()+1)]
+    phibin_center_data = [TBRANCH_CENTER_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
+    tbin_center_data = [TBRANCH_CENTER_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
 
 InFile_DATA.Close()
 
 print("\n\n~~~~~~~~~",relyield_left_data)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
+
+print("\n\n~~~~~~~~~",len(relyield_left_data))
+print("~~~~~~~~~",len(tbin_left_data))
+print("~~~~~~~~~",len(phibin_left_data))
 
 print("\n\n~~~~~~~~~",relyield_center_data)
 print("~~~~~~~~~",tbin_center_data)
