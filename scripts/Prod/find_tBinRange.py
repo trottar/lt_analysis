@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 06:11:44 trottar"
+# Time-stamp: "2023-02-20 06:14:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -393,6 +393,7 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [t[2]]
 
+    yieldVal = 0
     hist["yieldTree"].Branch("yield", yieldVal, "yield/D")
     # Extract the desired values from each group
     for key, val in groups.items():
