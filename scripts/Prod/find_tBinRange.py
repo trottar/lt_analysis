@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 06:20:22 trottar"
+# Time-stamp: "2023-02-20 06:29:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -393,7 +393,7 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [t[2]]
 
-    yieldVal = 0
+    yieldVal = array('d', [0])
     hist["yieldTree"].Branch("yield", yieldVal, "yield/D")
     # Extract the desired values from each group
     for key, val in groups.items():
@@ -1119,7 +1119,8 @@ for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Center":
         d_Center_Data = outHistFile.mkdir("Center Data")
         d_Center_Simc = outHistFile.mkdir("Center Simc")
-
+    hist["yieldTree"].Write()
+    
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
         d_Right_Data.cd()
@@ -1165,7 +1166,7 @@ for i,hist in enumerate(histlist):
     hist["H_tbins_DATA"].Write()
     hist["H_yield_DATA"].Write()
     hist["H_relyield_DATA"].Write()
-        
+    
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
         d_Right_Simc.cd()
@@ -1208,7 +1209,6 @@ for i,hist in enumerate(histlist):
     hist["H_pmz_SIMC"].Write()
     hist["H_yield_SIMC"].Write()
 
-outHistFile.Write()
 outHistFile.Close()
 
 for i,hist in enumerate(histlist):
