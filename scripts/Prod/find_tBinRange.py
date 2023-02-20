@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 06:07:35 trottar"
+# Time-stamp: "2023-02-20 06:11:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -393,11 +393,13 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [t[2]]
 
+    hist["yieldTree"].Branch("yield", yieldVal, "yield/D")
     # Extract the desired values from each group
     for key, val in groups.items():
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(val)*hist["normfac_data"]
-        hist["yieldTree"].Branch("yield", integrate.simps(val)*hist["normfac_data"], "yield/D")
+        yieldVal = integrate.simps(val)*hist["normfac_data"]
+        hist["yieldTree"].Fill()
             
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
