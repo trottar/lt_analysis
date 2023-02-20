@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 21:13:34 trottar"
+# Time-stamp: "2023-02-19 21:17:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -451,8 +451,8 @@ c_yield_simc.Print(outputpdf)
 
 c_relyield_data = TCanvas()
 
-x = np.array([hist["H_yield_DATA"].GetBinContent(i) for i in range(1, hist["H_yield_DATA"].GetNbinsX()+1)])
-y = np.array([hist["H_yield_SIMC"].GetBinContent(i) for i in range(1, hist["H_yield_SIMC"].GetNbinsX()+1)])
+x = np.array([hist["H_yield_DATA"].GetBinContent(i) for i in range(0, hist["H_yield_DATA"].GetNbinsX())])
+y = np.array([hist["H_yield_SIMC"].GetBinContent(i) for i in range(0, hist["H_yield_SIMC"].GetNbinsX())])
 
 z = x/y
 
