@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 03:13:20 trottar"
+# Time-stamp: "2023-02-20 03:16:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -460,11 +460,12 @@ for i,hist in enumerate(histlist):
             yieldClone.SetBinContent(j, 0)
         else:
             yieldClone.SetBinContent(j, hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j))
-        relyield = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
-        if relyield == 0.0:
-            hist["H_relyield_DATA"].Fill(0.0)
+        
+        if hist["H_yield_DATA"].GetBinContent(j) == 0.0 or  hist["H_yield_SIMC"].GetBinContent(j) == 0.0:
+            relyield = 0.0
         else:
-            hist["H_relyield_DATA"].Fill(relyield)
+            relyield = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
+        hist["H_relyield_DATA"].Fill(relyield)
     #hist["H_relyield_DATA"].Add(yieldClone)
             
 for i,hist in enumerate(histlist):
