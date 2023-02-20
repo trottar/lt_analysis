@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 06:05:57 trottar"
+# Time-stamp: "2023-02-20 15:55:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1086,14 +1086,12 @@ def defineHists(phi_setting, inpDict):
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_W_DATA.Add(H_W_DUMMY,-1)
     H_ct_ep_DATA.Add(H_ct_ep_DUMMY,-1)
-
-    yieldTree = ROOT.TTree("{}".format(phi_setting), "{}".format(phi_setting))
     
     histDict = {
         "phi_setting" : phi_setting,
         "pid_text" : pid_text,
         "runNums" : runNums.split(' '),
-        "yieldTree" : yieldTree,
+        "yieldTree" : ROOT.TTree("{}".format(phi_setting), "{} Yields".format(phi_setting)),
         "InData_efficiency" : InData_efficiency.split(' '),
         "G_data_eff" : G_data_eff,
         "normfac_data" : normfac_data,
