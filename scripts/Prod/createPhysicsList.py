@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 18:48:47 trottar"
+# Time-stamp: "2023-02-20 18:53:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,6 +150,8 @@ if float(runNumLeft[0]) != 0:
 if float(runNumCenter[0]) != 0:
     thpq_center = 0.000
 
+print(thpq_left)
+    
 ################################################################################################################################################
             
 f_list_settings = '{}/src/list.settings'.format(LTANAPATH)
