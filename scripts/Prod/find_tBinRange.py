@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 17:16:40 trottar"
+# Time-stamp: "2023-02-20 17:21:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -414,7 +414,8 @@ for i,hist in enumerate(histlist):
         hist["yieldDictData"][key] = integrate.simps(val)*hist["normfac_data"]
         yieldValData[0] = integrate.simps(val)*hist["normfac_data"]
         hist["yieldTree"].Fill()
-            
+        yieldValData = array('d', [0])
+        
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
     hist["H_yield_DATA"].SetLineColor(i+1)            
@@ -462,6 +463,7 @@ for i,hist in enumerate(histlist):
         hist["yieldDictSimc"][key] = integrate.simps(val)*hist["normfac_simc"]
         yieldValSimc[0] = integrate.simps(val)*hist["normfac_simc"]
         hist["yieldTree"].Fill()
+        yieldValSimc = array('d', [0])
         
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictSimc"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
@@ -485,7 +487,8 @@ for i,hist in enumerate(histlist):
             relyieldval[0] = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
         hist["H_relyield_DATA"].Fill(relyield)
         hist["yieldTree"].Fill()
-            
+        relyieldval = array('d', [0])
+    
 for i,hist in enumerate(histlist):
     print("\n\n~~~~~~~~~~~~~~~",hist["H_relyield_DATA"])
     hist["H_relyield_DATA"].SetLineColor(i+1)
