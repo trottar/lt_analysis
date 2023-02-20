@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 18:22:10 trottar"
+# Time-stamp: "2023-02-20 18:28:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,8 +32,8 @@ POL = sys.argv[2]
 EPSVAL = sys.argv[3]
 TMIN = sys.argv[4]
 TMAX = sys.argv[5]
-NumtBins = sys.argv[6]
-NumPhiBins = sys.argv[7]
+NumtBins = int(sys.argv[6])
+NumPhiBins = int(sys.argv[7])
 Kset = sys.argv[8]
 
 runNumRight = list(sys.argv[9].split(" "))
