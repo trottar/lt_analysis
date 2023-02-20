@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 05:31:58 trottar"
+# Time-stamp: "2023-02-20 05:33:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -203,7 +203,7 @@ if float(runNumLeft[0]) != 0:
                     write_to_file(f_list,check_line)
 
 if float(runNumCenter[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_+{:.0f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_center*1000)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
