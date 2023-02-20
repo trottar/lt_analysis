@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 01:19:37 trottar"
+# Time-stamp: "2023-02-20 01:21:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,7 +93,7 @@ OUTPATH=lt.OUTPATH
 
 InDATAFilename = OUTPATH+"/" + OutFilename + ".root"
 
-InFile_DATA = ROOT.TFile.Open(InDATAFilename, "OPEN")
+InFile_DATA = ROOT.TFile.Open(InDATAFilename, "READ")
 
 # Check if the file contains a TTree with the desired name
 if float(runNumRight[0]) != 0:
@@ -122,9 +122,7 @@ if float(runNumCenter[0]) != 0:
     phibin_center_data = [evt for evt in TBRANCH_CENTER_DATA.Get("H_phibins_DATA")]
     tbin_center_data = [evt for evt in TBRANCH_CENTER_DATA.Get("H_tbins_DATA")]
 
-print("\n\n~~~~~~~",relyield_right_data)
-print("~~~~~~~",relyield_left_data)
-print("~~~~~~~",relyield_center_data)
+InFile_DATA.Close()
 
 ################################################################################################################################################
 
