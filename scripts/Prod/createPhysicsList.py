@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 04:02:05 trottar"
+# Time-stamp: "2023-02-20 04:05:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,8 +112,6 @@ if float(runNumCenter[0]) != 0:
     yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].values
     phibins_center_data = InFile_DATA["Center Data/H_phibins_DATA"].values
     tbins_center_data = InFile_DATA["Center Data/H_tbins_DATA"].values
-
-InFile_DATA.Close()
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
