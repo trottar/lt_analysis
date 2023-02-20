@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 16:21:23 trottar"
+# Time-stamp: "2023-02-20 16:22:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,6 +105,20 @@ if float(runNumRight[0]) != 0:
         yield_right_data = list(t.yield_data)
         phibin_right_data = list(t.phibins)
         tbin_right_data = list(t.tbins)
+
+if float(runNumLeft[0]) != 0:
+    treeLeft = InFile_DATA.Get("Left")
+    for t in treeLeft:
+        yield_left_data = list(t.yield_data)
+        phibin_left_data = list(t.phibins)
+        tbin_left_data = list(t.tbins)
+
+if float(runNumCenter[0]) != 0:
+    treeCenter = InFile_DATA.Get("Center")
+    for t in treeCenter:
+        yield_center_data = list(t.yield_data)
+        phibin_center_data = list(t.phibins)
+        tbin_center_data = list(t.tbins)
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
