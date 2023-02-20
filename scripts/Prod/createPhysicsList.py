@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 16:18:11 trottar"
+# Time-stamp: "2023-02-20 16:21:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,10 +100,11 @@ InFile_DATA = ROOT.TFile.Open(InDATAFilename,"READ")
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    TreeRight = InFile_DATA.Get("Right")
-    yield_right_data = rnp.hist2array(,return_edges=True)
-    phibin_right_data = rnp.hist2array(InFile_DATA.Get("Right/H_phibins_DATA"),return_edges=True)
-    tbin_right_data = rnp.hist2array(InFile_DATA.Get("Right/H_tbins_DATA"),return_edges=True)
+    treeRight = InFile_DATA.Get("Right")
+    for t in treeRight:
+        yield_right_data = list(t.yield_data)
+        phibin_right_data = list(t.phibins)
+        tbin_right_data = list(t.tbins)
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
