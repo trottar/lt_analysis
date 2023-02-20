@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 05:07:52 trottar"
+# Time-stamp: "2023-02-20 05:13:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,19 +99,19 @@ InFile_DATA = ROOT.TFile.Open(InDATAFilename,"READ")
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    yield_right_data = InFile_DATA.Get("Right Data/H_yield_DATA").GetArray()
-    phibin_right_data = InFile_DATA.Get("Right Data/H_phibin_DATA").GetArray()
-    tbin_right_data = InFile_DATA.Get("Right Data/H_tbin_DATA").GetArray()
+    yield_right_data = [InFile_DATA.Get("Right Data/H_yield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Right Data/H_yield_DATA").GetNbinsX()+2)]
+    phibin_right_data = [InFile_DATA.Get("Right Data/H_phibins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Right Data/H_phibins_DATA").GetNbinsX()+2)]
+    tbin_right_data = [InFile_DATA.Get("Right Data/H_tbins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Right Data/H_tbins_DATA").GetNbinsX()+2)]
 
 if float(runNumLeft[0]) != 0:
-    yield_left_data = InFile_DATA.Get("Left Data/H_yield_DATA").GetArray()
-    phibin_left_data = InFile_DATA.Get("Left Data/H_phibin_DATA").GetArray()
-    tbin_left_data = InFile_DATA.Get("Left Data/H_tbin_DATA").GetArray()
+    yield_left_data = [InFile_DATA.Get("Left Data/H_yield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Left Data/H_yield_DATA").GetNbinsX()+2)]
+    phibin_left_data = [InFile_DATA.Get("Left Data/H_phibins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Left Data/H_phibins_DATA").GetNbinsX()+2)]
+    tbin_left_data = [InFile_DATA.Get("Left Data/H_tbins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Left Data/H_tbins_DATA").GetNbinsX()+2)]
 
 if float(runNumCenter[0]) != 0:
-    yield_center_data = InFile_DATA.Get("Center Data/H_yield_DATA").GetArray()
-    phibin_center_data = InFile_DATA.Get("Center Data/H_phibin_DATA").GetArray()
-    tbin_center_data = InFile_DATA.Get("Center Data/H_tbin_DATA").GetArray()
+    yield_center_data = [InFile_DATA.Get("Center Data/H_yield_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Center Data/H_yield_DATA").GetNbinsX()+2)]
+    phibin_center_data = [InFile_DATA.Get("Center Data/H_phibins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Center Data/H_phibins_DATA").GetNbinsX()+2)]
+    tbin_center_data = [InFile_DATA.Get("Center Data/H_tbins_DATA").GetXaxis().GetBinLowEdge(i) for i in range(1, InFile_DATA.Get("Center Data/H_tbins_DATA").GetNbinsX()+2)]
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
