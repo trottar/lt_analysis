@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 19:04:14 trottar"
+# Time-stamp: "2023-02-19 23:01:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -89,25 +89,32 @@ InDATAFilename = OUTPATH+"/" + OutFilename + ".root"
 
 InFile_DATA = ROOT.TFile.Open(InDATAFilename, "OPEN")
 
-TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Right Data")
-TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("Right Simc")
-
-TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Left Data")
-TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("Left Simc")
-
-TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Center Data")
-TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("Center Simc")
+TBRANCH_RIGHT_DATA  = InFile_DATA.Get("Right Data")
+TBRANCH_LEFT_DATA  = InFile_DATA.Get("Left Data")
+TBRANCH_CENTER_DATA  = InFile_DATA.Get("Center Data")
 
 ###############################################################################################################################################
 
-yield_right_data = []
+relyield_right_data = []
 print("\nGrabbing right data yield...")
 for i,evt in enumerate(TBRANCH_RIGHT_DATA):
     # Progress bar
-      Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries(),bar_length=25)
+      Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries(),bar_length=25)      
+      relyield_right_data.append(evt.H_relyield_DATA)
       
-      yield_right_data.append(evt.H_relyield_DATA)
+relyield_left_data = []
+print("\nGrabbing left data yield...")
+for i,evt in enumerate(TBRANCH_LEFT_DATA):
+    # Progress bar
+      Misc.progressBar(i, TBRANCH_LEFT_DATA.GetEntries(),bar_length=25)      
+      relyield_left_data.append(evt.H_relyield_DATA)
       
+relyield_center_data = []
+print("\nGrabbing center data yield...")
+for i,evt in enumerate(TBRANCH_CENTER_DATA):
+    # Progress bar
+      Misc.progressBar(i, TBRANCH_CENTER_DATA.GetEntries(),bar_length=25)      
+      relyield_center_data.append(evt.H_relyield_DATA)
       
 ###############################################################################################################################################
 
