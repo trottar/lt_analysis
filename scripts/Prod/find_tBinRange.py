@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 06:36:55 trottar"
+# Time-stamp: "2023-02-20 06:43:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -394,7 +394,7 @@ for i,hist in enumerate(histlist):
             groups[key] = [t[2]]
 
     yieldValData = 0
-    hist["yieldTree"].Branch("yield", yieldValData, "yield/D")
+    hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
     # Extract the desired values from each group
     for key, val in groups.items():
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
@@ -442,7 +442,7 @@ for i,hist in enumerate(histlist):
             groups[key] = [t[2]]
 
     yieldValSimc = 0
-    hist["yieldTree"].Branch("yield", yieldValSimc, "yield/D")
+    hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
     # Extract the desired values from each group
     for key, val in groups.items():
         hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
@@ -459,6 +459,8 @@ c_yield_simc.Print(outputpdf)
 
 c_relyield_data = TCanvas()
 
+relyield = 0
+hist["yieldTree"].Branch("rel_yield", relyield, "rel_yield/D")
 for i,hist in enumerate(histlist):
     yieldClone = hist["H_relyield_DATA"].Clone()
     for j in range(1, hist["H_yield_DATA"].GetNbinsX()+1):
@@ -472,6 +474,7 @@ for i,hist in enumerate(histlist):
         else:
             relyield = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
         hist["H_relyield_DATA"].Fill(relyield)
+        hist["yieldTree"].Fill()
     #hist["H_relyield_DATA"].Add(yieldClone)
             
 for i,hist in enumerate(histlist):
