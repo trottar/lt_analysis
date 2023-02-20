@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 22:59:52 trottar"
+# Time-stamp: "2023-02-20 00:05:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -383,6 +383,8 @@ for i,hist in enumerate(histlist):
                         phibin_index = None
                     if phibin_index != None:
                         MM_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                    else:
+                        MM_tmp.append((tbin_index, phibin_index, 0.0))
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
@@ -427,6 +429,8 @@ for i,hist in enumerate(histlist):
                         phibin_index = None
                     if phibin_index != None:
                         MM_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))*evt.Weight))
+                    else:
+                        MM_tmp.append((tbin_index, phibin_index, 0.0))
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
@@ -1152,6 +1156,7 @@ for i,hist in enumerate(histlist):
     hist["H_phibins_DATA"].Write()
     hist["H_tbins_DATA"].Write()
     hist["H_yield_DATA"].Write()
+    hist["H_relyield_DATA"].Write()
 
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
