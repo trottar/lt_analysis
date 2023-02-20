@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 22:22:13 trottar"
+# Time-stamp: "2023-02-19 22:56:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -453,7 +453,7 @@ c_relyield_data = TCanvas()
 
 ### Below fails because 160 bins not 80!
 for i,hist in enumerate(histlist):
-    yieldClone = hist["H_yield_DATA"].Clone()
+    yieldClone = hist["H_relyield_DATA"].Clone()
     print("\n\n~~~~~~~~~~",len(range(1, hist["H_yield_DATA"].GetNbinsX()+1)))
     for j in range(1, hist["H_yield_DATA"].GetNbinsX()+1):
         if hist["H_yield_SIMC"].GetBinContent(j) == 0:
