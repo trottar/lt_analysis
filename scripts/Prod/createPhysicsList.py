@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 01:08:56 trottar"
+# Time-stamp: "2023-02-20 01:16:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,37 +112,37 @@ if float(runNumRight[0]) != 0:
     phibin_right_data = []
     tbin_right_data = []
     print("\nGrabbing right data yield...")
-    for i,evt in enumerate(TBRANCH_RIGHT_DATA):
-        # Progress bar
-          Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries(),bar_length=25)      
-          relyield_right_data.append(evt.H_relyield_DATA)
-          phibin_right_data.append(evt.H_phibins_DATA)
-          tbin_right_data.append(evt.H_tbins_DATA)
+    for i,evt in enumerate(TBRANCH_RIGHT_DATA.Get("H_relyield_DATA")):
+          relyield_right_data.append(evt)
+    for i,evt in enumerate(TBRANCH_RIGHT_DATA.Get("H_phibins_DATA")):
+          phibin_right_data.append(evt)
+    for i,evt in enumerate(TBRANCH_RIGHT_DATA.Get("H_tbins_DATA")):          
+          tbin_right_data.append(evt)
 
 if float(runNumLeft[0]) != 0:
     relyield_left_data = []
     phibin_left_data = []
     tbin_left_data = []
     print("\nGrabbing left data yield...")
-    for i,evt in enumerate(TBRANCH_LEFT_DATA):
-        # Progress bar
-          Misc.progressBar(i, TBRANCH_LEFT_DATA.GetEntries(),bar_length=25)      
-          relyield_left_data.append(evt.H_relyield_DATA)
-          phibin_left_data.append(evt.H_phibins_DATA)
-          tbin_left_data.append(evt.H_tbins_DATA)
+    for i,evt in enumerate(TBRANCH_LEFT_DATA.Get("H_relyield_DATA")):
+          relyield_left_data.append(evt)
+    for i,evt in enumerate(TBRANCH_LEFT_DATA.Get("H_phibins_DATA")):
+          phibin_left_data.append(evt)
+    for i,evt in enumerate(TBRANCH_LEFT_DATA.Get("H_tbins_DATA")):          
+          tbin_left_data.append(evt)
 
 if float(runNumCenter[0]) != 0:
     relyield_center_data = []
     phibin_center_data = []
     tbin_center_data = []
     print("\nGrabbing center data yield...")
-    for i,evt in enumerate(TBRANCH_CENTER_DATA):
-        # Progress bar
-          Misc.progressBar(i, TBRANCH_CENTER_DATA.GetEntries(),bar_length=25)      
-          relyield_center_data.append(evt.H_relyield_DATA)
-          phibin_center_data.append(evt.H_phibins_DATA)
-          tbin_center_data.append(evt.H_tbins_DATA)
-        
+    for i,evt in enumerate(TBRANCH_CENTER_DATA.Get("H_relyield_DATA")):
+          relyield_center_data.append(evt)
+    for i,evt in enumerate(TBRANCH_CENTER_DATA.Get("H_phibins_DATA")):
+          phibin_center_data.append(evt)
+    for i,evt in enumerate(TBRANCH_CENTER_DATA.Get("H_tbins_DATA")):          
+          tbin_center_data.append(evt)
+
 print("\n\n~~~~~~~",relyield_right_data)
 print("~~~~~~~",relyield_left_data)
 print("~~~~~~~",relyield_center_data)
