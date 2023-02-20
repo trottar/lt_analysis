@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 19:04:44 trottar"
+# Time-stamp: "2023-02-19 19:07:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -459,7 +459,7 @@ for i,hist in enumerate(histlist):
     hist["H_relyield_DATA"].SetLineColor(i+1)
     hist["H_relyield_DATA"].Draw("same, E1")
     
-c_relyield_simc.Print(outputpdf)
+c_relyield_data.Print(outputpdf)
 
 '''
 c_yieldbin = TCanvas()
