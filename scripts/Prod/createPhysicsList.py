@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 04:11:35 trottar"
+# Time-stamp: "2023-02-20 04:18:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,17 +99,17 @@ InFile_DATA = up.open(InDATAFilename)
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    yield_right_data = InFile_DATA["Right Data/H_yield_DATA"].axis().edges()
+    yield_right_data = InFile_DATA["Right Data/H_yield_DATA"].values
     phibin_right_data = InFile_DATA["Right Data/H_phibins_DATA"].values
     tbin_right_data = InFile_DATA["Right Data/H_tbins_DATA"].values
 
 if float(runNumLeft[0]) != 0:
-    yield_left_data = InFile_DATA["Left Data/H_yield_DATA"].axis().edges()
+    yield_left_data = InFile_DATA["Left Data/H_yield_DATA"].values
     phibin_left_data = InFile_DATA["Left Data/H_phibins_DATA"].values
     tbin_left_data = InFile_DATA["Left Data/H_tbins_DATA"].values
 
 if float(runNumCenter[0]) != 0:
-    yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].axis().edges()
+    yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].values
     phibin_center_data = InFile_DATA["Center Data/H_phibins_DATA"].values
     tbin_center_data = InFile_DATA["Center Data/H_tbins_DATA"].values
 
@@ -168,7 +168,7 @@ with open(f_list_settings, 'r') as f:
 ################################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{:.3f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_right)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_-{:.0f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_right*1000)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
@@ -184,7 +184,7 @@ if float(runNumRight[0]) != 0:
                     write_to_file(f_list,check_line)
 
 if float(runNumLeft[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{:.3f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_left)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_+{:.0f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_left*1000)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
@@ -200,7 +200,7 @@ if float(runNumLeft[0]) != 0:
                     write_to_file(f_list,check_line)
 
 if float(runNumCenter[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_{:.3f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_center)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_+{:.0f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, thpq_center*1000)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
