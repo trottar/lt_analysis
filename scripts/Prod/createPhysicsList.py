@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 18:28:40 trottar"
+# Time-stamp: "2023-02-20 18:32:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,31 +102,31 @@ InFile_DATA = ROOT.TFile.Open(InDATAFilename,"READ")
 
 if float(runNumRight[0]) != 0:
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
-    yield_right_data = [evt.yield_data for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
+    relyield_right_data = [evt.relyield_data for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
     phibin_right_data = [evt.phibins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
     tbin_right_data = [evt.tbins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
 
 if float(runNumLeft[0]) != 0:
     TBRANCH_LEFT = InFile_DATA.Get("Left")
-    yield_left_data = [evt.yield_data for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
+    relyield_left_data = [evt.relyield_data for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
     phibin_left_data = [evt.phibins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
     tbin_left_data = [evt.tbins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
 
 if float(runNumCenter[0]) != 0:
     TBRANCH_CENTER = InFile_DATA.Get("Center")
-    yield_center_data = [evt.yield_data for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
+    relyield_center_data = [evt.relyield_data for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
     phibin_center_data = [evt.phibins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
     tbin_center_data = [evt.tbins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
 
-print("\n\n~~~~~~~~~",yield_left_data)
+print("\n\n~~~~~~~~~",relyield_left_data)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
 
-print("\n\n~~~~~~~~~",len(yield_left_data))
+print("\n\n~~~~~~~~~",len(relyield_left_data))
 print("~~~~~~~~~",len(tbin_left_data))
 print("~~~~~~~~~",len(phibin_left_data))
 
-print("\n\n~~~~~~~~~",yield_center_data)
+print("\n\n~~~~~~~~~",relyield_center_data)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
 
