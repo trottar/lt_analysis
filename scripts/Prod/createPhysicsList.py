@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 02:11:53 trottar"
+# Time-stamp: "2023-02-20 02:13:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -123,7 +123,7 @@ if float(runNumCenter[0]) != 0:
     tbin_center_data = [TBRANCH_CENTER_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
 
 InFile_DATA.Close()
-
+'''
 print("\n\n~~~~~~~~~",relyield_left_data)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
@@ -135,7 +135,7 @@ print("~~~~~~~~~",len(phibin_left_data))
 print("\n\n~~~~~~~~~",relyield_center_data)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
-
+'''
 ################################################################################################################################################
 
 def write_to_file(f_out,line):
