@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 03:50:31 trottar"
+# Time-stamp: "2023-02-20 03:55:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,19 +99,19 @@ InFile_DATA = up.open(InDATAFilename)
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    yield_right_data = InFile_DATA["Right Data/H_yield_DATA"].values()
-    phibin_right_data = InFile_DATA["Right Data/H_phibin_DATA"].values()
-    tbin_right_data = InFile_DATA["Right Data/H_tbin_DATA"].values()
+    yield_right_data = InFile_DATA["Right Data"]["H_yield_DATA"].to_hist()
+    phibin_right_data = InFile_DATA["Right Data"]["H_phibin_DATA"].to_hist()
+    tbin_right_data = InFile_DATA["Right Data"]["H_tbin_DATA"].to_hist()
 
 if float(runNumLeft[0]) != 0:
-    yield_left_data = InFile_DATA["Left Data/H_yield_DATA"].values()
-    phibin_left_data = InFile_DATA["Left Data/H_phibin_DATA"].values()
-    tbin_left_data = InFile_DATA["Left Data/H_tbin_DATA"].values()
+    yield_left_data = InFile_DATA["Left Data"]["H_yield_DATA"].to_hist()
+    phibin_left_data = InFile_DATA["Left Data"]["H_phibin_DATA"].to_hist()
+    tbin_left_data = InFile_DATA["Left Data"]["H_tbin_DATA"].to_hist()
 
 if float(runNumCenter[0]) != 0:
-    yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].values()
-    phibin_center_data = InFile_DATA["Center Data/H_phibin_DATA"].values()
-    tbin_center_data = InFile_DATA["Center Data/H_tbin_DATA"].values()
+    yield_center_data = InFile_DATA["Center Data"]["H_yield_DATA"].to_hist()
+    phibin_center_data = InFile_DATA["Center Data"]["H_phibin_DATA"].to_hist()
+    tbin_center_data = InFile_DATA["Center Data"]["H_tbin_DATA"].to_hist()
 
 InFile_DATA.Close()
 
