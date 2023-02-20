@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 17:37:35 trottar"
+# Time-stamp: "2023-02-20 17:38:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -345,10 +345,11 @@ for i,hist in enumerate(histlist):
     
     for j in range(NumtBins):
         for k in range(NumPhiBins):
+            index = j*NumPhiBins + k
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
-            tval[0] = tbinedges[j]
-            phival[0] = phibinedges[k]
+            tval[index] = tbinedges[j]
+            phival[index] = phibinedges[k]
             hist["yieldTree"].Fill()
 
     print("\n\n!!!!!!!!!!!!!!!!!!!",hist["yieldTree"].GetEntries())
