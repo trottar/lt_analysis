@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 20:53:04 trottar"
+# Time-stamp: "2023-02-19 20:57:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -396,8 +396,6 @@ for i,hist in enumerate(histlist):
     # Extract the desired values from each group
     yieldDict = {}
     for key, val in groups.items():
-        if integrate.simps(val)*hist["normfac_data"] <= 1e-9:
-            print("\n\n~~~~~~~~~~~~~~~~~",integrate.simps(val)*hist["normfac_data"])
         yieldDict[key] = integrate.simps(val)*hist["normfac_data"]
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
     hist["yieldDictData"] = yieldDict
@@ -442,8 +440,6 @@ for i,hist in enumerate(histlist):
     # Extract the desired values from each group
     yieldDict = {}
     for key, val in groups.items():
-        if integrate.simps(val)*hist["normfac_simc"] <= 1e-9:
-            print("\n\n~~~~~~~~~~~~~~~~~",integrate.simps(val)*hist["normfac_simc"])
         yieldDict[key] = integrate.simps(val)*hist["normfac_simc"]
         hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
     hist["yieldDictSimc"] = yieldDict
@@ -457,8 +453,11 @@ c_relyield_data = TCanvas()
 
 for i,hist in enumerate(histlist):
     yieldClone = hist["H_yield_DATA"].Clone()
-    yieldClone.Divide(hist["H_yield_SIMC"]*1e9)
-    hist["H_relyield_DATA"].Add(yieldClone*1e9)
+    yieldClone.Divide(hist["H_yield_SIMC"])
+    for i in range(yieldClone.GetNbinsX()):
+        print(yieldClone.GetBinContent(i+1))
+
+    hist["H_relyield_DATA"].Add(yieldClone)
 
 for i,hist in enumerate(histlist):
     hist["H_relyield_DATA"].SetLineColor(i+1)
