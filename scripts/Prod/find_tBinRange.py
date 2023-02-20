@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 17:04:33 trottar"
+# Time-stamp: "2023-02-20 17:16:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -351,8 +351,9 @@ for i,hist in enumerate(histlist):
             phival[0] = phibinedges[k]
             hist["yieldTree"].Fill()
             
-    hist["yieldTree"].Write()
-    print("\n\n!!!!!!!!!!!!!!!!!!!",hist["yieldTree"].tbins)
+            tval = array('d', [0])
+            phival = array('d', [0])
+            
 c_bins.Divide(2,1)
         
 for i,hist in enumerate(histlist):
@@ -1124,6 +1125,8 @@ for i,hist in enumerate(histlist):
 outHistFile = ROOT.TFile.Open(foutname, "RECREATE")
 
 for i,hist in enumerate(histlist):
+    
+    hist["yieldTree"].Write()
     
     if hist["phi_setting"] == "Right":
         d_Right_Data = outHistFile.mkdir("Right Data")
