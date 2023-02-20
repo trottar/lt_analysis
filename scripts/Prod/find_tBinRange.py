@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 19:17:15 trottar"
+# Time-stamp: "2023-02-19 19:21:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -386,7 +386,7 @@ for i,hist in enumerate(histlist):
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
-    for t in MM_tmp:
+    for t in MMtmp:
         key = (t[0], t[1])
         if key in groups:
             groups[key].append(t[2])
@@ -409,46 +409,125 @@ c_yield_simc = TCanvas()
 
 for i,hist in enumerate(histlist):
 
-    InFile_SIMC = hist["InFile_SIMC"]
-    TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+    if hist["phi_setting"] == 'Right':
+        InFile_RIGHT_SIMC = hist["InFile_SIMC"]
+        TBRANCH_RIGHT_SIMC  = InFile_RIGHT_SIMC.Get("h10")
+        
+        MM_Right_tmp = []
+        for evt in TBRANCH_RIGHT_SIMC:
+            for j in range(len(tbinedges) - 1):
+                if tbinedges[j] < evt.t < tbinedges[j+1]:
+                    tbin_index = j
+                else:
+                    tbin_index = None
+                if tbin_index != None:
+                    for k in range(len(phibinedges) - 1):
+                        if phibinedges[k] < (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
+                            phibin_index = k
+                        else:
+                            phibin_index = None
+                        if phibin_index != None:
+                            MM_Right_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))))
 
-    MM_tmp = []
-    for evt in TBRANCH_SIMC:
-        for j in range(len(tbinedges) - 1):
-            if tbinedges[j] < evt.t < tbinedges[j+1]:
-                tbin_index = j
+        groups = {}
+        # Group the tuples by the first two elements using a dictionary
+        for t in MM_Right_tmp:
+            key = (t[0], t[1])
+            if key in groups:
+                groups[key].append(t[2])
             else:
-                tbin_index = None
-            if tbin_index != None:
-                for k in range(len(phibinedges) - 1):
-                    if phibinedges[k] < (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
-                        phibin_index = k
-                    else:
-                        phibin_index = None
-                    if phibin_index != None:
-                        MM_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))))
+                groups[key] = [t[2]]
 
-    groups = {}
-    # Group the tuples by the first two elements using a dictionary
-    for t in MM_tmp:
-        key = (t[0], t[1])
-        if key in groups:
-            groups[key].append(t[2])
-        else:
-            groups[key] = [t[2]]
+        # Extract the desired values from each group
+        yieldRightDict = {}
+        for key, val in groups.items():
+            yieldRightDict[key] = integrate.simps(val)*hist["normfac_simc"]
+            hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
+        hist["yieldDictSimc"] = yieldRightDict
 
-    # Extract the desired values from each group
-    yieldDict = {}
-    for key, val in groups.items():
-        yieldDict[key] = integrate.simps(val)*hist["normfac_simc"]
-        hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
-    hist["yieldDictSimc"] = yieldDict
+        hist["H_yield_SIMC"].SetLineColor(i+1)            
+        hist["H_yield_SIMC"].Draw("same, E1")
+    
+    if hist["phi_setting"] == 'Left':
+        InFile_LEFT_SIMC = hist["InFile_SIMC"]
+        TBRANCH_LEFT_SIMC  = InFile_LEFT_SIMC.Get("h10")
+        
+        MM_Left_tmp = []
+        for evt in TBRANCH_LEFT_SIMC:
+            for j in range(len(tbinedges) - 1):
+                if tbinedges[j] < evt.t < tbinedges[j+1]:
+                    tbin_index = j
+                else:
+                    tbin_index = None
+                if tbin_index != None:
+                    for k in range(len(phibinedges) - 1):
+                        if phibinedges[k] < (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
+                            phibin_index = k
+                        else:
+                            phibin_index = None
+                        if phibin_index != None:
+                            MM_Left_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))*evt.Weight))
 
-    hist["H_yield_SIMC"].SetLineColor(i+1)            
-    hist["H_yield_SIMC"].Draw("same, E1")
+        groups = {}
+        # Group the tuples by the first two elements using a dictionary
+        for t in MM_Left_tmp:
+            key = (t[0], t[1])
+            if key in groups:
+                groups[key].append(t[2])
+            else:
+                groups[key] = [t[2]]
+
+        # Extract the desired values from each group
+        yieldLeftDict = {}
+        for key, val in groups.items():
+            yieldLeftDict[key] = integrate.simps(val)*hist["normfac_simc"]
+            hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
+        hist["yieldDictSimc"] = yieldLeftDict
+
+        hist["H_yield_SIMC"].SetLineColor(i+1)            
+        hist["H_yield_SIMC"].Draw("same, E1")
+
+    if hist["phi_setting"] == 'Center':
+        InFile_CENTER_SIMC = hist["InFile_SIMC"]
+        TBRANCH_CENTER_SIMC  = InFile_CENTER_SIMC.Get("h10")
+        
+        MM_Center_tmp = []
+        for evt in TBRANCH_CENTER_SIMC:
+            for j in range(len(tbinedges) - 1):
+                if tbinedges[j] < evt.t < tbinedges[j+1]:
+                    tbin_index = j
+                else:
+                    tbin_index = None
+                if tbin_index != None:
+                    for k in range(len(phibinedges) - 1):
+                        if phibinedges[k] < (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
+                            phibin_index = k
+                        else:
+                            phibin_index = None
+                        if phibin_index != None:
+                            MM_Center_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))*evt.Weight))
+
+        groups = {}
+        # Group the tuples by the first two elements using a dictionary
+        for t in MM_Center_tmp:
+            key = (t[0], t[1])
+            if key in groups:
+                groups[key].append(t[2])
+            else:
+                groups[key] = [t[2]]
+
+        # Extract the desired values from each group
+        yieldCenterDict = {}
+        for key, val in groups.items():
+            yieldCenterDict[key] = integrate.simps(val)*hist["normfac_simc"]
+            hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
+        hist["yieldDictSimc"] = yieldCenterDict
+
+        hist["H_yield_SIMC"].SetLineColor(i+1)            
+        hist["H_yield_SIMC"].Draw("same, E1")
         
 c_yield_simc.Print(outputpdf)
-'''
+
 c_relyield_data = TCanvas()
 
 for i,hist in enumerate(histlist):
@@ -460,7 +539,7 @@ for i,hist in enumerate(histlist):
     hist["H_relyield_DATA"].Draw("same, E1")
     
 c_relyield_data.Print(outputpdf)
-'''
+
 '''
 c_yieldbin = TCanvas()
 
@@ -1147,7 +1226,6 @@ for i,hist in enumerate(histlist):
     hist["H_phibins_DATA"].Write()
     hist["H_tbins_DATA"].Write()
     hist["H_yield_DATA"].Write()
-    hist["H_relyield_DATA"]
 
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
