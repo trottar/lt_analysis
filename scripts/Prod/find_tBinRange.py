@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 02:47:59 trottar"
+# Time-stamp: "2023-02-20 02:53:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -397,10 +397,10 @@ for i,hist in enumerate(histlist):
     yieldDict = {}
     for key, val in groups.items():
         yieldDict[key] = integrate.simps(val)*hist["normfac_data"]
-        hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
+        hist["H_yield_DATA"].Fill(integrate.simps(val),hist["normfac_data"])
     hist["yieldDictData"] = yieldDict
 
-    print("\n\n~~~~~~~~~~~~~~~",len(groups))
+    print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
     hist["H_yield_DATA"].SetLineColor(i+1)            
     hist["H_yield_DATA"].Draw("same")
@@ -443,10 +443,10 @@ for i,hist in enumerate(histlist):
     yieldDict = {}
     for key, val in groups.items():
         yieldDict[key] = integrate.simps(val)*hist["normfac_simc"]
-        hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
+        hist["H_yield_SIMC"].Fill(integrate.simps(val),hist["normfac_simc"])
     hist["yieldDictSimc"] = yieldDict
 
-    print("\n\n~~~~~~~~~~~~~~~",len(groups))
+    print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictSimc"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
     hist["H_yield_SIMC"].SetLineColor(i+1)            
     hist["H_yield_SIMC"].Draw("same")
@@ -458,10 +458,13 @@ c_relyield_data = TCanvas()
 for i,hist in enumerate(histlist):
     yieldClone = hist["H_relyield_DATA"].Clone()
     for j in range(1, hist["H_yield_DATA"].GetNbinsX()+1):
+        '''
         if hist["H_yield_SIMC"].GetBinContent(j) == 0:
             yieldClone.SetBinContent(j, 0)
         else:
             yieldClone.SetBinContent(j, hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j))
+        '''
+        yieldClone.SetBinContent(hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j))
     hist["H_relyield_DATA"].Add(yieldClone)
             
 for i,hist in enumerate(histlist):
