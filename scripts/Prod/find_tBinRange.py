@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 06:54:13 trottar"
+# Time-stamp: "2023-02-20 14:12:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -345,7 +345,9 @@ for i,hist in enumerate(histlist):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
             tval = tbinedges[j]
+            hist["yieldTree"].Fill()
             phival = phibinedges[k]
+            hist["yieldTree"].Fill()
         
 c_bins.Divide(2,1)
         
@@ -406,6 +408,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(val)*hist["normfac_data"]
         yieldValData = integrate.simps(val)*hist["normfac_data"]
+        hist["yieldTree"].Fill()
             
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
@@ -453,6 +456,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
         hist["yieldDictSimc"][key] = integrate.simps(val)*hist["normfac_simc"]
         yieldValSimc = integrate.simps(val)*hist["normfac_simc"]
+        hist["yieldTree"].Fill()
         
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictSimc"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
@@ -478,6 +482,7 @@ for i,hist in enumerate(histlist):
         else:
             relyield = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
         hist["H_relyield_DATA"].Fill(relyield)
+        hist["yieldTree"].Fill()
     #hist["H_relyield_DATA"].Add(yieldClone)
             
 for i,hist in enumerate(histlist):
@@ -1129,7 +1134,6 @@ for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Center":
         d_Center_Data = outHistFile.mkdir("Center Data")
         d_Center_Simc = outHistFile.mkdir("Center Simc")
-    hist["yieldTree"].Fill()
     hist["yieldTree"].Write()
     
 for i,hist in enumerate(histlist):
@@ -1173,10 +1177,6 @@ for i,hist in enumerate(histlist):
     hist["H_pmy_DATA"].Write()
     hist["H_pmz_DATA"].Write()
     hist["H_ct_ep_DATA"].Write()
-    hist["H_phibins_DATA"].Write()
-    hist["H_tbins_DATA"].Write()
-    hist["H_yield_DATA"].Write()
-    hist["H_relyield_DATA"].Write()
     
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
@@ -1218,7 +1218,6 @@ for i,hist in enumerate(histlist):
     hist["H_pmx_SIMC"].Write()
     hist["H_pmy_SIMC"].Write()
     hist["H_pmz_SIMC"].Write()
-    hist["H_yield_SIMC"].Write()
 
 outHistFile.Close()
 
