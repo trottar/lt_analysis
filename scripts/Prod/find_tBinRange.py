@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 19:30:42 trottar"
+# Time-stamp: "2023-02-19 19:44:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -427,6 +427,7 @@ for i,hist in enumerate(histlist):
                         phibin_index = None
                     if phibin_index != None:
                         MM_tmp.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))))
+                        print(hist["phi_setting"],MM_tmp[j])
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
