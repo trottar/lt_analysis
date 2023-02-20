@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 23:57:34 trottar"
+# Time-stamp: "2023-02-20 01:08:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,7 +81,7 @@ ltsep package import and pathing definitions
 # Import package for cuts
 from ltsep import Root
 
-lt=Root(os.path.realpath(__file__))
+lt=Root(os.path.realpath(__file__),"Plot_Prod")
 
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
