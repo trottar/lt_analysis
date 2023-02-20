@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 00:31:11 trottar"
+# Time-stamp: "2023-02-20 00:32:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -404,6 +404,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
     hist["yieldDictData"] = yieldDict
 
+    print(hist["H_yield_DATA"].GetEntries())
     hist["H_yield_DATA"].SetLineColor(i+1)            
     hist["H_yield_DATA"].Draw("same")
         
@@ -452,6 +453,7 @@ for i,hist in enumerate(histlist):
         hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
     hist["yieldDictSimc"] = yieldDict
 
+    print(hist["H_yield_SIMC"].GetEntries())
     hist["H_yield_SIMC"].SetLineColor(i+1)            
     hist["H_yield_SIMC"].Draw("same")
         
