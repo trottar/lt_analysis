@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 14:32:19 trottar"
+# Time-stamp: "2023-02-20 14:37:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -335,11 +335,11 @@ tbinvals.append(binned_t[0][0])
 tbinedges = binned_t[1]
 phibinedges = binned_phi[1]
 
-tval = 0
-phival = 0
-hist["yieldTree"].Branch("tbins", tval, "tbins/D", 1000000)
-hist["yieldTree"].Branch("phibins", phival, "phibins/D", 1000000)
 for i,hist in enumerate(histlist):
+    tval = 0
+    phival = 0
+    hist["yieldTree"].Branch("tbins", tval, "tbins/D")
+    hist["yieldTree"].Branch("phibins", phival, "phibins/D")    
     for j in range(NumtBins):
         for k in range(NumPhiBins):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
