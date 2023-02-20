@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 18:51:58 trottar"
+# Time-stamp: "2023-02-20 03:01:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1174,6 +1174,8 @@ def defineHists(phi_setting, inpDict):
         "phiq_vs_t_DATA" : phiq_vs_t_DATA,
         "polar_phiq_vs_t_DATA" : polar_phiq_vs_t_DATA,
         "Q2_vs_W_DATA" : Q2_vs_W_DATA,
+        "yieldDictData" : {},
+        "yieldDictSimc" : {},
         "InFile_DATA" : InFile_DATA,
         "InFile_DUMMY" : InFile_DUMMY,
         "InFile_SIMC" : InFile_SIMC,
