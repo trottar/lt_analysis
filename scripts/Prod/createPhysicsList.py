@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 16:28:08 trottar"
+# Time-stamp: "2023-02-20 18:15:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,21 +101,21 @@ InFile_DATA = ROOT.TFile.Open(InDATAFilename,"READ")
 
 if float(runNumRight[0]) != 0:
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
-    yield_right_data = [evt.yield_data for evt in TBRANCH_RIGHT]
-    phibin_right_data = [evt.phibins for evt in TBRANCH_RIGHT]
-    tbin_right_data = [evt.tbins for evt in TBRANCH_RIGHT]
+    yield_right_data = [evt.yield_data for i, evt in enumerate(TBRANCH_RIGHT) if i <= 80]
+    phibin_right_data = [evt.phibins for i, evt in enumerate(TBRANCH_RIGHT) if i <= 80]
+    tbin_right_data = [evt.tbins for i, evt in enumerate(TBRANCH_RIGHT) if i <= 80]
 
 if float(runNumLeft[0]) != 0:
     TBRANCH_LEFT = InFile_DATA.Get("Left")
-    yield_left_data = [evt.yield_data for evt in TBRANCH_LEFT]
-    phibin_left_data = [evt.phibins for evt in TBRANCH_LEFT]
-    tbin_left_data = [evt.tbins for evt in TBRANCH_LEFT]
+    yield_left_data = [evt.yield_data for i, evt in enumerate(TBRANCH_LEFT) if i <= 80]
+    phibin_left_data = [evt.phibins for i, evt in enumerate(TBRANCH_LEFT) if i <= 80]
+    tbin_left_data = [evt.tbins for i, evt in enumerate(TBRANCH_LEFT) if i <= 80]
 
 if float(runNumCenter[0]) != 0:
     TBRANCH_CENTER = InFile_DATA.Get("Center")
-    yield_center_data = [evt.yield_data for evt in TBRANCH_CENTER]
-    phibin_center_data = [evt.phibins for evt in TBRANCH_CENTER]
-    tbin_center_data = [evt.tbins for evt in TBRANCH_CENTER]
+    yield_center_data = [evt.yield_data for i, evt in enumerate(TBRANCH_CENTER) if i <= 80]
+    phibin_center_data = [evt.phibins for i, evt in enumerate(TBRANCH_CENTER) if i <= 80]
+    tbin_center_data = [evt.tbins for i, evt in enumerate(TBRANCH_CENTER) if i <= 80]
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
