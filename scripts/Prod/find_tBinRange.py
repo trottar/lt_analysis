@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 17:44:57 trottar"
+# Time-stamp: "2023-02-20 18:07:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,11 +347,11 @@ for i,hist in enumerate(histlist):
         for k in range(NumPhiBins):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
-            tval.clear()
-            phival.clear()
             tval[0] = tbinedges[j]
             phival[0] = phibinedges[k]
             hist["yieldTree"].Fill()
+
+    hist["yieldTree"].ResetBranchAddresses()
 
     print("\n\n!!!!!!!!!!!!!!!!!!!",hist["yieldTree"].GetEntries())
 c_bins.Divide(2,1)
