@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 15:19:18 trottar"
+# Time-stamp: "2023-02-20 15:22:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -344,6 +344,8 @@ for i,hist in enumerate(histlist):
             hist["H_phibins_DATA"].Fill(phibinedges[k])
             tval.push_back(tbinedges[j])
             phival.push_back(phibinedges[k])
+        print(tval)
+        print(phival)
     hist["yieldTree"].Branch("tbins", tval)
     hist["yieldTree"].Branch("phibins", phival)
     
