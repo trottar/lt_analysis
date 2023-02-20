@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 15:47:05 trottar"
+# Time-stamp: "2023-02-20 16:03:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -336,18 +336,19 @@ tbinedges = binned_t[1]
 phibinedges = binned_phi[1]
 
 for i,hist in enumerate(histlist):
-    tval = ROOT.vector('double')()
-    hist["yieldTree"]._tval = tval
-    phival = ROOT.vector('double')()
-    hist["yieldTree"]._phival = phival
-    hist["yieldTree"].Branch("tbins", tval)
-    hist["yieldTree"].Branch("phibins", phival)    
+    
+    tval = array('d', [0])
+    phival = array('d', [0])
+    
+    hist["yieldTree"].Branch("tbins", tval, "tbins/D")
+    hist["yieldTree"].Branch("phibins", phival, "phibins/D")
+    
     for j in range(NumtBins):
         for k in range(NumPhiBins):
             hist["H_tbins_DATA"].Fill(tbinedges[j])
             hist["H_phibins_DATA"].Fill(phibinedges[k])
-            tval.push_back(tbinedges[j])
-            phival.push_back(phibinedges[k])
+            tval[0] = tbinedges[j]
+            phival[0] = phibinedges[k]
             hist["yieldTree"].Fill()
     hist["yieldTree"].Fill()
     
@@ -1127,6 +1128,8 @@ outHistFile = ROOT.TFile.Open(foutname, "RECREATE")
 
 for i,hist in enumerate(histlist):
     
+    hist["yieldTree"].Write()
+    
     if hist["phi_setting"] == "Right":
         d_Right_Data = outHistFile.mkdir("Right Data")
         d_Right_Simc = outHistFile.mkdir("Right Simc")
@@ -1136,7 +1139,6 @@ for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Center":
         d_Center_Data = outHistFile.mkdir("Center Data")
         d_Center_Simc = outHistFile.mkdir("Center Simc")
-    hist["yieldTree"].Write()
     
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":
