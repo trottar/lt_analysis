@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 02:21:56 trottar"
+# Time-stamp: "2023-02-20 02:24:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,10 +186,10 @@ if float(runNumRight[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, yield in enumerate(yield_right_data):
-            if yield == 0.0:
+        for i, relyield in enumerate(relyield_right_data):
+            if relyield == 0.0:
                 # convert uC to C (10^-6C=1uC)
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield, 1.0000, phibin_right_data[i], tbin_right_data[i])
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -202,10 +202,10 @@ if float(runNumLeft[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, yield in enumerate(yield_left_data):
-            if yield == 0.0:
+        for i, relyield in enumerate(relyield_left_data):
+            if relyield == 0.0:
                 # convert uC to C (10^-6C=1uC)
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield, 1.0000, phibin_left_data[i], tbin_left_data[i])
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -218,10 +218,10 @@ if float(runNumCenter[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, yield in enumerate(yield_center_data):
-            if yield == 0.0:
+        for i, relyield in enumerate(relyield_center_data):
+            if relyield == 0.0:
                 # convert uC to C (10^-6C=1uC)
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield, 1.0000, phibin_center_data[i], tbin_center_data[i])
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
