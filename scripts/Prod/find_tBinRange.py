@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 16:03:37 trottar"
+# Time-stamp: "2023-02-20 16:06:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,7 +23,7 @@ import scipy.integrate as integrate
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
-import array
+from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
