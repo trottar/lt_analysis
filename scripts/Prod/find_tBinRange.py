@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 05:53:55 trottar"
+# Time-stamp: "2023-02-20 06:07:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -397,6 +397,7 @@ for i,hist in enumerate(histlist):
     for key, val in groups.items():
         hist["H_yield_DATA"].Fill(integrate.simps(val)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(val)*hist["normfac_data"]
+        hist["yieldTree"].Branch("yield", integrate.simps(val)*hist["normfac_data"], "yield/D")
             
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
@@ -463,7 +464,6 @@ for i,hist in enumerate(histlist):
             relyield = 0.0
         else:
             relyield = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
-        print("!!!!!!!!!!",relyield)
         hist["H_relyield_DATA"].Fill(relyield)
     #hist["H_relyield_DATA"].Add(yieldClone)
             
@@ -1106,17 +1106,6 @@ for i,hist in enumerate(histlist):
 outHistFile = ROOT.TFile.Open(foutname, "RECREATE")
 
 for i,hist in enumerate(histlist):
-
-    # create a TTree with a branch for each key in the dictionary
-    output_tree = ROOT.TTree("my_tree", "My Tree")
-    for key in hist["yieldDictData"].keys():
-        output_tree.Branch(key, ROOT.AddressOf(ROOT.Double(), key), key+"/D")
-
-    # fill the branches with the values from the dictionary
-    output_tree.Fill()
-        
-    # write the tree to the file and close it
-    output_tree.Write()
     
     if hist["phi_setting"] == "Right":
         d_Right_Data = outHistFile.mkdir("Right Data")
