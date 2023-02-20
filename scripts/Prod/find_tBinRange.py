@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 19:02:04 trottar"
+# Time-stamp: "2023-02-19 19:04:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -386,7 +386,7 @@ for i,hist in enumerate(histlist):
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
-    for t in MMtmp:
+    for t in MM_tmp:
         key = (t[0], t[1])
         if key in groups:
             groups[key].append(t[2])

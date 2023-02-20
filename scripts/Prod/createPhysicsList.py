@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 18:41:55 trottar"
+# Time-stamp: "2023-02-19 19:04:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,7 +106,7 @@ for i,evt in enumerate(TBRANCH_RIGHT_DATA):
     # Progress bar
       Misc.progressBar(i, TBRANCH_RIGHT_DATA.GetEntries(),bar_length=25)
       
-      yield_right_data.append(evt.H_yield_DATA)
+      yield_right_data.append(evt.H_relyield_DATA)
       
       
 ###############################################################################################################################################
