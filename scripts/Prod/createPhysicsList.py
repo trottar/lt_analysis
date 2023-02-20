@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 02:37:44 trottar"
+# Time-stamp: "2023-02-20 03:42:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -12,6 +12,7 @@
 #
 import sys, os
 import ROOT
+import uproot as up
 
 ##################################################################################################################################################
 
@@ -93,34 +94,28 @@ OUTPATH=lt.OUTPATH
 
 InDATAFilename = OUTPATH+"/" + OutFilename + ".root"
 
-InFile_DATA = ROOT.TFile.Open(InDATAFilename, "READ")
+InFile_DATA = up.open(InDATAFilename)
 
 # Check if the file contains a TTree with the desired name
 if float(runNumRight[0]) != 0:
     TBRANCH_RIGHT_DATA  = InFile_DATA.Get("Right Data")
-    
-if float(runNumLeft[0]) != 0:
-    TBRANCH_LEFT_DATA  = InFile_DATA.Get("Left Data")
-    
-if float(runNumCenter[0]) != 0:
-    TBRANCH_CENTER_DATA  = InFile_DATA.Get("Center Data")
 
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    yield_right_data = [TBRANCH_RIGHT_DATA.Get("H_yield_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_yield_DATA").GetNbinsX()+1)]
-    phibin_right_data = [TBRANCH_RIGHT_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
-    tbin_right_data = [TBRANCH_RIGHT_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_RIGHT_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
+    yield_right_data = InFile_DATA["Right Data/H_yield_DATA"].to_hist()
+    phibin_right_data = InFile_DATA["Right Data/H_phibin_DATA"].to_hist()
+    tbin_right_data = InFile_DATA["Right Data/H_tbin_DATA"].to_hist()
 
 if float(runNumLeft[0]) != 0:
-    yield_left_data = [TBRANCH_LEFT_DATA.Get("H_yield_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_yield_DATA").GetNbinsX()+1)]
-    phibin_left_data = [TBRANCH_LEFT_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
-    tbin_left_data = [TBRANCH_LEFT_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_LEFT_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
+    yield_left_data = InFile_DATA["Left Data/H_yield_DATA"].to_hist()
+    phibin_left_data = InFile_DATA["Left Data/H_phibin_DATA"].to_hist()
+    tbin_left_data = InFile_DATA["Left Data/H_tbin_DATA"].to_hist()
 
 if float(runNumCenter[0]) != 0:
-    yield_center_data = [TBRANCH_CENTER_DATA.Get("H_yield_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_yield_DATA").GetNbinsX()+1)]
-    phibin_center_data = [TBRANCH_CENTER_DATA.Get("H_phibins_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_phibins_DATA").GetNbinsX()+1)]
-    tbin_center_data = [TBRANCH_CENTER_DATA.Get("H_tbins_DATA").GetBinContent(i) for i in range(1, TBRANCH_CENTER_DATA.Get("H_tbins_DATA").GetNbinsX()+1)]
+    yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].to_hist()
+    phibin_center_data = InFile_DATA["Center Data/H_phibin_DATA"].to_hist()
+    tbin_center_data = InFile_DATA["Center Data/H_tbin_DATA"].to_hist()
 
 InFile_DATA.Close()
 
