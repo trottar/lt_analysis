@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 14:12:09 trottar"
+# Time-stamp: "2023-02-20 14:27:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,8 +337,8 @@ phibinedges = binned_phi[1]
 
 tval = 0
 phival = 0
-hist["yieldTree"].Branch("tbins", tval, "tbins/D")
-hist["yieldTree"].Branch("phibins", phival, "phibins/D")
+hist["yieldTree"].Branch("tbins", tval, "tbins/D", 32000)
+hist["yieldTree"].Branch("phibins", phival, "phibins/D", 32000)
 for i,hist in enumerate(histlist):
     for j in range(NumtBins):
         for k in range(NumPhiBins):
