@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 16:15:28 trottar"
+# Time-stamp: "2023-02-20 16:18:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -472,7 +472,7 @@ c_relyield_data = TCanvas()
 
 for i,hist in enumerate(histlist):
     relyieldval = array('d', [0])
-    hist["yieldTree"].Branch("rel_yield", relyield, "rel_yield/D")
+    hist["yieldTree"].Branch("rel_yield", relyieldval, "rel_yield/D")
     for j in range(1, hist["H_yield_DATA"].GetNbinsX()+1):
         
         if hist["H_yield_DATA"].GetBinContent(j) == 0.0 or  hist["H_yield_SIMC"].GetBinContent(j) == 0.0:
