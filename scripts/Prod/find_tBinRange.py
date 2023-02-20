@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 18:11:23 trottar"
+# Time-stamp: "2023-02-20 18:35:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -489,6 +489,8 @@ for i,hist in enumerate(histlist):
             relyieldval[0] = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
         hist["H_relyield_DATA"].Fill(relyield)
         hist["yieldTree"].Fill()
+
+    hist["yieldTree"].ResetBranchAddresses()
             
 for i,hist in enumerate(histlist):
     print("\n\n~~~~~~~~~~~~~~~",hist["H_relyield_DATA"])
