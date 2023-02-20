@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 04:45:37 trottar"
+# Time-stamp: "2023-02-20 04:52:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,19 +99,19 @@ InFile_DATA = up.open(InDATAFilename)
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    yield_right_data = InFile_DATA["Right Data/H_yield_DATA"].axis()
-    phibin_right_data = InFile_DATA["Right Data/H_phiaxis()_DATA"].axis()
-    tbin_right_data = InFile_DATA["Right Data/H_taxis()_DATA"].axis()
+    yield_right_data = InFile_DATA["Right Data/H_yield_DATA"].to_numpy()
+    phibin_right_data = InFile_DATA["Right Data/H_phito_numpy()_DATA"].to_numpy()
+    tbin_right_data = InFile_DATA["Right Data/H_tto_numpy()_DATA"].to_numpy()
 
 if float(runNumLeft[0]) != 0:
-    yield_left_data = InFile_DATA["Left Data/H_yield_DATA"].axis()
-    phibin_left_data = InFile_DATA["Left Data/H_phiaxis()_DATA"].axis()
-    tbin_left_data = InFile_DATA["Left Data/H_taxis()_DATA"].axis()
+    yield_left_data = InFile_DATA["Left Data/H_yield_DATA"].to_numpy()
+    phibin_left_data = InFile_DATA["Left Data/H_phito_numpy()_DATA"].to_numpy()
+    tbin_left_data = InFile_DATA["Left Data/H_tto_numpy()_DATA"].to_numpy()
 
 if float(runNumCenter[0]) != 0:
-    yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].axis()
-    phibin_center_data = InFile_DATA["Center Data/H_phiaxis()_DATA"].axis()
-    tbin_center_data = InFile_DATA["Center Data/H_taxis()_DATA"].axis()
+    yield_center_data = InFile_DATA["Center Data/H_yield_DATA"].to_numpy()
+    phibin_center_data = InFile_DATA["Center Data/H_phito_numpy()_DATA"].to_numpy()
+    tbin_center_data = InFile_DATA["Center Data/H_tto_numpy()_DATA"].to_numpy()
 
 print("\n\n~~~~~~~~~",yield_left_data)
 print("~~~~~~~~~",tbin_left_data)
