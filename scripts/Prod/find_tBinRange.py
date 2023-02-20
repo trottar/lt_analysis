@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 15:42:59 trottar"
+# Time-stamp: "2023-02-20 15:47:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,7 +337,9 @@ phibinedges = binned_phi[1]
 
 for i,hist in enumerate(histlist):
     tval = ROOT.vector('double')()
+    hist["yieldTree"]._tval = tval
     phival = ROOT.vector('double')()
+    hist["yieldTree"]._phival = phival
     hist["yieldTree"].Branch("tbins", tval)
     hist["yieldTree"].Branch("phibins", phival)    
     for j in range(NumtBins):
