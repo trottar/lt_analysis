@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 16:18:48 trottar"
+# Time-stamp: "2023-02-20 16:44:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,7 +350,6 @@ for i,hist in enumerate(histlist):
             tval[0] = tbinedges[j]
             phival[0] = phibinedges[k]
             hist["yieldTree"].Fill()
-    hist["yieldTree"].Fill()
     
 c_bins.Divide(2,1)
         
