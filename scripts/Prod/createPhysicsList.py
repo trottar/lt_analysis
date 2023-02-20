@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 18:53:08 trottar"
+# Time-stamp: "2023-02-20 18:57:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,7 +43,7 @@ runNumCenter = list(sys.argv[11].split(" "))
 pThetaValRight = list(sys.argv[12].split(" "))
 pThetaValLeft = list(sys.argv[13].split(" "))
 pThetaValCenter = list(sys.argv[14].split(" "))
-
+print("!!!!!!!!!!!!!!",sys.argv[13])
 EbeamValRight = list(sys.argv[15].split(" "))
 EbeamValLeft = list(sys.argv[16].split(" "))
 EbeamValCenter = list(sys.argv[17].split(" "))
