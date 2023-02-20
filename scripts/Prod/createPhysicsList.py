@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 18:36:49 trottar"
+# Time-stamp: "2023-02-20 18:42:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,8 +183,7 @@ if float(runNumRight[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_right_data):
-            if relyield == 0.0:
-                # convert uC to C (10^-6C=1uC)
+            if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
@@ -199,8 +198,7 @@ if float(runNumLeft[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_left_data):
-            if relyield == 0.0:
-                # convert uC to C (10^-6C=1uC)
+            if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
@@ -215,8 +213,7 @@ if float(runNumCenter[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_center_data):
-            if relyield == 0.0:
-                # convert uC to C (10^-6C=1uC)
+            if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
