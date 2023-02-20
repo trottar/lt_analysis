@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 20:11:45 trottar"
+# Time-stamp: "2023-02-19 20:15:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -442,8 +442,6 @@ for i,hist in enumerate(histlist):
     for key, val in groups.items():
         yieldDict[key] = integrate.simps(val)*hist["normfac_simc"]
         hist["H_yield_SIMC"].Fill(integrate.simps(val)*hist["normfac_simc"])
-        if hist["phi_setting"] == "Center":
-            print(hist["phi_setting"], yieldDict[key])
     hist["yieldDictSimc"] = yieldDict
 
     hist["H_yield_SIMC"].SetLineColor(i+1)            
@@ -461,6 +459,8 @@ for i,hist in enumerate(histlist):
 for i,hist in enumerate(histlist):
     hist["H_relyield_DATA"].SetLineColor(i+1)
     hist["H_relyield_DATA"].Draw("same, E1")
+    yieldClone.SetLineColor(7)
+    yieldClone.Draw("same, E1")
     
 c_relyield_data.Print(outputpdf)
 
