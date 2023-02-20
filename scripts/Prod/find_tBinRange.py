@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-19 20:57:12 trottar"
+# Time-stamp: "2023-02-19 21:03:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -452,6 +452,8 @@ c_yield_simc.Print(outputpdf)
 c_relyield_data = TCanvas()
 
 for i,hist in enumerate(histlist):
+    hist["H_yield_DATA"].Sumw2()
+    hist["H_yield_SIMC"].Sumw2()
     yieldClone = hist["H_yield_DATA"].Clone()
     yieldClone.Divide(hist["H_yield_SIMC"])
     for i in range(yieldClone.GetNbinsX()):
