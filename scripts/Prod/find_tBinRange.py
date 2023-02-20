@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 00:59:55 trottar"
+# Time-stamp: "2023-02-20 02:13:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -465,6 +465,7 @@ for i,hist in enumerate(histlist):
     hist["H_relyield_DATA"].Add(yieldClone)
             
 for i,hist in enumerate(histlist):
+    print("\n\n~~~~~~~~~~~~~~~",hist["H_relyield_DATA"].GetEntries())
     hist["H_relyield_DATA"].SetLineColor(i+1)
     hist["H_relyield_DATA"].Draw("same")
     
