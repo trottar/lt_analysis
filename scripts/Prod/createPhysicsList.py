@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-21 01:16:09 trottar"
+# Time-stamp: "2023-02-21 01:25:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -198,7 +198,8 @@ if float(runNumRight[0]) != 0:
         runNum = run
         pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
         if os.path.exists(pid_log):
-            thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))            
+            thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))
+            ebeam_right = EbeamValRight[i]
         else:
             continue
         
@@ -208,15 +209,48 @@ if float(runNumLeft[0]) != 0:
         runNum = run
         pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
         if os.path.exists(pid_log):
-            thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))            
+            thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))
+            ebeam_left = EbeamValLeft[i]
         else:
             continue
 
 if float(runNumCenter[0]) != 0:
-    thpq_center = 0.000
-
+    runNums= runNumCenter
+    for i, run in enumerate(runNumCenter):
+        runNum = run
+        pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+        if os.path.exists(pid_log):
+            thpq_center = 0.000
+            ebeam_center = EbeamValCenter[i]
+        else:
+            continue
+        
 print(thpq_left)
     
+################################################################################################################################################
+            
+f_list_settings = '{}/src/beam/Eb_KLT.dat'.format(LTANAPATH)
+if not os.path.exists(f_list_settings):
+    open(f_list_settings, "w").close()
+# First check if line exists
+with open(f_list_settings, 'r') as f:
+    lines = f.readlines()
+    if float(runNumRight[0]) != 0:
+        check_line = "{} {} {}\n".format(ebeam_right, Q2, EPSVAL)
+        # Check if the line already exists
+        if check_line not in lines:
+            write_to_file(f_list_settings,check_line)
+    if float(runNumLeft[0]) != 0:
+        check_line = "{} {} {}\n".format(ebeam_left, Q2, EPSVAL)
+        # Check if the line already exists
+        if check_line not in lines:
+            write_to_file(f_list_settings,check_line)
+    if float(runNumCenter[0]) != 0:
+        check_line = "{} {} {}\n".format(ebeam_center, Q2, EPSVAL)
+        # Check if the line already exists
+        if check_line not in lines:
+            write_to_file(f_list_settings,check_line)
+
 ################################################################################################################################################
             
 f_list_settings = '{}/src/list.settings'.format(LTANAPATH)
@@ -235,9 +269,9 @@ with open(f_list_settings, 'r') as f:
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
     if float(runNumCenter[0]) != 0:
-        check_line = "{} {} {} {:.3f} {} {} {} {}\n".format(POL, Q2, EPSVAL, thpq_center, TMIN, TMAX, NumtBins, Kset)
+        check_line = "{} {} {} +{:.3f} {} {} {} {}\n".format(POL, Q2, EPSVAL, thpq_center, TMIN, TMAX, NumtBins, Kset)
         if check_line not in lines:
-            write_to_file(f_list_settings,check_line)
+            write_to_file(f_list_settings,check_line)            
             
 ################################################################################################################################################
 
