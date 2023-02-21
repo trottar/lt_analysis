@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-21 01:37:49 trottar"
+# Time-stamp: "2023-02-21 01:43:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -238,17 +238,17 @@ if not os.path.exists(f_list_settings):
 with open(f_list_settings, 'r') as f:
     lines = f.readlines()
     if float(runNumRight[0]) != 0:
-        check_line = "{} {} {}\n".format(ebeam_right, Q2, EPSVAL)
+        check_line = "{:.3f} {} {:.4f}\n".format(ebeam_right, Q2, EPSVAL)
         # Check if the line already exists
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
     if float(runNumLeft[0]) != 0:
-        check_line = "{} {} {}\n".format(ebeam_left, Q2, EPSVAL)
+        check_line = "{:.3f} {} {:.4f}\n".format(ebeam_left, Q2, EPSVAL)
         # Check if the line already exists
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
     if float(runNumCenter[0]) != 0:
-        check_line = "{} {} {}\n".format(ebeam_center, Q2, EPSVAL)
+        check_line = "{:.3f} {} {:.4f}\n".format(ebeam_center, Q2, EPSVAL)
         # Check if the line already exists
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
@@ -262,16 +262,16 @@ if not os.path.exists(f_list_settings):
 with open(f_list_settings, 'r') as f:
     lines = f.readlines()
     if float(runNumRight[0]) != 0:
-        check_line = "{} {} {} -{:.3f} {} {} {} {}\n".format(POL, Q2, EPSVAL, thpq_right, TMIN, TMAX, NumtBins, Kset)
+        check_line = "{} {} {:.4f} -{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_right, TMIN, TMAX, NumtBins, Kset)
         # Check if the line already exists
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
     if float(runNumLeft[0]) != 0:
-        check_line = "{} {} {} +{:.3f} {} {} {} {}\n".format(POL, Q2, EPSVAL, thpq_left, TMIN, TMAX, NumtBins, Kset)
+        check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_left, TMIN, TMAX, NumtBins, Kset)
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
     if float(runNumCenter[0]) != 0:
-        check_line = "{} {} {} +{:.3f} {} {} {} {}\n".format(POL, Q2, EPSVAL, thpq_center, TMIN, TMAX, NumtBins, Kset)
+        check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_center, TMIN, TMAX, NumtBins, Kset)
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)            
             
@@ -287,7 +287,7 @@ with open(f_list_settings, 'r') as f:
         if float(runNumRight[0]) != 0:
             for i, relyield in enumerate(relyield_right):
                 if relyield != 0.0:
-                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
+                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_right_data[i]), int(tbin_right_data[i]))
                     # Check if the line already exists
                     if check_line not in lines:
                         write_to_file(f_list,check_line)
@@ -295,7 +295,7 @@ with open(f_list_settings, 'r') as f:
         if float(runNumLeft[0]) != 0:
             for i, relyield in enumerate(relyield_left):
                 if relyield != 0.0:
-                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
+                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_left_data[i]), int(tbin_left_data[i]))
                     # Check if the line already exists
                     if check_line not in lines:
                         write_to_file(f_list,check_line)
@@ -303,7 +303,7 @@ with open(f_list_settings, 'r') as f:
         if float(runNumCenter[0]) != 0:
             for i, relyield in enumerate(relyield_center):
                 if relyield != 0.0:
-                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
+                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_center_data[i]), int(tbin_center_data[i]))
                     # Check if the line already exists
                     if check_line not in lines:
                         write_to_file(f_list,check_line)
@@ -320,7 +320,7 @@ if float(runNumRight[0]) != 0:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_right):
             if relyield != 0.0:
-                check_line = "{} {} {} {} {}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -335,7 +335,7 @@ if float(runNumLeft[0]) != 0:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_left):
             if relyield != 0.0:
-                check_line = "{} {} {} {} {}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -350,7 +350,7 @@ if float(runNumCenter[0]) != 0:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_center):
             if relyield != 0.0:
-                check_line = "{} {} {} {} {}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
