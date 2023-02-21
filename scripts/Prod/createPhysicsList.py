@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 20:08:48 trottar"
+# Time-stamp: "2023-02-20 20:19:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,28 +99,46 @@ InFile_DATA = ROOT.TFile.Open(InDATAFilename,"READ")
 ###############################################################################################################################################
 
 if float(runNumRight[0]) != 0:
+    yield_right_data = []
+    yield_right_simc = []
+    phibin_right_data = []
+    tbin_right_data = []
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
-    yield_right_data = [evt.yield_data for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
-    yield_right_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
-    relyield_right = [d/s if s > 0 else 0.0 for d,s in zip(yield_right_data,yield_right_simc)] 
-    phibin_right_data = [evt.phibins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
-    tbin_right_data = [evt.tbins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
+    for i, evt in enumerate(TBRANCH_RIGHT):
+        if i <= NumtBins*NumPhiBins:
+            yield_right_data.append(evt.yield_data)
+            yield_right_simc.append(evt.yield_simc)
+            phibin_right_data.append(evt.phibins)
+            tbin_right_data.append(evt.tbins)
+    relyield_right = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_right_data,yield_right_simc)] 
 
 if float(runNumLeft[0]) != 0:
+    yield_left_data = []
+    yield_left_simc = []
+    phibin_left_data = []
+    tbin_left_data = []
     TBRANCH_LEFT = InFile_DATA.Get("Left")
-    yield_left_data = [evt.yield_data for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
-    yield_left_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
-    relyield_left = [d/s if s > 0 else 0.0 for d,s in zip(yield_left_data,yield_left_simc)] 
-    phibin_left_data = [evt.phibins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
-    tbin_left_data = [evt.tbins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
+    for i, evt in enumerate(TBRANCH_LEFT):
+        if i <= NumtBins*NumPhiBins:
+            yield_left_data.append(evt.yield_data)
+            yield_left_simc.append(evt.yield_simc)
+            phibin_left_data.append(evt.phibins)
+            tbin_left_data.append(evt.tbins)
+    relyield_left = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_left_data,yield_left_simc)] 
 
 if float(runNumCenter[0]) != 0:
+    yield_center_data = []
+    yield_center_simc = []
+    phibin_center_data = []
+    tbin_center_data = []
     TBRANCH_CENTER = InFile_DATA.Get("Center")
-    yield_center_data = [evt.yield_data for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
-    yield_center_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
-    relyield_center = [d/s if s > 0 else 0.0 for d,s in zip(yield_center_data,yield_center_simc)] 
-    phibin_center_data = [evt.phibins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
-    tbin_center_data = [evt.tbins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
+    for i, evt in enumerate(TBRANCH_CENTER):
+        if i <= NumtBins*NumPhiBins:
+            yield_center_data.append(evt.yield_data)
+            yield_center_simc.append(evt.yield_simc)
+            phibin_center_data.append(evt.phibins)
+            tbin_center_data.append(evt.tbins)
+    relyield_center = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_center_data,yield_center_simc)] 
     
 print("\n\n~~~~~~~~~",relyield_left)
 print("~~~~~~~~~",tbin_left_data)
@@ -149,25 +167,25 @@ def write_to_file(f_out,line):
 # Define thpq vector relative to middle setting
 if float(runNumRight[0]) != 0:
     if phi_setting == "Right":
-    runNums= runNumRight
-    for i, run in enumerate(runNumRight.split(' ')):
-        runNum = run
-        pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
-        if os.path.exists(pid_log):
-            thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))            
-        else:
-            continue
+        runNums= runNumRight
+        for i, run in enumerate(runNumRight.split(' ')):
+            runNum = run
+            pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+            if os.path.exists(pid_log):
+                thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))            
+            else:
+                continue
         
 if float(runNumLeft[0]) != 0:
     if phi_setting == "Left":
-    runNums= runNumLeft
-    for i, run in enumerate(runNumLeft.split(' ')):
-        runNum = run
-        pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
-        if os.path.exists(pid_log):
-            thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))            
-        else:
-            continue
+        runNums= runNumLeft
+        for i, run in enumerate(runNumLeft.split(' ')):
+            runNum = run
+            pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+            if os.path.exists(pid_log):
+                thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))            
+            else:
+                continue
 
 if float(runNumCenter[0]) != 0:
     thpq_center = 0.000
@@ -207,7 +225,7 @@ with open(f_list_settings, 'r') as f:
         lines = f.readlines()
         if float(runNumRight[0]) != 0:
             for i, relyield in enumerate(relyield_right):
-                if relyield != 0.0 and np.isfinite(relyield):
+                if relyield != 0.0:
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
                     # Check if the line already exists
                     if check_line not in lines:
@@ -215,7 +233,7 @@ with open(f_list_settings, 'r') as f:
 
         if float(runNumLeft[0]) != 0:
             for i, relyield in enumerate(relyield_left):
-                if relyield != 0.0 and np.isfinite(relyield):
+                if relyield != 0.0:
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
                     # Check if the line already exists
                     if check_line not in lines:
@@ -223,7 +241,7 @@ with open(f_list_settings, 'r') as f:
 
         if float(runNumCenter[0]) != 0:
             for i, relyield in enumerate(relyield_center):
-                if relyield != 0.0 and np.isfinite(relyield):
+                if relyield != 0.0:
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
                     # Check if the line already exists
                     if check_line not in lines:
@@ -240,7 +258,7 @@ if float(runNumRight[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_right_data):
-            if relyield != 0.0 and np.isfinite(relyield):
+            if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(Q2[i], dQ2[i], W[i], dW[i], tbin_right_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
@@ -255,7 +273,7 @@ if float(runNumLeft[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_left_data):
-            if relyield != 0.0 and np.isfinite(relyield):
+            if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(Q2[i], dQ2[i], W[i], dW[i], tbin_left_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
@@ -270,7 +288,7 @@ if float(runNumCenter[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_center_data):
-            if relyield != 0.0 and np.isfinite(relyield):
+            if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(Q2[i], dQ2[i], W[i], dW[i], tbin_center_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
