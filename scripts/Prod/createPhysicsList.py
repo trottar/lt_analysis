@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-21 01:45:08 trottar"
+# Time-stamp: "2023-02-21 01:45:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,7 +28,7 @@ User Inputs
 
 Q2 = sys.argv[1].replace("p",".")
 POL = sys.argv[2]
-EPSVAL = sys.argv[3]
+EPSVAL = float(sys.argv[3])
 TMIN = sys.argv[4]
 TMAX = sys.argv[5]
 NumtBins = int(sys.argv[6])
