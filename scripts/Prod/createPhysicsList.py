@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-21 01:11:16 trottar"
+# Time-stamp: "2023-02-21 01:16:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -283,7 +283,7 @@ if float(runNumRight[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, relyield in enumerate(relyield_right_data):
+        for i, relyield in enumerate(relyield_right):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i])
                 # Check if the line already exists
@@ -299,7 +299,7 @@ if float(runNumLeft[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, relyield in enumerate(relyield_left_data):
+        for i, relyield in enumerate(relyield_left):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i])
                 # Check if the line already exists
@@ -314,7 +314,7 @@ if float(runNumCenter[0]) != 0:
     # Open a file in read mode
     with open(f_list, 'r') as f:
         lines = f.readlines()
-        for i, relyield in enumerate(relyield_center_data):
+        for i, relyield in enumerate(relyield_center):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {} {}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i])
                 # Check if the line already exists
