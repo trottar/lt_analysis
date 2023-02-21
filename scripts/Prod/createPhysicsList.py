@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 19:17:23 trottar"
+# Time-stamp: "2023-02-20 19:23:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,7 +192,7 @@ with open(f_list_settings, 'r') as f:
         lines = f.readlines()
         if float(runNumRight[0]) != 0:
             for i, relyield in enumerate(relyield_right):
-                if relyield != 0.0:
+                if relyield != 0.0 and np.isfinite(relyield):
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
                     # Check if the line already exists
                     if check_line not in lines:
@@ -200,7 +200,7 @@ with open(f_list_settings, 'r') as f:
 
         if float(runNumLeft[0]) != 0:
             for i, relyield in enumerate(relyield_left):
-                if relyield != 0.0:
+                if relyield != 0.0 and np.isfinite(relyield):
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
                     # Check if the line already exists
                     if check_line not in lines:
@@ -208,7 +208,7 @@ with open(f_list_settings, 'r') as f:
 
         if float(runNumCenter[0]) != 0:
             for i, relyield in enumerate(relyield_center):
-                if relyield != 0.0:
+                if relyield != 0.0 and np.isfinite(relyield):
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
                     # Check if the line already exists
                     if check_line not in lines:
@@ -225,7 +225,7 @@ if float(runNumRight[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_right_data):
-            if relyield != 0.0:
+            if relyield != 0.0 and np.isfinite(relyield):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(Q2[i], dQ2[i], W[i], dW[i], tbin_right_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
@@ -240,7 +240,7 @@ if float(runNumLeft[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_left_data):
-            if relyield != 0.0:
+            if relyield != 0.0 and np.isfinite(relyield):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(Q2[i], dQ2[i], W[i], dW[i], tbin_left_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
@@ -255,7 +255,7 @@ if float(runNumCenter[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_center_data):
-            if relyield != 0.0:
+            if relyield != 0.0 and np.isfinite(relyield):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(Q2[i], dQ2[i], W[i], dW[i], tbin_center_data[i])
                 # Check if the line already exists
                 if check_line not in lines:
