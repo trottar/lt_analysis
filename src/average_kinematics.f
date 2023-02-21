@@ -215,7 +215,7 @@ c               read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
                   if(ipol.eq.-1) then
                      pol='mn'
                   elseif(ipol.eq.+1) then
-                     pol='pl'
+                     pol='k'
                   else
                      stop '*** aver: wrong pol ***'
                   endif
@@ -223,7 +223,7 @@ c               read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
 
                   
 
-                  write(fn,'(''kindata/kindata.'',a2,''_'',i3.3,''_'',i2.2,
+                  write(fn,'(''kindata/kindata.'',a2,''_'',i2.2,''_'',i2.2,
      *                 ''_'',SP,i5.4,S,''.dat'')')
      *                 pol,nint(q2_set*10.),nint(eps_set(lh)*100.),
      *                 nint(th_pq*1000.)
@@ -559,7 +559,7 @@ c      stop
 
 c     Save data.
 
-      write(fn,'(''averages/avek.'',i3.3,''.dat'')')
+      write(fn,'(''averages/avek.'',i2.2,''.dat'')')
      *     nint(q2_set*10.)
       print*,'fn=',fn
       print*
