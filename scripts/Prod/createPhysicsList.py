@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-21 15:30:36 trottar"
+# Time-stamp: "2023-02-21 15:33:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -320,7 +320,7 @@ if float(runNumRight[0]) != 0:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_right):
             if relyield != 0.0:
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -335,7 +335,7 @@ if float(runNumLeft[0]) != 0:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_left):
             if relyield != 0.0:
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -350,7 +350,7 @@ if float(runNumCenter[0]) != 0:
         lines = f.readlines()
         for i, relyield in enumerate(relyield_center):
             if relyield != 0.0:
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
