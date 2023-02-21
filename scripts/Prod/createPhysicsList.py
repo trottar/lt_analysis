@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 19:27:22 trottar"
+# Time-stamp: "2023-02-20 20:08:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,8 +42,6 @@ runNumCenter = list(sys.argv[11].split(" "))
 pThetaValRight = list(sys.argv[12].split(" "))
 pThetaValLeft = list(sys.argv[13].split(" "))
 pThetaValCenter = list(sys.argv[14].split(" "))
-print("!!!!!!!!!!!!!!",sys.argv[13])
-print("!!!!!!!!!!!!!!",sys.argv[14])
 EbeamValRight = list(sys.argv[15].split(" "))
 EbeamValLeft = list(sys.argv[16].split(" "))
 EbeamValCenter = list(sys.argv[17].split(" "))
@@ -150,9 +148,27 @@ def write_to_file(f_out,line):
 
 # Define thpq vector relative to middle setting
 if float(runNumRight[0]) != 0:
-    thpq_right = abs(float(pThetaValCenter[0])-float(pThetaValRight[0]))
+    if phi_setting == "Right":
+    runNums= runNumRight
+    for i, run in enumerate(runNumRight.split(' ')):
+        runNum = run
+        pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+        if os.path.exists(pid_log):
+            thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))            
+        else:
+            continue
+        
 if float(runNumLeft[0]) != 0:
-    thpq_left = abs(float(pThetaValCenter[0])-float(pThetaValLeft[0]))
+    if phi_setting == "Left":
+    runNums= runNumLeft
+    for i, run in enumerate(runNumLeft.split(' ')):
+        runNum = run
+        pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+        if os.path.exists(pid_log):
+            thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))            
+        else:
+            continue
+
 if float(runNumCenter[0]) != 0:
     thpq_center = 0.000
 
