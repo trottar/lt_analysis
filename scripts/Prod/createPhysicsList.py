@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-21 01:25:46 trottar"
+# Time-stamp: "2023-02-21 01:30:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -198,7 +198,8 @@ if float(runNumRight[0]) != 0:
         runNum = run
         pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
         if os.path.exists(pid_log):
-            thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))
+            #thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))
+            thpq_right = 3.000
             ebeam_right = EbeamValRight[i]
         else:
             continue
@@ -209,7 +210,8 @@ if float(runNumLeft[0]) != 0:
         runNum = run
         pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
         if os.path.exists(pid_log):
-            thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))
+            #thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))
+            thpq_left = 3.000
             ebeam_left = EbeamValLeft[i]
         else:
             continue
@@ -309,8 +311,7 @@ with open(f_list_settings, 'r') as f:
 ################################################################################################################################################
 
 if float(runNumRight[0]) != 0:
-    #f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_right*1000))
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_-3000.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_right*1000))
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
@@ -325,8 +326,7 @@ if float(runNumRight[0]) != 0:
                     write_to_file(f_list,check_line)
 
 if float(runNumLeft[0]) != 0:
-    #f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_left*1000))
-    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_+3000.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100)
+    f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_left*1000))
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
