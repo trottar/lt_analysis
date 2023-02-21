@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 23:21:45 trottar"
+# Time-stamp: "2023-02-20 23:34:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -394,39 +394,44 @@ for i,hist in enumerate(histlist):
                     else:
                         phibin_index = None
                     if phibin_index != None:
-                        tmp_lst.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)), evt.Q2, evt.W))
+                        tmp_lst.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)), evt.Q2, evt.W, -evt.MandelT))
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
     for t in tmp_lst:
         key = (t[0], t[1])
         if key in groups:
-            groups[key].append((t[2], t[3], t[4]))
+            groups[key].append((t[2], t[3], t[4], t[5]))
         else:
-            groups[key] = [(t[2], t[3], t[4])]
+            groups[key] = [(t[2], t[3], t[4], t[5])]
             
     print(groups)
     yieldValData = array('d', [0])
     hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
     Q2binValData = array('d', [0])
-    hist["yieldTree"].Branch("dQ2", Q2binValData, "dQ2/D")
+    hist["yieldTree"].Branch("aver_Q2", Q2binValData, "aver_Q2/D")
     WbinValData = array('d', [0])
-    hist["yieldTree"].Branch("dW", WbinValData, "dW/D")
+    hist["yieldTree"].Branch("aver_W", WbinValData, "aver_W/D")
+    tbinValData = array('d', [0])
+    hist["yieldTree"].Branch("aver_t", tbinValData, "aver_t/D")
     
     # Extract the desired values from each group
     MM_tmp = []
     Q2_tmp = []
-    W_tmp = []  
+    W_tmp = []
+    t_tmp = []
     for key, val in groups.items():
         for tup in val:
             MM_tmp.append(tup[0])
             Q2_tmp.append(tup[1])
             W_tmp.append(tup[2])
+            t_tmp.append(tup[3])
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
         yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
         Q2binValData[0] = np.average(Q2_tmp)
         WbinValData[0] = np.average(W_tmp)
+        tbinValData[0] = np.average(t_tmp)
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
@@ -459,7 +464,7 @@ for i,hist in enumerate(histlist):
                     else:
                         phibin_index = None
                     if phibin_index != None:
-                        tmp_lst.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))*evt.Weight, evt.Q2, evt.W))
+                        tmp_lst.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))*evt.Weight, evt.Q2, evt.W, evt.t))
                         
     groups = {}
     # Group the tuples by the first two elements using a dictionary
@@ -470,36 +475,50 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [(t[2], t[3], t[4])]
             
+    groups = {}
+    # Group the tuples by the first two elements using a dictionary
+    for t in tmp_lst:
+        key = (t[0], t[1])
+        if key in groups:
+            groups[key].append((t[2], t[3], t[4], t[5]))
+        else:
+            groups[key] = [(t[2], t[3], t[4], t[5])]
+            
     print(groups)
-    yieldValSimc = array('d', [0])
-    hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
-    Q2binValSimc = array('d', [0])
-    hist["yieldTree"].Branch("dQ2", Q2binValSimc, "dQ2/D")
-    WbinValSimc = array('d', [0])
-    hist["yieldTree"].Branch("dW", WbinValSimc, "dW/D")
+    yieldValData = array('d', [0])
+    hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
+    Q2binValData = array('d', [0])
+    hist["yieldTree"].Branch("aver_Q2", Q2binValData, "aver_Q2/D")
+    WbinValData = array('d', [0])
+    hist["yieldTree"].Branch("aver_W", WbinValData, "aver_W/D")
+    tbinValData = array('d', [0])
+    hist["yieldTree"].Branch("aver_t", tbinValData, "aver_t/D")
     
     # Extract the desired values from each group
     MM_tmp = []
     Q2_tmp = []
-    W_tmp = []  
+    W_tmp = []
+    t_tmp = []
     for key, val in groups.items():
         for tup in val:
             MM_tmp.append(tup[0])
             Q2_tmp.append(tup[1])
             W_tmp.append(tup[2])
-        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp)*hist["normfac_simc"])
-        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp)*hist["normfac_simc"]
-        yieldValSimc[0] = integrate.simps(MM_tmp)*hist["normfac_simc"]
-        Q2binValSimc[0] = np.average(Q2_tmp)
-        WbinValSimc[0] = np.average(W_tmp)
+            t_tmp.append(tup[3])
+        hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
+        hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        Q2binValData[0] = np.average(Q2_tmp)
+        WbinValData[0] = np.average(W_tmp)
+        tbinValData[0] = np.average(t_tmp)
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
             
-    print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictSimc"])
-    print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
-    hist["H_yield_SIMC"].SetLineColor(i+1)            
-    hist["H_yield_SIMC"].Draw("same")
+    print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictData"])
+    print("~~~~~~~~~~~~~~~",hist["H_yield_DATA"])
+    hist["H_yield_DATA"].SetLineColor(i+1)            
+    hist["H_yield_DATA"].Draw("same")
         
 c_yield_simc.Print(outputpdf)
 
