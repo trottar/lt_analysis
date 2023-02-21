@@ -110,14 +110,36 @@ else
     fi
 fi
 
+# Function that calls python script to grab run numbers
+grab_runs () {
+    RunList=$1
+    INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
+    if [[ -e $INPDIR ]]; then
+	cd "${LTANAPATH}/scripts"
+	RunNumArr=$(python3 getRunNumbers.py $INPDIR)
+	echo $RunNumArr
+    else
+	exit
+    fi
+}
+
 ##############
 # HARD CODED #
 ##############
 # Define heep run numbers for a particular setting
 if [[ $KIN = "10p6" && $s_flag != "true" ]]; then
-    declare -a data=(4827 4828 4855 4856 4857 4858 4859 4860 4862 4863) # All heep coin 10p6 runs
-    #    declare -a data=(4827) # Just one test run
-    declare -a dummydata=(4864)
+    # Define run list based off kinematics selected
+    file_dummy="HeePCoin_10p6_Autumn18_dummy"
+    file="HeePCoin_10p6_Autumn18"
+    echo "Reading in run numbers for right file ${file_dummy}..."
+    # Converts python output to bash array
+    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    echo
+    echo "Reading in run numbers for right file ${file}..."
+    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data[@]}]"
+    echo
 elif [[ $KIN = "8p2" ]]; then
     declare -a data=(7974 7975 7976)
     #    declare -a data=(7974) # Just one test run
@@ -249,44 +271,71 @@ fi
 
 cd "${LTANAPATH}/scripts"
 
-DataChargeVal=()
-DataEffVal=()
-DataRunNum=()
-echo
-echo "Calculating data total effective charge..."
-for i in "${data[@]}"
-do
-    # Calculates total efficiency then applies to the charge for each run number
-    # to get the effective charge per run and saves as an array
-    DataChargeVal+=($(python3 findEffectiveCharge.py ${EffData} ${ROOTPREFIX} "$i" -1))
-    # Grabs the total effiency value per run and saves as an array
-    DataEffVal+=($(python3 getEfficiencyValue.py "$i" ${EffData} "efficiency"))
-    DataRunNum+=("$i")
-    #echo "${DataChargeVal[@]} uC"
-done
-#echo ${DataChargeVal[*]}
-# Sums the array to get the total effective charge
-# Note: this must be done as an array! This is why uC is used at this step
-#       and later converted to C
-DataChargeSum=$(IFS=+; echo "$((${DataChargeVal[*]}))") # Only works for integers
-echo "${DataChargeSum} uC"
+# Checks that array isn't empty
+if [[ ${#data[@]} -ne 0 ]]; then
+    echo
+    echo "Calculating data total effective charge ..."
+    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data[*]}")
+    arr1=()
+    arr2=()
+    arr3=()
+    arr4=()
+    arr5=()
+    arr6=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$itt=(\"\${line_array[@]}\")"
+    done <<< "$PYSTRING"
+    DataChargeVal=("${arr1[@]}")
+    DataChargeErr=("${arr2[@]}")
+    DataEffVal=("${arr3[@]}")
+    DataEffErr=("${arr4[@]}")
+    DatapThetaVal=("${arr5[@]}")
+    DataEbeamVal=("${arr6[@]}")
+    #echo ${DataChargeVal[*]}
+    # Sums the array to get the total effective charge
+    # Note: this must be done as an array! This is why uC is used at this step
+    #       and later converted to C
+    DataChargeSum=$(IFS=+; echo "$((${DataChargeVal[*]}))") # Only works for integers
+    echo "Total Charge : ${DataChargeSum} uC"
+fi
 
-# Repeat the above process for dummy
-DummyChargeVal=()
-DummyEffVal=()
-DummyRunNum=()
-echo
-echo "Calculating dummy total effective charge..."
-for i in "${dummydata[@]}"
-do
-    DummyChargeVal+=($(python3 findEffectiveCharge.py ${EffData} ${ROOTPREFIX} "$i" -1))
-    DummyEffVal+=($(python3 getEfficiencyValue.py "$i" ${EffData} "efficiency"))
-    DummyRunNum+=($(echo "$i"))
-    #echo "${DummyChargeVal[@]} uC"
-done
-#echo ${DummyChargeVal[*]}
-DummyChargeSum=$(IFS=+; echo "$((${DummyChargeVal[*]}))") # Only works for integers
-echo "${DummyChargeSum} uC"
+# Checks that array isn't empty
+if [[ ${#dummydata[@]} -ne 0 ]]; then
+    echo
+    echo "Calculating dummy data total effective charge ..."
+    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummydata[*]}")
+    arr1=()
+    arr2=()
+    arr3=()
+    arr4=()
+    arr5=()
+    arr6=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$itt=(\"\${line_array[@]}\")"
+    done <<< "$PYSTRING"
+    DummyChargeVal=("${arr1[@]}")
+    DummyChargeErr=("${arr2[@]}")
+    DummyEffVal=("${arr3[@]}")
+    DummyEffErr=("${arr4[@]}")
+    DummypThetaVal=("${arr5[@]}")
+    DummyEbeamVal=("${arr6[@]}")
+    #echo ${DummyChargeVal[*]}
+    # Sums the array to get the total effective charge
+    # Note: this must be done as an array! This is why uC is used at this step
+    #       and later converted to C
+    DummyChargeSum=$(IFS=+; echo "$((${DummyChargeVal[*]}))") # Only works for integers
+    echo "Total Charge : ${DummyChargeSum} uC"
+fi
 
 # Finally, run the plotting script
 if [[ $s_flag = "true" ]]; then
@@ -294,7 +343,7 @@ if [[ $s_flag = "true" ]]; then
     python3 HeepSing.py ${KIN} "${OutDATAFilename}.root" $DataChargeSum "${DataEffVal[*]}" "${OutDUMMYFilename}.root" $DummyChargeSum "${DummyEffVal[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData} ${SPEC}
 else
     cd "${LTANAPATH}/scripts/HeeP/COIN"
-    python3 HeepCoin.py ${KIN} "${OutDATAFilename}.root" $DataChargeSum "${DataEffVal[*]}" "${DataRunNum[*]}" "${OutDUMMYFilename}.root" $DummyChargeSum "${DummyEffVal[*]}" "${DummyRunNum[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData}
+    python3 HeepCoin.py ${KIN} "${OutDATAFilename}.root" $DataChargeSum "${DataEffVal[*]}" "${data[*]}" "${OutDUMMYFilename}.root" $DummyChargeSum "${DummyEffVal[*]}" "${dummydata[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData}
 fi
 
 cd "${LTANAPATH}"
