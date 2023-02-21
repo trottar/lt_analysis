@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 23:11:54 trottar"
+# Time-stamp: "2023-02-20 23:13:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -401,9 +401,9 @@ for i,hist in enumerate(histlist):
     for t in tmp_lst:
         key = (t[0], t[1])
         if key in groups:
-            groups[key].append((t[2], t[3], t[4]))
+            groups[key].append([t[2], t[3], t[4]])
         else:
-            groups[key] = [(t[2], t[3], t[4])]
+            groups[key] = [[t[2], t[3], t[4]]]
     print(groups)
     yieldValData = array('d', [0])
     hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
@@ -457,9 +457,9 @@ for i,hist in enumerate(histlist):
     for t in tmp_lst:
         key = (t[0], t[1])
         if key in groups:
-            groups[key].append((t[2], t[3], t[4]))
+            groups[key].append([t[2], t[3], t[4]])
         else:
-            groups[key] = [(t[2], t[3], t[4])]
+            groups[key] = [[t[2], t[3], t[4]]]
 
     yieldValSimc = array('d', [0])
     hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
