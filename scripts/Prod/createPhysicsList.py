@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 20:23:16 trottar"
+# Time-stamp: "2023-02-20 20:26:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,7 +167,7 @@ def write_to_file(f_out,line):
 # Define thpq vector relative to middle setting
 if float(runNumRight[0]) != 0:
     runNums= runNumRight
-    for i, run in enumerate(runNumRight.split(' ')):
+    for i, run in enumerate(runNumRight):
         runNum = run
         pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
         if os.path.exists(pid_log):
@@ -177,7 +177,7 @@ if float(runNumRight[0]) != 0:
         
 if float(runNumLeft[0]) != 0:
     runNums= runNumLeft
-    for i, run in enumerate(runNumLeft.split(' ')):
+    for i, run in enumerate(runNumLeft):
         runNum = run
         pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
         if os.path.exists(pid_log):
