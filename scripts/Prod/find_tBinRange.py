@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 22:59:37 trottar"
+# Time-stamp: "2023-02-20 23:04:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -353,7 +353,6 @@ for i,hist in enumerate(histlist):
 
     hist["yieldTree"].ResetBranchAddresses()
 
-    print("\n\n!!!!!!!!!!!!!!!!!!!",hist["yieldTree"].GetEntries())
 c_bins.Divide(2,1)
         
 for i,hist in enumerate(histlist):
@@ -402,7 +401,7 @@ for i,hist in enumerate(histlist):
     for t in tmp_lst:
         key = (t[0], t[1])
         if key in groups:
-            groups[key].append((t[2], t[3], t[4]]))
+            groups[key].append((t[2], t[3], t[4]))
         else:
             groups[key] = [(t[2], t[3], t[4]])]
 
@@ -458,7 +457,7 @@ for i,hist in enumerate(histlist):
     for t in tmp_lst:
         key = (t[0], t[1])
         if key in groups:
-            groups[key].append((t[2], t[3], t[4]]))
+            groups[key].append((t[2], t[3], t[4]))
         else:
             groups[key] = [(t[2], t[3], t[4]])]
 
@@ -485,31 +484,6 @@ for i,hist in enumerate(histlist):
     hist["H_yield_SIMC"].Draw("same")
         
 c_yield_simc.Print(outputpdf)
-
-c_relyield_data = TCanvas()
-
-for i,hist in enumerate(histlist):
-    relyieldval = array('d', [0])
-    hist["yieldTree"].Branch("rel_yield", relyieldval, "rel_yield/D")
-    for j in range(1, hist["H_yield_DATA"].GetNbinsX()+1):
-        
-        if hist["H_yield_DATA"].GetBinContent(j) == 0.0 or  hist["H_yield_SIMC"].GetBinContent(j) == 0.0:
-            relyield = 0.0
-            relyieldval[0] = 0.0
-        else:
-            relyield = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
-            relyieldval[0] = hist["H_yield_DATA"].GetBinContent(j) / hist["H_yield_SIMC"].GetBinContent(j)
-        hist["H_relyield_DATA"].Fill(relyield)
-        hist["yieldTree"].Fill()
-
-    hist["yieldTree"].ResetBranchAddresses()
-            
-for i,hist in enumerate(histlist):
-    print("\n\n~~~~~~~~~~~~~~~",hist["H_relyield_DATA"])
-    hist["H_relyield_DATA"].SetLineColor(i+1)
-    hist["H_relyield_DATA"].Draw("same")
-    
-c_relyield_data.Print(outputpdf)
 
 '''
 c_yieldbin = TCanvas()

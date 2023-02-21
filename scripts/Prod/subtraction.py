@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 15:55:52 trottar"
+# Time-stamp: "2023-02-20 23:04:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -385,7 +385,6 @@ def defineHists(phi_setting, inpDict):
     H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
     H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
     H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
-    H_relyield_DATA = ROOT.TH1D("H_relyield_DATA", "Data Rel. Yield", NumtBins*NumPhiBins, 0, 1.0)
 
     H_hsdelta_DUMMY  = ROOT.TH1D("H_hsdelta_DUMMY","HMS Delta", 200, -20.0, 20.0)
     H_hsxptar_DUMMY  = ROOT.TH1D("H_hsxptar_DUMMY","HMS xptar", 200, -0.1, 0.1)
@@ -1129,7 +1128,6 @@ def defineHists(phi_setting, inpDict):
         "H_phibins_DATA" : H_phibins_DATA,
         "H_tbins_DATA" : H_tbins_DATA,
         "H_yield_DATA" : H_yield_DATA,
-        "H_relyield_DATA" : H_relyield_DATA,
         "normfac_simc" : normfac_simc,
         "H_hsdelta_SIMC" :     H_hsdelta_SIMC,
         "H_hsxptar_SIMC" :     H_hsxptar_SIMC,
