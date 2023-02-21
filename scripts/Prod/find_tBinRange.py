@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 23:06:17 trottar"
+# Time-stamp: "2023-02-20 23:09:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -461,6 +461,7 @@ for i,hist in enumerate(histlist):
         else:
             groups[key] = [(t[2], t[3], t[4])]
 
+    print(groups)
     yieldValSimc = array('d', [0])
     hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
     Q2binValSimc = array('d', [0])
