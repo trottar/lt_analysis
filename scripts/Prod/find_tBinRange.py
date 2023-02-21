@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 23:13:12 trottar"
+# Time-stamp: "2023-02-20 23:21:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -401,9 +401,10 @@ for i,hist in enumerate(histlist):
     for t in tmp_lst:
         key = (t[0], t[1])
         if key in groups:
-            groups[key].append([t[2], t[3], t[4]])
+            groups[key].append((t[2], t[3], t[4]))
         else:
-            groups[key] = [[t[2], t[3], t[4]]]
+            groups[key] = [(t[2], t[3], t[4])]
+            
     print(groups)
     yieldValData = array('d', [0])
     hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
@@ -411,13 +412,21 @@ for i,hist in enumerate(histlist):
     hist["yieldTree"].Branch("dQ2", Q2binValData, "dQ2/D")
     WbinValData = array('d', [0])
     hist["yieldTree"].Branch("dW", WbinValData, "dW/D")
+    
     # Extract the desired values from each group
+    MM_tmp = []
+    Q2_tmp = []
+    W_tmp = []  
     for key, val in groups.items():
-        hist["H_yield_DATA"].Fill(integrate.simps(val[0])*hist["normfac_data"])
-        hist["yieldDictData"][key] = integrate.simps(val[0])*hist["normfac_data"]
-        yieldValData[0] = integrate.simps(val[0])*hist["normfac_data"]
-        Q2binValData[0] = val[1]
-        WbinValData[0] = val[2]
+        for tup in val:
+            MM_tmp.append(tup[0])
+            Q2_tmp.append(tup[1])
+            W_tmp.append(tup[2])
+        hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
+        hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        Q2binValData[0] = np.average(Q2_tmp)
+        WbinValData[0] = np.average(W_tmp)
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
@@ -457,23 +466,32 @@ for i,hist in enumerate(histlist):
     for t in tmp_lst:
         key = (t[0], t[1])
         if key in groups:
-            groups[key].append([t[2], t[3], t[4]])
+            groups[key].append((t[2], t[3], t[4]))
         else:
-            groups[key] = [[t[2], t[3], t[4]]]
-
+            groups[key] = [(t[2], t[3], t[4])]
+            
+    print(groups)
     yieldValSimc = array('d', [0])
     hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
     Q2binValSimc = array('d', [0])
     hist["yieldTree"].Branch("dQ2", Q2binValSimc, "dQ2/D")
     WbinValSimc = array('d', [0])
     hist["yieldTree"].Branch("dW", WbinValSimc, "dW/D")
+    
     # Extract the desired values from each group
+    MM_tmp = []
+    Q2_tmp = []
+    W_tmp = []  
     for key, val in groups.items():
-        hist["H_yield_SIMC"].Fill(integrate.simps(val[0])*hist["normfac_simc"])
-        hist["yieldDictSimc"][key] = integrate.simps(val[0])*hist["normfac_simc"]
-        yieldValSimc[0] = integrate.simps(val[0])*hist["normfac_simc"]
-        Q2binValSimc[0] = val[1]
-        WbinValSimc[0] = val[2]
+        for tup in val:
+            MM_tmp.append(tup[0])
+            Q2_tmp.append(tup[1])
+            W_tmp.append(tup[2])
+        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp)*hist["normfac_simc"])
+        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp)*hist["normfac_simc"]
+        yieldValSimc[0] = integrate.simps(MM_tmp)*hist["normfac_simc"]
+        Q2binValSimc[0] = np.average(Q2_tmp)
+        WbinValSimc[0] = np.average(W_tmp)
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
