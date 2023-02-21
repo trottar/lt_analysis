@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 19:11:04 trottar"
+# Time-stamp: "2023-02-20 19:17:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,7 +105,7 @@ if float(runNumRight[0]) != 0:
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
     yield_right_data = [evt.yield_data for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
     yield_right_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
-    relyield_right = yield_right_data/yield_right_simc
+    relyield_right = [d/s if s > 0 else 0.0 for d,s in zip(yield_right_data,yield_right_simc)] 
     phibin_right_data = [evt.phibins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
     tbin_right_data = [evt.tbins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
 
@@ -113,15 +113,15 @@ if float(runNumLeft[0]) != 0:
     TBRANCH_LEFT = InFile_DATA.Get("Left")
     yield_left_data = [evt.yield_data for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
     yield_left_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
-    relyield_left = yield_left_data/yield_left_simc
+    relyield_left = [d/s if s > 0 else 0.0 for d,s in zip(yield_left_data,yield_left_simc)] 
     phibin_left_data = [evt.phibins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
     tbin_left_data = [evt.tbins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
-    
+
 if float(runNumCenter[0]) != 0:
     TBRANCH_CENTER = InFile_DATA.Get("Center")
     yield_center_data = [evt.yield_data for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
     yield_center_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
-    relyield_center = yield_center_data/yield_center_simc
+    relyield_center = [d/s if s > 0 else 0.0 for d,s in zip(yield_center_data,yield_center_simc)] 
     phibin_center_data = [evt.phibins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
     tbin_center_data = [evt.tbins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
     
