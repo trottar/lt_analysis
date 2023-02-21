@@ -225,7 +225,7 @@ c               read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
 
                   write(fn,'(''kindata/kindata.'',a2,''_'',i3.3,''_'',i2.2,
      *                 ''_'',SP,i5.4,S,''.dat'')')
-     *                 pol,nint(q2_set*100.),nint(eps_set(lh)*100.),
+     *                 pol,nint(q2_set*10.),nint(eps_set(lh)*100.),
      *                 nint(th_pq*1000.)
                   print*,'fn=',fn
 c                 pause
@@ -560,7 +560,7 @@ c      stop
 c     Save data.
 
       write(fn,'(''averages/avek.'',i3.3,''.dat'')')
-     *     nint(q2_set*100.)
+     *     nint(q2_set*10.)
       print*,'fn=',fn
       print*
 
