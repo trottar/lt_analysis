@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 23:50:36 trottar"
+# Time-stamp: "2023-02-20 23:51:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,14 +108,14 @@ if float(runNumRight[0]) != 0:
     avert_right_data = []
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
     for i, evt in enumerate(TBRANCH_RIGHT):
-        #if i <= NumtBins*NumPhiBins:
-        yield_right_data.append(evt.yield_data)
-        yield_right_simc.append(evt.yield_simc)
-        phibin_right_data.append(evt.phibins)
-        tbin_right_data.append(evt.tbins)
-        averQ2_right_data.append(evt.aver_Q2)
-        averW_right_data.append(evt.aver_W)
-        avert_right_data.append(evt.aver_t)
+        if i <= NumtBins*NumPhiBins:
+            yield_right_data.append(evt.yield_data)
+            yield_right_simc.append(evt.yield_simc)
+            phibin_right_data.append(evt.phibins)
+            tbin_right_data.append(evt.tbins)
+            averQ2_right_data.append(evt.aver_Q2)
+            averW_right_data.append(evt.aver_W)
+            avert_right_data.append(evt.aver_t)
     relyield_right = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_right_data,yield_right_simc)] 
 
 if float(runNumLeft[0]) != 0:
@@ -128,14 +128,14 @@ if float(runNumLeft[0]) != 0:
     avert_left_data = []
     TBRANCH_LEFT = InFile_DATA.Get("Left")
     for i, evt in enumerate(TBRANCH_LEFT):
-        #if i <= NumtBins*NumPhiBins:
-        yield_left_data.append(evt.yield_data)
-        yield_left_simc.append(evt.yield_simc)
-        phibin_left_data.append(evt.phibins)
-        tbin_left_data.append(evt.tbins)
-        averQ2_left_data.append(evt.aver_Q2)
-        averW_left_data.append(evt.aver_W)
-        avert_left_data.append(evt.aver_t)
+        if i <= NumtBins*NumPhiBins:
+            yield_left_data.append(evt.yield_data)
+            yield_left_simc.append(evt.yield_simc)
+            phibin_left_data.append(evt.phibins)
+            tbin_left_data.append(evt.tbins)
+            averQ2_left_data.append(evt.aver_Q2)
+            averW_left_data.append(evt.aver_W)
+            avert_left_data.append(evt.aver_t)
     relyield_left = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_left_data,yield_left_simc)] 
 
 if float(runNumCenter[0]) != 0:
@@ -148,14 +148,14 @@ if float(runNumCenter[0]) != 0:
     avert_center_data = []
     TBRANCH_CENTER = InFile_DATA.Get("Center")
     for i, evt in enumerate(TBRANCH_CENTER):
-        #if i <= NumtBins*NumPhiBins:
-        yield_center_data.append(evt.yield_data)
-        yield_center_simc.append(evt.yield_simc)
-        phibin_center_data.append(evt.phibins)
-        tbin_center_data.append(evt.tbins)
-        averQ2_center_data.append(evt.aver_Q2)
-        averW_center_data.append(evt.aver_W)
-        avert_center_data.append(evt.aver_t)
+        if i <= NumtBins*NumPhiBins:
+            yield_center_data.append(evt.yield_data)
+            yield_center_simc.append(evt.yield_simc)
+            phibin_center_data.append(evt.phibins)
+            tbin_center_data.append(evt.tbins)
+            averQ2_center_data.append(evt.aver_Q2)
+            averW_center_data.append(evt.aver_W)
+            avert_center_data.append(evt.aver_t)
     relyield_center = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_center_data,yield_center_simc)] 
     
 print("\n\n~~~~~~~~~",relyield_left)
@@ -178,8 +178,6 @@ print("~~~~~~~~~",phibin_center_data)
 print("~~~~~~~~~",averQ2_center_data)
 print("~~~~~~~~~",averW_center_data)
 print("~~~~~~~~~",avert_center_data)
-
-print(len([2.0064302368943903, 2.0435775337516615, 2.064608723532838, 2.0691952252496315, 2.0842268946593743, 2.0751257031992187, 2.063689667290914, 2.0710969076068744, 2.071070283874784, 2.069253520013948, 2.0723061734470045, 2.077397154748802, 2.079670912670819, 2.082087463026087, 2.0837494555476885, 2.0865995951508327, 2.094033309929658, 2.0923119577891844, 2.0906005637987475, 2.0911711345144854, 2.088276278314339, 2.0873845257028307, 2.087761261670512, 2.0875443855157974, 2.0889537973061407, 2.088256743926515, 2.0916295548030615, 2.0931696013346337, 2.095230595215424, 2.0925243023984974, 2.0927147049390813, 2.0931550282335083, 2.0939921622067614, 2.0938880575265575, 2.0941503103212766, 2.0949239704885336, 2.0966407812497696, 2.096913840526052, 2.0973155551283664, 2.09791348662799, 2.0969365414093835, 2.095368978738798, 2.09538204347393, 2.0955038217276405, 2.094121069663818, 2.0942192918273888, 2.0942426463469386, 2.0959052566824914, 2.094552839279856, 2.0937878895873165, 2.0940192963229705, 2.0941492409708364, 2.094689215539109, 2.095162643155075, 2.095322862999909, 2.0952531771690395, 2.0957212985352642, 2.0966474998201163, 2.0969319760567013, 2.096210125911857, 2.09613214388684, 2.0950402318367742, 2.094804005925986, 2.0948808575748887, 2.0944539624344745, 2.0948809970003626, 2.095239186124055, 2.095391934322366, 2.0956367600716663, 2.095964798835878, 2.09618260801855, 2.096451629139136, 2.096864411920424, 2.0973714723715773, 2.0977688025696235, 2.0980172443463236, 2.098065402913154, 2.0983778481603057, 2.097838923047321, 2.0980583206908348]))
 
 InFile_DATA.Close()
 
