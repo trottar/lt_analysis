@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 20:26:50 trottar"
+# Time-stamp: "2023-02-20 23:46:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,13 +103,19 @@ if float(runNumRight[0]) != 0:
     yield_right_simc = []
     phibin_right_data = []
     tbin_right_data = []
+    averQ2_right_data = []
+    averW_right_data = []
+    avert_right_data = []
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
     for i, evt in enumerate(TBRANCH_RIGHT):
-        if i <= NumtBins*NumPhiBins:
-            yield_right_data.append(evt.yield_data)
-            yield_right_simc.append(evt.yield_simc)
-            phibin_right_data.append(evt.phibins)
-            tbin_right_data.append(evt.tbins)
+        #if i <= NumtBins*NumPhiBins:
+        yield_right_data.append(evt.yield_data)
+        yield_right_simc.append(evt.yield_simc)
+        phibin_right_data.append(evt.phibins)
+        tbin_right_data.append(evt.tbins)
+        averQ2_right_data.append(evt.aver_Q2)
+        averW_right_data.append(evt.aver_W)
+        avert_right_data.append(evt.aver_t)
     relyield_right = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_right_data,yield_right_simc)] 
 
 if float(runNumLeft[0]) != 0:
@@ -117,13 +123,19 @@ if float(runNumLeft[0]) != 0:
     yield_left_simc = []
     phibin_left_data = []
     tbin_left_data = []
+    averQ2_left_data = []
+    averW_left_data = []
+    avert_left_data = []
     TBRANCH_LEFT = InFile_DATA.Get("Left")
     for i, evt in enumerate(TBRANCH_LEFT):
-        if i <= NumtBins*NumPhiBins:
-            yield_left_data.append(evt.yield_data)
-            yield_left_simc.append(evt.yield_simc)
-            phibin_left_data.append(evt.phibins)
-            tbin_left_data.append(evt.tbins)
+        #if i <= NumtBins*NumPhiBins:
+        yield_left_data.append(evt.yield_data)
+        yield_left_simc.append(evt.yield_simc)
+        phibin_left_data.append(evt.phibins)
+        tbin_left_data.append(evt.tbins)
+        averQ2_left_data.append(evt.aver_Q2)
+        averW_left_data.append(evt.aver_W)
+        avert_left_data.append(evt.aver_t)
     relyield_left = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_left_data,yield_left_simc)] 
 
 if float(runNumCenter[0]) != 0:
@@ -131,27 +143,41 @@ if float(runNumCenter[0]) != 0:
     yield_center_simc = []
     phibin_center_data = []
     tbin_center_data = []
+    averQ2_center_data = []
+    averW_center_data = []
+    avert_center_data = []
     TBRANCH_CENTER = InFile_DATA.Get("Center")
     for i, evt in enumerate(TBRANCH_CENTER):
-        if i <= NumtBins*NumPhiBins:
-            yield_center_data.append(evt.yield_data)
-            yield_center_simc.append(evt.yield_simc)
-            phibin_center_data.append(evt.phibins)
-            tbin_center_data.append(evt.tbins)
+        #if i <= NumtBins*NumPhiBins:
+        yield_center_data.append(evt.yield_data)
+        yield_center_simc.append(evt.yield_simc)
+        phibin_center_data.append(evt.phibins)
+        tbin_center_data.append(evt.tbins)
+        averQ2_center_data.append(evt.aver_Q2)
+        averW_center_data.append(evt.aver_W)
+        avert_center_data.append(evt.aver_t)
     relyield_center = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_center_data,yield_center_simc)] 
     
 print("\n\n~~~~~~~~~",relyield_left)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
+print("~~~~~~~~~",averQ2_left_data)
+print("~~~~~~~~~",averW_left_data)
+print("~~~~~~~~~",avert_left_data)
 
 print("\n\n~~~~~~~~~",len(relyield_left))
 print("~~~~~~~~~",len(tbin_left_data))
 print("~~~~~~~~~",len(phibin_left_data))
+print("~~~~~~~~~",len(averQ2_left_data))
+print("~~~~~~~~~",len(averW_left_data))
+print("~~~~~~~~~",len(avert_left_data))
 
 print("\n\n~~~~~~~~~",relyield_center)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
-
+print("~~~~~~~~~",averQ2_center_data)
+print("~~~~~~~~~",averW_center_data)
+print("~~~~~~~~~",avert_center_data)
 InFile_DATA.Close()
 
 ################################################################################################################################################
