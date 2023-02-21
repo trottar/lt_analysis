@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-20 19:06:49 trottar"
+# Time-stamp: "2023-02-20 19:11:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,31 +103,37 @@ InFile_DATA = ROOT.TFile.Open(InDATAFilename,"READ")
 
 if float(runNumRight[0]) != 0:
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
-    relyield_right_data = [evt.rel_yield for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
+    yield_right_data = [evt.yield_data for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
+    yield_right_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
+    relyield_right = yield_right_data/yield_right_simc
     phibin_right_data = [evt.phibins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
     tbin_right_data = [evt.tbins for i, evt in enumerate(TBRANCH_RIGHT) if i <= NumtBins*NumPhiBins]
 
 if float(runNumLeft[0]) != 0:
     TBRANCH_LEFT = InFile_DATA.Get("Left")
-    relyield_left_data = [evt.rel_yield for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
+    yield_left_data = [evt.yield_data for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
+    yield_left_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
+    relyield_left = yield_left_data/yield_left_simc
     phibin_left_data = [evt.phibins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
     tbin_left_data = [evt.tbins for i, evt in enumerate(TBRANCH_LEFT) if i <= NumtBins*NumPhiBins]
-
+    
 if float(runNumCenter[0]) != 0:
     TBRANCH_CENTER = InFile_DATA.Get("Center")
-    relyield_center_data = [evt.rel_yield for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
+    yield_center_data = [evt.yield_data for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
+    yield_center_simc = [evt.yield_simc for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
+    relyield_center = yield_center_data/yield_center_simc
     phibin_center_data = [evt.phibins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
     tbin_center_data = [evt.tbins for i, evt in enumerate(TBRANCH_CENTER) if i <= NumtBins*NumPhiBins]
-
-print("\n\n~~~~~~~~~",relyield_left_data)
+    
+print("\n\n~~~~~~~~~",relyield_left)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
 
-print("\n\n~~~~~~~~~",len(relyield_left_data))
+print("\n\n~~~~~~~~~",len(relyield_left))
 print("~~~~~~~~~",len(tbin_left_data))
 print("~~~~~~~~~",len(phibin_left_data))
 
-print("\n\n~~~~~~~~~",relyield_center_data)
+print("\n\n~~~~~~~~~",relyield_center)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
 
@@ -185,7 +191,7 @@ with open(f_list_settings, 'r') as f:
     with open(f_list, 'r') as f:
         lines = f.readlines()
         if float(runNumRight[0]) != 0:
-            for i, relyield in enumerate(relyield_right_data):
+            for i, relyield in enumerate(relyield_right):
                 if relyield != 0.0:
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_right_data[i], tbin_right_data[i])
                     # Check if the line already exists
@@ -193,7 +199,7 @@ with open(f_list_settings, 'r') as f:
                         write_to_file(f_list,check_line)
 
         if float(runNumLeft[0]) != 0:
-            for i, relyield in enumerate(relyield_left_data):
+            for i, relyield in enumerate(relyield_left):
                 if relyield != 0.0:
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_left_data[i], tbin_left_data[i])
                     # Check if the line already exists
@@ -201,7 +207,7 @@ with open(f_list_settings, 'r') as f:
                         write_to_file(f_list,check_line)
 
         if float(runNumCenter[0]) != 0:
-            for i, relyield in enumerate(relyield_center_data):
+            for i, relyield in enumerate(relyield_center):
                 if relyield != 0.0:
                     check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, phibin_center_data[i], tbin_center_data[i])
                     # Check if the line already exists
@@ -209,7 +215,7 @@ with open(f_list_settings, 'r') as f:
                         write_to_file(f_list,check_line)
                 
 ################################################################################################################################################
-
+'''
 if float(runNumRight[0]) != 0:
     f_list = '{}/src/kindata/kindata.{}_{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_right*1000))
 
@@ -254,6 +260,6 @@ if float(runNumCenter[0]) != 0:
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
-                
+'''
 ################################################################################################################################################
 
