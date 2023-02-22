@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-21 18:13:02 trottar"
+# Time-stamp: "2023-02-21 19:18:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2466,32 +2466,32 @@ H_ph_q_DATA_nocut.SetLineColor(kCyan)
 H_ph_q_DATA_nopid.SetLineColor(kMagenta)
 H_ph_q_DUMMY.SetLineColor(kGreen)
 
-#H_ph_q_SIMC.Draw("E1")
+H_ph_q_SIMC.Draw("E1")
 H_ph_q_DATA.Draw("same, E1")
 if DEBUG:
     H_ph_q_DATA_nocut.Draw("same, E1")
     H_ph_q_DATA_nopid.Draw("same, E1")
 H_ph_q_DUMMY.Draw("same, E1")
 
-#b_int_ph_q_simc = int(H_ph_q_SIMC.Integral())
+b_int_ph_q_simc = int(H_ph_q_SIMC.Integral())
 b_int_ph_q_data = int(H_ph_q_DATA.Integral())
 b_int_ph_q_data_nocut = int(H_ph_q_DATA_nocut.Integral())
 b_int_ph_q_data_nopid = int(H_ph_q_DATA_nopid.Integral())
 b_int_ph_q_dummy = int(H_ph_q_DUMMY.Integral())
 
-#b_mean_ph_q_simc = H_ph_q_SIMC.GetMean()
+b_mean_ph_q_simc = H_ph_q_SIMC.GetMean()
 b_mean_ph_q_data = H_ph_q_DATA.GetMean()
 b_mean_ph_q_data_nocut = H_ph_q_DATA_nocut.GetMean()
 b_mean_ph_q_data_nopid = H_ph_q_DATA_nopid.GetMean()
 b_mean_ph_q_dummy = H_ph_q_DUMMY.GetMean()
 
-#l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, INT = %s" % b_int_ph_q_simc)
+l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, INT = %s" % b_int_ph_q_simc)
 l_ph_q.AddEntry(H_ph_q_DATA,"DATA, INT = %s" % b_int_ph_q_data)
 if DEBUG:
     l_ph_q.AddEntry(H_ph_q_DATA_nocut,"DATA (no cut), INT = %s" % b_int_ph_q_data_nocut)
     l_ph_q.AddEntry(H_ph_q_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_ph_q_data_nopid)
 l_ph_q.AddEntry(H_ph_q_DUMMY,"DUMMY, INT = %s" % b_int_ph_q_dummy)
-#l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_ph_q_simc))
+l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_ph_q_simc))
 l_ph_q.AddEntry(H_ph_q_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_ph_q_data))
 if DEBUG:
     l_ph_q.AddEntry(H_ph_q_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_ph_q_data_nocut))
@@ -2546,6 +2546,7 @@ l_th_q.Draw()
 
 Cth_q.Print(outputpdf)
 
+'''
 Cph_recoil = TCanvas()
 l_ph_recoil = ROOT.TLegend(0.115,0.55,0.33,0.9)
 
@@ -2633,6 +2634,7 @@ l_th_recoil.AddEntry(H_th_recoil_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_th_
 l_th_recoil.Draw()
 
 Cth_recoil.Print(outputpdf)
+'''
 
 Cpmiss = TCanvas()
 l_pmiss = ROOT.TLegend(0.115,0.55,0.33,0.9)
