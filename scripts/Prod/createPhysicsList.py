@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 11:58:56 trottar"
+# Time-stamp: "2023-02-24 12:26:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -277,7 +277,7 @@ with open(f_list_settings, 'r') as f:
             
 ################################################################################################################################################
 
-    f_list = '{}/src/averages/aver.{}_{}_{}_{:.0f}.dat'.format(LTANAPATH, PID, POL, Q2.replace(".",""), float(EPSVAL)*100)
+    f_list = '{}/src/averages/aver.{}_{}_{:.0f}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
