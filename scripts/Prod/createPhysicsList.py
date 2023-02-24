@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 10:34:53 trottar"
+# Time-stamp: "2023-02-24 10:37:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -325,12 +325,12 @@ if float(runNumRight[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         check_line = "{:.6f}".format(1.0)
-        if check_line not in f_list.seek(0, 0):
-            f_list.seek(0, 0)
-            f_list.write(check_line)
-        if check_line not in f_list.seek(0, 2):
-            f_list.seek(0, 2)
-            f_list.write(check_line)
+        if check_line not in f.seek(0, 0):
+            f.seek(0, 0)
+            f.write(check_line)
+        if check_line not in f.seek(0, 2):
+            f.seek(0, 2)
+            f.write(check_line)
             
 if float(runNumLeft[0]) != 0:
     f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_left*1000))
@@ -347,12 +347,12 @@ if float(runNumLeft[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         check_line = "{:.6f}".format(1.0)
-        if check_line not in f_list.seek(0, 0):
-            f_list.seek(0, 0)
-            f_list.write(check_line)
-        if check_line not in f_list.seek(0, 2):
-            f_list.seek(0, 2)
-            f_list.write(check_line)
+        if check_line not in f.seek(0, 0):
+            f.seek(0, 0)
+            f.write(check_line)
+        if check_line not in f.seek(0, 2):
+            f.seek(0, 2)
+            f.write(check_line)
             
 if float(runNumCenter[0]) != 0:
     f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100)
@@ -369,12 +369,12 @@ if float(runNumCenter[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         check_line = "{:.6f}".format(1.0)
-        if check_line not in f_list.seek(0, 0):
-            f_list.seek(0, 0)
-            f_list.write(check_line)
-        if check_line not in f_list.seek(0, 2):
-            f_list.seek(0, 2)
-            f_list.write(check_line)
+        if check_line not in f.seek(0, 0):
+            f.seek(0, 0)
+            f.write(check_line)
+        if check_line not in f.seek(0, 2):
+            f.seek(0, 2)
+            f.write(check_line)
 
 ################################################################################################################################################
 
