@@ -764,9 +764,10 @@ c     endif
 c /*--------------------------------------------------*/
 c /*--------------------------------------------------*/
 
-      subroutine xmodel_ghm_two_model(npol_set,Eb,q2_set,w_gev,q2_gev,u_gev,tm,phicm,
-     *     eps,th_mod,x_mod,um_min)
-
+      subroutine xmodel_ghm_two_model(npol_set,Eb,q2_set,w_gev,q2_gev,
+     *                               u_gev,tm,phicm,eps,th_mod,x_mod,
+     *                               um_min)
+      
       implicit none
 
       integer npol_set
