@@ -213,7 +213,7 @@ c     construct kinematics data file name.
 
 *     construct output file name.
       write(xunsep_fn,30) pol,nint(q2_set*100),nint(eps_set*100)
- 30   format('xsects/x_unsep.',a2,'_',i3.3,'_',i2)
+ 30   format('xsects/x_unsep.',a1,'_',i3.3,'_',i2)
       print*,'xsect: xunsep_fn=',xunsep_fn
 c      pause
 
