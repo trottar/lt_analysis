@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 11:04:25 trottar"
+# Time-stamp: "2023-02-24 11:06:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -368,7 +368,7 @@ if float(runNumCenter[0]) != 0:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
     first_line = "{:.6f}\n".format(1.0)
-    last_line = "{:.6f}\n".format(1.0)
+    last_line = "{:.6f}".format(1.0)
     lines.insert(0,first_line)
     lines.append(last_line)
     write_to_file(f_list,"".join(lines),write_mode='w')
