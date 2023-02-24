@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 10:23:13 trottar"
+# Time-stamp: "2023-02-24 10:24:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -370,14 +370,13 @@ if float(runNumCenter[0]) != 0:
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
-        content = file.read()
         check_line = "{:.6f}".format(1.0)
-        if check_line not in file.seek(0, 0):
-            file.seek(0, 0)
-            file.write(check_line)
-        if check_line not in file.seek(0, 2):
-            file.seek(0, 2)
-            file.write(check_line)
+        if check_line not in f_list.seek(0, 0):
+            f_list.seek(0, 0)
+            f_list.write(check_line)
+        if check_line not in f_list.seek(0, 2):
+            f_list.seek(0, 2)
+            f_list.write(check_line)
 
 ################################################################################################################################################
 
