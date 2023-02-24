@@ -236,11 +236,12 @@ c                 print*, 'aaaaaaaaaaaaaaaaaaaa '
                   open(66,file=fn)
                   read(66,*) one
 
-c                  print*, "bbbbbbbbbbbbbbbbbbbb ", one
+                  print*, "bbbbbbbbbbbbbbbbbbbb ", one
 
 
                   do it=1,nbt
                      read(66,*) W,dW,Q2,dQ2,tt,dtt
+                     if (ierr /= 0) exit ! Check for end of file
                      print*,W,dW,Q2,dQ2,it
                      if(dW.gt.0.) then
                         aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
