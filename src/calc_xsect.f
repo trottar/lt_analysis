@@ -835,7 +835,7 @@ c        print*, "Q2=1.60 parameterization is used"
               
               
 
-      else if (q2_set.eq.2.45) then
+      else if (q2_set.eq.5.5) then
 
 c        print*, "Q2=2.45 parameterization is used" 
 
