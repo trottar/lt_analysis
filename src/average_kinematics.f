@@ -228,7 +228,7 @@ c               read(55,*,end=9) ipol,q2,eps,th_pq
      *                 pol,nint(q2_set*10.),nint(eps_set(lh)*100.),
      *                 nint(th_pq*1000.)
                   print*,'fn=',fn
-                  pause
+c                 pause
 
 
 c                 print*, 'aaaaaaaaaaaaaaaaaaaa '
@@ -258,6 +258,7 @@ c                 print*, 'aaaaaaaaaaaaaaaaaaaa '
 
 
                   end do
+                  read(66,*) one
                   close(66)
 
                   tmin=tmn
