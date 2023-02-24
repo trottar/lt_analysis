@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 10:55:26 trottar"
+# Time-stamp: "2023-02-24 10:57:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,9 +317,7 @@ if float(runNumRight[0]) != 0:
         open(f_list, "w").close()    
     # Open a file in read mode
     with open(f_list, 'r') as f:
-        first_line = "{:.6f}\n".format(1.0)
-        last_line = "{:.6f}\n".format(1.0)
-        lines = f.readlines().replace(first_line,"").replace(last_line,"")
+        lines = f.readlines()[1:-1]
         for i, relyield in enumerate(relyield_right):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
@@ -327,10 +325,12 @@ if float(runNumRight[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
+    first_line = "{:.6f}\n".format(1.0)
+    last_line = "{:.6f}\n".format(1.0)
     lines.insert(0,first_line)
     lines.append(last_line)
     write_to_file(f_list,check_line,write_mode='w')
-            
+
 if float(runNumLeft[0]) != 0:
     f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_left*1000))
 
@@ -338,9 +338,7 @@ if float(runNumLeft[0]) != 0:
         open(f_list, "w").close()    
     # Open a file in read mode
     with open(f_list, 'r') as f:
-        first_line = "{:.6f}\n".format(1.0)
-        last_line = "{:.6f}\n".format(1.0)
-        lines = f.readlines().replace(first_line,"").replace(last_line,"")
+        lines = f.readlines()[1:-1]
         for i, relyield in enumerate(relyield_left):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
@@ -348,6 +346,8 @@ if float(runNumLeft[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
+    first_line = "{:.6f}\n".format(1.0)
+    last_line = "{:.6f}\n".format(1.0)
     lines.insert(0,first_line)
     lines.append(last_line)
     write_to_file(f_list,check_line,write_mode='w')
@@ -359,9 +359,7 @@ if float(runNumCenter[0]) != 0:
         open(f_list, "w").close()    
     # Open a file in read mode
     with open(f_list, 'r') as f:
-        first_line = "{:.6f}\n".format(1.0)
-        last_line = "{:.6f}\n".format(1.0)
-        lines = f.readlines().replace(first_line,"").replace(last_line,"")
+        lines = f.readlines()[1:-1]
         for i, relyield in enumerate(relyield_center):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
@@ -369,9 +367,11 @@ if float(runNumCenter[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
+    first_line = "{:.6f}\n".format(1.0)
+    last_line = "{:.6f}\n".format(1.0)
     lines.insert(0,first_line)
     lines.append(last_line)
-    write_to_file(f_list,check_line,write_mode='w')    
+    write_to_file(f_list,check_line,write_mode='w')
 
 ################################################################################################################################################
 
