@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 11:16:32 trottar"
+# Time-stamp: "2023-02-24 11:20:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -325,6 +325,7 @@ if float(runNumRight[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
+        print(lines)
     first_line = "{:.6f}\n".format(1.0)
     last_line = "{:.6f}".format(1.0)
     lines.insert(0,first_line)
@@ -346,6 +347,7 @@ if float(runNumLeft[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
+        print(lines)
     first_line = "{:.6f}\n".format(1.0)
     last_line = "{:.6f}".format(1.0)
     lines.insert(0,first_line)
@@ -367,6 +369,7 @@ if float(runNumCenter[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
+        print(lines)
     first_line = "{:.6f}\n".format(1.0)
     last_line = "{:.6f}".format(1.0)
     lines.insert(0,first_line)
