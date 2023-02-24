@@ -31,16 +31,16 @@ c      stop
 !     call xsect(npol,Q2,eps)
       call xsect(+1,5.5,0.1838)
       call xsect(+1,5.5,0.5291)
-      call xsect(+1,4.4,0.4805)
-      call xsect(+1,4.4,0.7148)
-      call xsect(+1,3.3,0.3935)
-      call xsect(+1,3.3,0.6668)
-      call xsect(+1,3.3,0.5736)
-      call xsect(+1,3.3,0.8791)
-      call xsect(+1,2.115,0.2477)
-      call xsect(+1,2.115,0.7864)
-      call xsect(+1,0.5,0.4515)
-      call xsect(+1,0.5,0.6979)
+!      call xsect(+1,4.4,0.4805)
+!      call xsect(+1,4.4,0.7148)
+!      call xsect(+1,3.3,0.3935)
+!      call xsect(+1,3.3,0.6668)
+!      call xsect(+1,3.3,0.5736)
+!      call xsect(+1,3.3,0.8791)
+!      call xsect(+1,2.115,0.2477)
+!      call xsect(+1,2.115,0.7864)
+!      call xsect(+1,0.5,0.4515)
+!      call xsect(+1,0.5,0.6979)
       
       stop
       end
@@ -585,9 +585,9 @@ c      sig = sig/2./pi      !dsig/dtdphicm in microbarns/GeV^2/rad
       th_mod=thetacm
 
 c      if (phi.lt.0.3) then
-         write(6,102) eps_mod,tm,sigL,sigT,sigTT,sigLT, sig
- 102     format('xmodel: eps=',f5.3,' t=',f5.3,' sigL=',f7.2,' sigT=',f6.2,
-     1        ' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f10.6)
+      write(6,102) eps_mod,tm,sigL,sigT,sigTT,sigLT, sig
+ 102  format('xmodel: eps=',f5.3,' t=',f5.3,' sigL=',f7.2,' sigT=',f6.2,
+     1     ' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f10.6)
 c     endif
 
       end
