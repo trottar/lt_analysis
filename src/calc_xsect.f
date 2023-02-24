@@ -197,7 +197,7 @@ c 2       format(i5,5f10.5,2i5)
 
 c     construct ratio data file name.
 
-      write(r_fn,10) pol,nint(q2*100),nint(eps*100)
+      write(r_fn,10) pol,nint(q2*10),nint(eps*100)
  10   format('averages/aver.',a1,'_',i2.2,'_',i2,'.dat')
       print*,'xsect: r_fn=',r_fn
 
@@ -205,7 +205,7 @@ c     construct ratio data file name.
 
 c     construct kinematics data file name.
 
-      write(kin_fn,20) nint(q2*100)
+      write(kin_fn,20) nint(q2*10)
  20   format('averages/avek.',i2.2,'.dat')
       print*,'xsect: kin_fn=',kin_fn
 
