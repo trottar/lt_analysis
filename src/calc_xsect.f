@@ -253,8 +253,8 @@ c         print *, nbin, t_bin_boundary(it), t_bin_boundary(it+1)
 c         stop
 
 
-         read(52,*) w,dw,q2,dq2,tt,dtt,th_pos
-         write(6,32) w,dw,q2,dq2,tt,dtt,th_pos
+         read(52,*) q2,dq2,w,dw,tt,dtt,th_pos
+         write(6,32) q2,dq2,w,dw,tt,dtt,th_pos
  32      format('xsect: ',7f10.4)
 
 
