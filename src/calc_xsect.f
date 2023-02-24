@@ -1181,8 +1181,9 @@ c      real*8 q2_gev,w_gev,eps,tp
       
       up = abs(u_gev)      ! just to make sure it's positive
 
-      call eps_n_theta(npol_set, Eb, w_gev, q2_gev, tm, up, thetacm, eps)
-
+      call eps_n_theta(npol_set, Eb, w_gev, q2_gev, tm, 
+     *                 up, thetacm, eps)
+      
 c      a =  0.82472E-01
 c      b =  0.71359E+01
 c      c =  0.13529E-02
