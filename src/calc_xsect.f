@@ -188,7 +188,7 @@ c 2       format(i5,5f10.5,2i5)
       if(npol_set.lt.0) then
          pol='mn'
       else
-         pol='pl'
+         pol='k'
       end if
 
       write(6,4)Eb,q2,eps,pol
