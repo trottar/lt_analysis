@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 12:34:32 trottar"
+# Time-stamp: "2023-02-24 13:17:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -286,27 +286,24 @@ with open(f_list_settings, 'r') as f:
         lines = f.readlines()
         if float(runNumRight[0]) != 0:
             for i, relyield in enumerate(relyield_right):
-                if relyield != 0.0:
-                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_right_data[i]), int(tbin_right_data[i]))
-                    # Check if the line already exists
-                    if check_line not in lines:
-                        write_to_file(f_list,check_line)
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_right_data[i]), int(tbin_right_data[i]))
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
 
         if float(runNumLeft[0]) != 0:
             for i, relyield in enumerate(relyield_left):
-                if relyield != 0.0:
-                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_left_data[i]), int(tbin_left_data[i]))
-                    # Check if the line already exists
-                    if check_line not in lines:
-                        write_to_file(f_list,check_line)
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_left_data[i]), int(tbin_left_data[i]))
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
 
         if float(runNumCenter[0]) != 0:
             for i, relyield in enumerate(relyield_center):
-                if relyield != 0.0:
-                    check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_center_data[i]), int(tbin_center_data[i]))
-                    # Check if the line already exists
-                    if check_line not in lines:
-                        write_to_file(f_list,check_line)
+                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_center_data[i]), int(tbin_center_data[i]))
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
                 
 ################################################################################################################################################
 
