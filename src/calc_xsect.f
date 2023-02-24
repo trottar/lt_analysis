@@ -193,12 +193,12 @@ c 2       format(i5,5f10.5,2i5)
 
       write(6,4)Eb,q2,eps,pol
  4    format(' xsect: Eb=',f8.5,'   at Q2=',f7.4,
-     *     '  eps=',f6.4,'  pol=',a2)
+     *     '  eps=',f6.4,'  pol=',a1)
 
 c     construct ratio data file name.
 
       write(r_fn,10) pol,nint(q2*100),nint(eps*100)
- 10   format('averages/aver.',a2,'_',i3.3,'_',i2,'.dat')
+ 10   format('averages/aver.',a1,'_',i2.2,'_',i2,'.dat')
       print*,'xsect: r_fn=',r_fn
 
       open(51,file=r_fn)
@@ -206,14 +206,14 @@ c     construct ratio data file name.
 c     construct kinematics data file name.
 
       write(kin_fn,20) nint(q2*100)
- 20   format('averages/avek.',i3.3,'.dat')
+ 20   format('averages/avek.',i2.2,'.dat')
       print*,'xsect: kin_fn=',kin_fn
 
       open(52,file=kin_fn)
 
 *     construct output file name.
       write(xunsep_fn,30) pol,nint(q2_set*10),nint(eps_set*100)
- 30   format('xsects/x_unsep.',a1,'_',i3.3,'_',i2)
+ 30   format('xsects/x_unsep.',a1,'_',i2.2,'_',i2)
       print*,'xsect: xunsep_fn=',xunsep_fn
 c      pause
 
