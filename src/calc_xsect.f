@@ -791,8 +791,8 @@ c      real*8 q2_gev,w_gev,eps,tp
       
       up = abs(u_gev)      ! just to make sure it's positive
 
-      call eps_n_theta(npol_set, Eb, w_gev, q2_gev, tm, up, u_min, thetacm, eps)
-      
+      call eps_n_theta(npol_set, Eb, w_gev, q2_gev, tm, up, 
+     *                u_min, thetacm, eps)
       um_min = u_min
 
       if (up.lt. u_min) then
@@ -886,8 +886,9 @@ c      sigt = t0 + t1 * up + t2 * log(q2_gev) + t3 * up * log(q2_gev)
 
        
 
-       sigt = t0 / sqrt(q2_gev) + t1 * up / sqrt(q2_gev) + t2 / sqrt(q2_gev) + t3 * up / sqrt(q2_gev)
-
+       sigt = t0 / sqrt(q2_gev) + t1 * up / sqrt(q2_gev) + 
+     *        t2 / sqrt(q2_gev) + t3 * up / sqrt(q2_gev)
+       
 c      sigt = t0 
        
 c     /*--------------------------------------------------*/
@@ -898,16 +899,19 @@ c      sigl= l1 * exp( l2 * up ) + l3 / up
 c      sigl = l1 * (up-l2)**2 + l3
 
 c      sigl = l0 + l1 * up + l2 * log(q2_gev) + l3 * up * log(q2_gev)
-      sigl = l0/(q2_gev*q2_gev) + l1 * up/(q2_gev*q2_gev) + l2 / q2_gev + l3 * up / q2_gev
-
+      sigl = l0/(q2_gev*q2_gev) + l1 * up/(q2_gev*q2_gev) + 
+     *       l2 / q2_gev + l3 * up / q2_gev
 
 c     /*--------------------------------------------------*/
 c     // Sigma LT  
-      siglt = (lt0/q2_gev + lt1 * up/q2_gev + lt2 / q2_gev + lt3 * up / q2_gev) * sin(thetacm)
-
+      siglt = (lt0/q2_gev + lt1 * up/q2_gev + lt2 / q2_gev + 
+     *        lt3 * up / q2_gev) * sin(thetacm)
+      
 c     /*--------------------------------------------------*/
 c     // Sigma TT  
-      sigtt = (tt0/q2_gev + tt1 * up/q2_gev + tt2 / q2_gev + tt3 * up / q2_gev) * sin(thetacm) * sin(thetacm)
+      sigtt = (tt0/q2_gev + tt1 * up/q2_gev + tt2 / q2_gev + 
+     *        tt3 * up / q2_gev) * sin(thetacm) * sin(thetacm)
+      
 c      sigtt = (tt1 * exp( tt2 * up ) + tt3 / up) * sin(thetacm)  * sin(thetacm)
 
 c      print*, "theta check ", thetacm, sin(thetacm)
@@ -955,9 +959,9 @@ c      stop
 
 
       write(6,102) eps,up,sigT,sigL,sigLT,sigTT,sig,u_min
- 102     format('xmodel: eps=',f5.3,' u=',f5.3,' sigT=',f7.5,' sigL=',f7.5,
-     1        ' sigLT=',f10.8,' sigTT=',f10.8,' x_mod=',f15.14, 
-     1        ' umin=', f10.8)
+ 102  format('xmodel: eps=',f5.3,' u=',f5.3,' sigT=',f7.5,' sigL=',f7.5,
+     1     ' sigLT=',f10.8,' sigTT=',f10.8,' x_mod=',f15.14, 
+     1     ' umin=', f10.8)
 
 
 
@@ -1006,8 +1010,8 @@ c      real*8 q2_gev,w_gev,eps,tp
       
       up = abs(u_gev)      ! just to make sure it's positive
 
-      call eps_n_theta(npol_set, Eb, w_gev, q2_gev, tm, up, thetacm, eps)
-
+      call eps_n_theta(npol_set, Eb, w_gev, q2_gev, tm, up, 
+     *                thetacm, eps)
 
 c      a =  0.18881E+00
 c      b =  0.14443E+02
@@ -1152,8 +1156,8 @@ c     endif
 
 c /*--------------------------------------------------*/
 
-      subroutine xmodel_ghm_245(npol_set,Eb,q2_set,w_gev,q2_gev,u_gev,tm,phicm,
-     *     eps,th_mod,x_mod)
+      subroutine xmodel_ghm_245(npol_set,Eb,q2_set,w_gev,q2_gev,
+     *                         u_gev,tm,phicm,eps,th_mod,x_mod)
 
       integer npol_set
       real Eb, q2_set, w, q2, phi, th_mod
