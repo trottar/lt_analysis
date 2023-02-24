@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 11:22:06 trottar"
+# Time-stamp: "2023-02-24 11:23:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -325,12 +325,11 @@ if float(runNumRight[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
-        print(lines)
-    first_line = "{:.6f}\n".format(1.0)
-    last_line = "{:.6f}".format(1.0)
-    lines.insert(0,first_line)
-    lines.append(last_line)
-    write_to_file(f_list,"".join(lines),write_mode='w')
+        first_line = "{:.6f}\n".format(1.0)
+        last_line = "{:.6f}".format(1.0)
+        lines.insert(0,first_line)
+        lines.append(last_line)
+        write_to_file(f_list,"".join(lines),write_mode='w')
 
 if float(runNumLeft[0]) != 0:
     f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_left*1000))
@@ -347,12 +346,11 @@ if float(runNumLeft[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
-    print(lines)
-    first_line = "{:.6f}\n".format(1.0)
-    last_line = "{:.6f}".format(1.0)
-    lines.insert(0,first_line)
-    lines.append(last_line)
-    write_to_file(f_list,"".join(lines),write_mode='w')
+        first_line = "{:.6f}\n".format(1.0)
+        last_line = "{:.6f}".format(1.0)
+        lines.insert(0,first_line)
+        lines.append(last_line)
+        write_to_file(f_list,"".join(lines),write_mode='w')
 
 if float(runNumCenter[0]) != 0:
     f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100)
@@ -369,12 +367,11 @@ if float(runNumCenter[0]) != 0:
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
         lines = f.readlines()
-    print(lines)
-    first_line = "{:.6f}\n".format(1.0)
-    last_line = "{:.6f}".format(1.0)
-    lines.insert(0,first_line)
-    lines.append(last_line)
-    write_to_file(f_list,"".join(lines),write_mode='w')
+        first_line = "{:.6f}\n".format(1.0)
+        last_line = "{:.6f}".format(1.0)
+        lines.insert(0,first_line)
+        lines.append(last_line)
+        write_to_file(f_list,"".join(lines),write_mode='w')
 
 ################################################################################################################################################
 
