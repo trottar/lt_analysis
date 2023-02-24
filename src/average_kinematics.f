@@ -207,8 +207,8 @@ c     Get low, high eps. and neg., pos. polarity data.
             open(55,file='./list.settings')
             do while(.true.)
 
-c               read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
-               read(55,*,end=9) ipol,q2,eps,th_pq
+               read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
+c               read(55,*,end=9) ipol,q2,eps,th_pq
                if(ipol.eq.pol_set(ip).and.q2.eq.q2_set.and.
      &              eps.eq.eps_set(lh)) then
 
