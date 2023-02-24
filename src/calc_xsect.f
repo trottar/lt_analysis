@@ -155,6 +155,16 @@ c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
          read (22, '(A)') line  
          read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
 
+      elseif(q2_set.eq.5.5) then
+ 
+c        t_bin_boundary = (/ 0.0, 0.212, 0.33, 0.60/)
+c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
+ 
+         read (22,*) 
+         read (22,*) 
+         read (22, '(A)') line  
+         read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
+         
       endif
 
       
@@ -814,48 +824,70 @@ cc/*--------------------------------------------------*/
 
       if (q2_set.eq.1.6) then
 
-c        print*, "Q2=1.60 parameterization is used" 
-        t0  =            7.73587                   
-        t1  =            -7.9672                    
-        t2  =             0.0000                    
-        t3  =             0.0000                    
-        l0  =            13.2553                             
-        l1  =           -47.2633                               
-        l2  =             0.0000                                 
-        l3  =             0.0000                                     
-        lt0 =            -0.3439                     
-        lt1 =             5.9217                     
-        lt2 =             0.0000                    
-        lt3 =             0.0000                    
-        tt0 =             8.1221                    
-        tt1 =          -139.8422                    
-        tt2 =             0.0000                    
-        tt3 =             0.0000                   
+         print*, "Q2=1.60 parameterization is used" 
+         t0  =            7.73587                   
+         t1  =            -7.9672                    
+         t2  =             0.0000                    
+         t3  =             0.0000                    
+         l0  =            13.2553                             
+         l1  =           -47.2633                               
+         l2  =             0.0000                                 
+         l3  =             0.0000                                     
+         lt0 =            -0.3439                     
+         lt1 =             5.9217                     
+         lt2 =             0.0000                    
+         lt3 =             0.0000                    
+         tt0 =             8.1221                    
+         tt1 =          -139.8422                    
+         tt2 =             0.0000                    
+         tt3 =             0.0000                   
               
               
               
 
+      else if (q2_set.eq.2.45) then
+
+         print*, "Q2=2.45 parameterization is used" 
+
+         t0  =          6.16527  
+         t1  =          -4.2124  
+         t2  =           0.0000  
+         t3  =           0.0000  
+         l0  =          12.2546       
+         l1  =         -29.8629       
+         l2  =           0.0000       
+         l3  =           0.0000       
+         lt0 =          -0.3620  
+         lt1 =           3.1028  
+         lt2 =           0.0000  
+         lt3 =           0.0000  
+         tt0 =          -7.4032  
+         tt1 =          63.4705  
+         tt2 =           0.0000  
+         tt3 =           0.0000
+        
       else if (q2_set.eq.5.5) then
 
-c        print*, "Q2=2.45 parameterization is used" 
+         print*, "Q2=5.5 parameterization is used" 
 
-        t0  =          6.16527  
-        t1  =          -4.2124  
-        t2  =           0.0000  
-        t3  =           0.0000  
-        l0  =          12.2546       
-        l1  =         -29.8629       
-        l2  =           0.0000       
-        l3  =           0.0000       
-        lt0 =          -0.3620  
-        lt1 =           3.1028  
-        lt2 =           0.0000  
-        lt3 =           0.0000  
-        tt0 =          -7.4032  
-        tt1 =          63.4705  
-        tt2 =           0.0000  
-        tt3 =           0.0000  
+         t0  =          6.16527  
+         t1  =          -4.2124  
+         t2  =           0.0000  
+         t3  =           0.0000  
+         l0  =          12.2546       
+         l1  =         -29.8629       
+         l2  =           0.0000       
+         l3  =           0.0000       
+         lt0 =          -0.3620  
+         lt1 =           3.1028  
+         lt2 =           0.0000  
+         lt3 =           0.0000  
+         tt0 =          -7.4032  
+         tt1 =          63.4705  
+         tt2 =           0.0000  
+         tt3 =           0.0000  
 
+        
       else
           print*, "No parameterization is aviliable for Q2=", q2_set
           stop
