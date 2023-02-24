@@ -160,9 +160,9 @@ c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
 c        t_bin_boundary = (/ 0.0, 0.212, 0.33, 0.60/)
 c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
  
-         read (22,*) 
+C         read (22,*) 
 c         read (22,*) 
-         read (22, '(A)') line  
+         read (22, '(A)') line
          read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
          
       endif
