@@ -221,7 +221,7 @@ c               read(55,*,end=9) ipol,q2,eps,th_pq
                   endif
 
 
-                  
+                  print*, "nbt: ", nbt
 
                   write(fn,'(''kindata/kindata.'',a1,''_'',i2.2,''_'',i2.2,
      *                 ''_'',SP,i5.4,S,''.dat'')')
