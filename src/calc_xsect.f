@@ -751,10 +751,10 @@ c      sig = sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV^2/rad
 
       th_mod=thetacm
 
-c      if (phi.lt.0.3) then
-         write(6,102) eps,up,sigL,sigT,sigTT,sigLT, sig
- 102     format('xmodel: eps=',f5.3,' u=',f5.3,' sigL=',f7.2,' sigT=',f6.2,
-     1        ' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f10.6)
+c     if (phi.lt.0.3) then
+      write(6,102) eps,up,sigL,sigT,sigTT,sigLT, sig
+ 102  format('xmodel: eps=',f5.3,' u=',f5.3,' sigL=',f7.2,' sigT=',f6.2,
+     1     ' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f10.6)
 c     endif
 
       end
@@ -1138,9 +1138,9 @@ c      sig = sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV^2/rad
       th_mod=thetacm
 
 c      if (phi.lt.0.3) then
-         write(6,102) eps,up,sigT,sigL,sigLT,sigTT, sig
- 102     format('xmodel: eps=',f5.3,' u=',f5.3,' sigT=',f7.2,' sigL=',f6.2,
-     1        ' sigLT=',f5.2,' sigTT=',f5.2,' x_mod=',f10.6)
+      write(6,102) eps,up,sigT,sigL,sigLT,sigTT, sig
+ 102  format('xmodel: eps=',f5.3,' u=',f5.3,' sigT=',f7.2,' sigL=',f6.2,
+     1     ' sigLT=',f5.2,' sigTT=',f5.2,' x_mod=',f10.6)
 c     endif
 
       end
@@ -1337,9 +1337,9 @@ c      sig = sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV^2/rad
       th_mod=thetacm
 
 c      if (phi.lt.0.3) then
-         write(6,102) eps,up,sigT,sigL,sigLT,sigTT, sig
- 102     format('xmodel: eps=',f5.4,' u=',f5.4,' sigT=',f9.6,' sigL=',f9.6,
-     1        ' sigLT=',f9.6,' sigTT=',f9.6,' x_mod=',f9.6)
+      write(6,102) eps,up,sigT,sigL,sigLT,sigTT, sig
+ 102  format('xmodel: eps=',f5.4,' u=',f5.4,' sigT=',f9.6,' sigL=',f9.6,
+     1     ' sigLT=',f9.6,' sigTT=',f9.6,' x_mod=',f9.6)
 c     endif
 
         
