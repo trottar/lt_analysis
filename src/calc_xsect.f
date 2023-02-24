@@ -154,16 +154,6 @@ c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
          read (22,*) 
          read (22, '(A)') line  
          read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
-
-      elseif(q2_set.eq.5.5) then
- 
-c        t_bin_boundary = (/ 0.0, 0.212, 0.33, 0.60/)
-c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
- 
-         read (22,*) (t_bin_boundary(j), j = 1,  t_bin+1)
-c         read (22,*) 
-c         read (22, '(A)') line
-c         read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
          
       endif
 
@@ -241,7 +231,7 @@ c      pause
 
       do it=1,nbin
 
-c         tm=tmn+(it-0.5)*(tmx-tmn)/nbin
+         tm=tmn+(it-0.5)*(tmx-tmn)/nbin
 
 
          um = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2

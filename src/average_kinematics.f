@@ -185,7 +185,7 @@ c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
          read (22,*) 
          read (22, '(A)') line  
          read(line, *) (t_bin_boundary(j), j = 1, t_bin+1)
-
+         
       endif
 
 c      stop t_bin+1
