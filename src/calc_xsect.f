@@ -155,7 +155,7 @@ c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
          read (22, '(A)') line  
          read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
 
-      elseif(q2_set.eq.5.5) then
+      elseif(q2_set.eq.5.5000) then
  
 c        t_bin_boundary = (/ 0.0, 0.212, 0.33, 0.60/)
 c        t_bin_boundary = (/0.0, 0.19, 0.30, 0.50/)
@@ -866,7 +866,7 @@ cc/*--------------------------------------------------*/
          tt2 =           0.0000  
          tt3 =           0.0000
         
-      else if (q2_set.eq.5.5) then
+      else if (q2_set.eq.5.5000) then
 
          print*, "Q2=5.5 parameterization is used" 
 
