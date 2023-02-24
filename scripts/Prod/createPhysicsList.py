@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 10:37:46 trottar"
+# Time-stamp: "2023-02-24 10:55:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,9 +183,9 @@ InFile_DATA.Close()
 
 ################################################################################################################################################
 
-def write_to_file(f_out,line):
+def write_to_file(f_out,line,write_mode='a'):
     # Open a file in append mode
-    with open(f_out, 'a') as f:
+    with open(f_out, write_mode) as f:
         # Write the value of the variable to the file
         f.write(line)
 
@@ -317,64 +317,61 @@ if float(runNumRight[0]) != 0:
         open(f_list, "w").close()    
     # Open a file in read mode
     with open(f_list, 'r') as f:
-        lines = f.readlines()
+        first_line = "{:.6f}\n".format(1.0)
+        last_line = "{:.6f}\n".format(1.0)
+        lines = f.readlines().replace(first_line,"").replace(last_line,"")
         for i, relyield in enumerate(relyield_right):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
-        check_line = "{:.6f}".format(1.0)
-        if check_line not in f.seek(0, 0):
-            f.seek(0, 0)
-            f.write(check_line)
-        if check_line not in f.seek(0, 2):
-            f.seek(0, 2)
-            f.write(check_line)
+        lines = f.readlines()
+    lines.insert(0,first_line)
+    lines.append(last_line)
+    write_to_file(f_list,check_line,write_mode='w')
             
 if float(runNumLeft[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_left*1000))
+    f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_left*1000))
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
     # Open a file in read mode
     with open(f_list, 'r') as f:
-        lines = f.readlines()
+        first_line = "{:.6f}\n".format(1.0)
+        last_line = "{:.6f}\n".format(1.0)
+        lines = f.readlines().replace(first_line,"").replace(last_line,"")
         for i, relyield in enumerate(relyield_left):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
-        check_line = "{:.6f}".format(1.0)
-        if check_line not in f.seek(0, 0):
-            f.seek(0, 0)
-            f.write(check_line)
-        if check_line not in f.seek(0, 2):
-            f.seek(0, 2)
-            f.write(check_line)
-            
+        lines = f.readlines()
+    lines.insert(0,first_line)
+    lines.append(last_line)
+    write_to_file(f_list,check_line,write_mode='w')
+
 if float(runNumCenter[0]) != 0:
-    f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100)
+    f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_center*1000))
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()    
     # Open a file in read mode
     with open(f_list, 'r') as f:
-        lines = f.readlines()
+        first_line = "{:.6f}\n".format(1.0)
+        last_line = "{:.6f}\n".format(1.0)
+        lines = f.readlines().replace(first_line,"").replace(last_line,"")
         for i, relyield in enumerate(relyield_center):
             if relyield != 0.0:
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
-        check_line = "{:.6f}".format(1.0)
-        if check_line not in f.seek(0, 0):
-            f.seek(0, 0)
-            f.write(check_line)
-        if check_line not in f.seek(0, 2):
-            f.seek(0, 2)
-            f.write(check_line)
+        lines = f.readlines()
+    lines.insert(0,first_line)
+    lines.append(last_line)
+    write_to_file(f_list,check_line,write_mode='w')    
 
 ################################################################################################################################################
 
