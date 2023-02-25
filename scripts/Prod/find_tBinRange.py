@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 16:41:48 trottar"
+# Time-stamp: "2023-02-25 16:44:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -460,7 +460,7 @@ for i,hist in enumerate(histlist):
         for phibin in phibinarr:
             # Extract the desired values from each group
             for key, val in groups.items():
-                if key[0] == tbin and key[1] == phibin:
+                if key[0]+1 == tbin and key[1]+1 == phibin:
                     MM_tmp = []
                     Q2_tmp = []
                     W_tmp = []
