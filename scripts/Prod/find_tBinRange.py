@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 17:35:57 trottar"
+# Time-stamp: "2023-02-25 17:39:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -447,7 +447,7 @@ for i,hist in enumerate(histlist):
                 else:
                     groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]                    
 
-    groups = dict(sorted(groups.items()))                    
+    groups = dict(sorted(groups.items(), key=lambda x: x[0]))
 
     print(groups.keys())
     
