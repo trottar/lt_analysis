@@ -886,21 +886,6 @@ if [[ $t_flag = "true" ]]; then
     evince "OUTPUT/Analysis/${ANATYPE}LT/${OutFullAnalysisFilename}.pdf"
 fi
 
-cd "${LTANAPATH}/src/"
-echo
-echo "Compiling average_kinematics.f..."
-eval "gfortran -o average_kinematics average_kinematics.f"
-echo
-echo "Running average_kinematics..."
-./average_kinematics
-
-echo
-echo "Compiling calc_xsect.f..."
-eval "gfortran -o calc_xsect calc_xsect.f"
-echo
-echo "Running calc_xsect..."
-./calc_xsect
-
 echo
 echo
 echo
