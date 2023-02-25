@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 15:43:54 trottar"
+# Time-stamp: "2023-02-25 15:50:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -415,13 +415,13 @@ for i,hist in enumerate(histlist):
             groups[key] = [(t[1], t[2], t[3])]
 
     # Extract the desired values from each group
-    Q2_tmp = []
-    W_tmp = []
-    t_tmp = []
     Q2_aver = []
     W_aver = []
     t_aver = []
     for key, val in groups.items():
+        Q2_tmp = []
+        W_tmp = []
+        t_tmp = []
         for tup in val:
             Q2_tmp.append(tup[0])
             W_tmp.append(tup[1])
