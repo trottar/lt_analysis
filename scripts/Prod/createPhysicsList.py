@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-24 13:17:23 trottar"
+# Time-stamp: "2023-02-25 12:55:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,6 +113,8 @@ if float(runNumRight[0]) != 0:
             yield_right_simc.append(evt.yield_simc)
             phibin_right_data.append(evt.phibins)
             tbin_right_data.append(evt.tbins)
+            phibincenter_right_data.append(evt.phibincenter)
+            tbincenter_right_data.append(evt.tbincenter)
             averQ2_right_data.append(evt.aver_Q2)
             averW_right_data.append(evt.aver_W)
             avert_right_data.append(evt.aver_t)
@@ -133,6 +135,8 @@ if float(runNumLeft[0]) != 0:
             yield_left_simc.append(evt.yield_simc)
             phibin_left_data.append(evt.phibins)
             tbin_left_data.append(evt.tbins)
+            phibincenter_left_data.append(evt.phibincenter)
+            tbincenter_left_data.append(evt.tbincenter)
             averQ2_left_data.append(evt.aver_Q2)
             averW_left_data.append(evt.aver_W)
             avert_left_data.append(evt.aver_t)
@@ -153,6 +157,8 @@ if float(runNumCenter[0]) != 0:
             yield_center_simc.append(evt.yield_simc)
             phibin_center_data.append(evt.phibins)
             tbin_center_data.append(evt.tbins)
+            phibincenter_center_data.append(evt.phibincenter)
+            tbincenter_center_data.append(evt.tbincenter)
             averQ2_center_data.append(evt.aver_Q2)
             averW_center_data.append(evt.aver_W)
             avert_center_data.append(evt.aver_t)
@@ -161,6 +167,8 @@ if float(runNumCenter[0]) != 0:
 print("\n\n~~~~~~~~~",relyield_left)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
+print("~~~~~~~~~",tbincenter_left_data)
+print("~~~~~~~~~",phibincenter_left_data)
 print("~~~~~~~~~",averQ2_left_data)
 print("~~~~~~~~~",averW_left_data)
 print("~~~~~~~~~",avert_left_data)
@@ -175,6 +183,8 @@ print("~~~~~~~~~",len(avert_left_data))
 print("\n\n~~~~~~~~~",relyield_center)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
+print("~~~~~~~~~",tbincenter_center_data)
+print("~~~~~~~~~",phibincenter_center_data)
 print("~~~~~~~~~",averQ2_center_data)
 print("~~~~~~~~~",averW_center_data)
 print("~~~~~~~~~",avert_center_data)
