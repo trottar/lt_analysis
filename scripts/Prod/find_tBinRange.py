@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 17:59:34 trottar"
+# Time-stamp: "2023-02-25 18:22:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -413,9 +413,7 @@ for i,hist in enumerate(histlist):
         Q2_aver.append((key, np.average(Q2_tmp)))
         W_aver.append((key, np.average(W_tmp)))
         t_aver.append((key, np.average(t_tmp)))
-    print("!!!!!!!!!!!!",Q2_aver)
-    print("!!!!!!!!!!!!",W_aver)
-    print("!!!!!!!!!!!!",t_aver)
+
     groups = {}
     # Group the tuples by the first two elements using a dictionary
     for t in mm_list:
@@ -446,21 +444,24 @@ for i,hist in enumerate(histlist):
     hist["yieldTree"].Branch("tbincenter", tval, "tbincenter/D")
     hist["yieldTree"].Branch("phibincenter", phival, "phibincenter/D")
 
+    tbinarr = []
+    phibinarr = []
     # Extract the desired values from each group
     for key, val in groups.items():
         j = key[0]
         k = key[1]
+        tbinarr.append(j)
+        phibinarr.append(k)
         tnum[0] = j+1
         phinum[0] = k+1
         tval[0] = (tbinedges[j]+tbinedges[j+1])/2
         phival[0] = (phibinedges[k]+phibinedges[k+1])/2
-        #print(key)
+
         MM_tmp = []
         Q2_tmp = []
         W_tmp = []
         t_tmp = []
         for tup in val:
-            #print(key, tup[1])
             MM_tmp.append(tup[0])
             Q2_tmp.append(tup[1])
             W_tmp.append(tup[2])
@@ -508,20 +509,19 @@ for i,hist in enumerate(histlist):
     groups = {}
     # Group the tuples by the first two elements using a dictionary
     for t in tmp_lst:
-        key = (t[0], t[1])
-        if key in groups:
-            groups[key].append((t[2], t[3], t[4], t[5]))
-        else:
-            groups[key] = [(t[2], t[3], t[4], t[5])]
+        for j,k in zip(tbinarr,phibinarr):
+            if t[0] == j and t[1] == k:
+                key = (t[0], t[1])
+                if key in groups:
+                    groups[key].append((t[2], t[3], t[4], t[5]))
+                else:
+                    groups[key] = [(t[2], t[3], t[4], t[5])]
+            else:
+                continue
             
     yieldValSimc = array('d', [0])
+    
     hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
-    Q2binValSimc = array('d', [0])
-    hist["yieldTree"].Branch("aver_Q2", Q2binValSimc, "aver_Q2/D")
-    WbinValSimc = array('d', [0])
-    hist["yieldTree"].Branch("aver_W", WbinValSimc, "aver_W/D")
-    tbinValSimc = array('d', [0])
-    hist["yieldTree"].Branch("aver_t", tbinValSimc, "aver_t/D")
     
     # Extract the desired values from each group
     for key, val in groups.items():
@@ -537,9 +537,6 @@ for i,hist in enumerate(histlist):
         hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp)*hist["normfac_simc"])
         hist["yieldDictSimc"][key] = integrate.simps(MM_tmp)*hist["normfac_simc"]
         yieldValSimc[0] = integrate.simps(MM_tmp)*hist["normfac_simc"]
-        Q2binValSimc[0] = np.average(Q2_tmp)
-        WbinValSimc[0] = np.average(W_tmp)
-        tbinValSimc[0] = np.average(t_tmp)
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
