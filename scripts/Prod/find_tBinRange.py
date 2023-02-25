@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 13:26:16 trottar"
+# Time-stamp: "2023-02-25 13:29:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -470,16 +470,16 @@ for i,hist in enumerate(histlist):
                     else:
                         phibin_index = None
                     if phibin_index != None:
-                        tmp_lst.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2)), evt.Weight, evt.Q2, evt.W, evt.t))
-                        
+                        tmp_lst.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2)), evt.Q2, evt.W, evt.t))
+            
     groups = {}
     # Group the tuples by the first two elements using a dictionary
     for t in tmp_lst:
         key = (t[0], t[1])
         if key in groups:
-            groups[key].append((t[2], t[3], t[4], t[5], t[6]))
+            groups[key].append((t[2], t[3], t[4], t[5]))
         else:
-            groups[key] = [(t[2], t[3], t[4], t[5], t[6])]
+            groups[key] = [(t[2], t[3], t[4], t[5])]
             
     yieldValSimc = array('d', [0])
     hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
@@ -492,22 +492,18 @@ for i,hist in enumerate(histlist):
     
     # Extract the desired values from each group
     MM_tmp = []
-    Weight_tmp = []
     Q2_tmp = []
     W_tmp = []
     t_tmp = []
     for key, val in groups.items():
         for tup in val:
             MM_tmp.append(tup[0])
-            Weight_tmp.append(tup[1])
-            Q2_tmp.append(tup[2])
-            W_tmp.append(tup[3])
-            t_tmp.append(tup[4])
-        print("!!!!!!!!!!!!!",Weight_tmp)
-        int_MM = [integrate.simps(MM_tmp)*w for w in Weight_tmp] # Integrate MM and apply SIMC weight
-        hist["H_yield_SIMC"].Fill(int_MM*hist["normfac_simc"])
-        hist["yieldDictSimc"][key] = int_MM*hist["normfac_simc"]
-        yieldValSimc[0] = int_MM*hist["normfac_simc"]
+            Q2_tmp.append(tup[1])
+            W_tmp.append(tup[2])
+            t_tmp.append(tup[3])
+        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp)*hist["normfac_simc"])
+        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp)*hist["normfac_simc"]
+        yieldValSimc[0] = integrate.simps(MM_tmp)*hist["normfac_simc"]
         Q2binValSimc[0] = np.average(Q2_tmp)
         WbinValSimc[0] = np.average(W_tmp)
         tbinValSimc[0] = np.average(t_tmp)
