@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 17:08:15 trottar"
+# Time-stamp: "2023-02-25 17:14:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -456,12 +456,15 @@ for i,hist in enumerate(histlist):
     tbinValData = array('d', [0])
     hist["yieldTree"].Branch("aver_t", tbinValData, "aver_t/D")
 
+
+    print(tbinarr)
+    print(phibinarr)
     for tbin in tbinarr:
         for phibin in phibinarr:
             # Extract the desired values from each group
             for key, val in groups.items():
                 if key[0]+1 == tbin and key[1]+1 == phibin:
-                    print(key)
+                    #print(key)
                     MM_tmp = []
                     Q2_tmp = []
                     W_tmp = []
