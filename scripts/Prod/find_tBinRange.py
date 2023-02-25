@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 14:41:25 trottar"
+# Time-stamp: "2023-02-25 14:57:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -404,30 +404,6 @@ for i,hist in enumerate(histlist):
                         phibin_index = None
                     if phibin_index != None:
                         mm_list.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
-                        
-    groups = {}
-    # Group the tuples by the first two elements using a dictionary
-    for t in mm_list:
-        key = (t[0], t[1])
-        if key in groups:
-            groups[key].append(t[2])
-        else:
-            groups[key] = [t[2]]
-            
-    yieldValData = array('d', [0])
-    hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
-    
-    # Extract the desired values from each group
-    MM_tmp = []
-    for key, val in groups.items():
-        for tup in val:
-            MM_tmp.append(tup)
-        hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
-        hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
-        yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
-        hist["yieldTree"].Fill()
-
-    hist["yieldTree"].ResetBranchAddresses()
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
@@ -437,26 +413,60 @@ for i,hist in enumerate(histlist):
             groups[key].append((t[1], t[2], t[3]))
         else:
             groups[key] = [(t[1], t[2], t[3])]
-    
+
+    # Extract the desired values from each group
+    Q2_tmp = []
+    W_tmp = []
+    t_tmp = []
+    Q2_aver = []
+    W_aver = []
+    t_aver = []
+    for key, val in groups.items():
+        for tup in val:
+            Q2_tmp.append(tup[0])
+            W_tmp.append(tup[1])
+            t_tmp.append(tup[2])
+        Q2_aver.append((key[0], np.average(Q2_tmp)))
+        W_aver.append((key[0], np.average(W_tmp)))
+        t_aver.append((key[0], np.average(t_tmp)))
+        
+    groups = {}
+    # Group the tuples by the first two elements using a dictionary
+    for t in mm_list:
+        for j,a in enumerate(Q2_aver):
+            if a[0] == t[0]:
+                key = (t[0], t[1])
+                if key in groups:
+                    groups[key].append((t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1]))
+                else:
+                    groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]
+            
+    yieldValData = array('d', [0])
+    hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
     Q2binValData = array('d', [0])
     hist["yieldTree"].Branch("aver_Q2", Q2binValData, "aver_Q2/D")
     WbinValData = array('d', [0])
     hist["yieldTree"].Branch("aver_W", WbinValData, "aver_W/D")
     tbinValData = array('d', [0])
     hist["yieldTree"].Branch("aver_t", tbinValData, "aver_t/D")
-
+    
     # Extract the desired values from each group
+    MM_tmp = []
     Q2_tmp = []
     W_tmp = []
-    t_tmp = []
+    t_tmp = []    
     for key, val in groups.items():
         for tup in val:
-            Q2_tmp.append(tup[0])
-            W_tmp.append(tup[1])
-            t_tmp.append(tup[2])
-        Q2binValData[0] = np.average(Q2_tmp)
-        WbinValData[0] = np.average(W_tmp)
-        tbinValData[0] = np.average(t_tmp)
+            MM_tmp.append(tup[0])
+            Q2_tmp.append(tup[1])
+            W_tmp.append(tup[2])
+            t_tmp.append(tup[3])
+        hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
+        hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        Q2binValData[0] = Q2_tmp[0]
+        WbinValData[0] = W_tmp[0]
+        tbinValData[0] = t_tmp[0]
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
