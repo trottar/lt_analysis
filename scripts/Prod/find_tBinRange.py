@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 17:06:08 trottar"
+# Time-stamp: "2023-02-25 17:08:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -467,7 +467,7 @@ for i,hist in enumerate(histlist):
                     W_tmp = []
                     t_tmp = []
                     for tup in val:
-                        print(key, tup[1])
+                        #print(key, tup[1])
                         MM_tmp.append(tup[0])
                         Q2_tmp.append(tup[1])
                         W_tmp.append(tup[2])
