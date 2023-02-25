@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 15:33:21 trottar"
+# Time-stamp: "2023-02-25 15:38:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -437,6 +437,7 @@ for i,hist in enumerate(histlist):
     for t in mm_list:
         for j,a in enumerate(Q2_aver):
             if a[0] == t[0]:
+                print(a[0],a[1])
                 key = (t[0], t[1])
                 if key in groups:
                     groups[key].append((t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1]))
