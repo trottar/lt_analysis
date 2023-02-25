@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 17:27:37 trottar"
+# Time-stamp: "2023-02-25 17:32:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -446,7 +446,9 @@ for i,hist in enumerate(histlist):
                     groups[key].append((t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1]))
                 else:
                     groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]                    
-    
+
+    groups = dict(sorted(groups.items()))                    
+                    
     yieldValData = array('d', [0])
     hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
     Q2binValData = array('d', [0])
