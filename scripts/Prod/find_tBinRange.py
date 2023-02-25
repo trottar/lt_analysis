@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 15:00:16 trottar"
+# Time-stamp: "2023-02-25 15:15:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -461,6 +461,9 @@ for i,hist in enumerate(histlist):
             Q2_tmp.append(tup[1])
             W_tmp.append(tup[2])
             t_tmp.append(tup[3])
+        print("!!!!!!!!!!!!",Q2_tmp)
+        print("!!!!!!!!!!!!",W_tmp)
+        print("!!!!!!!!!!!!",t_tmp)
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
         yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
