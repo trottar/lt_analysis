@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 15:38:41 trottar"
+# Time-stamp: "2023-02-25 15:43:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -437,7 +437,6 @@ for i,hist in enumerate(histlist):
     for t in mm_list:
         for j,a in enumerate(Q2_aver):
             if a[0] == t[0]:
-                print(a[0],a[1])
                 key = (t[0], t[1])
                 if key in groups:
                     groups[key].append((t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1]))
@@ -454,22 +453,22 @@ for i,hist in enumerate(histlist):
     hist["yieldTree"].Branch("aver_t", tbinValData, "aver_t/D")
     
     # Extract the desired values from each group
-    MM_tmp = []
-    Q2_tmp = []
-    W_tmp = []
-    t_tmp = []    
     for key, val in groups.items():
+        MM_tmp = []
+        Q2_tmp = []
+        W_tmp = []
+        t_tmp = []
         for tup in val:
             MM_tmp.append(tup[0])
             Q2_tmp.append(tup[1])
             W_tmp.append(tup[2])
             t_tmp.append(tup[3])
-            Q2binValData[0] = tup[1]
-            WbinValData[0] = tup[2]
-            tbinValData[0] = tup[3]
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
         yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        Q2binValData[0] = Q2_tmp[0]
+        WbinValData[0] = W_tmp[0]
+        tbinValData[0] = t_tmp[0]
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
@@ -523,11 +522,11 @@ for i,hist in enumerate(histlist):
     hist["yieldTree"].Branch("aver_t", tbinValSimc, "aver_t/D")
     
     # Extract the desired values from each group
-    MM_tmp = []
-    Q2_tmp = []
-    W_tmp = []
-    t_tmp = []
     for key, val in groups.items():
+        MM_tmp = []
+        Q2_tmp = []
+        W_tmp = []
+        t_tmp = []
         for tup in val:
             MM_tmp.append(tup[0])
             Q2_tmp.append(tup[1])
