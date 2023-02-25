@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 13:17:38 trottar"
+# Time-stamp: "2023-02-25 13:23:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -503,7 +503,7 @@ for i,hist in enumerate(histlist):
             Q2_tmp.append(tup[2])
             W_tmp.append(tup[3])
             t_tmp.append(tup[4])
-        int_MM = integrate.simps(MM_tmp)*Weight_tmp # Integrate MM and apply SIMC weight
+        int_MM = [integrate.simps(MM_tmp)*w for w in Weight_tmp] # Integrate MM and apply SIMC weight
         hist["H_yield_SIMC"].Fill(int_MM*hist["normfac_simc"])
         hist["yieldDictSimc"][key] = int_MM*hist["normfac_simc"]
         yieldValSimc[0] = int_MM*hist["normfac_simc"]
