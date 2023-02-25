@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 12:55:25 trottar"
+# Time-stamp: "2023-02-25 12:59:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,6 +103,8 @@ if float(runNumRight[0]) != 0:
     yield_right_simc = []
     phibin_right_data = []
     tbin_right_data = []
+    phibincenter_right_data = []
+    tbincenter_right_data = []
     averQ2_right_data = []
     averW_right_data = []
     avert_right_data = []
@@ -125,6 +127,8 @@ if float(runNumLeft[0]) != 0:
     yield_left_simc = []
     phibin_left_data = []
     tbin_left_data = []
+    phibincenter_left_data = []
+    tbincenter_left_data = []
     averQ2_left_data = []
     averW_left_data = []
     avert_left_data = []
@@ -147,6 +151,8 @@ if float(runNumCenter[0]) != 0:
     yield_center_simc = []
     phibin_center_data = []
     tbin_center_data = []
+    phibincenter_center_data = []
+    tbincenter_center_data = []
     averQ2_center_data = []
     averW_center_data = []
     avert_center_data = []
