@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 17:57:37 trottar"
+# Time-stamp: "2023-02-25 17:59:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -435,7 +435,7 @@ for i,hist in enumerate(histlist):
     tnum = array('d', [0])
     phinum = array('d', [0])
     tval = array('d', [0])
-    phival = array('d', [
+    phival = array('d', [0])
     
     hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
     hist["yieldTree"].Branch("aver_Q2", Q2binValData, "aver_Q2/D")
