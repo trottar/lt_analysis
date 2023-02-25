@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 17:19:57 trottar"
+# Time-stamp: "2023-02-25 17:27:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -458,29 +458,24 @@ for i,hist in enumerate(histlist):
 
     # Extract the desired values from each group
     for key, val in groups.items():
-        for tbin in tbinarr:
-            for phibin in phibinarr:
-                if key[0]+1 == tbin and key[1]+1 == phibin:
-                    #print(key)
-                    MM_tmp = []
-                    Q2_tmp = []
-                    W_tmp = []
-                    t_tmp = []
-                    for tup in val:
-                        #print(key, tup[1])
-                        MM_tmp.append(tup[0])
-                        Q2_tmp.append(tup[1])
-                        W_tmp.append(tup[2])
-                        t_tmp.append(tup[3])
-                    hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
-                    hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
-                    yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
-                    Q2binValData[0] = Q2_tmp[0]
-                    WbinValData[0] = W_tmp[0]
-                    tbinValData[0] = t_tmp[0]
-                    hist["yieldTree"].Fill()
-                else:
-                    continue
+        #print(key)
+        MM_tmp = []
+        Q2_tmp = []
+        W_tmp = []
+        t_tmp = []
+        for tup in val:
+            #print(key, tup[1])
+            MM_tmp.append(tup[0])
+            Q2_tmp.append(tup[1])
+            W_tmp.append(tup[2])
+            t_tmp.append(tup[3])
+        hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
+        hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        Q2binValData[0] = Q2_tmp[0]
+        WbinValData[0] = W_tmp[0]
+        tbinValData[0] = t_tmp[0]
+        hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
     
