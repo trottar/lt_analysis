@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 14:57:00 trottar"
+# Time-stamp: "2023-02-25 15:00:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -426,9 +426,9 @@ for i,hist in enumerate(histlist):
             Q2_tmp.append(tup[0])
             W_tmp.append(tup[1])
             t_tmp.append(tup[2])
-        Q2_aver.append((key[0], np.average(Q2_tmp)))
-        W_aver.append((key[0], np.average(W_tmp)))
-        t_aver.append((key[0], np.average(t_tmp)))
+        Q2_aver.append((key, np.average(Q2_tmp)))
+        W_aver.append((key, np.average(W_tmp)))
+        t_aver.append((key, np.average(t_tmp)))
         
     groups = {}
     # Group the tuples by the first two elements using a dictionary
