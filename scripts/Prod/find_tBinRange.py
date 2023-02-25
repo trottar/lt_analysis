@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 17:47:56 trottar"
+# Time-stamp: "2023-02-25 17:57:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -338,31 +338,11 @@ phibinedges = binned_phi[1]
 
 for i,hist in enumerate(histlist):
     
-    tnum = array('d', [0])
-    phinum = array('d', [0])
-    tval = array('d', [0])
-    phival = array('d', [0])
-    
-    hist["yieldTree"].Branch("tbins", tnum, "tbins/D")
-    hist["yieldTree"].Branch("phibins", phinum, "phibins/D")
-    hist["yieldTree"].Branch("tbincenter", tval, "tbincenter/D")
-    hist["yieldTree"].Branch("phibincenter", phival, "phibincenter/D")
 
-    tbinarr = []
-    phibinarr = []
     for j in range(NumtBins):
         for k in range(NumPhiBins):
             hist["H_tbins_DATA"].Fill((tbinedges[j]+tbinedges[j+1])/2)
             hist["H_phibins_DATA"].Fill((phibinedges[k]+phibinedges[k+1])/2)
-            tbinarr.append(j+1)
-            phibinarr.append(k+1)
-            tnum[0] = j+1
-            phinum[0] = k+1
-            tval[0] = (tbinedges[j]+tbinedges[j+1])/2
-            phival[0] = (phibinedges[k]+phibinedges[k+1])/2
-            hist["yieldTree"].Fill()
-
-    hist["yieldTree"].ResetBranchAddresses()
 
 c_bins.Divide(2,1)
         
@@ -447,21 +427,33 @@ for i,hist in enumerate(histlist):
                 else:
                     groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]                    
 
-    sortgroups = {key: groups[key] for key in sorted(groups.keys(), key = lambda ele: ele[1] * ele[0])}
-
-    print(sortgroups.keys())
-    
     yieldValData = array('d', [0])
-    hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
     Q2binValData = array('d', [0])
-    hist["yieldTree"].Branch("aver_Q2", Q2binValData, "aver_Q2/D")
     WbinValData = array('d', [0])
-    hist["yieldTree"].Branch("aver_W", WbinValData, "aver_W/D")
     tbinValData = array('d', [0])
-    hist["yieldTree"].Branch("aver_t", tbinValData, "aver_t/D")
+    
+    tnum = array('d', [0])
+    phinum = array('d', [0])
+    tval = array('d', [0])
+    phival = array('d', [
+    
+    hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
+    hist["yieldTree"].Branch("aver_Q2", Q2binValData, "aver_Q2/D")
+    hist["yieldTree"].Branch("aver_W", WbinValData, "aver_W/D")
+    hist["yieldTree"].Branch("aver_t", tbinValData, "aver_t/D")    
+    hist["yieldTree"].Branch("tbins", tnum, "tbins/D")
+    hist["yieldTree"].Branch("phibins", phinum, "phibins/D")
+    hist["yieldTree"].Branch("tbincenter", tval, "tbincenter/D")
+    hist["yieldTree"].Branch("phibincenter", phival, "phibincenter/D")
 
     # Extract the desired values from each group
     for key, val in groups.items():
+        j = key[0]
+        k = key[1]
+        tnum[0] = j+1
+        phinum[0] = k+1
+        tval[0] = (tbinedges[j]+tbinedges[j+1])/2
+        phival[0] = (phibinedges[k]+phibinedges[k+1])/2
         #print(key)
         MM_tmp = []
         Q2_tmp = []
