@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 15:21:59 trottar"
+# Time-stamp: "2023-02-25 15:33:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -431,7 +431,7 @@ for i,hist in enumerate(histlist):
         t_aver.append((key, np.average(t_tmp)))
     print("!!!!!!!!!!!!",Q2_aver)
     print("!!!!!!!!!!!!",W_aver)
-    print("!!!!!!!!!!!!",t_aver)        
+    print("!!!!!!!!!!!!",t_aver)
     groups = {}
     # Group the tuples by the first two elements using a dictionary
     for t in mm_list:
@@ -463,12 +463,12 @@ for i,hist in enumerate(histlist):
             Q2_tmp.append(tup[1])
             W_tmp.append(tup[2])
             t_tmp.append(tup[3])
+            Q2binValData[0] = tup[1]
+            WbinValData[0] = tup[2]
+            tbinValData[0] = tup[3]
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
         yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
-        Q2binValData[0] = Q2_tmp[0]
-        WbinValData[0] = W_tmp[0]
-        tbinValData[0] = t_tmp[0]
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
