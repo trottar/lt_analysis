@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 13:29:55 trottar"
+# Time-stamp: "2023-02-25 14:11:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -387,7 +387,8 @@ for i,hist in enumerate(histlist):
     TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
     #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
 
-    tmp_lst = []
+    mm_list = []
+    aver_lst = []
     for evt in TBRANCH_DATA:
         for j in range(len(tbinedges) - 1):
             if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
@@ -395,22 +396,25 @@ for i,hist in enumerate(histlist):
             else:
                 tbin_index = None
             if tbin_index != None:
-                for k in range(len(phibinedges) - 1):
+                aver_lst.append((tbin_index, evt.Q2, evt.W, -evt.MandelT))
+                for k in range(len(phibinedges) - 1):                    
                     if phibinedges[k] <= (evt.ph_q+math.pi)*(180/math.pi) < phibinedges[k+1]:
                         phibin_index = k
                     else:
                         phibin_index = None
                     if phibin_index != None:
-                        tmp_lst.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)), evt.Q2, evt.W, -evt.MandelT))
-
+                        mm_list.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                        
     groups = {}
     # Group the tuples by the first two elements using a dictionary
-    for t in tmp_lst:
-        key = (t[0], t[1])
-        if key in groups:
-            groups[key].append((t[2], t[3], t[4], t[5]))
-        else:
-            groups[key] = [(t[2], t[3], t[4], t[5])]
+    for mm in mm_list:
+        for a in aver_lst:
+            if a[0] == mm[0]:
+                key = (mm[0], mm[1])
+                if key in groups:
+                    groups[key].append((mm[2], a[1], a[2], a[3]))
+                else:
+                    groups[key] = [(mm[2], a[1], a[2], a[3])]
             
     yieldValData = array('d', [0])
     hist["yieldTree"].Branch("yield_data", yieldValData, "yield_data/D")
