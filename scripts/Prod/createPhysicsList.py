@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 12:59:08 trottar"
+# Time-stamp: "2023-02-25 18:27:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,7 +110,7 @@ if float(runNumRight[0]) != 0:
     avert_right_data = []
     TBRANCH_RIGHT = InFile_DATA.Get("Right")
     for i, evt in enumerate(TBRANCH_RIGHT):
-        if i <= NumtBins*NumPhiBins:
+        if i <= NumtBins*NumPhiBins-1:
             yield_right_data.append(evt.yield_data)
             yield_right_simc.append(evt.yield_simc)
             phibin_right_data.append(evt.phibins)
@@ -134,7 +134,7 @@ if float(runNumLeft[0]) != 0:
     avert_left_data = []
     TBRANCH_LEFT = InFile_DATA.Get("Left")
     for i, evt in enumerate(TBRANCH_LEFT):
-        if i <= NumtBins*NumPhiBins:
+        if i <= NumtBins*NumPhiBins-1:
             yield_left_data.append(evt.yield_data)
             yield_left_simc.append(evt.yield_simc)
             phibin_left_data.append(evt.phibins)
@@ -158,7 +158,7 @@ if float(runNumCenter[0]) != 0:
     avert_center_data = []
     TBRANCH_CENTER = InFile_DATA.Get("Center")
     for i, evt in enumerate(TBRANCH_CENTER):
-        if i <= NumtBins*NumPhiBins:
+        if i <= NumtBins*NumPhiBins-1:
             yield_center_data.append(evt.yield_data)
             yield_center_simc.append(evt.yield_simc)
             phibin_center_data.append(evt.phibins)
