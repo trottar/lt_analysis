@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 13:12:55 trottar"
+# Time-stamp: "2023-02-26 13:13:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,7 +137,9 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
 fi
 
 # Replace p with '.'
-Q=${Q//p/.}
+Q2=${Q2//p/.}
+
+echo ${Q2}
 
 cd "${LTANAPATH}/src/"
 echo
