@@ -35,19 +35,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       call xsect(inp_pol, inp_Q2, inp_loeps)
       call xsect(inp_pol, inp_Q2, inp_hieps)
       
-!     call xsect(npol,Q2,eps)
-!      call xsect(+1,5.5,0.1838)
-!      call xsect(+1,5.5,0.5291)
-!      call xsect(+1,4.4,0.4805)
-!      call xsect(+1,4.4,0.7148)
-!      call xsect(+1,3.3,0.3935)
-!      call xsect(+1,3.3,0.6668)
-!      call xsect(+1,3.3,0.5736)
-!      call xsect(+1,3.3,0.8791)
-!      call xsect(+1,2.115,0.2477)
-!      call xsect(+1,2.115,0.7864)
-!      call xsect(+1,0.5,0.4515)
-!      call xsect(+1,0.5,0.6979)
+      print*,  "-------------------------------------------------"
       
       stop
       end

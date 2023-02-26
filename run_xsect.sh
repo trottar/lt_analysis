@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 13:25:41 trottar"
+# Time-stamp: "2023-02-26 13:46:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -159,3 +159,17 @@ eval "gfortran -o calc_xsect calc_xsect.f"
 echo
 echo "Running calc_xsect..."
 ./calc_xsect.expect ${POL} ${Q2} ${LOEPS} ${HIEPS}
+
+
+# Replace p with '.'
+Q2=${Q2//./p}
+
+KIN="Q${Q2}W${W}"
+
+echo "!!!!!!!!!!!!!!!!!!!${KIN}"
+
+# Define input and output file names
+OutDATAFilename="Analysed_Data_${KIN}"
+OutDUMMYFilename="Analysed_Dummy_${KIN}"
+OutFullAnalysisFilename="FullAnalysis_${KIN}"
+
