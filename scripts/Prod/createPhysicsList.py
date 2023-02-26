@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 20:05:44 trottar"
+# Time-stamp: "2023-02-25 20:11:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,20 +256,29 @@ print(thpq_left)
 f_list_settings = '{}/src/beam/Eb_KLT.dat'.format(LTANAPATH)
 if not os.path.exists(f_list_settings):
     open(f_list_settings, "w").close()
-# First check if line exists
-with open(f_list_settings, 'r') as f:
-    lines = f.readlines()
-    if float(runNumRight[0]) != 0:
+
+if float(runNumRight[0]) != 0:
+    # First check if line exists
+    with open(f_list_settings, 'r') as f:
+        lines = f.readlines()    
         check_line = "{:.3f} {} {:.4f}\n".format(ebeam_right, Q2, EPSVAL)
         # Check if the line already exists
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
-    if float(runNumLeft[0]) != 0:
+            
+if float(runNumLeft[0]) != 0:
+    # First check if line exists
+    with open(f_list_settings, 'r') as f:
+        lines = f.readlines()    
         check_line = "{:.3f} {} {:.4f}\n".format(ebeam_left, Q2, EPSVAL)
         # Check if the line already exists
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
-    if float(runNumCenter[0]) != 0:
+            
+if float(runNumCenter[0]) != 0:
+    # First check if line exists
+    with open(f_list_settings, 'r') as f:
+        lines = f.readlines()        
         check_line = "{:.3f} {} {:.4f}\n".format(ebeam_center, Q2, EPSVAL)
         # Check if the line already exists
         if check_line not in lines:
@@ -280,19 +289,28 @@ with open(f_list_settings, 'r') as f:
 f_list_settings = '{}/src/list.settings'.format(LTANAPATH)
 if not os.path.exists(f_list_settings):
     open(f_list_settings, "w").close()
-# First check if line exists
-with open(f_list_settings, 'r') as f:
-    lines = f.readlines()
-    if float(runNumRight[0]) != 0:
+
+if float(runNumRight[0]) != 0:    
+    # First check if line exists
+    with open(f_list_settings, 'r') as f:
+        lines = f.readlines()
         check_line = "{} {} {:.4f} -{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_right, TMIN, TMAX, NumtBins, Kset)
         # Check if the line already exists
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
-    if float(runNumLeft[0]) != 0:
+            
+if float(runNumLeft[0]) != 0:
+    # First check if line exists
+    with open(f_list_settings, 'r') as f:
+        lines = f.readlines()        
         check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_left, TMIN, TMAX, NumtBins, Kset)
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)
-    if float(runNumCenter[0]) != 0:
+            
+if float(runNumCenter[0]) != 0:
+    # First check if line exists
+    with open(f_list_settings, 'r') as f:
+        lines = f.readlines()        
         check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_center, TMIN, TMAX, NumtBins, Kset)
         if check_line not in lines:
             write_to_file(f_list_settings,check_line)            
