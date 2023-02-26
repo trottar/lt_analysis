@@ -976,9 +976,8 @@ c      stop
 
 
       write(6,102) eps,up,sigT,sigL,sigLT,sigTT,sig,u_min
- 102  format('xmodel: eps=',f5.3,' u=',f5.3,' sigT=',f7.5,' sigL=',f7.5,
-     1     ' sigLT=',f10.8,' sigTT=',f10.8,' x_mod=',f15.14, 
-     1     ' umin=', f10.8)
+ 102  format('xmodel: eps=',f5.3,' sigT=',f7.5,' sigL=',f7.5,
+     1     ' sigLT=',f10.8,' sigTT=',f10.8,' x_mod=',f15.14)
 
 
 
