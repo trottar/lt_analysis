@@ -100,7 +100,7 @@ c   Read the u and phi bins
 
       open (unit = 22, file = "./t_bin_interval", action='read')
       read (22,*) q2_bin, t_bin, phi_bin
-      read (22, '    ') line  
+      read (22, ''// char(9) //'') line  
       read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
       nt = t_bin
       nphi = phi_bin 
