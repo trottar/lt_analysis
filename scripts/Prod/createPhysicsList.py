@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 20:02:50 trottar"
+# Time-stamp: "2023-02-25 20:05:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,9 +45,7 @@ pThetaValCenter = list(sys.argv[14].split(" "))
 EbeamValRight = list(sys.argv[15].split(" "))
 EbeamValLeft = list(sys.argv[16].split(" "))
 EbeamValCenter = list(sys.argv[17].split(" "))
-print("!!!!!!!!!!!!!!!!!",pThetaValRight)
-print(pThetaValLeft)
-print(pThetaValCenter)
+
 EffValRight = list(sys.argv[18].split(" "))
 EffValLeft = list(sys.argv[19].split(" "))
 EffValCenter = list(sys.argv[20].split(" "))
@@ -304,25 +302,32 @@ with open(f_list_settings, 'r') as f:
     f_list = '{}/src/averages/aver.{}_{}_{:.0f}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100)
 
     if not os.path.exists(f_list):
-        open(f_list, "w").close()    
-    # Open a file in read mode
-    with open(f_list, 'r') as f:
-        lines = f.readlines()
-        if float(runNumRight[0]) != 0:
+        open(f_list, "w").close()
+
+    if float(runNumRight[0]) != 0:        
+        # Open a file in read mode
+        with open(f_list, 'r') as f:
+            lines = f.readlines()
             for i, relyield in enumerate(relyield_right):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_right_data[i]), int(tbin_right_data[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
 
-        if float(runNumLeft[0]) != 0:
+    if float(runNumLeft[0]) != 0:                    
+        # Open a file in read mode
+        with open(f_list, 'r') as f:
+            lines = f.readlines()                    
             for i, relyield in enumerate(relyield_left):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_left_data[i]), int(tbin_left_data[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
 
-        if float(runNumCenter[0]) != 0:
+    if float(runNumCenter[0]) != 0:                    
+        # Open a file in read mode
+        with open(f_list, 'r') as f:
+            lines = f.readlines()                    
             for i, relyield in enumerate(relyield_center):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_center_data[i]), int(tbin_center_data[i]))
                 # Check if the line already exists
