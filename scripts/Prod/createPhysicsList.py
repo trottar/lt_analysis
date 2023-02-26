@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 19:22:16 trottar"
+# Time-stamp: "2023-02-25 19:25:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -335,7 +335,7 @@ if float(runNumRight[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()[1:-1]
         tbin_right_data.append(0.0)
-        for i, Q2 in enumerate(averQ2_right_data):
+        for i, Q2val in enumerate(averQ2_right_data):
             check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
             write_to_file(f_list,check_line)
         lines = f.readlines()
@@ -354,7 +354,7 @@ if float(runNumLeft[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()[1:-1]
         tbin_left_data.append(0.0)
-        for i, Q2 in enumerate(averQ2_left_data):
+        for i, Q2val in enumerate(averQ2_left_data):
             check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
             write_to_file(f_list,check_line)
         lines = f.readlines()
@@ -373,7 +373,7 @@ if float(runNumCenter[0]) != 0:
     with open(f_list, 'r') as f:
         lines = f.readlines()[1:-1]
         tbin_center_data.append(0.0)
-        for i, Q2 in enumerate(averQ2_center_data):
+        for i, Q2val in enumerate(averQ2_center_data):
             check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
             write_to_file(f_list,check_line)
         lines = f.readlines()
