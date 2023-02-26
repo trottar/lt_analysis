@@ -305,11 +305,11 @@ c            print*, q2_set, um
 c            stop
 
 
-            call xmodel_ghm(npol_set,Eb,q2_set,w,q2,um,tm,phi,
-     *                      eps_mod,th_mod,x_mod)
+c            call xmodel_ghm(npol_set,Eb,q2_set,w,q2,um,tm,phi,
+c     *           eps_mod,th_mod,x_mod)
 
-c            call xmodel_ghm_two_model(npol_set,Eb,q2_set,w,q2,um,tm,phi,
-c     *           eps,th_mod,x_mod,um_min)
+            call xmodel_ghm_two_model(npol_set,Eb,q2_set,w,q2,um,tm,phi,
+     *           eps,th_mod,x_mod,um_min)
 
 
 c           stop
