@@ -103,13 +103,17 @@ c   Read the u and phi bins
       
       open (unit = 22, file = "./t_bin_interval", action='read')
       read (22,*) q2_bin, t_bin, phi_bin
-      read (22, *)
-      do i = 1, len(line)
-         if (line(i:i) == char(9)) then ! tab character
-            read(line(i+1:),*) (t_bin_boundary(j), j = 1,  t_bin+1)
-            exit
-         endif
-      enddo
+      read (22, '(A)') line
+      read (line, end=20)
+      read(line,*) (t_bin_boundary(j), j = 1,  t_bin+1)
+      
+c      read (22, *)
+c      do i = 1, len(line)
+c         if (line(i:i) == char(9)) then ! tab character
+c            read(line(i+1:),*) (t_bin_boundary(j), j = 1,  t_bin+1)
+c            exit
+c         endif
+c      enddo
       
       nt = t_bin
       nphi = phi_bin 
