@@ -178,7 +178,10 @@ c 2       format(i5,5f10.5,2i5)
       if(tmn.eq.0..or.tmx.eq.0.) 
      *     stop '*** setting is not found in list.settings'
 
-      Eb=Ebeam(kset)
+      open(65,file='./beam/Eb_KLT.dat')
+      read(65,*) Eb
+      write(*,*) Eb
+ 5    close(65)
 
       if(npol_set.lt.0) then
          pol='mn'
