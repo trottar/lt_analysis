@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 13:10:18 trottar"
+# Time-stamp: "2023-02-26 13:12:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -136,6 +136,8 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
     HIEPS=0.6979
 fi
 
+# Replace p with '.'
+Q=${Q//p/.}
 
 cd "${LTANAPATH}/src/"
 echo
@@ -143,7 +145,7 @@ echo "Compiling average_kinematics.f..."
 eval "gfortran -o average_kinematics average_kinematics.f"
 echo
 echo "Running average_kinematics..."
-./average_kinematics.expect ${echo ${Q2} | sed 's/p/./g'} ${LOEPS} ${HIEPS}
+./average_kinematics.expect ${Q2} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
