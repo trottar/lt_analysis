@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 14:31:21 trottar"
+# Time-stamp: "2023-02-26 15:53:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,7 +161,7 @@ echo "Compiling calc_xsect.f..."
 eval "gfortran -o calc_xsect calc_xsect.f"
 echo
 echo "Running calc_xsect..."
-./calc_xsect.expect ${POL} ${Q2} ${LOEPS} ${HIEPS}
+#./calc_xsect.expect ${POL} ${Q2} ${LOEPS} ${HIEPS}
 
 
 # Replace p with '.'
