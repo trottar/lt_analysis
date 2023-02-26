@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 18:27:44 trottar"
+# Time-stamp: "2023-02-25 19:11:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,9 +117,10 @@ if float(runNumRight[0]) != 0:
             tbin_right_data.append(evt.tbins)
             phibincenter_right_data.append(evt.phibincenter)
             tbincenter_right_data.append(evt.tbincenter)
-            averQ2_right_data.append(evt.aver_Q2)
-            averW_right_data.append(evt.aver_W)
-            avert_right_data.append(evt.aver_t)
+            if evt.aver_Q2 not in averQ2_right_data:
+                averQ2_right_data.append(evt.aver_Q2)
+                averW_right_data.append(evt.aver_W)
+                avert_right_data.append(evt.aver_t)
     relyield_right = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_right_data,yield_right_simc)] 
 
 if float(runNumLeft[0]) != 0:
@@ -141,9 +142,10 @@ if float(runNumLeft[0]) != 0:
             tbin_left_data.append(evt.tbins)
             phibincenter_left_data.append(evt.phibincenter)
             tbincenter_left_data.append(evt.tbincenter)
-            averQ2_left_data.append(evt.aver_Q2)
-            averW_left_data.append(evt.aver_W)
-            avert_left_data.append(evt.aver_t)
+            if evt.aver_Q2 not in averQ2_left_data:
+                averQ2_left_data.append(evt.aver_Q2)
+                averW_left_data.append(evt.aver_W)
+                avert_left_data.append(evt.aver_t)
     relyield_left = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_left_data,yield_left_simc)] 
 
 if float(runNumCenter[0]) != 0:
@@ -165,9 +167,10 @@ if float(runNumCenter[0]) != 0:
             tbin_center_data.append(evt.tbins)
             phibincenter_center_data.append(evt.phibincenter)
             tbincenter_center_data.append(evt.tbincenter)
-            averQ2_center_data.append(evt.aver_Q2)
-            averW_center_data.append(evt.aver_W)
-            avert_center_data.append(evt.aver_t)
+            if evt.aver_Q2 not in averQ2_center_data:
+                averQ2_center_data.append(evt.aver_Q2)
+                averW_center_data.append(evt.aver_W)
+                avert_center_data.append(evt.aver_t)
     relyield_center = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_center_data,yield_center_simc)] 
     
 print("\n\n~~~~~~~~~",relyield_left)
