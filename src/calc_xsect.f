@@ -234,7 +234,8 @@ c      pause
 
          um = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
 
-c         print *, "11112222  " , nbin, t_bin_boundary(1), t_bin_boundary(2), t_bin_boundary(3), um 
+         print *, "11112222  " , nbin, t_bin_boundary(1),
+     *            t_bin_boundary(2), t_bin_boundary(3), um 
 
 c         print *, nbin, t_bin_boundary(it), t_bin_boundary(it+1)  
 
