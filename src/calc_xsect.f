@@ -98,17 +98,21 @@ c      common  t_bin, phi_bin
 c   /*--------------------------------------------------*/
 c   Read the u and phi bins 
 
+      integer i
+      character(len=100) :: line      
+      
       open (unit = 22, file = "./t_bin_interval", action='read')
       read (22,*) q2_bin, t_bin, phi_bin
-      character(10) :: tab
-      tab = '' // char(9) // ''
-      read (22, tab) line  
-      read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
+      read (22, *)
+      do i = 1, len(line)
+         if (line(i:i) == char(9)) then ! tab character
+            read(line(i+1:),*) (t_bin_boundary(j), j = 1,  t_bin+1)
+            exit
+         endif
+      enddo
+      
       nt = t_bin
       nphi = phi_bin 
-
-
-
 
 c      read (22, '(A)') line  
 c      read (22, '(A)') line  
