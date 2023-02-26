@@ -101,7 +101,7 @@ c   Read the u and phi bins
       integer i
       character(len=100) :: line      
       
-      open (unit = 22, file = "./t_bin_interval", action='read')
+      open (unit = 22, file = "./t_bin_interval")
       read (22,*) q2_bin, t_bin, phi_bin
       read (22, '(A)') line
       read (line, end=20)
