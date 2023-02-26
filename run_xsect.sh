@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 13:46:18 trottar"
+# Time-stamp: "2023-02-26 14:09:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -166,10 +166,12 @@ Q2=${Q2//./p}
 
 KIN="Q${Q2}W${W}"
 
-echo "!!!!!!!!!!!!!!!!!!!${KIN}"
-
 # Define input and output file names
-OutDATAFilename="Analysed_Data_${KIN}"
-OutDUMMYFilename="Analysed_Dummy_${KIN}"
-OutFullAnalysisFilename="FullAnalysis_${KIN}"
+OutUnsepxsectsFilename="unsep_xsects_${KIN}"
 
+python3 plot_unsep.py ${Q2} ${W} ${LOWEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
+
+echo
+echo
+echo
+echo "Script Complete!"
