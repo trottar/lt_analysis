@@ -590,8 +590,8 @@ c     endif
 c /*--------------------------------------------------*/
 
 
-      subroutine xmodel_ghm(npol_set,Eb,q2_set,w_gev,q2_gev,u_gev,tm,phicm,
-     *     eps,th_mod,x_mod)
+      subroutine xmodel_ghm(npol_set,Eb,q2_set,w_gev,q2_gev,u_gev,
+     *     tm,phicm,eps,th_mod,x_mod)
 
       integer npol_set
       real Eb, q2_set, w, q2, phi, th_mod
