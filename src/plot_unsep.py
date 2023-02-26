@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 18:55:07 trottar"
+# Time-stamp: "2023-02-26 18:56:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -89,8 +89,8 @@ setting_file = LTANAPATH+"/src/list.settings"
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins', 'Kset'])
 
 for i,row in file_df_dict['setting_df'].iterrows():
-    print(row['Q2'], Q2.replace("p","."))
     if row['Q2'] == Q2.replace("p","."):
+        print(row['Q2'], Q2.replace("p","."))
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")) \
                                                , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos'])
