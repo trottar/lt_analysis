@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 19:42:13 trottar"
+# Time-stamp: "2023-02-25 19:48:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -219,8 +219,8 @@ if float(runNumRight[0]) != 0:
         runNum = run
         pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
         if os.path.exists(pid_log):
-            #thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))
-            thpq_right = 3.000
+            thpq_right = abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))
+            #thpq_right = 3.000
             ebeam_right = float(EbeamValRight[i])
         else:
             continue
@@ -231,8 +231,8 @@ if float(runNumLeft[0]) != 0:
         runNum = run
         pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
         if os.path.exists(pid_log):
-            #thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))
-            thpq_left = 3.000
+            thpq_left = abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))
+            #thpq_left = 3.000
             ebeam_left = float(EbeamValLeft[i])
         else:
             continue
