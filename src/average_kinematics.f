@@ -8,9 +8,15 @@ c     settings, then different polarities.
 c
 c     Input:  kindata/kindata.*.dat
 c     Output: averages/averages.*.dat
+
+      real inp_Q2, inp_loeps, inp_hieps
+      write(*,*) "Please input your Q2 and low+high epsilon:"
+      read(*,*) inp_Q2, inp_loeps, inp_hieps
+      
+      call average_k(inp_Q2, inp_loeps, inp_hieps)
       
 !     call average_k(Q2,epslow,epshigh)
-      call average_k(5.5,0.1838,0.5291)
+!      call average_k(5.5,0.1838,0.5291)
       print*,  "-------------------------------------------------"
 !      call average_k(4.4,0.4805,0.7148)
       print*,  "-------------------------------------------------"

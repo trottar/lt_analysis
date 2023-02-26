@@ -348,3 +348,8 @@ fi
 
 cd "${LTANAPATH}"
 evince "OUTPUT/Analysis/HeeP/${OutFullAnalysisFilename}.pdf"
+
+echo
+echo
+echo
+echo "Script Complete!"

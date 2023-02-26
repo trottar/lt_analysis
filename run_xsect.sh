@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 19:04:38 trottar"
+# Time-stamp: "2023-02-26 12:52:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,13 +37,14 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
+
 cd "${LTANAPATH}/src/"
 echo
 echo "Compiling average_kinematics.f..."
 eval "gfortran -o average_kinematics average_kinematics.f"
 echo
 echo "Running average_kinematics..."
-./average_kinematics
+./average_kinematics.expect ${Q2} ${LOEPS} ${LOEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
