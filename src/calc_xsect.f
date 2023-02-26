@@ -309,7 +309,7 @@ c            call xmodel_ghm(npol_set,Eb,q2_set,w,q2,um,tm,phi,
 c     *           eps_mod,th_mod,x_mod)
 
             call xmodel_ghm_two_model(npol_set,Eb,q2_set,w,q2,um,tm,phi,
-     *           eps,th_mod,x_mod,um_min)
+     *           eps,th_cm,x_mod,um_min)
 
 
 c           stop
