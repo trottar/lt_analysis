@@ -17,19 +17,7 @@ c     Output: averages/averages.*.dat
      *           "high_eps = ",inp_hieps
       
       call average_k(inp_Q2, inp_loeps, inp_hieps)
-      
-!     call average_k(Q2,epslow,epshigh)
-!      call average_k(5.5,0.1838,0.5291)
       print*,  "-------------------------------------------------"
-!      call average_k(4.4,0.4805,0.7148)
-      print*,  "-------------------------------------------------"
-!      call average_k(3.3,0.3935,0.6668)
-      print*,  "-------------------------------------------------"
-!      call average_k(3.3,0.5736,0.8791)
-      print*,  "-------------------------------------------------"
-!      call average_k(2.1,0.2477,0.7864)
-      print*,  "-------------------------------------------------"
-!      call average_k(0.5,0.4515,0.6979)
       
       stop
       end

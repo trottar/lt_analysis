@@ -23,14 +23,20 @@ c      call getarg(1,prv_it)
 
 c     Calculate unseparated cross-sections. Now settings are for the piplus data (+)
 
+      real inp_pol, inp_Q2, inp_loeps, inp_hieps      
+      
+      write(*,*) "Please input your polarity, Q2 and low+high epsilon:"
+      read(*,*) inp_pol, inp_Q2, inp_loeps, inp_hieps
 
+      write(*,*) "POL = ", inp_pol, "Q2 = ",inp_Q2,
+     *           "low_eps = ",inp_loeps,"high_eps = ",inp_hieps          
 
-
-c      stop
-
+      call xsect(inp_pol, inp_Q2, inp_loeps)
+      call xsect(inp_pol, inp_Q2, inp_hieps)
+      
 !     call xsect(npol,Q2,eps)
-      call xsect(+1,5.5,0.1838)
-      call xsect(+1,5.5,0.5291)
+!      call xsect(+1,5.5,0.1838)
+!      call xsect(+1,5.5,0.5291)
 !      call xsect(+1,4.4,0.4805)
 !      call xsect(+1,4.4,0.7148)
 !      call xsect(+1,3.3,0.3935)

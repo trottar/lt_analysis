@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 13:13:53 trottar"
+# Time-stamp: "2023-02-26 13:17:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,6 +97,12 @@ if [[ -z "$2" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3r
     done
 fi
 
+##############
+# HARD CODED #
+##############
+
+# Define global variables for lt_analysis scripts
+POL="+1" # All KaonLT is positive polarity
 
 echo
 echo "---------------------------------------------------------"
@@ -139,8 +145,6 @@ fi
 # Replace p with '.'
 Q2=${Q2//p/.}
 
-echo ${Q2}
-
 cd "${LTANAPATH}/src/"
 echo
 echo "Compiling average_kinematics.f..."
@@ -154,4 +158,4 @@ echo "Compiling calc_xsect.f..."
 eval "gfortran -o calc_xsect calc_xsect.f"
 echo
 echo "Running calc_xsect..."
-#./calc_xsect
+./calc_xsect.except ${POL} ${Q2} ${LOEPS} ${HIEPS}
