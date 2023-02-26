@@ -30,7 +30,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       read(*,*) inp_pol, inp_Q2, inp_loeps, inp_hieps
 
       write(*,*) "POL = ",inp_pol,"Q2 = ",inp_Q2,
-     *           "low_eps = ",inp_loeps,"high_eps = ",inp_hieps          
+     *           "low_eps = ",inp_loeps,"high_eps = ",inp_hieps
 
       call xsect(inp_pol, inp_Q2, inp_loeps)
       call xsect(inp_pol, inp_Q2, inp_hieps)
@@ -238,8 +238,8 @@ c         print *, nbin, t_bin_boundary(it), t_bin_boundary(it+1)
 c         stop
 
 
-         read(52,*) q2,dq2,w,dw,tt,dtt,th_pos
-         write(6,32) q2,dq2,w,dw,tt,dtt,th_pos
+         read(52,*) w,dw,q2,dq2,tt,dtt,th_pos
+         write(6,32) w,dw,q2,dq2,tt,dtt,th_pos
  32      format('xsect: ',7f10.4)
 
 
