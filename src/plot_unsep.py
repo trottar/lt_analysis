@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 18:56:28 trottar"
+# Time-stamp: "2023-02-26 18:58:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -89,12 +89,12 @@ setting_file = LTANAPATH+"/src/list.settings"
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins', 'Kset'])
 
 for i,row in file_df_dict['setting_df'].iterrows():
-    if row['Q2'] == Q2.replace("p","."):
+    if row['Q2'] in Q2.replace("p","."):
         print(row['Q2'], Q2.replace("p","."))
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")) \
                                                , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos'])
-        if row['EPSVAL'] == LOEPS:
+        if row['EPSVAL'] in LOEPS:
             if row['thpq'] < 0.0:
                 file_df_dict['aver_loeps_{}'.format('right')] = file_to_df( \
                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
@@ -113,7 +113,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                               LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                               .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            if row['thpq'] == 0.0:
+            if row['thpq'] in 0.0:
                 file_df_dict['aver_loeps_{}'.format('center')] = file_to_df( \
                                                                              LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
                                                                              .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
@@ -127,7 +127,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                             .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
                                                             , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
-        if row['EPSVAL'] == HIEPS:
+        if row['EPSVAL'] in HIEPS:
             if row['thpq'] < 0.0:
                 file_df_dict['aver_hieps_{}'.format('right')] = file_to_df( \
                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
@@ -146,7 +146,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                               LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                               .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            if row['thpq'] == 0.0:
+            if row['thpq'] in 0.0:
                 file_df_dict['aver_hieps_{}'.format('center')] = file_to_df( \
                                                                              LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
                                                                              .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
