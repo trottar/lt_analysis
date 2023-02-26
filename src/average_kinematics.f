@@ -526,7 +526,7 @@ c      end do
          print*, "~~~~~~1",q2, w, Eb, eps        
 
          call eps_n_theta(npol_set,Eb,aveW(it),aveQ2(it),
-     *                    tm,um,u_min,th_mod,eps_mod)
+     *                    tm,th_mod,eps_mod)
 
          print*, "!!!!!!",th_mod
 
