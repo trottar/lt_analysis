@@ -9,14 +9,15 @@ c
 c     Input:  kindata/kindata.*.dat
 c     Output: averages/averages.*.dat
 
+      integer inp_pol
       real inp_Q2, inp_loeps, inp_hieps
-      write(*,*) "Please input your Q2 and low+high epsilon:"
-      read(*,*) inp_Q2, inp_loeps, inp_hieps
+      write(*,*) "Please input your polarity, Q2 and low+high epsilon:"
+      read(*,*) inp_pol, inp_Q2, inp_loeps, inp_hieps
 
-      write(*,*) "Q2 = ",inp_Q2,"low_eps = ",inp_loeps,
-     *           "high_eps = ",inp_hieps
+      write(*,*) "POL = ",inp_pol,"Q2 = ",inp_Q2,
+     *           "low_eps = ",inp_loeps,"high_eps = ",inp_hieps
       
-      call average_k(inp_Q2, inp_loeps, inp_hieps)
+      call average_k(inp_pol, inp_Q2, inp_loeps, inp_hieps)
       print*,  "-------------------------------------------------"
       
       stop
@@ -24,7 +25,7 @@ c     Output: averages/averages.*.dat
 
 *-----------------------------------------------------------------------
 
-      subroutine average_k(q2_set,eps_lo_set,eps_hi_set)
+      subroutine average_k(npol_set,q2_set,eps_lo_set,eps_hi_set)
 
 
       implicit none
@@ -55,7 +56,7 @@ c      real thetacm_neg(nu),thetacm_pos(nu)
 
       real eps_set(2)
 
-      integer pol_set(2), j
+      integer pol_set(1), j
 
       real q2_bin, q2_set, eps_lo_set, eps_hi_set, dq2, dtt, dw, eb, eps
       real tt, wwmx, w, tmn, tmx, tmax, tmin, tm, th_mod, q2
@@ -75,8 +76,7 @@ c      real thetacm_neg(nu),thetacm_pos(nu)
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set
 
-      pol_set(1)=+1
-      pol_set(2)=-1
+      pol_set(1)=npol_set
 
       do it=1,nu
 
@@ -523,7 +523,7 @@ c      end do
          print*, tm, um
 
 
-        
+         print*, "~~~~~~2",q2, w, Eb, eps        
 
          call eps_n_theta(-1,Eb,aveW(it),aveQ2(it),
      *                    tm,um,u_min,th_mod,eps_mod)
