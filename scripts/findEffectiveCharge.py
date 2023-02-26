@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-21 17:12:08 trottar"
+# Time-stamp: "2023-02-25 19:47:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,5 +62,5 @@ for runNum in RUNLIST:
     pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
 
 
-BashInput=("{}\n{}\n{}\n{}\n{}\n{}".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, ebeam_val, pTheta_val))
+BashInput=("{}\n{}\n{}\n{}\n{}\n{}".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, pTheta_val, ebeam_val))
 print(BashInput)
