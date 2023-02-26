@@ -96,16 +96,17 @@ c      common  t_bin, phi_bin
 
 
 c   /*--------------------------------------------------*/
-c   Read the t and phi bins 
+c   Read the u and phi bins 
 
-      open(unit = 22, file = "./t_bin_interval")
-      read(22,*) q2_bin, t_bin, phi_bin
-      read(22, '(A)') line
-      read(line, end=20)
-      read(line,*) (t_bin_boundary(j), j = 1,  t_bin+1)
-      
+      open (unit = 22, file = "./t_bin_interval", action='read')
+      read (22,*) q2_bin, t_bin, phi_bin
+      read (22, '(A)') line  
+      read(line, *) (t_bin_boundary(j), j = 1,  t_bin+1)
       nt = t_bin
       nphi = phi_bin 
+
+
+
 
 c      read (22, '(A)') line  
 c      read (22, '(A)') line  
