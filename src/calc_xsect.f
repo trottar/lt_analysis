@@ -801,6 +801,7 @@ c      real*8 q2_gev,w_gev,eps,tp
 
       print*,"w_gev   =   ",  w_gev 
       print*,"q2_gev  =   ",  q2_gev
+      print*,"up      =   ",  up
       print*,"phicm   =   ",  phicm
       print*,"thetacm =   ",  thetacm
       print*,"eps     =   ",  eps
@@ -971,13 +972,17 @@ c     1        ' sigLT=',f10.8,' sigTT=',f10.8,' x_mod=',f15.14,
 c     1   ' wfactor=', f10.6, ' mp=',f5.4, ' w_gev=',f6.4)
 c
 
-      print*, t0, t1 , q2_gev, w_gev, wfactor, eps, sigT, sigL, sig 
+      print*, t0, t1 , q2_gev, up, w_gev, wfactor, eps, sigT, sigL, sig 
 c      stop
 
 
-      write(6,102) eps,sigT,sigL,sigLT,sigTT,sig
- 102  format('xmodel: eps=',f5.3,' sigT=',f7.5,' sigL=',f7.5,
-     1     ' sigLT=',f10.8,' sigTT=',f10.8,' x_mod=',f15.14)
+      print*, "asdasdasdas ", u_min 
+
+
+      write(6,102) eps,up,sigT,sigL,sigLT,sigTT,sig,u_min
+ 102  format('xmodel: eps=',f5.3,' u=',f5.3,' sigT=',f7.5,' sigL=',f7.5,
+     1     ' sigLT=',f10.8,' sigTT=',f10.8,' x_mod=',f15.14, 
+     1     ' umin=', f10.8)
 
 
 
