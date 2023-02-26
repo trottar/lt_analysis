@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 15:53:27 trottar"
+# Time-stamp: "2023-02-26 16:07:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,7 +154,7 @@ echo "Compiling average_kinematics.f..."
 eval "gfortran -o average_kinematics average_kinematics.f"
 echo
 echo "Running average_kinematics..."
-./average_kinematics.expect ${Q2} ${LOEPS} ${HIEPS}
+./average_kinematics.expect ${POL} ${Q2} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
