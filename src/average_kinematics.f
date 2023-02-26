@@ -56,7 +56,7 @@ c      real thetacm_neg(nu),thetacm_pos(nu)
 
       real eps_set(2)
 
-      integer pol_set(1), j
+      integer pol_set(1), j, npol_set
 
       real q2_bin, q2_set, eps_lo_set, eps_hi_set, dq2, dtt, dw, eb, eps
       real tt, wwmx, w, tmn, tmx, tmax, tmin, tm, th_mod, q2
