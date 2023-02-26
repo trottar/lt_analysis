@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 14:26:54 trottar"
+# Time-stamp: "2023-02-26 14:27:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -169,8 +169,7 @@ KIN="Q${Q2}W${W}"
 # Define input and output file names
 OutUnsepxsectsFilename="unsep_xsects_${KIN}"
 
-echo ${Q2} ${W} ${LOWEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
-python3 plot_unsep.py ${Q2} ${W} ${LOWEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
+python3 plot_unsep.py ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
 
 echo
 echo
