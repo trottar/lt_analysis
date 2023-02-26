@@ -528,7 +528,7 @@ c      end do
          call eps_n_theta(-1,Eb,aveW(it),aveQ2(it),
      *                    tm,um,u_min,th_mod,eps_mod)
 
-         print*, th_mod
+         print*, "!!!!!!",th_mod
 
 
 c         stop
