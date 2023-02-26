@@ -12,6 +12,9 @@ c     Output: averages/averages.*.dat
       real inp_Q2, inp_loeps, inp_hieps
       write(*,*) "Please input your Q2 and low+high epsilon:"
       read(*,*) inp_Q2, inp_loeps, inp_hieps
+
+      write(*,*) "Q2 = ",inp_Q2,"low_eps = ",inp_loeps,
+     *           "high_eps = ",inp_hieps
       
       call average_k(inp_Q2, inp_loeps, inp_hieps)
       
