@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 15:35:01 trottar"
+# Time-stamp: "2023-02-26 15:35:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,7 +88,7 @@ file_df_dict = {}
 setting_file = LTANAPATH+"/src/list.settings"
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins', 'Kset'])
 
-for i,row in setting_df.iterrows():
+for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == Q2:
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])        
         if row['EPSVAL'] == LOEPS:
