@@ -309,7 +309,7 @@ c            call xmodel_ghm(npol_set,Eb,q2_set,w,q2,um,tm,phi,
 c     *           eps_mod,th_mod,x_mod)
 
             call xmodel_ghm_two_model(npol_set,Eb,q2_set,w,q2,um,tm,phi,
-     *           eps_mod,th_mod,x_mod,um_min)
+     *           eps,th_mod,x_mod,um_min)
 
 
 c           stop
@@ -410,9 +410,9 @@ c   This is where data output to file happens
 
 
             
-            print*, "kkkkkk  ", x_mod, eps_mod, th_mod 
+            print*, "kkkkkk  ", x_mod, eps, th_mod 
 
-            write(61,40) x_real,dx_real,x_mod,eps_mod,
+            write(61,40) x_real,dx_real,x_mod,eps,
      *           th_mod*180./3.14159,phi*180./3.14159,tm,um,um_min,w,q2
  40         format(3G15.5,f8.5,2f7.2,5f8.5)
 
@@ -427,7 +427,7 @@ c         stop
 
 c        Write out kinematics for Henk.
          if(npol_set.gt.0) write(99,'(5f8.3,2x,2f6.2)')
-     *   w,q2,eps_mod,th_mod*180./3.14159,tm,eps_set,q2_set
+     *   w,q2,eps,th_mod*180./3.14159,tm,eps_set,q2_set
 
       end do                    !t
 
@@ -1006,8 +1006,8 @@ c /*--------------------------------------------------*/
 c /*--------------------------------------------------*/
 
 
-      subroutine xmodel_ghm_160(npol_set,Eb,q2_set,w_gev,q2_gev,u_gev,tm,phicm,
-     *     eps,th_mod,x_mod)
+      subroutine xmodel_ghm_160(npol_set,Eb,q2_set,w_gev,q2_gev,u_gev,
+     *     tm,phicm,eps,th_mod,x_mod)
 
       integer npol_set
       real Eb, q2_set, w, q2, phi, th_mod

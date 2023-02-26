@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 14:27:23 trottar"
+# Time-stamp: "2023-02-26 14:31:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,14 +104,6 @@ fi
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity
 
-echo
-echo "---------------------------------------------------------"
-echo
-echo "Finding unesp xsect for Q2=${Q2}, W=${W}  setting..."
-echo
-echo "---------------------------------------------------------"
-echo
-
 if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     LOEPS=0.1838
     HIEPS=0.5291
@@ -141,6 +133,17 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
     LOEPS=0.4515
     HIEPS=0.6979
 fi
+
+echo
+echo "---------------------------------------------------------"
+echo
+echo "Finding unesp xsect for Q2=${Q2}, W=${W}  setting..."
+echo
+echo "                        LOEPS = ${LOEPS}"
+echo "                        HIEPS = ${HIEPS}"
+echo
+echo "---------------------------------------------------------"
+echo
 
 # Replace p with '.'
 Q2=${Q2//p/.}
