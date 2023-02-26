@@ -23,7 +23,8 @@ c      call getarg(1,prv_it)
 
 c     Calculate unseparated cross-sections. Now settings are for the piplus data (+)
 
-      real inp_pol, inp_Q2, inp_loeps, inp_hieps      
+      character*2 inp_pol
+      real inp_Q2, inp_loeps, inp_hieps      
       
       write(*,*) "Please input your polarity, Q2 and low+high epsilon:"
       read(*,*) inp_pol, inp_Q2, inp_loeps, inp_hieps
