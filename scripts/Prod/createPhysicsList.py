@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-25 21:02:12 trottar"
+# Time-stamp: "2023-02-26 17:36:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -121,7 +121,7 @@ if float(runNumRight[0]) != 0:
                 averQ2_right_data.append(evt.aver_Q2)
                 averW_right_data.append(evt.aver_W)
                 avert_right_data.append(evt.aver_t)
-    relyield_right = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_right_data,yield_right_simc)] 
+    ratio_right = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_right_data,yield_right_simc)] 
 
 if float(runNumLeft[0]) != 0:
     yield_left_data = []
@@ -146,7 +146,7 @@ if float(runNumLeft[0]) != 0:
                 averQ2_left_data.append(evt.aver_Q2)
                 averW_left_data.append(evt.aver_W)
                 avert_left_data.append(evt.aver_t)
-    relyield_left = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_left_data,yield_left_simc)] 
+    ratio_left = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_left_data,yield_left_simc)] 
 
 if float(runNumCenter[0]) != 0:
     yield_center_data = []
@@ -171,9 +171,9 @@ if float(runNumCenter[0]) != 0:
                 averQ2_center_data.append(evt.aver_Q2)
                 averW_center_data.append(evt.aver_W)
                 avert_center_data.append(evt.aver_t)
-    relyield_center = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_center_data,yield_center_simc)] 
+    ratio_center = [0.0 if s == 0.0 else 0.0 if np.isnan(d) else 0.0 if np.isnan(s) else d/s for d,s in zip(yield_center_data,yield_center_simc)] 
     
-print("\n\n~~~~~~~~~",relyield_left)
+print("\n\n~~~~~~~~~",ratio_left)
 print("~~~~~~~~~",tbin_left_data)
 print("~~~~~~~~~",phibin_left_data)
 print("~~~~~~~~~",tbincenter_left_data)
@@ -182,14 +182,14 @@ print("~~~~~~~~~",averQ2_left_data)
 print("~~~~~~~~~",averW_left_data)
 print("~~~~~~~~~",avert_left_data)
 
-print("\n\n~~~~~~~~~",len(relyield_left))
+print("\n\n~~~~~~~~~",len(ratio_left))
 print("~~~~~~~~~",len(tbin_left_data))
 print("~~~~~~~~~",len(phibin_left_data))
 print("~~~~~~~~~",len(averQ2_left_data))
 print("~~~~~~~~~",len(averW_left_data))
 print("~~~~~~~~~",len(avert_left_data))
 
-print("\n\n~~~~~~~~~",relyield_center)
+print("\n\n~~~~~~~~~",ratio_center)
 print("~~~~~~~~~",tbin_center_data)
 print("~~~~~~~~~",phibin_center_data)
 print("~~~~~~~~~",tbincenter_center_data)
@@ -326,8 +326,8 @@ if float(runNumCenter[0]) != 0:
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()
-            for i, relyield in enumerate(relyield_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_right_data[i]), int(tbin_right_data[i]))
+            for i, ratio in enumerate(ratio_right):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_right_data[i]), int(tbin_right_data[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -336,8 +336,8 @@ if float(runNumCenter[0]) != 0:
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
-            for i, relyield in enumerate(relyield_left):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_left_data[i]), int(tbin_left_data[i]))
+            for i, ratio in enumerate(ratio_left):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_left_data[i]), int(tbin_left_data[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -346,8 +346,8 @@ if float(runNumCenter[0]) != 0:
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
-            for i, relyield in enumerate(relyield_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(relyield, 1.0000, int(phibin_center_data[i]), int(tbin_center_data[i]))
+            for i, ratio in enumerate(ratio_center):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_center_data[i]), int(tbin_center_data[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)

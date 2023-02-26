@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 15:35:32 trottar"
+# Time-stamp: "2023-02-26 18:50:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,71 +90,80 @@ file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 't
 
 for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == Q2:
-        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])        
+        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
+        file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")) \
+                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos'])
         if row['EPSVAL'] == LOEPS:
             if row['thpq'] < 0.0:
                 file_df_dict['aver_loeps_{}'.format('right')] = file_to_df( \
                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
                                                                             .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                            , ['relyield', 'relerr', 'phibin', 'tbin'])
+                                                                            , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('right')] = file_to_df( \
                                                                                LTANAPATH+"/src/kindata.{}_{}_{:.0f}_-{}.dat" \
                                                                                .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
-                                                                               , ['averQ2', 'averQ2err', 'averW', 'averWerr', 'avert', 'averterr'])
+                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
                 file_df_dict['aver_loeps_{}'.format('left')] = file_to_df( \
                                                                            LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
                                                                            .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                           , ['relyield', 'relerr', 'phibin', 'tbin'])
+                                                                           , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('left')] = file_to_df( \
                                                                               LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                               .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
-                                                                              , ['averQ2', 'averQ2err', 'averW', 'averWerr', 'avert', 'averterr'])
+                                                                              , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] == 0.0:
                 file_df_dict['aver_loeps_{}'.format('center')] = file_to_df( \
                                                                              LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
                                                                              .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                             , ['relyield', 'relerr', 'phibin', 'tbin'])
+                                                                             , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('center')] = file_to_df( \
                                                                                 LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                                 .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
-                                                                                , ['averQ2', 'averQ2err', 'averW', 'averWerr', 'avert', 'averterr'])
+                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             file_df_dict['xsects_file_loeps'] = file_to_df( \
                                                             LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}" \
                                                             .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                            , [])
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
         if row['EPSVAL'] == HIEPS:
             if row['thpq'] < 0.0:
                 file_df_dict['aver_hieps_{}'.format('right')] = file_to_df( \
                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
                                                                             .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                            , ['relyield', 'relerr', 'phibin', 'tbin'])
+                                                                            , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('right')] = file_to_df( \
                                                                                LTANAPATH+"/src/kindata.{}_{}_{:.0f}_-{}.dat" \
                                                                                .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
-                                                                               , ['averQ2', 'averQ2err', 'averW', 'averWerr', 'avert', 'averterr'])
+                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
                 file_df_dict['aver_hieps_{}'.format('left')] = file_to_df( \
                                                                            LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
                                                                            .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                           , ['relyield', 'relerr', 'phibin', 'tbin'])
+                                                                           , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('left')] = file_to_df( \
                                                                               LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                               .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
-                                                                              , ['averQ2', 'averQ2err', 'averW', 'averWerr', 'avert', 'averterr'])
+                                                                              , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] == 0.0:
                 file_df_dict['aver_hieps_{}'.format('center')] = file_to_df( \
                                                                              LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
                                                                              .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                             , ['relyield', 'relerr', 'phibin', 'tbin'])
+                                                                             , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('center')] = file_to_df( \
                                                                                 LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                                 .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
-                                                                                , ['averQ2', 'averQ2err', 'averW', 'averWerr', 'avert', 'averterr'])
+                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             file_df_dict['xsects_file_hieps'] = file_to_df( \
                                                             LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}" \
                                                             .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                            , [])                    
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
-avek_file = LTANAPATH+"/src/averages/aver.{}.dat".format(Q2.replace("p",""))
+################################################################################################################################################
+G_Q2_tbin = ROOT.TGraphErrors(len(file_df_dict['avek_file']['Q2']), file_df_dict['avek_file']['Q2'] \
+                              ,file_df_dict['avek_file']['dQ2'], file_df_dict['avek_file']['th_pos'])
+C_Q2_tbin = TCanvas()
+C_Q2_tbin.SetGrid()
+
+G_Q2_tbin.SetMarkerStyle(21)
+G_Q2_tbin.Draw('AP')
