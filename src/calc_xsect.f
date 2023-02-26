@@ -790,8 +790,7 @@ c      real*8 q2_gev,w_gev,eps,tp
       
       up = abs(u_gev)      ! just to make sure it's positive
 
-      call eps_n_theta(npol_set, Eb, w_gev, q2_gev, tm, up, 
-     *                 u_min, thetacm, eps)
+      call eps_n_theta(npol_set, Eb, w_gev, q2_gev, tm, thetacm, eps)
       
       um_min = u_min
 
