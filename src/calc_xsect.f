@@ -260,7 +260,7 @@ c        stop
          
 
          print*, " "
-         print*, " ", th_cm
+         print*, "th_cm ", th_cm
          print*, " "
 
 
