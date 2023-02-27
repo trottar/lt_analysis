@@ -574,7 +574,7 @@ c
 
       open(77,file=fn)
       do it=1,ntbins
-         write(77,'(f12.8,1x)')
+         write(77,'(F10.8)')
      *        aveW(it),errW(it),aveQ2(it),errQ2(it),
      *        avett(it), errtt(it), thetacm_only(it),it
 
