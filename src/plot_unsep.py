@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 17:11:44 trottar"
+# Time-stamp: "2023-02-27 17:12:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -233,7 +233,7 @@ G_W_tbin = ROOT.TGraphErrors()
 l_W_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 
-G_W_tbin.SetTitle(" ; #theta_{cm}; Q^{2}")
+G_W_tbin.SetTitle(" ; #theta_{cm}; W")
 
 for i in range(len(file_df_dict['avek_file']['W'].tolist())):
     print(i+1, np.array(file_df_dict['avek_file']['W'].tolist())[i])
