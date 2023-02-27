@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 19:43:20 trottar"
+# Time-stamp: "2023-02-26 19:44:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,9 +103,9 @@ def fix_spacing(f_name):
             output.write('\n'.join(lines))
 
 # Fix file spacing to work in pandas
-fix_spacing("{}/src/averages/avek.{}.dat".format(LTANAPATH, Q2.replace("p",""))
-fix_spacing("{}/src/xsects/x_unsep.{}_{}_{:.0f}".format(LTANAPATH, PID, Q2.replace("p",""), float(LOEPS)*100))
-fix_spacing("{}/src/xsects/x_unsep.{}_{}_{:.0f}".format(LTANAPATH, PID, Q2.replace("p",""), float(HIEPS)*100))
+fix_spacing(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")))
+fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(LOEPS)*100))
+fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(HIEPS)*100))
 ################################################################################################################################################
 # Read in files and convert to dataframes
 
