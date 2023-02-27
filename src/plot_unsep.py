@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:07:40 trottar"
+# Time-stamp: "2023-02-27 16:13:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,7 +77,18 @@ def file_to_df(f_name, columns):
     Read in file and convert to dataframe with custom column names
     '''
 
-    df = pd.read_csv(f_name, header=None, sep=' ')
+    lineskip=False
+    
+    # Open the file for reading
+    with open(f_name, 'r') as file:
+        lines = file.readlines()
+        if lines == 1.000000:
+            lineskip=True
+
+    if lineskip:
+        df = pd.read_csv(f_name, header=None, sep=' ', skiprows=1, skipfooter=1)
+    else:
+        df = pd.read_csv(f_name, header=None, sep=' ')    
     df.columns = columns
     return df
 
