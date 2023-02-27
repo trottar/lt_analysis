@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:04:19 trottar"
+# Time-stamp: "2023-02-27 16:06:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -119,7 +119,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")) \
                                                , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])
-        if row['EPSVAL'] == LOEPS:
+        if row['EPSVAL'] == float(LOEPS):
             if row['thpq'] < 0.0:
                 file_df_dict['aver_loeps_{}'.format('right')] = file_to_df( \
                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
@@ -152,7 +152,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                             .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
                                                             , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
-        if row['EPSVAL'] == HIEPS:
+        if row['EPSVAL'] == float(HIEPS):
             if row['thpq'] < 0.0:
                 file_df_dict['aver_hieps_{}'.format('right')] = file_to_df( \
                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
