@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 19:49:04 trottar"
+# Time-stamp: "2023-02-26 19:51:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -188,8 +188,8 @@ for i,row in file_df_dict['setting_df'].iterrows():
 ################################################################################################################################################
 
 G_Q2_tbin = ROOT.TGraphErrors(len(file_df_dict['avek_file']['Q2'].tolist()) \
-                              , file_df_dict['avek_file']['th_pos'].tolist(), file_df_dict['avek_file']['Q2'].tolist() \
-                              , len(file_df_dict['avek_file']['th_pos'].tolist())*[0], file_df_dict['avek_file']['dQ2'].tolist())
+                              , np.array(file_df_dict['avek_file']['th_pos'].tolist()), np.array(file_df_dict['avek_file']['Q2'].tolist()) \
+                              , len(file_df_dict['avek_file']['th_pos'].tolist())*np.array([0]), np.array(file_df_dict['avek_file']['dQ2'].tolist()))
 C_Q2_tbin = TCanvas()
 C_Q2_tbin.SetGrid()
 
