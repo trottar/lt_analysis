@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:28:48 trottar"
+# Time-stamp: "2023-02-27 16:29:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,6 +206,7 @@ C_Q2_tbin.SetGrid()
 l_Q2_tbin = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
 for i in range(len(file_df_dict['avek_file']['Q2'].tolist())):
+    print(np.array(file_df_dict['avek_file']['Q2'].tolist())[i])
     G_Q2_tbin.SetPoint(i, np.array(file_df_dict['avek_file']['th_pos'].tolist())[i], np.array(file_df_dict['avek_file']['Q2'].tolist())[i])
     G_Q2_tbin.SetPointError(i, np.array(len(file_df_dict['avek_file']['th_pos'].tolist())*[0])[i], np.array(file_df_dict['avek_file']['dQ2'].tolist())[i])
     G_Q2_tbin.SetMarkerColor(i+1)
