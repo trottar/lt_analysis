@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:38:25 trottar"
+# Time-stamp: "2023-02-27 16:39:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -211,10 +211,8 @@ for i in range(len(file_df_dict['avek_file']['Q2'].tolist())):
     G_Q2_tbin.SetPointError(i, np.array(len(file_df_dict['avek_file']['th_pos'].tolist())*[0])[i], np.array(file_df_dict['avek_file']['dQ2'].tolist())[i])
     G_Q2_tbin.SetMarkerStyle(21)
     G_Q2_tbin.SetMarkerSize(1)
+    G_Q2_tbin.SetPointColor(i+1)
 
-for i in range(len(file_df_dict['avek_file']['Q2'].tolist())):
-    G_Q2_tbin.SetMarkerColor(i+1)
-    
 G_Q2_tbin.Draw('AP')
 
 G_Q2_tbin.SetTitle(" ; #theta; Q^{2}")
