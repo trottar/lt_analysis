@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 19:01:09 trottar"
+# Time-stamp: "2023-02-26 19:02:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,10 +28,10 @@ if len(sys.argv)-1!=6:
 
 ###############################################################################################################################################
     
-Q2 = float(sys.argv[1].replace("p","."))
-W = float(sys.argv[2].replace("p","."))
-LOEPS = float(sys.argv[3])
-HIEPS = float(sys.argv[4])
+Q2 = sys.argv[1].replace("p",".")
+W = sys.argv[2]
+LOEPS = sys.argv[3]
+HIEPS = sys.argv[4]
 
 kinematics = sys.argv[5]
 OutFilename = sys.argv[6]
@@ -160,6 +160,9 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                             , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
 ################################################################################################################################################
+Q2 = float(Q2.replace("p","."))
+W = float(W.replace("p","."))
+
 G_Q2_tbin = ROOT.TGraphErrors(len(file_df_dict['avek_file']['Q2']), file_df_dict['avek_file']['Q2'] \
                               ,file_df_dict['avek_file']['dQ2'], file_df_dict['avek_file']['th_pos'])
 C_Q2_tbin = TCanvas()
