@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 15:56:34 trottar"
+# Time-stamp: "2023-02-27 16:01:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -196,13 +196,16 @@ C_Q2_tbin = TCanvas()
 C_Q2_tbin.SetGrid()
 l_Q2_tbin = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
+for i in range(len(file_df_dict['avek_file']['Q2'].tolist())):
+    G_Q2_tbin.SetMarkerColor(i+1)
+
 G_Q2_tbin.SetMarkerStyle(21)
 G_Q2_tbin.Draw('AP')
 
 G_Q2_tbin.SetTitle(" ;Q^{2} (t-binned); #theta")
 
-for i,t in enumerate(file_df_dict['avek_file']['tbin'].tolist()):
-    l_Q2_tbin.AddEntry(G_Q2_tbin, "{}".format(t))
+for i,t in enumerate(file_df_dict['avek_file']['t'].tolist()):
+    l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {}".format(t))
 l_Q2_tbin.Draw()
 
 C_Q2_tbin.Print(outputpdf)
