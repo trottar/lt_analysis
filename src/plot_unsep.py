@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 19:27:49 trottar"
+# Time-stamp: "2023-02-26 19:42:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,6 +17,7 @@ import ROOT
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
+import re
 import sys, math, os, subprocess
 
 ##################################################################################################################################################
@@ -80,6 +81,31 @@ def file_to_df(f_name, columns):
     df.columns = columns
     return df
 
+################################################################################################################################################
+
+def fix_spacing(f_name):
+    '''
+    Fortran created files are bad with spacing. This fixes it.
+    '''
+
+    # Open the file for reading
+    with open(f_name, 'r') as file:
+
+        # Read the lines of the file and split based on whitespace
+        lines = file.readlines()
+        lines = [re.split(r'\s+', line.strip()) for line in lines]
+
+        # Join the split lines with a single space
+        lines = [' '.join(line) for line in lines]
+
+        # Write the lines back to the file
+        with open(f_name, 'w') as output:
+            output.write('\n'.join(lines))
+
+# Fix file spacing to work in pandas
+fix_spacing(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p",""))
+fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(LOEPS)*100))
+fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(HIEPS)*100))
 ################################################################################################################################################
 # Read in files and convert to dataframes
 
