@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:51:02 trottar"
+# Time-stamp: "2023-02-27 16:52:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -205,7 +205,7 @@ C_Q2_tbin.SetGrid()
 
 G_Q2_tbin = ROOT.TGraphErrors()
 
-l_Q2_tbin = ROOT.TLegend(0.115,0.8,0.33,0.95)
+l_Q2_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 
 G_Q2_tbin.SetTitle(" ; #theta_{cm}; Q^{2}")
