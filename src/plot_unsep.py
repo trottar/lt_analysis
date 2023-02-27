@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 17:03:49 trottar"
+# Time-stamp: "2023-02-27 17:04:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -215,7 +215,7 @@ for i in range(len(file_df_dict['avek_file']['Q2'].tolist())):
     G_Q2_tbin.SetPoint(i, np.array(file_df_dict['avek_file']['th_pos'].tolist())[i], np.array(file_df_dict['avek_file']['Q2'].tolist())[i])
     G_Q2_tbin.SetPointError(i, 0, np.array(file_df_dict['avek_file']['dQ2'].tolist())[i])
     l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {:.4f}".format(np.array(file_df_dict['avek_file']['t'].tolist())[i]))
-    m = TMarker(np.array(file_df_dict['avek_file']['th_pos'].tolist())[i], np.array(file_df_dict['avek_file']['Q2'].tolist())[i],20)
+    m = ROOT.TMarker(np.array(file_df_dict['avek_file']['th_pos'].tolist())[i], np.array(file_df_dict['avek_file']['Q2'].tolist())[i],20)
     m.SetMarkerColor(i+1)
     m.Paint()
 
