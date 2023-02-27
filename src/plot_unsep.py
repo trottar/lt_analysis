@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 17:09:58 trottar"
+# Time-stamp: "2023-02-27 17:11:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -223,4 +223,29 @@ G_Q2_tbin.SetMarkerSize(1)
 G_Q2_tbin.Draw('AP')
 l_Q2_tbin.Draw()
 
-C_Q2_tbin.Print(outputpdf)
+C_Q2_tbin.Print(outputpdf + '(')
+
+C_W_tbin = TCanvas()
+C_W_tbin.SetGrid()
+
+G_W_tbin = ROOT.TGraphErrors()
+
+l_W_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+
+
+G_W_tbin.SetTitle(" ; #theta_{cm}; Q^{2}")
+
+for i in range(len(file_df_dict['avek_file']['W'].tolist())):
+    print(i+1, np.array(file_df_dict['avek_file']['W'].tolist())[i])
+    G_W_tbin.SetPoint(i, np.array(file_df_dict['avek_file']['th_pos'].tolist())[i], np.array(file_df_dict['avek_file']['W'].tolist())[i])
+    G_W_tbin.SetPointError(i, 0, np.array(file_df_dict['avek_file']['dW'].tolist())[i])
+    l_W_tbin.AddEntry(G_W_tbin, "t = {:.4f}".format(np.array(file_df_dict['avek_file']['t'].tolist())[i]))
+    G_W_tbin.SetMarkerColor(i+1)
+
+G_W_tbin.SetMarkerStyle(21)
+G_W_tbin.SetMarkerSize(1)
+    
+G_W_tbin.Draw('AP')
+l_W_tbin.Draw()
+
+C_W_tbin.Print(outputpdf + ')')
