@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 16:24:50 trottar"
+# Time-stamp: "2023-02-26 19:53:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -172,6 +172,8 @@ KIN="Q${Q2}W${W}"
 OutUnsepxsectsFilename="unsep_xsects_${KIN}"
 
 python3 plot_unsep.py ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
+
+evince "OUTPUT/Analysis/${ANATYPE}LT/${OutUnsepxsectsFilename}.pdf"
 
 echo
 echo
