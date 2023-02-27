@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:47:03 trottar"
+# Time-stamp: "2023-02-27 16:48:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -212,9 +212,9 @@ G_Q2_tbin.SetTitle(" ; #theta; Q^{2}")
 
 for i in range(len(file_df_dict['avek_file']['Q2'].tolist())):
     print(i+1, np.array(file_df_dict['avek_file']['Q2'].tolist())[i])
-    G_Q2_tbin.SetPoint(i, np.array(file_df_dict['avek_file']['th_pos'].tolist())[i], np.array(file_df_dict['avek_file']['Q2'].tolist())[i])
-    G_Q2_tbin.SetPointError(i, np.array(len(file_df_dict['avek_file']['th_pos'].tolist())*[0])[i], np.array(file_df_dict['avek_file']['dQ2'].tolist())[i])
     G_Q2_tbin.SetMarkerColor(i+1)
+    G_Q2_tbin.SetPoint(i, np.array(file_df_dict['avek_file']['th_pos'].tolist())[i], np.array(file_df_dict['avek_file']['Q2'].tolist())[i])
+    G_Q2_tbin.SetPointError(i, 0, np.array(file_df_dict['avek_file']['dQ2'].tolist())[i])
     l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {:.4f}".format(np.array(file_df_dict['avek_file']['t'].tolist())[i]))
 
 G_Q2_tbin.SetMarkerStyle(21)
