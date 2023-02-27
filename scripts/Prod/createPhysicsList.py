@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 17:36:17 trottar"
+# Time-stamp: "2023-02-27 17:28:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -188,6 +188,13 @@ print("~~~~~~~~~",len(phibin_left_data))
 print("~~~~~~~~~",len(averQ2_left_data))
 print("~~~~~~~~~",len(averW_left_data))
 print("~~~~~~~~~",len(avert_left_data))
+
+print("\n\n~~~~~~~~~",len(ratio_center))
+print("~~~~~~~~~",len(tbin_center_data))
+print("~~~~~~~~~",len(phibin_center_data))
+print("~~~~~~~~~",len(averQ2_center_data))
+print("~~~~~~~~~",len(averW_center_data))
+print("~~~~~~~~~",len(avert_center_data))
 
 print("\n\n~~~~~~~~~",ratio_center)
 print("~~~~~~~~~",tbin_center_data)

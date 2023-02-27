@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 17:12:58 trottar"
+# Time-stamp: "2023-02-27 17:14:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,7 +207,6 @@ G_Q2_tbin = ROOT.TGraphErrors()
 
 l_Q2_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-
 G_Q2_tbin.SetTitle(" ; #theta_{cm}; Q^{2}")
 
 for i in range(len(file_df_dict['avek_file']['Q2'].tolist())):
@@ -231,7 +230,6 @@ C_W_tbin.SetGrid()
 G_W_tbin = ROOT.TGraphErrors()
 
 l_W_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
-
 
 G_W_tbin.SetTitle(" ; #theta_{cm}; W")
 
