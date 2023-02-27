@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:17:42 trottar"
+# Time-stamp: "2023-02-27 16:18:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,7 +138,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                             .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
                                                                             , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('right')] = file_to_df( \
-                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat" \
+                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
                                                                                .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
@@ -171,7 +171,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                             .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
                                                                             , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('right')] = file_to_df( \
-                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat" \
+                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
                                                                                .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
