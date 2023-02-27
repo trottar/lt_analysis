@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 19:51:06 trottar"
+# Time-stamp: "2023-02-26 19:52:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,6 +186,8 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                             , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
 ################################################################################################################################################
+ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
+################################################################################################################################################
 
 G_Q2_tbin = ROOT.TGraphErrors(len(file_df_dict['avek_file']['Q2'].tolist()) \
                               , np.array(file_df_dict['avek_file']['th_pos'].tolist()), np.array(file_df_dict['avek_file']['Q2'].tolist()) \
@@ -195,3 +197,5 @@ C_Q2_tbin.SetGrid()
 
 G_Q2_tbin.SetMarkerStyle(21)
 G_Q2_tbin.Draw('AP')
+
+C_Q2_tbin.Print(outputpdf)
