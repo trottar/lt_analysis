@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:18:19 trottar"
+# Time-stamp: "2023-02-27 16:19:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,7 +83,6 @@ def file_to_df(f_name, columns):
     with open(f_name, 'r') as file:
         lines = file.readlines()
         if '1.000000\n' in lines:
-            print(lines)
             lineskip=True
 
     if lineskip:
@@ -215,7 +214,7 @@ G_Q2_tbin.Draw('AP')
 
 G_Q2_tbin.SetTitle(" ;Q^{2} (t-binned); #theta")
 
-for i,t in enumerate(file_df_dict['xsects_file_loeps']['t'].tolist()):
+for i,t in enumerate(file_df_dict['xsects_file_loeps']['tm'].tolist()):
     l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {}".format(t))
 l_Q2_tbin.Draw()
 
