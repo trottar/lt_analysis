@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:01:47 trottar"
+# Time-stamp: "2023-02-27 16:04:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,14 +189,13 @@ for i,row in file_df_dict['setting_df'].iterrows():
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ################################################################################################################################################
 
-G_Q2_tbin = ROOT.TGraphErrors(len(file_df_dict['avek_file']['Q2'].tolist()) \
-                              , np.array(file_df_dict['avek_file']['th_pos'].tolist()), np.array(file_df_dict['avek_file']['Q2'].tolist()) \
-                              , len(file_df_dict['avek_file']['th_pos'].tolist())*np.array([0]), np.array(file_df_dict['avek_file']['dQ2'].tolist()))
+G_Q2_tbin = ROOT.TGraph(len(file_df_dict['xsects_file_loeps']['Q2'].tolist()) \
+                              , np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist()), np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist()))
 C_Q2_tbin = TCanvas()
 C_Q2_tbin.SetGrid()
 l_Q2_tbin = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
-for i in range(len(file_df_dict['avek_file']['Q2'].tolist())):
+for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
     G_Q2_tbin.SetMarkerColor(i+1)
 
 G_Q2_tbin.SetMarkerStyle(21)
@@ -204,7 +203,7 @@ G_Q2_tbin.Draw('AP')
 
 G_Q2_tbin.SetTitle(" ;Q^{2} (t-binned); #theta")
 
-for i,t in enumerate(file_df_dict['avek_file']['t'].tolist()):
+for i,t in enumerate(file_df_dict['xsects_file_loeps']['t'].tolist()):
     l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {}".format(t))
 l_Q2_tbin.Draw()
 
