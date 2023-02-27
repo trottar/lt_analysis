@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 19:09:30 trottar"
+# Time-stamp: "2023-02-26 19:27:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,7 +92,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")) \
-                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos'])
+                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])
         if row['EPSVAL'] == LOEPS:
             if row['thpq'] < 0.0:
                 file_df_dict['aver_loeps_{}'.format('right')] = file_to_df( \
