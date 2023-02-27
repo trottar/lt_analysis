@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 15:47:26 trottar"
+# Time-stamp: "2023-02-27 15:48:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -202,7 +202,7 @@ G_Q2_tbin.Draw('AP')
 G_Q2_tbin.SetTitle(" ;Q^{2} (t-binned); #theta")
 
 for i,t in enumerate(file_df_dict['avek_file']['tbin'].tolist()):
-    l_Q2_tbin.AddEntry(file_df_dict['avek_file']['Q2'].tolist(),t)
+    l_Q2_tbin.AddEntry(G_Q2_tbin,t)
 l_Q2_tbin.Draw()
 
 C_Q2_tbin.Print(outputpdf)
