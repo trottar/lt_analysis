@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-27 16:06:56 trottar"
+# Time-stamp: "2023-02-27 16:07:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -126,7 +126,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                             .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
                                                                             , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('right')] = file_to_df( \
-                                                                               LTANAPATH+"/src/kindata.{}_{}_{:.0f}_-{}.dat" \
+                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat" \
                                                                                .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
@@ -135,7 +135,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                            .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
                                                                            , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('left')] = file_to_df( \
-                                                                              LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
+                                                                              LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                               .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] == 0.0:
@@ -144,7 +144,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                              .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
                                                                              , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('center')] = file_to_df( \
-                                                                                LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
+                                                                                LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                                 .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                                 , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             file_df_dict['xsects_file_loeps'] = file_to_df( \
@@ -159,7 +159,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                             .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
                                                                             , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('right')] = file_to_df( \
-                                                                               LTANAPATH+"/src/kindata.{}_{}_{:.0f}_-{}.dat" \
+                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat" \
                                                                                .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
@@ -168,7 +168,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                            .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
                                                                            , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('left')] = file_to_df( \
-                                                                              LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
+                                                                              LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                               .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] == 0.0:
@@ -177,7 +177,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                              .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
                                                                              , ['ratio', 'ratioerr', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('center')] = file_to_df( \
-                                                                                LTANAPATH+"/src/kindata.{}_{}_{:.0f}_+{}.dat" \
+                                                                                LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                                 .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                                 , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             file_df_dict['xsects_file_hieps'] = file_to_df( \
