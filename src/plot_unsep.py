@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 19:52:51 trottar"
+# Time-stamp: "2023-02-27 15:46:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -194,8 +194,15 @@ G_Q2_tbin = ROOT.TGraphErrors(len(file_df_dict['avek_file']['Q2'].tolist()) \
                               , len(file_df_dict['avek_file']['th_pos'].tolist())*np.array([0]), np.array(file_df_dict['avek_file']['dQ2'].tolist()))
 C_Q2_tbin = TCanvas()
 C_Q2_tbin.SetGrid()
+l_Q2_tbin = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
 G_Q2_tbin.SetMarkerStyle(21)
 G_Q2_tbin.Draw('AP')
+
+G_Q2_tbin.SetTitle(" ;Q^{2} (t-binned); #theta")
+
+for i,t in enumerate(file_df_dict['avek_file']['tbin'].tolist()):
+    l_eff_plt.AddEntry(file_df_dict['avek_file']['Q2'].tolist(),t)
+l_eff_plt.Draw()
 
 C_Q2_tbin.Print(outputpdf)
