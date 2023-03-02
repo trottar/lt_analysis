@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 19:54:33 trottar"
+# Time-stamp: "2023-03-02 11:23:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ while getopts 'h' flag; do
         echo
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
-	echo "     EPSILON=arg1, Q2=arg2, W=arg3"
+	echo "     Q2=arg1, W=arg2"
 	echo
 	echo " Avaliable Kinematics..."	
 	echo "                      Q2=5p5, W=3p02"

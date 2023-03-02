@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-26 13:54:33 trottar"
+# Time-stamp: "2023-03-02 13:20:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -548,25 +548,137 @@ for i,hist in enumerate(histlist):
         
 c_yield_simc.Print(outputpdf)
 
-'''
-c_yieldbin = TCanvas()
+c_Q2tbin = TCanvas()
 
-c_yieldbin.Divide(int(len(hist["yieldDictData"])/3), 3)
+c_Q2tbin.Divide(3, int(NumtBins/2))
 
 for i,hist in enumerate(histlist):
-    for j in range(hist["H_yield_DATA"].GetNbinsX()):
-        yieldbin = ROOT.TH1D()
-        bin_content = hist["H_yield_DATA"].GetBinContent(j)
-        for k, (key, value) in enumerate(hist["yieldDictData"].items()):
-            if value == bin_content:
-                yieldbin.Fill(bin_content)
-                c_yieldbin.cd(k+1)
-                yieldbin.SetLineColor(i+1)            
-                yieldbin.Draw()
-    c_yieldbin.Update()
 
-c_yieldbin.Print(outputpdf)
-'''
+    InFile_DATA = hist["InFile_DATA"]
+    #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+
+    aver_lst = []
+    for evt in TBRANCH_DATA:
+        for j in range(len(tbinedges) - 1):
+            if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
+                tbin_index = j
+            else:
+                tbin_index = None
+            if tbin_index != None:
+                aver_lst.append((tbin_index, evt.Q2))
+
+    groups = {}
+    # Group the tuples by the first two elements using a dictionary
+    for t in aver_lst:
+        key = (t[0])
+        if key in groups:
+            groups[key].append((t[1]))
+        else:
+            groups[key] = [(t[1])]
+
+    # Extract the desired values from each group
+    for key, val in groups.items():
+        for tup in val:
+            hist["H_Q2_tbin_DATA_{}".format(key+1)].Fill(tup)
+        c_Q2tbin.cd(key+1)
+        hist["H_Q2_tbin_DATA_{}".format(key+1)].Draw("same")
+        hist["H_Q2_tbin_DATA_{}".format(key+1)].SetLineColor(i+1)
+
+c_Q2tbin.Print(outputpdf)
+
+c_Wtbin = TCanvas()
+
+c_Wtbin.Divide(3, int(NumtBins/2))
+
+for i,hist in enumerate(histlist):
+
+    InFile_DATA = hist["InFile_DATA"]
+    #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+
+    aver_lst = []
+    for evt in TBRANCH_DATA:
+        for j in range(len(tbinedges) - 1):
+            if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
+                tbin_index = j
+            else:
+                tbin_index = None
+            if tbin_index != None:
+                aver_lst.append((tbin_index, evt.W))
+
+    groups = {}
+    # Group the tuples by the first two elements using a dictionary
+    for t in aver_lst:
+        key = (t[0])
+        if key in groups:
+            groups[key].append((t[1]))
+        else:
+            groups[key] = [(t[1])]
+
+    # Extract the desired values from each group
+    for key, val in groups.items():
+        for tup in val:
+            hist["H_W_tbin_DATA_{}".format(key+1)].Fill(tup)
+        c_Wtbin.cd(key+1)
+        hist["H_W_tbin_DATA_{}".format(key+1)].Draw("same")
+        hist["H_W_tbin_DATA_{}".format(key+1)].SetLineColor(i+1)
+
+c_Wtbin.Print(outputpdf)
+
+c_ttbin = TCanvas()
+
+c_ttbin.Divide(3, int(NumtBins/2))
+
+for i,hist in enumerate(histlist):
+
+    InFile_DATA = hist["InFile_DATA"]
+    #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
+    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+
+    aver_lst = []
+    for evt in TBRANCH_DATA:
+        for j in range(len(tbinedges) - 1):
+            if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
+                tbin_index = j
+            else:
+                tbin_index = None
+            if tbin_index != None:
+                aver_lst.append((tbin_index, -evt.MandelT))
+
+    groups = {}
+    # Group the tuples by the first two elements using a dictionary
+    for t in aver_lst:
+        key = (t[0])
+        if key in groups:
+            groups[key].append((t[1]))
+        else:
+            groups[key] = [(t[1])]
+
+    # Extract the desired values from each group
+    for key, val in groups.items():
+        for tup in val:
+            hist["H_t_tbin_DATA_{}".format(key+1)].Fill(tup)
+        c_ttbin.cd(key+1)
+        hist["H_t_tbin_DATA_{}".format(key+1)].Draw("same")
+        hist["H_t_tbin_DATA_{}".format(key+1)].SetLineColor(i+1)
+
+c_ttbin.Print(outputpdf)
 
 # Plot histograms
 c_pid = TCanvas()
@@ -1234,6 +1346,10 @@ for i,hist in enumerate(histlist):
     hist["H_pmy_DATA"].Write()
     hist["H_pmz_DATA"].Write()
     hist["H_ct_ep_DATA"].Write()
+    for b in range(NumtBins):
+        hist["H_Q2_tbin_DATA_{}".format(b+1)].Write()
+        hist["H_W_tbin_DATA_{}".format(b+1)].Write()
+        hist["H_t_tbin_DATA_{}".format(b+1)].Write()
     
 for i,hist in enumerate(histlist):
     if hist["phi_setting"] == "Right":

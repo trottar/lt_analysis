@@ -18,10 +18,17 @@ Tmp*
 list.*
 *.dat
 t_bin_interval*
+x_unsep.*
+
+# Fortran
+average_kinematics
+calc_xsect
+fort.99
 
 # Directories
 __pycache__
 build
+average_kinematics
 
 
 # Sym link
