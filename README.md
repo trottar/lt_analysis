@@ -6,9 +6,9 @@
 
 1. First run simc...
 
-'''
+```
 set_HeepInput.sh -a <Kinematics>
-'''
+```
 
 - *Note*: Flag '-a' is required for analysis, see '-h' for all options
 
