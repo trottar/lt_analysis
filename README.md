@@ -6,7 +6,7 @@
 
 # HeeP Analyisis
 
-_ **Note:** I will elaborate on this when I, eventually, update the scripts
+- **Note:** I will elaborate on this when I, eventually, update the scripts
 
 1. First run SIMC...
 
