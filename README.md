@@ -50,7 +50,7 @@ set_ProdInput.sh <epsilon> <Q2> <W>
 applyCuts_Prod.sh <epsilon> <phi_setting> <Q2> <W> <target> <run_number>
 ```
 
-3. Combine run numbers for each phi setting, bin data in t & phi, and produce input files for cross-section fortran scripts...
+3. Combine run numbers for each phi setting, apply diamond cuts, bin data in t & phi, and produce input files for cross-section fortran scripts...
 
 ```
 run_Prod_Analysis.sh -at <epsilon> <Q2> <W>
