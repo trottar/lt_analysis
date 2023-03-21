@@ -2,11 +2,11 @@
 ![LT_Analyisis Workflow Part 2](docs/LT_Analysis_Workflow_2.png)
 ![LT_Analyisis Workflow Part 3](docs/LT_Analysis_Workflow_3.png)
 
-- **Note**: I need to update the above diagram as it is no longer correct!
+- **Note:** I need to update the above diagram as it is no longer correct!
 
 # HeeP Analyisis
 
-_ **Note**: I will elaborate on this when I, eventually, update the scripts
+_ **Note:** I will elaborate on this when I, eventually, update the scripts
 
 1. First run SIMC...
 
@@ -14,7 +14,7 @@ _ **Note**: I will elaborate on this when I, eventually, update the scripts
 ./set_HeepInput.sh -a <Kinematics>
 ```
 
-- **Note**: Flag '-a' is required for analysis, see '-h' for all options
+- **Note:** Flag '-a' is required for analysis, see '-h' for all options
 
 - If you want to check offsets running...
 
