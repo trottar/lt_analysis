@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-03-23 12:30:51 trottar"
+# Time-stamp: "2023-03-23 13:04:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -858,7 +858,6 @@ def defineHists(phi_setting, inpDict):
     # Normalize data by effective charge
 
     normfac_simc = (simc_normfactor)/(simc_nevents)
-    '''
     H_ssxfp_SIMC.Scale(normfac_simc)
     H_ssyfp_SIMC.Scale(normfac_simc)
     H_ssxpfp_SIMC.Scale(normfac_simc)
@@ -887,7 +886,7 @@ def defineHists(phi_setting, inpDict):
     #H_pmy_SIMC.Scale(normfac_simc)
     #H_pmz_SIMC.Scale(normfac_simc)
     H_W_SIMC.Scale(normfac_simc)
-    '''
+
     dummy_target_corr = 4.8579
     if phi_setting == "Right":
         normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
@@ -898,7 +897,7 @@ def defineHists(phi_setting, inpDict):
     if phi_setting == "Center":
         normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
         normfac_data = 1/(data_charge_center)
-    '''
+        
     H_ssxfp_DUMMY.Scale(normfac_dummy)
     H_ssyfp_DUMMY.Scale(normfac_dummy)
     H_ssxpfp_DUMMY.Scale(normfac_dummy)
@@ -1096,7 +1095,7 @@ def defineHists(phi_setting, inpDict):
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_W_DATA.Add(H_W_DUMMY,-1)
     H_ct_ek_DATA.Add(H_ct_ek_DUMMY,-1)
-    '''
+    
     histDict = {
         "phi_setting" : phi_setting,
         "pid_text" : pid_text,
