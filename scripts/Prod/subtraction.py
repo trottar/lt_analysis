@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-03-21 01:20:21 trottar"
+# Time-stamp: "2023-03-23 12:25:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -856,7 +856,7 @@ def defineHists(phi_setting, inpDict):
     # Normalize simc by normfactor/nevents
     # Normalize dummy by effective charge and target correction
     # Normalize data by effective charge
-
+    '''
     normfac_simc = (simc_normfactor)/(simc_nevents)
     H_ssxfp_SIMC.Scale(normfac_simc)
     H_ssyfp_SIMC.Scale(normfac_simc)
@@ -1095,7 +1095,7 @@ def defineHists(phi_setting, inpDict):
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_W_DATA.Add(H_W_DUMMY,-1)
     H_ct_ek_DATA.Add(H_ct_ek_DUMMY,-1)
-    
+    '''
     histDict = {
         "phi_setting" : phi_setting,
         "pid_text" : pid_text,
