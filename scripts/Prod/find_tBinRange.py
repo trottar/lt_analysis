@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 12:02:58 trottar"
+# Time-stamp: "2023-04-24 13:01:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -147,13 +147,7 @@ def bin_data(histlist):
     for i,hist in enumerate(histlist):
         if hist["phi_setting"] == 'Right':
             InFile_RIGHT_DATA = hist["InFile_DATA"]
-            #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Uncut_Kaon_Events")
-            #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_noRF")
-            #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-            #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_noRF")
-            #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_all_RF")
-            TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_prompt_RF")
-            #TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_Kaon_Events_rand_RF")
+            TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
             print("\nCreating right t-bin histogram...")
             # Grab t bin range
             H_list_Right = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_RIGHT_DATA) if (tmin <= -evt.MandelT <= tmax)]
@@ -162,13 +156,7 @@ def bin_data(histlist):
 
         if hist["phi_setting"] == 'Left':
             InFile_LEFT_DATA = hist["InFile_DATA"]
-            #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Uncut_Kaon_Events")
-            #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_all_noRF")
-            #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-            #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_noRF")
-            #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_all_RF")
-            TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_prompt_RF")
-            #TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_Kaon_Events_rand_RF")
+            TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
             print("\nCreating left t-bin histogram...")
             # Grab t bin range
             H_list_Left = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_LEFT_DATA) if (tmin <= -evt.MandelT <= tmax)]
@@ -177,13 +165,7 @@ def bin_data(histlist):
             
         if hist["phi_setting"] == 'Center':
             InFile_CENTER_DATA = hist["InFile_DATA"]
-            #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Uncut_Kaon_Events")
-            #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_all_noRF")
-            #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-            #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_noRF")
-            #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_all_RF")
-            TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_prompt_RF")
-            #TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_Kaon_Events_rand_RF")
+            TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
             print("\nCreating center t-bin histogram...")
             # Grab t bin range
             H_list_Center = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_CENTER_DATA) if (tmin <= -evt.MandelT <= tmax)]
@@ -362,13 +344,7 @@ c_yield_data = TCanvas()
 for i,hist in enumerate(histlist):
 
     InFile_DATA = hist["InFile_DATA"]
-    #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
     mm_list = []
     aver_lst = []
@@ -554,13 +530,7 @@ c_Q2tbin.Divide(3, int(NumtBins/2))
 for i,hist in enumerate(histlist):
 
     InFile_DATA = hist["InFile_DATA"]
-    #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
     aver_lst = []
     for evt in TBRANCH_DATA:
@@ -598,13 +568,7 @@ c_Wtbin.Divide(3, int(NumtBins/2))
 for i,hist in enumerate(histlist):
 
     InFile_DATA = hist["InFile_DATA"]
-    #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
     aver_lst = []
     for evt in TBRANCH_DATA:
@@ -642,13 +606,7 @@ c_ttbin.Divide(3, int(NumtBins/2))
 for i,hist in enumerate(histlist):
 
     InFile_DATA = hist["InFile_DATA"]
-    #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
-    #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
     aver_lst = []
     for evt in TBRANCH_DATA:
