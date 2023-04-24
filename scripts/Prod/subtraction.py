@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 13:27:19 trottar"
+# Time-stamp: "2023-04-24 13:34:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1762,14 +1762,14 @@ def defineHists(phi_setting, inpDict):
         #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
 
         if phi_setting == "Right":
-            normfac_subpion_dummy = 1/(2)
-            normfac_subpion_data = 1/(2)
+            normfac_subpion_dummy = 5/(1)
+            normfac_subpion_data = 5/(1)
         if phi_setting == "Left":
-            normfac_subpion_dummy = 1/(2)
-            normfac_subpion_data = 1/(2)
+            normfac_subpion_dummy = 5/(1)
+            normfac_subpion_data = 5/(1)
         if phi_setting == "Center":
-            normfac_subpion_dummy = 1/(2)
-            normfac_subpion_data = 1/(2)
+            normfac_subpion_dummy = 5/(1)
+            normfac_subpion_data = 5/(1)
 
         H_ssxfp_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
         H_ssyfp_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
@@ -1886,14 +1886,14 @@ def defineHists(phi_setting, inpDict):
         #H_ct_epi_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
 
         if phi_setting == "Right":
-            normfac_subproton_dummy = 1/(2)
-            normfac_subproton_data = 1/(2)
+            normfac_subproton_dummy = 5/(1)
+            normfac_subproton_data = 5/(1)
         if phi_setting == "Left":
-            normfac_subproton_dummy = 1/(2)
-            normfac_subproton_data = 1/(2)
+            normfac_subproton_dummy = 5/(1)
+            normfac_subproton_data = 5/(1)
         if phi_setting == "Center":
-            normfac_subproton_dummy = 1/(2)
-            normfac_subproton_data = 1/(2)
+            normfac_subproton_dummy = 5/(1)
+            normfac_subproton_data = 5/(1)
 
         H_ssxfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_ssyfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
@@ -2065,7 +2065,6 @@ def defineHists(phi_setting, inpDict):
         H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
         H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
-        '''
         ###
         # Data Random subtraction
         H_ssxfp_SUBPION_DATA.Add(H_ssxfp_SUBPION_RAND,-1)
@@ -2177,7 +2176,6 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DUMMY.Add(H_pmz_SUBPROTON_DUMMY_RAND,-1)
         H_W_SUBPROTON_DUMMY.Add(H_W_SUBPROTON_DUMMY_RAND,-1)
         H_ct_ep_SUBPROTON_DUMMY.Add(H_ct_ep_SUBPROTON_DUMMY_RAND,-1)
-        '''
                 
         ###
         # Dummy Subtraction
@@ -2207,7 +2205,6 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_DUMMY,-1)
         H_ct_DATA.Add(H_ct_DUMMY,-1)
 
-        '''
         ###
         # Dummy Subtraction
         H_ssxfp_SUBPION_DATA.Add(H_ssxfp_SUBPION_DUMMY,-1)
@@ -2263,7 +2260,6 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DATA.Add(H_pmz_SUBPROTON_DUMMY,-1)
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
-        '''
 
         ###
         # Plot MM for each particle type
