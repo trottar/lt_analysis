@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 16:55:14 trottar"
+# Time-stamp: "2023-04-24 17:15:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2421,7 +2421,7 @@ def defineHists(phi_setting, inpDict):
         histDict.update(tbinDict)
 
         for key,val in histDict.items():
-            isinstance(val, ROOT.TH1D):
+            if isinstance(val, ROOT.TH1D):
                 print("#####", key, " ", type(val))
 
         ###
