@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 15:22:19 trottar"
+# Time-stamp: "2023-04-24 15:38:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2322,27 +2322,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPROTON_DATA,-1)
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
-        
-        ###
-        # Plot MM for each particle type
-        cmm = TCanvas()
-        l_mm = ROOT.TLegend(0.115,0.65,0.33,0.95)
-        l_mm.SetTextSize(0.0235)        
-        H_MM_DATA.SetLineColor(1)
-        H_MM_SUBPION_DATA.SetLineColor(2)
-        H_MM_SUBPROTON_DATA.SetLineColor(3)
-        H_MM_DATA_nosub.SetLineColor(4)
-        l_mm.AddEntry(H_MM_DATA,"Kaon")
-        l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
-        l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")
-        l_mm.AddEntry(H_MM_DATA_nosub,"Kaon (no sub)")        
-        H_MM_DATA.Draw("same, E1")
-        H_MM_SUBPION_DATA.Draw("same, E1")
-        H_MM_SUBPROTON_DATA.Draw("same, E1")
-        H_MM_DATA_nosub.Draw("same, E1")
-        l_mm.Draw()
-        cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting)))
-        
+                
         histDict = {
             "phi_setting" : phi_setting,
             "pid_text" : pid_text,
@@ -2439,6 +2419,26 @@ def defineHists(phi_setting, inpDict):
 
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
+
+        ###
+        # Plot MM for each particle type
+        cmm = TCanvas()
+        l_mm = ROOT.TLegend(0.115,0.65,0.33,0.95)
+        l_mm.SetTextSize(0.0235)        
+        H_MM_DATA.SetLineColor(1)
+        H_MM_SUBPION_DATA.SetLineColor(2)
+        H_MM_SUBPROTON_DATA.SetLineColor(3)
+        H_MM_DATA_nosub.SetLineColor(4)
+        l_mm.AddEntry(H_MM_DATA,"Kaon")
+        l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
+        l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")
+        l_mm.AddEntry(H_MM_DATA_nosub,"Kaon (no sub)")        
+        H_MM_DATA.Draw("same, E1")
+        H_MM_SUBPION_DATA.Draw("same, E1")
+        H_MM_SUBPROTON_DATA.Draw("same, E1")
+        H_MM_DATA_nosub.Draw("same, E1")
+        l_mm.Draw()
+        cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting)))
         
         return histDict
         
