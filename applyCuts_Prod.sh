@@ -53,7 +53,7 @@ while getopts 'hp' flag; do
 	echo "                      Q2=0p5, W=2p40"
         exit 0
         ;;
-	t) p_flag='true' ;;
+	p) p_flag='true' ;;
         *) print_usage
         exit 1 ;;
     esac
