@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 13:16:13 trottar"
+# Time-stamp: "2023-04-24 13:21:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2205,6 +2205,7 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_DUMMY,-1)
         H_ct_DATA.Add(H_ct_DUMMY,-1)
 
+        '''
         ###
         # Dummy Subtraction
         H_ssxfp_SUBPION_DATA.Add(H_ssxfp_SUBPION_DUMMY,-1)
@@ -2260,6 +2261,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DATA.Add(H_pmz_SUBPROTON_DUMMY,-1)
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
+        '''
 
         ###
         # Plot MM for each particle type
