@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 16:35:47 trottar"
+# Time-stamp: "2023-04-24 16:41:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2421,7 +2421,8 @@ def defineHists(phi_setting, inpDict):
         histDict.update(tbinDict)
 
         for key,val in histDict.items():
-            print("#####", key, " ", type(val))
+            if str(type(val)) == "class 'ROOT.TH1D'":
+                print("#####", key, " ", type(val))
 
         ###
         # Plot MM for each particle type
