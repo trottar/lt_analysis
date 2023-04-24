@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 15:23:20 trottar"
+# Time-stamp: "2023-04-24 15:26:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -254,7 +254,7 @@ for phiset in phisetlist:
 
 print("\n\n")
 
-print("\n\n\n\n\n\n¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",hist)
+print("\n\n\n\n\n\n¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",histlist)
 
 settingList = []
 for i,hist in enumerate(histlist):    
