@@ -507,7 +507,7 @@ if [[ $a_flag = "true" ]]; then
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
@@ -536,7 +536,7 @@ if [[ $a_flag = "true" ]]; then
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
@@ -565,7 +565,7 @@ if [[ $a_flag = "true" ]]; then
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
@@ -594,7 +594,7 @@ if [[ $a_flag = "true" ]]; then
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
@@ -623,7 +623,7 @@ if [[ $a_flag = "true" ]]; then
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
@@ -652,7 +652,7 @@ if [[ $a_flag = "true" ]]; then
 		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		else
-		    echo "WARNING: ${i}_Raw_Data.root does not exist!"
+		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		fi
 	    done	 
 	fi
