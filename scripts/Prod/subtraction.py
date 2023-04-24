@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 13:34:53 trottar"
+# Time-stamp: "2023-04-24 13:40:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1606,6 +1606,22 @@ def defineHists(phi_setting, inpDict):
         # Normalize dummy by effective charge and target correction
         # Normalize data by effective charge
 
+        ###
+        # Plot MM for each particle type
+        cmm = TCanvas()
+        l_mm = ROOT.TLegend(0.115,0.45,0.33,0.95)
+        l_mm.SetTextSize(0.0235)        
+        #H_MM_DATA.SetLineColor(1)
+        H_MM_SUBPION_DATA.SetLineColor(2)
+        H_MM_SUBPROTON_DATA.SetLineColor(3)
+        #l_mm.AddEntry(H_MM_DATA,"Kaon")
+        l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
+        l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")        
+        #H_MM_DATA.Draw("same, E1")
+        H_MM_SUBPION_DATA.Draw("same, E1")
+        H_MM_SUBPROTON_DATA.Draw("same, E1")
+        cmm.Print(outputpdf.replace("kaon_","kaon_MM_subtract_"))
+        
         normfac_simc = (simc_normfactor)/(simc_nevents)
         H_ssxfp_SIMC.Scale(normfac_simc)
         H_ssyfp_SIMC.Scale(normfac_simc)
@@ -1762,14 +1778,14 @@ def defineHists(phi_setting, inpDict):
         #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
 
         if phi_setting == "Right":
-            normfac_subpion_dummy = 5/(1)
-            normfac_subpion_data = 5/(1)
+            normfac_subpion_dummy = 1/(2)
+            normfac_subpion_data = 1/(2)
         if phi_setting == "Left":
-            normfac_subpion_dummy = 5/(1)
-            normfac_subpion_data = 5/(1)
+            normfac_subpion_dummy = 1/(2)
+            normfac_subpion_data = 1/(2)
         if phi_setting == "Center":
-            normfac_subpion_dummy = 5/(1)
-            normfac_subpion_data = 5/(1)
+            normfac_subpion_dummy = 1/(2)
+            normfac_subpion_data = 1/(2)
 
         H_ssxfp_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
         H_ssyfp_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
@@ -1886,14 +1902,14 @@ def defineHists(phi_setting, inpDict):
         #H_ct_epi_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
 
         if phi_setting == "Right":
-            normfac_subproton_dummy = 5/(1)
-            normfac_subproton_data = 5/(1)
+            normfac_subproton_dummy = 1/(2)
+            normfac_subproton_data = 1/(2)
         if phi_setting == "Left":
-            normfac_subproton_dummy = 5/(1)
-            normfac_subproton_data = 5/(1)
+            normfac_subproton_dummy = 1/(2)
+            normfac_subproton_data = 1/(2)
         if phi_setting == "Center":
-            normfac_subproton_dummy = 5/(1)
-            normfac_subproton_data = 5/(1)
+            normfac_subproton_dummy = 1/(2)
+            normfac_subproton_data = 1/(2)
 
         H_ssxfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_ssyfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
@@ -2260,22 +2276,6 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DATA.Add(H_pmz_SUBPROTON_DUMMY,-1)
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
-
-        ###
-        # Plot MM for each particle type
-        cmm = TCanvas()
-        l_mm = ROOT.TLegend(0.115,0.45,0.33,0.95)
-        l_mm.SetTextSize(0.0235)        
-        H_MM_DATA.SetLineColor(1)
-        H_MM_SUBPION_DATA.SetLineColor(2)
-        H_MM_SUBPROTON_DATA.SetLineColor(3)
-        l_mm.AddEntry(H_MM_DATA,"Kaon")
-        l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
-        l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")        
-        H_MM_DATA.Draw("same, E1")
-        H_MM_SUBPION_DATA.Draw("same, E1")
-        H_MM_SUBPROTON_DATA.Draw("same, E1")
-        cmm.Print(outputpdf.replace("kaon_","kaon_MM_subtract_"))
         
         ###
         # Pion Subtraction
