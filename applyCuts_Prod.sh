@@ -26,8 +26,8 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
-# Flag definitions (flags: h)
-while getopts 'h' flag; do
+# Flag definitions (flags: h, p)
+while getopts 'hp' flag; do
     case "${flag}" in
         h) 
         echo "--------------------------------------------------------------"
@@ -39,6 +39,8 @@ while getopts 'h' flag; do
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
 	echo "     EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, target=arg5, RUNNUM=arg6"
+	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
+	echo "        EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, target=arg5, RUNNUM=arg6, ParticleType=arg7"
 	echo
 	echo " Avaliable Kinematics..."
 	echo "                      EPSILON={high,low}"
@@ -51,89 +53,189 @@ while getopts 'h' flag; do
 	echo "                      Q2=0p5, W=2p40"
         exit 0
         ;;
+	t) p_flag='true' ;;
         *) print_usage
         exit 1 ;;
     esac
 done
-    
-EPSILON=$(echo "$1" | tr '[:upper:]' '[:lower:]')
-PHIVAL=$(echo "$2" | tr '[:upper:]' '[:lower:]')
-Q2=$3
-W=$4
-TargetType=$(echo "$5" | tr '[:upper:]' '[:lower:]')
-RUNNUM=$6
-echo "Epsilon must be - high - low - Case Sensitive!"
-echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
-echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
-if [[ -z "$1" || ! "$EPSILON" =~ high|low ]]; then # Check the 1st argument was provided and that it's one of the valid options
-    echo ""
-    echo "I need a valid epsilon..."
-    while true; do
-	echo ""
-	read -p "Epsilon must be - high - low - Case Sensitive! - or press ctrl-c to exit : " EPSILON
-	case $EPSILON in
-	    '');; # If blank, prompt again
-	    'high'|'low') break;; # If a valid option, break the loop and continue
-	esac
-    done
-fi
-if [[ -z "$2" || ! "$PHIVAL" =~ right|left|center ]]; then # Check the 1st argument was provided and that it's one of the valid options
-    echo ""
-    echo "I need a valid phi value..."
-    while true; do
-	echo ""
-	read -p "Phi value must be - right - left - center - Case Sensitive! - or press ctrl-c to exit : " PHIVAL
-	case $PHIVAL in
-	    '');; # If blank, prompt again
-	    'right'|'left'|'center') break;; # If a valid option, break the loop and continue
-	esac
-    done
-fi
-if [[ -z "$3" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
-    echo ""
-    echo "I need a valid Q2..."
-    while true; do
-	echo ""
-	read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5] - or press ctrl-c to exit : " Q2
-	case $Q2 in
-	    '');; # If blank, prompt again
-	    '5p5'|'4p4'|'3p0'|'2p1'|'0p5') break;; # If a valid option, break the loop and continue
-	esac
-    done
-fi
-if [[ -z "$4" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
-    echo ""
-    echo "I need a valid W..."
-    while true; do
-	echo ""
-	read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40] - or press ctrl-c to exit : " W
-	case $W in
-	    '');; # If blank, prompt again
-	    '3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40') break;; # If a valid option, break the loop and continue
-	esac
-    done
-fi
-if [[ -z "$5" || ! "$TargetType" =~ lh2|dummy ]]; then # Check the 3rd argument was provided and that it's one of the valid options
-    echo ""
-    echo "I need a valid target type..."
-    while true; do
-	echo ""
-	read -p "Target type must be one of - [lh2 - dummy] - or press ctrl-c to exit : " TargetType
-	case $TargetType in
-	    '');; # If blank, prompt again
-	    'lh2'|'dummy') break;; # If a valid option, break the loop and continue
-	esac
-    done
-fi
 
-echo
-echo "---------------------------------------------------------"
-echo
-echo "Creating analysis root file for Q2=${Q2}, W=${W}, EPSILON=${EPSILON}, PHIVAL=${PHIVAL} setting..."
-echo
-echo
-echo "---------------------------------------------------------"
-echo
+if [[ $p_flag = "true" ]]; then
+
+    EPSILON=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+    PHIVAL=$(echo "$3" | tr '[:upper:]' '[:lower:]')
+    Q2=$4
+    W=$5
+    TargetType=$(echo "$6" | tr '[:upper:]' '[:lower:]')
+    RUNNUM=$7
+    ParticleType=$8
+    echo "Epsilon must be - high - low - Case Sensitive!"
+    echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
+    echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
+    if [[ -z "$2" || ! "$EPSILON" =~ high|low ]]; then # Check the 1st argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid epsilon..."
+	while true; do
+	    echo ""
+	    read -p "Epsilon must be - high - low - Case Sensitive! - or press ctrl-c to exit : " EPSILON
+	    case $EPSILON in
+		'');; # If blank, prompt again
+		'high'|'low') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$3" || ! "$PHIVAL" =~ right|left|center ]]; then # Check the 1st argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid phi value..."
+	while true; do
+	    echo ""
+	    read -p "Phi value must be - right - left - center - Case Sensitive! - or press ctrl-c to exit : " PHIVAL
+	    case $PHIVAL in
+		'');; # If blank, prompt again
+		'right'|'left'|'center') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$4" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid Q2..."
+	while true; do
+	    echo ""
+	    read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5] - or press ctrl-c to exit : " Q2
+	    case $Q2 in
+		'');; # If blank, prompt again
+		'5p5'|'4p4'|'3p0'|'2p1'|'0p5') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$5" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid W..."
+	while true; do
+	    echo ""
+	    read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40] - or press ctrl-c to exit : " W
+	    case $W in
+		'');; # If blank, prompt again
+		'3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$6" || ! "$TargetType" =~ lh2|dummy ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid target type..."
+	while true; do
+	    echo ""
+	    read -p "Target type must be one of - [lh2 - dummy] - or press ctrl-c to exit : " TargetType
+	    case $TargetType in
+		'');; # If blank, prompt again
+		'lh2'|'dummy') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$8" || ! "$ParticleType" =~ kaon|pion|proton ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid target type..."
+	while true; do
+	    echo ""
+	    read -p "Particle type must be one of - [kaon - pion - proton] - or press ctrl-c to exit : " ParticleType
+	    case $ParticleType in
+		'');; # If blank, prompt again
+		'kaon'|'pion'|'proton') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    
+    echo
+    echo "---------------------------------------------------------"
+    echo
+    echo "Creating analysis root file for Q2=${Q2}, W=${W}, EPSILON=${EPSILON}, PHIVAL=${PHIVAL} setting..."
+    echo
+    echo "Only running for ${ParticleType}"
+    echo
+    echo "---------------------------------------------------------"
+    echo    
+    
+else
+    
+    EPSILON=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+    PHIVAL=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+    Q2=$3
+    W=$4
+    TargetType=$(echo "$5" | tr '[:upper:]' '[:lower:]')
+    RUNNUM=$6
+    echo "Epsilon must be - high - low - Case Sensitive!"
+    echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
+    echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
+    if [[ -z "$1" || ! "$EPSILON" =~ high|low ]]; then # Check the 1st argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid epsilon..."
+	while true; do
+	    echo ""
+	    read -p "Epsilon must be - high - low - Case Sensitive! - or press ctrl-c to exit : " EPSILON
+	    case $EPSILON in
+		'');; # If blank, prompt again
+		'high'|'low') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$2" || ! "$PHIVAL" =~ right|left|center ]]; then # Check the 1st argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid phi value..."
+	while true; do
+	    echo ""
+	    read -p "Phi value must be - right - left - center - Case Sensitive! - or press ctrl-c to exit : " PHIVAL
+	    case $PHIVAL in
+		'');; # If blank, prompt again
+		'right'|'left'|'center') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$3" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid Q2..."
+	while true; do
+	    echo ""
+	    read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5] - or press ctrl-c to exit : " Q2
+	    case $Q2 in
+		'');; # If blank, prompt again
+		'5p5'|'4p4'|'3p0'|'2p1'|'0p5') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$4" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid W..."
+	while true; do
+	    echo ""
+	    read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40] - or press ctrl-c to exit : " W
+	    case $W in
+		'');; # If blank, prompt again
+		'3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+    if [[ -z "$5" || ! "$TargetType" =~ lh2|dummy ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	echo ""
+	echo "I need a valid target type..."
+	while true; do
+	    echo ""
+	    read -p "Target type must be one of - [lh2 - dummy] - or press ctrl-c to exit : " TargetType
+	    case $TargetType in
+		'');; # If blank, prompt again
+		'lh2'|'dummy') break;; # If a valid option, break the loop and continue
+	    esac
+	done
+    fi
+
+    echo
+    echo "---------------------------------------------------------"
+    echo
+    echo "Creating analysis root file for Q2=${Q2}, W=${W}, EPSILON=${EPSILON}, PHIVAL=${PHIVAL} setting..."
+    echo 
+    echo "Running for kaon, pion, proton"    
+    echo
+    echo "---------------------------------------------------------"
+    echo
+fi
 
 if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     if [[ $PHIVAL = "right" ]]; then
@@ -378,54 +480,112 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
 fi    
 
 
-# Define input and output file names
-InDATAFilename="Proc_Data_${KIN}.root"
-OutDATAFilename="Analysed_Data_${KIN}"
-OutFullAnalysisFilename="FullAnalysis_${KIN}"
+if [[ $p_flag = "true" ]]; then
 
-# The analysis script (Analysed_Prod.py) will create a new root file per run number
-if [ ${PHIVAL} = "right" ]; then
-    echo
-    echo "Analysing right data..."
-    echo
-    echo
-    echo "--------------------------------"
-    echo "Analysing right data run ${RUNNUM}..."
-    echo "--------------------------------"
-    echo
-    cd "${LTANAPATH}/scripts/Prod"
-    python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
-    echo
+    # Define input and output file names
+    InDATAFilename="Proc_Data_${ParticleType}_${KIN}.root"
+    OutDATAFilename="Analysed_Data_${ParticleType}_${KIN}"
+    OutFullAnalysisFilename="FullAnalysis_${ParticleType}_${KIN}"
+
+    # The analysis script (Analysed_Prod.py) will create a new root file per run number
+    if [ ${PHIVAL} = "right" ]; then
+	echo
+	echo "Analysing right data..."
+	echo
+	echo
+	echo "--------------------------------"
+	echo "Analysing right data run ${RUNNUM}..."
+	echo "--------------------------------"
+	echo
+	cd "${LTANAPATH}/scripts/Prod"
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	echo
+    fi
+
+    # Checks that array isn't empty
+    if [ ${PHIVAL} = "left" ]; then
+	echo
+	echo "Analysing left data..."
+	echo
+	echo
+	echo "--------------------------------"
+	echo "Analysing left data run ${RUNNUM}..."
+	echo "--------------------------------"
+	echo
+	cd "${LTANAPATH}/scripts/Prod"
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+    fi
+
+    # Checks that array isn't empty
+    if [ ${PHIVAL} = "center" ]; then
+	echo
+	echo "Analysing center data..."
+	echo
+	echo
+	echo "--------------------------------"
+	echo "Analysing center data run ${RUNNUM}..."
+	echo "--------------------------------"
+	echo
+	cd "${LTANAPATH}/scripts/Prod"
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+    fi
+
+else
+    declare -a ParticleTypes=("kaon" "pion" "proton")
+    for i in "${ParticleTypes[@]}"
+    do
+
+	# Define input and output file names
+	InDATAFilename="Proc_Data_${i}_${KIN}.root"
+	OutDATAFilename="Analysed_Data_${i}_${KIN}"
+	OutFullAnalysisFilename="FullAnalysis_${i}_${KIN}"
+
+	# The analysis script (Analysed_Prod.py) will create a new root file per run number
+	if [ ${PHIVAL} = "right" ]; then
+	    echo
+	    echo "Analysing right data..."
+	    echo
+	    echo
+	    echo "--------------------------------"
+	    echo "Analysing right data run ${RUNNUM}..."
+	    echo "--------------------------------"
+	    echo
+	    cd "${LTANAPATH}/scripts/Prod"
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Right_Analysed_Prod_${i}_${RUNNUM}.log
+	    echo
+	fi
+
+	# Checks that array isn't empty
+	if [ ${PHIVAL} = "left" ]; then
+	    echo
+	    echo "Analysing left data..."
+	    echo
+	    echo
+	    echo "--------------------------------"
+	    echo "Analysing left data run ${RUNNUM}..."
+	    echo "--------------------------------"
+	    echo
+	    cd "${LTANAPATH}/scripts/Prod"
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Left_Analysed_Prod_${i}_${RUNNUM}.log
+	fi
+
+	# Checks that array isn't empty
+	if [ ${PHIVAL} = "center" ]; then
+	    echo
+	    echo "Analysing center data..."
+	    echo
+	    echo
+	    echo "--------------------------------"
+	    echo "Analysing center data run ${RUNNUM}..."
+	    echo "--------------------------------"
+	    echo
+	    cd "${LTANAPATH}/scripts/Prod"
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Center_Analysed_Prod_${i}_${RUNNUM}.log
+	    
+	fi
+    done
 fi
-
-# Checks that array isn't empty
-if [ ${PHIVAL} = "left" ]; then
-    echo
-    echo "Analysing left data..."
-    echo
-    echo
-    echo "--------------------------------"
-    echo "Analysing left data run ${RUNNUM}..."
-    echo "--------------------------------"
-    echo
-    cd "${LTANAPATH}/scripts/Prod"
-    python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
-fi
-
-# Checks that array isn't empty
-if [ ${PHIVAL} = "center" ]; then
-    echo
-    echo "Analysing center data..."
-    echo
-    echo
-    echo "--------------------------------"
-    echo "Analysing center data run ${RUNNUM}..."
-    echo "--------------------------------"
-    echo
-    cd "${LTANAPATH}/scripts/Prod"
-    python3 Analysed_Prod.py "${RUNNUM}" | tee ../../log/Analysed_Prod_${RUNNUM}.log
-fi
-
+	
 echo
 echo
 echo
