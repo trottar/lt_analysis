@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 12:44:40 trottar"
+# Time-stamp: "2023-04-24 12:49:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2331,7 +2331,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DATA.Add(H_pmy_SUBPROTON_DATA,-1)
         H_pmz_DATA.Add(H_pmz_SUBPROTON_DATA,-1)
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
-        H_ct_ep_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
+        H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
         
         histDict = {
             "phi_setting" : phi_setting,
