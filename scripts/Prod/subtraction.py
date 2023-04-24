@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 15:14:31 trottar"
+# Time-stamp: "2023-04-24 15:18:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2438,9 +2438,7 @@ def defineHists(phi_setting, inpDict):
         }
 
         # Add t-binned histograms to dictionary
-        histDict.update(tbinDict)
-        
-        return histDict
+        histDict.update(tbinDict)        
         
     else:    
 
@@ -3485,4 +3483,5 @@ def defineHists(phi_setting, inpDict):
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
 
-        return histDict
+    print(histDict)
+    return histDict
