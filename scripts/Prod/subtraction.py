@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 14:52:51 trottar"
+# Time-stamp: "2023-04-24 14:57:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2265,7 +2265,7 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
 
-        H_MM_DATA_nosub = H_MM_DATA
+        H_MM_DATA_nosub = H_MM_DATA.copy()
         
         ###
         # Pion Subtraction
