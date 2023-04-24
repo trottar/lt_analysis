@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 13:40:30 trottar"
+# Time-stamp: "2023-04-24 13:44:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1620,6 +1620,7 @@ def defineHists(phi_setting, inpDict):
         #H_MM_DATA.Draw("same, E1")
         H_MM_SUBPION_DATA.Draw("same, E1")
         H_MM_SUBPROTON_DATA.Draw("same, E1")
+        l_mm.Draw()
         cmm.Print(outputpdf.replace("kaon_","kaon_MM_subtract_"))
         
         normfac_simc = (simc_normfactor)/(simc_nevents)
