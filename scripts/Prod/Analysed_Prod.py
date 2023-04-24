@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-23 21:54:53 trottar"
+# Time-stamp: "2023-04-23 22:06:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,6 +74,8 @@ if ParticleType == "kaon":
     cuts = ["coin_ek_cut_all_noRF","coin_ek_cut_prompt_noRF","coin_ek_cut_rand_noRF","coin_ek_cut_all_RF","coin_ek_cut_prompt_RF","coin_ek_cut_rand_RF"]
 if ParticleType == "pion":
     cuts = ["coin_epi_cut_all_noRF","coin_epi_cut_prompt_noRF","coin_epi_cut_rand_noRF","coin_epi_cut_all_RF","coin_epi_cut_prompt_RF","coin_epi_cut_rand_RF"]
+if ParticleType == "proton":
+    cuts = ["coin_ep_cut_all_noRF","coin_ep_cut_prompt_noRF","coin_ep_cut_rand_noRF","coin_ep_cut_all_RF","coin_ep_cut_prompt_RF","coin_ep_cut_rand_RF"]    
 
 lt=Root(os.path.realpath(__file__),"Prod",ROOTPrefix,runNum,MaxEvent,cut_f,cuts)
 
