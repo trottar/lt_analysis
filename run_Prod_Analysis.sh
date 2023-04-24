@@ -26,8 +26,8 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
-# Flag definitions (flags: h, a, t)
-while getopts 'hat' flag; do
+# Flag definitions (flags: h, a, t, p)
+while getopts 'hatp' flag; do
     case "${flag}" in
         h) 
         echo "--------------------------------------------------------------"
@@ -38,7 +38,8 @@ while getopts 'hat' flag; do
         echo
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
-        echo "    -a, combine data for each phi setting"	
+        echo "    -a, combine data for each phi setting"
+	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."	
         echo "    -t, set t-bin (!!!required for script!!!)"
 	echo "        EPSILON=arg1, Q2=arg2, W=arg3"
 	echo
@@ -53,6 +54,7 @@ while getopts 'hat' flag; do
         ;;
 	a) a_flag='true' ;;
         t) t_flag='true' ;;
+	p) p_flag='true' ;;
         *) print_usage
         exit 1 ;;
     esac
@@ -485,181 +487,363 @@ OutFullAnalysisFilename="FullAnalysis_${KIN}"
 # will create a new root file per run number which are combined using hadd
 if [[ $a_flag = "true" ]]; then
 
-    # Checks that array isn't empty
-    if [ ${#dummy_right[@]} -ne 0 ]; then
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root" ]; then
-	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root exists already, deleting..."
-	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root"
-	fi
-	echo
-	echo "Combining right dummy..."
-	echo
-	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Right" "${dummy_right[*]}" "${ParticleType}"
-	echo
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root" ]; then
-	    for i in "${dummy_right[@]}"
-	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		else
-		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+    if [[ $p_flag != "true" ]]; then
+	
+	declare -a ParticleTypes=("kaon" "pion" "proton")
+	for pid in "${ParticleTypes[@]}"
+	do
+	    
+	    # Checks that array isn't empty
+	    if [ ${#dummy_right[@]} -ne 0 ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Right.root" ]; then
+		    echo
+		    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Right.root exists already, deleting..."
+		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Right.root"
 		fi
-	    done	 
-	fi
-	echo
-    fi
+		echo
+		echo "Combining right dummy..."
+		echo
+		cd "${LTANAPATH}/scripts"
+		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Right" "${dummy_right[*]}" "${pid}"
+		echo
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Right.root" ]; then
+		    for i in "${dummy_right[@]}"
+		    do       
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			else
+			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
+			fi
+		    done	 
+		fi
+		echo
+	    fi
 
-    # Checks that array isn't empty
-    if [ ${#data_right[@]} -ne 0 ]; then
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root" ]; then
-	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root exists already, deleting..."
-	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root"
-	fi
-	echo
-	echo "Combining right data..."
-	echo
-	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Right" "${data_right[*]}" "${ParticleType}"
-	echo
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root" ]; then
-	    for i in "${data_right[@]}"
-	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		else
-		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+	    # Checks that array isn't empty
+	    if [ ${#data_right[@]} -ne 0 ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Right.root" ]; then
+		    echo
+		    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Right.root exists already, deleting..."
+		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Right.root"
 		fi
-	    done	 
-	fi
-	echo
-    fi
-    
-    # Checks that array isn't empty
-    if [ ${#dummy_left[@]} -ne 0 ]; then
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root" ]; then
-	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root exists already, deleting..."
-	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root"
-	fi
-	echo
-	echo "Combining left dummy..."
-	echo
-	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${ParticleType}"
-	echo
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root" ]; then
-	    for i in "${dummy_left[@]}"
-	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		else
-		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+		echo
+		echo "Combining right data..."
+		echo
+		cd "${LTANAPATH}/scripts"
+		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Right" "${data_right[*]}" "${pid}"
+		echo
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Right.root" ]; then
+		    for i in "${data_right[@]}"
+		    do       
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			else
+			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
+			fi
+		    done	 
 		fi
-	    done	 
-	fi
-	echo
-    fi
+		echo
+	    fi
 
-    # Checks that array isn't empty
-    if [ ${#data_left[@]} -ne 0 ]; then
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root" ]; then
-	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root exists already, deleting..."
-	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root"
-	fi
-	echo
-	echo "Combining left data..."
-	echo
-	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Left" "${data_left[*]}" "${ParticleType}"
-	echo
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root" ]; then
-	    for i in "${data_left[@]}"
-	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		else
-		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+	    # Checks that array isn't empty
+	    if [ ${#dummy_left[@]} -ne 0 ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Left.root" ]; then
+		    echo
+		    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Left.root exists already, deleting..."
+		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Left.root"
 		fi
-	    done	 
-	fi
-	echo
-    fi
-    
-    # Checks that array isn't empty
-    if [ ${#dummy_center[@]} -ne 0 ]; then
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root" ]; then
-	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root exists already, deleting..."
-	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root"
-	fi
-	echo
-	echo "Combining center dummy..."
-	echo
-	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Center" "${dummy_center[*]}" "${ParticleType}"
-	echo
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root" ]; then
-	    for i in "${dummy_center[@]}"
-	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		else
-		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+		echo
+		echo "Combining left dummy..."
+		echo
+		cd "${LTANAPATH}/scripts"
+		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${pid}"
+		echo
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Left.root" ]; then
+		    for i in "${dummy_left[@]}"
+		    do       
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			else
+			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
+			fi
+		    done	 
 		fi
-	    done	 
-	fi
-	echo
-    fi
+		echo
+	    fi
 
-    # Checks that array isn't empty
-    if [ ${#data_center[@]} -ne 0 ]; then
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root" ]; then
-	    echo
-	    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root exists already, deleting..."
-	    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root"
-	fi
-	echo
-	echo "Combining center data..."
-	echo
-	cd "${LTANAPATH}/scripts"
-	python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Center" "${data_center[*]}" "${ParticleType}"
-	echo
-	if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
-	    for i in "${data_center[@]}"
-	    do       
-		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
-		    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-		    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-		    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-		else
-		    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+	    # Checks that array isn't empty
+	    if [ ${#data_left[@]} -ne 0 ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Left.root" ]; then
+		    echo
+		    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Left.root exists already, deleting..."
+		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Left.root"
 		fi
-	    done	 
+		echo
+		echo "Combining left data..."
+		echo
+		cd "${LTANAPATH}/scripts"
+		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Left" "${data_left[*]}" "${pid}"
+		echo
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Left.root" ]; then
+		    for i in "${data_left[@]}"
+		    do       
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			else
+			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
+			fi
+		    done	 
+		fi
+		echo
+	    fi
+
+	    # Checks that array isn't empty
+	    if [ ${#dummy_center[@]} -ne 0 ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Center.root" ]; then
+		    echo
+		    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Center.root exists already, deleting..."
+		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Center.root"
+		fi
+		echo
+		echo "Combining center dummy..."
+		echo
+		cd "${LTANAPATH}/scripts"
+		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Center" "${dummy_center[*]}" "${pid}"
+		echo
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Center.root" ]; then
+		    for i in "${dummy_center[@]}"
+		    do       
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			else
+			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
+			fi
+		    done	 
+		fi
+		echo
+	    fi
+
+	    # Checks that array isn't empty
+	    if [ ${#data_center[@]} -ne 0 ]; then
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Center.root" ]; then
+		    echo
+		    echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Center.root exists already, deleting..."
+		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Center.root"
+		fi
+		echo
+		echo "Combining center data..."
+		echo
+		cd "${LTANAPATH}/scripts"
+		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Center" "${data_center[*]}" "${pid}"
+		echo
+		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
+		    for i in "${data_center[@]}"
+		    do       
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			else
+			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
+			fi
+		    done	 
+		fi
+		echo
+	    fi
+	done
+	
+    else
+	
+	# Checks that array isn't empty
+	if [ ${#dummy_right[@]} -ne 0 ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root" ]; then
+		echo
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root"
+	    fi
+	    echo
+	    echo "Combining right dummy..."
+	    echo
+	    cd "${LTANAPATH}/scripts"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Right" "${dummy_right[*]}" "${ParticleType}"
+	    echo
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root" ]; then
+		for i in "${dummy_right[@]}"
+		do       
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    else
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+		    fi
+		done	 
+	    fi
+	    echo
 	fi
-	echo
+
+	# Checks that array isn't empty
+	if [ ${#data_right[@]} -ne 0 ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root" ]; then
+		echo
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root"
+	    fi
+	    echo
+	    echo "Combining right data..."
+	    echo
+	    cd "${LTANAPATH}/scripts"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Right" "${data_right[*]}" "${ParticleType}"
+	    echo
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root" ]; then
+		for i in "${data_right[@]}"
+		do       
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    else
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+		    fi
+		done	 
+	    fi
+	    echo
+	fi
+
+	# Checks that array isn't empty
+	if [ ${#dummy_left[@]} -ne 0 ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root" ]; then
+		echo
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root"
+	    fi
+	    echo
+	    echo "Combining left dummy..."
+	    echo
+	    cd "${LTANAPATH}/scripts"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${ParticleType}"
+	    echo
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root" ]; then
+		for i in "${dummy_left[@]}"
+		do       
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    else
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+		    fi
+		done	 
+	    fi
+	    echo
+	fi
+
+	# Checks that array isn't empty
+	if [ ${#data_left[@]} -ne 0 ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root" ]; then
+		echo
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root"
+	    fi
+	    echo
+	    echo "Combining left data..."
+	    echo
+	    cd "${LTANAPATH}/scripts"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Left" "${data_left[*]}" "${ParticleType}"
+	    echo
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root" ]; then
+		for i in "${data_left[@]}"
+		do       
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    else
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+		    fi
+		done	 
+	    fi
+	    echo
+	fi
+
+	# Checks that array isn't empty
+	if [ ${#dummy_center[@]} -ne 0 ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root" ]; then
+		echo
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root"
+	    fi
+	    echo
+	    echo "Combining center dummy..."
+	    echo
+	    cd "${LTANAPATH}/scripts"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Center" "${dummy_center[*]}" "${ParticleType}"
+	    echo
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root" ]; then
+		for i in "${dummy_center[@]}"
+		do       
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    else
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+		    fi
+		done	 
+	    fi
+	    echo
+	fi
+
+	# Checks that array isn't empty
+	if [ ${#data_center[@]} -ne 0 ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root" ]; then
+		echo
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root"
+	    fi
+	    echo
+	    echo "Combining center data..."
+	    echo
+	    cd "${LTANAPATH}/scripts"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Center" "${data_center[*]}" "${ParticleType}"
+	    echo
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
+		for i in "${data_center[@]}"
+		do       
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
+			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
+			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
+		    else
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
+		    fi
+		done	 
+	    fi
+	    echo
+	fi
     fi
-    
-    
 fi
 
 cd "${LTANAPATH}/scripts"

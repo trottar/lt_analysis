@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 10:51:46 trottar"
+# Time-stamp: "2023-04-24 11:07:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -925,7 +925,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Fill histograms for various trees called above
 
-        print("\nGrabbing %s data..." % phi_setting)
+        print("\nGrabbing %s kaon data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_DATA):
 
             # Progress bar
@@ -1013,7 +1013,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Fill dummy histograms for various trees called above
 
-        print("\nGrabbing %s dummy..." % phi_setting)
+        print("\nGrabbing %s kaon dummy..." % phi_setting)
         for i,evt in enumerate(TBRANCH_DUMMY):
 
             # Progress bar
@@ -1086,7 +1086,7 @@ def defineHists(phi_setting, inpDict):
         ###################################################################################################################################################    
         # Fill random histograms for various trees called above
 
-        print("\nGrabbing %s random data..." % phi_setting)
+        print("\nGrabbing %s kaon random data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_RAND):
 
             # Progress bar
@@ -1151,7 +1151,7 @@ def defineHists(phi_setting, inpDict):
         ###################################################################################################################################################    
         # Fill dummy random histograms for various trees called above
 
-        print("\nGrabbing %s dummy random data..." % phi_setting)
+        print("\nGrabbing %s kaon dummy random data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
             # Progress bar
@@ -1216,7 +1216,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Fill histograms for various trees called above
 
-        print("\nGrabbing %s data..." % phi_setting)
+        print("\nGrabbing %s pion data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_SUBPION_DATA):
 
             # Progress bar
@@ -1304,7 +1304,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Fill dummy histograms for various trees called above
 
-        print("\nGrabbing %s dummy..." % phi_setting)
+        print("\nGrabbing %s pion dummy..." % phi_setting)
         for i,evt in enumerate(TBRANCH_SUBPION_DUMMY):
 
             # Progress bar
@@ -1377,7 +1377,7 @@ def defineHists(phi_setting, inpDict):
         ###################################################################################################################################################    
         # Fill random histograms for various trees called above
 
-        print("\nGrabbing %s random data..." % phi_setting)
+        print("\nGrabbing %s pion random data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_SUBPION_RAND):
 
             # Progress bar
@@ -1442,7 +1442,7 @@ def defineHists(phi_setting, inpDict):
         ###################################################################################################################################################    
         # Fill dummy random histograms for various trees called above
 
-        print("\nGrabbing %s dummy random data..." % phi_setting)
+        print("\nGrabbing %s pion dummy random data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_SUBPION_DUMMY_RAND):
 
             # Progress bar
@@ -1507,7 +1507,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Fill histograms for various trees called above
 
-        print("\nGrabbing %s data..." % phi_setting)
+        print("\nGrabbing %s proton data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_SUBPROTON_DATA):
 
             # Progress bar
@@ -1595,7 +1595,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Fill dummy histograms for various trees called above
 
-        print("\nGrabbing %s dummy..." % phi_setting)
+        print("\nGrabbing %s proton dummy..." % phi_setting)
         for i,evt in enumerate(TBRANCH_SUBPROTON_DUMMY):
 
             # Progress bar
@@ -1668,7 +1668,7 @@ def defineHists(phi_setting, inpDict):
         ###################################################################################################################################################    
         # Fill random histograms for various trees called above
 
-        print("\nGrabbing %s random data..." % phi_setting)
+        print("\nGrabbing %s proton random data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_SUBPROTON_RAND):
 
             # Progress bar
@@ -1733,7 +1733,7 @@ def defineHists(phi_setting, inpDict):
         ###################################################################################################################################################    
         # Fill dummy random histograms for various trees called above
 
-        print("\nGrabbing %s dummy random data..." % phi_setting)
+        print("\nGrabbing %s proton dummy random data..." % phi_setting)
         for i,evt in enumerate(TBRANCH_SUBPROTON_DUMMY_RAND):
 
             # Progress bar
