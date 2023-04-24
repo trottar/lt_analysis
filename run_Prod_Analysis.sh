@@ -170,16 +170,6 @@ KSet=1 # Arbitrary value
 #EffData="coin_production_Prod_efficiency_data_2022_12_30.csv"
 EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
 
-if [[ $ParticleType = "kaon" ]]; then
-    TreeNames="Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF"
-fi
-if [[ $ParticleType = "pion" ]]; then
-    TreeNames="Uncut_Pion_Events Cut_Pion_Events_all_noRF Cut_Pion_Events_prompt_noRF Cut_Pion_Events_rand_noRF Cut_Pion_Events_all_RF Cut_Pion_Events_prompt_RF Cut_Pion_Events_rand_RF"
-fi
-if [[ $ParticleType = "proton" ]]; then
-    TreeNames="Uncut_Proton_Events Cut_Proton_Events_all_noRF Cut_Proton_Events_prompt_noRF Cut_Proton_Events_rand_noRF Cut_Proton_Events_all_RF Cut_Proton_Events_prompt_RF Cut_Proton_Events_rand_RF"
-fi
-
 # Function that calls python script to grab run numbers
 grab_runs () {
     RunList=$1
@@ -492,6 +482,16 @@ if [[ $a_flag = "true" ]]; then
 	declare -a ParticleTypes=("kaon" "pion" "proton")
 	for pid in "${ParticleTypes[@]}"
 	do
+
+	    if [[ $pid = "kaon" ]]; then
+		TreeNames="Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF"
+	    fi
+	    if [[ $pid = "pion" ]]; then
+		TreeNames="Uncut_Pion_Events Cut_Pion_Events_all_noRF Cut_Pion_Events_prompt_noRF Cut_Pion_Events_rand_noRF Cut_Pion_Events_all_RF Cut_Pion_Events_prompt_RF Cut_Pion_Events_rand_RF"
+	    fi
+	    if [[ $pid = "proton" ]]; then
+		TreeNames="Uncut_Proton_Events Cut_Proton_Events_all_noRF Cut_Proton_Events_prompt_noRF Cut_Proton_Events_rand_noRF Cut_Proton_Events_all_RF Cut_Proton_Events_prompt_RF Cut_Proton_Events_rand_RF"
+	    fi
 	    
 	    # Checks that array isn't empty
 	    if [ ${#dummy_right[@]} -ne 0 ]; then
@@ -669,6 +669,16 @@ if [[ $a_flag = "true" ]]; then
 	done
 	
     else
+
+	if [[ $ParticleType = "kaon" ]]; then
+	    TreeNames="Uncut_Kaon_Events Cut_Kaon_Events_all_noRF Cut_Kaon_Events_prompt_noRF Cut_Kaon_Events_rand_noRF Cut_Kaon_Events_all_RF Cut_Kaon_Events_prompt_RF Cut_Kaon_Events_rand_RF"
+	fi
+	if [[ $ParticleType = "pion" ]]; then
+	    TreeNames="Uncut_Pion_Events Cut_Pion_Events_all_noRF Cut_Pion_Events_prompt_noRF Cut_Pion_Events_rand_noRF Cut_Pion_Events_all_RF Cut_Pion_Events_prompt_RF Cut_Pion_Events_rand_RF"
+	fi
+	if [[ $ParticleType = "proton" ]]; then
+	    TreeNames="Uncut_Proton_Events Cut_Proton_Events_all_noRF Cut_Proton_Events_prompt_noRF Cut_Proton_Events_rand_noRF Cut_Proton_Events_all_RF Cut_Proton_Events_prompt_RF Cut_Proton_Events_rand_RF"
+	fi
 	
 	# Checks that array isn't empty
 	if [ ${#dummy_right[@]} -ne 0 ]; then
