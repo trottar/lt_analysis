@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 14:47:05 trottar"
+# Time-stamp: "2023-04-24 14:52:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1896,8 +1896,8 @@ def defineHists(phi_setting, inpDict):
             normfac_subproton_data = 1/(12000)
         if phi_setting == "Center":
             # 5p5, low
-            normfac_subproton_dummy = 1/(5500)
-            normfac_subproton_data = 1/(5500)
+            normfac_subproton_dummy = 1/(6000)
+            normfac_subproton_data = 1/(6000)
 
         H_ssxfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_ssyfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
@@ -2264,6 +2264,8 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DATA.Add(H_pmz_SUBPROTON_DUMMY,-1)
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
+
+        H_MM_DATA_nosub = H_MM_DATA
         
         ###
         # Pion Subtraction
@@ -2329,12 +2331,15 @@ def defineHists(phi_setting, inpDict):
         H_MM_DATA.SetLineColor(1)
         H_MM_SUBPION_DATA.SetLineColor(2)
         H_MM_SUBPROTON_DATA.SetLineColor(3)
+        H_MM_DATA_nosub.SetLineColor(4)
         l_mm.AddEntry(H_MM_DATA,"Kaon")
         l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
-        l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")        
+        l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")
+        l_mm.AddEntry(H_MM_DATA_nosub,"Kaon (no sub)")        
         H_MM_DATA.Draw("same, E1")
         H_MM_SUBPION_DATA.Draw("same, E1")
         H_MM_SUBPROTON_DATA.Draw("same, E1")
+        H_MM_DATA_nosub.Draw("same, E1")
         l_mm.Draw()
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting)))
 
