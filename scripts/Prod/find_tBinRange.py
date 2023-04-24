@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 13:09:11 trottar"
+# Time-stamp: "2023-04-24 15:14:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,6 +256,7 @@ print("\n\n")
 
 settingList = []
 for i,hist in enumerate(histlist):
+    print("\n\n\n\n\n\n¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",hist["H_tbins_DATA"])
     if not bool(hist): # If hist is empty
         histlist.remove(hist)
     else:
