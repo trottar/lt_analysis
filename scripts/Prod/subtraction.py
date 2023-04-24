@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 12:11:25 trottar"
+# Time-stamp: "2023-04-24 12:28:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,15 +161,8 @@ def defineHists(phi_setting, inpDict):
 
         InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
-        #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
         TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
 
-        #TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
         TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
 
         ################################################################################################################################################
@@ -182,15 +175,8 @@ def defineHists(phi_setting, inpDict):
 
         InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")  
 
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Uncut_Kaon_Events")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_noRF")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_noRF")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_RF")
         TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_RF")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
 
-        #TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
         TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
 
         ################################################################################################################################################
@@ -203,16 +189,9 @@ def defineHists(phi_setting, inpDict):
 
         InFile_SUBPION_DATA = ROOT.TFile.Open(rootFileSubPionData, "OPEN")
 
-        #TBRANCH_SUBPION_DATA  = InFile_SUBPION_DATA.Get("Uncut_Pion_Events")
-        #TBRANCH_SUBPION_DATA  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_all_noRF")
-        #TBRANCH_SUBPION_DATA  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_prompt_noRF")
-        #TBRANCH_SUBPION_DATA  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_rand_noRF")
-        #TBRANCH_SUBPION_DATA  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_all_RF")
-        TBRANCH_SUBPION_DATA  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_prompt_RF")
-        #TBRANCH_SUBPION_DATA  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_rand_RF")
+        TBRANCH_SUBPION_DATA  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_prompt_noRF")
 
-        #TBRANCH_SUBPION_RAND  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_rand_noRF")
-        TBRANCH_SUBPION_RAND  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_rand_RF")
+        TBRANCH_SUBPION_RAND  = InFile_SUBPION_DATA.Get("Cut_Pion_Events_rand_noRF")
 
         ################################################################################################################################################
         # Define dummy root file trees of interest
@@ -224,16 +203,9 @@ def defineHists(phi_setting, inpDict):
 
         InFile_SUBPION_DUMMY = ROOT.TFile.Open(rootFileSubPionDummy, "OPEN")  
 
-        #TBRANCH_SUBPION_DUMMY  = InFile_SUBPION_DUMMY.Get("Uncut_Pion_Events")
-        #TBRANCH_SUBPION_DUMMY  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_all_noRF")
-        #TBRANCH_SUBPION_DUMMY  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_prompt_noRF")
-        #TBRANCH_SUBPION_DUMMY  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_rand_noRF")
-        #TBRANCH_SUBPION_DUMMY  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_all_RF")
-        TBRANCH_SUBPION_DUMMY  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_prompt_RF")
-        #TBRANCH_SUBPION_DUMMY  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_rand_RF")
+        TBRANCH_SUBPION_DUMMY  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_prompt_noRF")
 
-        #TBRANCH_SUBPION_DUMMY_RAND  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_rand_noRF")
-        TBRANCH_SUBPION_DUMMY_RAND  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_rand_RF")
+        TBRANCH_SUBPION_DUMMY_RAND  = InFile_SUBPION_DUMMY.Get("Cut_Pion_Events_rand_noRF")
 
         ################################################################################################################################################
         # Define data root file trees of interest
@@ -245,16 +217,9 @@ def defineHists(phi_setting, inpDict):
 
         InFile_SUBPROTON_DATA = ROOT.TFile.Open(rootFileSubProtonData, "OPEN")
 
-        #TBRANCH_SUBPROTON_DATA  = InFile_SUBPROTON_DATA.Get("Uncut_Proton_Events")
-        #TBRANCH_SUBPROTON_DATA  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_all_noRF")
-        #TBRANCH_SUBPROTON_DATA  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_prompt_noRF")
-        #TBRANCH_SUBPROTON_DATA  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_rand_noRF")
-        #TBRANCH_SUBPROTON_DATA  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_all_RF")
-        TBRANCH_SUBPROTON_DATA  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_prompt_RF")
-        #TBRANCH_SUBPROTON_DATA  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_rand_RF")
+        TBRANCH_SUBPROTON_DATA  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_prompt_noRF")
 
-        #TBRANCH_SUBPROTON_RAND  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_rand_noRF")
-        TBRANCH_SUBPROTON_RAND  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_rand_RF")
+        TBRANCH_SUBPROTON_RAND  = InFile_SUBPROTON_DATA.Get("Cut_Proton_Events_rand_noRF")
 
         ################################################################################################################################################
         # Define dummy root file trees of interest
@@ -266,16 +231,9 @@ def defineHists(phi_setting, inpDict):
 
         InFile_SUBPROTON_DUMMY = ROOT.TFile.Open(rootFileSubProtonDummy, "OPEN")  
 
-        #TBRANCH_SUBPROTON_DUMMY  = InFile_SUBPROTON_DUMMY.Get("Uncut_Proton_Events")
-        #TBRANCH_SUBPROTON_DUMMY  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_all_noRF")
-        #TBRANCH_SUBPROTON_DUMMY  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_prompt_noRF")
-        #TBRANCH_SUBPROTON_DUMMY  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_rand_noRF")
-        #TBRANCH_SUBPROTON_DUMMY  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_all_RF")
-        TBRANCH_SUBPROTON_DUMMY  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_prompt_RF")
-        #TBRANCH_SUBPROTON_DUMMY  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_rand_RF")
+        TBRANCH_SUBPROTON_DUMMY  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_prompt_noRF")
 
-        #TBRANCH_SUBPROTON_DUMMY_RAND  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_rand_noRF")
-        TBRANCH_SUBPROTON_DUMMY_RAND  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_rand_RF")
+        TBRANCH_SUBPROTON_DUMMY_RAND  = InFile_SUBPROTON_DUMMY.Get("Cut_Proton_Events_rand_noRF")
         
         ################################################################################################################################################
         # Grabs PID cut string
