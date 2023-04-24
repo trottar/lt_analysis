@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 12:32:49 trottar"
+# Time-stamp: "2023-04-24 12:44:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2303,7 +2303,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DATA.Add(H_pmy_SUBPION_DATA,-1)
         H_pmz_DATA.Add(H_pmz_SUBPION_DATA,-1)
         H_W_DATA.Add(H_W_SUBPION_DATA,-1)
-        H_ct_epi_DATA.Add(H_ct_epi_SUBPION_DATA,-1)
+        H_ct_DATA.Add(H_ct_epi_SUBPION_DATA,-1)
 
         ###
         # Proton Subtraction
