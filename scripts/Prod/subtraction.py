@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 11:07:21 trottar"
+# Time-stamp: "2023-04-24 12:02:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -196,7 +196,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Define data root file trees of interest
 
-        rootFileSubPionData = OUTPATH + "/" + ParticleType + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+        rootFileSubPionData = OUTPATH + "/" + "pion" + "_" + InDATAFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileSubPionData):
             print("\n\nERROR: No data file found called {}\n\n".format(rootFileSubPionData))
             return {}  
@@ -217,7 +217,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Define dummy root file trees of interest
 
-        rootFileSubPionDummy = OUTPATH + "/" + ParticleType + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+        rootFileSubPionDummy = OUTPATH + "/" + "pion" + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileSubPionDummy):
             print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileSubPionDummy))
             return {}
@@ -238,7 +238,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Define data root file trees of interest
 
-        rootFileSubProtonData = OUTPATH + "/" + ParticleType + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+        rootFileSubProtonData = OUTPATH + "/" + "proton" + "_" + InDATAFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileSubProtonData):
             print("\n\nERROR: No data file found called {}\n\n".format(rootFileSubProtonData))
             return {}  
@@ -259,7 +259,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Define dummy root file trees of interest
 
-        rootFileSubProtonDummy = OUTPATH + "/" + ParticleType + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+        rootFileSubProtonDummy = OUTPATH + "/" + "proton" + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileSubProtonDummy):
             print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileSubProtonDummy))
             return {}
@@ -284,7 +284,7 @@ def defineHists(phi_setting, inpDict):
             runNums= runNumRight
             for run in runNumRight.split(' '):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
                 if os.path.exists(pid_log):
                         with open(pid_log, 'r') as f_log:
                             for line in f_log:
@@ -300,7 +300,7 @@ def defineHists(phi_setting, inpDict):
             runNums= runNumLeft
             for run in runNumLeft.split(' '):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
                 if os.path.exists(pid_log):
                         with open(pid_log, 'r') as f_log:
                             for line in f_log:
@@ -315,7 +315,7 @@ def defineHists(phi_setting, inpDict):
             runNums= runNumCenter
             for run in runNumCenter.split(' '):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
                 if os.path.exists(pid_log):
                         with open(pid_log, 'r') as f_log:
                             for line in f_log:
@@ -464,7 +464,7 @@ def defineHists(phi_setting, inpDict):
         H_pmx_DATA  = ROOT.TH1D("H_pmx_DATA","pmx", 200, -10.0, 10.0)
         H_pmy_DATA  = ROOT.TH1D("H_pmy_DATA","pmy ", 200, -10.0, 10.0)
         H_pmz_DATA  = ROOT.TH1D("H_pmz_DATA","pmz", 200, -10.0, 10.0)
-        H_ct_ek_DATA = ROOT.TH1D("H_ct_ek_DATA", "Electron-Kaon CTime", 200, -10, 10)
+        H_ct_DATA = ROOT.TH1D("H_ct_DATA", "Electron-Kaon CTime", 200, -10, 10)
         H_cal_etottracknorm_DATA = ROOT.TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 200, 0.2, 1.8)
         H_cer_npeSum_DATA = ROOT.TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 200, 0, 30)
         P_cal_etottracknorm_DATA = ROOT.TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 200, 0, 1)
@@ -502,7 +502,7 @@ def defineHists(phi_setting, inpDict):
         H_pmx_DUMMY  = ROOT.TH1D("H_pmx_DUMMY","pmx", 200, -10.0, 10.0)
         H_pmy_DUMMY  = ROOT.TH1D("H_pmy_DUMMY","pmy ", 200, -10.0, 10.0)
         H_pmz_DUMMY  = ROOT.TH1D("H_pmz_DUMMY","pmz", 200, -10.0, 10.0)
-        H_ct_ek_DUMMY = ROOT.TH1D("H_ct_ek_DUMMY", "Electron-Kaon CTime", 200, -10, 10)
+        H_ct_DUMMY = ROOT.TH1D("H_ct_DUMMY", "Electron-Kaon CTime", 200, -10, 10)
 
         H_hsdelta_RAND  = ROOT.TH1D("H_hsdelta_RAND","HMS Delta", 200, -20.0, 20.0)
         H_hsxptar_RAND  = ROOT.TH1D("H_hsxptar_RAND","HMS xptar", 200, -0.1, 0.1)
@@ -535,7 +535,7 @@ def defineHists(phi_setting, inpDict):
         H_pmx_RAND  = ROOT.TH1D("H_pmx_RAND","pmx", 200, -10.0, 10.0)
         H_pmy_RAND  = ROOT.TH1D("H_pmy_RAND","pmy ", 200, -10.0, 10.0)
         H_pmz_RAND  = ROOT.TH1D("H_pmz_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_ek_RAND = ROOT.TH1D("H_ct_ek_RAND", "Electron-Kaon CTime", 200, -10, 10)
+        H_ct_RAND = ROOT.TH1D("H_ct_RAND", "Electron-Kaon CTime", 200, -10, 10)
 
         H_hsdelta_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_DUMMY_RAND","HMS Delta", 200, -20.0, 20.0)
         H_hsxptar_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_DUMMY_RAND","HMS xptar", 200, -0.1, 0.1)
@@ -568,7 +568,7 @@ def defineHists(phi_setting, inpDict):
         H_pmx_DUMMY_RAND  = ROOT.TH1D("H_pmx_DUMMY_RAND","pmx", 200, -10.0, 10.0)
         H_pmy_DUMMY_RAND  = ROOT.TH1D("H_pmy_DUMMY_RAND","pmy ", 200, -10.0, 10.0)
         H_pmz_DUMMY_RAND  = ROOT.TH1D("H_pmz_DUMMY_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_ek_DUMMY_RAND = ROOT.TH1D("H_ct_ek_DUMMY_RAND", "Electron-Kaon CTime", 200, -10, 10)
+        H_ct_DUMMY_RAND = ROOT.TH1D("H_ct_DUMMY_RAND", "Electron-Kaon CTime", 200, -10, 10)
 
         H_hsdelta_SUBPION_DATA  = ROOT.TH1D("H_hsdelta_SUBPION_DATA","HMS Delta", 200, -20.0, 20.0)
         H_hsxptar_SUBPION_DATA  = ROOT.TH1D("H_hsxptar_SUBPION_DATA","HMS xptar", 200, -0.1, 0.1)
@@ -966,7 +966,7 @@ def defineHists(phi_setting, inpDict):
               #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)          
               Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
 
-              H_ct_ek_DATA.Fill(evt.CTime_ROC1)
+              H_ct_DATA.Fill(evt.CTime_ROC1)
 
               H_ssxfp_DATA.Fill(evt.ssxfp)
               H_ssyfp_DATA.Fill(evt.ssyfp)
@@ -1046,7 +1046,7 @@ def defineHists(phi_setting, inpDict):
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
-              H_ct_ek_DUMMY.Fill(evt.CTime_ROC1)
+              H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
               H_ssxfp_DUMMY.Fill(evt.ssxfp)
               H_ssyfp_DUMMY.Fill(evt.ssyfp)
@@ -1869,7 +1869,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DUMMY.Scale(normfac_dummy)
         H_pmz_DUMMY.Scale(normfac_dummy)
         H_W_DUMMY.Scale(normfac_dummy)
-        H_ct_ek_DUMMY.Scale(normfac_dummy)
+        H_ct_DUMMY.Scale(normfac_dummy)
 
         H_ssxfp_DATA.Scale(normfac_data)
         H_ssyfp_DATA.Scale(normfac_data)
@@ -1899,7 +1899,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DATA.Scale(normfac_data)
         H_pmz_DATA.Scale(normfac_data)
         H_W_DATA.Scale(normfac_data)
-        H_ct_ek_DATA.Scale(normfac_data)
+        H_ct_DATA.Scale(normfac_data)
 
         # Data Random subtraction
         H_ssxfp_RAND.Scale(normfac_data/nWindows)
@@ -1926,7 +1926,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_RAND.Scale(normfac_data/nWindows)
         H_pmz_RAND.Scale(normfac_data/nWindows)
         H_W_RAND.Scale(normfac_data/nWindows)
-        #H_ct_ek_RAND.Scale(normfac_data/nWindows)
+        #H_ct_RAND.Scale(normfac_data/nWindows)
 
         # Dummy Random subtraction
         H_ssxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
@@ -1953,7 +1953,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_pmz_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_W_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        #H_ct_ek_DUMMY_RAND.Scale(normfac_dummy/nWindows)
+        #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
 
         if phi_setting == "Right":
             normfac_subpion_dummy = 1/(2)
@@ -2229,7 +2229,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DATA.Add(H_pmy_RAND,-1)
         H_pmz_DATA.Add(H_pmz_RAND,-1)
         H_W_DATA.Add(H_W_RAND,-1)
-        H_ct_ek_DATA.Add(H_ct_ek_RAND,-1)
+        H_ct_DATA.Add(H_ct_RAND,-1)
 
         ###
         # Dummy Random subtraction
@@ -2257,7 +2257,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DUMMY.Add(H_pmy_DUMMY_RAND,-1)
         H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
         H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
-        H_ct_ek_DUMMY.Add(H_ct_ek_DUMMY_RAND,-1)
+        H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
         ###
         # Data Random subtraction
@@ -2397,7 +2397,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DATA.Add(H_pmy_DUMMY,-1)
         H_pmz_DATA.Add(H_pmz_DUMMY,-1)
         H_W_DATA.Add(H_W_DUMMY,-1)
-        H_ct_ek_DATA.Add(H_ct_ek_DUMMY,-1)
+        H_ct_DATA.Add(H_ct_DUMMY,-1)
 
         ###
         # Dummy Subtraction
@@ -2602,7 +2602,7 @@ def defineHists(phi_setting, inpDict):
             "H_pmz_SIMC" :     H_pmz_SIMC,
             "H_W_SIMC" :     H_W_SIMC,
             "H_yield_SIMC" : H_yield_SIMC,
-            "H_ct_ek_DATA" :     H_ct_ek_DATA,
+            "H_ct_DATA" :     H_ct_DATA,
             "H_cal_etottracknorm_DATA" :     H_cal_etottracknorm_DATA,
             "H_cer_npeSum_DATA" :     H_cer_npeSum_DATA,
             "P_cal_etottracknorm_DATA" :     P_cal_etottracknorm_DATA,
@@ -2663,44 +2663,30 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Define data root file trees of interest
 
-        rootFileData = OUTPATH+"/"+InDATAFilename+"_%s.root" % (phi_setting)
+        rootFileData = OUTPATH + "/" + ParticleType + "_" + InDATAFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileData):
             print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
             return {}  
 
         InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
-        #TBRANCH_DATA  = InFile_DATA.Get("Uncut_Kaon_Events")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_noRF")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_noRF")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_all_RF")
-        TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_prompt_RF")
-        #TBRANCH_DATA  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
-
-        #TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_noRF")
-        TBRANCH_RAND  = InFile_DATA.Get("Cut_Kaon_Events_rand_RF")
+        TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+        
+        TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
         ################################################################################################################################################
         # Define dummy root file trees of interest
 
-        rootFileDummy = OUTPATH+"/"+InDUMMYFilename+"_%s.root" % (phi_setting)
+        rootFileDummy = OUTPATH + "/" + ParticleType + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileDummy):
             print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
             return {}
 
         InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")  
 
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Uncut_Kaon_Events")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_noRF")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_noRF")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_all_RF")
-        TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_prompt_RF")
-        #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
+        TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
-        #TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_noRF")
-        TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_Kaon_Events_rand_RF")
+        TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
         ################################################################################################################################################
         # Grabs PID cut string
@@ -2709,13 +2695,16 @@ def defineHists(phi_setting, inpDict):
             runNums= runNumRight
             for run in runNumRight.split(' '):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
                 if os.path.exists(pid_log):
                         with open(pid_log, 'r') as f_log:
                             for line in f_log:
-                                if "coin_ek_cut_prompt_RF" in line:
+                                if "coin_epi_cut_prompt_RF" in line:
                                     pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                     break
+                                if "coin_ep_cut_prompt_RF" in line:
+                                    pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                    break                                
                 else:
                     print("WARNING: Run {} does not have a valid PID log!".format(run))
                     continue
@@ -2725,13 +2714,16 @@ def defineHists(phi_setting, inpDict):
             runNums= runNumLeft
             for run in runNumLeft.split(' '):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
                 if os.path.exists(pid_log):
                         with open(pid_log, 'r') as f_log:
                             for line in f_log:
-                                if "coin_ek_cut_prompt_RF" in line:
+                                if "coin_epi_cut_prompt_RF" in line:
                                     pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                     break
+                                if "coin_ep_cut_prompt_RF" in line:
+                                    pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                    break                                
                 else:
                     print("WARNING: Run {} does not have a valid PID log!".format(run))
                     continue
@@ -2740,11 +2732,14 @@ def defineHists(phi_setting, inpDict):
             runNums= runNumCenter
             for run in runNumCenter.split(' '):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
                 if os.path.exists(pid_log):
                         with open(pid_log, 'r') as f_log:
                             for line in f_log:
-                                if "coin_ek_cut_prompt_RF" in line:
+                                if "coin_epi_cut_prompt_RF" in line:
+                                    pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                    break
+                                if "coin_ep_cut_prompt_RF" in line:
                                     pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                     break
                 else:
@@ -2889,7 +2884,10 @@ def defineHists(phi_setting, inpDict):
         H_pmx_DATA  = ROOT.TH1D("H_pmx_DATA","pmx", 200, -10.0, 10.0)
         H_pmy_DATA  = ROOT.TH1D("H_pmy_DATA","pmy ", 200, -10.0, 10.0)
         H_pmz_DATA  = ROOT.TH1D("H_pmz_DATA","pmz", 200, -10.0, 10.0)
-        H_ct_ek_DATA = ROOT.TH1D("H_ct_ek_DATA", "Electron-Kaon CTime", 200, -10, 10)
+        if ParticleType == "pion":
+            H_ct_DATA = ROOT.TH1D("H_ct_DATA", "Electron-Pion CTime", 200, -10, 10)
+        if ParticleType == "proton":
+            H_ct_DATA = ROOT.TH1D("H_ct_DATA", "Electron-Proton CTime", 200, -10, 10)            
         H_cal_etottracknorm_DATA = ROOT.TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 200, 0.2, 1.8)
         H_cer_npeSum_DATA = ROOT.TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 200, 0, 30)
         P_cal_etottracknorm_DATA = ROOT.TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 200, 0, 1)
@@ -2927,8 +2925,11 @@ def defineHists(phi_setting, inpDict):
         H_pmx_DUMMY  = ROOT.TH1D("H_pmx_DUMMY","pmx", 200, -10.0, 10.0)
         H_pmy_DUMMY  = ROOT.TH1D("H_pmy_DUMMY","pmy ", 200, -10.0, 10.0)
         H_pmz_DUMMY  = ROOT.TH1D("H_pmz_DUMMY","pmz", 200, -10.0, 10.0)
-        H_ct_ek_DUMMY = ROOT.TH1D("H_ct_ek_DUMMY", "Electron-Kaon CTime", 200, -10, 10)
-
+        if ParticleType == "pion":
+            H_ct_DUMMY = ROOT.TH1D("H_ct_DUMMY", "Electron-Pion CTime", 200, -10, 10)
+        if ParticleType == "proton":
+            H_ct_DUMMY = ROOT.TH1D("H_ct_DUMMY", "Electron-Proton CTime", 200, -10, 10)
+            
         H_hsdelta_RAND  = ROOT.TH1D("H_hsdelta_RAND","HMS Delta", 200, -20.0, 20.0)
         H_hsxptar_RAND  = ROOT.TH1D("H_hsxptar_RAND","HMS xptar", 200, -0.1, 0.1)
         H_hsyptar_RAND  = ROOT.TH1D("H_hsyptar_RAND","HMS yptar", 200, -0.1, 0.1)
@@ -2960,7 +2961,10 @@ def defineHists(phi_setting, inpDict):
         H_pmx_RAND  = ROOT.TH1D("H_pmx_RAND","pmx", 200, -10.0, 10.0)
         H_pmy_RAND  = ROOT.TH1D("H_pmy_RAND","pmy ", 200, -10.0, 10.0)
         H_pmz_RAND  = ROOT.TH1D("H_pmz_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_ek_RAND = ROOT.TH1D("H_ct_ek_RAND", "Electron-Kaon CTime", 200, -10, 10)
+        if ParticleType == "pion":
+            H_ct_RAND = ROOT.TH1D("H_ct_RAND", "Electron-Pion CTime", 200, -10, 10)
+        if ParticleType == "proton":
+            H_ct_RAND = ROOT.TH1D("H_ct_RAND", "Electron-Proton CTime", 200, -10, 10)            
 
         H_hsdelta_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_DUMMY_RAND","HMS Delta", 200, -20.0, 20.0)
         H_hsxptar_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_DUMMY_RAND","HMS xptar", 200, -0.1, 0.1)
@@ -2993,7 +2997,10 @@ def defineHists(phi_setting, inpDict):
         H_pmx_DUMMY_RAND  = ROOT.TH1D("H_pmx_DUMMY_RAND","pmx", 200, -10.0, 10.0)
         H_pmy_DUMMY_RAND  = ROOT.TH1D("H_pmy_DUMMY_RAND","pmy ", 200, -10.0, 10.0)
         H_pmz_DUMMY_RAND  = ROOT.TH1D("H_pmz_DUMMY_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_ek_DUMMY_RAND = ROOT.TH1D("H_ct_ek_DUMMY_RAND", "Electron-Kaon CTime", 200, -10, 10)
+        if ParticleType == "pion":
+            H_ct_DUMMY_RAND = ROOT.TH1D("H_ct_DUMMY_RAND", "Electron-Pion CTime", 200, -10, 10)
+        if ParticleType == "proton":
+            H_ct_DUMMY_RAND = ROOT.TH1D("H_ct_DUMMY_RAND", "Electron-Proton CTime", 200, -10, 10)            
 
         ################################################################################################################################################
         # t/phi binned histograms
@@ -3117,7 +3124,7 @@ def defineHists(phi_setting, inpDict):
               #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)          
               Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
 
-              H_ct_ek_DATA.Fill(evt.CTime_ROC1)
+              H_ct_DATA.Fill(evt.CTime_ROC1)
 
               H_ssxfp_DATA.Fill(evt.ssxfp)
               H_ssyfp_DATA.Fill(evt.ssyfp)
@@ -3197,7 +3204,7 @@ def defineHists(phi_setting, inpDict):
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
-              H_ct_ek_DUMMY.Fill(evt.CTime_ROC1)
+              H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
               H_ssxfp_DUMMY.Fill(evt.ssxfp)
               H_ssyfp_DUMMY.Fill(evt.ssyfp)
@@ -3439,7 +3446,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DUMMY.Scale(normfac_dummy)
         H_pmz_DUMMY.Scale(normfac_dummy)
         H_W_DUMMY.Scale(normfac_dummy)
-        H_ct_ek_DUMMY.Scale(normfac_dummy)
+        H_ct_DUMMY.Scale(normfac_dummy)
 
         H_ssxfp_DATA.Scale(normfac_data)
         H_ssyfp_DATA.Scale(normfac_data)
@@ -3469,7 +3476,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DATA.Scale(normfac_data)
         H_pmz_DATA.Scale(normfac_data)
         H_W_DATA.Scale(normfac_data)
-        H_ct_ek_DATA.Scale(normfac_data)
+        H_ct_DATA.Scale(normfac_data)
 
         # Data Random subtraction
         H_ssxfp_RAND.Scale(normfac_data/nWindows)
@@ -3496,7 +3503,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_RAND.Scale(normfac_data/nWindows)
         H_pmz_RAND.Scale(normfac_data/nWindows)
         H_W_RAND.Scale(normfac_data/nWindows)
-        #H_ct_ek_RAND.Scale(normfac_data/nWindows)
+        #H_ct_RAND.Scale(normfac_data/nWindows)
 
         # Dummy Random subtraction
         H_ssxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
@@ -3523,7 +3530,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_pmz_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_W_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        #H_ct_ek_DUMMY_RAND.Scale(normfac_dummy/nWindows)
+        #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
 
         ###
         # Data Random subtraction
@@ -3551,7 +3558,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DATA.Add(H_pmy_RAND,-1)
         H_pmz_DATA.Add(H_pmz_RAND,-1)
         H_W_DATA.Add(H_W_RAND,-1)
-        H_ct_ek_DATA.Add(H_ct_ek_RAND,-1)
+        H_ct_DATA.Add(H_ct_RAND,-1)
 
         ###
         # Dummy Random subtraction
@@ -3579,7 +3586,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DUMMY.Add(H_pmy_DUMMY_RAND,-1)
         H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
         H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
-        H_ct_ek_DUMMY.Add(H_ct_ek_DUMMY_RAND,-1)
+        H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
         ###
         # Dummy Subtraction
@@ -3607,7 +3614,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_DATA.Add(H_pmy_DUMMY,-1)
         H_pmz_DATA.Add(H_pmz_DUMMY,-1)
         H_W_DATA.Add(H_W_DUMMY,-1)
-        H_ct_ek_DATA.Add(H_ct_ek_DUMMY,-1)
+        H_ct_DATA.Add(H_ct_DUMMY,-1)
 
         histDict = {
             "phi_setting" : phi_setting,
@@ -3684,7 +3691,7 @@ def defineHists(phi_setting, inpDict):
             "H_pmz_SIMC" :     H_pmz_SIMC,
             "H_W_SIMC" :     H_W_SIMC,
             "H_yield_SIMC" : H_yield_SIMC,
-            "H_ct_ek_DATA" :     H_ct_ek_DATA,
+            "H_ct_DATA" :     H_ct_DATA,
             "H_cal_etottracknorm_DATA" :     H_cal_etottracknorm_DATA,
             "H_cer_npeSum_DATA" :     H_cer_npeSum_DATA,
             "P_cal_etottracknorm_DATA" :     P_cal_etottracknorm_DATA,

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-23 23:42:44 trottar"
+# Time-stamp: "2023-04-24 12:02:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -720,13 +720,13 @@ c_pid.Draw()
 
 c_pid.Print(outputpdf)
 
-ct_ek = TCanvas()
+ct = TCanvas()
 
 for i,hist in enumerate(histlist):
-    hist["H_ct_ek_DATA"].SetLineColor(i+1)
-    hist["H_ct_ek_DATA"].Draw("same, E1")
+    hist["H_ct_DATA"].SetLineColor(i+1)
+    hist["H_ct_DATA"].Draw("same, E1")
 
-ct_ek.Print(outputpdf)
+ct.Print(outputpdf)
 
 
 CQ2 = TCanvas()
@@ -1344,7 +1344,7 @@ for i,hist in enumerate(histlist):
     hist["H_pmx_DATA"].Write()
     hist["H_pmy_DATA"].Write()
     hist["H_pmz_DATA"].Write()
-    hist["H_ct_ek_DATA"].Write()
+    hist["H_ct_DATA"].Write()
     for b in range(NumtBins):
         hist["H_Q2_tbin_DATA_{}".format(b+1)].Write()
         hist["H_W_tbin_DATA_{}".format(b+1)].Write()
