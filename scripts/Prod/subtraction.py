@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 12:02:42 trottar"
+# Time-stamp: "2023-04-24 12:11:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -944,17 +944,8 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
 
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-           # Must be outside diamond cuts to avoid weird overflow errors
+            # Must be outside diamond cuts to avoid weird overflow errors
             polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
@@ -1032,17 +1023,6 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
@@ -1106,18 +1086,6 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
-
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
               H_ssxfp_RAND.Fill(evt.ssxfp)
@@ -1171,18 +1139,6 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
-
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
               H_ssxfp_DUMMY_RAND.Fill(evt.ssxfp)
@@ -1235,27 +1191,8 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-           # Must be outside diamond cuts to avoid weird overflow errors
-            polar_phiq_vs_t_SUBPION_DATA.SetPoint(polar_phiq_vs_t_SUBPION_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
-
-              MM_vs_CoinTime_SUBPION_DATA.Fill(evt.MM, evt.CTime_ROC1)
-              CoinTime_vs_beta_SUBPION_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-              MM_vs_beta_SUBPION_DATA.Fill(evt.MM,evt.P_gtr_beta)
-              phiq_vs_t_SUBPION_DATA.Fill(evt.ph_q, -evt.MandelT)
-              #polar_phiq_vs_t_SUBPION_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)          
-              Q2_vs_W_SUBPION_DATA.Fill(evt.Q2, evt.W)
 
               H_ct_epi_SUBPION_DATA.Fill(evt.CTime_ROC1)
 
@@ -1323,17 +1260,6 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
@@ -1397,18 +1323,6 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
-
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
               H_ssxfp_SUBPION_RAND.Fill(evt.ssxfp)
@@ -1462,18 +1376,6 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
-
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
               H_ssxfp_SUBPION_DUMMY_RAND.Fill(evt.ssxfp)
@@ -1526,27 +1428,8 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-           # Must be outside diamond cuts to avoid weird overflow errors
-            polar_phiq_vs_t_SUBPROTON_DATA.SetPoint(polar_phiq_vs_t_SUBPROTON_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
-
-              MM_vs_CoinTime_SUBPROTON_DATA.Fill(evt.MM, evt.CTime_ROC1)
-              CoinTime_vs_beta_SUBPROTON_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-              MM_vs_beta_SUBPROTON_DATA.Fill(evt.MM,evt.P_gtr_beta)
-              phiq_vs_t_SUBPROTON_DATA.Fill(evt.ph_q, -evt.MandelT)
-              #polar_phiq_vs_t_SUBPROTON_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)          
-              Q2_vs_W_SUBPROTON_DATA.Fill(evt.Q2, evt.W)
 
               H_ct_ep_SUBPROTON_DATA.Fill(evt.CTime_ROC1)
 
@@ -1614,17 +1497,6 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
@@ -1688,18 +1560,6 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
-
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
               H_ssxfp_SUBPROTON_RAND.Fill(evt.ssxfp)
@@ -1752,18 +1612,6 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
@@ -3102,17 +2950,8 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
 
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-           # Must be outside diamond cuts to avoid weird overflow errors
+            # Must be outside diamond cuts to avoid weird overflow errors
             polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
@@ -3190,17 +3029,6 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
@@ -3264,18 +3092,6 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
-
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
               H_ssxfp_RAND.Fill(evt.ssxfp)
@@ -3328,18 +3144,6 @@ def defineHists(phi_setting, inpDict):
                     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
                 except ZeroDivisionError:
                     Diamond = False
-
-            '''
-            if phi_setting == "Right":
-                ct_cut = (evt.CTime_ROC1 > -2) & (evt.CTime_ROC1 < 3)
-            else:
-                ct_cut = True
-
-            #........................................
-
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & ct_cut):
-            '''
-
 
             if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
 
