@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 14:36:23 trottar"
+# Time-stamp: "2023-04-24 14:42:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1896,8 +1896,8 @@ def defineHists(phi_setting, inpDict):
             normfac_subproton_data = 1/(12000)
         if phi_setting == "Center":
             # 5p5, low
-            normfac_subproton_dummy = 1/(12000)
-            normfac_subproton_data = 1/(12000)
+            normfac_subproton_dummy = 1/(7500)
+            normfac_subproton_data = 1/(7500)
 
         H_ssxfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_ssyfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
