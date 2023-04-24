@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 13:44:51 trottar"
+# Time-stamp: "2023-04-24 13:49:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1605,23 +1605,6 @@ def defineHists(phi_setting, inpDict):
         # Normalize simc by normfactor/nevents
         # Normalize dummy by effective charge and target correction
         # Normalize data by effective charge
-
-        ###
-        # Plot MM for each particle type
-        cmm = TCanvas()
-        l_mm = ROOT.TLegend(0.115,0.45,0.33,0.95)
-        l_mm.SetTextSize(0.0235)        
-        #H_MM_DATA.SetLineColor(1)
-        H_MM_SUBPION_DATA.SetLineColor(2)
-        H_MM_SUBPROTON_DATA.SetLineColor(3)
-        #l_mm.AddEntry(H_MM_DATA,"Kaon")
-        l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
-        l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")        
-        #H_MM_DATA.Draw("same, E1")
-        H_MM_SUBPION_DATA.Draw("same, E1")
-        H_MM_SUBPROTON_DATA.Draw("same, E1")
-        l_mm.Draw()
-        cmm.Print(outputpdf.replace("kaon_","kaon_MM_subtract_"))
         
         normfac_simc = (simc_normfactor)/(simc_nevents)
         H_ssxfp_SIMC.Scale(normfac_simc)
@@ -2334,6 +2317,23 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
         
+        ###
+        # Plot MM for each particle type
+        cmm = TCanvas()
+        l_mm = ROOT.TLegend(0.115,0.45,0.53,0.95)
+        l_mm.SetTextSize(0.0235)        
+        #H_MM_DATA.SetLineColor(1)
+        H_MM_SUBPION_DATA.SetLineColor(2)
+        H_MM_SUBPROTON_DATA.SetLineColor(3)
+        #l_mm.AddEntry(H_MM_DATA,"Kaon")
+        l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
+        l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")        
+        #H_MM_DATA.Draw("same, E1")
+        H_MM_SUBPION_DATA.Draw("same, E1")
+        H_MM_SUBPROTON_DATA.Draw("same, E1")
+        l_mm.Draw()
+        cmm.Print(outputpdf.replace("kaon_","kaon_MM_subtract_"))
+
         histDict = {
             "phi_setting" : phi_setting,
             "pid_text" : pid_text,
