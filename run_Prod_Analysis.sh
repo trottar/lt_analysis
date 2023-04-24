@@ -509,11 +509,8 @@ if [[ $a_flag = "true" ]]; then
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Right.root" ]; then
 		    for i in "${dummy_right[@]}"
 		    do       
-			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 			else
 			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
 			fi
@@ -538,11 +535,8 @@ if [[ $a_flag = "true" ]]; then
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Right.root" ]; then
 		    for i in "${data_right[@]}"
 		    do       
-			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 			else
 			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
 			fi
@@ -567,11 +561,8 @@ if [[ $a_flag = "true" ]]; then
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Left.root" ]; then
 		    for i in "${dummy_left[@]}"
 		    do       
-			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 			else
 			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
 			fi
@@ -596,11 +587,8 @@ if [[ $a_flag = "true" ]]; then
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Left.root" ]; then
 		    for i in "${data_left[@]}"
 		    do       
-			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 			else
 			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
 			fi
@@ -625,11 +613,8 @@ if [[ $a_flag = "true" ]]; then
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Center.root" ]; then
 		    for i in "${dummy_center[@]}"
 		    do       
-			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 			else
 			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
 			fi
@@ -654,11 +639,8 @@ if [[ $a_flag = "true" ]]; then
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 		    for i in "${data_center[@]}"
 		    do       
-			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			    echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			    #mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			    #mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 			else
 			    echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!"
 			fi
@@ -696,11 +678,8 @@ if [[ $a_flag = "true" ]]; then
 	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root" ]; then
 		for i in "${dummy_right[@]}"
 		do       
-		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    else
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		    fi
@@ -725,11 +704,8 @@ if [[ $a_flag = "true" ]]; then
 	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root" ]; then
 		for i in "${data_right[@]}"
 		do       
-		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    else
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		    fi
@@ -754,11 +730,8 @@ if [[ $a_flag = "true" ]]; then
 	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root" ]; then
 		for i in "${dummy_left[@]}"
 		do       
-		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    else
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		    fi
@@ -783,11 +756,8 @@ if [[ $a_flag = "true" ]]; then
 	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root" ]; then
 		for i in "${data_left[@]}"
 		do       
-		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    else
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		    fi
@@ -812,11 +782,8 @@ if [[ $a_flag = "true" ]]; then
 	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root" ]; then
 		for i in "${dummy_center[@]}"
 		do       
-		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    else
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		    fi
@@ -841,11 +808,8 @@ if [[ $a_flag = "true" ]]; then
 	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
 		for i in "${data_center[@]}"
 		do       
-		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${i}_-1_Raw_Data.root" ]; then
+		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
-			echo "Renaming ${i}_Raw_Data to ${i}_Proc_Data..."
-			#mv ${i}_-1_Raw_Data.root ${i}_-1_Proc_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
-			#mv ${i}_-1_Proc_Data.root ${i}_-1_Raw_Data.root # <runNum>_-1_Proc_Data.root is used in later LT_analysis
 		    else
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!"
 		    fi
