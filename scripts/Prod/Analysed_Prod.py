@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-23 22:06:29 trottar"
+# Time-stamp: "2023-04-23 22:07:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ if len(sys.argv)-1!=2:
 
 # Input params - run number, particle type, and max number of events
 runNum = sys.argv[1]
-ParticleType = sys.argv[1]
+ParticleType = sys.argv[2]
 MaxEvent = "-1"
 
 ################################################################################################################################################
