@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 12:28:18 trottar"
+# Time-stamp: "2023-04-24 12:32:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1923,7 +1923,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_pmz_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_W_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
-        H_ct_epi_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
+        H_ct_ep_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
 
         H_ssxfp_SUBPROTON_DATA.Scale(normfac_subproton_data)
         H_ssyfp_SUBPROTON_DATA.Scale(normfac_subproton_data)
@@ -1953,7 +1953,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_SUBPROTON_DATA.Scale(normfac_subproton_data)
         H_pmz_SUBPROTON_DATA.Scale(normfac_subproton_data)
         H_W_SUBPROTON_DATA.Scale(normfac_subproton_data)
-        H_ct_epi_SUBPROTON_DATA.Scale(normfac_subproton_data)
+        H_ct_ep_SUBPROTON_DATA.Scale(normfac_subproton_data)
 
         # Data Random subtraction
         H_ssxfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
@@ -1980,7 +1980,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
         H_pmz_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
         H_W_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        #H_ct_epi_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
+        #H_ct_ep_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
 
         # Dummy Random subtraction
         H_ssxfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
@@ -2007,7 +2007,7 @@ def defineHists(phi_setting, inpDict):
         H_pmy_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
         H_pmz_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
         H_W_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        #H_ct_epi_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
+        #H_ct_ep_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
         
         ###
         # Data Random subtraction
