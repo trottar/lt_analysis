@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 13:21:52 trottar"
+# Time-stamp: "2023-04-24 13:27:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2065,6 +2065,7 @@ def defineHists(phi_setting, inpDict):
         H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
         H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
+        '''
         ###
         # Data Random subtraction
         H_ssxfp_SUBPION_DATA.Add(H_ssxfp_SUBPION_RAND,-1)
@@ -2176,6 +2177,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DUMMY.Add(H_pmz_SUBPROTON_DUMMY_RAND,-1)
         H_W_SUBPROTON_DUMMY.Add(H_W_SUBPROTON_DUMMY_RAND,-1)
         H_ct_ep_SUBPROTON_DUMMY.Add(H_ct_ep_SUBPROTON_DUMMY_RAND,-1)
+        '''
                 
         ###
         # Dummy Subtraction
