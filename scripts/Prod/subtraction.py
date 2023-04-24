@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 12:49:03 trottar"
+# Time-stamp: "2023-04-24 13:16:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2275,7 +2275,7 @@ def defineHists(phi_setting, inpDict):
         H_MM_DATA.Draw("same, E1")
         H_MM_SUBPION_DATA.Draw("same, E1")
         H_MM_SUBPROTON_DATA.Draw("same, E1")
-        cmm.Print("MM_subtract_"+outputpdf)
+        cmm.Print(outputpdf.replace("kaon_","kaon_MM_subtract_"))
         
         ###
         # Pion Subtraction
