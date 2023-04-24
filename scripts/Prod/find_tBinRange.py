@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-03-24 15:29:31 trottar"
+# Time-stamp: "2023-04-23 23:42:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,8 +31,8 @@ from functools import reduce
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=24:
-    print("!!!!! ERROR !!!!!\n Expected 24 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=25:
+    print("!!!!! ERROR !!!!!\n Expected 25 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -64,8 +64,7 @@ InData_efficiency_right = sys.argv[21]
 InData_efficiency_left = sys.argv[22]
 InData_efficiency_center = sys.argv[23]
 efficiency_table = sys.argv[24]
-
-particle = "kaon"
+ParticleType = sys.argv[25]
 
 inpDict = {
     "kinematics" : kinematics,
@@ -92,7 +91,7 @@ inpDict = {
     "InData_efficiency_left" : InData_efficiency_left,
     "InData_efficiency_center" : InData_efficiency_center,
     "efficiency_table" : efficiency_table,
-    "particle" : particle,
+    "ParticleType" : ParticleType,
 }
 
 ###############################################################################################################################################
@@ -119,9 +118,9 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
-foutname = OUTPATH+"/" + OutFilename + ".root"
-fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
-outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
+foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
+fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
+outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 ################################################################################################################################################
 '''

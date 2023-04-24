@@ -48,7 +48,7 @@ print("\n\n!!! Ensure all relevant Analysed_Data.root file names have same preci
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
-def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax):
+def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax):
 
     Qs = str(Q2Val).replace('.','p')
     Ws = str(WVal).replace('.','p')
@@ -199,10 +199,12 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
         infile = ROOT.TFile.Open(rootName, "READ")
 
 	# Assumes 2021 trees do not have Prompt MM cut, as some do not right now. *** NEED TO BE REPLAYED AGAIN WITH THIS BRANCH ***
-        if particle == "kaon":
+        if ParticleType == "kaon":
             Cut_Events_all_RF_tree = infile.Get("Cut_Kaon_Events_prompt_RF")
-        if particle == "pion":
+        if ParticleType == "pion":
             Cut_Events_all_RF_tree = infile.Get("Cut_Pion_Events_prompt_RF")
+        if ParticleType == "proton":
+            Cut_Events_all_RF_tree = infile.Get("Cut_Proton_Events_prompt_RF")            
 
 	##############################################################################################################################################
         countB = 0
@@ -377,7 +379,7 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
     }
 
     ##############################################################################################################################################
-    c1_kin = TCanvas("c1_kin", "%s Kinematic Distributions" % particle, 100, 0, 1000, 900)
+    c1_kin = TCanvas("c1_kin", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
     gStyle.SetTitleFontSize(0.03)
     gStyle.SetPalette(86)
     ex1 = TExec("ex1","gStyle->SetPalette(86)")
@@ -441,22 +443,22 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
     gStyle.SetPalette(55)
 
     if (tmax != False):
-        c1_kint = TCanvas("c1_kint", "%s Kinematic Distributions" % particle, 100, 0, 1000, 900)
+        c1_kint = TCanvas("c1_kint", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
         t_cut.Draw("colz")
         c1_kint.Print(Analysis_Distributions)
     if (highe_input != False):
-        c1_kinh = TCanvas("c1_kinh", "%s Kinematic Distributions" % particle, 100, 0, 1000, 900)
+        c1_kinh = TCanvas("c1_kinh", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
         Q2vsW_hi_cut.Draw("colz")
         c1_kinh.Print(Analysis_Distributions+end)
     if (mide_input != False):
-        c1_kinm = TCanvas("c1_kinm", "%s Kinematic Distributions" % particle, 100, 0, 1000, 900)
+        c1_kinm = TCanvas("c1_kinm", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
         Q2vsW_mi_cut.Draw("colz")
         c1_kinm.Print(Analysis_Distributions+end+endm)
     if (lowe_input != False):
-        c1_kinl = TCanvas("c1_kinl", "%s Kinematic Distributions" % particle, 100, 0, 1000, 900)
+        c1_kinl = TCanvas("c1_kinl", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
         Q2vsW_lo_cut.Draw("colz")
         c1_kinl.Print(Analysis_Distributions)
-        c1_kinll = TCanvas("c1_kinll", "%s Kinematic Distributions" % particle, 100, 0, 1000, 900)
+        c1_kinll = TCanvas("c1_kinll", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
         Q2vsW_lolo_cut.Draw("colz")
         #    lol.clear()
         #   lor.clear()
@@ -502,12 +504,12 @@ def DiamondPlot(particle, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tm
         c1_kinll.Print(Analysis_Distributions+end)
 
         if (mide_input != False):
-            c1_kinml = TCanvas("c1_kinml", "%s Kinematic Distributions" % particle, 100, 0, 1000, 900)
+            c1_kinml = TCanvas("c1_kinml", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
             Q2vsW_milo_cut.Draw("colz")
             c1_kinml.Print(Analysis_Distributions+endc)
 
         if (highe_input != False):
-            c1_kinhl = TCanvas("c1_kinhl", "%s Kinematic Distributions" % particle, 100, 0, 1000, 900)
+            c1_kinhl = TCanvas("c1_kinhl", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
             Q2vsW_hilo_cut.Draw("colz")
             c1_kinhl.Print(Analysis_Distributions+endc+endf)
 	

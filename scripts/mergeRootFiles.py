@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-15 00:36:22 trottar"
+# Time-stamp: "2023-04-23 23:00:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,6 +18,7 @@ input_file_name = sys.argv[2]
 input_tree_names = sys.argv[3]
 output_file_name = sys.argv[4]
 string_run_nums = sys.argv[5]
+particle = sys.argv[6]
 
 ###############################################################################################################################################
 '''
@@ -46,7 +47,7 @@ for tree in input_tree_names.split():
             Misc.progressBar(i, len(arr_run_nums)-1,bar_length=25)
         else:
             Misc.progressBar(len(arr_run_nums), len(arr_run_nums),bar_length=25)
-        filepath = root_path + str(n) + input_file_name + ".root"
+        filepath = root_path + particle + str(n) + input_file_name + ".root"
         if not os.path.isfile(filepath):
             print("WARNING: File {} not found.".format(filepath))
             continue
