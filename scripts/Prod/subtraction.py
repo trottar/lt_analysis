@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 22:16:53 trottar"
+# Time-stamp: "2023-04-24 22:24:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2363,7 +2363,7 @@ def defineHists(phi_setting, inpDict):
             "H_pmz_DATA" :     H_pmz_DATA,
             "H_W_DATA" :     H_W_DATA,
             "H_phibins_DATA" : H_phibins_DATA,
-            "H_tbins_DATA" : H_tbins_DATA,
+            "H_tbins_DATA" : H_tbins_DATA.GetArray(),
             "H_yield_DATA" : H_yield_DATA,
             "normfac_simc" : normfac_simc,
             "H_hsdelta_SIMC" :     H_hsdelta_SIMC,
@@ -2437,7 +2437,7 @@ def defineHists(phi_setting, inpDict):
         l_mm.AddEntry(H_MM_DATA,"Kaon")
         l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
         l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")
-        l_mm.AddEntry(H_MM_DATA_nosub,"Kaon (no sub)")        
+        l_mm.AddEntry(H_MM_DATA_nosub,"Kaon (no sub)")
         H_MM_DATA.Draw("same, E1")
         H_MM_SUBPION_DATA.Draw("same, E1")
         H_MM_SUBPROTON_DATA.Draw("same, E1")
@@ -2448,7 +2448,7 @@ def defineHists(phi_setting, inpDict):
 
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
-        return histDict["H_tbins_DATA"]
+        return histDict
         
     else:    
 
