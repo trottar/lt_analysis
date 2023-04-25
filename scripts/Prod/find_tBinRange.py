@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 21:56:24 trottar"
+# Time-stamp: "2023-04-24 22:04:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,12 +250,10 @@ def find_tbins(H_t_BinTest):
 phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
-    histlist.append(defineHists(phiset,inpDict))
+    #histlist.append(defineHists(phiset,inpDict))
+    print(defineHists(phiset,inpDict)["H_tbins_DATA"])
 
 print("\n\n")
-
-for i,hist in enumerate(histlist):
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!", hist["H_tbins_DATA"])
 
 settingList = []
 for i,hist in enumerate(histlist):    
@@ -263,6 +261,9 @@ for i,hist in enumerate(histlist):
         histlist.remove(hist)
     else:
         settingList.append(hist["phi_setting"])
+
+for i,hist in enumerate(histlist):
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!", hist["H_tbins_DATA"])
         
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()
