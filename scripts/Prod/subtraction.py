@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 21:50:34 trottar"
+# Time-stamp: "2023-04-24 22:11:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -157,7 +157,7 @@ def defineHists(phi_setting, inpDict):
         rootFileData = OUTPATH + "/" + ParticleType + "_" + InDATAFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileData):
             print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
-            return {}  
+            return {}
 
         InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
@@ -2444,6 +2444,9 @@ def defineHists(phi_setting, inpDict):
         H_MM_DATA_nosub.Draw("same, E1")
         l_mm.Draw()
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting)))
+
+
+        print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
         return histDict
         

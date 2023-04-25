@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 22:04:15 trottar"
+# Time-stamp: "2023-04-24 22:08:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,8 +250,7 @@ def find_tbins(H_t_BinTest):
 phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
-    #histlist.append(defineHists(phiset,inpDict))
-    print(defineHists(phiset,inpDict)["H_tbins_DATA"])
+    histlist.append(defineHists(phiset,inpDict))
 
 print("\n\n")
 
