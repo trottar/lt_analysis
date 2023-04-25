@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 23:17:54 trottar"
+# Time-stamp: "2023-04-24 23:29:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -39,6 +39,15 @@ from ltsep import Misc
 
 lt=Root(os.path.realpath(__file__),"Plot_Prod")
 
+# Add this to all files for more dynamic pathing
+USER=lt.USER # Grab user info for file finding
+HOST=lt.HOST
+REPLAYPATH=lt.REPLAYPATH
+UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH
+ANATYPE=lt.ANATYPE
+OUTPATH=lt.OUTPATH
+
 ################################################################################################################################################
 
 def defineHists(phi_setting, inpDict):    
@@ -70,15 +79,6 @@ def defineHists(phi_setting, inpDict):
     ParticleType = inpDict["ParticleType"]
 
     ################################################################################################################################################
-
-    # Add this to all files for more dynamic pathing
-    USER=lt.USER # Grab user info for file finding
-    HOST=lt.HOST
-    REPLAYPATH=lt.REPLAYPATH
-    UTILPATH=lt.UTILPATH
-    LTANAPATH=lt.LTANAPATH
-    ANATYPE=lt.ANATYPE
-    OUTPATH=lt.OUTPATH
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
     fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
@@ -2430,15 +2430,15 @@ def defineHists(phi_setting, inpDict):
         cmm = TCanvas()
         l_mm = ROOT.TLegend(0.115,0.65,0.33,0.95)
         l_mm.SetTextSize(0.0235)        
-        H_MM_DATA.SetLineColor(1)
+        histDict["H_MM_DATA"].SetLineColor(1)
         H_MM_SUBPION_DATA.SetLineColor(2)
         H_MM_SUBPROTON_DATA.SetLineColor(3)
         H_MM_DATA_nosub.SetLineColor(4)
-        l_mm.AddEntry(H_MM_DATA,"Kaon")
+        l_mm.AddEntry(histDict["H_MM_DATA"],"Kaon")
         l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
         l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")
         l_mm.AddEntry(H_MM_DATA_nosub,"Kaon (no sub)")
-        H_MM_DATA.Draw("same, E1")
+        histDict["H_MM_DATA"].Draw("same, E1")
         H_MM_SUBPION_DATA.Draw("same, E1")
         H_MM_SUBPROTON_DATA.Draw("same, E1")
         H_MM_DATA_nosub.Draw("same, E1")
@@ -2446,10 +2446,8 @@ def defineHists(phi_setting, inpDict):
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting)))
 
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
-
-        temp = histDict.copy()
         
-        return temp
+        return histDict
         
     else:    
 
