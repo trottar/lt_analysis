@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 17:15:11 trottar"
+# Time-stamp: "2023-04-24 21:39:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2363,7 +2363,7 @@ def defineHists(phi_setting, inpDict):
             "H_pmz_DATA" :     H_pmz_DATA,
             "H_W_DATA" :     H_W_DATA,
             "H_phibins_DATA" : H_phibins_DATA,
-            "H_tbins_DATA" : H_tbins_DATA,
+            "H_tbins_DATA" : H_tbins_DATA.Clone("H_tbins_DATA"),
             "H_yield_DATA" : H_yield_DATA,
             "normfac_simc" : normfac_simc,
             "H_hsdelta_SIMC" :     H_hsdelta_SIMC,
