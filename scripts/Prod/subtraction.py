@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 22:24:44 trottar"
+# Time-stamp: "2023-04-24 22:34:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2363,7 +2363,7 @@ def defineHists(phi_setting, inpDict):
             "H_pmz_DATA" :     H_pmz_DATA,
             "H_W_DATA" :     H_W_DATA,
             "H_phibins_DATA" : H_phibins_DATA,
-            "H_tbins_DATA" : H_tbins_DATA.GetArray(),
+            "H_tbins_DATA" : H_tbins_DATA,
             "H_yield_DATA" : H_yield_DATA,
             "normfac_simc" : normfac_simc,
             "H_hsdelta_SIMC" :     H_hsdelta_SIMC,
@@ -2445,10 +2445,6 @@ def defineHists(phi_setting, inpDict):
         l_mm.Draw()
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting)))
 
-
-        print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
-        
-        return histDict
         
     else:    
 
@@ -3493,4 +3489,6 @@ def defineHists(phi_setting, inpDict):
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
 
-        return histDict
+    print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
+        
+    return histDict
