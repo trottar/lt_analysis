@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 23:56:22 trottar"
+# Time-stamp: "2023-04-24 23:58:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -196,8 +196,6 @@ def find_phibins(H_phi_BinTest):
     phi_arr = np.linspace(0.0, 360.0, NumPhiBins+1)
 
     n, bins, patches = plt.hist(H_phi_BinTest, phi_arr)
-
-    print("$$$$$$$$$$$$$$$$$$$$$$$", n, bins)
 
     return [n,bins]
 
