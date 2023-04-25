@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 23:35:27 trottar"
+# Time-stamp: "2023-04-24 23:49:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2447,7 +2447,7 @@ def defineHists(phi_setting, inpDict):
 
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
-        return histDict
+        return "hey"
         
     else:    
 

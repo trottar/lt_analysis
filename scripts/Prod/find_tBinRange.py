@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 23:36:42 trottar"
+# Time-stamp: "2023-04-24 23:48:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,7 +251,7 @@ phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(defineHists(phiset,inpDict))
-    print(histlist[0]["H_tbins_DATA"])
+    print("$$$$$$$$$$$$",histlist[0])
     
 print("\n\n")
 
