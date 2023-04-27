@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-27 10:35:55 trottar"
+# Time-stamp: "2023-04-27 10:44:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2436,13 +2436,18 @@ def defineHists(phi_setting, inpDict):
         ###
         # CT plots
         ct = TCanvas()
-        
+        l_ct = ROOT.TLegend(0.115,0.65,0.33,0.95)
+        l_ct.SetTextSize(0.0235)
         H_ct_DATA.SetLineColor(2)
         H_ct_DATA.Draw("same, HIST")
         H_ct_epi_SUBPION_DATA.SetLineColor(3)
         H_ct_epi_SUBPION_DATA.Draw("same, HIST")
         H_ct_ep_SUBPROTON_DATA.SetLineColor(6)
         H_ct_ep_SUBPROTON_DATA.Draw("same, HIST")
+        l_ct.AddEntry(H_ct_DATA,"Kaon")
+        l_ct.AddEntry(H_ct_epi_SUBPION_DATA,"Pion")
+        l_ct.AddEntry(H_ct_ep_SUBPROTON_DATA,"Proton")
+        l_ct.Draw()
 
         ct.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+'(')
 
@@ -2507,12 +2512,11 @@ def defineHists(phi_setting, inpDict):
 
         c_pid.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting)))
 
-
         ###
         # Plot MM for each particle type
         cmm = TCanvas()
         l_mm = ROOT.TLegend(0.115,0.65,0.33,0.95)
-        l_mm.SetTextSize(0.0235)        
+        l_mm.SetTextSize(0.0235)
         H_MM_DATA_nosub.SetLineColor(4)
         histDict["H_MM_DATA"].SetLineColor(2)
         H_MM_SUBPION_DATA.SetLineColor(3)
@@ -2530,6 +2534,7 @@ def defineHists(phi_setting, inpDict):
         H_MM_SUBPROTON_DATA.Draw("same, HIST")
         H_MM_DATA_nosub.SetFillColor(4)
         l_mm.Draw()
+        cmm.Draw()
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+')')
         histDict["c_mm_sub"] = cmm
 
