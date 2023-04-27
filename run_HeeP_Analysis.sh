@@ -131,28 +131,67 @@ if [[ $KIN = "10p6" && $s_flag != "true" ]]; then
     # Define run list based off kinematics selected
     file_dummy="HeePCoin_10p6_Autumn18_dummy"
     file="HeePCoin_10p6_Autumn18"
-    echo "Reading in run numbers for right file ${file_dummy}..."
+    echo "Reading in run numbers for file ${file_dummy}..."
     # Converts python output to bash array
     IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
     echo "Dummy Run Numbers: [${dummydata[@]}]"
     echo
-    echo "Reading in run numbers for right file ${file}..."
+    echo "Reading in run numbers for file ${file}..."
     IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
     echo "Data Run Numbers: [${data[@]}]"
     echo
-elif [[ $KIN = "8p2" ]]; then
-    declare -a data=(7974 7975 7976)
-    #    declare -a data=(7974) # Just one test run
-    declare -a dummydata=(7977)
-elif [[ $KIN = "6p2" ]]; then
-    declare -a data=(7866 7867)
-    declare -a dummydata=(7868)
-elif [[ $KIN = "4p9" ]]; then
-    declare -a data=(6881 6882)
-    declare -a dummydata=(6883)
-elif [[ $KIN = "3p8" ]]; then
-    declare -a data=(6634 6635)
-    declare -a dummydata=(6637)
+elif [[ $KIN = "8p2" && $s_flag != "true" ]]; then
+    # Define run list based off kinematics selected
+    file_dummy="HeePCoin_8p2_Spring19_dummy"
+    file="HeePCoin_8p2_Spring19"
+    echo "Reading in run numbers for file ${file_dummy}..."
+    # Converts python output to bash array
+    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    echo
+    echo "Reading in run numbers for file ${file}..."
+    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data[@]}]"
+    echo
+elif [[ $KIN = "6p2" && $s_flag != "true" ]]; then
+    # Define run list based off kinematics selected
+    file_dummy="HeePCoin_6p2_Spring19_dummy"
+    file="HeePCoin_6p2_Spring19"
+    echo "Reading in run numbers for file ${file_dummy}..."
+    # Converts python output to bash array
+    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    echo
+    echo "Reading in run numbers for file ${file}..."
+    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data[@]}]"
+    echo
+elif [[ $KIN = "4p9" && $s_flag != "true" ]]; then
+    # Define run list based off kinematics selected
+    file_dummy="HeePCoin_4p9_Autumn18_dummy"
+    file="HeePCoin_4p9_Autumn18"
+    echo "Reading in run numbers for file ${file_dummy}..."
+    # Converts python output to bash array
+    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    echo
+    echo "Reading in run numbers for file ${file}..."
+    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data[@]}]"
+    echo
+elif [[ $KIN = "3p8" && $s_flag != "true" ]]; then
+    # Define run list based off kinematics selected
+    file_dummy="HeePCoin_3p8_Autumn18_dummy"
+    file="HeePCoin_3p8_Autumn18"
+    echo "Reading in run numbers for file ${file_dummy}..."
+    # Converts python output to bash array
+    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    echo
+    echo "Reading in run numbers for file ${file}..."
+    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data[@]}]"
+    echo
 elif [[ $KIN = "10p6" && $s_flag = "true" ]]; then
     declare -a data=(7974 7975 7976)
     #    declare -a data=(7974) # Just one test run
@@ -187,7 +226,7 @@ if [[ $a_flag = "true" ]]; then
 	    echo "Analysing data run $i..."
 	    echo "-----------------------------"
 	    echo
-	    python3 Analysed_SING.py "$i" ${SPEC} | tee ../../log/Analysed_SING_${SPEC}_$i.log
+	    python3 Analysed_SING.py "$i" ${SPEC} | tee ../../../log/Analysed_HeeP_SING_${SPEC}_$i.log
 	    #root -l <<EOF 
 	    #.x $LTANAPATH/Analysed_SING.C("$InDATAFilename","$OutDATAFilename")
 	    #EOF
@@ -210,7 +249,7 @@ if [[ $a_flag = "true" ]]; then
 	    echo "Analysing dummy data run $i..."
 	    echo "-----------------------------------"
 	    echo
-	    python3 Analysed_SING.py "$i" ${SPEC} | tee ../../log/Analysed_SING_${SPEC}_$i.log
+	    python3 Analysed_SING.py "$i" ${SPEC} | tee ../../../log/Analysed_HeeP_SING_${SPEC}_$i.log
 	    #root -l <<EOF 
 	    #.x $LTANAPATH/Analysed_SING.C("$InDUMMYFilename","$OutDUMMYFilename")
 	    #EOF
@@ -233,7 +272,7 @@ if [[ $a_flag = "true" ]]; then
 	    echo "Analysing data run $i..."
 	    echo "-----------------------------"
 	    echo
-	    python3 Analysed_COIN.py "$i" | tee ../../log/Analysed_COIN_$i.log
+	    python3 Analysed_COIN.py "$i" | tee ../../../log/Analysed_HeeP_COIN_$i.log
 	    #root -l <<EOF 
 	    #.x $LTANAPATH/Analysed_COIN.C("$InDATAFilename","$OutDATAFilename")
 	    #EOF
@@ -256,7 +295,7 @@ if [[ $a_flag = "true" ]]; then
 	    echo "Analysing dummy data run $i..."
 	    echo "-----------------------------------"
 	    echo
-	    python3 Analysed_COIN.py "$i" | tee ../../log/Analysed_COIN_$i.log
+	    python3 Analysed_COIN.py "$i" | tee ../../../log/Analysed_HeeP_COIN_$i.log
 	    #root -l <<EOF 
 	    #.x $LTANAPATH/Analysed_COIN.C("$InDUMMYFilename","$OutDUMMYFilename")
 	    #EOF

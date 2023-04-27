@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 23:58:52 trottar"
+# Time-stamp: "2023-04-26 19:25:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,6 +251,8 @@ phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(defineHists(phiset,inpDict))
+
+print("$$$$$$$$$$$$$$$$$$$",type(histlist[0]))
     
 print("\n\n")
 
@@ -262,7 +264,14 @@ for i,hist in enumerate(histlist):
         settingList.append(hist["phi_setting"])
 
 for i,hist in enumerate(histlist):
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!", hist["H_tbins_DATA"])
+    print("!!!!!!!!!!!!!!!!!!!!!!!!! MM", type(hist["H_MM_DATA"]), hist["H_MM_DATA"])
+    print("!!!!!!!!!!!!!!!!!!!!!!!!! tbins", type(hist["H_tbins_DATA"]), hist["H_tbins_DATA"])
+
+for i,hist in enumerate(histlist):
+    if i == 0:
+        hist["c_mm_sub"].Print(outputpdf+'(')
+    else:
+        hist["c_mm_sub"].Print(outputpdf)
         
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()
@@ -297,7 +306,8 @@ for i,hist in enumerate(histlist):
 
 l_eff_plt.Draw()
 
-eff_plt.Print(outputpdf + '(')
+#eff_plt.Print(outputpdf + '(')
+eff_plt.Print(outputpdf)
 
 c_bins = TCanvas()
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 23:59:28 trottar"
+# Time-stamp: "2023-04-26 19:36:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -115,7 +115,13 @@ def defineHists(phi_setting, inpDict):
     a4 = paramDict["a4"]
     b4 = paramDict["b4"]
 
-    
+    ################################################################################################################################################
+    # Define return dictionary of data
+    histDict = {}
+
+    ################################################################################################################################################
+    # Check particle type
+
     if ParticleType == "kaon":
 
 
@@ -127,7 +133,7 @@ def defineHists(phi_setting, inpDict):
         rootFileSimc = OUTPATH+"/"+InSIMCFilename
         if not os.path.isfile(rootFileSimc):
             print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
-            return {}
+            return histDict
 
         InFile_SIMC = ROOT.TFile.Open(rootFileSimc, "OPEN")
 
@@ -149,15 +155,15 @@ def defineHists(phi_setting, inpDict):
         if 'simc_nevents' and 'simc_normfactor' not in locals():
             print("\n\nERROR: Invalid simc hist file %s\n\n" % simc_hist)
             sys.exit(1)
-        f_simc.close()    
+        f_simc.close()
 
         ################################################################################################################################################
         # Define data root file trees of interest
 
-        rootFileData = OUTPATH + "/" + ParticleType + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+        rootFileData = OUTPATH + "/" + "kaon" + "_" + InDATAFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileData):
             print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
-            return {}
+            return histDict
 
         InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
@@ -168,10 +174,10 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Define dummy root file trees of interest
 
-        rootFileDummy = OUTPATH + "/" + ParticleType + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+        rootFileDummy = OUTPATH + "/" + "kaon" + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileDummy):
             print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
-            return {}
+            return histDict
 
         InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")  
 
@@ -185,7 +191,7 @@ def defineHists(phi_setting, inpDict):
         rootFileSubPionData = OUTPATH + "/" + "pion" + "_" + InDATAFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileSubPionData):
             print("\n\nERROR: No data file found called {}\n\n".format(rootFileSubPionData))
-            return {}  
+            return histDict  
 
         InFile_SUBPION_DATA = ROOT.TFile.Open(rootFileSubPionData, "OPEN")
 
@@ -199,7 +205,7 @@ def defineHists(phi_setting, inpDict):
         rootFileSubPionDummy = OUTPATH + "/" + "pion" + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileSubPionDummy):
             print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileSubPionDummy))
-            return {}
+            return histDict
 
         InFile_SUBPION_DUMMY = ROOT.TFile.Open(rootFileSubPionDummy, "OPEN")  
 
@@ -213,7 +219,7 @@ def defineHists(phi_setting, inpDict):
         rootFileSubProtonData = OUTPATH + "/" + "proton" + "_" + InDATAFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileSubProtonData):
             print("\n\nERROR: No data file found called {}\n\n".format(rootFileSubProtonData))
-            return {}  
+            return histDict  
 
         InFile_SUBPROTON_DATA = ROOT.TFile.Open(rootFileSubProtonData, "OPEN")
 
@@ -227,7 +233,7 @@ def defineHists(phi_setting, inpDict):
         rootFileSubProtonDummy = OUTPATH + "/" + "proton" + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileSubProtonDummy):
             print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileSubProtonDummy))
-            return {}
+            return histDict
 
         InFile_SUBPROTON_DUMMY = ROOT.TFile.Open(rootFileSubProtonDummy, "OPEN")  
 
@@ -358,449 +364,449 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Plot definitions
 
-        H_hsdelta_SIMC  = ROOT.TH1D("H_hsdelta_SIMC","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SIMC  = ROOT.TH1D("H_hsxptar_SIMC","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SIMC  = ROOT.TH1D("H_hsyptar_SIMC","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SIMC    = ROOT.TH1D("H_ssxfp_SIMC","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SIMC    = ROOT.TH1D("H_ssyfp_SIMC","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SIMC   = ROOT.TH1D("H_ssxpfp_SIMC","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SIMC   = ROOT.TH1D("H_ssypfp_SIMC","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SIMC    = ROOT.TH1D("H_hsxfp_SIMC","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SIMC    = ROOT.TH1D("H_hsyfp_SIMC","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SIMC   = ROOT.TH1D("H_hsxpfp_SIMC","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SIMC   = ROOT.TH1D("H_hsypfp_SIMC","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SIMC  = ROOT.TH1D("H_ssdelta_SIMC","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SIMC  = ROOT.TH1D("H_ssxptar_SIMC","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SIMC  = ROOT.TH1D("H_ssyptar_SIMC","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SIMC        = ROOT.TH1D("H_q_SIMC","q", 200, 0.0, 10.0)
-        H_Q2_SIMC       = ROOT.TH1D("H_Q2_SIMC","Q2", 200, Q2min, Q2max)
-        H_W_SIMC  = ROOT.TH1D("H_W_SIMC","W ", 200, Wmin, Wmax)
-        H_t_SIMC       = ROOT.TH1D("H_t_SIMC","-t", 200, -1.0, 1.5)  
-        H_epsilon_SIMC  = ROOT.TH1D("H_epsilon_SIMC","epsilon", 200, 0., 1.0)
-        H_MM_SIMC  = ROOT.TH1D("H_MM_SIMC","MM_{K}", 200, 0.0, 1.5)
-        H_th_SIMC  = ROOT.TH1D("H_th_SIMC","X' tar", 200, -0.1, 0.1)
-        H_ph_SIMC  = ROOT.TH1D("H_ph_SIMC","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SIMC  = ROOT.TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SIMC  = ROOT.TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SIMC  = ROOT.TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SIMC  = ROOT.TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SIMC  = ROOT.TH1D("H_pmiss_SIMC","pmiss", 200, 0.0, 10.0)
-        H_emiss_SIMC  = ROOT.TH1D("H_emiss_SIMC","emiss", 200, 0.0, 10.0)
-        H_pmx_SIMC  = ROOT.TH1D("H_pmx_SIMC","pmx", 200, -10.0, 10.0)
-        H_pmy_SIMC  = ROOT.TH1D("H_pmy_SIMC","pmy ", 200, -10.0, 10.0)
-        H_pmz_SIMC  = ROOT.TH1D("H_pmz_SIMC","pmz", 200, -10.0, 10.0)
+        H_hsdelta_SIMC  = ROOT.TH1D("H_hsdelta_SIMC","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SIMC  = ROOT.TH1D("H_hsxptar_SIMC","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SIMC  = ROOT.TH1D("H_hsyptar_SIMC","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SIMC    = ROOT.TH1D("H_ssxfp_SIMC","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SIMC    = ROOT.TH1D("H_ssyfp_SIMC","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SIMC   = ROOT.TH1D("H_ssxpfp_SIMC","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SIMC   = ROOT.TH1D("H_ssypfp_SIMC","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SIMC    = ROOT.TH1D("H_hsxfp_SIMC","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SIMC    = ROOT.TH1D("H_hsyfp_SIMC","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SIMC   = ROOT.TH1D("H_hsxpfp_SIMC","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SIMC   = ROOT.TH1D("H_hsypfp_SIMC","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SIMC  = ROOT.TH1D("H_ssdelta_SIMC","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SIMC  = ROOT.TH1D("H_ssxptar_SIMC","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SIMC  = ROOT.TH1D("H_ssyptar_SIMC","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SIMC        = ROOT.TH1D("H_q_SIMC","q", 100, 0.0, 10.0)
+        H_Q2_SIMC       = ROOT.TH1D("H_Q2_SIMC","Q2", 100, Q2min, Q2max)
+        H_W_SIMC  = ROOT.TH1D("H_W_SIMC","W ", 100, Wmin, Wmax)
+        H_t_SIMC       = ROOT.TH1D("H_t_SIMC","-t", 100, -1.0, 1.5)  
+        H_epsilon_SIMC  = ROOT.TH1D("H_epsilon_SIMC","epsilon", 100, 0., 1.0)
+        H_MM_SIMC  = ROOT.TH1D("H_MM_SIMC","MM_{K}", 100, 0.0, 1.5)
+        H_th_SIMC  = ROOT.TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
+        H_ph_SIMC  = ROOT.TH1D("H_ph_SIMC","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SIMC  = ROOT.TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SIMC  = ROOT.TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SIMC  = ROOT.TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SIMC  = ROOT.TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SIMC  = ROOT.TH1D("H_pmiss_SIMC","pmiss", 100, 0.0, 10.0)
+        H_emiss_SIMC  = ROOT.TH1D("H_emiss_SIMC","emiss", 100, 0.0, 10.0)
+        H_pmx_SIMC  = ROOT.TH1D("H_pmx_SIMC","pmx", 100, -10.0, 10.0)
+        H_pmy_SIMC  = ROOT.TH1D("H_pmy_SIMC","pmy ", 100, -10.0, 10.0)
+        H_pmz_SIMC  = ROOT.TH1D("H_pmz_SIMC","pmz", 100, -10.0, 10.0)
         H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0, 1.0)
 
-        H_hsdelta_DATA  = ROOT.TH1D("H_hsdelta_DATA","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_DATA  = ROOT.TH1D("H_hsxptar_DATA","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_DATA  = ROOT.TH1D("H_hsyptar_DATA","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_DATA    = ROOT.TH1D("H_ssxfp_DATA","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_DATA    = ROOT.TH1D("H_ssyfp_DATA","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_DATA   = ROOT.TH1D("H_ssxpfp_DATA","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_DATA   = ROOT.TH1D("H_ssypfp_DATA","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_DATA    = ROOT.TH1D("H_hsxfp_DATA","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_DATA    = ROOT.TH1D("H_hsyfp_DATA","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_DATA   = ROOT.TH1D("H_hsxpfp_DATA","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_DATA   = ROOT.TH1D("H_hsypfp_DATA","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_DATA  = ROOT.TH1D("H_ssdelta_DATA","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_DATA  = ROOT.TH1D("H_ssxptar_DATA","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_DATA  = ROOT.TH1D("H_ssyptar_DATA","SHMS yptar", 200, -0.04, 0.04)
-        H_q_DATA        = ROOT.TH1D("H_q_DATA","q", 200, 0.0, 10.0)
-        H_Q2_DATA       = ROOT.TH1D("H_Q2_DATA","Q2", 200, Q2min, Q2max)
-        H_W_DATA  = ROOT.TH1D("H_W_DATA","W ", 200, Wmin, Wmax)
-        H_t_DATA       = ROOT.TH1D("H_t_DATA","-t", 200, -1.0, 1.5)  
-        H_epsilon_DATA  = ROOT.TH1D("H_epsilon_DATA","epsilon", 200, 0., 1.0)
-        H_MM_DATA  = ROOT.TH1D("H_MM_DATA","MM_{K}", 200, 0.0, 1.5)
-        H_th_DATA  = ROOT.TH1D("H_th_DATA","X' tar", 200, -0.1, 0.1)
-        H_ph_DATA  = ROOT.TH1D("H_ph_DATA","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_DATA  = ROOT.TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_DATA  = ROOT.TH1D("H_th_q_DATA","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_DATA  = ROOT.TH1D("H_ph_recoil_DATA","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_DATA  = ROOT.TH1D("H_th_recoil_DATA","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_DATA  = ROOT.TH1D("H_pmiss_DATA","pmiss", 200, 0.0, 10.0)
-        H_emiss_DATA  = ROOT.TH1D("H_emiss_DATA","emiss", 200, 0.0, 10.0)
-        H_pmx_DATA  = ROOT.TH1D("H_pmx_DATA","pmx", 200, -10.0, 10.0)
-        H_pmy_DATA  = ROOT.TH1D("H_pmy_DATA","pmy ", 200, -10.0, 10.0)
-        H_pmz_DATA  = ROOT.TH1D("H_pmz_DATA","pmz", 200, -10.0, 10.0)
-        H_ct_DATA = ROOT.TH1D("H_ct_DATA", "Electron-Kaon CTime", 200, -10, 10)
-        H_cal_etottracknorm_DATA = ROOT.TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 200, 0.2, 1.8)
-        H_cer_npeSum_DATA = ROOT.TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 200, 0, 30)
-        P_cal_etottracknorm_DATA = ROOT.TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 200, 0, 1)
-        P_hgcer_npeSum_DATA = ROOT.TH1D("P_hgcer_npeSum_DATA", "SHMS HGCer Npe Sum", 200, 0, 50)
-        P_aero_npeSum_DATA = ROOT.TH1D("P_aero_npeSum_DATA", "SHMS Aero Npe Sum", 200, 0, 50)
+        H_hsdelta_DATA  = ROOT.TH1D("H_hsdelta_DATA","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_DATA  = ROOT.TH1D("H_hsxptar_DATA","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_DATA  = ROOT.TH1D("H_hsyptar_DATA","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_DATA    = ROOT.TH1D("H_ssxfp_DATA","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_DATA    = ROOT.TH1D("H_ssyfp_DATA","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_DATA   = ROOT.TH1D("H_ssxpfp_DATA","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_DATA   = ROOT.TH1D("H_ssypfp_DATA","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_DATA    = ROOT.TH1D("H_hsxfp_DATA","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_DATA    = ROOT.TH1D("H_hsyfp_DATA","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_DATA   = ROOT.TH1D("H_hsxpfp_DATA","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_DATA   = ROOT.TH1D("H_hsypfp_DATA","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_DATA  = ROOT.TH1D("H_ssdelta_DATA","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_DATA  = ROOT.TH1D("H_ssxptar_DATA","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_DATA  = ROOT.TH1D("H_ssyptar_DATA","SHMS yptar", 100, -0.04, 0.04)
+        H_q_DATA        = ROOT.TH1D("H_q_DATA","q", 100, 0.0, 10.0)
+        H_Q2_DATA       = ROOT.TH1D("H_Q2_DATA","Q2", 100, Q2min, Q2max)
+        H_W_DATA  = ROOT.TH1D("H_W_DATA","W ", 100, Wmin, Wmax)
+        H_t_DATA       = ROOT.TH1D("H_t_DATA","-t", 100, -1.0, 1.5)  
+        H_epsilon_DATA  = ROOT.TH1D("H_epsilon_DATA","epsilon", 100, 0., 1.0)
+        H_MM_DATA  = ROOT.TH1D("H_MM_DATA","MM_{K}", 100, 0.0, 1.5)
+        H_th_DATA  = ROOT.TH1D("H_th_DATA","X' tar", 100, -0.1, 0.1)
+        H_ph_DATA  = ROOT.TH1D("H_ph_DATA","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_DATA  = ROOT.TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_DATA  = ROOT.TH1D("H_th_q_DATA","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_DATA  = ROOT.TH1D("H_ph_recoil_DATA","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_DATA  = ROOT.TH1D("H_th_recoil_DATA","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_DATA  = ROOT.TH1D("H_pmiss_DATA","pmiss", 100, 0.0, 10.0)
+        H_emiss_DATA  = ROOT.TH1D("H_emiss_DATA","emiss", 100, 0.0, 10.0)
+        H_pmx_DATA  = ROOT.TH1D("H_pmx_DATA","pmx", 100, -10.0, 10.0)
+        H_pmy_DATA  = ROOT.TH1D("H_pmy_DATA","pmy ", 100, -10.0, 10.0)
+        H_pmz_DATA  = ROOT.TH1D("H_pmz_DATA","pmz", 100, -10.0, 10.0)
+        H_ct_DATA = ROOT.TH1D("H_ct_DATA", "Electron-Kaon CTime", 100, -10, 10)
+        H_cal_etottracknorm_DATA = ROOT.TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 100, 0.2, 1.8)
+        H_cer_npeSum_DATA = ROOT.TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 100, 0, 30)
+        P_cal_etottracknorm_DATA = ROOT.TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 100, 0, 1)
+        P_hgcer_npeSum_DATA = ROOT.TH1D("P_hgcer_npeSum_DATA", "SHMS HGCer Npe Sum", 100, 0, 50)
+        P_aero_npeSum_DATA = ROOT.TH1D("P_aero_npeSum_DATA", "SHMS Aero Npe Sum", 100, 0, 50)
 
-        H_hsdelta_DUMMY  = ROOT.TH1D("H_hsdelta_DUMMY","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_DUMMY  = ROOT.TH1D("H_hsxptar_DUMMY","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_DUMMY  = ROOT.TH1D("H_hsyptar_DUMMY","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_DUMMY    = ROOT.TH1D("H_ssxfp_DUMMY","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_DUMMY    = ROOT.TH1D("H_ssyfp_DUMMY","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_DUMMY   = ROOT.TH1D("H_ssxpfp_DUMMY","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_DUMMY   = ROOT.TH1D("H_ssypfp_DUMMY","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_DUMMY    = ROOT.TH1D("H_hsxfp_DUMMY","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_DUMMY    = ROOT.TH1D("H_hsyfp_DUMMY","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_DUMMY   = ROOT.TH1D("H_hsxpfp_DUMMY","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_DUMMY   = ROOT.TH1D("H_hsypfp_DUMMY","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_DUMMY  = ROOT.TH1D("H_ssdelta_DUMMY","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_DUMMY  = ROOT.TH1D("H_ssxptar_DUMMY","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_DUMMY  = ROOT.TH1D("H_ssyptar_DUMMY","SHMS yptar", 200, -0.04, 0.04)
-        H_q_DUMMY        = ROOT.TH1D("H_q_DUMMY","q", 200, 0.0, 10.0)
-        H_Q2_DUMMY       = ROOT.TH1D("H_Q2_DUMMY","Q2", 200, Q2min, Q2max)
-        H_W_DUMMY  = ROOT.TH1D("H_W_DUMMY","W ", 200, Wmin, Wmax)
-        H_t_DUMMY       = ROOT.TH1D("H_t_DUMMY","-t", 200, -1.0, 1.5)  
-        H_epsilon_DUMMY  = ROOT.TH1D("H_epsilon_DUMMY","epsilon", 200, 0., 1.0)
-        H_MM_DUMMY  = ROOT.TH1D("H_MM_DUMMY","MM_{K}", 200, 0.0, 1.5)
-        H_th_DUMMY  = ROOT.TH1D("H_th_DUMMY","X' tar", 200, -0.1, 0.1)
-        H_ph_DUMMY  = ROOT.TH1D("H_ph_DUMMY","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_DUMMY  = ROOT.TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_DUMMY  = ROOT.TH1D("H_th_q_DUMMY","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_DUMMY  = ROOT.TH1D("H_ph_recoil_DUMMY","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_DUMMY  = ROOT.TH1D("H_th_recoil_DUMMY","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_DUMMY  = ROOT.TH1D("H_pmiss_DUMMY","pmiss", 200, 0.0, 10.0)
-        H_emiss_DUMMY  = ROOT.TH1D("H_emiss_DUMMY","emiss", 200, 0.0, 10.0)
-        H_pmx_DUMMY  = ROOT.TH1D("H_pmx_DUMMY","pmx", 200, -10.0, 10.0)
-        H_pmy_DUMMY  = ROOT.TH1D("H_pmy_DUMMY","pmy ", 200, -10.0, 10.0)
-        H_pmz_DUMMY  = ROOT.TH1D("H_pmz_DUMMY","pmz", 200, -10.0, 10.0)
-        H_ct_DUMMY = ROOT.TH1D("H_ct_DUMMY", "Electron-Kaon CTime", 200, -10, 10)
+        H_hsdelta_DUMMY  = ROOT.TH1D("H_hsdelta_DUMMY","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_DUMMY  = ROOT.TH1D("H_hsxptar_DUMMY","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_DUMMY  = ROOT.TH1D("H_hsyptar_DUMMY","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_DUMMY    = ROOT.TH1D("H_ssxfp_DUMMY","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_DUMMY    = ROOT.TH1D("H_ssyfp_DUMMY","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_DUMMY   = ROOT.TH1D("H_ssxpfp_DUMMY","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_DUMMY   = ROOT.TH1D("H_ssypfp_DUMMY","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_DUMMY    = ROOT.TH1D("H_hsxfp_DUMMY","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_DUMMY    = ROOT.TH1D("H_hsyfp_DUMMY","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_DUMMY   = ROOT.TH1D("H_hsxpfp_DUMMY","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_DUMMY   = ROOT.TH1D("H_hsypfp_DUMMY","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_DUMMY  = ROOT.TH1D("H_ssdelta_DUMMY","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_DUMMY  = ROOT.TH1D("H_ssxptar_DUMMY","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_DUMMY  = ROOT.TH1D("H_ssyptar_DUMMY","SHMS yptar", 100, -0.04, 0.04)
+        H_q_DUMMY        = ROOT.TH1D("H_q_DUMMY","q", 100, 0.0, 10.0)
+        H_Q2_DUMMY       = ROOT.TH1D("H_Q2_DUMMY","Q2", 100, Q2min, Q2max)
+        H_W_DUMMY  = ROOT.TH1D("H_W_DUMMY","W ", 100, Wmin, Wmax)
+        H_t_DUMMY       = ROOT.TH1D("H_t_DUMMY","-t", 100, -1.0, 1.5)  
+        H_epsilon_DUMMY  = ROOT.TH1D("H_epsilon_DUMMY","epsilon", 100, 0., 1.0)
+        H_MM_DUMMY  = ROOT.TH1D("H_MM_DUMMY","MM_{K}", 100, 0.0, 1.5)
+        H_th_DUMMY  = ROOT.TH1D("H_th_DUMMY","X' tar", 100, -0.1, 0.1)
+        H_ph_DUMMY  = ROOT.TH1D("H_ph_DUMMY","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_DUMMY  = ROOT.TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_DUMMY  = ROOT.TH1D("H_th_q_DUMMY","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_DUMMY  = ROOT.TH1D("H_ph_recoil_DUMMY","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_DUMMY  = ROOT.TH1D("H_th_recoil_DUMMY","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_DUMMY  = ROOT.TH1D("H_pmiss_DUMMY","pmiss", 100, 0.0, 10.0)
+        H_emiss_DUMMY  = ROOT.TH1D("H_emiss_DUMMY","emiss", 100, 0.0, 10.0)
+        H_pmx_DUMMY  = ROOT.TH1D("H_pmx_DUMMY","pmx", 100, -10.0, 10.0)
+        H_pmy_DUMMY  = ROOT.TH1D("H_pmy_DUMMY","pmy ", 100, -10.0, 10.0)
+        H_pmz_DUMMY  = ROOT.TH1D("H_pmz_DUMMY","pmz", 100, -10.0, 10.0)
+        H_ct_DUMMY = ROOT.TH1D("H_ct_DUMMY", "Electron-Kaon CTime", 100, -10, 10)
 
-        H_hsdelta_RAND  = ROOT.TH1D("H_hsdelta_RAND","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_RAND  = ROOT.TH1D("H_hsxptar_RAND","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_RAND  = ROOT.TH1D("H_hsyptar_RAND","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_RAND    = ROOT.TH1D("H_ssxfp_RAND","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_RAND    = ROOT.TH1D("H_ssyfp_RAND","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_RAND   = ROOT.TH1D("H_ssxpfp_RAND","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_RAND   = ROOT.TH1D("H_ssypfp_RAND","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_RAND    = ROOT.TH1D("H_hsxfp_RAND","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_RAND    = ROOT.TH1D("H_hsyfp_RAND","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_RAND   = ROOT.TH1D("H_hsxpfp_RAND","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_RAND   = ROOT.TH1D("H_hsypfp_RAND","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_RAND  = ROOT.TH1D("H_ssdelta_RAND","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_RAND  = ROOT.TH1D("H_ssxptar_RAND","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_RAND  = ROOT.TH1D("H_ssyptar_RAND","SHMS yptar", 200, -0.04, 0.04)
-        H_q_RAND        = ROOT.TH1D("H_q_RAND","q", 200, 0.0, 10.0)
-        H_Q2_RAND       = ROOT.TH1D("H_Q2_RAND","Q2", 200, Q2min, Q2max)
-        H_W_RAND  = ROOT.TH1D("H_W_RAND","W ", 200, Wmin, Wmax)
-        H_t_RAND       = ROOT.TH1D("H_t_RAND","-t", 200, -1.0, 1.5)
-        H_epsilon_RAND  = ROOT.TH1D("H_epsilon_RAND","epsilon", 200, 0., 1.0)
-        H_MM_RAND  = ROOT.TH1D("H_MM_RAND","MM_{K}", 200, 0.0, 1.5)
-        H_th_RAND  = ROOT.TH1D("H_th_RAND","X' tar", 200, -0.1, 0.1)
-        H_ph_RAND  = ROOT.TH1D("H_ph_RAND","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_RAND  = ROOT.TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_RAND  = ROOT.TH1D("H_th_q_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_RAND  = ROOT.TH1D("H_ph_recoil_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_RAND  = ROOT.TH1D("H_th_recoil_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_RAND  = ROOT.TH1D("H_pmiss_RAND","pmiss", 200, 0.0, 10.0)
-        H_emiss_RAND  = ROOT.TH1D("H_emiss_RAND","emiss", 200, 0.0, 10.0)
-        H_pmx_RAND  = ROOT.TH1D("H_pmx_RAND","pmx", 200, -10.0, 10.0)
-        H_pmy_RAND  = ROOT.TH1D("H_pmy_RAND","pmy ", 200, -10.0, 10.0)
-        H_pmz_RAND  = ROOT.TH1D("H_pmz_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_RAND = ROOT.TH1D("H_ct_RAND", "Electron-Kaon CTime", 200, -10, 10)
+        H_hsdelta_RAND  = ROOT.TH1D("H_hsdelta_RAND","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_RAND  = ROOT.TH1D("H_hsxptar_RAND","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_RAND  = ROOT.TH1D("H_hsyptar_RAND","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_RAND    = ROOT.TH1D("H_ssxfp_RAND","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_RAND    = ROOT.TH1D("H_ssyfp_RAND","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_RAND   = ROOT.TH1D("H_ssxpfp_RAND","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_RAND   = ROOT.TH1D("H_ssypfp_RAND","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_RAND    = ROOT.TH1D("H_hsxfp_RAND","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_RAND    = ROOT.TH1D("H_hsyfp_RAND","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_RAND   = ROOT.TH1D("H_hsxpfp_RAND","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_RAND   = ROOT.TH1D("H_hsypfp_RAND","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_RAND  = ROOT.TH1D("H_ssdelta_RAND","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_RAND  = ROOT.TH1D("H_ssxptar_RAND","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_RAND  = ROOT.TH1D("H_ssyptar_RAND","SHMS yptar", 100, -0.04, 0.04)
+        H_q_RAND        = ROOT.TH1D("H_q_RAND","q", 100, 0.0, 10.0)
+        H_Q2_RAND       = ROOT.TH1D("H_Q2_RAND","Q2", 100, Q2min, Q2max)
+        H_W_RAND  = ROOT.TH1D("H_W_RAND","W ", 100, Wmin, Wmax)
+        H_t_RAND       = ROOT.TH1D("H_t_RAND","-t", 100, -1.0, 1.5)
+        H_epsilon_RAND  = ROOT.TH1D("H_epsilon_RAND","epsilon", 100, 0., 1.0)
+        H_MM_RAND  = ROOT.TH1D("H_MM_RAND","MM_{K}", 100, 0.0, 1.5)
+        H_th_RAND  = ROOT.TH1D("H_th_RAND","X' tar", 100, -0.1, 0.1)
+        H_ph_RAND  = ROOT.TH1D("H_ph_RAND","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_RAND  = ROOT.TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_RAND  = ROOT.TH1D("H_th_q_RAND","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_RAND  = ROOT.TH1D("H_ph_recoil_RAND","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_RAND  = ROOT.TH1D("H_th_recoil_RAND","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_RAND  = ROOT.TH1D("H_pmiss_RAND","pmiss", 100, 0.0, 10.0)
+        H_emiss_RAND  = ROOT.TH1D("H_emiss_RAND","emiss", 100, 0.0, 10.0)
+        H_pmx_RAND  = ROOT.TH1D("H_pmx_RAND","pmx", 100, -10.0, 10.0)
+        H_pmy_RAND  = ROOT.TH1D("H_pmy_RAND","pmy ", 100, -10.0, 10.0)
+        H_pmz_RAND  = ROOT.TH1D("H_pmz_RAND","pmz", 100, -10.0, 10.0)
+        H_ct_RAND = ROOT.TH1D("H_ct_RAND", "Electron-Kaon CTime", 100, -10, 10)
 
-        H_hsdelta_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_DUMMY_RAND","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_DUMMY_RAND","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_DUMMY_RAND  = ROOT.TH1D("H_hsyptar_DUMMY_RAND","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_DUMMY_RAND    = ROOT.TH1D("H_ssxfp_DUMMY_RAND","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_DUMMY_RAND    = ROOT.TH1D("H_ssyfp_DUMMY_RAND","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_DUMMY_RAND   = ROOT.TH1D("H_ssxpfp_DUMMY_RAND","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_DUMMY_RAND   = ROOT.TH1D("H_ssypfp_DUMMY_RAND","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_DUMMY_RAND    = ROOT.TH1D("H_hsxfp_DUMMY_RAND","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_DUMMY_RAND    = ROOT.TH1D("H_hsyfp_DUMMY_RAND","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_DUMMY_RAND   = ROOT.TH1D("H_hsxpfp_DUMMY_RAND","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_DUMMY_RAND   = ROOT.TH1D("H_hsypfp_DUMMY_RAND","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_DUMMY_RAND  = ROOT.TH1D("H_ssdelta_DUMMY_RAND","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_DUMMY_RAND  = ROOT.TH1D("H_ssxptar_DUMMY_RAND","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_DUMMY_RAND  = ROOT.TH1D("H_ssyptar_DUMMY_RAND","SHMS yptar", 200, -0.04, 0.04)
-        H_q_DUMMY_RAND        = ROOT.TH1D("H_q_DUMMY_RAND","q", 200, 0.0, 10.0)
-        H_Q2_DUMMY_RAND       = ROOT.TH1D("H_Q2_DUMMY_RAND","Q2", 200, Q2min, Q2max)
-        H_W_DUMMY_RAND  = ROOT.TH1D("H_W_DUMMY_RAND","W ", 200, Wmin, Wmax)
-        H_t_DUMMY_RAND       = ROOT.TH1D("H_t_DUMMY_RAND","-t", 200, -1.0, 1.5)
-        H_epsilon_DUMMY_RAND  = ROOT.TH1D("H_epsilon_DUMMY_RAND","epsilon", 200, 0., 1.0)
-        H_MM_DUMMY_RAND  = ROOT.TH1D("H_MM_DUMMY_RAND","MM_{K}", 200, 0.0, 1.5)
-        H_th_DUMMY_RAND  = ROOT.TH1D("H_th_DUMMY_RAND","X' tar", 200, -0.1, 0.1)
-        H_ph_DUMMY_RAND  = ROOT.TH1D("H_ph_DUMMY_RAND","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_DUMMY_RAND  = ROOT.TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_DUMMY_RAND  = ROOT.TH1D("H_th_q_DUMMY_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_DUMMY_RAND  = ROOT.TH1D("H_ph_recoil_DUMMY_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_DUMMY_RAND  = ROOT.TH1D("H_th_recoil_DUMMY_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_DUMMY_RAND  = ROOT.TH1D("H_pmiss_DUMMY_RAND","pmiss", 200, 0.0, 10.0)
-        H_emiss_DUMMY_RAND  = ROOT.TH1D("H_emiss_DUMMY_RAND","emiss", 200, 0.0, 10.0)
-        H_pmx_DUMMY_RAND  = ROOT.TH1D("H_pmx_DUMMY_RAND","pmx", 200, -10.0, 10.0)
-        H_pmy_DUMMY_RAND  = ROOT.TH1D("H_pmy_DUMMY_RAND","pmy ", 200, -10.0, 10.0)
-        H_pmz_DUMMY_RAND  = ROOT.TH1D("H_pmz_DUMMY_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_DUMMY_RAND = ROOT.TH1D("H_ct_DUMMY_RAND", "Electron-Kaon CTime", 200, -10, 10)
+        H_hsdelta_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_DUMMY_RAND","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_DUMMY_RAND","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_DUMMY_RAND  = ROOT.TH1D("H_hsyptar_DUMMY_RAND","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_DUMMY_RAND    = ROOT.TH1D("H_ssxfp_DUMMY_RAND","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_DUMMY_RAND    = ROOT.TH1D("H_ssyfp_DUMMY_RAND","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_DUMMY_RAND   = ROOT.TH1D("H_ssxpfp_DUMMY_RAND","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_DUMMY_RAND   = ROOT.TH1D("H_ssypfp_DUMMY_RAND","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_DUMMY_RAND    = ROOT.TH1D("H_hsxfp_DUMMY_RAND","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_DUMMY_RAND    = ROOT.TH1D("H_hsyfp_DUMMY_RAND","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_DUMMY_RAND   = ROOT.TH1D("H_hsxpfp_DUMMY_RAND","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_DUMMY_RAND   = ROOT.TH1D("H_hsypfp_DUMMY_RAND","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_DUMMY_RAND  = ROOT.TH1D("H_ssdelta_DUMMY_RAND","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_DUMMY_RAND  = ROOT.TH1D("H_ssxptar_DUMMY_RAND","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_DUMMY_RAND  = ROOT.TH1D("H_ssyptar_DUMMY_RAND","SHMS yptar", 100, -0.04, 0.04)
+        H_q_DUMMY_RAND        = ROOT.TH1D("H_q_DUMMY_RAND","q", 100, 0.0, 10.0)
+        H_Q2_DUMMY_RAND       = ROOT.TH1D("H_Q2_DUMMY_RAND","Q2", 100, Q2min, Q2max)
+        H_W_DUMMY_RAND  = ROOT.TH1D("H_W_DUMMY_RAND","W ", 100, Wmin, Wmax)
+        H_t_DUMMY_RAND       = ROOT.TH1D("H_t_DUMMY_RAND","-t", 100, -1.0, 1.5)
+        H_epsilon_DUMMY_RAND  = ROOT.TH1D("H_epsilon_DUMMY_RAND","epsilon", 100, 0., 1.0)
+        H_MM_DUMMY_RAND  = ROOT.TH1D("H_MM_DUMMY_RAND","MM_{K}", 100, 0.0, 1.5)
+        H_th_DUMMY_RAND  = ROOT.TH1D("H_th_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
+        H_ph_DUMMY_RAND  = ROOT.TH1D("H_ph_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_DUMMY_RAND  = ROOT.TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_DUMMY_RAND  = ROOT.TH1D("H_th_q_DUMMY_RAND","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_DUMMY_RAND  = ROOT.TH1D("H_ph_recoil_DUMMY_RAND","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_DUMMY_RAND  = ROOT.TH1D("H_th_recoil_DUMMY_RAND","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_DUMMY_RAND  = ROOT.TH1D("H_pmiss_DUMMY_RAND","pmiss", 100, 0.0, 10.0)
+        H_emiss_DUMMY_RAND  = ROOT.TH1D("H_emiss_DUMMY_RAND","emiss", 100, 0.0, 10.0)
+        H_pmx_DUMMY_RAND  = ROOT.TH1D("H_pmx_DUMMY_RAND","pmx", 100, -10.0, 10.0)
+        H_pmy_DUMMY_RAND  = ROOT.TH1D("H_pmy_DUMMY_RAND","pmy ", 100, -10.0, 10.0)
+        H_pmz_DUMMY_RAND  = ROOT.TH1D("H_pmz_DUMMY_RAND","pmz", 100, -10.0, 10.0)
+        H_ct_DUMMY_RAND = ROOT.TH1D("H_ct_DUMMY_RAND", "Electron-Kaon CTime", 100, -10, 10)
 
-        H_hsdelta_SUBPION_DATA  = ROOT.TH1D("H_hsdelta_SUBPION_DATA","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SUBPION_DATA  = ROOT.TH1D("H_hsxptar_SUBPION_DATA","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SUBPION_DATA  = ROOT.TH1D("H_hsyptar_SUBPION_DATA","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SUBPION_DATA    = ROOT.TH1D("H_ssxfp_SUBPION_DATA","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SUBPION_DATA    = ROOT.TH1D("H_ssyfp_SUBPION_DATA","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SUBPION_DATA   = ROOT.TH1D("H_ssxpfp_SUBPION_DATA","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SUBPION_DATA   = ROOT.TH1D("H_ssypfp_SUBPION_DATA","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SUBPION_DATA    = ROOT.TH1D("H_hsxfp_SUBPION_DATA","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SUBPION_DATA    = ROOT.TH1D("H_hsyfp_SUBPION_DATA","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SUBPION_DATA   = ROOT.TH1D("H_hsxpfp_SUBPION_DATA","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SUBPION_DATA   = ROOT.TH1D("H_hsypfp_SUBPION_DATA","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SUBPION_DATA  = ROOT.TH1D("H_ssdelta_SUBPION_DATA","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SUBPION_DATA  = ROOT.TH1D("H_ssxptar_SUBPION_DATA","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SUBPION_DATA  = ROOT.TH1D("H_ssyptar_SUBPION_DATA","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SUBPION_DATA        = ROOT.TH1D("H_q_SUBPION_DATA","q", 200, 0.0, 10.0)
-        H_Q2_SUBPION_DATA       = ROOT.TH1D("H_Q2_SUBPION_DATA","Q2", 200, Q2min, Q2max)
-        H_W_SUBPION_DATA  = ROOT.TH1D("H_W_SUBPION_DATA","W ", 200, Wmin, Wmax)
-        H_t_SUBPION_DATA       = ROOT.TH1D("H_t_SUBPION_DATA","-t", 200, -1.0, 1.5)  
-        H_epsilon_SUBPION_DATA  = ROOT.TH1D("H_epsilon_SUBPION_DATA","epsilon", 200, 0., 1.0)
-        H_MM_SUBPION_DATA  = ROOT.TH1D("H_MM_SUBPION_DATA","MM_{K}", 200, 0.0, 1.5)
-        H_th_SUBPION_DATA  = ROOT.TH1D("H_th_SUBPION_DATA","X' tar", 200, -0.1, 0.1)
-        H_ph_SUBPION_DATA  = ROOT.TH1D("H_ph_SUBPION_DATA","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SUBPION_DATA  = ROOT.TH1D("H_ph_q_SUBPION_DATA","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SUBPION_DATA  = ROOT.TH1D("H_th_q_SUBPION_DATA","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SUBPION_DATA  = ROOT.TH1D("H_ph_recoil_SUBPION_DATA","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SUBPION_DATA  = ROOT.TH1D("H_th_recoil_SUBPION_DATA","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SUBPION_DATA  = ROOT.TH1D("H_pmiss_SUBPION_DATA","pmiss", 200, 0.0, 10.0)
-        H_emiss_SUBPION_DATA  = ROOT.TH1D("H_emiss_SUBPION_DATA","emiss", 200, 0.0, 10.0)
-        H_pmx_SUBPION_DATA  = ROOT.TH1D("H_pmx_SUBPION_DATA","pmx", 200, -10.0, 10.0)
-        H_pmy_SUBPION_DATA  = ROOT.TH1D("H_pmy_SUBPION_DATA","pmy ", 200, -10.0, 10.0)
-        H_pmz_SUBPION_DATA  = ROOT.TH1D("H_pmz_SUBPION_DATA","pmz", 200, -10.0, 10.0)
-        H_ct_epi_SUBPION_DATA = ROOT.TH1D("H_ct_epi_SUBPION_DATA", "Electron-Pion CTime", 200, -10, 10)
-        H_cal_etottracknorm_SUBPION_DATA = ROOT.TH1D("H_cal_etottracknorm_SUBPION_DATA", "HMS Cal etottracknorm", 200, 0.2, 1.8)
-        H_cer_npeSum_SUBPION_DATA = ROOT.TH1D("H_cer_npeSum_SUBPION_DATA", "HMS Cer Npe Sum", 200, 0, 30)
-        P_cal_etottracknorm_SUBPION_DATA = ROOT.TH1D("P_cal_etottracknorm_SUBPION_DATA", "SHMS Cal etottracknorm", 200, 0, 1)
-        P_hgcer_npeSum_SUBPION_DATA = ROOT.TH1D("P_hgcer_npeSum_SUBPION_DATA", "SHMS HGCer Npe Sum", 200, 0, 50)
-        P_aero_npeSum_SUBPION_DATA = ROOT.TH1D("P_aero_npeSum_SUBPION_DATA", "SHMS Aero Npe Sum", 200, 0, 50)
+        H_hsdelta_SUBPION_DATA  = ROOT.TH1D("H_hsdelta_SUBPION_DATA","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SUBPION_DATA  = ROOT.TH1D("H_hsxptar_SUBPION_DATA","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SUBPION_DATA  = ROOT.TH1D("H_hsyptar_SUBPION_DATA","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SUBPION_DATA    = ROOT.TH1D("H_ssxfp_SUBPION_DATA","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SUBPION_DATA    = ROOT.TH1D("H_ssyfp_SUBPION_DATA","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SUBPION_DATA   = ROOT.TH1D("H_ssxpfp_SUBPION_DATA","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SUBPION_DATA   = ROOT.TH1D("H_ssypfp_SUBPION_DATA","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SUBPION_DATA    = ROOT.TH1D("H_hsxfp_SUBPION_DATA","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SUBPION_DATA    = ROOT.TH1D("H_hsyfp_SUBPION_DATA","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SUBPION_DATA   = ROOT.TH1D("H_hsxpfp_SUBPION_DATA","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SUBPION_DATA   = ROOT.TH1D("H_hsypfp_SUBPION_DATA","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SUBPION_DATA  = ROOT.TH1D("H_ssdelta_SUBPION_DATA","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SUBPION_DATA  = ROOT.TH1D("H_ssxptar_SUBPION_DATA","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SUBPION_DATA  = ROOT.TH1D("H_ssyptar_SUBPION_DATA","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SUBPION_DATA        = ROOT.TH1D("H_q_SUBPION_DATA","q", 100, 0.0, 10.0)
+        H_Q2_SUBPION_DATA       = ROOT.TH1D("H_Q2_SUBPION_DATA","Q2", 100, Q2min, Q2max)
+        H_W_SUBPION_DATA  = ROOT.TH1D("H_W_SUBPION_DATA","W ", 100, Wmin, Wmax)
+        H_t_SUBPION_DATA       = ROOT.TH1D("H_t_SUBPION_DATA","-t", 100, -1.0, 1.5)  
+        H_epsilon_SUBPION_DATA  = ROOT.TH1D("H_epsilon_SUBPION_DATA","epsilon", 100, 0., 1.0)
+        H_MM_SUBPION_DATA  = ROOT.TH1D("H_MM_SUBPION_DATA","MM_{K}", 100, 0.0, 1.5)
+        H_th_SUBPION_DATA  = ROOT.TH1D("H_th_SUBPION_DATA","X' tar", 100, -0.1, 0.1)
+        H_ph_SUBPION_DATA  = ROOT.TH1D("H_ph_SUBPION_DATA","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SUBPION_DATA  = ROOT.TH1D("H_ph_q_SUBPION_DATA","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SUBPION_DATA  = ROOT.TH1D("H_th_q_SUBPION_DATA","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SUBPION_DATA  = ROOT.TH1D("H_ph_recoil_SUBPION_DATA","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SUBPION_DATA  = ROOT.TH1D("H_th_recoil_SUBPION_DATA","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SUBPION_DATA  = ROOT.TH1D("H_pmiss_SUBPION_DATA","pmiss", 100, 0.0, 10.0)
+        H_emiss_SUBPION_DATA  = ROOT.TH1D("H_emiss_SUBPION_DATA","emiss", 100, 0.0, 10.0)
+        H_pmx_SUBPION_DATA  = ROOT.TH1D("H_pmx_SUBPION_DATA","pmx", 100, -10.0, 10.0)
+        H_pmy_SUBPION_DATA  = ROOT.TH1D("H_pmy_SUBPION_DATA","pmy ", 100, -10.0, 10.0)
+        H_pmz_SUBPION_DATA  = ROOT.TH1D("H_pmz_SUBPION_DATA","pmz", 100, -10.0, 10.0)
+        H_ct_epi_SUBPION_DATA = ROOT.TH1D("H_ct_epi_SUBPION_DATA", "Electron-Pion CTime", 100, -10, 10)
+        H_cal_etottracknorm_SUBPION_DATA = ROOT.TH1D("H_cal_etottracknorm_SUBPION_DATA", "HMS Cal etottracknorm", 100, 0.2, 1.8)
+        H_cer_npeSum_SUBPION_DATA = ROOT.TH1D("H_cer_npeSum_SUBPION_DATA", "HMS Cer Npe Sum", 100, 0, 30)
+        P_cal_etottracknorm_SUBPION_DATA = ROOT.TH1D("P_cal_etottracknorm_SUBPION_DATA", "SHMS Cal etottracknorm", 100, 0, 1)
+        P_hgcer_npeSum_SUBPION_DATA = ROOT.TH1D("P_hgcer_npeSum_SUBPION_DATA", "SHMS HGCer Npe Sum", 100, 0, 50)
+        P_aero_npeSum_SUBPION_DATA = ROOT.TH1D("P_aero_npeSum_SUBPION_DATA", "SHMS Aero Npe Sum", 100, 0, 50)
 
-        H_hsdelta_SUBPION_DUMMY  = ROOT.TH1D("H_hsdelta_SUBPION_DUMMY","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SUBPION_DUMMY  = ROOT.TH1D("H_hsxptar_SUBPION_DUMMY","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SUBPION_DUMMY  = ROOT.TH1D("H_hsyptar_SUBPION_DUMMY","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SUBPION_DUMMY    = ROOT.TH1D("H_ssxfp_SUBPION_DUMMY","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SUBPION_DUMMY    = ROOT.TH1D("H_ssyfp_SUBPION_DUMMY","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SUBPION_DUMMY   = ROOT.TH1D("H_ssxpfp_SUBPION_DUMMY","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SUBPION_DUMMY   = ROOT.TH1D("H_ssypfp_SUBPION_DUMMY","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SUBPION_DUMMY    = ROOT.TH1D("H_hsxfp_SUBPION_DUMMY","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SUBPION_DUMMY    = ROOT.TH1D("H_hsyfp_SUBPION_DUMMY","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SUBPION_DUMMY   = ROOT.TH1D("H_hsxpfp_SUBPION_DUMMY","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SUBPION_DUMMY   = ROOT.TH1D("H_hsypfp_SUBPION_DUMMY","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SUBPION_DUMMY  = ROOT.TH1D("H_ssdelta_SUBPION_DUMMY","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SUBPION_DUMMY  = ROOT.TH1D("H_ssxptar_SUBPION_DUMMY","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SUBPION_DUMMY  = ROOT.TH1D("H_ssyptar_SUBPION_DUMMY","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SUBPION_DUMMY        = ROOT.TH1D("H_q_SUBPION_DUMMY","q", 200, 0.0, 10.0)
-        H_Q2_SUBPION_DUMMY       = ROOT.TH1D("H_Q2_SUBPION_DUMMY","Q2", 200, Q2min, Q2max)
-        H_W_SUBPION_DUMMY  = ROOT.TH1D("H_W_SUBPION_DUMMY","W ", 200, Wmin, Wmax)
-        H_t_SUBPION_DUMMY       = ROOT.TH1D("H_t_SUBPION_DUMMY","-t", 200, -1.0, 1.5)  
-        H_epsilon_SUBPION_DUMMY  = ROOT.TH1D("H_epsilon_SUBPION_DUMMY","epsilon", 200, 0., 1.0)
-        H_MM_SUBPION_DUMMY  = ROOT.TH1D("H_MM_SUBPION_DUMMY","MM_{K}", 200, 0.0, 1.5)
-        H_th_SUBPION_DUMMY  = ROOT.TH1D("H_th_SUBPION_DUMMY","X' tar", 200, -0.1, 0.1)
-        H_ph_SUBPION_DUMMY  = ROOT.TH1D("H_ph_SUBPION_DUMMY","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SUBPION_DUMMY  = ROOT.TH1D("H_ph_q_SUBPION_DUMMY","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SUBPION_DUMMY  = ROOT.TH1D("H_th_q_SUBPION_DUMMY","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SUBPION_DUMMY  = ROOT.TH1D("H_ph_recoil_SUBPION_DUMMY","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SUBPION_DUMMY  = ROOT.TH1D("H_th_recoil_SUBPION_DUMMY","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SUBPION_DUMMY  = ROOT.TH1D("H_pmiss_SUBPION_DUMMY","pmiss", 200, 0.0, 10.0)
-        H_emiss_SUBPION_DUMMY  = ROOT.TH1D("H_emiss_SUBPION_DUMMY","emiss", 200, 0.0, 10.0)
-        H_pmx_SUBPION_DUMMY  = ROOT.TH1D("H_pmx_SUBPION_DUMMY","pmx", 200, -10.0, 10.0)
-        H_pmy_SUBPION_DUMMY  = ROOT.TH1D("H_pmy_SUBPION_DUMMY","pmy ", 200, -10.0, 10.0)
-        H_pmz_SUBPION_DUMMY  = ROOT.TH1D("H_pmz_SUBPION_DUMMY","pmz", 200, -10.0, 10.0)
-        H_ct_epi_SUBPION_DUMMY = ROOT.TH1D("H_ct_epi_SUBPION_DUMMY", "Electron-Pion CTime", 200, -10, 10)
+        H_hsdelta_SUBPION_DUMMY  = ROOT.TH1D("H_hsdelta_SUBPION_DUMMY","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SUBPION_DUMMY  = ROOT.TH1D("H_hsxptar_SUBPION_DUMMY","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SUBPION_DUMMY  = ROOT.TH1D("H_hsyptar_SUBPION_DUMMY","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SUBPION_DUMMY    = ROOT.TH1D("H_ssxfp_SUBPION_DUMMY","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SUBPION_DUMMY    = ROOT.TH1D("H_ssyfp_SUBPION_DUMMY","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SUBPION_DUMMY   = ROOT.TH1D("H_ssxpfp_SUBPION_DUMMY","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SUBPION_DUMMY   = ROOT.TH1D("H_ssypfp_SUBPION_DUMMY","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SUBPION_DUMMY    = ROOT.TH1D("H_hsxfp_SUBPION_DUMMY","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SUBPION_DUMMY    = ROOT.TH1D("H_hsyfp_SUBPION_DUMMY","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SUBPION_DUMMY   = ROOT.TH1D("H_hsxpfp_SUBPION_DUMMY","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SUBPION_DUMMY   = ROOT.TH1D("H_hsypfp_SUBPION_DUMMY","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SUBPION_DUMMY  = ROOT.TH1D("H_ssdelta_SUBPION_DUMMY","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SUBPION_DUMMY  = ROOT.TH1D("H_ssxptar_SUBPION_DUMMY","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SUBPION_DUMMY  = ROOT.TH1D("H_ssyptar_SUBPION_DUMMY","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SUBPION_DUMMY        = ROOT.TH1D("H_q_SUBPION_DUMMY","q", 100, 0.0, 10.0)
+        H_Q2_SUBPION_DUMMY       = ROOT.TH1D("H_Q2_SUBPION_DUMMY","Q2", 100, Q2min, Q2max)
+        H_W_SUBPION_DUMMY  = ROOT.TH1D("H_W_SUBPION_DUMMY","W ", 100, Wmin, Wmax)
+        H_t_SUBPION_DUMMY       = ROOT.TH1D("H_t_SUBPION_DUMMY","-t", 100, -1.0, 1.5)  
+        H_epsilon_SUBPION_DUMMY  = ROOT.TH1D("H_epsilon_SUBPION_DUMMY","epsilon", 100, 0., 1.0)
+        H_MM_SUBPION_DUMMY  = ROOT.TH1D("H_MM_SUBPION_DUMMY","MM_{K}", 100, 0.0, 1.5)
+        H_th_SUBPION_DUMMY  = ROOT.TH1D("H_th_SUBPION_DUMMY","X' tar", 100, -0.1, 0.1)
+        H_ph_SUBPION_DUMMY  = ROOT.TH1D("H_ph_SUBPION_DUMMY","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SUBPION_DUMMY  = ROOT.TH1D("H_ph_q_SUBPION_DUMMY","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SUBPION_DUMMY  = ROOT.TH1D("H_th_q_SUBPION_DUMMY","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SUBPION_DUMMY  = ROOT.TH1D("H_ph_recoil_SUBPION_DUMMY","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SUBPION_DUMMY  = ROOT.TH1D("H_th_recoil_SUBPION_DUMMY","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SUBPION_DUMMY  = ROOT.TH1D("H_pmiss_SUBPION_DUMMY","pmiss", 100, 0.0, 10.0)
+        H_emiss_SUBPION_DUMMY  = ROOT.TH1D("H_emiss_SUBPION_DUMMY","emiss", 100, 0.0, 10.0)
+        H_pmx_SUBPION_DUMMY  = ROOT.TH1D("H_pmx_SUBPION_DUMMY","pmx", 100, -10.0, 10.0)
+        H_pmy_SUBPION_DUMMY  = ROOT.TH1D("H_pmy_SUBPION_DUMMY","pmy ", 100, -10.0, 10.0)
+        H_pmz_SUBPION_DUMMY  = ROOT.TH1D("H_pmz_SUBPION_DUMMY","pmz", 100, -10.0, 10.0)
+        H_ct_epi_SUBPION_DUMMY = ROOT.TH1D("H_ct_epi_SUBPION_DUMMY", "Electron-Pion CTime", 100, -10, 10)
 
-        H_hsdelta_SUBPION_RAND  = ROOT.TH1D("H_hsdelta_SUBPION_RAND","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SUBPION_RAND  = ROOT.TH1D("H_hsxptar_SUBPION_RAND","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SUBPION_RAND  = ROOT.TH1D("H_hsyptar_SUBPION_RAND","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SUBPION_RAND    = ROOT.TH1D("H_ssxfp_SUBPION_RAND","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SUBPION_RAND    = ROOT.TH1D("H_ssyfp_SUBPION_RAND","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SUBPION_RAND   = ROOT.TH1D("H_ssxpfp_SUBPION_RAND","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SUBPION_RAND   = ROOT.TH1D("H_ssypfp_SUBPION_RAND","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SUBPION_RAND    = ROOT.TH1D("H_hsxfp_SUBPION_RAND","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SUBPION_RAND    = ROOT.TH1D("H_hsyfp_SUBPION_RAND","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SUBPION_RAND   = ROOT.TH1D("H_hsxpfp_SUBPION_RAND","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SUBPION_RAND   = ROOT.TH1D("H_hsypfp_SUBPION_RAND","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SUBPION_RAND  = ROOT.TH1D("H_ssdelta_SUBPION_RAND","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SUBPION_RAND  = ROOT.TH1D("H_ssxptar_SUBPION_RAND","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SUBPION_RAND  = ROOT.TH1D("H_ssyptar_SUBPION_RAND","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SUBPION_RAND        = ROOT.TH1D("H_q_SUBPION_RAND","q", 200, 0.0, 10.0)
-        H_Q2_SUBPION_RAND       = ROOT.TH1D("H_Q2_SUBPION_RAND","Q2", 200, Q2min, Q2max)
-        H_W_SUBPION_RAND  = ROOT.TH1D("H_W_SUBPION_RAND","W ", 200, Wmin, Wmax)
-        H_t_SUBPION_RAND       = ROOT.TH1D("H_t_SUBPION_RAND","-t", 200, -1.0, 1.5)
-        H_epsilon_SUBPION_RAND  = ROOT.TH1D("H_epsilon_SUBPION_RAND","epsilon", 200, 0., 1.0)
-        H_MM_SUBPION_RAND  = ROOT.TH1D("H_MM_SUBPION_RAND","MM_{K}", 200, 0.0, 1.5)
-        H_th_SUBPION_RAND  = ROOT.TH1D("H_th_SUBPION_RAND","X' tar", 200, -0.1, 0.1)
-        H_ph_SUBPION_RAND  = ROOT.TH1D("H_ph_SUBPION_RAND","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SUBPION_RAND  = ROOT.TH1D("H_ph_q_SUBPION_RAND","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SUBPION_RAND  = ROOT.TH1D("H_th_q_SUBPION_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SUBPION_RAND  = ROOT.TH1D("H_ph_recoil_SUBPION_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SUBPION_RAND  = ROOT.TH1D("H_th_recoil_SUBPION_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SUBPION_RAND  = ROOT.TH1D("H_pmiss_SUBPION_RAND","pmiss", 200, 0.0, 10.0)
-        H_emiss_SUBPION_RAND  = ROOT.TH1D("H_emiss_SUBPION_RAND","emiss", 200, 0.0, 10.0)
-        H_pmx_SUBPION_RAND  = ROOT.TH1D("H_pmx_SUBPION_RAND","pmx", 200, -10.0, 10.0)
-        H_pmy_SUBPION_RAND  = ROOT.TH1D("H_pmy_SUBPION_RAND","pmy ", 200, -10.0, 10.0)
-        H_pmz_SUBPION_RAND  = ROOT.TH1D("H_pmz_SUBPION_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_epi_SUBPION_RAND = ROOT.TH1D("H_ct_epi_SUBPION_RAND", "Electron-Pion CTime", 200, -10, 10)
+        H_hsdelta_SUBPION_RAND  = ROOT.TH1D("H_hsdelta_SUBPION_RAND","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SUBPION_RAND  = ROOT.TH1D("H_hsxptar_SUBPION_RAND","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SUBPION_RAND  = ROOT.TH1D("H_hsyptar_SUBPION_RAND","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SUBPION_RAND    = ROOT.TH1D("H_ssxfp_SUBPION_RAND","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SUBPION_RAND    = ROOT.TH1D("H_ssyfp_SUBPION_RAND","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SUBPION_RAND   = ROOT.TH1D("H_ssxpfp_SUBPION_RAND","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SUBPION_RAND   = ROOT.TH1D("H_ssypfp_SUBPION_RAND","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SUBPION_RAND    = ROOT.TH1D("H_hsxfp_SUBPION_RAND","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SUBPION_RAND    = ROOT.TH1D("H_hsyfp_SUBPION_RAND","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SUBPION_RAND   = ROOT.TH1D("H_hsxpfp_SUBPION_RAND","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SUBPION_RAND   = ROOT.TH1D("H_hsypfp_SUBPION_RAND","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SUBPION_RAND  = ROOT.TH1D("H_ssdelta_SUBPION_RAND","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SUBPION_RAND  = ROOT.TH1D("H_ssxptar_SUBPION_RAND","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SUBPION_RAND  = ROOT.TH1D("H_ssyptar_SUBPION_RAND","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SUBPION_RAND        = ROOT.TH1D("H_q_SUBPION_RAND","q", 100, 0.0, 10.0)
+        H_Q2_SUBPION_RAND       = ROOT.TH1D("H_Q2_SUBPION_RAND","Q2", 100, Q2min, Q2max)
+        H_W_SUBPION_RAND  = ROOT.TH1D("H_W_SUBPION_RAND","W ", 100, Wmin, Wmax)
+        H_t_SUBPION_RAND       = ROOT.TH1D("H_t_SUBPION_RAND","-t", 100, -1.0, 1.5)
+        H_epsilon_SUBPION_RAND  = ROOT.TH1D("H_epsilon_SUBPION_RAND","epsilon", 100, 0., 1.0)
+        H_MM_SUBPION_RAND  = ROOT.TH1D("H_MM_SUBPION_RAND","MM_{K}", 100, 0.0, 1.5)
+        H_th_SUBPION_RAND  = ROOT.TH1D("H_th_SUBPION_RAND","X' tar", 100, -0.1, 0.1)
+        H_ph_SUBPION_RAND  = ROOT.TH1D("H_ph_SUBPION_RAND","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SUBPION_RAND  = ROOT.TH1D("H_ph_q_SUBPION_RAND","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SUBPION_RAND  = ROOT.TH1D("H_th_q_SUBPION_RAND","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SUBPION_RAND  = ROOT.TH1D("H_ph_recoil_SUBPION_RAND","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SUBPION_RAND  = ROOT.TH1D("H_th_recoil_SUBPION_RAND","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SUBPION_RAND  = ROOT.TH1D("H_pmiss_SUBPION_RAND","pmiss", 100, 0.0, 10.0)
+        H_emiss_SUBPION_RAND  = ROOT.TH1D("H_emiss_SUBPION_RAND","emiss", 100, 0.0, 10.0)
+        H_pmx_SUBPION_RAND  = ROOT.TH1D("H_pmx_SUBPION_RAND","pmx", 100, -10.0, 10.0)
+        H_pmy_SUBPION_RAND  = ROOT.TH1D("H_pmy_SUBPION_RAND","pmy ", 100, -10.0, 10.0)
+        H_pmz_SUBPION_RAND  = ROOT.TH1D("H_pmz_SUBPION_RAND","pmz", 100, -10.0, 10.0)
+        H_ct_epi_SUBPION_RAND = ROOT.TH1D("H_ct_epi_SUBPION_RAND", "Electron-Pion CTime", 100, -10, 10)
 
-        H_hsdelta_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_SUBPION_DUMMY_RAND","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_SUBPION_DUMMY_RAND","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_hsyptar_SUBPION_DUMMY_RAND","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SUBPION_DUMMY_RAND    = ROOT.TH1D("H_ssxfp_SUBPION_DUMMY_RAND","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SUBPION_DUMMY_RAND    = ROOT.TH1D("H_ssyfp_SUBPION_DUMMY_RAND","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SUBPION_DUMMY_RAND   = ROOT.TH1D("H_ssxpfp_SUBPION_DUMMY_RAND","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SUBPION_DUMMY_RAND   = ROOT.TH1D("H_ssypfp_SUBPION_DUMMY_RAND","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SUBPION_DUMMY_RAND    = ROOT.TH1D("H_hsxfp_SUBPION_DUMMY_RAND","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SUBPION_DUMMY_RAND    = ROOT.TH1D("H_hsyfp_SUBPION_DUMMY_RAND","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SUBPION_DUMMY_RAND   = ROOT.TH1D("H_hsxpfp_SUBPION_DUMMY_RAND","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SUBPION_DUMMY_RAND   = ROOT.TH1D("H_hsypfp_SUBPION_DUMMY_RAND","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ssdelta_SUBPION_DUMMY_RAND","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ssxptar_SUBPION_DUMMY_RAND","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ssyptar_SUBPION_DUMMY_RAND","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SUBPION_DUMMY_RAND        = ROOT.TH1D("H_q_SUBPION_DUMMY_RAND","q", 200, 0.0, 10.0)
-        H_Q2_SUBPION_DUMMY_RAND       = ROOT.TH1D("H_Q2_SUBPION_DUMMY_RAND","Q2", 200, Q2min, Q2max)
-        H_W_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_W_SUBPION_DUMMY_RAND","W ", 200, Wmin, Wmax)
-        H_t_SUBPION_DUMMY_RAND       = ROOT.TH1D("H_t_SUBPION_DUMMY_RAND","-t", 200, -1.0, 1.5)
-        H_epsilon_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_epsilon_SUBPION_DUMMY_RAND","epsilon", 200, 0., 1.0)
-        H_MM_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_MM_SUBPION_DUMMY_RAND","MM_{K}", 200, 0.0, 1.5)
-        H_th_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_th_SUBPION_DUMMY_RAND","X' tar", 200, -0.1, 0.1)
-        H_ph_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ph_SUBPION_DUMMY_RAND","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ph_q_SUBPION_DUMMY_RAND","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_th_q_SUBPION_DUMMY_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ph_recoil_SUBPION_DUMMY_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_th_recoil_SUBPION_DUMMY_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_pmiss_SUBPION_DUMMY_RAND","pmiss", 200, 0.0, 10.0)
-        H_emiss_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_emiss_SUBPION_DUMMY_RAND","emiss", 200, 0.0, 10.0)
-        H_pmx_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_pmx_SUBPION_DUMMY_RAND","pmx", 200, -10.0, 10.0)
-        H_pmy_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_pmy_SUBPION_DUMMY_RAND","pmy ", 200, -10.0, 10.0)
-        H_pmz_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_pmz_SUBPION_DUMMY_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_epi_SUBPION_DUMMY_RAND = ROOT.TH1D("H_ct_epi_SUBPION_DUMMY_RAND", "Electron-Pion CTime", 200, -10, 10)
+        H_hsdelta_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_SUBPION_DUMMY_RAND","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_SUBPION_DUMMY_RAND","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_hsyptar_SUBPION_DUMMY_RAND","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SUBPION_DUMMY_RAND    = ROOT.TH1D("H_ssxfp_SUBPION_DUMMY_RAND","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SUBPION_DUMMY_RAND    = ROOT.TH1D("H_ssyfp_SUBPION_DUMMY_RAND","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SUBPION_DUMMY_RAND   = ROOT.TH1D("H_ssxpfp_SUBPION_DUMMY_RAND","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SUBPION_DUMMY_RAND   = ROOT.TH1D("H_ssypfp_SUBPION_DUMMY_RAND","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SUBPION_DUMMY_RAND    = ROOT.TH1D("H_hsxfp_SUBPION_DUMMY_RAND","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SUBPION_DUMMY_RAND    = ROOT.TH1D("H_hsyfp_SUBPION_DUMMY_RAND","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SUBPION_DUMMY_RAND   = ROOT.TH1D("H_hsxpfp_SUBPION_DUMMY_RAND","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SUBPION_DUMMY_RAND   = ROOT.TH1D("H_hsypfp_SUBPION_DUMMY_RAND","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ssdelta_SUBPION_DUMMY_RAND","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ssxptar_SUBPION_DUMMY_RAND","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ssyptar_SUBPION_DUMMY_RAND","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SUBPION_DUMMY_RAND        = ROOT.TH1D("H_q_SUBPION_DUMMY_RAND","q", 100, 0.0, 10.0)
+        H_Q2_SUBPION_DUMMY_RAND       = ROOT.TH1D("H_Q2_SUBPION_DUMMY_RAND","Q2", 100, Q2min, Q2max)
+        H_W_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_W_SUBPION_DUMMY_RAND","W ", 100, Wmin, Wmax)
+        H_t_SUBPION_DUMMY_RAND       = ROOT.TH1D("H_t_SUBPION_DUMMY_RAND","-t", 100, -1.0, 1.5)
+        H_epsilon_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_epsilon_SUBPION_DUMMY_RAND","epsilon", 100, 0., 1.0)
+        H_MM_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_MM_SUBPION_DUMMY_RAND","MM_{K}", 100, 0.0, 1.5)
+        H_th_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_th_SUBPION_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
+        H_ph_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ph_SUBPION_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ph_q_SUBPION_DUMMY_RAND","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_th_q_SUBPION_DUMMY_RAND","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_ph_recoil_SUBPION_DUMMY_RAND","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_th_recoil_SUBPION_DUMMY_RAND","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_pmiss_SUBPION_DUMMY_RAND","pmiss", 100, 0.0, 10.0)
+        H_emiss_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_emiss_SUBPION_DUMMY_RAND","emiss", 100, 0.0, 10.0)
+        H_pmx_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_pmx_SUBPION_DUMMY_RAND","pmx", 100, -10.0, 10.0)
+        H_pmy_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_pmy_SUBPION_DUMMY_RAND","pmy ", 100, -10.0, 10.0)
+        H_pmz_SUBPION_DUMMY_RAND  = ROOT.TH1D("H_pmz_SUBPION_DUMMY_RAND","pmz", 100, -10.0, 10.0)
+        H_ct_epi_SUBPION_DUMMY_RAND = ROOT.TH1D("H_ct_epi_SUBPION_DUMMY_RAND", "Electron-Pion CTime", 100, -10, 10)
 
-        H_hsdelta_SUBPROTON_DATA  = ROOT.TH1D("H_hsdelta_SUBPROTON_DATA","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SUBPROTON_DATA  = ROOT.TH1D("H_hsxptar_SUBPROTON_DATA","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SUBPROTON_DATA  = ROOT.TH1D("H_hsyptar_SUBPROTON_DATA","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SUBPROTON_DATA    = ROOT.TH1D("H_ssxfp_SUBPROTON_DATA","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SUBPROTON_DATA    = ROOT.TH1D("H_ssyfp_SUBPROTON_DATA","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SUBPROTON_DATA   = ROOT.TH1D("H_ssxpfp_SUBPROTON_DATA","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SUBPROTON_DATA   = ROOT.TH1D("H_ssypfp_SUBPROTON_DATA","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SUBPROTON_DATA    = ROOT.TH1D("H_hsxfp_SUBPROTON_DATA","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SUBPROTON_DATA    = ROOT.TH1D("H_hsyfp_SUBPROTON_DATA","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SUBPROTON_DATA   = ROOT.TH1D("H_hsxpfp_SUBPROTON_DATA","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SUBPROTON_DATA   = ROOT.TH1D("H_hsypfp_SUBPROTON_DATA","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SUBPROTON_DATA  = ROOT.TH1D("H_ssdelta_SUBPROTON_DATA","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SUBPROTON_DATA  = ROOT.TH1D("H_ssxptar_SUBPROTON_DATA","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SUBPROTON_DATA  = ROOT.TH1D("H_ssyptar_SUBPROTON_DATA","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SUBPROTON_DATA        = ROOT.TH1D("H_q_SUBPROTON_DATA","q", 200, 0.0, 10.0)
-        H_Q2_SUBPROTON_DATA       = ROOT.TH1D("H_Q2_SUBPROTON_DATA","Q2", 200, Q2min, Q2max)
-        H_W_SUBPROTON_DATA  = ROOT.TH1D("H_W_SUBPROTON_DATA","W ", 200, Wmin, Wmax)
-        H_t_SUBPROTON_DATA       = ROOT.TH1D("H_t_SUBPROTON_DATA","-t", 200, -1.0, 1.5)  
-        H_epsilon_SUBPROTON_DATA  = ROOT.TH1D("H_epsilon_SUBPROTON_DATA","epsilon", 200, 0., 1.0)
-        H_MM_SUBPROTON_DATA  = ROOT.TH1D("H_MM_SUBPROTON_DATA","MM_{K}", 200, 0.0, 1.5)
-        H_th_SUBPROTON_DATA  = ROOT.TH1D("H_th_SUBPROTON_DATA","X' tar", 200, -0.1, 0.1)
-        H_ph_SUBPROTON_DATA  = ROOT.TH1D("H_ph_SUBPROTON_DATA","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SUBPROTON_DATA  = ROOT.TH1D("H_ph_q_SUBPROTON_DATA","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SUBPROTON_DATA  = ROOT.TH1D("H_th_q_SUBPROTON_DATA","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SUBPROTON_DATA  = ROOT.TH1D("H_ph_recoil_SUBPROTON_DATA","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SUBPROTON_DATA  = ROOT.TH1D("H_th_recoil_SUBPROTON_DATA","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SUBPROTON_DATA  = ROOT.TH1D("H_pmiss_SUBPROTON_DATA","pmiss", 200, 0.0, 10.0)
-        H_emiss_SUBPROTON_DATA  = ROOT.TH1D("H_emiss_SUBPROTON_DATA","emiss", 200, 0.0, 10.0)
-        H_pmx_SUBPROTON_DATA  = ROOT.TH1D("H_pmx_SUBPROTON_DATA","pmx", 200, -10.0, 10.0)
-        H_pmy_SUBPROTON_DATA  = ROOT.TH1D("H_pmy_SUBPROTON_DATA","pmy ", 200, -10.0, 10.0)
-        H_pmz_SUBPROTON_DATA  = ROOT.TH1D("H_pmz_SUBPROTON_DATA","pmz", 200, -10.0, 10.0)
-        H_ct_ep_SUBPROTON_DATA = ROOT.TH1D("H_ct_ep_SUBPROTON_DATA", "Electron-Proton CTime", 200, -10, 10)
-        H_cal_etottracknorm_SUBPROTON_DATA = ROOT.TH1D("H_cal_etottracknorm_SUBPROTON_DATA", "HMS Cal etottracknorm", 200, 0.2, 1.8)
-        H_cer_npeSum_SUBPROTON_DATA = ROOT.TH1D("H_cer_npeSum_SUBPROTON_DATA", "HMS Cer Npe Sum", 200, 0, 30)
-        P_cal_etottracknorm_SUBPROTON_DATA = ROOT.TH1D("P_cal_etottracknorm_SUBPROTON_DATA", "SHMS Cal etottracknorm", 200, 0, 1)
-        P_hgcer_npeSum_SUBPROTON_DATA = ROOT.TH1D("P_hgcer_npeSum_SUBPROTON_DATA", "SHMS HGCer Npe Sum", 200, 0, 50)
-        P_aero_npeSum_SUBPROTON_DATA = ROOT.TH1D("P_aero_npeSum_SUBPROTON_DATA", "SHMS Aero Npe Sum", 200, 0, 50)
+        H_hsdelta_SUBPROTON_DATA  = ROOT.TH1D("H_hsdelta_SUBPROTON_DATA","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SUBPROTON_DATA  = ROOT.TH1D("H_hsxptar_SUBPROTON_DATA","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SUBPROTON_DATA  = ROOT.TH1D("H_hsyptar_SUBPROTON_DATA","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SUBPROTON_DATA    = ROOT.TH1D("H_ssxfp_SUBPROTON_DATA","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SUBPROTON_DATA    = ROOT.TH1D("H_ssyfp_SUBPROTON_DATA","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SUBPROTON_DATA   = ROOT.TH1D("H_ssxpfp_SUBPROTON_DATA","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SUBPROTON_DATA   = ROOT.TH1D("H_ssypfp_SUBPROTON_DATA","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SUBPROTON_DATA    = ROOT.TH1D("H_hsxfp_SUBPROTON_DATA","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SUBPROTON_DATA    = ROOT.TH1D("H_hsyfp_SUBPROTON_DATA","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SUBPROTON_DATA   = ROOT.TH1D("H_hsxpfp_SUBPROTON_DATA","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SUBPROTON_DATA   = ROOT.TH1D("H_hsypfp_SUBPROTON_DATA","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SUBPROTON_DATA  = ROOT.TH1D("H_ssdelta_SUBPROTON_DATA","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SUBPROTON_DATA  = ROOT.TH1D("H_ssxptar_SUBPROTON_DATA","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SUBPROTON_DATA  = ROOT.TH1D("H_ssyptar_SUBPROTON_DATA","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SUBPROTON_DATA        = ROOT.TH1D("H_q_SUBPROTON_DATA","q", 100, 0.0, 10.0)
+        H_Q2_SUBPROTON_DATA       = ROOT.TH1D("H_Q2_SUBPROTON_DATA","Q2", 100, Q2min, Q2max)
+        H_W_SUBPROTON_DATA  = ROOT.TH1D("H_W_SUBPROTON_DATA","W ", 100, Wmin, Wmax)
+        H_t_SUBPROTON_DATA       = ROOT.TH1D("H_t_SUBPROTON_DATA","-t", 100, -1.0, 1.5)  
+        H_epsilon_SUBPROTON_DATA  = ROOT.TH1D("H_epsilon_SUBPROTON_DATA","epsilon", 100, 0., 1.0)
+        H_MM_SUBPROTON_DATA  = ROOT.TH1D("H_MM_SUBPROTON_DATA","MM_{K}", 100, 0.0, 1.5)
+        H_th_SUBPROTON_DATA  = ROOT.TH1D("H_th_SUBPROTON_DATA","X' tar", 100, -0.1, 0.1)
+        H_ph_SUBPROTON_DATA  = ROOT.TH1D("H_ph_SUBPROTON_DATA","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SUBPROTON_DATA  = ROOT.TH1D("H_ph_q_SUBPROTON_DATA","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SUBPROTON_DATA  = ROOT.TH1D("H_th_q_SUBPROTON_DATA","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SUBPROTON_DATA  = ROOT.TH1D("H_ph_recoil_SUBPROTON_DATA","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SUBPROTON_DATA  = ROOT.TH1D("H_th_recoil_SUBPROTON_DATA","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SUBPROTON_DATA  = ROOT.TH1D("H_pmiss_SUBPROTON_DATA","pmiss", 100, 0.0, 10.0)
+        H_emiss_SUBPROTON_DATA  = ROOT.TH1D("H_emiss_SUBPROTON_DATA","emiss", 100, 0.0, 10.0)
+        H_pmx_SUBPROTON_DATA  = ROOT.TH1D("H_pmx_SUBPROTON_DATA","pmx", 100, -10.0, 10.0)
+        H_pmy_SUBPROTON_DATA  = ROOT.TH1D("H_pmy_SUBPROTON_DATA","pmy ", 100, -10.0, 10.0)
+        H_pmz_SUBPROTON_DATA  = ROOT.TH1D("H_pmz_SUBPROTON_DATA","pmz", 100, -10.0, 10.0)
+        H_ct_ep_SUBPROTON_DATA = ROOT.TH1D("H_ct_ep_SUBPROTON_DATA", "Electron-Proton CTime", 100, -10, 10)
+        H_cal_etottracknorm_SUBPROTON_DATA = ROOT.TH1D("H_cal_etottracknorm_SUBPROTON_DATA", "HMS Cal etottracknorm", 100, 0.2, 1.8)
+        H_cer_npeSum_SUBPROTON_DATA = ROOT.TH1D("H_cer_npeSum_SUBPROTON_DATA", "HMS Cer Npe Sum", 100, 0, 30)
+        P_cal_etottracknorm_SUBPROTON_DATA = ROOT.TH1D("P_cal_etottracknorm_SUBPROTON_DATA", "SHMS Cal etottracknorm", 100, 0, 1)
+        P_hgcer_npeSum_SUBPROTON_DATA = ROOT.TH1D("P_hgcer_npeSum_SUBPROTON_DATA", "SHMS HGCer Npe Sum", 100, 0, 50)
+        P_aero_npeSum_SUBPROTON_DATA = ROOT.TH1D("P_aero_npeSum_SUBPROTON_DATA", "SHMS Aero Npe Sum", 100, 0, 50)
 
-        H_hsdelta_SUBPROTON_DUMMY  = ROOT.TH1D("H_hsdelta_SUBPROTON_DUMMY","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SUBPROTON_DUMMY  = ROOT.TH1D("H_hsxptar_SUBPROTON_DUMMY","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SUBPROTON_DUMMY  = ROOT.TH1D("H_hsyptar_SUBPROTON_DUMMY","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SUBPROTON_DUMMY    = ROOT.TH1D("H_ssxfp_SUBPROTON_DUMMY","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SUBPROTON_DUMMY    = ROOT.TH1D("H_ssyfp_SUBPROTON_DUMMY","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SUBPROTON_DUMMY   = ROOT.TH1D("H_ssxpfp_SUBPROTON_DUMMY","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SUBPROTON_DUMMY   = ROOT.TH1D("H_ssypfp_SUBPROTON_DUMMY","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SUBPROTON_DUMMY    = ROOT.TH1D("H_hsxfp_SUBPROTON_DUMMY","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SUBPROTON_DUMMY    = ROOT.TH1D("H_hsyfp_SUBPROTON_DUMMY","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SUBPROTON_DUMMY   = ROOT.TH1D("H_hsxpfp_SUBPROTON_DUMMY","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SUBPROTON_DUMMY   = ROOT.TH1D("H_hsypfp_SUBPROTON_DUMMY","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SUBPROTON_DUMMY  = ROOT.TH1D("H_ssdelta_SUBPROTON_DUMMY","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SUBPROTON_DUMMY  = ROOT.TH1D("H_ssxptar_SUBPROTON_DUMMY","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SUBPROTON_DUMMY  = ROOT.TH1D("H_ssyptar_SUBPROTON_DUMMY","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SUBPROTON_DUMMY        = ROOT.TH1D("H_q_SUBPROTON_DUMMY","q", 200, 0.0, 10.0)
-        H_Q2_SUBPROTON_DUMMY       = ROOT.TH1D("H_Q2_SUBPROTON_DUMMY","Q2", 200, Q2min, Q2max)
-        H_W_SUBPROTON_DUMMY  = ROOT.TH1D("H_W_SUBPROTON_DUMMY","W ", 200, Wmin, Wmax)
-        H_t_SUBPROTON_DUMMY       = ROOT.TH1D("H_t_SUBPROTON_DUMMY","-t", 200, -1.0, 1.5)  
-        H_epsilon_SUBPROTON_DUMMY  = ROOT.TH1D("H_epsilon_SUBPROTON_DUMMY","epsilon", 200, 0., 1.0)
-        H_MM_SUBPROTON_DUMMY  = ROOT.TH1D("H_MM_SUBPROTON_DUMMY","MM_{K}", 200, 0.0, 1.5)
-        H_th_SUBPROTON_DUMMY  = ROOT.TH1D("H_th_SUBPROTON_DUMMY","X' tar", 200, -0.1, 0.1)
-        H_ph_SUBPROTON_DUMMY  = ROOT.TH1D("H_ph_SUBPROTON_DUMMY","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SUBPROTON_DUMMY  = ROOT.TH1D("H_ph_q_SUBPROTON_DUMMY","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SUBPROTON_DUMMY  = ROOT.TH1D("H_th_q_SUBPROTON_DUMMY","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SUBPROTON_DUMMY  = ROOT.TH1D("H_ph_recoil_SUBPROTON_DUMMY","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SUBPROTON_DUMMY  = ROOT.TH1D("H_th_recoil_SUBPROTON_DUMMY","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SUBPROTON_DUMMY  = ROOT.TH1D("H_pmiss_SUBPROTON_DUMMY","pmiss", 200, 0.0, 10.0)
-        H_emiss_SUBPROTON_DUMMY  = ROOT.TH1D("H_emiss_SUBPROTON_DUMMY","emiss", 200, 0.0, 10.0)
-        H_pmx_SUBPROTON_DUMMY  = ROOT.TH1D("H_pmx_SUBPROTON_DUMMY","pmx", 200, -10.0, 10.0)
-        H_pmy_SUBPROTON_DUMMY  = ROOT.TH1D("H_pmy_SUBPROTON_DUMMY","pmy ", 200, -10.0, 10.0)
-        H_pmz_SUBPROTON_DUMMY  = ROOT.TH1D("H_pmz_SUBPROTON_DUMMY","pmz", 200, -10.0, 10.0)
-        H_ct_ep_SUBPROTON_DUMMY = ROOT.TH1D("H_ct_ep_SUBPROTON_DUMMY", "Electron-Proton CTime", 200, -10, 10)
+        H_hsdelta_SUBPROTON_DUMMY  = ROOT.TH1D("H_hsdelta_SUBPROTON_DUMMY","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SUBPROTON_DUMMY  = ROOT.TH1D("H_hsxptar_SUBPROTON_DUMMY","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SUBPROTON_DUMMY  = ROOT.TH1D("H_hsyptar_SUBPROTON_DUMMY","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SUBPROTON_DUMMY    = ROOT.TH1D("H_ssxfp_SUBPROTON_DUMMY","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SUBPROTON_DUMMY    = ROOT.TH1D("H_ssyfp_SUBPROTON_DUMMY","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SUBPROTON_DUMMY   = ROOT.TH1D("H_ssxpfp_SUBPROTON_DUMMY","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SUBPROTON_DUMMY   = ROOT.TH1D("H_ssypfp_SUBPROTON_DUMMY","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SUBPROTON_DUMMY    = ROOT.TH1D("H_hsxfp_SUBPROTON_DUMMY","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SUBPROTON_DUMMY    = ROOT.TH1D("H_hsyfp_SUBPROTON_DUMMY","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SUBPROTON_DUMMY   = ROOT.TH1D("H_hsxpfp_SUBPROTON_DUMMY","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SUBPROTON_DUMMY   = ROOT.TH1D("H_hsypfp_SUBPROTON_DUMMY","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SUBPROTON_DUMMY  = ROOT.TH1D("H_ssdelta_SUBPROTON_DUMMY","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SUBPROTON_DUMMY  = ROOT.TH1D("H_ssxptar_SUBPROTON_DUMMY","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SUBPROTON_DUMMY  = ROOT.TH1D("H_ssyptar_SUBPROTON_DUMMY","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SUBPROTON_DUMMY        = ROOT.TH1D("H_q_SUBPROTON_DUMMY","q", 100, 0.0, 10.0)
+        H_Q2_SUBPROTON_DUMMY       = ROOT.TH1D("H_Q2_SUBPROTON_DUMMY","Q2", 100, Q2min, Q2max)
+        H_W_SUBPROTON_DUMMY  = ROOT.TH1D("H_W_SUBPROTON_DUMMY","W ", 100, Wmin, Wmax)
+        H_t_SUBPROTON_DUMMY       = ROOT.TH1D("H_t_SUBPROTON_DUMMY","-t", 100, -1.0, 1.5)  
+        H_epsilon_SUBPROTON_DUMMY  = ROOT.TH1D("H_epsilon_SUBPROTON_DUMMY","epsilon", 100, 0., 1.0)
+        H_MM_SUBPROTON_DUMMY  = ROOT.TH1D("H_MM_SUBPROTON_DUMMY","MM_{K}", 100, 0.0, 1.5)
+        H_th_SUBPROTON_DUMMY  = ROOT.TH1D("H_th_SUBPROTON_DUMMY","X' tar", 100, -0.1, 0.1)
+        H_ph_SUBPROTON_DUMMY  = ROOT.TH1D("H_ph_SUBPROTON_DUMMY","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SUBPROTON_DUMMY  = ROOT.TH1D("H_ph_q_SUBPROTON_DUMMY","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SUBPROTON_DUMMY  = ROOT.TH1D("H_th_q_SUBPROTON_DUMMY","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SUBPROTON_DUMMY  = ROOT.TH1D("H_ph_recoil_SUBPROTON_DUMMY","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SUBPROTON_DUMMY  = ROOT.TH1D("H_th_recoil_SUBPROTON_DUMMY","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SUBPROTON_DUMMY  = ROOT.TH1D("H_pmiss_SUBPROTON_DUMMY","pmiss", 100, 0.0, 10.0)
+        H_emiss_SUBPROTON_DUMMY  = ROOT.TH1D("H_emiss_SUBPROTON_DUMMY","emiss", 100, 0.0, 10.0)
+        H_pmx_SUBPROTON_DUMMY  = ROOT.TH1D("H_pmx_SUBPROTON_DUMMY","pmx", 100, -10.0, 10.0)
+        H_pmy_SUBPROTON_DUMMY  = ROOT.TH1D("H_pmy_SUBPROTON_DUMMY","pmy ", 100, -10.0, 10.0)
+        H_pmz_SUBPROTON_DUMMY  = ROOT.TH1D("H_pmz_SUBPROTON_DUMMY","pmz", 100, -10.0, 10.0)
+        H_ct_ep_SUBPROTON_DUMMY = ROOT.TH1D("H_ct_ep_SUBPROTON_DUMMY", "Electron-Proton CTime", 100, -10, 10)
 
-        H_hsdelta_SUBPROTON_RAND  = ROOT.TH1D("H_hsdelta_SUBPROTON_RAND","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SUBPROTON_RAND  = ROOT.TH1D("H_hsxptar_SUBPROTON_RAND","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SUBPROTON_RAND  = ROOT.TH1D("H_hsyptar_SUBPROTON_RAND","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SUBPROTON_RAND    = ROOT.TH1D("H_ssxfp_SUBPROTON_RAND","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SUBPROTON_RAND    = ROOT.TH1D("H_ssyfp_SUBPROTON_RAND","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SUBPROTON_RAND   = ROOT.TH1D("H_ssxpfp_SUBPROTON_RAND","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SUBPROTON_RAND   = ROOT.TH1D("H_ssypfp_SUBPROTON_RAND","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SUBPROTON_RAND    = ROOT.TH1D("H_hsxfp_SUBPROTON_RAND","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SUBPROTON_RAND    = ROOT.TH1D("H_hsyfp_SUBPROTON_RAND","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SUBPROTON_RAND   = ROOT.TH1D("H_hsxpfp_SUBPROTON_RAND","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SUBPROTON_RAND   = ROOT.TH1D("H_hsypfp_SUBPROTON_RAND","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SUBPROTON_RAND  = ROOT.TH1D("H_ssdelta_SUBPROTON_RAND","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SUBPROTON_RAND  = ROOT.TH1D("H_ssxptar_SUBPROTON_RAND","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SUBPROTON_RAND  = ROOT.TH1D("H_ssyptar_SUBPROTON_RAND","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SUBPROTON_RAND        = ROOT.TH1D("H_q_SUBPROTON_RAND","q", 200, 0.0, 10.0)
-        H_Q2_SUBPROTON_RAND       = ROOT.TH1D("H_Q2_SUBPROTON_RAND","Q2", 200, Q2min, Q2max)
-        H_W_SUBPROTON_RAND  = ROOT.TH1D("H_W_SUBPROTON_RAND","W ", 200, Wmin, Wmax)
-        H_t_SUBPROTON_RAND       = ROOT.TH1D("H_t_SUBPROTON_RAND","-t", 200, -1.0, 1.5)
-        H_epsilon_SUBPROTON_RAND  = ROOT.TH1D("H_epsilon_SUBPROTON_RAND","epsilon", 200, 0., 1.0)
-        H_MM_SUBPROTON_RAND  = ROOT.TH1D("H_MM_SUBPROTON_RAND","MM_{K}", 200, 0.0, 1.5)
-        H_th_SUBPROTON_RAND  = ROOT.TH1D("H_th_SUBPROTON_RAND","X' tar", 200, -0.1, 0.1)
-        H_ph_SUBPROTON_RAND  = ROOT.TH1D("H_ph_SUBPROTON_RAND","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SUBPROTON_RAND  = ROOT.TH1D("H_ph_q_SUBPROTON_RAND","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SUBPROTON_RAND  = ROOT.TH1D("H_th_q_SUBPROTON_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SUBPROTON_RAND  = ROOT.TH1D("H_ph_recoil_SUBPROTON_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SUBPROTON_RAND  = ROOT.TH1D("H_th_recoil_SUBPROTON_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SUBPROTON_RAND  = ROOT.TH1D("H_pmiss_SUBPROTON_RAND","pmiss", 200, 0.0, 10.0)
-        H_emiss_SUBPROTON_RAND  = ROOT.TH1D("H_emiss_SUBPROTON_RAND","emiss", 200, 0.0, 10.0)
-        H_pmx_SUBPROTON_RAND  = ROOT.TH1D("H_pmx_SUBPROTON_RAND","pmx", 200, -10.0, 10.0)
-        H_pmy_SUBPROTON_RAND  = ROOT.TH1D("H_pmy_SUBPROTON_RAND","pmy ", 200, -10.0, 10.0)
-        H_pmz_SUBPROTON_RAND  = ROOT.TH1D("H_pmz_SUBPROTON_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_ep_SUBPROTON_RAND = ROOT.TH1D("H_ct_ep_SUBPROTON_RAND", "Electron-Proton CTime", 200, -10, 10)
+        H_hsdelta_SUBPROTON_RAND  = ROOT.TH1D("H_hsdelta_SUBPROTON_RAND","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SUBPROTON_RAND  = ROOT.TH1D("H_hsxptar_SUBPROTON_RAND","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SUBPROTON_RAND  = ROOT.TH1D("H_hsyptar_SUBPROTON_RAND","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SUBPROTON_RAND    = ROOT.TH1D("H_ssxfp_SUBPROTON_RAND","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SUBPROTON_RAND    = ROOT.TH1D("H_ssyfp_SUBPROTON_RAND","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SUBPROTON_RAND   = ROOT.TH1D("H_ssxpfp_SUBPROTON_RAND","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SUBPROTON_RAND   = ROOT.TH1D("H_ssypfp_SUBPROTON_RAND","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SUBPROTON_RAND    = ROOT.TH1D("H_hsxfp_SUBPROTON_RAND","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SUBPROTON_RAND    = ROOT.TH1D("H_hsyfp_SUBPROTON_RAND","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SUBPROTON_RAND   = ROOT.TH1D("H_hsxpfp_SUBPROTON_RAND","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SUBPROTON_RAND   = ROOT.TH1D("H_hsypfp_SUBPROTON_RAND","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SUBPROTON_RAND  = ROOT.TH1D("H_ssdelta_SUBPROTON_RAND","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SUBPROTON_RAND  = ROOT.TH1D("H_ssxptar_SUBPROTON_RAND","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SUBPROTON_RAND  = ROOT.TH1D("H_ssyptar_SUBPROTON_RAND","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SUBPROTON_RAND        = ROOT.TH1D("H_q_SUBPROTON_RAND","q", 100, 0.0, 10.0)
+        H_Q2_SUBPROTON_RAND       = ROOT.TH1D("H_Q2_SUBPROTON_RAND","Q2", 100, Q2min, Q2max)
+        H_W_SUBPROTON_RAND  = ROOT.TH1D("H_W_SUBPROTON_RAND","W ", 100, Wmin, Wmax)
+        H_t_SUBPROTON_RAND       = ROOT.TH1D("H_t_SUBPROTON_RAND","-t", 100, -1.0, 1.5)
+        H_epsilon_SUBPROTON_RAND  = ROOT.TH1D("H_epsilon_SUBPROTON_RAND","epsilon", 100, 0., 1.0)
+        H_MM_SUBPROTON_RAND  = ROOT.TH1D("H_MM_SUBPROTON_RAND","MM_{K}", 100, 0.0, 1.5)
+        H_th_SUBPROTON_RAND  = ROOT.TH1D("H_th_SUBPROTON_RAND","X' tar", 100, -0.1, 0.1)
+        H_ph_SUBPROTON_RAND  = ROOT.TH1D("H_ph_SUBPROTON_RAND","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SUBPROTON_RAND  = ROOT.TH1D("H_ph_q_SUBPROTON_RAND","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SUBPROTON_RAND  = ROOT.TH1D("H_th_q_SUBPROTON_RAND","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SUBPROTON_RAND  = ROOT.TH1D("H_ph_recoil_SUBPROTON_RAND","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SUBPROTON_RAND  = ROOT.TH1D("H_th_recoil_SUBPROTON_RAND","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SUBPROTON_RAND  = ROOT.TH1D("H_pmiss_SUBPROTON_RAND","pmiss", 100, 0.0, 10.0)
+        H_emiss_SUBPROTON_RAND  = ROOT.TH1D("H_emiss_SUBPROTON_RAND","emiss", 100, 0.0, 10.0)
+        H_pmx_SUBPROTON_RAND  = ROOT.TH1D("H_pmx_SUBPROTON_RAND","pmx", 100, -10.0, 10.0)
+        H_pmy_SUBPROTON_RAND  = ROOT.TH1D("H_pmy_SUBPROTON_RAND","pmy ", 100, -10.0, 10.0)
+        H_pmz_SUBPROTON_RAND  = ROOT.TH1D("H_pmz_SUBPROTON_RAND","pmz", 100, -10.0, 10.0)
+        H_ct_ep_SUBPROTON_RAND = ROOT.TH1D("H_ct_ep_SUBPROTON_RAND", "Electron-Proton CTime", 100, -10, 10)
 
-        H_hsdelta_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_SUBPROTON_DUMMY_RAND","HMS Delta", 200, -20.0, 20.0)
-        H_hsxptar_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_SUBPROTON_DUMMY_RAND","HMS xptar", 200, -0.1, 0.1)
-        H_hsyptar_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_hsyptar_SUBPROTON_DUMMY_RAND","HMS yptar", 200, -0.1, 0.1)
-        H_ssxfp_SUBPROTON_DUMMY_RAND    = ROOT.TH1D("H_ssxfp_SUBPROTON_DUMMY_RAND","SHMS xfp", 200, -25.0, 25.0)
-        H_ssyfp_SUBPROTON_DUMMY_RAND    = ROOT.TH1D("H_ssyfp_SUBPROTON_DUMMY_RAND","SHMS yfp", 200, -25.0, 25.0)
-        H_ssxpfp_SUBPROTON_DUMMY_RAND   = ROOT.TH1D("H_ssxpfp_SUBPROTON_DUMMY_RAND","SHMS xpfp", 200, -0.09, 0.09)
-        H_ssypfp_SUBPROTON_DUMMY_RAND   = ROOT.TH1D("H_ssypfp_SUBPROTON_DUMMY_RAND","SHMS ypfp", 200, -0.05, 0.04)
-        H_hsxfp_SUBPROTON_DUMMY_RAND    = ROOT.TH1D("H_hsxfp_SUBPROTON_DUMMY_RAND","HMS xfp", 200, -40.0, 40.0)
-        H_hsyfp_SUBPROTON_DUMMY_RAND    = ROOT.TH1D("H_hsyfp_SUBPROTON_DUMMY_RAND","HMS yfp", 200, -20.0, 20.0)
-        H_hsxpfp_SUBPROTON_DUMMY_RAND   = ROOT.TH1D("H_hsxpfp_SUBPROTON_DUMMY_RAND","HMS xpfp", 200, -0.09, 0.05)
-        H_hsypfp_SUBPROTON_DUMMY_RAND   = ROOT.TH1D("H_hsypfp_SUBPROTON_DUMMY_RAND","HMS ypfp", 200, -0.05, 0.04)
-        H_ssdelta_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ssdelta_SUBPROTON_DUMMY_RAND","SHMS delta", 200, -20.0, 20.0)
-        H_ssxptar_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ssxptar_SUBPROTON_DUMMY_RAND","SHMS xptar", 200, -0.1, 0.1)
-        H_ssyptar_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ssyptar_SUBPROTON_DUMMY_RAND","SHMS yptar", 200, -0.04, 0.04)
-        H_q_SUBPROTON_DUMMY_RAND        = ROOT.TH1D("H_q_SUBPROTON_DUMMY_RAND","q", 200, 0.0, 10.0)
-        H_Q2_SUBPROTON_DUMMY_RAND       = ROOT.TH1D("H_Q2_SUBPROTON_DUMMY_RAND","Q2", 200, Q2min, Q2max)
-        H_W_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_W_SUBPROTON_DUMMY_RAND","W ", 200, Wmin, Wmax)
-        H_t_SUBPROTON_DUMMY_RAND       = ROOT.TH1D("H_t_SUBPROTON_DUMMY_RAND","-t", 200, -1.0, 1.5)
-        H_epsilon_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_epsilon_SUBPROTON_DUMMY_RAND","epsilon", 200, 0., 1.0)
-        H_MM_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_MM_SUBPROTON_DUMMY_RAND","MM_{K}", 200, 0.0, 1.5)
-        H_th_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_th_SUBPROTON_DUMMY_RAND","X' tar", 200, -0.1, 0.1)
-        H_ph_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ph_SUBPROTON_DUMMY_RAND","Y' tar", 200, -0.1, 0.1)
-        H_ph_q_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ph_q_SUBPROTON_DUMMY_RAND","Phi Detected (ph_xq)", 200, -5.0, 5.0)
-        H_th_q_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_th_q_SUBPROTON_DUMMY_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
-        H_ph_recoil_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ph_recoil_SUBPROTON_DUMMY_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
-        H_th_recoil_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_th_recoil_SUBPROTON_DUMMY_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
-        H_pmiss_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_pmiss_SUBPROTON_DUMMY_RAND","pmiss", 200, 0.0, 10.0)
-        H_emiss_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_emiss_SUBPROTON_DUMMY_RAND","emiss", 200, 0.0, 10.0)
-        H_pmx_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_pmx_SUBPROTON_DUMMY_RAND","pmx", 200, -10.0, 10.0)
-        H_pmy_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_pmy_SUBPROTON_DUMMY_RAND","pmy ", 200, -10.0, 10.0)
-        H_pmz_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_pmz_SUBPROTON_DUMMY_RAND","pmz", 200, -10.0, 10.0)
-        H_ct_ep_SUBPROTON_DUMMY_RAND = ROOT.TH1D("H_ct_ep_SUBPROTON_DUMMY_RAND", "Electron-Proton CTime", 200, -10, 10)
+        H_hsdelta_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_SUBPROTON_DUMMY_RAND","HMS Delta", 100, -20.0, 20.0)
+        H_hsxptar_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_SUBPROTON_DUMMY_RAND","HMS xptar", 100, -0.1, 0.1)
+        H_hsyptar_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_hsyptar_SUBPROTON_DUMMY_RAND","HMS yptar", 100, -0.1, 0.1)
+        H_ssxfp_SUBPROTON_DUMMY_RAND    = ROOT.TH1D("H_ssxfp_SUBPROTON_DUMMY_RAND","SHMS xfp", 100, -25.0, 25.0)
+        H_ssyfp_SUBPROTON_DUMMY_RAND    = ROOT.TH1D("H_ssyfp_SUBPROTON_DUMMY_RAND","SHMS yfp", 100, -25.0, 25.0)
+        H_ssxpfp_SUBPROTON_DUMMY_RAND   = ROOT.TH1D("H_ssxpfp_SUBPROTON_DUMMY_RAND","SHMS xpfp", 100, -0.09, 0.09)
+        H_ssypfp_SUBPROTON_DUMMY_RAND   = ROOT.TH1D("H_ssypfp_SUBPROTON_DUMMY_RAND","SHMS ypfp", 100, -0.05, 0.04)
+        H_hsxfp_SUBPROTON_DUMMY_RAND    = ROOT.TH1D("H_hsxfp_SUBPROTON_DUMMY_RAND","HMS xfp", 100, -40.0, 40.0)
+        H_hsyfp_SUBPROTON_DUMMY_RAND    = ROOT.TH1D("H_hsyfp_SUBPROTON_DUMMY_RAND","HMS yfp", 100, -20.0, 20.0)
+        H_hsxpfp_SUBPROTON_DUMMY_RAND   = ROOT.TH1D("H_hsxpfp_SUBPROTON_DUMMY_RAND","HMS xpfp", 100, -0.09, 0.05)
+        H_hsypfp_SUBPROTON_DUMMY_RAND   = ROOT.TH1D("H_hsypfp_SUBPROTON_DUMMY_RAND","HMS ypfp", 100, -0.05, 0.04)
+        H_ssdelta_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ssdelta_SUBPROTON_DUMMY_RAND","SHMS delta", 100, -20.0, 20.0)
+        H_ssxptar_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ssxptar_SUBPROTON_DUMMY_RAND","SHMS xptar", 100, -0.1, 0.1)
+        H_ssyptar_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ssyptar_SUBPROTON_DUMMY_RAND","SHMS yptar", 100, -0.04, 0.04)
+        H_q_SUBPROTON_DUMMY_RAND        = ROOT.TH1D("H_q_SUBPROTON_DUMMY_RAND","q", 100, 0.0, 10.0)
+        H_Q2_SUBPROTON_DUMMY_RAND       = ROOT.TH1D("H_Q2_SUBPROTON_DUMMY_RAND","Q2", 100, Q2min, Q2max)
+        H_W_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_W_SUBPROTON_DUMMY_RAND","W ", 100, Wmin, Wmax)
+        H_t_SUBPROTON_DUMMY_RAND       = ROOT.TH1D("H_t_SUBPROTON_DUMMY_RAND","-t", 100, -1.0, 1.5)
+        H_epsilon_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_epsilon_SUBPROTON_DUMMY_RAND","epsilon", 100, 0., 1.0)
+        H_MM_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_MM_SUBPROTON_DUMMY_RAND","MM_{K}", 100, 0.0, 1.5)
+        H_th_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_th_SUBPROTON_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
+        H_ph_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ph_SUBPROTON_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
+        H_ph_q_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ph_q_SUBPROTON_DUMMY_RAND","Phi Detected (ph_xq)", 100, -5.0, 5.0)
+        H_th_q_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_th_q_SUBPROTON_DUMMY_RAND","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        H_ph_recoil_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_ph_recoil_SUBPROTON_DUMMY_RAND","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        H_th_recoil_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_th_recoil_SUBPROTON_DUMMY_RAND","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        H_pmiss_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_pmiss_SUBPROTON_DUMMY_RAND","pmiss", 100, 0.0, 10.0)
+        H_emiss_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_emiss_SUBPROTON_DUMMY_RAND","emiss", 100, 0.0, 10.0)
+        H_pmx_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_pmx_SUBPROTON_DUMMY_RAND","pmx", 100, -10.0, 10.0)
+        H_pmy_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_pmy_SUBPROTON_DUMMY_RAND","pmy ", 100, -10.0, 10.0)
+        H_pmz_SUBPROTON_DUMMY_RAND  = ROOT.TH1D("H_pmz_SUBPROTON_DUMMY_RAND","pmz", 100, -10.0, 10.0)
+        H_ct_ep_SUBPROTON_DUMMY_RAND = ROOT.TH1D("H_ct_ep_SUBPROTON_DUMMY_RAND", "Electron-Proton CTime", 100, -10, 10)
         
         ################################################################################################################################################
         # t/phi binned histograms
@@ -811,19 +817,19 @@ def defineHists(phi_setting, inpDict):
 
         tbinDict = {}
         for i in range(NumtBins):
-            tbinDict["H_Q2_tbin_DATA_{}".format(i+1)] = ROOT.TH1D("H_Q2_tbin_DATA_{}".format(i+1), "Q2 (t bin {})".format(i+1), 200, Q2min, Q2max)
-            tbinDict["H_W_tbin_DATA_{}".format(i+1)] = ROOT.TH1D("H_W_tbin_DATA_{}".format(i+1), "W (t bin {})".format(i+1), 200, Wmin, Wmax)
-            tbinDict["H_t_tbin_DATA_{}".format(i+1)] = ROOT.TH1D("H_t_tbin_DATA_{}".format(i+1), "t (t bin {})".format(i+1), 200, tmin, tmax)
+            tbinDict["H_Q2_tbin_DATA_{}".format(i+1)] = ROOT.TH1D("H_Q2_tbin_DATA_{}".format(i+1), "Q2 (t bin {})".format(i+1), 100, Q2min, Q2max)
+            tbinDict["H_W_tbin_DATA_{}".format(i+1)] = ROOT.TH1D("H_W_tbin_DATA_{}".format(i+1), "W (t bin {})".format(i+1), 100, Wmin, Wmax)
+            tbinDict["H_t_tbin_DATA_{}".format(i+1)] = ROOT.TH1D("H_t_tbin_DATA_{}".format(i+1), "t (t bin {})".format(i+1), 100, tmin, tmax)
 
         ################################################################################################################################################
         # 2D histograms
 
         MM_vs_CoinTime_DATA = ROOT.TH2D("MM_vs_CoinTime_DATA","Missing Mass vs CTime; MM; Coin_Time",100, 0, 2, 100, -2, 2)
         CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 100, -2, 2, 100, 0, 2)
-        MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 200, 0, 2)
+        MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 100, 0, 2, 100, 0, 2)
         phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
         polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
-        Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
+        Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 100, Q2min, Q2max, 100, Wmin, Wmax)
 
         ################################################################################################################################################
         # Fill data histograms for various trees called above
@@ -2323,131 +2329,201 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
                 
-        histDict = {
-            "InFile_DATA" : InFile_DATA,
-            "InFile_DUMMY" : InFile_DUMMY,
-            "InFile_SIMC" : InFile_SIMC,            
-            "phi_setting" : phi_setting,
-            "pid_text" : pid_text,
-            "runNums" : runNums.split(' '),
-            "yieldTree" : ROOT.TTree("{}".format(phi_setting), "{} Yields".format(phi_setting)),
-            "InData_efficiency" : InData_efficiency.split(' '),
-            "G_data_eff" : G_data_eff,
-            "normfac_data" : normfac_data,
-            "H_hsdelta_DATA" :     H_hsdelta_DATA,
-            "H_hsxptar_DATA" :     H_hsxptar_DATA,
-            "H_hsyptar_DATA" :     H_hsyptar_DATA,
-            "H_ssxfp_DATA" :     H_ssxfp_DATA  ,
-            "H_ssyfp_DATA" :     H_ssyfp_DATA  ,
-            "H_ssxpfp_DATA" :     H_ssxpfp_DATA ,
-            "H_ssypfp_DATA" :     H_ssypfp_DATA ,
-            "H_hsxfp_DATA" :     H_hsxfp_DATA  ,
-            "H_hsyfp_DATA" :     H_hsyfp_DATA  ,
-            "H_hsxpfp_DATA" :     H_hsxpfp_DATA ,
-            "H_hsypfp_DATA" :     H_hsypfp_DATA ,
-            "H_ssdelta_DATA" :     H_ssdelta_DATA,
-            "H_ssxptar_DATA" :     H_ssxptar_DATA,
-            "H_ssyptar_DATA" :     H_ssyptar_DATA,
-            "H_q_DATA" :     H_q_DATA      ,
-            "H_Q2_DATA" :     H_Q2_DATA     ,
-            "H_t_DATA" :     H_t_DATA     ,
-            "H_epsilon_DATA" :     H_epsilon_DATA,
-            "H_MM_DATA" :     H_MM_DATA,
-            "H_th_DATA" :     H_th_DATA,
-            "H_ph_DATA" :     H_ph_DATA,
-            "H_ph_q_DATA" :     H_ph_q_DATA,
-            "H_th_q_DATA" :     H_th_q_DATA,
-            "H_ph_recoil_DATA" :     H_ph_recoil_DATA,
-            "H_th_recoil_DATA" :     H_th_recoil_DATA,
-            "H_pmiss_DATA" :     H_pmiss_DATA,
-            "H_emiss_DATA" :     H_emiss_DATA,
-            "H_pmx_DATA" :     H_pmx_DATA,
-            "H_pmy_DATA" :     H_pmy_DATA,
-            "H_pmz_DATA" :     H_pmz_DATA,
-            "H_W_DATA" :     H_W_DATA,
-            "H_phibins_DATA" : H_phibins_DATA,
-            "H_tbins_DATA" : H_tbins_DATA,
-            "H_yield_DATA" : H_yield_DATA,
-            "normfac_simc" : normfac_simc,
-            "H_hsdelta_SIMC" :     H_hsdelta_SIMC,
-            "H_hsxptar_SIMC" :     H_hsxptar_SIMC,
-            "H_hsyptar_SIMC" :     H_hsyptar_SIMC,
-            "H_ssxfp_SIMC" :     H_ssxfp_SIMC  ,
-            "H_ssyfp_SIMC" :     H_ssyfp_SIMC  ,
-            "H_ssxpfp_SIMC" :     H_ssxpfp_SIMC ,
-            "H_ssypfp_SIMC" :     H_ssypfp_SIMC ,
-            "H_hsxfp_SIMC" :     H_hsxfp_SIMC  ,
-            "H_hsyfp_SIMC" :     H_hsyfp_SIMC  ,
-            "H_hsxpfp_SIMC" :     H_hsxpfp_SIMC ,
-            "H_hsypfp_SIMC" :     H_hsypfp_SIMC ,
-            "H_ssdelta_SIMC" :     H_ssdelta_SIMC,
-            "H_ssxptar_SIMC" :     H_ssxptar_SIMC,
-            "H_ssyptar_SIMC" :     H_ssyptar_SIMC,
-            "H_q_SIMC" :     H_q_SIMC      ,
-            "H_Q2_SIMC" :     H_Q2_SIMC     ,
-            "H_t_SIMC" :     H_t_SIMC     ,
-            "H_epsilon_SIMC" :     H_epsilon_SIMC,
-            "H_MM_SIMC" :     H_MM_SIMC,
-            "H_th_SIMC" :     H_th_SIMC,
-            "H_ph_SIMC" :     H_ph_SIMC,
-            "H_ph_q_SIMC" :     H_ph_q_SIMC,
-            "H_th_q_SIMC" :     H_th_q_SIMC,
-            "H_ph_recoil_SIMC" :     H_ph_recoil_SIMC,
-            "H_th_recoil_SIMC" :     H_th_recoil_SIMC,
-            "H_pmiss_SIMC" :     H_pmiss_SIMC,
-            "H_emiss_SIMC" :     H_emiss_SIMC,
-            "H_pmx_SIMC" :     H_pmx_SIMC,
-            "H_pmy_SIMC" :     H_pmy_SIMC,
-            "H_pmz_SIMC" :     H_pmz_SIMC,
-            "H_W_SIMC" :     H_W_SIMC,
-            "H_yield_SIMC" : H_yield_SIMC,
-            "H_ct_DATA" :     H_ct_DATA,
-            "H_cal_etottracknorm_DATA" :     H_cal_etottracknorm_DATA,
-            "H_cer_npeSum_DATA" :     H_cer_npeSum_DATA,
-            "P_cal_etottracknorm_DATA" :     P_cal_etottracknorm_DATA,
-            "P_hgcer_npeSum_DATA" :     P_hgcer_npeSum_DATA,
-            "P_aero_npeSum_DATA" :     P_aero_npeSum_DATA,
-            "MM_vs_CoinTime_DATA" : MM_vs_CoinTime_DATA,
-            "CoinTime_vs_beta_DATA" : CoinTime_vs_beta_DATA,
-            "MM_vs_beta_DATA" : MM_vs_beta_DATA,
-            "phiq_vs_t_DATA" : phiq_vs_t_DATA,
-            "polar_phiq_vs_t_DATA" : polar_phiq_vs_t_DATA,
-            "Q2_vs_W_DATA" : Q2_vs_W_DATA,
-            "yieldDictData" : {},
-            "yieldDictSimc" : {},
-        }
+        histDict["InFile_DATA"] = InFile_DATA
+        histDict["InFile_DUMMY"] = InFile_DUMMY
+        histDict["InFile_SIMC"] = InFile_SIMC,           
+        histDict["phi_setting"] = phi_setting
+        histDict["pid_text"] = pid_text
+        histDict["runNums"] = runNums.split(' ')
+        histDict["yieldTree"] = ROOT.TTree("{}".format(phi_setting), "{} Yields".format(phi_setting))
+        histDict["InData_efficiency"] = InData_efficiency.split(' ')
+        histDict["G_data_eff"] = G_data_eff
+        histDict["normfac_data"] = normfac_data
+        histDict["H_hsdelta_DATA"] =     H_hsdelta_DATA
+        histDict["H_hsxptar_DATA"] =     H_hsxptar_DATA
+        histDict["H_hsyptar_DATA"] =     H_hsyptar_DATA
+        histDict["H_ssxfp_DATA"] =     H_ssxfp_DATA  
+        histDict["H_ssyfp_DATA"] =     H_ssyfp_DATA  
+        histDict["H_ssxpfp_DATA"] =     H_ssxpfp_DATA 
+        histDict["H_ssypfp_DATA"] =     H_ssypfp_DATA 
+        histDict["H_hsxfp_DATA"] =     H_hsxfp_DATA  
+        histDict["H_hsyfp_DATA"] =     H_hsyfp_DATA  
+        histDict["H_hsxpfp_DATA"] =     H_hsxpfp_DATA 
+        histDict["H_hsypfp_DATA"] =     H_hsypfp_DATA 
+        histDict["H_ssdelta_DATA"] =     H_ssdelta_DATA
+        histDict["H_ssxptar_DATA"] =     H_ssxptar_DATA
+        histDict["H_ssyptar_DATA"] =     H_ssyptar_DATA
+        histDict["H_q_DATA"] =     H_q_DATA      
+        histDict["H_Q2_DATA"] =     H_Q2_DATA     
+        histDict["H_t_DATA"] =     H_t_DATA     
+        histDict["H_epsilon_DATA"] =     H_epsilon_DATA
+        histDict["H_MM_DATA"] =     H_MM_DATA
+        histDict["H_th_DATA"] =     H_th_DATA
+        histDict["H_ph_DATA"] =     H_ph_DATA
+        histDict["H_ph_q_DATA"] =     H_ph_q_DATA
+        histDict["H_th_q_DATA"] =     H_th_q_DATA
+        histDict["H_ph_recoil_DATA"] =     H_ph_recoil_DATA
+        histDict["H_th_recoil_DATA"] =     H_th_recoil_DATA
+        histDict["H_pmiss_DATA"] =     H_pmiss_DATA
+        histDict["H_emiss_DATA"] =     H_emiss_DATA
+        histDict["H_pmx_DATA"] =     H_pmx_DATA
+        histDict["H_pmy_DATA"] =     H_pmy_DATA
+        histDict["H_pmz_DATA"] =     H_pmz_DATA
+        histDict["H_W_DATA"] =     H_W_DATA
+        histDict["H_phibins_DATA"] = H_phibins_DATA
+        histDict["H_tbins_DATA"] = H_tbins_DATA
+        histDict["H_yield_DATA"] = H_yield_DATA
+        histDict["normfac_simc"] = normfac_simc
+        histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
+        histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC
+        histDict["H_hsyptar_SIMC"] =     H_hsyptar_SIMC
+        histDict["H_ssxfp_SIMC"] =     H_ssxfp_SIMC  
+        histDict["H_ssyfp_SIMC"] =     H_ssyfp_SIMC  
+        histDict["H_ssxpfp_SIMC"] =     H_ssxpfp_SIMC 
+        histDict["H_ssypfp_SIMC"] =     H_ssypfp_SIMC 
+        histDict["H_hsxfp_SIMC"] =     H_hsxfp_SIMC  
+        histDict["H_hsyfp_SIMC"] =     H_hsyfp_SIMC  
+        histDict["H_hsxpfp_SIMC"] =     H_hsxpfp_SIMC 
+        histDict["H_hsypfp_SIMC"] =     H_hsypfp_SIMC 
+        histDict["H_ssdelta_SIMC"] =     H_ssdelta_SIMC
+        histDict["H_ssxptar_SIMC"] =     H_ssxptar_SIMC
+        histDict["H_ssyptar_SIMC"] =     H_ssyptar_SIMC
+        histDict["H_q_SIMC"] =     H_q_SIMC      
+        histDict["H_Q2_SIMC"] =     H_Q2_SIMC     
+        histDict["H_t_SIMC"] =     H_t_SIMC     
+        histDict["H_epsilon_SIMC"] =     H_epsilon_SIMC
+        histDict["H_MM_SIMC"] =     H_MM_SIMC
+        histDict["H_th_SIMC"] =     H_th_SIMC
+        histDict["H_ph_SIMC"] =     H_ph_SIMC
+        histDict["H_ph_q_SIMC"] =     H_ph_q_SIMC
+        histDict["H_th_q_SIMC"] =     H_th_q_SIMC
+        histDict["H_ph_recoil_SIMC"] =     H_ph_recoil_SIMC
+        histDict["H_th_recoil_SIMC"] =     H_th_recoil_SIMC
+        histDict["H_pmiss_SIMC"] =     H_pmiss_SIMC
+        histDict["H_emiss_SIMC"] =     H_emiss_SIMC
+        histDict["H_pmx_SIMC"] =     H_pmx_SIMC
+        histDict["H_pmy_SIMC"] =     H_pmy_SIMC
+        histDict["H_pmz_SIMC"] =     H_pmz_SIMC
+        histDict["H_W_SIMC"] =     H_W_SIMC
+        histDict["H_yield_SIMC"] = H_yield_SIMC
+        histDict["H_ct_DATA"] =     H_ct_DATA
+        histDict["H_cal_etottracknorm_DATA"] =     H_cal_etottracknorm_DATA
+        histDict["H_cer_npeSum_DATA"] =     H_cer_npeSum_DATA
+        histDict["P_cal_etottracknorm_DATA"] =     P_cal_etottracknorm_DATA
+        histDict["P_hgcer_npeSum_DATA"] =     P_hgcer_npeSum_DATA
+        histDict["P_aero_npeSum_DATA"] =     P_aero_npeSum_DATA
+        histDict["MM_vs_CoinTime_DATA"] = MM_vs_CoinTime_DATA
+        histDict["CoinTime_vs_beta_DATA"] = CoinTime_vs_beta_DATA
+        histDict["MM_vs_beta_DATA"] = MM_vs_beta_DATA
+        histDict["phiq_vs_t_DATA"] = phiq_vs_t_DATA
+        histDict["polar_phiq_vs_t_DATA"] = polar_phiq_vs_t_DATA
+        histDict["Q2_vs_W_DATA"] = Q2_vs_W_DATA
+        histDict["yieldDictData"] = {}
+        histDict["yieldDictSimc"] = {}
 
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
 
         for key,val in histDict.items():
+            if val == H_MM_DATA:
+                if isinstance(val, ROOT.TH1D):
+                    print("##### key->", key, " val->", type(val), val.Print())
             if val == H_tbins_DATA:
                 if isinstance(val, ROOT.TH1D):
-                    print("#####", key, " ", val)
+                    print("##### key->", key, " val->", type(val), val.Print())
+
+
+        ###
+        # PID Plots
+        c_pid = TCanvas()
+        
+        c_pid.Divide(2,3)
+
+        c_pid.cd(1)
+        gPad.SetLogy()
+
+        H_cal_etottracknorm_DATA.SetLineColor(2)
+        H_cal_etottracknorm_DATA.Draw("same, HIST")
+        H_cal_etottracknorm_SUBPION_DATA.SetLineColor(3)
+        H_cal_etottracknorm_SUBPION_DATA.Draw("same, HIST")
+        H_cal_etottracknorm_SUBPROTON_DATA.SetLineColor(6)
+        H_cal_etottracknorm_SUBPROTON_DATA.Draw("same, HIST")
+
+        c_pid.cd(2)
+        gPad.SetLogy()
+    
+        H_cer_npeSum_DATA.SetLineColor(2)
+        H_cer_npeSum_DATA.Draw("same, HIST")
+        H_cer_npeSum_SUBPION_DATA.SetLineColor(3)
+        H_cer_npeSum_SUBPION_DATA.Draw("same, HIST")
+        H_cer_npeSum_SUBPROTON_DATA.SetLineColor(6)
+        H_cer_npeSum_SUBPROTON_DATA.Draw("same, HIST")
+
+        c_pid.cd(3)
+        gPad.SetLogy()
+    
+        P_cal_etottracknorm_DATA.SetLineColor(2)
+        P_cal_etottracknorm_DATA.Draw("same, HIST")
+        P_cal_etottracknorm_SUBPION_DATA.SetLineColor(3)
+        P_cal_etottracknorm_SUBPION_DATA.Draw("same, HIST")
+        P_cal_etottracknorm_SUBPROTON_DATA.SetLineColor(6)
+        P_cal_etottracknorm_SUBPROTON_DATA.Draw("same, HIST")
+
+        c_pid.cd(4)
+        gPad.SetLogy()
+    
+        P_hgcer_npeSum_DATA.SetLineColor(2)
+        P_hgcer_npeSum_DATA.Draw("same, HIST")
+        P_hgcer_npeSum_SUBPION_DATA.SetLineColor(3)
+        P_hgcer_npeSum_SUBPION_DATA.Draw("same, HIST")
+        P_hgcer_npeSum_SUBPROTON_DATA.SetLineColor(6)
+        P_hgcer_npeSum_SUBPROTON_DATA.Draw("same, HIST")
+
+        c_pid.cd(5)
+        gPad.SetLogy()
+
+        P_aero_npeSum_DATA.SetLineColor(2)
+        P_aero_npeSum_DATA.Draw("same, HIST")
+        P_aero_npeSum_SUBPION_DATA.SetLineColor(3)
+        P_aero_npeSum_SUBPION_DATA.Draw("same, HIST")
+        P_aero_npeSum_SUBPROTON_DATA.SetLineColor(6)
+        P_aero_npeSum_SUBPROTON_DATA.Draw("same, HIST")
+
+        c_pid.Draw()
+
+        c_pid.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+'(')
+
 
         ###
         # Plot MM for each particle type
         cmm = TCanvas()
         l_mm = ROOT.TLegend(0.115,0.65,0.33,0.95)
         l_mm.SetTextSize(0.0235)        
-        histDict["H_MM_DATA"].SetLineColor(1)
-        H_MM_SUBPION_DATA.SetLineColor(2)
-        H_MM_SUBPROTON_DATA.SetLineColor(3)
         H_MM_DATA_nosub.SetLineColor(4)
+        histDict["H_MM_DATA"].SetLineColor(2)
+        H_MM_SUBPION_DATA.SetLineColor(3)
+        H_MM_SUBPROTON_DATA.SetLineColor(6)
+        histDict["H_MM_DATA"].SetLineWidth(3)
+        H_MM_SUBPION_DATA.SetLineWidth(3)
+        H_MM_SUBPROTON_DATA.SetLineWidth(3)
+        l_mm.AddEntry(H_MM_DATA_nosub,"Kaon (no sub)")
         l_mm.AddEntry(histDict["H_MM_DATA"],"Kaon")
         l_mm.AddEntry(H_MM_SUBPION_DATA,"Pion")
         l_mm.AddEntry(H_MM_SUBPROTON_DATA,"Proton")
-        l_mm.AddEntry(H_MM_DATA_nosub,"Kaon (no sub)")
-        histDict["H_MM_DATA"].Draw("same, E1")
-        H_MM_SUBPION_DATA.Draw("same, E1")
-        H_MM_SUBPROTON_DATA.Draw("same, E1")
-        H_MM_DATA_nosub.Draw("same, E1")
+        H_MM_DATA_nosub.Draw("same, HIST")
+        histDict["H_MM_DATA"].Draw("same, HIST")
+        H_MM_SUBPION_DATA.Draw("same, HIST")
+        H_MM_SUBPROTON_DATA.Draw("same, HIST")
+        H_MM_DATA_nosub.SetFillColor(4)
         l_mm.Draw()
-        cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting)))
+        cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+')')
+        histDict["c_mm_sub"] = cmm
 
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
-        return histDict
+        print("$$$$$$$$$$$$$$$$$$$",type(H_tbins_DATA))
+        #return histDict
+        return H_tbins_DATA
         
     else:    
 
@@ -2459,7 +2535,7 @@ def defineHists(phi_setting, inpDict):
         rootFileSimc = OUTPATH+"/"+InSIMCFilename
         if not os.path.isfile(rootFileSimc):
             print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
-            return {}
+            return histDict
 
         InFile_SIMC = ROOT.TFile.Open(rootFileSimc, "OPEN")
 
@@ -2489,7 +2565,7 @@ def defineHists(phi_setting, inpDict):
         rootFileData = OUTPATH + "/" + ParticleType + "_" + InDATAFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileData):
             print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
-            return {}  
+            return histDict  
 
         InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
@@ -2503,7 +2579,7 @@ def defineHists(phi_setting, inpDict):
         rootFileDummy = OUTPATH + "/" + ParticleType + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
         if not os.path.isfile(rootFileDummy):
             print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
-            return {}
+            return histDict
 
         InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")  
 
@@ -3395,99 +3471,97 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_DUMMY,-1)
         H_ct_DATA.Add(H_ct_DUMMY,-1)
 
-        histDict = {
-            "phi_setting" : phi_setting,
-            "pid_text" : pid_text,
-            "runNums" : runNums.split(' '),
-            "yieldTree" : ROOT.TTree("{}".format(phi_setting), "{} Yields".format(phi_setting)),
-            "InData_efficiency" : InData_efficiency.split(' '),
-            "G_data_eff" : G_data_eff,
-            "normfac_data" : normfac_data,
-            "H_hsdelta_DATA" :     H_hsdelta_DATA,
-            "H_hsxptar_DATA" :     H_hsxptar_DATA,
-            "H_hsyptar_DATA" :     H_hsyptar_DATA,
-            "H_ssxfp_DATA" :     H_ssxfp_DATA  ,
-            "H_ssyfp_DATA" :     H_ssyfp_DATA  ,
-            "H_ssxpfp_DATA" :     H_ssxpfp_DATA ,
-            "H_ssypfp_DATA" :     H_ssypfp_DATA ,
-            "H_hsxfp_DATA" :     H_hsxfp_DATA  ,
-            "H_hsyfp_DATA" :     H_hsyfp_DATA  ,
-            "H_hsxpfp_DATA" :     H_hsxpfp_DATA ,
-            "H_hsypfp_DATA" :     H_hsypfp_DATA ,
-            "H_ssdelta_DATA" :     H_ssdelta_DATA,
-            "H_ssxptar_DATA" :     H_ssxptar_DATA,
-            "H_ssyptar_DATA" :     H_ssyptar_DATA,
-            "H_q_DATA" :     H_q_DATA      ,
-            "H_Q2_DATA" :     H_Q2_DATA     ,
-            "H_t_DATA" :     H_t_DATA     ,
-            "H_epsilon_DATA" :     H_epsilon_DATA,
-            "H_MM_DATA" :     H_MM_DATA,
-            "H_th_DATA" :     H_th_DATA,
-            "H_ph_DATA" :     H_ph_DATA,
-            "H_ph_q_DATA" :     H_ph_q_DATA,
-            "H_th_q_DATA" :     H_th_q_DATA,
-            "H_ph_recoil_DATA" :     H_ph_recoil_DATA,
-            "H_th_recoil_DATA" :     H_th_recoil_DATA,
-            "H_pmiss_DATA" :     H_pmiss_DATA,
-            "H_emiss_DATA" :     H_emiss_DATA,
-            "H_pmx_DATA" :     H_pmx_DATA,
-            "H_pmy_DATA" :     H_pmy_DATA,
-            "H_pmz_DATA" :     H_pmz_DATA,
-            "H_W_DATA" :     H_W_DATA,
-            "H_phibins_DATA" : H_phibins_DATA,
-            "H_tbins_DATA" : H_tbins_DATA,
-            "H_yield_DATA" : H_yield_DATA,
-            "normfac_simc" : normfac_simc,
-            "H_hsdelta_SIMC" :     H_hsdelta_SIMC,
-            "H_hsxptar_SIMC" :     H_hsxptar_SIMC,
-            "H_hsyptar_SIMC" :     H_hsyptar_SIMC,
-            "H_ssxfp_SIMC" :     H_ssxfp_SIMC  ,
-            "H_ssyfp_SIMC" :     H_ssyfp_SIMC  ,
-            "H_ssxpfp_SIMC" :     H_ssxpfp_SIMC ,
-            "H_ssypfp_SIMC" :     H_ssypfp_SIMC ,
-            "H_hsxfp_SIMC" :     H_hsxfp_SIMC  ,
-            "H_hsyfp_SIMC" :     H_hsyfp_SIMC  ,
-            "H_hsxpfp_SIMC" :     H_hsxpfp_SIMC ,
-            "H_hsypfp_SIMC" :     H_hsypfp_SIMC ,
-            "H_ssdelta_SIMC" :     H_ssdelta_SIMC,
-            "H_ssxptar_SIMC" :     H_ssxptar_SIMC,
-            "H_ssyptar_SIMC" :     H_ssyptar_SIMC,
-            "H_q_SIMC" :     H_q_SIMC      ,
-            "H_Q2_SIMC" :     H_Q2_SIMC     ,
-            "H_t_SIMC" :     H_t_SIMC     ,
-            "H_epsilon_SIMC" :     H_epsilon_SIMC,
-            "H_MM_SIMC" :     H_MM_SIMC,
-            "H_th_SIMC" :     H_th_SIMC,
-            "H_ph_SIMC" :     H_ph_SIMC,
-            "H_ph_q_SIMC" :     H_ph_q_SIMC,
-            "H_th_q_SIMC" :     H_th_q_SIMC,
-            "H_ph_recoil_SIMC" :     H_ph_recoil_SIMC,
-            "H_th_recoil_SIMC" :     H_th_recoil_SIMC,
-            "H_pmiss_SIMC" :     H_pmiss_SIMC,
-            "H_emiss_SIMC" :     H_emiss_SIMC,
-            "H_pmx_SIMC" :     H_pmx_SIMC,
-            "H_pmy_SIMC" :     H_pmy_SIMC,
-            "H_pmz_SIMC" :     H_pmz_SIMC,
-            "H_W_SIMC" :     H_W_SIMC,
-            "H_yield_SIMC" : H_yield_SIMC,
-            "H_ct_DATA" :     H_ct_DATA,
-            "H_cal_etottracknorm_DATA" :     H_cal_etottracknorm_DATA,
-            "H_cer_npeSum_DATA" :     H_cer_npeSum_DATA,
-            "P_cal_etottracknorm_DATA" :     P_cal_etottracknorm_DATA,
-            "P_hgcer_npeSum_DATA" :     P_hgcer_npeSum_DATA,
-            "P_aero_npeSum_DATA" :     P_aero_npeSum_DATA,
-            "MM_vs_CoinTime_DATA" : MM_vs_CoinTime_DATA,
-            "CoinTime_vs_beta_DATA" : CoinTime_vs_beta_DATA,
-            "MM_vs_beta_DATA" : MM_vs_beta_DATA,
-            "phiq_vs_t_DATA" : phiq_vs_t_DATA,
-            "polar_phiq_vs_t_DATA" : polar_phiq_vs_t_DATA,
-            "Q2_vs_W_DATA" : Q2_vs_W_DATA,
-            "yieldDictData" : {},
-            "yieldDictSimc" : {},
-            "InFile_DATA" : InFile_DATA,
-            "InFile_DUMMY" : InFile_DUMMY,
-            "InFile_SIMC" : InFile_SIMC,
-        }
+        histDict["InFile_DATA"] = InFile_DATA
+        histDict["InFile_DUMMY"] = InFile_DUMMY
+        histDict["InFile_SIMC"] = InFile_SIMC,           
+        histDict["phi_setting"] = phi_setting
+        histDict["pid_text"] = pid_text
+        histDict["runNums"] = runNums.split(' ')
+        histDict["yieldTree"] = ROOT.TTree("{}".format(phi_setting), "{} Yields".format(phi_setting))
+        histDict["InData_efficiency"] = InData_efficiency.split(' ')
+        histDict["G_data_eff"] = G_data_eff
+        histDict["normfac_data"] = normfac_data
+        histDict["H_hsdelta_DATA"] =     H_hsdelta_DATA
+        histDict["H_hsxptar_DATA"] =     H_hsxptar_DATA
+        histDict["H_hsyptar_DATA"] =     H_hsyptar_DATA
+        histDict["H_ssxfp_DATA"] =     H_ssxfp_DATA  
+        histDict["H_ssyfp_DATA"] =     H_ssyfp_DATA  
+        histDict["H_ssxpfp_DATA"] =     H_ssxpfp_DATA 
+        histDict["H_ssypfp_DATA"] =     H_ssypfp_DATA 
+        histDict["H_hsxfp_DATA"] =     H_hsxfp_DATA  
+        histDict["H_hsyfp_DATA"] =     H_hsyfp_DATA  
+        histDict["H_hsxpfp_DATA"] =     H_hsxpfp_DATA 
+        histDict["H_hsypfp_DATA"] =     H_hsypfp_DATA 
+        histDict["H_ssdelta_DATA"] =     H_ssdelta_DATA
+        histDict["H_ssxptar_DATA"] =     H_ssxptar_DATA
+        histDict["H_ssyptar_DATA"] =     H_ssyptar_DATA
+        histDict["H_q_DATA"] =     H_q_DATA      
+        histDict["H_Q2_DATA"] =     H_Q2_DATA     
+        histDict["H_t_DATA"] =     H_t_DATA     
+        histDict["H_epsilon_DATA"] =     H_epsilon_DATA
+        histDict["H_MM_DATA"] =     H_MM_DATA
+        histDict["H_th_DATA"] =     H_th_DATA
+        histDict["H_ph_DATA"] =     H_ph_DATA
+        histDict["H_ph_q_DATA"] =     H_ph_q_DATA
+        histDict["H_th_q_DATA"] =     H_th_q_DATA
+        histDict["H_ph_recoil_DATA"] =     H_ph_recoil_DATA
+        histDict["H_th_recoil_DATA"] =     H_th_recoil_DATA
+        histDict["H_pmiss_DATA"] =     H_pmiss_DATA
+        histDict["H_emiss_DATA"] =     H_emiss_DATA
+        histDict["H_pmx_DATA"] =     H_pmx_DATA
+        histDict["H_pmy_DATA"] =     H_pmy_DATA
+        histDict["H_pmz_DATA"] =     H_pmz_DATA
+        histDict["H_W_DATA"] =     H_W_DATA
+        histDict["H_phibins_DATA"] = H_phibins_DATA
+        histDict["H_tbins_DATA"] = H_tbins_DATA
+        histDict["H_yield_DATA"] = H_yield_DATA
+        histDict["normfac_simc"] = normfac_simc
+        histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
+        histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC
+        histDict["H_hsyptar_SIMC"] =     H_hsyptar_SIMC
+        histDict["H_ssxfp_SIMC"] =     H_ssxfp_SIMC  
+        histDict["H_ssyfp_SIMC"] =     H_ssyfp_SIMC  
+        histDict["H_ssxpfp_SIMC"] =     H_ssxpfp_SIMC 
+        histDict["H_ssypfp_SIMC"] =     H_ssypfp_SIMC 
+        histDict["H_hsxfp_SIMC"] =     H_hsxfp_SIMC  
+        histDict["H_hsyfp_SIMC"] =     H_hsyfp_SIMC  
+        histDict["H_hsxpfp_SIMC"] =     H_hsxpfp_SIMC 
+        histDict["H_hsypfp_SIMC"] =     H_hsypfp_SIMC 
+        histDict["H_ssdelta_SIMC"] =     H_ssdelta_SIMC
+        histDict["H_ssxptar_SIMC"] =     H_ssxptar_SIMC
+        histDict["H_ssyptar_SIMC"] =     H_ssyptar_SIMC
+        histDict["H_q_SIMC"] =     H_q_SIMC      
+        histDict["H_Q2_SIMC"] =     H_Q2_SIMC     
+        histDict["H_t_SIMC"] =     H_t_SIMC     
+        histDict["H_epsilon_SIMC"] =     H_epsilon_SIMC
+        histDict["H_MM_SIMC"] =     H_MM_SIMC
+        histDict["H_th_SIMC"] =     H_th_SIMC
+        histDict["H_ph_SIMC"] =     H_ph_SIMC
+        histDict["H_ph_q_SIMC"] =     H_ph_q_SIMC
+        histDict["H_th_q_SIMC"] =     H_th_q_SIMC
+        histDict["H_ph_recoil_SIMC"] =     H_ph_recoil_SIMC
+        histDict["H_th_recoil_SIMC"] =     H_th_recoil_SIMC
+        histDict["H_pmiss_SIMC"] =     H_pmiss_SIMC
+        histDict["H_emiss_SIMC"] =     H_emiss_SIMC
+        histDict["H_pmx_SIMC"] =     H_pmx_SIMC
+        histDict["H_pmy_SIMC"] =     H_pmy_SIMC
+        histDict["H_pmz_SIMC"] =     H_pmz_SIMC
+        histDict["H_W_SIMC"] =     H_W_SIMC
+        histDict["H_yield_SIMC"] = H_yield_SIMC
+        histDict["H_ct_DATA"] =     H_ct_DATA
+        histDict["H_cal_etottracknorm_DATA"] =     H_cal_etottracknorm_DATA
+        histDict["H_cer_npeSum_DATA"] =     H_cer_npeSum_DATA
+        histDict["P_cal_etottracknorm_DATA"] =     P_cal_etottracknorm_DATA
+        histDict["P_hgcer_npeSum_DATA"] =     P_hgcer_npeSum_DATA
+        histDict["P_aero_npeSum_DATA"] =     P_aero_npeSum_DATA
+        histDict["MM_vs_CoinTime_DATA"] = MM_vs_CoinTime_DATA
+        histDict["CoinTime_vs_beta_DATA"] = CoinTime_vs_beta_DATA
+        histDict["MM_vs_beta_DATA"] = MM_vs_beta_DATA
+        histDict["phiq_vs_t_DATA"] = phiq_vs_t_DATA
+        histDict["polar_phiq_vs_t_DATA"] = polar_phiq_vs_t_DATA
+        histDict["Q2_vs_W_DATA"] = Q2_vs_W_DATA
+        histDict["yieldDictData"] = {}
+        histDict["yieldDictSimc"] = {}
 
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
