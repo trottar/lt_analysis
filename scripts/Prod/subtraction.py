@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-26 19:36:36 trottar"
+# Time-stamp: "2023-04-27 10:32:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2434,6 +2434,20 @@ def defineHists(phi_setting, inpDict):
 
 
         ###
+        # CT plots
+        ct = TCanvas()
+        
+        H_ct_DATA.SetLineColor(2)
+        H_ct_DATA.Draw("same, HIST")
+        H_ct_epi_SUBPION_DATA.SetLineColor(3)
+        H_ct_epi_SUBPION_DATA.Draw("same, HIST")
+        H_ct_ep_SUBPROTON_DATA.SetLineColor(6)
+        H_ct_ep_SUBPROTON_DATA.Draw("same, HIST")
+
+        ct.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+'(')
+
+                    
+        ###
         # PID Plots
         c_pid = TCanvas()
         
@@ -2491,7 +2505,7 @@ def defineHists(phi_setting, inpDict):
 
         c_pid.Draw()
 
-        c_pid.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+'(')
+        c_pid.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))
 
 
         ###
