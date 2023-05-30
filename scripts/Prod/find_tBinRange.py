@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-04 13:10:16 trottar"
+# Time-stamp: "2023-05-30 13:46:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -472,7 +472,6 @@ for i,hist in enumerate(histlist):
         
 c_yield_data.Print(outputpdf)
 
-'''
 c_yield_simc = TCanvas()
 
 for i,hist in enumerate(histlist):
@@ -537,7 +536,6 @@ for i,hist in enumerate(histlist):
     hist["H_yield_SIMC"].Draw("same")
         
 c_yield_simc.Print(outputpdf)
-'''
 
 c_Q2tbin = TCanvas()
 
