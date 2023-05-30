@@ -1051,7 +1051,7 @@ fi
 
 if [[ $t_flag = "true" ]]; then
     cd "${LTANAPATH}"
-    evince "OUTPUT/Analysis/${ANATYPE}LT/${OutFullAnalysisFilename}.pdf"
+    evince "OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutFullAnalysisFilename}.pdf"
 fi
 
 echo
