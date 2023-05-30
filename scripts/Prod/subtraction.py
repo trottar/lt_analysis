@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 14:37:56 trottar"
+# Time-stamp: "2023-05-30 14:42:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2331,7 +2331,7 @@ def defineHists(phi_setting, inpDict):
         
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
-        histDict["InFile_SIMC"] = InFile_SIMC,
+        histDict["InFile_SIMC"] = InFile_SIMC
         histDict["InFile_SUBPION_DATA"] = InFile_SUBPION_DATA
         histDict["InFile_SUBPION_DUMMY"] = InFile_SUBPION_DUMMY
         histDict["InFile_SUBPROTON_DATA"] = InFile_SUBPROTON_DATA
@@ -2545,8 +2545,8 @@ def defineHists(phi_setting, inpDict):
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
         print("$$$$$$$$$$$$$$$$$$$",type(H_tbins_DATA))
-        #return histDict
-        return H_tbins_DATA
+        return histDict
+        #return H_tbins_DATA
         
     else:    
 
@@ -3496,7 +3496,7 @@ def defineHists(phi_setting, inpDict):
 
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
-        histDict["InFile_SIMC"] = InFile_SIMC,           
+        histDict["InFile_SIMC"] = InFile_SIMC
         histDict["phi_setting"] = phi_setting
         histDict["pid_text"] = pid_text
         histDict["runNums"] = runNums.split(' ')
