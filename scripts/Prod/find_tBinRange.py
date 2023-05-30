@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 14:37:48 trottar"
+# Time-stamp: "2023-05-30 17:54:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -270,8 +270,10 @@ for i,hist in enumerate(histlist):
 if ParticleType == "kaon":
     for i,hist in enumerate(histlist):
         if i == 0:
+            hist["c_mm_sub"].Draw()
             hist["c_mm_sub"].Print(outputpdf+'(')
         else:
+            hist["c_mm_sub"].Draw()
             hist["c_mm_sub"].Print(outputpdf)
         
 eff_plt = TCanvas()
@@ -1369,10 +1371,11 @@ for i,hist in enumerate(histlist):
     hist["InFile_DATA"].Close()
     hist["InFile_DUMMY"].Close()
     hist["InFile_SIMC"].Close()
-    hist["InFile_SUBPION_DATA"].Close()
-    hist["InFile_SUBPION_DUMMY"].Close()
-    hist["InFile_SUBPROTON_DATA"].Close()
-    hist["InFile_SUBPROTON_DUMMY"].Close()
+    if ParticleType == "kaon":
+        hist["InFile_SUBPION_DATA"].Close()
+        hist["InFile_SUBPION_DUMMY"].Close()
+        hist["InFile_SUBPROTON_DATA"].Close()
+        hist["InFile_SUBPROTON_DUMMY"].Close()
 
 print ("Processing Complete")
 
