@@ -155,7 +155,8 @@ fi
 ##############
 # HARD CODED #
 ##############
-ParticleType="kaon"
+#ParticleType="kaon"
+ParticleType="pion"
 NumtBins=3
 NumPhiBins=10
 

@@ -3,7 +3,11 @@
 #
 # Description:
 # ================================================================
+<<<<<<< HEAD
 # Time-stamp: "2023-05-30 13:34:09 trottar"
+=======
+# Time-stamp: "2023-05-04 13:23:25 trottar"
+>>>>>>> f01d7926bf92ef72937a4f73486a67a9d1371138
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2593,9 +2597,9 @@ def defineHists(phi_setting, inpDict):
 
         InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
-        TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+        TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize())) # No RF unless replayed with pion/proton
         
-        TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+        TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize())) # No RF unless replayed with pion/proton
 
         ################################################################################################################################################
         # Define dummy root file trees of interest
@@ -2607,9 +2611,9 @@ def defineHists(phi_setting, inpDict):
 
         InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")  
 
-        TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+        TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize())) # No RF unless replayed with pion/proton
 
-        TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+        TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize())) # No RF unless replayed with pion/proton
 
         ################################################################################################################################################
         # Grabs PID cut string
