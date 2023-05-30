@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-03-02 10:45:26 trottar"
+# Time-stamp: "2023-05-21 15:10:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1892,12 +1892,6 @@ raster_y_vs_miss.Print(outputpdf)
 
 raster_x_vs_raster_y = TCanvas()
 
-raster_x_vs_raster_y.Divide(1,2)
-
-raster_x_vs_raster_y.cd(1)
-H_raster_x_vs_H_raster_y_DATA.Draw("colz")
-
-raster_x_vs_raster_y.cd(2)
 H_raster_x_vs_H_raster_y_DATA.Draw("colz")
 
 raster_x_vs_raster_y.Print(outputpdf)

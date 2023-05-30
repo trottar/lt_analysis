@@ -75,7 +75,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     if(target == '0'): target = ""
     print("\n\nKinematics: ",FilenameOverride,"\nPhi Setting: ",target)
     #    for file in glob.glob(OUTPATH+'/**/'+FilenameOverride+'*'+target+'*Analysed_Data.root',recursive = True):
-    for file in glob.glob(OUTPATH+'/*'+FilenameOverride+'*'+target+'*.root'):
+    for file in glob.glob(OUTPATH+'/*'+ParticleType+'*'+FilenameOverride+'*'+target+'*.root'):
 	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
         # Shortest file assumed to be full analyisis as it will not have "part" or "week" or "dummy" labels
         #print(file)
@@ -202,9 +202,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         if ParticleType == "kaon":
             Cut_Events_all_RF_tree = infile.Get("Cut_Kaon_Events_prompt_RF")
         if ParticleType == "pion":
-            Cut_Events_all_RF_tree = infile.Get("Cut_Pion_Events_prompt_RF")
+            Cut_Events_all_RF_tree = infile.Get("Cut_Pion_Events_prompt_RF") # No RF unless replayed with pion
         if ParticleType == "proton":
-            Cut_Events_all_RF_tree = infile.Get("Cut_Proton_Events_prompt_RF")            
+            Cut_Events_all_RF_tree = infile.Get("Cut_Proton_Events_prompt_RF") # No RF unless replayed with proton
 
 	##############################################################################################################################################
         countB = 0

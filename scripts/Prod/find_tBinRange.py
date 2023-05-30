@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-26 19:25:45 trottar"
+# Time-stamp: "2023-05-04 13:10:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -267,11 +267,12 @@ for i,hist in enumerate(histlist):
     print("!!!!!!!!!!!!!!!!!!!!!!!!! MM", type(hist["H_MM_DATA"]), hist["H_MM_DATA"])
     print("!!!!!!!!!!!!!!!!!!!!!!!!! tbins", type(hist["H_tbins_DATA"]), hist["H_tbins_DATA"])
 
-for i,hist in enumerate(histlist):
-    if i == 0:
-        hist["c_mm_sub"].Print(outputpdf+'(')
-    else:
-        hist["c_mm_sub"].Print(outputpdf)
+if ParticleType == "kaon":
+    for i,hist in enumerate(histlist):
+        if i == 0:
+            hist["c_mm_sub"].Print(outputpdf+'(')
+        else:
+            hist["c_mm_sub"].Print(outputpdf)
         
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()
@@ -306,8 +307,10 @@ for i,hist in enumerate(histlist):
 
 l_eff_plt.Draw()
 
-#eff_plt.Print(outputpdf + '(')
-eff_plt.Print(outputpdf)
+if ParticleType == "kaon":
+    eff_plt.Print(outputpdf)
+else:
+    eff_plt.Print(outputpdf + '(')
 
 c_bins = TCanvas()
 
@@ -469,6 +472,7 @@ for i,hist in enumerate(histlist):
         
 c_yield_data.Print(outputpdf)
 
+'''
 c_yield_simc = TCanvas()
 
 for i,hist in enumerate(histlist):
@@ -533,6 +537,7 @@ for i,hist in enumerate(histlist):
     hist["H_yield_SIMC"].Draw("same")
         
 c_yield_simc.Print(outputpdf)
+'''
 
 c_Q2tbin = TCanvas()
 
@@ -1365,7 +1370,7 @@ outHistFile.Close()
 for i,hist in enumerate(histlist):
     hist["InFile_DATA"].Close()
     hist["InFile_DUMMY"].Close()
-    hist["InFile_SIMC"].Close()
+    #hist["InFile_SIMC"].Close()
 
 print ("Processing Complete")
 
