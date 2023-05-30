@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 13:58:00 trottar"
+# Time-stamp: "2023-05-30 14:00:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2305,8 +2305,6 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPION_DATA,-1)
         H_W_DATA.Add(H_W_SUBPION_DATA,-1)
         H_ct_DATA.Add(H_ct_epi_SUBPION_DATA,-1)
-
-        InFile_SUBPION_DATA.Close()
         
         ###
         # Proton Subtraction
@@ -2335,8 +2333,6 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPROTON_DATA,-1)
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
-
-        InFile_SUBPROTON_DATA.Close()
         
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
@@ -2547,6 +2543,9 @@ def defineHists(phi_setting, inpDict):
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+')')
         histDict["c_mm_sub"] = cmm
 
+        InFile_SUBPION_DATA.Close()
+        InFile_SUBPROTON_DATA.Close()
+        
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
         print("$$$$$$$$$$$$$$$$$$$",type(H_tbins_DATA))
