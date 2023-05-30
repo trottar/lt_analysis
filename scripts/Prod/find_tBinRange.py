@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 13:46:58 trottar"
+# Time-stamp: "2023-05-30 14:16:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1368,7 +1368,11 @@ outHistFile.Close()
 for i,hist in enumerate(histlist):
     hist["InFile_DATA"].Close()
     hist["InFile_DUMMY"].Close()
-    #hist["InFile_SIMC"].Close()
+    hist["InFile_SIMC"].Close()
+    hist["InFile_SUBPION_DATA"].Close()
+    hist["InFile_SUBPROTON_DATA"].Close()
+    hist["InFile_SUBPION_DUMMY"].Close()
+    hist["InFile_SUBPROTON_DUMMY"].Close()
 
 print ("Processing Complete")
 

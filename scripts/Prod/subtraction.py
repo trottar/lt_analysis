@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 14:07:44 trottar"
+# Time-stamp: "2023-05-30 14:17:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2242,8 +2242,6 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPION_DATA.Add(H_pmz_SUBPION_DUMMY,-1)
         H_W_SUBPION_DATA.Add(H_W_SUBPION_DUMMY,-1)
         H_ct_epi_SUBPION_DATA.Add(H_ct_epi_SUBPION_DUMMY,-1)
-
-        #InFile_SUBPION_DUMMY.Close()
         
         ###
         # Dummy Subtraction
@@ -2273,10 +2271,6 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
 
-        #InFile_SUBPROTON_DUMMY.Close()
-
-
-        print("£££££££££££££££££££££££",H_MM_DATA)
         H_MM_DATA_nosub = H_MM_DATA.Clone("H_MM_DATA_nosub")
         
         ###
@@ -2337,7 +2331,11 @@ def defineHists(phi_setting, inpDict):
         
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
-        histDict["InFile_SIMC"] = InFile_SIMC,           
+        histDict["InFile_SIMC"] = InFile_SIMC,
+        histDict["InFile_SUBPION_DATA"] = InFile_SUBPION_DATA
+        histDict["InFile_SUBPROTON_DATA"] = InFile_SUBPROTON_DATA
+        histDict["InFile_SUBPION_DUMMY"] = InFile_SUBPION_DUMMY
+        histDict["InFile_SUBPROTON_DUMMY"] = InFile_SUBPROTON_DUMMY
         histDict["phi_setting"] = phi_setting
         histDict["pid_text"] = pid_text
         histDict["runNums"] = runNums.split(' ')
@@ -2543,9 +2541,6 @@ def defineHists(phi_setting, inpDict):
         cmm.Draw()
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+')')
         histDict["c_mm_sub"] = cmm
-
-        InFile_SUBPION_DATA.Close()
-        InFile_SUBPROTON_DATA.Close()
         
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
