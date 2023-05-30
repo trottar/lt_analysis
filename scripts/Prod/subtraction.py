@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 14:05:31 trottar"
+# Time-stamp: "2023-05-30 14:07:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2243,7 +2243,7 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DATA.Add(H_W_SUBPION_DUMMY,-1)
         H_ct_epi_SUBPION_DATA.Add(H_ct_epi_SUBPION_DUMMY,-1)
 
-        InFile_SUBPION_DUMMY.Close()
+        #InFile_SUBPION_DUMMY.Close()
         
         ###
         # Dummy Subtraction
@@ -2273,7 +2273,7 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
 
-        InFile_SUBPROTON_DUMMY.Close()
+        #InFile_SUBPROTON_DUMMY.Close()
 
 
         print("£££££££££££££££££££££££",H_MM_DATA)
