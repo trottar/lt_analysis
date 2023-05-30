@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 14:00:58 trottar"
+# Time-stamp: "2023-05-30 14:05:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2275,7 +2275,8 @@ def defineHists(phi_setting, inpDict):
 
         InFile_SUBPROTON_DUMMY.Close()
 
-        
+
+        print("£££££££££££££££££££££££",H_MM_DATA)
         H_MM_DATA_nosub = H_MM_DATA.Clone("H_MM_DATA_nosub")
         
         ###
