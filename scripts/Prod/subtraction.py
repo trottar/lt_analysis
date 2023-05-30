@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 13:37:44 trottar"
+# Time-stamp: "2023-05-30 13:58:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1808,7 +1808,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
         H_W_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
         H_ct_epi_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
-
+        
         H_ssxfp_SUBPION_DATA.Scale(normfac_subpion_data)
         H_ssyfp_SUBPION_DATA.Scale(normfac_subpion_data)
         H_ssxpfp_SUBPION_DATA.Scale(normfac_subpion_data)
@@ -2243,6 +2243,8 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DATA.Add(H_W_SUBPION_DUMMY,-1)
         H_ct_epi_SUBPION_DATA.Add(H_ct_epi_SUBPION_DUMMY,-1)
 
+        InFile_SUBPION_DUMMY.Close()
+        
         ###
         # Dummy Subtraction
         H_ssxfp_SUBPROTON_DATA.Add(H_ssxfp_SUBPROTON_DUMMY,-1)
@@ -2271,6 +2273,9 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
 
+        InFile_SUBPROTON_DUMMY.Close()
+
+        
         H_MM_DATA_nosub = H_MM_DATA.Clone("H_MM_DATA_nosub")
         
         ###
@@ -2301,6 +2306,8 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_SUBPION_DATA,-1)
         H_ct_DATA.Add(H_ct_epi_SUBPION_DATA,-1)
 
+        InFile_SUBPION_DATA.Close()
+        
         ###
         # Proton Subtraction
         H_ssxfp_DATA.Add(H_ssxfp_SUBPROTON_DATA,-1)
@@ -2328,12 +2335,9 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPROTON_DATA,-1)
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
-                
-        InFile_SUBPION_DATA.Close()
-        InFile_SUBPION_DUMMY.Close()
-        InFile_SUBPROTON_DATA.Close()
-        InFile_SUBPROTON_DUMMY.Close()
 
+        InFile_SUBPROTON_DATA.Close()
+        
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
         histDict["InFile_SIMC"] = InFile_SIMC,           
