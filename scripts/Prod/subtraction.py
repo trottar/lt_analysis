@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-27 10:44:40 trottar"
+# Time-stamp: "2023-05-30 13:34:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2329,6 +2329,11 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
                 
+        InFile_SUBPION_DATA.Close()
+        InFile_SUBPION_DUMMY.Close()
+        InFile_SUBPROTON_DATA.Close()
+        InFile_SUBPROTON_DUMMY.Close()
+
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
         histDict["InFile_SIMC"] = InFile_SIMC,           
@@ -2420,7 +2425,7 @@ def defineHists(phi_setting, inpDict):
         histDict["Q2_vs_W_DATA"] = Q2_vs_W_DATA
         histDict["yieldDictData"] = {}
         histDict["yieldDictSimc"] = {}
-
+        
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
 
