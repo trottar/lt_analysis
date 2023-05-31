@@ -39,7 +39,7 @@ while getopts 'hatp' flag; do
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
         echo "    -a, combine data for each phi setting"
-	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."	
+	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
         echo "    -t, set t-bin (!!!required for script!!!)"
 	echo "        EPSILON=arg1, Q2=arg2, W=arg3"
 	echo
@@ -155,8 +155,21 @@ fi
 ##############
 # HARD CODED #
 ##############
-ParticleType="kaon"
-#ParticleType="pion"
+if [[ $p_flag != "true" ]]; then
+    ParticleType="kaon"
+    #ParticleType="pion"
+else
+    echo "Please select a particle type..."
+    while true; do
+	echo ""
+	read -p "Particle type must be one of - [kaon - pion - proton] - or press ctrl-c to exit : " ParticleType
+	case $ParticleType in
+	    '');; # If blank, prompt again
+	    'kaon'|'pion'|'proton') break;; # If a valid option, break the loop and continue
+	esac
+    done
+fi
+
 NumtBins=3
 NumPhiBins=10
 

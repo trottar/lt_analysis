@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 17:54:24 trottar"
+# Time-stamp: "2023-05-30 21:01:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2538,9 +2538,11 @@ def defineHists(phi_setting, inpDict):
         H_MM_SUBPROTON_DATA.Draw("same, HIST")
         H_MM_DATA_nosub.SetFillColor(4)
         l_mm.Draw()
-        #cmm.Draw()
-        #cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+')')
-        histDict["c_mm_sub"] = cmm
+        cmm.Draw()
+        cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+')')
+        image = ROOT.TImage.Create()
+        image.FromPad(cmm)
+        histDict["c_mm_sub"] = ROOT.TH2F("myhist", "My Histogram", image.GetWidth(), 0, image.GetWidth(), image.GetHeight(), 0, image.GetHeight())
         
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
