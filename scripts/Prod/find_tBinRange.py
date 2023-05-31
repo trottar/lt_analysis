@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 20:59:37 trottar"
+# Time-stamp: "2023-05-30 21:13:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,13 +266,6 @@ for i,hist in enumerate(histlist):
 for i,hist in enumerate(histlist):
     print("!!!!!!!!!!!!!!!!!!!!!!!!! MM", type(hist["H_MM_DATA"]), hist["H_MM_DATA"])
     print("!!!!!!!!!!!!!!!!!!!!!!!!! tbins", type(hist["H_tbins_DATA"]), hist["H_tbins_DATA"])
-
-if ParticleType == "kaon":
-    for i,hist in enumerate(histlist):
-        if i == 0:
-            hist["c_mm_sub"].Print(outputpdf+'(')
-        else:
-            hist["c_mm_sub"].Print(outputpdf)
         
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()

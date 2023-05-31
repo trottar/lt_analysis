@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 21:01:35 trottar"
+# Time-stamp: "2023-05-30 21:13:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2540,9 +2540,7 @@ def defineHists(phi_setting, inpDict):
         l_mm.Draw()
         cmm.Draw()
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+')')
-        image = ROOT.TImage.Create()
-        image.FromPad(cmm)
-        histDict["c_mm_sub"] = ROOT.TH2F("myhist", "My Histogram", image.GetWidth(), 0, image.GetWidth(), image.GetHeight(), 0, image.GetHeight())
+        cmm.Print(outputpdf+'(')
         
         print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
         
