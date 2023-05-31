@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 21:13:52 trottar"
+# Time-stamp: "2023-05-30 21:28:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2519,6 +2519,7 @@ def defineHists(phi_setting, inpDict):
         ###
         # Plot MM for each particle type
         cmm = TCanvas()
+        cmm.SetTitle("%s M_{K}" % phi_setting )
         l_mm = ROOT.TLegend(0.115,0.65,0.33,0.95)
         l_mm.SetTextSize(0.0235)
         H_MM_DATA_nosub.SetLineColor(4)
