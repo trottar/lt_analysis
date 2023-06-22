@@ -26,8 +26,8 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
-# Flag definitions (flags: h, a, t, p)
-while getopts 'hatp' flag; do
+# Flag definitions (flags: h, a, b, p)
+while getopts 'habp' flag; do
     case "${flag}" in
         h) 
         echo "--------------------------------------------------------------"
@@ -40,7 +40,7 @@ while getopts 'hatp' flag; do
         echo "    -h, help"
         echo "    -a, combine data for each phi setting"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
-        echo "    -t, set t-bin (!!!required for script!!!)"
+        echo "    -b, run binning script (!!!required!!!)"
 	echo "        EPSILON=arg1, Q2=arg2, W=arg3"
 	echo
 	echo " Avaliable Kinematics..."	
@@ -53,7 +53,7 @@ while getopts 'hatp' flag; do
         exit 0
         ;;
 	a) a_flag='true' ;;
-        t) t_flag='true' ;;
+        t) b_flag='true' ;;
 	p) p_flag='true' ;;
         *) print_usage
         exit 1 ;;
@@ -61,7 +61,7 @@ while getopts 'hatp' flag; do
 done
 
 # When any flag is used then the user input changes argument order
-if [[ $t_flag = "true" || $a_flag = "true" ]]; then
+if [[ $b_flag = "true" || $a_flag = "true" ]]; then
 
     EPSILON=$(echo "$2" | tr '[:upper:]' '[:lower:]')
     Q2=$3
@@ -1036,7 +1036,7 @@ fi
 
 # Run the plotting script if t-flag enabled
 # Checks that array isn't empty
-if [[ $t_flag = "true" ]]; then
+if [[ $b_flag = "true" ]]; then
     echo
     echo
     echo
@@ -1062,7 +1062,7 @@ else
     python3 createPhysicsList.py ${Q2} ${POL} ${EPSVAL} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} ${KSet} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" "${DataChargeValRight[*]}" "${DataChargeValLeft[*]}" "${DataChargeValCenter[*]}" "${DataChargeErrRight[*]}" "${DataChargeErrLeft[*]}" "${DataChargeErrCenter[*]}" ${KIN} ${OutFullAnalysisFilename}
 fi
 
-if [[ $t_flag = "true" ]]; then
+if [[ $b_flag = "true" ]]; then
     cd "${LTANAPATH}"
     evince "OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutFullAnalysisFilename}.pdf"
 fi
