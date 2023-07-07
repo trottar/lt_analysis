@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 10:32:21 trottar"
+# Time-stamp: "2023-07-07 10:39:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -268,7 +268,8 @@ for i,hist in enumerate(histlist):
         if curr ==  min_curr_hms:
             min_yield_HMS_scaler = hist["luminosity"]["yield_HMS_scaler"][i]
     hist["luminosity"].update({"min_yield_HMS_scaler" : min_yield_HMS_scaler})
-    hist["luminosity"].update({"yieldRel_HMS_scaler" : hist["luminosity"]["yield_HMS_scaler"]/min_yield_HMS_scaler}})
+    hist["luminosity"].update({"yieldRel_HMS_scaler": hist["luminosity"]["yield_HMS_scaler"] / min_yield_HMS_scaler})
+
 
     relYieldPlot = plt.figure(figsize=(12,8))
 
