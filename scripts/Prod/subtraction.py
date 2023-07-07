@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 21:37:43 trottar"
+# Time-stamp: "2023-07-07 10:31:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,6 +47,10 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+################################################################################################################################################
+
+from scaler_lumi import scaler
 
 ################################################################################################################################################
 
@@ -2328,6 +2332,18 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPROTON_DATA,-1)
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
+
+        from collections import defaultdict
+        lumi_dicts = []
+        for r in runNum:
+             lumi_dicts.append(scaler(r, up.open(rootFileData)["TSP"]))
+
+        combined_dict = defaultdict(list)
+        for d in dicts:
+            for key, val in d.items():
+                combined_dict[key].append(val)
+
+        histDict["luminosity"] = dict(combined_dict)
         
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY

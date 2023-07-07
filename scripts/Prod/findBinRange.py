@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-30 21:13:59 trottar"
+# Time-stamp: "2023-07-07 10:32:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,6 +251,42 @@ phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(defineHists(phiset,inpDict))
+
+for i,hist in enumerate(histlist):
+    # Define relative yield relative to minimum current
+    curr_tmp_hms = 0
+    for i,curr in enumerate(hist["luminosity"]["current"]):
+        if len(hist["luminosity"]["current"]) <= 1:
+            min_curr_hms = hist["luminosity"]["current"][i]
+            break
+        if curr_tmp_hms >= curr or curr_tmp_hms == 0:
+            min_curr_hms = hist["luminosity"]["current"][i]
+            curr_tmp_hms = curr
+    
+    # Define relative yield relative to minimum current
+    for i,curr in enumerate(hist["luminosity"]["current"]):
+        if curr ==  min_curr_hms:
+            min_yield_HMS_scaler = hist["luminosity"]["yield_HMS_scaler"][i]
+    hist["luminosity"].update({"min_yield_HMS_scaler" : min_yield_HMS_scaler})
+    hist["luminosity"].update({"yieldRel_HMS_scaler" : hist["luminosity"]["yield_HMS_scaler"]/min_yield_HMS_scaler}})
+
+    relYieldPlot = plt.figure(figsize=(12,8))
+
+    #HMS plot scaler
+    plt.grid(zorder=1)
+    plt.xlim(0,70)
+    plt.ylim(0.925,1.075)
+    plt.plot([0,70], [1,1], 'r-',zorder=2)
+    plt.errorbar(hist["luminosity"]["current"],hist["luminosity"]["yieldRel_HMS_scaler"],yerr=hist["luminosity"]["yieldRel_HMS_scaler"]*hist["luminosity"]["uncern_yieldRel_HMS_scaler"],color='black',linestyle='None',zorder=3,label="_nolegend_")
+    plt.scatter(hist["luminosity"]["current"],hist["luminosity"]["yieldRel_HMS_scaler"],color='blue',zorder=4,label="_nolegend_")
+    #    hist["luminosity"]["m0_curr_HMS_scaler"] = linear_plot(hist["luminosity"]["current"],hist["luminosity"]["yieldRel_HMS_scaler"],None,hist["luminosity"]["uncern_yieldRel_HMS_scaler"])
+
+    plt.ylabel('Rel. Yield Scaler', fontsize=16)
+    plt.xlabel('Current [uA]', fontsize =16)
+    plt.legend()
+    plt.title('HMS LH2 %s-%s' % (int(min(hist["luminosity"]["run number"])),int(max(hist["luminosity"]["run number"]))), fontsize =16)
+    plt.show()
+    
 
 print("$$$$$$$$$$$$$$$$$$$",type(histlist[0]))
     
