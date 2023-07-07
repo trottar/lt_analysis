@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 12:00:27 trottar"
+# Time-stamp: "2023-07-07 12:03:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2464,7 +2464,7 @@ def defineHists(phi_setting, inpDict):
         hist.update({"yieldRel_HMS_scaler": hist["yield_HMS_scaler"] / min_yield_HMS_scaler})
                 
 
-        histDict["luminosity"].update(hist)
+        histDict["luminosity"] = hist
 
 
         #################
