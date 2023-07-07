@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 11:10:13 trottar"
+# Time-stamp: "2023-07-07 11:36:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2349,6 +2349,8 @@ def defineHists(phi_setting, inpDict):
                 combined_dict[key].append(val)
 
         histDict["luminosity"] = dict(combined_dict)
+
+        print("\n\n\n\n\n\n\n",histDict.keys(),"\n\n\n\n\n\n\n")
 
         #################
         #################
