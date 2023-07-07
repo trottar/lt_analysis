@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 10:31:23 trottar"
+# Time-stamp: "2023-07-07 10:49:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2333,10 +2333,15 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
 
+
+        #################
+        # HARD CODED
+        #################
+        
         from collections import defaultdict
         lumi_dicts = []
         for r in runNum:
-             lumi_dicts.append(scaler(r, up.open(rootFileData)["TSP"]))
+             lumi_dicts.append(scaler(r, up.open("/group/c-kaonlt/USERS/trottar/hallc_replay_lt//ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_%s_-1.root" % r )["TSP"]))
 
         combined_dict = defaultdict(list)
         for d in dicts:
@@ -2344,6 +2349,10 @@ def defineHists(phi_setting, inpDict):
                 combined_dict[key].append(val)
 
         histDict["luminosity"] = dict(combined_dict)
+
+        #################
+        #################
+        #################
         
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
