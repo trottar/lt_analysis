@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 12:22:26 trottar"
+# Time-stamp: "2023-07-07 12:25:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2436,8 +2436,8 @@ def defineHists(phi_setting, inpDict):
         from collections import defaultdict
         lumi_dicts = []
         for run in runNums.split(' '):
-            lumi_f = up.open("/group/c-kaonlt/USERS/trottar/hallc_replay_lt//ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_%s_-1.root" % run )["TSP"]
-            lumi_dicts.append(scaler(run, lumi_f))
+            lumi_f = up.open("/group/c-kaonlt/USERS/trottar/hallc_replay_lt//ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_%s_-1.root" % run )
+            lumi_dicts.append(scaler(run, lumi_f["TSP"]))
             lumi_f.close()
 
         combined_dict = defaultdict(list)
