@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 11:43:00 trottar"
+# Time-stamp: "2023-07-07 11:53:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2332,28 +2332,6 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPROTON_DATA,-1)
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
-
-
-        #################
-        # HARD CODED
-        #################
-        
-        from collections import defaultdict
-        lumi_dicts = []
-        for run in runNums.split(' '):
-             lumi_dicts.append(scaler(run, up.open("/group/c-kaonlt/USERS/trottar/hallc_replay_lt//ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_%s_-1.root" % run )["TSP"]))
-
-        combined_dict = defaultdict(list)
-        for d in lumi_dicts:
-            for key, val in d.items():
-                combined_dict[key].append(val)
-
-        histDict["luminosity"] = dict(combined_dict)
-
-
-        #################
-        #################
-        #################
         
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
@@ -2451,7 +2429,28 @@ def defineHists(phi_setting, inpDict):
         histDict["yieldDictData"] = {}
         histDict["yieldDictSimc"] = {}
 
-        print("\n\n\n\n\n\n\n",histDict.keys(),"\n\n\n\n\n\n\n")
+        #################
+        # HARD CODED
+        #################
+        
+        from collections import defaultdict
+        lumi_dicts = []
+        for run in runNums.split(' '):
+             lumi_dicts.append(scaler(run, up.open("/group/c-kaonlt/USERS/trottar/hallc_replay_lt//ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_%s_-1.root" % run )["TSP"]))
+
+        combined_dict = defaultdict(list)
+        for d in lumi_dicts:
+            for key, val in d.items():
+                combined_dict[key].append(val)
+
+        histDict["luminosity"] = dict(combined_dict)
+
+
+        #################
+        #################
+        #################
+        
+        print("\n\n\n\n\n\n\n",histDict["luminosity"],"\n\n\n\n\n\n\n")
         
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
