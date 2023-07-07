@@ -53,7 +53,7 @@ while getopts 'habp' flag; do
         exit 0
         ;;
 	a) a_flag='true' ;;
-        t) b_flag='true' ;;
+        b) b_flag='true' ;;
 	p) p_flag='true' ;;
         *) print_usage
         exit 1 ;;
