@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 12:47:49 trottar"
+# Time-stamp: "2023-07-07 12:53:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,6 +251,15 @@ phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(defineHists(phiset,inpDict))
+    
+print("\n\n")
+
+settingList = []
+for i,hist in enumerate(histlist):    
+    if not bool(hist): # If hist is empty
+        histlist.remove(hist)
+    else:
+        settingList.append(hist["phi_setting"])
 
 relYieldPlot = plt.figure(figsize=(12,8))
 
@@ -272,22 +281,7 @@ plt.ylabel('Rel. Yield Scaler', fontsize=16)
 plt.xlabel('Current [uA]', fontsize =16)
 plt.legend()
 plt.show()
-    
 
-print("$$$$$$$$$$$$$$$$$$$",type(histlist[0]))
-    
-print("\n\n")
-
-settingList = []
-for i,hist in enumerate(histlist):    
-    if not bool(hist): # If hist is empty
-        histlist.remove(hist)
-    else:
-        settingList.append(hist["phi_setting"])
-
-for i,hist in enumerate(histlist):
-    print("!!!!!!!!!!!!!!!!!!!!!!!!! MM", type(hist["H_MM_DATA"]), hist["H_MM_DATA"])
-    print("!!!!!!!!!!!!!!!!!!!!!!!!! tbins", type(hist["H_tbins_DATA"]), hist["H_tbins_DATA"])
         
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()

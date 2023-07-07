@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 12:39:47 trottar"
+# Time-stamp: "2023-07-07 12:52:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2583,11 +2583,7 @@ def defineHists(phi_setting, inpDict):
         cmm.Print(outputpdf.replace("kaon_","{}_kaon_MM_subtract_".format(phi_setting))+')')
         cmm.Print(outputpdf+'(')
         
-        print("@@@@@@@@@@@",histDict["H_tbins_DATA"])
-        
-        print("$$$$$$$$$$$$$$$$$$$",type(H_tbins_DATA))
         return histDict
-        #return H_tbins_DATA
         
     else:    
 
