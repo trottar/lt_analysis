@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 12:10:58 trottar"
+# Time-stamp: "2023-07-07 12:14:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2447,7 +2447,6 @@ def defineHists(phi_setting, inpDict):
                 
         # Define relative yield relative to minimum current
         curr_tmp_hms = 0
-        print("\n\n\n\n\n\n\n",hist,"\n\n\n\n\n\n\n")
         for i,curr in enumerate(hist["current"]):
             if len(hist["current"]) <= 1:
                 min_curr_hms = hist["current"][i]
@@ -2474,14 +2473,6 @@ def defineHists(phi_setting, inpDict):
         
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
-
-        for key,val in histDict.items():
-            if val == H_MM_DATA:
-                if isinstance(val, ROOT.TH1D):
-                    print("##### key->", key, " val->", type(val), val.Print())
-            if val == H_tbins_DATA:
-                if isinstance(val, ROOT.TH1D):
-                    print("##### key->", key, " val->", type(val), val.Print())
 
 
         ###
