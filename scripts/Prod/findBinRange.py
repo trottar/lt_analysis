@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 11:21:01 trottar"
+# Time-stamp: "2023-07-07 11:47:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -255,6 +255,7 @@ for phiset in phisetlist:
 for i,hist in enumerate(histlist):
     # Define relative yield relative to minimum current
     curr_tmp_hms = 0
+    print("\n\n\n\n\n\n\n",hist["luminosity"],"\n\n\n\n\n\n\n")
     for i,curr in enumerate(hist["luminosity"]["current"]):
         if len(hist["luminosity"]["current"]) <= 1:
             min_curr_hms = hist["luminosity"]["current"][i]
