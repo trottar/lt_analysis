@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 12:07:46 trottar"
+# Time-stamp: "2023-07-07 12:10:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2471,7 +2471,6 @@ def defineHists(phi_setting, inpDict):
         #################
         #################
         
-        print("\n\n\n\n\n\n\n",histDict["luminosity"],"\n\n\n\n\n\n\n")
         
         # Add t-binned histograms to dictionary
         histDict.update(tbinDict)
