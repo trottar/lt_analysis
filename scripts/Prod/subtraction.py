@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 11:53:47 trottar"
+# Time-stamp: "2023-07-07 12:00:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2442,8 +2442,29 @@ def defineHists(phi_setting, inpDict):
         for d in lumi_dicts:
             for key, val in d.items():
                 combined_dict[key].append(val)
+                
+        hist = dict(combined_dict)
+                
+        # Define relative yield relative to minimum current
+        curr_tmp_hms = 0
+        print("\n\n\n\n\n\n\n",hist,"\n\n\n\n\n\n\n")
+        for i,curr in enumerate(hist["current"]):
+            if len(hist["current"]) <= 1:
+                min_curr_hms = hist["current"][i]
+                break
+            if curr_tmp_hms >= curr or curr_tmp_hms == 0:
+                min_curr_hms = hist["current"][i]
+                curr_tmp_hms = curr
 
-        histDict["luminosity"] = dict(combined_dict)
+        # Define relative yield relative to minimum current
+        for i,curr in enumerate(hist["current"]):
+            if curr ==  min_curr_hms:
+                min_yield_HMS_scaler = hist["yield_HMS_scaler"][i]
+        hist.update({"min_yield_HMS_scaler" : min_yield_HMS_scaler})
+        hist.update({"yieldRel_HMS_scaler": hist["yield_HMS_scaler"] / min_yield_HMS_scaler})
+                
+
+        histDict["luminosity"].update(hist)
 
 
         #################

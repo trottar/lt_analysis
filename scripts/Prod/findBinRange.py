@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 11:47:37 trottar"
+# Time-stamp: "2023-07-07 11:58:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,26 +251,6 @@ phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(defineHists(phiset,inpDict))
-
-for i,hist in enumerate(histlist):
-    # Define relative yield relative to minimum current
-    curr_tmp_hms = 0
-    print("\n\n\n\n\n\n\n",hist["luminosity"],"\n\n\n\n\n\n\n")
-    for i,curr in enumerate(hist["luminosity"]["current"]):
-        if len(hist["luminosity"]["current"]) <= 1:
-            min_curr_hms = hist["luminosity"]["current"][i]
-            break
-        if curr_tmp_hms >= curr or curr_tmp_hms == 0:
-            min_curr_hms = hist["luminosity"]["current"][i]
-            curr_tmp_hms = curr
-    
-    # Define relative yield relative to minimum current
-    for i,curr in enumerate(hist["luminosity"]["current"]):
-        if curr ==  min_curr_hms:
-            min_yield_HMS_scaler = hist["luminosity"]["yield_HMS_scaler"][i]
-    hist["luminosity"].update({"min_yield_HMS_scaler" : min_yield_HMS_scaler})
-    hist["luminosity"].update({"yieldRel_HMS_scaler": hist["luminosity"]["yield_HMS_scaler"] / min_yield_HMS_scaler})
-
 
 relYieldPlot = plt.figure(figsize=(12,8))
 
