@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 12:53:44 trottar"
+# Time-stamp: "2023-07-07 13:07:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,7 +266,7 @@ relYieldPlot = plt.figure(figsize=(12,8))
 #HMS plot scaler
 plt.grid(zorder=1)
 plt.xlim(0,70)
-plt.ylim(0.925,1.075)
+#plt.ylim(0.925,1.075)
 plt.plot([0,70], [1,1], 'r-',zorder=2)
 
 for i,hist in enumerate(histlist):
