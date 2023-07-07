@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 11:58:19 trottar"
+# Time-stamp: "2023-07-07 12:08:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -261,16 +261,16 @@ plt.ylim(0.925,1.075)
 plt.plot([0,70], [1,1], 'r-',zorder=2)
 
 for i,hist in enumerate(histlist):
-    plt.errorbar(hist["luminosity"]["current"],hist["luminosity"]["yieldRel_HMS_scaler"], \
-                 yerr=hist["luminosity"]["yieldRel_HMS_scaler"]*hist["luminosity"]["uncern_yieldRel_HMS_scaler"], \
+    plt.errorbar(hist["current"],hist["yieldRel_HMS_scaler"], \
+                 yerr=hist["yieldRel_HMS_scaler"]*hist["uncern_yieldRel_HMS_scaler"], \
                  color='black',linestyle='None',zorder=3,label="_nolegend_")
-    plt.scatter(hist["luminosity"]["current"],hist["luminosity"]["yieldRel_HMS_scaler"],color='blue',zorder=4,label="_nolegend_")
-    #    hist["luminosity"]["m0_curr_HMS_scaler"] = linear_plot(hist["luminosity"]["current"],hist["luminosity"]["yieldRel_HMS_scaler"],None,hist["luminosity"]["uncern_yieldRel_HMS_scaler"])
+    plt.scatter(hist["current"],hist["yieldRel_HMS_scaler"],color='blue',zorder=4,label="_nolegend_")
+    #    hist["m0_curr_HMS_scaler"] = linear_plot(hist["current"],hist["yieldRel_HMS_scaler"],None,hist["uncern_yieldRel_HMS_scaler"])
+    plt.title('HMS LH2 %s-%s' % (int(min(hist["run number"])),int(max(hist["run number"]))), fontsize =16)
 
 plt.ylabel('Rel. Yield Scaler', fontsize=16)
 plt.xlabel('Current [uA]', fontsize =16)
 plt.legend()
-plt.title('HMS LH2 %s-%s' % (int(min(hist["luminosity"]["run number"])),int(max(hist["luminosity"]["run number"]))), fontsize =16)
 plt.show()
     
 
