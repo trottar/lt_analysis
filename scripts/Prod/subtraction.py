@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 12:14:00 trottar"
+# Time-stamp: "2023-07-07 12:19:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2465,7 +2465,8 @@ def defineHists(phi_setting, inpDict):
 
         histDict.update(hist)
 
-
+        print("\n\n\n\n\n\n\n",histDict.keys(),"\n\n\n\n\n\n\n")
+        
         #################
         #################
         #################
