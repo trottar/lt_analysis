@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 13:07:33 trottar"
+# Time-stamp: "2023-07-12 16:53:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -371,21 +371,22 @@ for i,hist in enumerate(histlist):
 
     mm_list = []
     aver_lst = []
-    for evt in TBRANCH_DATA:
+    #for evt in TBRANCH_DATA:
+    for i, evt in enumerate(hist["H_Q2_DATA"]):
         for j in range(len(tbinedges) - 1):
-            if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
+            if tbinedges[j] <= hist["H_t_DATA"][i] < tbinedges[j+1]:
                 tbin_index = j
             else:
                 tbin_index = None
             if tbin_index != None:
-                aver_lst.append((tbin_index, evt.Q2, evt.W, -evt.MandelT))
+                aver_lst.append((tbin_index, hist["H_Q2_DATA"][i], hist["H_W_DATA"][i], hist["H_t_DATA"]))
                 for k in range(len(phibinedges) - 1):                    
-                    if phibinedges[k] <= (evt.ph_q+math.pi)*(180/math.pi) < phibinedges[k+1]:
+                    if phibinedges[k] <= (hist["H_ph_q_DATA"][i]+math.pi)*(180/math.pi) < phibinedges[k+1]:
                         phibin_index = k
                     else:
                         phibin_index = None
                     if phibin_index != None:
-                        mm_list.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                        mm_list.append((tbin_index, phibin_index, np.sqrt(pow(hist["H_emiss_DATA"][i], 2) - pow(hist["H_pmiss_DATA"][i], 2))))
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
