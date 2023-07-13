@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-07 11:19:26 trottar"
+# Time-stamp: "2023-07-13 10:46:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,7 +245,7 @@ def scaler(runNum, s_tree, thres_curr=3):
         "current": charge_sum[bcm_ix]/time_sum[bcm_ix],
         "sent_edtm": EDTM_sum,
         "HMS_EL_CLEAN_scaler" : hms_el_clean_sum,
-        "HMS_EL_CLEAN_scaler_accp" : hms_el_clean_sum-EDTM_sum,
+        "HMS_EL_CLEAN_scaler_accp" : hms_el_clean_sum,,
         "rate_HMS_EL_CLEAN": hms_el_clean_sum/time_sum[bcm_ix],
         "yield_HMS_scaler": (hms_el_clean_sum-EDTM_sum)/charge_sum[bcm_ix],
         "uncern_yieldRel_HMS_scaler": np.sqrt(hms_el_clean_sum)/hms_el_clean_sum,
