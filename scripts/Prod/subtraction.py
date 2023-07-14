@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-13 10:57:32 trottar"
+# Time-stamp: "2023-07-14 10:45:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -913,10 +913,37 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
+            # Defined Geomatrical cuts
+            cutg = ROOT.TCutG("cutg",21)
+            cutg.SetVarX("P_hgcer_yAtCer")
+            cutg.SetVarY("P_hgcer_xAtCer")
+            cutg.SetPoint(0,-25,2)
+            cutg.SetPoint(1,-2,2)
+            cutg.SetPoint(2,-1,2.5)
+            cutg.SetPoint(3,0,3)
+            cutg.SetPoint(4,1,3)
+            cutg.SetPoint(5,2,3.3)
+            cutg.SetPoint(6,3,3.0)
+            cutg.SetPoint(7,4,2.5)
+            cutg.SetPoint(8,5,2)
+            cutg.SetPoint(9,25,2)
+            cutg.SetPoint(10,25,0.5)
+            cutg.SetPoint(11,5,0.5)
+            cutg.SetPoint(12,4,1)
+            cutg.SetPoint(13,3,-1)
+            cutg.SetPoint(14,2,-2)
+            cutg.SetPoint(15,1,-2.3)
+            cutg.SetPoint(16,0,-1.5)
+            cutg.SetPoint(17,-1,-1)
+            cutg.SetPoint(18,-2,0.5)
+            cutg.SetPoint(19,-25,0.5)
+            cutg.SetPoint(20,-25,2)
+
+                    
             # Must be outside diamond cuts to avoid weird overflow errors
             polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
 
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
+            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & cutg):
 
               MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
               CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -2304,7 +2331,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPION_DATA,-1)
         H_W_DATA.Add(H_W_SUBPION_DATA,-1)
         H_ct_DATA.Add(H_ct_epi_SUBPION_DATA,-1)
-        '''
+        
         ###
         # Proton Subtraction
         H_ssxfp_DATA.Add(H_ssxfp_SUBPROTON_DATA,-1)
@@ -2332,7 +2359,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPROTON_DATA,-1)
         H_W_DATA.Add(H_W_SUBPROTON_DATA,-1)
         H_ct_DATA.Add(H_ct_ep_SUBPROTON_DATA,-1)
-        '''
+        
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
         histDict["InFile_SIMC"] = InFile_SIMC
