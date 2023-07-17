@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-04-24 11:02:41 trottar"
+# Time-stamp: "2023-07-17 19:43:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,8 +55,16 @@ for tree in input_tree_names.split():
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
             print("WARNING: File {} not found or not opened or corrupted.".format(filepath))
             continue
+        # Check if the tree has at least one entry
+        if tempfile.Get(tree).GetEntries() == 0:
+            print("WARNING: Tree {} in file {} is empty.".format(tree, filepath))
+            continue
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
+
+    if chain.GetEntries() == 0:
+        print("WARNING: No entries found for tree {}. Skipping.".format(tree))
+        continue        
         
     outfile.cd()
     chain.Write(tree, ROOT.TObject.kWriteDelete)
