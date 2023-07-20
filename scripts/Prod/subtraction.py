@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-20 15:25:32 trottar"
+# Time-stamp: "2023-07-20 15:42:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1878,12 +1878,12 @@ def defineHists(phi_setting, inpDict):
         #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
 
         if phi_setting == "Right":
-            normfac_subpion_dummy = 1/(300000)
-            normfac_subpion_data = 1/(300000)
+            normfac_subpion_dummy = 1/(500000)
+            normfac_subpion_data = 1/(500000)
         if phi_setting == "Left":
             # 5p5, low
-            normfac_subpion_dummy = 1/(300000)
-            normfac_subpion_data = 1/(300000)
+            normfac_subpion_dummy = 1/(500000)
+            normfac_subpion_data = 1/(500000)
         if phi_setting == "Center":
             # 5p5, low
             normfac_subpion_dummy = 1/(500000)
