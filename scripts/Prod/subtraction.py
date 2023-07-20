@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-20 15:59:06 trottar"
+# Time-stamp: "2023-07-20 16:19:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -943,7 +943,7 @@ def defineHists(phi_setting, inpDict):
             # Must be outside diamond cuts to avoid weird overflow errors
             polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
 
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
+            if(HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
 
               MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
               CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -1046,7 +1046,7 @@ def defineHists(phi_setting, inpDict):
             cutg.SetPoint(20,-25,2)
 
                     
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
+            if(HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
 
               H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
@@ -1134,7 +1134,7 @@ def defineHists(phi_setting, inpDict):
             cutg.SetPoint(19,-25,0.5)
             cutg.SetPoint(20,-25,2)
 
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
+            if(HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
 
               H_ssxfp_RAND.Fill(evt.ssxfp)
               H_ssyfp_RAND.Fill(evt.ssyfp)
