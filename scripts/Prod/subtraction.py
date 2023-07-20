@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-20 15:15:18 trottar"
+# Time-stamp: "2023-07-20 15:25:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1019,7 +1019,34 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
+            # Defined Geomatrical cuts
+            cutg = ROOT.TCutG("cutg",21)
+            cutg.SetVarX("P_hgcer_yAtCer")
+            cutg.SetVarY("P_hgcer_xAtCer")
+            cutg.SetPoint(0,-25,2)
+            cutg.SetPoint(1,-2,2)
+            cutg.SetPoint(2,-1,2.5)
+            cutg.SetPoint(3,0,3)
+            cutg.SetPoint(4,1,3)
+            cutg.SetPoint(5,2,3.3)
+            cutg.SetPoint(6,3,3.0)
+            cutg.SetPoint(7,4,2.5)
+            cutg.SetPoint(8,5,2)
+            cutg.SetPoint(9,25,2)
+            cutg.SetPoint(10,25,0.5)
+            cutg.SetPoint(11,5,0.5)
+            cutg.SetPoint(12,4,1)
+            cutg.SetPoint(13,3,-1)
+            cutg.SetPoint(14,2,-2)
+            cutg.SetPoint(15,1,-2.3)
+            cutg.SetPoint(16,0,-1.5)
+            cutg.SetPoint(17,-1,-1)
+            cutg.SetPoint(18,-2,0.5)
+            cutg.SetPoint(19,-25,0.5)
+            cutg.SetPoint(20,-25,2)
+
+                    
+            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
 
               H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
@@ -1081,7 +1108,33 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
+            # Defined Geomatrical cuts
+            cutg = ROOT.TCutG("cutg",21)
+            cutg.SetVarX("P_hgcer_yAtCer")
+            cutg.SetVarY("P_hgcer_xAtCer")
+            cutg.SetPoint(0,-25,2)
+            cutg.SetPoint(1,-2,2)
+            cutg.SetPoint(2,-1,2.5)
+            cutg.SetPoint(3,0,3)
+            cutg.SetPoint(4,1,3)
+            cutg.SetPoint(5,2,3.3)
+            cutg.SetPoint(6,3,3.0)
+            cutg.SetPoint(7,4,2.5)
+            cutg.SetPoint(8,5,2)
+            cutg.SetPoint(9,25,2)
+            cutg.SetPoint(10,25,0.5)
+            cutg.SetPoint(11,5,0.5)
+            cutg.SetPoint(12,4,1)
+            cutg.SetPoint(13,3,-1)
+            cutg.SetPoint(14,2,-2)
+            cutg.SetPoint(15,1,-2.3)
+            cutg.SetPoint(16,0,-1.5)
+            cutg.SetPoint(17,-1,-1)
+            cutg.SetPoint(18,-2,0.5)
+            cutg.SetPoint(19,-25,0.5)
+            cutg.SetPoint(20,-25,2)
+
+            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
 
               H_ssxfp_RAND.Fill(evt.ssxfp)
               H_ssyfp_RAND.Fill(evt.ssyfp)
@@ -1134,7 +1187,33 @@ def defineHists(phi_setting, inpDict):
                 except ZeroDivisionError:
                     Diamond = False
 
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond):
+            # Defined Geomatrical cuts
+            cutg = ROOT.TCutG("cutg",21)
+            cutg.SetVarX("P_hgcer_yAtCer")
+            cutg.SetVarY("P_hgcer_xAtCer")
+            cutg.SetPoint(0,-25,2)
+            cutg.SetPoint(1,-2,2)
+            cutg.SetPoint(2,-1,2.5)
+            cutg.SetPoint(3,0,3)
+            cutg.SetPoint(4,1,3)
+            cutg.SetPoint(5,2,3.3)
+            cutg.SetPoint(6,3,3.0)
+            cutg.SetPoint(7,4,2.5)
+            cutg.SetPoint(8,5,2)
+            cutg.SetPoint(9,25,2)
+            cutg.SetPoint(10,25,0.5)
+            cutg.SetPoint(11,5,0.5)
+            cutg.SetPoint(12,4,1)
+            cutg.SetPoint(13,3,-1)
+            cutg.SetPoint(14,2,-2)
+            cutg.SetPoint(15,1,-2.3)
+            cutg.SetPoint(16,0,-1.5)
+            cutg.SetPoint(17,-1,-1)
+            cutg.SetPoint(18,-2,0.5)
+            cutg.SetPoint(19,-25,0.5)
+            cutg.SetPoint(20,-25,2)
+
+            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
 
               H_ssxfp_DUMMY_RAND.Fill(evt.ssxfp)
               H_ssyfp_DUMMY_RAND.Fill(evt.ssyfp)
