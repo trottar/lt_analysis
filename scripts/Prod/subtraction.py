@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-20 15:42:38 trottar"
+# Time-stamp: "2023-07-20 15:57:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1213,7 +1213,7 @@ def defineHists(phi_setting, inpDict):
             cutg.SetPoint(19,-25,0.5)
             cutg.SetPoint(20,-25,2)
 
-            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
+            if(HMS_FixCut & HMS_Acceptance & SHMS_FixCut & SHMS_Acceptance & Diamond & not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)):
 
               H_ssxfp_DUMMY_RAND.Fill(evt.ssxfp)
               H_ssyfp_DUMMY_RAND.Fill(evt.ssyfp)
