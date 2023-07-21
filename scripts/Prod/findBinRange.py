@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 11:02:56 trottar"
+# Time-stamp: "2023-07-21 11:14:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,22 +151,22 @@ def bin_data(histlist):
         phi = np.array(hist["H_ph_q_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
 
-        trange = (tmin <= t) & (t <= tmax)
+        tmask = (tmin <= t) & (t <= tmax)
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
-            H_t_Right = np.append(H_t_Right, t[trange])
-            H_phi_Right = np.append(H_phi_Right, phi_deg[trange])
+            H_t_Right = np.append(H_t_Right, t[tmask])
+            H_phi_Right = np.append(H_phi_Right, phi_deg[tmask])
 
         elif hist["phi_setting"] == 'Left':
             print("\nCreating left t-bin histogram...")
-            H_t_Left = np.append(H_t_Left, t[trange])
-            H_phi_Left = np.append(H_phi_Left, phi_deg[trange])
+            H_t_Left = np.append(H_t_Left, t[tmask])
+            H_phi_Left = np.append(H_phi_Left, phi_deg[tmask])
 
         elif hist["phi_setting"] == 'Center':
             print("\nCreating center t-bin histogram...")
-            H_t_Center = np.append(H_t_Center, t[trange])
-            H_phi_Center = np.append(H_phi_Center, phi_deg[trange])
+            H_t_Center = np.append(H_t_Center, t[tmask])
+            H_phi_Center = np.append(H_phi_Center, phi_deg[tmask])
 
     ################################################################################################################################################
 
@@ -373,7 +373,8 @@ aver_lst = []
 
 # Loop through histlist
 for hist in histlist:
-    # Convert lists to NumPy arrays
+    
+    # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
     t = -np.array(hist["H_t_DATA"])
     phi = np.array(hist["H_ph_q_DATA"]) + math.pi
     phi_deg = phi * (180 / math.pi)
@@ -382,26 +383,26 @@ for hist in histlist:
     pmiss = np.array(hist["H_pmiss_DATA"])
     emiss = np.array(hist["H_emiss_DATA"])
 
-    # Calculate tbin_index using NumPy array indexing
-    tbin_index = np.digitize(-t, tbinedges) - 1
-    valid_tbin_mask = (0 <= tbin_index) & (tbin_index < len(tbinedges) - 1)
+    # Initialize NumPy arrays
+    aver_lst = np.array([], dtype=object)
+    mm_list = np.array([], dtype=object)
 
-    # Calculate phibin_index using NumPy array indexing
-    phibin_index = np.digitize(phi_deg, phibinedges) - 1
-    valid_phibin_mask = (0 <= phibin_index) & (phibin_index < len(phibinedges) - 1)
+    # Loop through tbinedges
+    for j in range(len(tbinedges) - 1):
+        tbin_indices = np.where((tbinedges[j] <= -t) & (-t < tbinedges[j + 1]))[0]
+        if len(tbin_indices) > 0:
+            tbin_index = tbin_indices[0]
+            Q2_val = Q2[tbin_index]
+            W_val = W[tbin_index]
+            t_val = -t[tbin_index]
 
-    # Filter arrays based on valid bin indices
-    t = t[valid_tbin_mask & valid_phibin_mask]
-    phi_deg = phi_deg[valid_tbin_mask & valid_phibin_mask]
-    Q2 = Q2[valid_tbin_mask & valid_phibin_mask]
-    W = W[valid_tbin_mask & valid_phibin_mask]
-    emiss = emiss[valid_tbin_mask & valid_phibin_mask]
-    pmiss = pmiss[valid_tbin_mask & valid_phibin_mask]
+            phibin_indices = np.where((phibinedges[j] <= phi_deg) & (phi_deg < phibinedges[j + 1]))[0]
+            for k in phibin_indices:
+                mm_list = np.append(mm_list, (tbin_index, k, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
 
-    # Calculate mm_list and aver_lst using list comprehensions
-    mm_list.extend([(t_idx, phi_idx, np.sqrt(em ** 2 - pm ** 2)) for t_idx, phi_idx, em, pm in zip(tbin_index, phibin_index, emiss, pmiss)])
-    aver_lst.extend([(t_idx, q2, w, -t_val) for t_idx, q2, w, t_val in zip(tbin_index, Q2, W, t)])
-
+                # Append tbin_index, Q2, W, and -t to aver_lst
+                aver_lst = np.append(aver_lst, (tbin_index, Q2_val, W_val, t_val))
+            
     groups = {}
     # Group the tuples by the first two elements using a dictionary
     for t in aver_lst:
