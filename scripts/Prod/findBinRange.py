@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 13:11:33 trottar"
+# Time-stamp: "2023-07-21 13:22:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -432,6 +432,7 @@ for hist in histlist:
         key = (t[0], t[1])
         if key in groups:
             j, k = key
+            print("~~~~~~~~~~~~~~~~~~~~~",j, k ,"~~~~~~~~~~~~~~~~~~~~~")
             Q2_val = Q2_aver[j][1]
             W_val = W_aver[j][1]
             t_val = t_aver[j][1]
