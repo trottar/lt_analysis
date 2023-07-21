@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 17:37:09 trottar"
+# Time-stamp: "2023-07-21 17:52:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -131,6 +131,12 @@ from subtraction import defineHists
 
 ################################################################################################################################################
 
+# Convert TH1F to NumPy array
+def hist_to_numpy(hist):
+    n_bins = hist.GetNbinsX()
+    bin_contents = [hist.GetBinContent(i) for i in range(1, n_bins + 1)]
+    return np.array(bin_contents)
+
 def bin_data(histlist):
 
     ################################################################################################################################################
@@ -147,8 +153,8 @@ def bin_data(histlist):
     
     for i,hist in enumerate(histlist):
         
-        t = np.array(hist["H_t_DATA"])
-        phi = np.array(hist["H_ph_q_DATA"]) + math.pi
+        t = hist_to_numpy(hist["_H_t_DATA"])
+        phi = hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
         
         tmask = (tmin <= t) & (t <= tmax)
@@ -369,13 +375,13 @@ c_yield_data = TCanvas()
 for hist in histlist:
     
     # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
-    t = np.array(hist["H_t_DATA"])
-    phi = np.array(hist["H_ph_q_DATA"]) + math.pi
+    t = hist_to_numpy(hist["H_t_DATA"])
+    phi = hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
     phi_deg = phi * (180 / math.pi)
-    Q2 = np.array(hist["H_Q2_DATA"])
-    W = np.array(hist["H_W_DATA"])
-    pmiss = np.array(hist["H_pmiss_DATA"])
-    emiss = np.array(hist["H_emiss_DATA"])
+    Q2 = hist_to_numpy(hist["H_Q2_DATA"])
+    W = hist_to_numpy(hist["H_W_DATA"])
+    pmiss = hist_to_numpy(hist["H_pmiss_DATA"])
+    emiss = hist_to_numpy(hist["H_emiss_DATA"])
 
     # Initialize NumPy arrays
     aver_lst = []
