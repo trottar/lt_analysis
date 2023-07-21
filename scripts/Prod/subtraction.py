@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 15:32:13 trottar"
+# Time-stamp: "2023-07-21 15:41:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2056,12 +2056,12 @@ def defineHists(phi_setting, inpDict):
         H_W_RAND.Scale(normfac_data/nWindows)
         #H_ct_RAND.Scale(normfac_data/nWindows)
 
-        arr_t_RAND = arr_t_RAND*normfac_rand/nWindows
-        arr_phi_RAND = arr_phi_RAND*normfac_rand/nWindows
-        arr_Q2_RAND = arr_Q2_RAND*normfac_rand/nWindows
-        arr_W_RAND = arr_W_RAND*normfac_rand/nWindows
-        arr_pmiss_RAND = arr_pmiss_RAND*normfac_rand/nWindows
-        arr_emiss_RAND = arr_emiss_RAND*normfac_rand/nWindows
+        arr_t_RAND = arr_t_RAND*normfac_data/nWindows
+        arr_phi_RAND = arr_phi_RAND*normfac_data/nWindows
+        arr_Q2_RAND = arr_Q2_RAND*normfac_data/nWindows
+        arr_W_RAND = arr_W_RAND*normfac_data/nWindows
+        arr_pmiss_RAND = arr_pmiss_RAND*normfac_data/nWindows
+        arr_emiss_RAND = arr_emiss_RAND*normfac_data/nWindows
         
         # Dummy Random subtraction
         H_ssxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
