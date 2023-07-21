@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 12:32:28 trottar"
+# Time-stamp: "2023-07-21 12:43:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -390,13 +390,14 @@ for hist in histlist:
             Q2_val = Q2[tbin_index]
             W_val = W[tbin_index]
             t_val = t[tbin_index]
-            print("---------------------",t_val,W_val,Q2_val,"---------------------")
             # Append tbin_index, Q2, W, and t to aver_lst
             aver_lst = np.append(aver_lst, (tbin_index, Q2_val, W_val, t_val))
             for k in range(len(phibinedges) - 1):
                 phibin_indices = np.where((phibinedges[k] <= t) & (t < phibinedges[k + 1]))[0]
                 if len(phibin_indices) > 0:
-                    mm_list = np.append(mm_list, (tbin_index, k, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
+                    phibin_index = phibin_indices[0]
+                    print("---------------------",t_val,phi_deg[phibin_index],W_val,Q2_val,"---------------------")
+                    mm_list = np.append(mm_list, (tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
 
             
     groups = {}
