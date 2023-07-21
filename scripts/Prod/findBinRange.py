@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 12:43:26 trottar"
+# Time-stamp: "2023-07-21 12:52:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -379,8 +379,8 @@ for hist in histlist:
     emiss = np.array(hist["H_emiss_DATA"])
 
     # Initialize NumPy arrays
-    aver_lst = np.array([], dtype=object)
-    mm_list = np.array([], dtype=object)
+    aver_lst = []
+    mm_list = []
 
     # Loop through tbinedges
     for j in range(len(tbinedges) - 1):
@@ -391,13 +391,13 @@ for hist in histlist:
             W_val = W[tbin_index]
             t_val = t[tbin_index]
             # Append tbin_index, Q2, W, and t to aver_lst
-            aver_lst = np.append(aver_lst, (tbin_index, Q2_val, W_val, t_val))
+            aver_lst.append((tbin_index, Q2_val, W_val, t_val))
             for k in range(len(phibinedges) - 1):
                 phibin_indices = np.where((phibinedges[k] <= t) & (t < phibinedges[k + 1]))[0]
                 if len(phibin_indices) > 0:
                     phibin_index = phibin_indices[0]
                     print("---------------------",t_val,phi_deg[phibin_index],W_val,Q2_val,"---------------------")
-                    mm_list = np.append(mm_list, (tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
+                    mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
 
             
     groups = {}
