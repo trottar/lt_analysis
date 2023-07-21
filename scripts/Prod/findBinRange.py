@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 18:13:56 trottar"
+# Time-stamp: "2023-07-21 18:25:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -157,7 +157,8 @@ def bin_data(histlist):
         phi = hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
         
-        tmask = (tmin <= t) & (t <= tmax)
+        #tmask = (tmin <= t) & (t <= tmax)
+        tmask = 0 <= t
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
@@ -176,18 +177,11 @@ def bin_data(histlist):
 
     ################################################################################################################################################
 
-    # Initialize NumPy arrays
-    H_t_BinTest = np.array([])
-    H_phi_BinTest = np.array([])
+    # Concatenate the H_t arrays for Right, Left, and Center
+    H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
 
-    for val in settingList:
-        # Concatenate the H_t arrays for Right, Left, and Center
-        H_t_concatenated = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
-        H_t_BinTest = np.concatenate((H_t_BinTest, H_t_concatenated))
-
-        # Concatenate the H_phi arrays for Right, Left, and Center
-        H_phi_concatenated = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
-        H_phi_BinTest = np.concatenate((H_phi_BinTest, H_phi_concatenated))
+    # Concatenate the H_phi arrays for Right, Left, and Center
+    H_phi_BinTest = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
         
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
 
