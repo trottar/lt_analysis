@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-13 10:45:46 trottar"
+# Time-stamp: "2023-07-21 10:49:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -136,56 +136,52 @@ def bin_data(histlist):
     ################################################################################################################################################
     # Define root file trees of interest
 
-    H_t_Right = []
-    H_t_Left = []
-    H_t_Center = []
+    # Initialize NumPy arrays
+    H_t_Right = np.array([])
+    H_t_Left = np.array([])
+    H_t_Center = np.array([])
 
-    H_phi_Right = []
-    H_phi_Left = []
-    H_phi_Center = []
+    H_phi_Right = np.array([])
+    H_phi_Left = np.array([])
+    H_phi_Center = np.array([])
     
     for i,hist in enumerate(histlist):
-        if hist["phi_setting"] == 'Right':
-            InFile_RIGHT_DATA = hist["InFile_DATA"]
-            TBRANCH_RIGHT_DATA  = InFile_RIGHT_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
-            print("\nCreating right t-bin histogram...")
-            # Grab t bin range
-            H_list_Right = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_RIGHT_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            H_t_Right = [t[0] for t in H_list_Right]
-            H_phi_Right = [t[1] for t in H_list_Right]
+        
+        t = -np.array(hist["H_t_DATA"])
+        phi = np.array(hist["H_ph_q_DATA"]) + math.pi
+        phi_deg = phi * (180 / math.pi)
 
-        if hist["phi_setting"] == 'Left':
-            InFile_LEFT_DATA = hist["InFile_DATA"]
-            TBRANCH_LEFT_DATA  = InFile_LEFT_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+        trange = (tmin <= t) & (t <= tmax)
+        
+        if hist["phi_setting"] == 'Right':
+            print("\nCreating right t-bin histogram...")
+            H_t_Right = np.append(H_t_Right, t[trange])
+            H_phi_Right = np.append(H_phi_Right, phi_deg[trange])
+
+        elif hist["phi_setting"] == 'Left':
             print("\nCreating left t-bin histogram...")
-            # Grab t bin range
-            H_list_Left = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_LEFT_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            H_t_Left = [t[0] for t in H_list_Left]
-            H_phi_Left = [t[1] for t in H_list_Left]
-            
-        if hist["phi_setting"] == 'Center':
-            InFile_CENTER_DATA = hist["InFile_DATA"]
-            TBRANCH_CENTER_DATA  = InFile_CENTER_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+            H_t_Left = np.append(H_t_Left, t[trange])
+            H_phi_Left = np.append(H_phi_Left, phi_deg[trange])
+
+        elif hist["phi_setting"] == 'Center':
             print("\nCreating center t-bin histogram...")
-            # Grab t bin range
-            H_list_Center = [(-evt.MandelT,(evt.ph_q+math.pi)*(180/math.pi)) for i,evt in enumerate(TBRANCH_CENTER_DATA) if (tmin <= -evt.MandelT <= tmax)]
-            H_t_Center = [t[0] for t in H_list_Center]
-            H_phi_Center = [t[1] for t in H_list_Center]
-            
+            H_t_Center = np.append(H_t_Center, t[trange])
+            H_phi_Center = np.append(H_phi_Center, phi_deg[trange])
+
     ################################################################################################################################################
 
-    H_t_BinTest = []
-    H_phi_BinTest = []
+    # Initialize NumPy arrays
+    H_t_BinTest = np.array([])
+    H_phi_BinTest = np.array([])
+
     for val in settingList:
-        if val == "Right":
-            H_t_BinTest = np.concatenate((H_t_BinTest, H_t_Right))
-            H_phi_BinTest = np.concatenate((H_phi_BinTest, H_phi_Right))
-        if val == "Left":
-            H_t_BinTest = np.concatenate((H_t_BinTest, H_t_Left))
-            H_phi_BinTest = np.concatenate((H_phi_BinTest, H_phi_Left))
-        if val == "Center":
-            H_t_BinTest = np.concatenate((H_t_BinTest, H_t_Center))
-            H_phi_BinTest = np.concatenate((H_phi_BinTest, H_phi_Center))
+        # Concatenate the H_t arrays for Right, Left, and Center
+        H_t_concatenated = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
+        H_t_BinTest = np.concatenate((H_t_BinTest, H_t_concatenated))
+
+        # Concatenate the H_phi arrays for Right, Left, and Center
+        H_phi_concatenated = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
+        H_phi_BinTest = np.concatenate((H_phi_BinTest, H_phi_concatenated))
             
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
 
@@ -261,6 +257,10 @@ for i,hist in enumerate(histlist):
     else:
         settingList.append(hist["phi_setting"])
 
+#################
+# HARD CODED
+#################
+
 relYieldPlot = plt.figure(figsize=(12,8))
 
 #HMS plot scaler
@@ -270,7 +270,6 @@ plt.xlim(0,70)
 plt.plot([0,70], [1,1], 'r-',zorder=2)
 
 for i,hist in enumerate(histlist):
-    print("\n\n\n\n\n\n\n",hist.keys(),"\n\n\n\n\n\n\n")
     plt.errorbar(hist["current"],hist["yieldRel_HMS_scaler"], \
                  yerr=hist["yieldRel_HMS_scaler"]*hist["uncern_yieldRel_HMS_scaler"], \
                  color='black',linestyle='None',zorder=3,label="_nolegend_")
@@ -282,6 +281,9 @@ plt.xlabel('Current [uA]', fontsize =16)
 plt.legend()
 plt.show()
 
+#################
+#################
+#################
         
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()
@@ -364,28 +366,41 @@ c_bins.Print(outputpdf)
         
 c_yield_data = TCanvas()
         
-for i,hist in enumerate(histlist):
 
-    InFile_DATA = hist["InFile_DATA"]
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+# Initialize lists
+mm_list = []
+aver_lst = []
 
-    mm_list = []
-    aver_lst = []
-    for evt in TBRANCH_DATA:
-        for j in range(len(tbinedges) - 1):
-            if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
-                tbin_index = j
-            else:
-                tbin_index = None
-            if tbin_index != None:
-                aver_lst.append((tbin_index, evt.Q2, evt.W, -evt.MandelT))
-                for k in range(len(phibinedges) - 1):                    
-                    if phibinedges[k] <= (evt.ph_q+math.pi)*(180/math.pi) < phibinedges[k+1]:
-                        phibin_index = k
-                    else:
-                        phibin_index = None
-                    if phibin_index != None:
-                        mm_list.append((tbin_index, phibin_index, np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+# Loop through histlist
+for hist in histlist:
+    # Convert lists to NumPy arrays
+    t = -np.array(hist["H_t_DATA"])
+    phi = np.array(hist["H_ph_q_DATA"]) + math.pi
+    phi_deg = phi * (180 / math.pi)
+    Q2 = np.array(hist["H_Q2_DATA"])
+    W = np.array(hist["H_W_DATA"])
+    pmiss = np.array(hist["H_pmiss_DATA"])
+    emiss = np.array(hist["H_emiss_DATA"])
+
+    # Calculate tbin_index using NumPy array indexing
+    tbin_index = np.digitize(-t, tbinedges) - 1
+    valid_tbin_mask = (0 <= tbin_index) & (tbin_index < len(tbinedges) - 1)
+
+    # Calculate phibin_index using NumPy array indexing
+    phibin_index = np.digitize(phi_deg, phibinedges) - 1
+    valid_phibin_mask = (0 <= phibin_index) & (phibin_index < len(phibinedges) - 1)
+
+    # Filter arrays based on valid bin indices
+    t = t[valid_tbin_mask & valid_phibin_mask]
+    phi_deg = phi_deg[valid_tbin_mask & valid_phibin_mask]
+    Q2 = Q2[valid_tbin_mask & valid_phibin_mask]
+    W = W[valid_tbin_mask & valid_phibin_mask]
+    emiss = emiss[valid_tbin_mask & valid_phibin_mask]
+    pmiss = pmiss[valid_tbin_mask & valid_phibin_mask]
+
+    # Calculate mm_list and aver_lst using list comprehensions
+    mm_list.extend([(t_idx, phi_idx, np.sqrt(em ** 2 - pm ** 2)) for t_idx, phi_idx, em, pm in zip(tbin_index, phibin_index, emiss, pmiss)])
+    aver_lst.extend([(t_idx, q2, w, -t_val) for t_idx, q2, w, t_val in zip(tbin_index, Q2, W, t)])
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
