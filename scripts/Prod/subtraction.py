@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 15:14:05 trottar"
+# Time-stamp: "2023-07-21 15:23:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -958,8 +958,8 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SIMC = np.append(arr_phi_SIMC, evt.Weight*evt.phipq)
               arr_Q2_SIMC = np.append(arr_Q2_SIMC, evt.Weight*evt.Q2)
               arr_W_SIMC = np.append(arr_W_SIMC, evt.Weight*evt.W)
-              arr_pmiss_SIMC = np.append(arr_pmiss_SIMC, evt.Weight*evt.pmiss)
-              arr_emiss_SIMC = np.append(arr_emiss_SIMC, evt.Weight*evt.emiss)
+              arr_pmiss_SIMC = np.append(arr_pmiss_SIMC, evt.Weight*evt.Pm)
+              arr_emiss_SIMC = np.append(arr_emiss_SIMC, evt.Weight*evt.Em)
               
               H_ssxfp_SIMC.Fill(evt.ssxfp, evt.Weight)
               H_ssyfp_SIMC.Fill(evt.ssyfp, evt.Weight)
