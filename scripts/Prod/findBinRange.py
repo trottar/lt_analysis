@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 17:01:17 trottar"
+# Time-stamp: "2023-07-21 17:22:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,8 +150,6 @@ def bin_data(histlist):
         t = np.array(hist["H_t_DATA"])
         phi = np.array(hist["H_ph_q_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
-
-        print("-------------------",phi_deg,t,"-------------------")
         
         tmask = (tmin <= t) & (t <= tmax)
         
@@ -184,12 +182,8 @@ def bin_data(histlist):
         # Concatenate the H_phi arrays for Right, Left, and Center
         H_phi_concatenated = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
         H_phi_BinTest = np.concatenate((H_phi_BinTest, H_phi_concatenated))
-
-
-        print("~~~~~~~~~~~~~~~~~~~",H_t_concatenated,"\n",H_t_BinTest,"~~~~~~~~~~~~~~~~~~~")
         
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
-
 
 def find_phibins(H_phi_BinTest):
 
@@ -401,6 +395,7 @@ for hist in histlist:
                 phibin_indices = np.where((phibinedges[k] <= t) & (t < phibinedges[k + 1]))[0]
                 if len(phibin_indices) > 0:
                     phibin_index = k
+                    print("-------------------",t_val, phi[k], Q2_val, W_val,"-------------------")
                     mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
 
             
