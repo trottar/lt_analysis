@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 16:47:08 trottar"
+# Time-stamp: "2023-07-21 17:01:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -148,13 +148,12 @@ def bin_data(histlist):
     for i,hist in enumerate(histlist):
         
         t = np.array(hist["H_t_DATA"])
-        phi = np.array(hist["H_phi_DATA"]) + math.pi
+        phi = np.array(hist["H_ph_q_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
 
         print("-------------------",phi_deg,t,"-------------------")
         
-        #tmask = (tmin <= t) & (t <= tmax)
-        tmask = 0 < t
+        tmask = (tmin <= t) & (t <= tmax)
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
@@ -375,9 +374,9 @@ c_yield_data = TCanvas()
 # Loop through histlist
 for hist in histlist:
     
-    # Convert hist["H_t_DATA"], hist["H_phi_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
+    # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
     t = np.array(hist["H_t_DATA"])
-    phi = np.array(hist["H_phi_DATA"]) + math.pi
+    phi = np.array(hist["H_ph_q_DATA"]) + math.pi
     phi_deg = phi * (180 / math.pi)
     Q2 = np.array(hist["H_Q2_DATA"])
     W = np.array(hist["H_W_DATA"])
