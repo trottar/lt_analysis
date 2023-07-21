@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 12:52:38 trottar"
+# Time-stamp: "2023-07-21 13:11:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -279,7 +279,7 @@ for i,hist in enumerate(histlist):
 plt.ylabel('Rel. Yield Scaler', fontsize=16)
 plt.xlabel('Current [uA]', fontsize =16)
 plt.legend()
-plt.show()
+#plt.show()
 
 #################
 #################
@@ -427,14 +427,18 @@ for hist in histlist:
 
     groups = {}
     # Group the tuples by the first two elements using a dictionary
+    # Loop through groups
     for t in mm_list:
-        for j,a in enumerate(Q2_aver):
-            if a[0] == t[0]:
-                key = (t[0], t[1])
-                if key in groups:
-                    groups[key].append((t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1]))
-                else:
-                    groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]                    
+        key = (t[0], t[1])
+        if key in groups:
+            j, k = key
+            Q2_val = Q2_aver[j][1]
+            W_val = W_aver[j][1]
+            t_val = t_aver[j][1]
+            groups[key].append((t[2], Q2_val, W_val, t_val))
+        else:
+            groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]
+                 
 
     yieldValData = array('d', [0])
     Q2binValData = array('d', [0])
