@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 11:16:01 trottar"
+# Time-stamp: "2023-07-21 11:26:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -370,7 +370,7 @@ c_yield_data = TCanvas()
 for hist in histlist:
     
     # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
-    t = -np.array(hist["H_t_DATA"])
+    t = np.array(hist["H_t_DATA"])
     phi = np.array(hist["H_ph_q_DATA"]) + math.pi
     phi_deg = phi * (180 / math.pi)
     Q2 = np.array(hist["H_Q2_DATA"])
