@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 12:07:45 trottar"
+# Time-stamp: "2023-07-21 12:19:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -383,10 +383,8 @@ for hist in histlist:
     mm_list = np.array([], dtype=object)
 
     # Loop through tbinedges
-    #for j in range(len(tbinedges) - 1):
-    #    tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
-    tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
-    for j in tbin_indices:
+    for j in range(len(tbinedges) - 1):
+        tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
         if len(tbin_indices) > 0:
             tbin_index = tbin_indices[0]
             Q2_val = Q2[tbin_index]
@@ -394,12 +392,13 @@ for hist in histlist:
             t_val = t[tbin_index]
             print("---------------------",t_val,W_val,Q2_val,"---------------------")
 
-            phibin_indices = np.where((phibinedges[j] <= phi_deg) & (phi_deg < phibinedges[j + 1]))[0]
-            for k in phibin_indices:
-                mm_list = np.append(mm_list, (tbin_index, k, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
+            for k in range(len(phibinedges) - 1):
+                phibin_indices = np.where((phibinedges[k] <= t) & (t < phibinedges[k + 1]))[0]
+                if len(phibin_indices) > 0:
+                    mm_list = np.append(mm_list, (tbin_index, k, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
 
-                # Append tbin_index, Q2, W, and t to aver_lst
-                aver_lst = np.append(aver_lst, (tbin_index, Q2_val, W_val, t_val))
+                    # Append tbin_index, Q2, W, and t to aver_lst
+                    aver_lst = np.append(aver_lst, (tbin_index, Q2_val, W_val, t_val))
             
     groups = {}
     # Group the tuples by the first two elements using a dictionary
