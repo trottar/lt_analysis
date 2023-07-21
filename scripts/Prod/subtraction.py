@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 15:41:59 trottar"
+# Time-stamp: "2023-07-21 15:51:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2433,12 +2433,14 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_RAND,-1)
         H_ct_DATA.Add(H_ct_RAND,-1)
 
+        '''        
         arr_t_DATA = arr_t_DATA-arr_t_RAND
         arr_phi_DATA = arr_phi_DATA-arr_phi_RAND
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_RAND
         arr_W_DATA = arr_W_DATA-arr_W_RAND
         arr_pmiss_DATA = arr_pmiss_DATA-arr_pmiss_RAND
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_RAND
+        '''
         
         ###
         # Dummy Random subtraction
@@ -2468,12 +2470,14 @@ def defineHists(phi_setting, inpDict):
         H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
         H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
+        '''
         arr_t_DUMMY = arr_t_DUMMY-arr_t_RAND
         arr_phi_DUMMY = arr_phi_DUMMY-arr_phi_RAND
         arr_Q2_DUMMY = arr_Q2_DUMMY-arr_Q2_RAND
         arr_W_DUMMY = arr_W_DUMMY-arr_W_RAND
         arr_pmiss_DUMMY = arr_pmiss_DUMMY-arr_pmiss_RAND
         arr_emiss_DUMMY = arr_emiss_DUMMY-arr_emiss_RAND
+        '''
 
         ###
         # Data Random subtraction
@@ -2503,12 +2507,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DATA.Add(H_W_SUBPION_RAND,-1)
         H_ct_epi_SUBPION_DATA.Add(H_ct_epi_SUBPION_RAND,-1)
 
+        '''
         arr_t_SUBPION_DATA = arr_t_SUBPION_DATA-arr_t_RAND
         arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA-arr_phi_RAND
         arr_Q2_SUBPION_DATA = arr_Q2_SUBPION_DATA-arr_Q2_RAND
         arr_W_SUBPION_DATA = arr_W_SUBPION_DATA-arr_W_RAND
         arr_pmiss_SUBPION_DATA = arr_pmiss_SUBPION_DATA-arr_pmiss_RAND
         arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA-arr_emiss_RAND
+        '''
 
         ###
         # Dummy Random subtraction
@@ -2538,12 +2544,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DUMMY.Add(H_W_SUBPION_DUMMY_RAND,-1)
         H_ct_epi_SUBPION_DUMMY.Add(H_ct_epi_SUBPION_DUMMY_RAND,-1)
 
+        '''
         arr_t_SUBPION_DUMMY = arr_t_SUBPION_DUMMY-arr_t_RAND
         arr_phi_SUBPION_DUMMY = arr_phi_SUBPION_DUMMY-arr_phi_RAND
         arr_Q2_SUBPION_DUMMY = arr_Q2_SUBPION_DUMMY-arr_Q2_RAND
         arr_W_SUBPION_DUMMY = arr_W_SUBPION_DUMMY-arr_W_RAND
         arr_pmiss_SUBPION_DUMMY = arr_pmiss_SUBPION_DUMMY-arr_pmiss_RAND
         arr_emiss_SUBPION_DUMMY = arr_emiss_SUBPION_DUMMY-arr_emiss_RAND
+        '''
         
         ###
         # Data Random subtraction
@@ -2573,12 +2581,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_RAND,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_RAND,-1)
 
+        '''
         arr_t_SUBPROTON_DATA = arr_t_SUBPROTON_DATA-arr_t_RAND
         arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA-arr_phi_RAND
         arr_Q2_SUBPROTON_DATA = arr_Q2_SUBPROTON_DATA-arr_Q2_RAND
         arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA-arr_W_RAND
         arr_pmiss_SUBPROTON_DATA = arr_pmiss_SUBPROTON_DATA-arr_pmiss_RAND
         arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA-arr_emiss_RAND
+        '''
         
         ###
         # Dummy Random subtraction
@@ -2608,12 +2618,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DUMMY.Add(H_W_SUBPROTON_DUMMY_RAND,-1)
         H_ct_ep_SUBPROTON_DUMMY.Add(H_ct_ep_SUBPROTON_DUMMY_RAND,-1)
 
+        '''
         arr_t_SUBPROTON_DUMMY = arr_t_SUBPROTON_DUMMY-arr_t_RAND
         arr_phi_SUBPROTON_DUMMY = arr_phi_SUBPROTON_DUMMY-arr_phi_RAND
         arr_Q2_SUBPROTON_DUMMY = arr_Q2_SUBPROTON_DUMMY-arr_Q2_RAND
         arr_W_SUBPROTON_DUMMY = arr_W_SUBPROTON_DUMMY-arr_W_RAND
         arr_pmiss_SUBPROTON_DUMMY = arr_pmiss_SUBPROTON_DUMMY-arr_pmiss_RAND
         arr_emiss_SUBPROTON_DUMMY = arr_emiss_SUBPROTON_DUMMY-arr_emiss_RAND
+        '''
         
         ###
         # Dummy Subtraction
@@ -2643,12 +2655,14 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_DUMMY,-1)
         H_ct_DATA.Add(H_ct_DUMMY,-1)
 
+        '''
         arr_t_DATA = arr_t_DATA-arr_t_DUMMY
         arr_phi_DATA = arr_phi_DATA-arr_phi_DUMMY
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_DUMMY
         arr_W_DATA = arr_W_DATA-arr_W_DUMMY
         arr_pmiss_DATA = arr_pmiss_DATA-arr_pmiss_DUMMY
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_DUMMY
+        '''
         
         ###
         # Dummy Subtraction
@@ -2678,12 +2692,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DATA.Add(H_W_SUBPION_DUMMY,-1)
         H_ct_epi_SUBPION_DATA.Add(H_ct_epi_SUBPION_DUMMY,-1)
 
+        '''
         arr_t_SUBPION_DATA = arr_t_SUBPION_DATA-arr_t_DUMMY
         arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA-arr_phi_DUMMY
         arr_Q2_SUBPION_DATA = arr_Q2_SUBPION_DATA-arr_Q2_DUMMY
         arr_W_SUBPION_DATA = arr_W_SUBPION_DATA-arr_W_DUMMY
         arr_pmiss_SUBPION_DATA = arr_pmiss_SUBPION_DATA-arr_pmiss_DUMMY
         arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA-arr_emiss_DUMMY
+        '''
         
         ###
         # Dummy Subtraction
@@ -2713,13 +2729,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
 
+        '''
         arr_t_SUBPROTON_DATA = arr_t_SUBPROTON_DATA-arr_t_DUMMY
         arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA-arr_phi_DUMMY
         arr_Q2_SUBPROTON_DATA = arr_Q2_SUBPROTON_DATA-arr_Q2_DUMMY
         arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA-arr_W_DUMMY
         arr_pmiss_SUBPROTON_DATA = arr_pmiss_SUBPROTON_DATA-arr_pmiss_DUMMY
         arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA-arr_emiss_DUMMY
-
+        '''
         
         H_MM_DATA_nosub = H_MM_DATA.Clone("H_MM_DATA_nosub")
         
@@ -2751,12 +2768,14 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_SUBPION_DATA,-1)
         H_ct_DATA.Add(H_ct_epi_SUBPION_DATA,-1)
 
+        '''        
         arr_t_DATA = arr_t_DATA-arr_t_SUBPION_DATA
         arr_phi_DATA = arr_phi_DATA-arr_phi_SUBPION_DATA
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_SUBPION_DATA
         arr_W_DATA = arr_W_DATA-arr_W_SUBPION_DATA
         arr_pmiss_DATA = arr_pmiss_DATA-arr_pmiss_SUBPION_DATA
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_SUBPION_DATA
+        '''
         
         '''
         ###
