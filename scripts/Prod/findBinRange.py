@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 18:46:42 trottar"
+# Time-stamp: "2023-07-21 18:54:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -387,12 +387,12 @@ for hist in histlist:
 # Initialize NumPy arrays
 aver_lst = []
 mm_list = []
-
+'''
 # Loop through tbinedges
 print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
 for i, evt in enumerate(t):
     for j in range(len(tbinedges) - 1):
-        if (tbinedges[j] <= t) & (t < tbinedges[j + 1]):
+        if (tbinedges[j] <= t[i]) & (t[i] < tbinedges[j + 1]):
             tbin_index = j
             Q2_val = Q2[tbin_index]
             W_val = W[tbin_index]
@@ -400,12 +400,13 @@ for i, evt in enumerate(t):
             # Append tbin_index, Q2, W, and t to aver_lst
             aver_lst.append((tbin_index, Q2_val, W_val, t_val))
             for k in range(len(phibinedges) - 1):
-                if (phibinedges[k] <= t) & (t < phibinedges[k + 1]):
+                if (phibinedges[k] <= phi_deg[i]) & (phi_deg[i] < phibinedges[k + 1]):
                     phibin_index = k
                     print("-------------------",t_val, phi_deg[k], Q2_val, W_val,"-------------------")
                     mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
                 
 '''
+print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
 for j in range(len(tbinedges) - 1):
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
@@ -416,12 +417,11 @@ for j in range(len(tbinedges) - 1):
         # Append tbin_index, Q2, W, and t to aver_lst
         aver_lst.append((tbin_index, Q2_val, W_val, t_val))
         for k in range(len(phibinedges) - 1):
-            phibin_indices = np.where((phibinedges[k] <= t) & (t < phibinedges[k + 1]))[0]
+            phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
                 print("-------------------",t_val, phi_deg[k], Q2_val, W_val,"-------------------")
                 mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
-'''
                 
 
 groups = {}
