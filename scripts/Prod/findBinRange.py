@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 13:52:48 trottar"
+# Time-stamp: "2023-07-21 13:58:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -432,7 +432,7 @@ for hist in histlist:
     # Loop through groups
     for t in mm_list:
         key = (t[0], t[1])
-        print("~~~~~~~~~~~~~~~~~~~~~",(tbin, phibin), " ", key ,"~~~~~~~~~~~~~~~~~~~~~")
+        print("~~~~~~~~~~~~~~~~~~~~~","(tbin, phibin)", key ,"~~~~~~~~~~~~~~~~~~~~~")
         if key in groups:
             j, k = key
             Q2_val = Q2_aver[j][1]
