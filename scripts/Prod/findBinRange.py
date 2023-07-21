@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 15:58:36 trottar"
+# Time-stamp: "2023-07-21 16:07:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,7 +182,10 @@ def bin_data(histlist):
         # Concatenate the H_phi arrays for Right, Left, and Center
         H_phi_concatenated = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
         H_phi_BinTest = np.concatenate((H_phi_BinTest, H_phi_concatenated))
-            
+
+
+        print("-------------------",H_t_concatenated,"\n",H_t_BinTest,"-------------------")
+        
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
 
 
