@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 11:26:38 trottar"
+# Time-stamp: "2023-07-21 11:47:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -390,6 +390,7 @@ for hist in histlist:
             Q2_val = Q2[tbin_index]
             W_val = W[tbin_index]
             t_val = t[tbin_index]
+            print("---------------------",t_val,W_val,Q2_val,"---------------------") 
 
             phibin_indices = np.where((phibinedges[j] <= phi_deg) & (phi_deg < phibinedges[j + 1]))[0]
             for k in phibin_indices:
