@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 10:49:44 trottar"
+# Time-stamp: "2023-07-21 11:02:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -147,7 +147,7 @@ def bin_data(histlist):
     
     for i,hist in enumerate(histlist):
         
-        t = -np.array(hist["H_t_DATA"])
+        t = np.array(hist["H_t_DATA"])
         phi = np.array(hist["H_ph_q_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
 
