@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 11:14:18 trottar"
+# Time-stamp: "2023-07-21 11:16:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -366,11 +366,6 @@ c_bins.Print(outputpdf)
         
 c_yield_data = TCanvas()
         
-
-# Initialize lists
-mm_list = []
-aver_lst = []
-
 # Loop through histlist
 for hist in histlist:
     
@@ -389,18 +384,18 @@ for hist in histlist:
 
     # Loop through tbinedges
     for j in range(len(tbinedges) - 1):
-        tbin_indices = np.where((tbinedges[j] <= -t) & (-t < tbinedges[j + 1]))[0]
+        tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
         if len(tbin_indices) > 0:
             tbin_index = tbin_indices[0]
             Q2_val = Q2[tbin_index]
             W_val = W[tbin_index]
-            t_val = -t[tbin_index]
+            t_val = t[tbin_index]
 
             phibin_indices = np.where((phibinedges[j] <= phi_deg) & (phi_deg < phibinedges[j + 1]))[0]
             for k in phibin_indices:
                 mm_list = np.append(mm_list, (tbin_index, k, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
 
-                # Append tbin_index, Q2, W, and -t to aver_lst
+                # Append tbin_index, Q2, W, and t to aver_lst
                 aver_lst = np.append(aver_lst, (tbin_index, Q2_val, W_val, t_val))
             
     groups = {}
