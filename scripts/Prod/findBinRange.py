@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 18:25:32 trottar"
+# Time-stamp: "2023-07-21 18:32:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,7 +158,7 @@ def bin_data(histlist):
         phi_deg = phi * (180 / math.pi)
         
         #tmask = (tmin <= t) & (t <= tmax)
-        tmask = 0 <= t
+        tmask = 0 < t
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
