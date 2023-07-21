@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 15:23:27 trottar"
+# Time-stamp: "2023-07-21 15:32:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -873,12 +873,12 @@ def defineHists(phi_setting, inpDict):
         arr_pmiss_DUMMY_RAND = np.array([])
         arr_emiss_DUMMY_RAND = np.array([])
 
-        arr_t_SUBPION = np.array([])
-        arr_phi_SUBPION = np.array([])
-        arr_Q2_SUBPION = np.array([])
-        arr_W_SUBPION = np.array([])
-        arr_pmiss_SUBPION = np.array([])
-        arr_emiss_SUBPION = np.array([])        
+        arr_t_SUBPION_DATA = np.array([])
+        arr_phi_SUBPION_DATA = np.array([])
+        arr_Q2_SUBPION_DATA = np.array([])
+        arr_W_SUBPION_DATA = np.array([])
+        arr_pmiss_SUBPION_DATA = np.array([])
+        arr_emiss_SUBPION_DATA = np.array([])        
         
         arr_t_SUBPION_RAND = np.array([])
         arr_phi_SUBPION_RAND = np.array([])
@@ -901,12 +901,12 @@ def defineHists(phi_setting, inpDict):
         arr_pmiss_SUBPION_DUMMY_RAND = np.array([])
         arr_emiss_SUBPION_DUMMY_RAND = np.array([])
         
-        arr_t_SUBPROTON = np.array([])
-        arr_phi_SUBPROTON = np.array([])
-        arr_Q2_SUBPROTON = np.array([])
-        arr_W_SUBPROTON = np.array([])
-        arr_pmiss_SUBPROTON = np.array([])
-        arr_emiss_SUBPROTON = np.array([])        
+        arr_t_SUBPROTON_DATA = np.array([])
+        arr_phi_SUBPROTON_DATA = np.array([])
+        arr_Q2_SUBPROTON_DATA = np.array([])
+        arr_W_SUBPROTON_DATA = np.array([])
+        arr_pmiss_SUBPROTON_DATA = np.array([])
+        arr_emiss_SUBPROTON_DATA = np.array([])        
         
         arr_t_SUBPROTON_RAND = np.array([])
         arr_phi_SUBPROTON_RAND = np.array([])
