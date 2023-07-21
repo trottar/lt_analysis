@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 16:16:05 trottar"
+# Time-stamp: "2023-07-21 16:23:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,6 +151,8 @@ def bin_data(histlist):
         phi = np.array(hist["arr_phi_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
 
+        print("-------------------",phi_deg,t,"-------------------")
+        
         tmask = (tmin <= t) & (t <= tmax)
         
         if hist["phi_setting"] == 'Right':
@@ -162,7 +164,6 @@ def bin_data(histlist):
             print("\nCreating left t-bin histogram...")
             H_t_Left = np.append(H_t_Left, t[tmask])
             H_phi_Left = np.append(H_phi_Left, phi_deg[tmask])
-            print("-------------------",H_t_Left,"-------------------")
 
         elif hist["phi_setting"] == 'Center':
             print("\nCreating center t-bin histogram...")
