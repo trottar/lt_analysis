@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 14:21:08 trottar"
+# Time-stamp: "2023-07-21 15:14:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -147,8 +147,8 @@ def bin_data(histlist):
     
     for i,hist in enumerate(histlist):
         
-        t = np.array(hist["H_t_DATA"])
-        phi = np.array(hist["H_ph_q_DATA"]) + math.pi
+        t = np.array(hist["arr_t_DATA"])
+        phi = np.array(hist["arr_ph_q_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
 
         tmask = (tmin <= t) & (t <= tmax)
@@ -369,14 +369,14 @@ c_yield_data = TCanvas()
 # Loop through histlist
 for hist in histlist:
     
-    # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
-    t = np.array(hist["H_t_DATA"])
-    phi = np.array(hist["H_ph_q_DATA"]) + math.pi
+    # Convert hist["arr_t_DATA"], hist["arr_ph_q_DATA"], hist["arr_Q2_DATA"], hist["arr_W_DATA"], hist["arr_pmiss_DATA"], hist["arr_emiss_DATA"] to NumPy arrays
+    t = np.array(hist["arr_t_DATA"])
+    phi = np.array(hist["arr_ph_q_DATA"]) + math.pi
     phi_deg = phi * (180 / math.pi)
-    Q2 = np.array(hist["H_Q2_DATA"])
-    W = np.array(hist["H_W_DATA"])
-    pmiss = np.array(hist["H_pmiss_DATA"])
-    emiss = np.array(hist["H_emiss_DATA"])
+    Q2 = np.array(hist["arr_Q2_DATA"])
+    W = np.array(hist["arr_W_DATA"])
+    pmiss = np.array(hist["arr_pmiss_DATA"])
+    emiss = np.array(hist["arr_emiss_DATA"])
 
     # Initialize NumPy arrays
     aver_lst = []
