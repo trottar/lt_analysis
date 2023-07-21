@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 18:00:16 trottar"
+# Time-stamp: "2023-07-21 18:13:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -370,82 +370,90 @@ for i,hist in enumerate(histlist):
 c_bins.Print(outputpdf)
         
 c_yield_data = TCanvas()
-        
-# Loop through histlist
+
+t = 0
+phi = 0
+phi_deg = 0
+Q2 = 0
+W = 0
+pmiss = 0
+emiss = 0
+
 for hist in histlist:
     
     # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
-    t = hist_to_numpy(hist["H_t_DATA"])
-    phi = hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
-    phi_deg = phi * (180 / math.pi)
-    Q2 = hist_to_numpy(hist["H_Q2_DATA"])
-    W = hist_to_numpy(hist["H_W_DATA"])
-    pmiss = hist_to_numpy(hist["H_pmiss_DATA"])
-    emiss = hist_to_numpy(hist["H_emiss_DATA"])
+    t += hist_to_numpy(hist["H_t_DATA"])
+    phi += hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
+    phi_deg += phi * (180 / math.pi)
+    Q2 += hist_to_numpy(hist["H_Q2_DATA"])
+    W += hist_to_numpy(hist["H_W_DATA"])
+    pmiss += hist_to_numpy(hist["H_pmiss_DATA"])
+    emiss += hist_to_numpy(hist["H_emiss_DATA"])
 
-    # Initialize NumPy arrays
-    aver_lst = []
-    mm_list = []
+# Initialize NumPy arrays
+aver_lst = []
+mm_list = []
 
-    # Loop through tbinedges
-    print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
-    for j in range(len(tbinedges) - 1):
-        tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
-        if len(tbin_indices) > 0:
-            tbin_index = j
-            Q2_val = Q2[tbin_index]
-            W_val = W[tbin_index]
-            t_val = t[tbin_index]
-            # Append tbin_index, Q2, W, and t to aver_lst
-            aver_lst.append((tbin_index, Q2_val, W_val, t_val))
-            for k in range(len(phibinedges) - 1):
-                phibin_indices = np.where((phibinedges[k] <= t) & (t < phibinedges[k + 1]))[0]
-                if len(phibin_indices) > 0:
-                    phibin_index = k
-                    print("-------------------",t_val, phi_deg[k], Q2_val, W_val,"-------------------")
-                    mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
+# Loop through tbinedges
+print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
+for j in range(len(tbinedges) - 1):
+    tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
+    if len(tbin_indices) > 0:
+        tbin_index = j
+        Q2_val = Q2[tbin_index]
+        W_val = W[tbin_index]
+        t_val = t[tbin_index]
+        # Append tbin_index, Q2, W, and t to aver_lst
+        aver_lst.append((tbin_index, Q2_val, W_val, t_val))
+        for k in range(len(phibinedges) - 1):
+            phibin_indices = np.where((phibinedges[k] <= t) & (t < phibinedges[k + 1]))[0]
+            if len(phibin_indices) > 0:
+                phibin_index = k
+                print("-------------------",t_val, phi_deg[k], Q2_val, W_val,"-------------------")
+                mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
 
-            
-    groups = {}
-    # Group the tuples by the first two elements using a dictionary
-    for t in aver_lst:
-        key = (t[0])
-        if key in groups:
-            groups[key].append((t[1], t[2], t[3]))
-        else:
-            groups[key] = [(t[1], t[2], t[3])]
 
-    # Extract the desired values from each group
-    Q2_aver = []
-    W_aver = []
-    t_aver = []
-    for key, val in groups.items():
-        Q2_tmp = []
-        W_tmp = []
-        t_tmp = []
-        for tup in val:
-            Q2_tmp.append(tup[0])
-            W_tmp.append(tup[1])
-            t_tmp.append(tup[2])
-        Q2_aver.append((key, np.average(Q2_tmp)))
-        W_aver.append((key, np.average(W_tmp)))
-        t_aver.append((key, np.average(t_tmp)))
+groups = {}
+# Group the tuples by the first two elements using a dictionary
+for t in aver_lst:
+    key = (t[0])
+    if key in groups:
+        groups[key].append((t[1], t[2], t[3]))
+    else:
+        groups[key] = [(t[1], t[2], t[3])]
 
-    groups = {}
-    # Group the tuples by the first two elements using a dictionary
-    # Loop through groups
-    for t in mm_list:
-        key = (t[0], t[1])
-        if key in groups:
-            j, k = key
-            Q2_val = Q2_aver[j][1]
-            W_val = W_aver[j][1]
-            t_val = t_aver[j][1]
-            groups[key].append((t[2], Q2_val, W_val, t_val))
-        else:
-            groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]
+# Extract the desired values from each group
+Q2_aver = []
+W_aver = []
+t_aver = []
+for key, val in groups.items():
+    Q2_tmp = []
+    W_tmp = []
+    t_tmp = []
+    for tup in val:
+        Q2_tmp.append(tup[0])
+        W_tmp.append(tup[1])
+        t_tmp.append(tup[2])
+    Q2_aver.append((key, np.average(Q2_tmp)))
+    W_aver.append((key, np.average(W_tmp)))
+    t_aver.append((key, np.average(t_tmp)))
+
+groups = {}
+# Group the tuples by the first two elements using a dictionary
+# Loop through groups
+for t in mm_list:
+    key = (t[0], t[1])
+    if key in groups:
+        j, k = key
+        Q2_val = Q2_aver[j][1]
+        W_val = W_aver[j][1]
+        t_val = t_aver[j][1]
+        groups[key].append((t[2], Q2_val, W_val, t_val))
+    else:
+        groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]
                  
-
+for hist in histlist:
+    
     yieldValData = array('d', [0])
     Q2binValData = array('d', [0])
     WbinValData = array('d', [0])
