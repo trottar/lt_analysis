@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 16:55:09 trottar"
+# Time-stamp: "2023-07-22 17:16:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -386,10 +386,10 @@ for hist in histlist:
     emiss = np.append(emiss, hist_to_numpy(hist["H_emiss_DATA"]))
 
     print("H_Q2_DATA",len(hist["H_Q2_DATA"]))
-    print("H_Q2_DATA",np.average(hist_to_numpy(hist["H_Q2_DATA"])))
+    print("H_Q2_DATA",max(hist_to_numpy(hist["H_Q2_DATA"])))
 
 print("Q2",len(Q2))
-print("Q2",np.average(Q2))
+print("Q2",max(Q2))
 
 # Initialize NumPy arrays
 aver_lst = []
