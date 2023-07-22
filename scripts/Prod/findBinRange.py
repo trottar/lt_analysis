@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 18:33:57 trottar"
+# Time-stamp: "2023-07-22 18:39:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,7 +133,7 @@ from subtraction import defineHists
 
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram):
-    hist_values, bin_edges = rnp.hist2array(histogram,return_edges=True)[1]
+    hist_values, bin_edges = rnp.hist2array(histogram,return_edges=True)
     bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
     return bin_centers
 
