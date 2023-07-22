@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 19:03:24 trottar"
+# Time-stamp: "2023-07-21 20:24:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -384,10 +384,16 @@ for hist in histlist:
     pmiss += hist_to_numpy(hist["H_pmiss_DATA"])
     emiss += hist_to_numpy(hist["H_emiss_DATA"])
 
+    print("H_Q2_DATA",len(hist["H_Q2_DATA"]))
+    print("H_Q2_DATA",np.average(hist_to_numpy(hist["H_Q2_DATA"])))
+
+print("Q2",len(Q2))
+print("Q2",np.average(Q2))
+
 # Initialize NumPy arrays
 aver_lst = []
 mm_list = []
-#'''
+'''
 # Loop through tbinedges
 print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
 for i, evt in enumerate(t):
@@ -406,7 +412,7 @@ for i, evt in enumerate(t):
                     mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
                 
 '''
-print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
+#print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
 for j in range(len(tbinedges) - 1):
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
@@ -423,7 +429,7 @@ for j in range(len(tbinedges) - 1):
                 print("-------------------",t_val, phi_deg[k], Q2_val, W_val,"-------------------")
                 mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
                 
-'''
+#'''
 groups = {}
 # Group the tuples by the first two elements using a dictionary
 for t in aver_lst:
