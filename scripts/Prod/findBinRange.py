@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 16:47:55 trottar"
+# Time-stamp: "2023-07-22 16:55:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -364,6 +364,15 @@ for i,hist in enumerate(histlist):
 c_bins.Print(outputpdf)
         
 c_yield_data = TCanvas()
+
+# Initialize NumPy arrays before the loop
+t = np.array([])
+phi = np.array([])
+phi_deg = np.array([])
+Q2 = np.array([])
+W = np.array([])
+pmiss = np.array([])
+emiss = np.array([])
 
 for hist in histlist:
     
