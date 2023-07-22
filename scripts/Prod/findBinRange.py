@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 21:09:09 trottar"
+# Time-stamp: "2023-07-22 16:47:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -364,14 +364,6 @@ for i,hist in enumerate(histlist):
 c_bins.Print(outputpdf)
         
 c_yield_data = TCanvas()
-
-t = 0
-phi = 0
-phi_deg = 0
-Q2 = 0
-W = 0
-pmiss = 0
-emiss = 0
 
 for hist in histlist:
     
