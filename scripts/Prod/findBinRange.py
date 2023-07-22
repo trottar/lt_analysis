@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 17:58:26 trottar"
+# Time-stamp: "2023-07-22 18:04:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -148,6 +148,7 @@ def bin_data(histlist):
     for i,hist in enumerate(histlist):
         
         t = rnp.hist2array(hist["H_t_DATA"],return_edges=True)
+        print("*****************",t,"*****************")
         phi = rnp.hist2array(hist["H_ph_q_DATA"],return_edges=True)
         phi_deg = (phi + math.pi) * (180 / math.pi)
         
