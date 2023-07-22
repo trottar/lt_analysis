@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 17:29:45 trottar"
+# Time-stamp: "2023-07-22 17:38:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,7 +134,7 @@ from subtraction import defineHists
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram):
     #return np.array([histogram.GetBinContent(i) for i in range(1, histogram.GetNbinsX() + 1)])
-    return np.array(histogram.GetArray())
+    return rnp.hist2array(histogram)
 
 def bin_data(histlist):
 
