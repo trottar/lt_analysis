@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-21 20:24:14 trottar"
+# Time-stamp: "2023-07-21 20:37:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -376,13 +376,13 @@ emiss = 0
 for hist in histlist:
     
     # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
-    t += hist_to_numpy(hist["H_t_DATA"])
-    phi += hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
-    phi_deg += phi * (180 / math.pi)
-    Q2 += hist_to_numpy(hist["H_Q2_DATA"])
-    W += hist_to_numpy(hist["H_W_DATA"])
-    pmiss += hist_to_numpy(hist["H_pmiss_DATA"])
-    emiss += hist_to_numpy(hist["H_emiss_DATA"])
+    t = np.append(hist_to_numpy(hist["H_t_DATA"]))
+    phi = np.append(hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi)
+    phi_deg = np.append(phi * (180 / math.pi))
+    Q2 = np.append(hist_to_numpy(hist["H_Q2_DATA"]))
+    W = np.append(hist_to_numpy(hist["H_W_DATA"]))
+    pmiss = np.append(hist_to_numpy(hist["H_pmiss_DATA"]))
+    emiss = np.append(hist_to_numpy(hist["H_emiss_DATA"]))
 
     print("H_Q2_DATA",len(hist["H_Q2_DATA"]))
     print("H_Q2_DATA",np.average(hist_to_numpy(hist["H_Q2_DATA"])))
