@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 18:04:46 trottar"
+# Time-stamp: "2023-07-22 18:19:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -147,9 +147,9 @@ def bin_data(histlist):
     
     for i,hist in enumerate(histlist):
         
-        t = rnp.hist2array(hist["H_t_DATA"],return_edges=True)
+        t = rnp.hist2array(hist["H_t_DATA"],return_edges=True)[1]
         print("*****************",t,"*****************")
-        phi = rnp.hist2array(hist["H_ph_q_DATA"],return_edges=True)
+        phi = rnp.hist2array(hist["H_ph_q_DATA"],return_edges=True)[1]
         phi_deg = (phi + math.pi) * (180 / math.pi)
         
         #tmask = (tmin <= t) & (t <= tmax)
@@ -372,16 +372,16 @@ emiss = np.array([])
 for hist in histlist:
     
     # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
-    t = np.append(t, rnp.hist2array(hist["H_t_DATA"],return_edges=True))
-    phi = np.append(phi, rnp.hist2array(hist["H_ph_q_DATA"],return_edges=True) + math.pi)
+    t = np.append(t, rnp.hist2array(hist["H_t_DATA"],return_edges=True)[1])
+    phi = np.append(phi, rnp.hist2array(hist["H_ph_q_DATA"],return_edges=True)[1] + math.pi)
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
-    Q2 = np.append(Q2, rnp.hist2array(hist["H_Q2_DATA"],return_edges=True))
-    W = np.append(W, rnp.hist2array(hist["H_W_DATA"],return_edges=True))
-    pmiss = np.append(pmiss, rnp.hist2array(hist["H_pmiss_DATA"],return_edges=True))
-    emiss = np.append(emiss, rnp.hist2array(hist["H_emiss_DATA"],return_edges=True))
+    Q2 = np.append(Q2, rnp.hist2array(hist["H_Q2_DATA"],return_edges=True)[1])
+    W = np.append(W, rnp.hist2array(hist["H_W_DATA"],return_edges=True)[1])
+    pmiss = np.append(pmiss, rnp.hist2array(hist["H_pmiss_DATA"],return_edges=True)[1])
+    emiss = np.append(emiss, rnp.hist2array(hist["H_emiss_DATA"],return_edges=True)[1])
 
     print("H_Q2_DATA",len(hist["H_Q2_DATA"]))
-    print("H_Q2_DATA",max(rnp.hist2array(hist["H_Q2_DATA"],return_edges=True)))
+    print("H_Q2_DATA",max(rnp.hist2array(hist["H_Q2_DATA"],return_edges=True)[1]))
 
 print("Q2",len(Q2))
 print("Q2",max(Q2))
