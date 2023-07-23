@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 03:52:22 trottar"
+# Time-stamp: "2023-07-23 03:57:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -398,7 +398,6 @@ for j in range(len(tbinedges) - 1):
         tbin_index = j
         Q2_val = Q2[tbin_index]
         W_val = W[tbin_index]
-        #MM_val = MM[tbin_index]
         t_val = t[tbin_index]
         # Append tbin_index, Q2, W, and t to aver_lst
         aver_lst.append((tbin_index, Q2_val, W_val, t_val))
@@ -502,7 +501,7 @@ for hist in histlist:
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"]))
     W = np.append(W, hist_to_numpy(hist["H_W_SIMC"]))
-    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"]*hist["normfac_simc"]))    
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"])*hist_to_numpy(hist["normfac_simc"]))    
 
 # Initialize NumPy arrays
 tmp_lst = []
