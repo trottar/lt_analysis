@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 01:08:21 trottar"
+# Time-stamp: "2023-07-23 01:13:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -22,6 +22,7 @@ import scipy
 import scipy.integrate as integrate
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
+from collections import defaultdict
 import sys, math, os, subprocess
 from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
@@ -438,13 +439,12 @@ for j in range(len(tbinedges) - 1):
                 
 #'''
 
-from collections import defaultdict
-
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
 for t in aver_lst:
     key = t[0]
     groups[key].append((t[1], t[2], t[3]))
+    print("*****************",t[0], t[1], t[2], t[3],"*****************")
 
 # Extract the desired values from each group
 Q2_aver = [(key, np.average([tup[0] for tup in val])) for key, val in groups.items()]
