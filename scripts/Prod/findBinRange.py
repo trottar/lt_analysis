@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 04:47:44 trottar"
+# Time-stamp: "2023-07-23 14:54:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -569,8 +569,8 @@ for j in range(len(tbinedges) - 1):
         tbin_index = j
         Q2_val = Q2[tbin_index]
         # Append tbin_index, Q2 to aver_lst
-        aver_lst.append((tbin_index, Q2_val))
-        print("-------------------",Q2_val,"-------------------")
+        aver_lst.append((tbin_index, Q2))
+        print("-------------------",Q2,"-------------------")
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
