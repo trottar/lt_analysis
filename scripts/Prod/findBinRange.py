@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 15:06:29 trottar"
+# Time-stamp: "2023-07-23 15:11:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -567,10 +567,10 @@ for j in range(len(tbinedges) - 1):
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
         tbin_index = j
-        Q2_val = Q2[tbin_index]
+        Q2_val = Q2[tbin_indices]
         # Append tbin_index, Q2 to aver_lst
-        aver_lst.append((tbin_index, Q2))
-        print("-------------------",Q2,"-------------------")
+        aver_lst.append((tbin_index, Q2_val))
+        print("-------------------",Q2_val,"-------------------")
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
@@ -582,8 +582,7 @@ for hist in histlist:
     # Extract the desired values from each group
     for key, val in groups.items():
         for tup in val:
-            for q in tup:
-                hist["H_Q2_tbin_DATA_{}".format(key+1)].Fill(q)
+            hist["H_Q2_tbin_DATA_{}".format(key+1)].Fill(tup)
         c_Q2tbin.cd(key+1)
         hist["H_Q2_tbin_DATA_{}".format(key+1)].Draw("same")
         hist["H_Q2_tbin_DATA_{}".format(key+1)].SetLineColor(i+1)
