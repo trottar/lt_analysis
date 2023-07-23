@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 04:31:13 trottar"
+# Time-stamp: "2023-07-23 04:35:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -496,12 +496,12 @@ MM = np.array([])
 for hist in histlist:
     
     # Convert to NumPy arrays
-    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"]))
-    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"]))
+    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"])*hist["normfac_simc"])
+    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"])*hist["normfac_simc"])
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
-    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"]))
-    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"]))
-    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"]))
+    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"])*hist["normfac_simc"])
+    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"])*hist["normfac_simc"])
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"])*hist["normfac_simc"])
 
 # Initialize NumPy arrays
 tmp_lst = []
