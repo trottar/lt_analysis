@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 19:31:46 trottar"
+# Time-stamp: "2023-07-23 19:37:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -537,9 +537,9 @@ for hist in histlist:
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
         print("*******************",(MM_tmp),"*******************")
 
-        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp[0]) * hist["normfac_simc"])
-        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp[0]) * hist["normfac_simc"]
-        yieldValSimc[0] = integrate.simps(MM_tmp[0]) * hist["normfac_simc"]
+        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp) * hist["normfac_simc"])
+        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp) * hist["normfac_simc"]
+        yieldValSimc[0] = integrate.simps(MM_tmp) * hist["normfac_simc"]
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
