@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 03:03:28 trottar"
+# Time-stamp: "2023-07-23 03:07:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -398,6 +398,7 @@ for j in range(len(tbinedges) - 1):
         tbin_index = j
         Q2_val = Q2[tbin_index]
         W_val = W[tbin_index]
+        MM_val = MM[tbin_index]
         t_val = t[tbin_index]
         # Append tbin_index, Q2, W, and t to aver_lst
         aver_lst.append((tbin_index, Q2_val, W_val, t_val))
@@ -405,8 +406,8 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM,"-------------------")
-                mm_list.append((tbin_index, phibin_index, MM))
+                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM_val,"-------------------")
+                mm_list.append((tbin_index, phibin_index, MM_val))
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
@@ -510,14 +511,13 @@ for j in range(len(tbinedges) - 1):
         tbin_index = j
         Q2_val = Q2[tbin_index]
         W_val = W[tbin_index]
+        MM_val = MM[tbin_index]
         t_val = t[tbin_index]
-        # Append tbin_index, Q2, W, and t to aver_lst
-        aver_lst.append((tbin_index, Q2_val, W_val, t_val))
         for k in range(len(phibinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                tmp_list.append((tbin_index, phibin_index, MM, Q2_val, W_val, t_val))
+                tmp_list.append((tbin_index, phibin_index, MM_val, Q2_val, W_val, t_val))
 
 # Group the tuples by the first two elements using defaultdict
 for t in tmp_list:
@@ -553,8 +553,6 @@ c_Q2tbin = TCanvas()
 
 c_Q2tbin.Divide(3, int(NumtBins/2))
 
-
-
 # Initialize NumPy arrays before the loop
 t = np.array([])
 Q2 = np.array([])
@@ -572,8 +570,7 @@ for j in range(len(tbinedges) - 1):
     if len(tbin_indices) > 0:
         tbin_index = j
         Q2_val = Q2[tbin_index]
-        t_val = t[tbin_index]
-        # Append tbin_index, Q2, W, and t to aver_lst
+        # Append tbin_index, Q2 to aver_lst
         aver_lst.append((tbin_index, Q2_val))
 
 # Group the tuples by the first two elements using defaultdict
