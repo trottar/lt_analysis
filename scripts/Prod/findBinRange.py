@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 21:18:52 trottar"
+# Time-stamp: "2023-07-23 00:52:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,7 +140,6 @@ def hist_to_numpy(histogram):
         bin_edges = np.concatenate(bin_edges)    
     # Convert bin_edges to a NumPy array
     bin_edges = np.array(bin_edges)
-    print("*****************",bin_edges[:-1], bin_edges[1:],"*****************")
     bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
     return bin_centers
 
@@ -446,6 +445,7 @@ for t in aver_lst:
         groups[key].append((t[1], t[2], t[3]))
     else:
         groups[key] = [(t[1], t[2], t[3])]
+    print("*****************",t[0], t[1], t[2], t[3],"*****************")
 
 # Extract the desired values from each group
 Q2_aver = []
