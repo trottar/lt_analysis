@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 15:33:09 trottar"
+# Time-stamp: "2023-07-23 15:58:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,7 +406,7 @@ for j in range(len(tbinedges) - 1):
             if len(phibin_indices) > 0:
                 phibin_index = k
                 combined_indices = np.intersect1d(tbin_indices, phibin_indices)
-                MM_val = MM[combined_indices]
+                MM_val = MM[tbin_indices]
                 #print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM,"-------------------")
                 mm_lst.append((tbin_index, phibin_index, MM_val))
 
