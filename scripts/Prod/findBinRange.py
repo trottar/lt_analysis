@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 01:13:53 trottar"
+# Time-stamp: "2023-07-23 01:21:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -434,7 +434,7 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                print("-------------------",t_val, phi_deg[k], Q2_val, W_val,"-------------------")
+                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val,"-------------------")
                 mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
                 
 #'''
