@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 19:37:16 trottar"
+# Time-stamp: "2023-07-23 19:46:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -586,7 +586,8 @@ for hist in histlist:
     # Extract the desired values from each group
     for key, val in groups.items():
         for tup in val:
-            hist["H_Q2_tbin_DATA_{}".format(key+1)].Fill(tup)
+            for q in tup:
+                hist["H_Q2_tbin_DATA_{}".format(key+1)].Fill(q)
         c_Q2tbin.cd(key+1)
         hist["H_Q2_tbin_DATA_{}".format(key+1)].Draw("same")
         hist["H_Q2_tbin_DATA_{}".format(key+1)].SetLineColor(i+1)
