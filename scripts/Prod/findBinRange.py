@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 03:57:36 trottar"
+# Time-stamp: "2023-07-23 04:04:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -501,7 +501,7 @@ for hist in histlist:
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"]))
     W = np.append(W, hist_to_numpy(hist["H_W_SIMC"]))
-    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"])*hist_to_numpy(hist["normfac_simc"]))    
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"])*hist["normfac_simc"])
 
 # Initialize NumPy arrays
 tmp_lst = []
@@ -534,9 +534,9 @@ for hist in histlist:
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
         print("-------------------",len(MM_tmp),"-------------------")
 
-        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp) * hist["normfac_simc"])
-        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp) * hist["normfac_simc"]
-        yieldValSimc[0] = integrate.simps(MM_tmp) * hist["normfac_simc"]
+        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp[0]) * hist["normfac_simc"])
+        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp[0]) * hist["normfac_simc"]
+        yieldValSimc[0] = integrate.simps(MM_tmp[0]) * hist["normfac_simc"]
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
