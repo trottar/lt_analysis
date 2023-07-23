@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 18:44:50 trottar"
+# Time-stamp: "2023-07-22 20:40:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,6 +138,7 @@ def hist_to_numpy(histogram):
     # Convert bin_edges to a NumPy array
     bin_edges = np.array(bin_edges)
     bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+    print("*****************",bin_centers,"*****************")
     return bin_centers
 
 def bin_data(histlist):
