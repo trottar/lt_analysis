@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 02:40:49 trottar"
+# Time-stamp: "2023-07-23 02:44:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -566,9 +566,6 @@ for hist in histlist:
         hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp) * hist["normfac_simc"])
         hist["yieldDictSimc"][key] = integrate.simps(MM_tmp) * hist["normfac_simc"]
         yieldValSimc[0] = integrate.simps(MM_tmp) * hist["normfac_simc"]
-        Q2binValSimc[0] = Q2_tmp[0]
-        WbinValSimc[0] = W_tmp[0]
-        tbinValSimc[0] = t_tmp[0]
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
