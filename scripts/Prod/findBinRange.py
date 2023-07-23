@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 01:43:08 trottar"
+# Time-stamp: "2023-07-23 01:56:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -461,7 +461,7 @@ for t in mm_list:
     W_val = W_aver[j][1]
     t_val = t_aver[j][1]
     groups[key].append((t[2], Q2_val, W_val, t_val))
-    print("*****************",t[0], t[1], Q2_aver,"*****************")
+    print("*****************",t[0], t[1], t[2], Q2_aver,"*****************")
                  
 for hist in histlist:
     
