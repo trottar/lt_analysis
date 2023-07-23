@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-22 21:00:29 trottar"
+# Time-stamp: "2023-07-22 21:12:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -135,6 +135,9 @@ from subtraction import defineHists
 def hist_to_numpy(histogram):
     # Convert the histogram data to a NumPy array
     hist_values, bin_edges = rnp.hist2array(histogram,return_edges=True)
+    # Check if bin_edges is a list of lists, and flatten it if necessary
+    if isinstance(bin_edges[0], (list, np.ndarray)):
+        bin_edges = np.concatenate(bin_edges)    
     # Convert bin_edges to a NumPy array
     bin_edges = np.array(bin_edges)
     print("*****************",bin_edges[:-1], bin_edges[1:],"*****************")
