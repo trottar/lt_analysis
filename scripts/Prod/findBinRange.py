@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 01:21:24 trottar"
+# Time-stamp: "2023-07-23 01:29:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -444,7 +444,6 @@ groups = defaultdict(list)
 for t in aver_lst:
     key = t[0]
     groups[key].append((t[1], t[2], t[3]))
-    print("*****************",t[0], t[1], t[2], t[3],"*****************")
 
 # Extract the desired values from each group
 Q2_aver = [(key, np.average([tup[0] for tup in val])) for key, val in groups.items()]
@@ -462,6 +461,7 @@ for t in mm_list:
     W_val = W_aver[j][1]
     t_val = t_aver[j][1]
     groups[key].append((t[2], Q2_val, W_val, t_val))
+    print("*****************",t[0], t[1], Q2_aver,"*****************")
                  
 for hist in histlist:
     
