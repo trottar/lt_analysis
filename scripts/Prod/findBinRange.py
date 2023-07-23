@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 02:23:40 trottar"
+# Time-stamp: "2023-07-23 02:37:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -584,30 +584,36 @@ c_Q2tbin = TCanvas()
 
 c_Q2tbin.Divide(3, int(NumtBins/2))
 
-for i,hist in enumerate(histlist):
 
-    InFile_DATA = hist["InFile_DATA"]
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
-    aver_lst = []
-    for evt in TBRANCH_DATA:
-        for j in range(len(tbinedges) - 1):
-            if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
-                tbin_index = j
-            else:
-                tbin_index = None
-            if tbin_index != None:
-                aver_lst.append((tbin_index, evt.Q2))
+# Initialize NumPy arrays before the loop
+t = np.array([])
+Q2 = np.array([])
 
-    groups = {}
-    # Group the tuples by the first two elements using a dictionary
-    for t in aver_lst:
-        key = (t[0])
-        if key in groups:
-            groups[key].append((t[1]))
-        else:
-            groups[key] = [(t[1])]
+for hist in histlist:
+    
+    # Convert to NumPy arrays
+    t = np.append(t, hist_to_numpy(hist["H_t_DATA"]))
+    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_DATA"]))
 
+# Initialize NumPy arrays
+aver_lst = []
+for j in range(len(tbinedges) - 1):
+    tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
+    if len(tbin_indices) > 0:
+        tbin_index = j
+        Q2_val = Q2[tbin_index]
+        t_val = t[tbin_index]
+        # Append tbin_index, Q2, W, and t to aver_lst
+        aver_lst.append((tbin_index, Q2_val))
+
+# Group the tuples by the first two elements using defaultdict
+groups = defaultdict(list)
+for t in aver_lst:
+    key = t[0]
+    groups[key].append((t[1]))
+
+for hist in histlist:    
     # Extract the desired values from each group
     for key, val in groups.items():
         for tup in val:
