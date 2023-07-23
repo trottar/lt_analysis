@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 03:07:39 trottar"
+# Time-stamp: "2023-07-23 03:13:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -391,7 +391,7 @@ for hist in histlist:
 
 # Initialize NumPy arrays
 aver_lst = []
-mm_list = []
+mm_lst = []
 for j in range(len(tbinedges) - 1):
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
@@ -407,7 +407,7 @@ for j in range(len(tbinedges) - 1):
             if len(phibin_indices) > 0:
                 phibin_index = k
                 print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM_val,"-------------------")
-                mm_list.append((tbin_index, phibin_index, MM_val))
+                mm_lst.append((tbin_index, phibin_index, MM_val))
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
@@ -424,7 +424,7 @@ t_aver = [(key, np.average([tup[2] for tup in val])) for key, val in groups.item
 groups.clear()
 
 # Group the tuples by the first two elements using defaultdict
-for t in mm_list:
+for t in mm_lst:
     key = (t[0], t[1])
     j, k = key
     Q2_val = Q2_aver[j][1]
@@ -517,10 +517,10 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                tmp_list.append((tbin_index, phibin_index, MM_val, Q2_val, W_val, t_val))
+                tmp_lst.append((tbin_index, phibin_index, MM_val, Q2_val, W_val, t_val))
 
 # Group the tuples by the first two elements using defaultdict
-for t in tmp_list:
+for t in tmp_lst:
     key = (t[0], t[1])
     groups[key].append((t[2], t[3], t[4], t[5]))
 
