@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 01:56:07 trottar"
+# Time-stamp: "2023-07-23 02:01:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -434,7 +434,7 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val,"-------------------")
+                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2)),"-------------------")
                 mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
                 
 #'''
@@ -461,7 +461,7 @@ for t in mm_list:
     W_val = W_aver[j][1]
     t_val = t_aver[j][1]
     groups[key].append((t[2], Q2_val, W_val, t_val))
-    print("*****************",t[0], t[1], t[2], Q2_aver,"*****************")
+    #print("*****************",t[0], t[1], t[2], Q2_aver,"*****************")
                  
 for hist in histlist:
     
@@ -498,7 +498,7 @@ for hist in histlist:
 
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
 
-        print("^^^^^^^^^^^^^^^^^",MM_tmp, Q2_tmp, W_tmp, t_tmp,"^^^^^^^^^^^^^^^^^")
+        #print("^^^^^^^^^^^^^^^^^",MM_tmp, Q2_tmp, W_tmp, t_tmp,"^^^^^^^^^^^^^^^^^")
 
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp) * hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp) * hist["normfac_data"]
