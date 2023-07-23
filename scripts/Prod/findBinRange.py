@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 03:37:26 trottar"
+# Time-stamp: "2023-07-23 03:45:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,7 +406,7 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM,"-------------------")
+                #print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM,"-------------------")
                 mm_lst.append((tbin_index, phibin_index, MM))
 
 # Group the tuples by the first two elements using defaultdict
@@ -465,6 +465,7 @@ for hist in histlist:
         phival[0] = np.mean(phibinedges[k:k+2])
 
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
+        print("-------------------",MM_tmp,"-------------------")
 
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp) * hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp) * hist["normfac_data"]
@@ -511,14 +512,13 @@ for j in range(len(tbinedges) - 1):
         tbin_index = j
         Q2_val = Q2[tbin_index]
         W_val = W[tbin_index]
-        MM_val = MM[tbin_index]
+        #MM_val = MM[tbin_index]
         t_val = t[tbin_index]
         for k in range(len(phibinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
                 tmp_lst.append((tbin_index, phibin_index, MM, Q2_val, W_val, t_val))
-                print("-------------------",MM, MM_val,"-------------------")
 
 # Group the tuples by the first two elements using defaultdict
 for t in tmp_lst:
@@ -533,6 +533,7 @@ for hist in histlist:
     
     for key, val in groups.items():
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
+        print("-------------------",MM_tmp,"-------------------")
 
         hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp) * hist["normfac_simc"])
         hist["yieldDictSimc"][key] = integrate.simps(MM_tmp) * hist["normfac_simc"]
