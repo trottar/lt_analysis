@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 02:09:36 trottar"
+# Time-stamp: "2023-07-23 02:13:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -380,6 +380,7 @@ Q2 = np.array([])
 W = np.array([])
 pmiss = np.array([])
 emiss = np.array([])
+MM = np.array([])
 
 for hist in histlist:
     
