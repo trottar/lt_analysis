@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 04:35:37 trottar"
+# Time-stamp: "2023-07-23 04:47:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -496,12 +496,12 @@ MM = np.array([])
 for hist in histlist:
     
     # Convert to NumPy arrays
-    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"])*hist["normfac_simc"])
-    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"])*hist["normfac_simc"])
-    phi_deg = np.append(phi_deg, phi * (180 / math.pi))
-    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"])*hist["normfac_simc"])
-    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"])*hist["normfac_simc"])
-    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"])*hist["normfac_simc"])
+    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    phi_deg = np.append(phi_deg, phi * (180 / math.pi)) # Need to change to weight
+    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"])*hist["normfac_simc"]) # Need to change to weight
 
 # Initialize NumPy arrays
 tmp_lst = []
@@ -532,7 +532,6 @@ for hist in histlist:
     
     for key, val in groups.items():
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
-        print("-------------------",(integrate.simps(MM_tmp[0]) * hist["normfac_simc"]),"-------------------")
 
         hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp[0]) * hist["normfac_simc"])
         hist["yieldDictSimc"][key] = integrate.simps(MM_tmp[0]) * hist["normfac_simc"]
@@ -571,6 +570,7 @@ for j in range(len(tbinedges) - 1):
         Q2_val = Q2[tbin_index]
         # Append tbin_index, Q2 to aver_lst
         aver_lst.append((tbin_index, Q2_val))
+        print("-------------------",Q2_val,"-------------------")
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
