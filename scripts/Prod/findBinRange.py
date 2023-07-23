@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 00:52:24 trottar"
+# Time-stamp: "2023-07-23 01:08:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -437,45 +437,31 @@ for j in range(len(tbinedges) - 1):
                 mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
                 
 #'''
-groups = {}
-# Group the tuples by the first two elements using a dictionary
+
+from collections import defaultdict
+
+# Group the tuples by the first two elements using defaultdict
+groups = defaultdict(list)
 for t in aver_lst:
-    key = (t[0])
-    if key in groups:
-        groups[key].append((t[1], t[2], t[3]))
-    else:
-        groups[key] = [(t[1], t[2], t[3])]
-    print("*****************",t[0], t[1], t[2], t[3],"*****************")
+    key = t[0]
+    groups[key].append((t[1], t[2], t[3]))
 
 # Extract the desired values from each group
-Q2_aver = []
-W_aver = []
-t_aver = []
-for key, val in groups.items():
-    Q2_tmp = []
-    W_tmp = []
-    t_tmp = []
-    for tup in val:
-        Q2_tmp.append(tup[0])
-        W_tmp.append(tup[1])
-        t_tmp.append(tup[2])
-    Q2_aver.append((key, np.average(Q2_tmp)))
-    W_aver.append((key, np.average(W_tmp)))
-    t_aver.append((key, np.average(t_tmp)))
+Q2_aver = [(key, np.average([tup[0] for tup in val])) for key, val in groups.items()]
+W_aver = [(key, np.average([tup[1] for tup in val])) for key, val in groups.items()]
+t_aver = [(key, np.average([tup[2] for tup in val])) for key, val in groups.items()]
 
-groups = {}
-# Group the tuples by the first two elements using a dictionary
-# Loop through groups
+# Clear groups for the next loop
+groups.clear()
+
+# Group the tuples by the first two elements using defaultdict
 for t in mm_list:
     key = (t[0], t[1])
-    if key in groups:
-        j, k = key
-        Q2_val = Q2_aver[j][1]
-        W_val = W_aver[j][1]
-        t_val = t_aver[j][1]
-        groups[key].append((t[2], Q2_val, W_val, t_val))
-    else:
-        groups[key] = [(t[2], Q2_aver[j][1], W_aver[j][1], t_aver[j][1])]
+    j, k = key
+    Q2_val = Q2_aver[j][1]
+    W_val = W_aver[j][1]
+    t_val = t_aver[j][1]
+    groups[key].append((t[2], Q2_val, W_val, t_val))
                  
 for hist in histlist:
     
