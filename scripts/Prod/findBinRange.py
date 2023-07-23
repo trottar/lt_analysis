@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 03:13:19 trottar"
+# Time-stamp: "2023-07-23 03:20:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -398,7 +398,7 @@ for j in range(len(tbinedges) - 1):
         tbin_index = j
         Q2_val = Q2[tbin_index]
         W_val = W[tbin_index]
-        MM_val = MM[tbin_index]
+        #MM_val = MM[tbin_index]
         t_val = t[tbin_index]
         # Append tbin_index, Q2, W, and t to aver_lst
         aver_lst.append((tbin_index, Q2_val, W_val, t_val))
@@ -406,8 +406,8 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM_val,"-------------------")
-                mm_lst.append((tbin_index, phibin_index, MM_val))
+                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM,"-------------------")
+                mm_lst.append((tbin_index, phibin_index, MM))
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
