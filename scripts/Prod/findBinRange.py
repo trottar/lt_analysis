@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 02:13:36 trottar"
+# Time-stamp: "2023-07-23 02:23:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,7 +165,6 @@ def bin_data(histlist):
         phi_deg = phi * (180 / math.pi)
         
         tmask = (tmin <= t) & (t <= tmax)
-        #tmask = 0 < t
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
@@ -378,51 +377,21 @@ phi = np.array([])
 phi_deg = np.array([])
 Q2 = np.array([])
 W = np.array([])
-pmiss = np.array([])
-emiss = np.array([])
 MM = np.array([])
 
 for hist in histlist:
     
-    # Convert hist["H_t_DATA"], hist["H_ph_q_DATA"], hist["H_Q2_DATA"], hist["H_W_DATA"], hist["H_pmiss_DATA"], hist["H_emiss_DATA"] to NumPy arrays
+    # Convert to NumPy arrays
     t = np.append(t, hist_to_numpy(hist["H_t_DATA"]))
     phi = np.append(phi, hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi)
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_DATA"]))
     W = np.append(W, hist_to_numpy(hist["H_W_DATA"]))
-    pmiss = np.append(pmiss, hist_to_numpy(hist["H_pmiss_DATA"]))
-    emiss = np.append(emiss, hist_to_numpy(hist["H_emiss_DATA"]))
     MM = np.append(MM, hist_to_numpy(hist["H_MM_DATA"]))    
-
-    print("H_Q2_DATA",len(hist["H_Q2_DATA"]))
-    print("H_Q2_DATA",max(hist_to_numpy(hist["H_Q2_DATA"])))
-
-print("Q2",len(Q2))
-print("Q2",max(Q2))
 
 # Initialize NumPy arrays
 aver_lst = []
 mm_list = []
-'''
-# Loop through tbinedges
-print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
-for i, evt in enumerate(t):
-    for j in range(len(tbinedges) - 1):
-        if (tbinedges[j] <= t[i]) & (t[i] < tbinedges[j + 1]):
-            tbin_index = j
-            Q2_val = Q2[tbin_index]
-            W_val = W[tbin_index]
-            t_val = t[tbin_index]
-            # Append tbin_index, Q2, W, and t to aver_lst
-            aver_lst.append((tbin_index, Q2_val, W_val, t_val))
-            for k in range(len(phibinedges) - 1):
-                if (phibinedges[k] <= phi_deg[i]) & (phi_deg[i] < phibinedges[k + 1]):
-                    phibin_index = k
-                    print("-------------------",t_val, phi_deg[k], Q2_val, W_val,"-------------------")
-                    mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
-                
-'''
-#print("~~~~~~~~~~~~~~~~~~~",t, phi_deg, Q2, W,"~~~~~~~~~~~~~~~~~~~")
 for j in range(len(tbinedges) - 1):
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
@@ -436,10 +405,8 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2)),"-------------------")
+                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM),"-------------------")
                 mm_list.append((tbin_index, phibin_index, MM))
-                
-#'''
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
@@ -463,7 +430,6 @@ for t in mm_list:
     W_val = W_aver[j][1]
     t_val = t_aver[j][1]
     groups[key].append((t[2], Q2_val, W_val, t_val))
-    #print("*****************",t[0], t[1], t[2], Q2_aver,"*****************")
                  
 for hist in histlist:
     
@@ -486,7 +452,6 @@ for hist in histlist:
     hist["yieldTree"].Branch("tbincenter", tval, "tbincenter/D")
     hist["yieldTree"].Branch("phibincenter", phival, "phibincenter/D")
 
-
     tbinarr = []
     phibinarr = []
     for key, val in groups.items():
@@ -499,8 +464,6 @@ for hist in histlist:
         phival[0] = np.mean(phibinedges[k:k+2])
 
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
-
-        #print("^^^^^^^^^^^^^^^^^",MM_tmp, Q2_tmp, W_tmp, t_tmp,"^^^^^^^^^^^^^^^^^")
 
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp) * hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp) * hist["normfac_data"]
@@ -521,62 +484,95 @@ c_yield_data.Print(outputpdf)
 
 c_yield_simc = TCanvas()
 
-for i,hist in enumerate(histlist):
+# Initialize NumPy arrays before the loop
+t = np.array([])
+phi = np.array([])
+phi_deg = np.array([])
+Q2 = np.array([])
+W = np.array([])
+MM = np.array([])
 
-    InFile_SIMC = hist["InFile_SIMC"]
-    TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+for hist in histlist:
+    
+    # Convert to NumPy arrays
+    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"]))
+    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"]) + math.pi)
+    phi_deg = np.append(phi_deg, phi * (180 / math.pi))
+    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"]))
+    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"]))
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"]))    
 
-    tmp_lst = []
-    for evt in TBRANCH_SIMC:
-        for j in range(len(tbinedges) - 1):
-            if tbinedges[j] <= evt.t < tbinedges[j+1]:
-                tbin_index = j
-            else:
-                tbin_index = None
-            if tbin_index != None:
-                for k in range(len(phibinedges) - 1):
-                    if phibinedges[k] <= (evt.phipq)*(180/math.pi) < phibinedges[k+1]:
-                        phibin_index = k
-                    else:
-                        phibin_index = None
-                    if phibin_index != None:
-                        tmp_lst.append((tbin_index, phibin_index, np.sqrt(pow(evt.Em, 2) - pow(evt.Pm, 2))*evt.Weight, evt.Q2, evt.W, evt.t))
-            
-    groups = {}
-    # Group the tuples by the first two elements using a dictionary
-    for t in tmp_lst:
-        for j,k in zip(tbinarr,phibinarr):
-            if t[0] == j and t[1] == k:
-                key = (t[0], t[1])
-                if key in groups:
-                    groups[key].append((t[2], t[3], t[4], t[5]))
-                else:
-                    groups[key] = [(t[2], t[3], t[4], t[5])]
-            else:
-                continue
-            
+# Initialize NumPy arrays
+aver_lst = []
+mm_list = []
+for j in range(len(tbinedges) - 1):
+    tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
+    if len(tbin_indices) > 0:
+        tbin_index = j
+        Q2_val = Q2[tbin_index]
+        W_val = W[tbin_index]
+        t_val = t[tbin_index]
+        # Append tbin_index, Q2, W, and t to aver_lst
+        aver_lst.append((tbin_index, Q2_val, W_val, t_val))
+        for k in range(len(phibinedges) - 1):
+            phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
+            if len(phibin_indices) > 0:
+                phibin_index = k
+                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM),"-------------------")
+                mm_list.append((tbin_index, phibin_index, MM))
+
+# Group the tuples by the first two elements using defaultdict
+groups = defaultdict(list)
+for t in aver_lst:
+    key = t[0]
+    groups[key].append((t[1], t[2], t[3]))
+
+# Extract the desired values from each group
+Q2_aver = [(key, np.average([tup[0] for tup in val])) for key, val in groups.items()]
+W_aver = [(key, np.average([tup[1] for tup in val])) for key, val in groups.items()]
+t_aver = [(key, np.average([tup[2] for tup in val])) for key, val in groups.items()]
+
+# Clear groups for the next loop
+groups.clear()
+
+# Group the tuples by the first two elements using defaultdict
+for t in mm_list:
+    key = (t[0], t[1])
+    j, k = key
+    Q2_val = Q2_aver[j][1]
+    W_val = W_aver[j][1]
+    t_val = t_aver[j][1]
+    groups[key].append((t[2], Q2_val, W_val, t_val))
+
+for hist in histlist:
+    
     yieldValSimc = array('d', [0])
     
     hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
     
-    # Extract the desired values from each group
+    tbinarr = []
+    phibinarr = []
     for key, val in groups.items():
-        MM_tmp = []
-        Q2_tmp = []
-        W_tmp = []
-        t_tmp = []
-        for tup in val:
-            MM_tmp.append(tup[0])
-            Q2_tmp.append(tup[1])
-            W_tmp.append(tup[2])
-            t_tmp.append(tup[3])
-        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp)*hist["normfac_simc"])
-        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp)*hist["normfac_simc"]
-        yieldValSimc[0] = integrate.simps(MM_tmp)*hist["normfac_simc"]
+        j, k = key
+        tbinarr.append(j)
+        phibinarr.append(k)
+        tnum[0] = j + 1
+        phinum[0] = k + 1
+        tval[0] = np.mean(tbinedges[j:j+2])
+        phival[0] = np.mean(phibinedges[k:k+2])
+
+        MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
+
+        hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp) * hist["normfac_simc"])
+        hist["yieldDictSimc"][key] = integrate.simps(MM_tmp) * hist["normfac_simc"]
+        yieldValSimc[0] = integrate.simps(MM_tmp) * hist["normfac_simc"]
+        Q2binValSimc[0] = Q2_tmp[0]
+        WbinValSimc[0] = W_tmp[0]
+        tbinValSimc[0] = t_tmp[0]
         hist["yieldTree"].Fill()
 
     hist["yieldTree"].ResetBranchAddresses()
-            
+    
     print("\n\n~~~~~~~~~~~~~~~",hist["yieldDictSimc"])
     print("~~~~~~~~~~~~~~~",hist["H_yield_SIMC"])
     hist["H_yield_SIMC"].SetLineColor(i+1)            
