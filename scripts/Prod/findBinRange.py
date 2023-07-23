@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 02:44:46 trottar"
+# Time-stamp: "2023-07-23 02:53:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -496,7 +496,7 @@ for hist in histlist:
     
     # Convert to NumPy arrays
     t = np.append(t, hist_to_numpy(hist["H_t_SIMC"]))
-    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"]) + math.pi)
+    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"]))
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"]))
     W = np.append(W, hist_to_numpy(hist["H_W_SIMC"]))
