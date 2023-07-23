@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 03:26:56 trottar"
+# Time-stamp: "2023-07-23 03:37:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -511,13 +511,14 @@ for j in range(len(tbinedges) - 1):
         tbin_index = j
         Q2_val = Q2[tbin_index]
         W_val = W[tbin_index]
-        #MM_val = MM[tbin_index]
+        MM_val = MM[tbin_index]
         t_val = t[tbin_index]
         for k in range(len(phibinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
                 tmp_lst.append((tbin_index, phibin_index, MM, Q2_val, W_val, t_val))
+                print("-------------------",MM, MM_val,"-------------------")
 
 # Group the tuples by the first two elements using defaultdict
 for t in tmp_lst:
@@ -530,8 +531,6 @@ for hist in histlist:
     
     hist["yieldTree"].Branch("yield_simc", yieldValSimc, "yield_simc/D")
     
-    tbinarr = []
-    phibinarr = []
     for key, val in groups.items():
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
 
