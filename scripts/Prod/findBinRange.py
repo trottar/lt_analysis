@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 02:53:13 trottar"
+# Time-stamp: "2023-07-23 03:03:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -500,11 +500,10 @@ for hist in histlist:
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"]))
     W = np.append(W, hist_to_numpy(hist["H_W_SIMC"]))
-    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"]))    
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"]*hist["normfac_simc"]))    
 
 # Initialize NumPy arrays
-aver_lst = []
-mm_list = []
+tmp_lst = []
 for j in range(len(tbinedges) - 1):
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
@@ -518,31 +517,12 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM,"-------------------")
-                mm_list.append((tbin_index, phibin_index, MM))
+                tmp_list.append((tbin_index, phibin_index, MM, Q2_val, W_val, t_val))
 
 # Group the tuples by the first two elements using defaultdict
-groups = defaultdict(list)
-for t in aver_lst:
-    key = t[0]
-    groups[key].append((t[1], t[2], t[3]))
-
-# Extract the desired values from each group
-Q2_aver = [(key, np.average([tup[0] for tup in val])) for key, val in groups.items()]
-W_aver = [(key, np.average([tup[1] for tup in val])) for key, val in groups.items()]
-t_aver = [(key, np.average([tup[2] for tup in val])) for key, val in groups.items()]
-
-# Clear groups for the next loop
-groups.clear()
-
-# Group the tuples by the first two elements using defaultdict
-for t in mm_list:
+for t in tmp_list:
     key = (t[0], t[1])
-    j, k = key
-    Q2_val = Q2_aver[j][1]
-    W_val = W_aver[j][1]
-    t_val = t_aver[j][1]
-    groups[key].append((t[2], Q2_val, W_val, t_val))
+    groups[key].append((t[2], t[3], t[4], t[5]))
 
 for hist in histlist:
     
@@ -553,14 +533,6 @@ for hist in histlist:
     tbinarr = []
     phibinarr = []
     for key, val in groups.items():
-        j, k = key
-        tbinarr.append(j)
-        phibinarr.append(k)
-        tnum[0] = j + 1
-        phinum[0] = k + 1
-        tval[0] = np.mean(tbinedges[j:j+2])
-        phival[0] = np.mean(phibinedges[k:k+2])
-
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
 
         hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp) * hist["normfac_simc"])
