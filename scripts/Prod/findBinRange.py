@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 04:04:09 trottar"
+# Time-stamp: "2023-07-23 04:11:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -532,7 +532,7 @@ for hist in histlist:
     
     for key, val in groups.items():
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
-        print("-------------------",len(MM_tmp),"-------------------")
+        print("-------------------",(integrate.simps(MM_tmp[0]) * hist["normfac_simc"]),"-------------------")
 
         hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp[0]) * hist["normfac_simc"])
         hist["yieldDictSimc"][key] = integrate.simps(MM_tmp[0]) * hist["normfac_simc"]
