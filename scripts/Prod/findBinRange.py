@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 01:29:48 trottar"
+# Time-stamp: "2023-07-23 01:43:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -484,31 +484,25 @@ for hist in histlist:
     hist["yieldTree"].Branch("tbincenter", tval, "tbincenter/D")
     hist["yieldTree"].Branch("phibincenter", phival, "phibincenter/D")
 
+
     tbinarr = []
     phibinarr = []
-    # Extract the desired values from each group
     for key, val in groups.items():
-        j = key[0]
-        k = key[1]
+        j, k = key
         tbinarr.append(j)
         phibinarr.append(k)
-        tnum[0] = j+1
-        phinum[0] = k+1
-        tval[0] = (tbinedges[j]+tbinedges[j+1])/2
-        phival[0] = (phibinedges[k]+phibinedges[k+1])/2
+        tnum[0] = j + 1
+        phinum[0] = k + 1
+        tval[0] = np.mean(tbinedges[j:j+2])
+        phival[0] = np.mean(phibinedges[k:k+2])
 
-        MM_tmp = []
-        Q2_tmp = []
-        W_tmp = []
-        t_tmp = []
-        for tup in val:
-            MM_tmp.append(tup[0])
-            Q2_tmp.append(tup[1])
-            W_tmp.append(tup[2])
-            t_tmp.append(tup[3])
-        hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp)*hist["normfac_data"])
-        hist["yieldDictData"][key] = integrate.simps(MM_tmp)*hist["normfac_data"]
-        yieldValData[0] = integrate.simps(MM_tmp)*hist["normfac_data"]
+        MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
+
+        print("^^^^^^^^^^^^^^^^^",MM_tmp, Q2_tmp, W_tmp, t_tmp,"^^^^^^^^^^^^^^^^^")
+
+        hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp) * hist["normfac_data"])
+        hist["yieldDictData"][key] = integrate.simps(MM_tmp) * hist["normfac_data"]
+        yieldValData[0] = integrate.simps(MM_tmp) * hist["normfac_data"]
         Q2binValData[0] = Q2_tmp[0]
         WbinValData[0] = W_tmp[0]
         tbinValData[0] = t_tmp[0]
