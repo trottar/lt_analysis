@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 02:01:16 trottar"
+# Time-stamp: "2023-07-23 02:09:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -391,6 +391,7 @@ for hist in histlist:
     W = np.append(W, hist_to_numpy(hist["H_W_DATA"]))
     pmiss = np.append(pmiss, hist_to_numpy(hist["H_pmiss_DATA"]))
     emiss = np.append(emiss, hist_to_numpy(hist["H_emiss_DATA"]))
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_DATA"]))    
 
     print("H_Q2_DATA",len(hist["H_Q2_DATA"]))
     print("H_Q2_DATA",max(hist_to_numpy(hist["H_Q2_DATA"])))
@@ -435,7 +436,7 @@ for j in range(len(tbinedges) - 1):
             if len(phibin_indices) > 0:
                 phibin_index = k
                 print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2)),"-------------------")
-                mm_list.append((tbin_index, phibin_index, np.sqrt(pow(emiss[tbin_index], 2) - pow(pmiss[tbin_index], 2))))
+                mm_list.append((tbin_index, phibin_index, MM))
                 
 #'''
 
