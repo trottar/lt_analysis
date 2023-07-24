@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 13:48:54 trottar"
+# Time-stamp: "2023-07-24 13:56:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -368,7 +368,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Plot definitions
 
-        #H_Weight_SIMC = ROOT.TH1D("H_Weight_SIMC", "Simc Weight", 200, 0, 10000)
+        H_Weight_SIMC = ROOT.TH1D("H_Weight_SIMC", "Simc Weight", 200, 0, 1e-8)
         H_hsdelta_SIMC  = ROOT.TH1D("H_hsdelta_SIMC","HMS Delta", 200, -20.0, 20.0)
         H_hsxptar_SIMC  = ROOT.TH1D("H_hsxptar_SIMC","HMS xptar", 200, -0.1, 0.1)
         H_hsyptar_SIMC  = ROOT.TH1D("H_hsyptar_SIMC","HMS yptar", 200, -0.1, 0.1)
@@ -963,7 +963,9 @@ def defineHists(phi_setting, inpDict):
               arr_emiss_SIMC = np.append(arr_emiss_SIMC, evt.Weight*evt.Em)
 
 
-              print("@@@@@@@@@@@@@@@@@@",evt.Weight,"@@@@@@@@@@@@@@@@@@")
+              #print("@@@@@@@@@@@@@@@@@@",evt.Weight,"@@@@@@@@@@@@@@@@@@")
+
+              H_Weight_SIMC.Fill(evt.Weight)
               
               H_ssxfp_SIMC.Fill(evt.ssxfp, evt.Weight)
               H_ssyfp_SIMC.Fill(evt.ssyfp, evt.Weight)
@@ -2892,7 +2894,8 @@ def defineHists(phi_setting, inpDict):
         histDict["H_phibins_DATA"] = H_phibins_DATA
         histDict["H_tbins_DATA"] = H_tbins_DATA
         histDict["H_yield_DATA"] = H_yield_DATA
-        histDict["normfac_simc"] = normfac_simc
+        histDict["normfac_simc"] = normfac_simc        
+        histDict["H_Weight_SIMC"] =     H_Weight_SIMC
         histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
         histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC
         histDict["H_hsyptar_SIMC"] =     H_hsyptar_SIMC
