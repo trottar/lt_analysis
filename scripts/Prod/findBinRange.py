@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 02:40:30 trottar"
+# Time-stamp: "2023-07-24 02:45:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -425,6 +425,7 @@ mm_lst = []
 print("-------------------Q2",max(Q2),"-------------------")
 print("-------------------MM",max(MM),"-------------------")
 for j in range(len(tbinedges) - 1):
+    print("-------------------MM[j]",MM[j],"-------------------")
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
         tbin_index = j
