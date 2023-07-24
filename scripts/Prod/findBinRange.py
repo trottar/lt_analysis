@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 01:26:58 trottar"
+# Time-stamp: "2023-07-24 01:31:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,7 +192,7 @@ def bin_data(histlist):
     for i,hist in enumerate(histlist):
         
         t = hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"])
-        phi = hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_ph_q_DATA"]) + math.pi
+        phi = hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_phi_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)        
         
         if hist["phi_setting"] == 'Right':
@@ -412,7 +412,7 @@ for hist in histlist:
     
     # Convert to NumPy arrays
     t = np.append(t, hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"]))
-    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_ph_q_DATA"]) + math.pi)
+    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_phi_DATA"]) + math.pi)
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_DATA"], hist["arr_Q2_DATA"]))
     W = np.append(W, hist_to_numpy(hist["H_W_DATA"], hist["arr_W_DATA"]))
