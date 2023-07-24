@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 20:30:09 trottar"
+# Time-stamp: "2023-07-23 20:41:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,6 +167,9 @@ def hist_to_numpy(histogram):
     mean_value = np.sum(bin_centers * bin_weights) / np.sum(bin_weights)
     weighted_stddev = np.sqrt(np.sum(bin_weights * (bin_centers - mean_value)**2) / np.sum(bin_weights))    
 
+
+    print("^^^^^^^^^^^^^^^^^^^",len(weighted_average),"^^^^^^^^^^^^^^^^^^^")
+    
     return weighted_average
 
 def bin_data(histlist):
