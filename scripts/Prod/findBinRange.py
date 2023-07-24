@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 03:56:41 trottar"
+# Time-stamp: "2023-07-24 04:33:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -157,22 +157,12 @@ def hist_to_numpy(histogram, data):
     #events = np.array(events, dtype=float)
     edges = edges[0]
     events = data
-
-    #print("!!!!!!!!!!!!!!!!!!!",max(events),"!!!!!!!!!!!!!!!!!!!")
-    #print("???????????????????",edges,"???????????????????")
     
     # Get the histogram values and bin bin_edges
     hist_values, bin_edges = np.histogram(events, bins=edges)
     
     # Create a 1D dataset (array) representing the event distribution bin-to-bin
     event_distribution = np.repeat(bin_edges[:-1], hist_values)
-
-    #print(">>>>>>>>>>>>>>>>>>>",hist_values,">>>>>>>>>>>>>>>>>>>")
-    #print("<<<<<<<<<<<<<<<<<<<",bin_edges,"<<<<<<<<<<<<<<<<<<<")
-    print("^^^^^^^^^^^^^^^^^^^",event_distribution,"^^^^^^^^^^^^^^^^^^^")
-    print("^^^^^^^^^^^^^^^^^^^",len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
-    
-    #print("^^^^^^^^^^^^^^^^^^^",max(bin_edges), len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
     
     return event_distribution
 
@@ -422,18 +412,10 @@ for hist in histlist:
 # Initialize NumPy arrays
 aver_lst = []
 mm_lst = []
-print("-------------------Q2",max(Q2),"-------------------")
-print("-------------------MM",max(MM),"-------------------")
-print("-------------------Q2",len(Q2),"-------------------")
-print("-------------------t",len(t),"-------------------")
 for j in range(len(tbinedges) - 1):
-    print("-------------------MM[j]",MM[j],"-------------------")
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
         tbin_index = j
-        #Q2_val = Q2[tbin_index]
-        #W_val = W[tbin_index]
-        #t_val = t[tbin_index]
         Q2_val = Q2[tbin_indices]
         W_val = W[tbin_indices]
         t_val = t[tbin_indices]
@@ -443,9 +425,7 @@ for j in range(len(tbinedges) - 1):
             phibin_indices = np.where((phibinedges[k] <= phi_deg) & (phi_deg < phibinedges[k + 1]))[0]
             if len(phibin_indices) > 0:
                 phibin_index = k
-                #MM_val = MM[tbin_index]
                 MM_val = MM[tbin_indices]
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM_val,"-------------------")
                 mm_lst.append((tbin_index, phibin_index, MM_val))
 
 # Group the tuples by the first two elements using defaultdict
@@ -504,7 +484,6 @@ for hist in histlist:
         phival[0] = np.mean(phibinedges[k:k+2])
 
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
-        print("*******************",(MM_tmp),"*******************")
 
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp) * hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp) * hist["normfac_data"]
@@ -612,7 +591,6 @@ for j in range(len(tbinedges) - 1):
         Q2_val = Q2[tbin_indices]
         # Append tbin_index, Q2 to aver_lst
         aver_lst.append((tbin_index, Q2_val))
-        print("-------------------",Q2_val,"-------------------")
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
@@ -655,7 +633,6 @@ for j in range(len(tbinedges) - 1):
         W_val = W[tbin_indices]
         # Append tbin_index, W to aver_lst
         aver_lst.append((tbin_index, W_val))
-        print("-------------------",W_val,"-------------------")
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
@@ -698,7 +675,6 @@ for j in range(len(tbinedges) - 1):
         t_val = t[tbin_indices]
         # Append tbin_index, t to aver_lst
         aver_lst.append((tbin_index, t_val))
-        print("-------------------",t_val,"-------------------")
 
 # Group the tuples by the first two elements using defaultdict
 groups = defaultdict(list)
