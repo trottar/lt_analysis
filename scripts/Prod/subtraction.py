@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 13:21:43 trottar"
+# Time-stamp: "2023-07-24 13:23:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3598,7 +3598,7 @@ def defineHists(phi_setting, inpDict):
               H_W_SIMC.Fill(evt.W, evt.Weight)
               H_t_DATA.Fill(evt.t)
               H_epsilon_SIMC.Fill(evt.epsilon, evt.Weight)
-              H_MM_SIMC.Fill(np.sqrt(abs((evt.Em, 2) - pow(evt.Pm, 2)))) evt.Weight)
+              H_MM_SIMC.Fill(np.sqrt(abs((evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
 
 
         ################################################################################################################################################
