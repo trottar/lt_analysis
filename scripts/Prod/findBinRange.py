@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 01:10:24 trottar"
+# Time-stamp: "2023-07-24 01:21:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -147,7 +147,7 @@ def hist_to_numpy(histogram):
 '''
 
 # Convert TH1F to NumPy array
-def hist_to_numpy(histogram):
+def hist_to_numpy(histogram, data):
     
     # Convert the histogram data to a NumPy array
     events, edges = rnp.hist2array(histogram,return_edges=True)
@@ -156,7 +156,7 @@ def hist_to_numpy(histogram):
     #edges = np.array(edges, dtype=float)[0]
     #events = np.array(events, dtype=float)
     edges = edges[0]
-    events = events
+    events = data
 
     #print("!!!!!!!!!!!!!!!!!!!",events,"!!!!!!!!!!!!!!!!!!!")
     #print("???????????????????",edges,"???????????????????")
@@ -191,8 +191,8 @@ def bin_data(histlist):
     
     for i,hist in enumerate(histlist):
         
-        t = hist_to_numpy(hist["H_t_DATA"])
-        phi = hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
+        t = hist_to_numpy(hist["H_t_DATA"], arr_t_DATA)
+        phi = hist_to_numpy(hist["H_ph_q_DATA"], arr_ph_q_DATA) + math.pi
         phi_deg = phi * (180 / math.pi)        
         
         if hist["phi_setting"] == 'Right':
@@ -411,12 +411,12 @@ MM = np.array([])
 for hist in histlist:
     
     # Convert to NumPy arrays
-    t = np.append(t, hist_to_numpy(hist["H_t_DATA"]))
-    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi)
+    t = np.append(t, hist_to_numpy(hist["H_t_DATA"]), arr_t_DATA)
+    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_DATA"], arr_ph_q_DATA) + math.pi)
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
-    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_DATA"]))
-    W = np.append(W, hist_to_numpy(hist["H_W_DATA"]))
-    MM = np.append(MM, hist_to_numpy(hist["H_MM_DATA"]))    
+    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_DATA"]), arr_Q2_DATA)
+    W = np.append(W, hist_to_numpy(hist["H_W_DATA"]), arr_W_DATA)
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_DATA"], arr_MM_DATA)) 
 
 # Initialize NumPy arrays
 aver_lst = []
