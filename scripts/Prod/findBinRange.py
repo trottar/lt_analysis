@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 23:07:59 trottar"
+# Time-stamp: "2023-07-23 23:12:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,16 +156,12 @@ def hist_to_numpy(histogram):
     edges = np.array(edges, dtype=float)[0]
     hist_values = np.array(hist_values, dtype=float)
 
-
     # Create a 1D dataset (array) representing the event distribution bin-to-bin
     event_distribution = np.concatenate([np.full(int(count), edge) for edge, count in zip(edges[:-1], hist_values)])
 
     print("^^^^^^^^^^^^^^^^^^^",hist_values,"^^^^^^^^^^^^^^^^^^^")
-    print("<<<<<<<<<<<<<<<<<<<",bin_edges,"<<<<<<<<<<<<<<<<<<<")
+    print("<<<<<<<<<<<<<<<<<<<",edges,"<<<<<<<<<<<<<<<<<<<")
     
-    # Create a 1D dataset (array) representing the event distribution bin-to-bin
-    event_distribution = np.repeat(bin_edges[:-1], hist_values)
-
     #print("^^^^^^^^^^^^^^^^^^^",max(bin_edges), len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
     
     return event_distribution
