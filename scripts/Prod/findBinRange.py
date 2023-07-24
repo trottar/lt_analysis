@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 20:04:38 trottar"
+# Time-stamp: "2023-07-23 20:18:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -392,6 +392,8 @@ for hist in histlist:
 # Initialize NumPy arrays
 aver_lst = []
 mm_lst = []
+print("-------------------Q2",max(Q2),"-------------------")
+print("-------------------MM",max(MM),"-------------------")
 for j in range(len(tbinedges) - 1):
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
     if len(tbin_indices) > 0:
@@ -406,7 +408,7 @@ for j in range(len(tbinedges) - 1):
             if len(phibin_indices) > 0:
                 phibin_index = k
                 MM_val = MM[tbin_index]
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM_val,"-------------------")
+                #print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM_val,"-------------------")
                 mm_lst.append((tbin_index, phibin_index, MM_val))
 
 # Group the tuples by the first two elements using defaultdict
