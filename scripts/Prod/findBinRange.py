@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 03:06:37 trottar"
+# Time-stamp: "2023-07-24 03:30:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -422,8 +422,9 @@ for hist in histlist:
 # Initialize NumPy arrays
 aver_lst = []
 mm_lst = []
-print("-------------------Q2",len(Q2),"-------------------")
-print("-------------------MM",len(MM),"-------------------")
+print("-------------------Q2",max(Q2),"-------------------")
+print("-------------------MM",max(MM),"-------------------")
+print("-------------------tbinedges",len(tbinedges),"-------------------")
 for j in range(len(tbinedges) - 1):
     print("-------------------MM[j]",MM[j],"-------------------")
     tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
