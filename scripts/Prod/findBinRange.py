@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 01:47:04 trottar"
+# Time-stamp: "2023-07-24 02:22:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,8 +158,8 @@ def hist_to_numpy(histogram, data):
     edges = edges[0]
     events = data
 
-    print("!!!!!!!!!!!!!!!!!!!",max(events),"!!!!!!!!!!!!!!!!!!!")
-    print("???????????????????",edges,"???????????????????")
+    #print("!!!!!!!!!!!!!!!!!!!",max(events),"!!!!!!!!!!!!!!!!!!!")
+    #print("???????????????????",edges,"???????????????????")
     
     # Get the histogram values and bin bin_edges
     hist_values, bin_edges = np.histogram(events, bins=edges)
@@ -170,6 +170,7 @@ def hist_to_numpy(histogram, data):
     #print(">>>>>>>>>>>>>>>>>>>",hist_values,">>>>>>>>>>>>>>>>>>>")
     #print("<<<<<<<<<<<<<<<<<<<",bin_edges,"<<<<<<<<<<<<<<<<<<<")
     print("^^^^^^^^^^^^^^^^^^^",event_distribution,"^^^^^^^^^^^^^^^^^^^")
+    print("^^^^^^^^^^^^^^^^^^^",len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
     
     #print("^^^^^^^^^^^^^^^^^^^",max(bin_edges), len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
     
@@ -528,12 +529,12 @@ MM = np.array([])
 for hist in histlist:
     
     # Convert to NumPy arrays
-    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"])*hist["normfac_simc"]) # Need to change to weight
-    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"], hist["arr_t_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"], hist["arr_phi_SIMC"])*hist["normfac_simc"]) # Need to change to weight
     phi_deg = np.append(phi_deg, phi * (180 / math.pi)) # Need to change to weight
-    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"])*hist["normfac_simc"]) # Need to change to weight
-    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"])*hist["normfac_simc"]) # Need to change to weight
-    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"], hist["arr_Q2_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"], hist["arr_W_SIMC"])*hist["normfac_simc"]) # Need to change to weight
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"], hist["arr_MM_SIMC"])*hist["normfac_simc"]) # Need to change to weight
 
 # Initialize NumPy arrays
 tmp_lst = []
@@ -592,8 +593,8 @@ Q2 = np.array([])
 for hist in histlist:
     
     # Convert to NumPy arrays
-    t = np.append(t, hist_to_numpy(hist["H_t_DATA"]))
-    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_DATA"]))
+    t = np.append(t, hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"]))
+    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_DATA"], hist["arr_Q2_DATA"]))
 
 # Initialize NumPy arrays
 aver_lst = []
