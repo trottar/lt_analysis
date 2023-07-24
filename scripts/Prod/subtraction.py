@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 01:56:37 trottar"
+# Time-stamp: "2023-07-24 02:13:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -842,91 +842,91 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SIMC = np.array([])
         arr_Q2_SIMC = np.array([])
         arr_W_SIMC = np.array([])
-        arr_pmiss_SIMC = np.array([])
+        arr_MM_SIMC = np.array([])
         arr_emiss_SIMC = np.array([])
         
         arr_t_DATA = np.array([])
         arr_phi_DATA = np.array([])
         arr_Q2_DATA = np.array([])
         arr_W_DATA = np.array([])
-        arr_pmiss_DATA = np.array([])
+        arr_MM_DATA = np.array([])
         arr_emiss_DATA = np.array([])
 
         arr_t_RAND = np.array([])
         arr_phi_RAND = np.array([])
         arr_Q2_RAND = np.array([])
         arr_W_RAND = np.array([])
-        arr_pmiss_RAND = np.array([])
+        arr_MM_RAND = np.array([])
         arr_emiss_RAND = np.array([])
         
         arr_t_DUMMY = np.array([])
         arr_phi_DUMMY = np.array([])
         arr_Q2_DUMMY = np.array([])
         arr_W_DUMMY = np.array([])
-        arr_pmiss_DUMMY = np.array([])
+        arr_MM_DUMMY = np.array([])
         arr_emiss_DUMMY = np.array([])        
         
         arr_t_DUMMY_RAND = np.array([])
         arr_phi_DUMMY_RAND = np.array([])
         arr_Q2_DUMMY_RAND = np.array([])
         arr_W_DUMMY_RAND = np.array([])
-        arr_pmiss_DUMMY_RAND = np.array([])
+        arr_MM_DUMMY_RAND = np.array([])
         arr_emiss_DUMMY_RAND = np.array([])
 
         arr_t_SUBPION_DATA = np.array([])
         arr_phi_SUBPION_DATA = np.array([])
         arr_Q2_SUBPION_DATA = np.array([])
         arr_W_SUBPION_DATA = np.array([])
-        arr_pmiss_SUBPION_DATA = np.array([])
+        arr_MM_SUBPION_DATA = np.array([])
         arr_emiss_SUBPION_DATA = np.array([])        
         
         arr_t_SUBPION_RAND = np.array([])
         arr_phi_SUBPION_RAND = np.array([])
         arr_Q2_SUBPION_RAND = np.array([])
         arr_W_SUBPION_RAND = np.array([])
-        arr_pmiss_SUBPION_RAND = np.array([])
+        arr_MM_SUBPION_RAND = np.array([])
         arr_emiss_SUBPION_RAND = np.array([])
 
         arr_t_SUBPION_DUMMY = np.array([])
         arr_phi_SUBPION_DUMMY = np.array([])
         arr_Q2_SUBPION_DUMMY = np.array([])
         arr_W_SUBPION_DUMMY = np.array([])
-        arr_pmiss_SUBPION_DUMMY = np.array([])
+        arr_MM_SUBPION_DUMMY = np.array([])
         arr_emiss_SUBPION_DUMMY = np.array([])        
         
         arr_t_SUBPION_DUMMY_RAND = np.array([])
         arr_phi_SUBPION_DUMMY_RAND = np.array([])
         arr_Q2_SUBPION_DUMMY_RAND = np.array([])
         arr_W_SUBPION_DUMMY_RAND = np.array([])
-        arr_pmiss_SUBPION_DUMMY_RAND = np.array([])
+        arr_MM_SUBPION_DUMMY_RAND = np.array([])
         arr_emiss_SUBPION_DUMMY_RAND = np.array([])
         
         arr_t_SUBPROTON_DATA = np.array([])
         arr_phi_SUBPROTON_DATA = np.array([])
         arr_Q2_SUBPROTON_DATA = np.array([])
         arr_W_SUBPROTON_DATA = np.array([])
-        arr_pmiss_SUBPROTON_DATA = np.array([])
+        arr_MM_SUBPROTON_DATA = np.array([])
         arr_emiss_SUBPROTON_DATA = np.array([])        
         
         arr_t_SUBPROTON_RAND = np.array([])
         arr_phi_SUBPROTON_RAND = np.array([])
         arr_Q2_SUBPROTON_RAND = np.array([])
         arr_W_SUBPROTON_RAND = np.array([])
-        arr_pmiss_SUBPROTON_RAND = np.array([])
+        arr_MM_SUBPROTON_RAND = np.array([])
         arr_emiss_SUBPROTON_RAND = np.array([])
 
         arr_t_SUBPROTON_DUMMY = np.array([])
         arr_phi_SUBPROTON_DUMMY = np.array([])
         arr_Q2_SUBPROTON_DUMMY = np.array([])
         arr_W_SUBPROTON_DUMMY = np.array([])
-        arr_pmiss_SUBPROTON_DUMMY = np.array([])
+        arr_MM_SUBPROTON_DUMMY = np.array([])
         arr_emiss_SUBPROTON_DUMMY = np.array([])        
         
         arr_t_SUBPROTON_DUMMY_RAND = np.array([])
         arr_phi_SUBPROTON_DUMMY_RAND = np.array([])
         arr_Q2_SUBPROTON_DUMMY_RAND = np.array([])
         arr_W_SUBPROTON_DUMMY_RAND = np.array([])
-        arr_pmiss_SUBPROTON_DUMMY_RAND = np.array([])
+        arr_MM_SUBPROTON_DUMMY_RAND = np.array([])
         arr_emiss_SUBPROTON_DUMMY_RAND = np.array([])        
         
         ################################################################################################################################################
@@ -958,7 +958,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SIMC = np.append(arr_phi_SIMC, evt.Weight*evt.phipq)
               arr_Q2_SIMC = np.append(arr_Q2_SIMC, evt.Weight*evt.Q2)
               arr_W_SIMC = np.append(arr_W_SIMC, evt.Weight*evt.W)
-              arr_pmiss_SIMC = np.append(arr_pmiss_SIMC, evt.Weight*evt.Pm)
+              arr_MM_SIMC = np.append(arr_MM_SIMC, evt.Weight*evt.Pm)
               arr_emiss_SIMC = np.append(arr_emiss_SIMC, evt.Weight*evt.Em)
               
               H_ssxfp_SIMC.Fill(evt.ssxfp, evt.Weight)
@@ -1050,7 +1050,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_DATA = np.append(arr_phi_DATA, evt.ph_q)
               arr_Q2_DATA = np.append(arr_Q2_DATA, evt.Q2)
               arr_W_DATA = np.append(arr_W_DATA, evt.W)
-              arr_pmiss_DATA = np.append(arr_pmiss_DATA, evt.pmiss)
+              arr_MM_DATA = np.append(arr_MM_DATA, evt.pmiss)
               arr_emiss_DATA = np.append(arr_emiss_DATA, evt.emiss)
                 
               MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
@@ -1160,7 +1160,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_DUMMY = np.append(arr_phi_DUMMY, evt.ph_q)
               arr_Q2_DUMMY = np.append(arr_Q2_DUMMY, evt.Q2)
               arr_W_DUMMY = np.append(arr_W_DUMMY, evt.W)
-              arr_pmiss_DUMMY = np.append(arr_pmiss_DUMMY, evt.pmiss)
+              arr_MM_DUMMY = np.append(arr_MM_DUMMY, evt.pmiss)
               arr_emiss_DUMMY = np.append(arr_emiss_DUMMY, evt.emiss)
               
               H_ct_DUMMY.Fill(evt.CTime_ROC1)
@@ -1255,7 +1255,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_RAND = np.append(arr_phi_RAND, evt.ph_q)
               arr_Q2_RAND = np.append(arr_Q2_RAND, evt.Q2)
               arr_W_RAND = np.append(arr_W_RAND, evt.W)
-              arr_pmiss_RAND = np.append(arr_pmiss_RAND, evt.pmiss)
+              arr_MM_RAND = np.append(arr_MM_RAND, evt.pmiss)
               arr_emiss_RAND = np.append(arr_emiss_RAND, evt.emiss)
                 
               H_ssxfp_RAND.Fill(evt.ssxfp)
@@ -1341,7 +1341,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_DUMMY_RAND = np.append(arr_phi_DUMMY_RAND, evt.ph_q)
               arr_Q2_DUMMY_RAND = np.append(arr_Q2_DUMMY_RAND, evt.Q2)
               arr_W_DUMMY_RAND = np.append(arr_W_DUMMY_RAND, evt.W)
-              arr_pmiss_DUMMY_RAND = np.append(arr_pmiss_DUMMY_RAND, evt.pmiss)
+              arr_MM_DUMMY_RAND = np.append(arr_MM_DUMMY_RAND, evt.pmiss)
               arr_emiss_DUMMY_RAND = np.append(arr_emiss_DUMMY_RAND, evt.emiss)
               
               H_ssxfp_DUMMY_RAND.Fill(evt.ssxfp)
@@ -1401,7 +1401,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SUBPION_DATA = np.append(arr_phi_SUBPION_DATA, evt.ph_q)
               arr_Q2_SUBPION_DATA = np.append(arr_Q2_SUBPION_DATA, evt.Q2)
               arr_W_SUBPION_DATA = np.append(arr_W_SUBPION_DATA, evt.W)
-              arr_pmiss_SUBPION_DATA = np.append(arr_pmiss_SUBPION_DATA, evt.pmiss)
+              arr_MM_SUBPION_DATA = np.append(arr_MM_SUBPION_DATA, evt.pmiss)
               arr_emiss_SUBPION_DATA = np.append(arr_emiss_SUBPION_DATA, evt.emiss)
                 
               H_ct_epi_SUBPION_DATA.Fill(evt.CTime_ROC1)
@@ -1477,7 +1477,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SUBPION_DUMMY = np.append(arr_phi_SUBPION_DUMMY, evt.ph_q)
               arr_Q2_SUBPION_DUMMY = np.append(arr_Q2_SUBPION_DUMMY, evt.Q2)
               arr_W_SUBPION_DUMMY = np.append(arr_W_SUBPION_DUMMY, evt.W)
-              arr_pmiss_SUBPION_DUMMY = np.append(arr_pmiss_SUBPION_DUMMY, evt.pmiss)
+              arr_MM_SUBPION_DUMMY = np.append(arr_MM_SUBPION_DUMMY, evt.pmiss)
               arr_emiss_SUBPION_DUMMY = np.append(arr_emiss_SUBPION_DUMMY, evt.emiss)
                 
               H_ct_epi_SUBPION_DUMMY.Fill(evt.CTime_ROC1)
@@ -1546,7 +1546,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SUBPION_RAND = np.append(arr_phi_SUBPION_RAND, evt.ph_q)
               arr_Q2_SUBPION_RAND = np.append(arr_Q2_SUBPION_RAND, evt.Q2)
               arr_W_SUBPION_RAND = np.append(arr_W_SUBPION_RAND, evt.W)
-              arr_pmiss_SUBPION_RAND = np.append(arr_pmiss_SUBPION_RAND, evt.pmiss)
+              arr_MM_SUBPION_RAND = np.append(arr_MM_SUBPION_RAND, evt.pmiss)
               arr_emiss_SUBPION_RAND = np.append(arr_emiss_SUBPION_RAND, evt.emiss)
                 
               H_ssxfp_SUBPION_RAND.Fill(evt.ssxfp)
@@ -1606,7 +1606,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SUBPION_DUMMY_RAND = np.append(arr_phi_SUBPION_DUMMY_RAND, evt.ph_q)
               arr_Q2_SUBPION_DUMMY_RAND = np.append(arr_Q2_SUBPION_DUMMY_RAND, evt.Q2)
               arr_W_SUBPION_DUMMY_RAND = np.append(arr_W_SUBPION_DUMMY_RAND, evt.W)
-              arr_pmiss_SUBPION_DUMMY_RAND = np.append(arr_pmiss_SUBPION_DUMMY_RAND, evt.pmiss)
+              arr_MM_SUBPION_DUMMY_RAND = np.append(arr_MM_SUBPION_DUMMY_RAND, evt.pmiss)
               arr_emiss_SUBPION_DUMMY_RAND = np.append(arr_emiss_SUBPION_DUMMY_RAND, evt.emiss)
               
               H_ssxfp_SUBPION_DUMMY_RAND.Fill(evt.ssxfp)
@@ -1666,7 +1666,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SUBPROTON_DATA = np.append(arr_phi_SUBPROTON_DATA, evt.ph_q)
               arr_Q2_SUBPROTON_DATA = np.append(arr_Q2_SUBPROTON_DATA, evt.Q2)
               arr_W_SUBPROTON_DATA = np.append(arr_W_SUBPROTON_DATA, evt.W)
-              arr_pmiss_SUBPROTON_DATA = np.append(arr_pmiss_SUBPROTON_DATA, evt.pmiss)
+              arr_MM_SUBPROTON_DATA = np.append(arr_MM_SUBPROTON_DATA, evt.pmiss)
               arr_emiss_SUBPROTON_DATA = np.append(arr_emiss_SUBPROTON_DATA, evt.emiss)
               
               H_ct_ep_SUBPROTON_DATA.Fill(evt.CTime_ROC1)
@@ -1742,7 +1742,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SUBPROTON_DUMMY = np.append(arr_phi_SUBPROTON_DUMMY, evt.ph_q)
               arr_Q2_SUBPROTON_DUMMY = np.append(arr_Q2_SUBPROTON_DUMMY, evt.Q2)
               arr_W_SUBPROTON_DUMMY = np.append(arr_W_SUBPROTON_DUMMY, evt.W)
-              arr_pmiss_SUBPROTON_DUMMY = np.append(arr_pmiss_SUBPROTON_DUMMY, evt.pmiss)
+              arr_MM_SUBPROTON_DUMMY = np.append(arr_MM_SUBPROTON_DUMMY, evt.pmiss)
               arr_emiss_SUBPROTON_DUMMY = np.append(arr_emiss_SUBPROTON_DUMMY, evt.emiss)
                 
               H_ct_ep_SUBPROTON_DUMMY.Fill(evt.CTime_ROC1)
@@ -1811,7 +1811,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SUBPROTON_RAND = np.append(arr_phi_SUBPROTON_RAND, evt.ph_q)
               arr_Q2_SUBPROTON_RAND = np.append(arr_Q2_SUBPROTON_RAND, evt.Q2)
               arr_W_SUBPROTON_RAND = np.append(arr_W_SUBPROTON_RAND, evt.W)
-              arr_pmiss_SUBPROTON_RAND = np.append(arr_pmiss_SUBPROTON_RAND, evt.pmiss)
+              arr_MM_SUBPROTON_RAND = np.append(arr_MM_SUBPROTON_RAND, evt.pmiss)
               arr_emiss_SUBPROTON_RAND = np.append(arr_emiss_SUBPROTON_RAND, evt.emiss)
                 
               H_ssxfp_SUBPROTON_RAND.Fill(evt.ssxfp)
@@ -1871,7 +1871,7 @@ def defineHists(phi_setting, inpDict):
               arr_phi_SUBPROTON_DUMMY_RAND = np.append(arr_phi_SUBPROTON_DUMMY_RAND, evt.ph_q)
               arr_Q2_SUBPROTON_DUMMY_RAND = np.append(arr_Q2_SUBPROTON_DUMMY_RAND, evt.Q2)
               arr_W_SUBPROTON_DUMMY_RAND = np.append(arr_W_SUBPROTON_DUMMY_RAND, evt.W)
-              arr_pmiss_SUBPROTON_DUMMY_RAND = np.append(arr_pmiss_SUBPROTON_DUMMY_RAND, evt.pmiss)
+              arr_MM_SUBPROTON_DUMMY_RAND = np.append(arr_MM_SUBPROTON_DUMMY_RAND, evt.pmiss)
               arr_emiss_SUBPROTON_DUMMY_RAND = np.append(arr_emiss_SUBPROTON_DUMMY_RAND, evt.emiss)
                 
               H_ssxfp_SUBPROTON_DUMMY_RAND.Fill(evt.ssxfp)
@@ -1942,7 +1942,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SIMC = arr_phi_SIMC*normfac_simc
         arr_Q2_SIMC = arr_Q2_SIMC*normfac_simc
         arr_W_SIMC = arr_W_SIMC*normfac_simc
-        arr_pmiss_SIMC = arr_pmiss_SIMC*normfac_simc
+        arr_MM_SIMC = arr_MM_SIMC*normfac_simc
         arr_emiss_SIMC = arr_emiss_SIMC*normfac_simc
         '''
 
@@ -1992,7 +1992,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_DUMMY = arr_phi_DUMMY*normfac_dummy
         arr_Q2_DUMMY = arr_Q2_DUMMY*normfac_dummy
         arr_W_DUMMY = arr_W_DUMMY*normfac_dummy
-        arr_pmiss_DUMMY = arr_pmiss_DUMMY*normfac_dummy
+        arr_MM_DUMMY = arr_MM_DUMMY*normfac_dummy
         arr_emiss_DUMMY = arr_emiss_DUMMY*normfac_dummy
         '''
 
@@ -2031,7 +2031,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_DATA = arr_phi_DATA*normfac_data
         arr_Q2_DATA = arr_Q2_DATA*normfac_data
         arr_W_DATA = arr_W_DATA*normfac_data
-        arr_pmiss_DATA = arr_pmiss_DATA*normfac_data
+        arr_MM_DATA = arr_MM_DATA*normfac_data
         arr_emiss_DATA = arr_emiss_DATA*normfac_data
         '''
 
@@ -2067,7 +2067,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_RAND = arr_phi_RAND*normfac_data/nWindows
         arr_Q2_RAND = arr_Q2_RAND*normfac_data/nWindows
         arr_W_RAND = arr_W_RAND*normfac_data/nWindows
-        arr_pmiss_RAND = arr_pmiss_RAND*normfac_data/nWindows
+        arr_MM_RAND = arr_MM_RAND*normfac_data/nWindows
         arr_emiss_RAND = arr_emiss_RAND*normfac_data/nWindows
         '''
 
@@ -2103,7 +2103,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_DUMMY_RAND = arr_phi_DUMMY_RAND*normfac_dummy/nWindows
         arr_Q2_DUMMY_RAND = arr_Q2_DUMMY_RAND*normfac_dummy/nWindows
         arr_W_DUMMY_RAND = arr_W_DUMMY_RAND*normfac_dummy/nWindows
-        arr_pmiss_DUMMY_RAND = arr_pmiss_DUMMY_RAND*normfac_dummy/nWindows
+        arr_MM_DUMMY_RAND = arr_MM_DUMMY_RAND*normfac_dummy/nWindows
         arr_emiss_DUMMY_RAND = arr_emiss_DUMMY_RAND*normfac_dummy/nWindows
         '''
         
@@ -2154,7 +2154,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPION_DUMMY = arr_phi_SUBPION_DUMMY*normfac_subpion_dummy
         arr_Q2_SUBPION_DUMMY = arr_Q2_SUBPION_DUMMY*normfac_subpion_dummy
         arr_W_SUBPION_DUMMY = arr_W_SUBPION_DUMMY*normfac_subpion_dummy
-        arr_pmiss_SUBPION_DUMMY = arr_pmiss_SUBPION_DUMMY*normfac_subpion_dummy
+        arr_MM_SUBPION_DUMMY = arr_MM_SUBPION_DUMMY*normfac_subpion_dummy
         arr_emiss_SUBPION_DUMMY = arr_emiss_SUBPION_DUMMY*normfac_subpion_dummy
         '''
 
@@ -2193,7 +2193,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA*normfac_subpion_data
         arr_Q2_SUBPION_DATA = arr_Q2_SUBPION_DATA*normfac_subpion_data
         arr_W_SUBPION_DATA = arr_W_SUBPION_DATA*normfac_subpion_data
-        arr_pmiss_SUBPION_DATA = arr_pmiss_SUBPION_DATA*normfac_subpion_data
+        arr_MM_SUBPION_DATA = arr_MM_SUBPION_DATA*normfac_subpion_data
         arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA*normfac_subpion_data
         '''
 
@@ -2229,7 +2229,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPION_RAND = arr_phi_SUBPION_RAND*normfac_subpion_data/nWindows
         arr_Q2_SUBPION_RAND = arr_Q2_SUBPION_RAND*normfac_subpion_data/nWindows
         arr_W_SUBPION_RAND = arr_W_SUBPION_RAND*normfac_subpion_data/nWindows
-        arr_pmiss_SUBPION_RAND = arr_pmiss_SUBPION_RAND*normfac_subpion_data/nWindows
+        arr_MM_SUBPION_RAND = arr_MM_SUBPION_RAND*normfac_subpion_data/nWindows
         arr_emiss_SUBPION_RAND = arr_emiss_SUBPION_RAND*normfac_subpion_data/nWindows
         '''
 
@@ -2265,7 +2265,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPION_DUMMY_RAND = arr_phi_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
         arr_Q2_SUBPION_DUMMY_RAND = arr_Q2_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
         arr_W_SUBPION_DUMMY_RAND = arr_W_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
-        arr_pmiss_SUBPION_DUMMY_RAND = arr_pmiss_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
+        arr_MM_SUBPION_DUMMY_RAND = arr_MM_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
         arr_emiss_SUBPION_DUMMY_RAND = arr_emiss_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
         '''
         
@@ -2316,7 +2316,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPROTON_DUMMY = arr_phi_SUBPROTON_DUMMY*normfac_subproton_dummy
         arr_Q2_SUBPROTON_DUMMY = arr_Q2_SUBPROTON_DUMMY*normfac_subproton_dummy
         arr_W_SUBPROTON_DUMMY = arr_W_SUBPROTON_DUMMY*normfac_subproton_dummy
-        arr_pmiss_SUBPROTON_DUMMY = arr_pmiss_SUBPROTON_DUMMY*normfac_subproton_dummy
+        arr_MM_SUBPROTON_DUMMY = arr_MM_SUBPROTON_DUMMY*normfac_subproton_dummy
         arr_emiss_SUBPROTON_DUMMY = arr_emiss_SUBPROTON_DUMMY*normfac_subproton_dummy
         '''
 
@@ -2356,7 +2356,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA*normfac_subproton_data
         arr_Q2_SUBPROTON_DATA = arr_Q2_SUBPROTON_DATA*normfac_subproton_data
         arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA*normfac_subproton_data
-        arr_pmiss_SUBPROTON_DATA = arr_pmiss_SUBPROTON_DATA*normfac_subproton_data
+        arr_MM_SUBPROTON_DATA = arr_MM_SUBPROTON_DATA*normfac_subproton_data
         arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA*normfac_subproton_data
 
         '''        
@@ -2391,7 +2391,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPROTON_RAND = arr_phi_SUBPROTON_RAND*normfac_subproton_data/nWindows
         arr_Q2_SUBPROTON_RAND = arr_Q2_SUBPROTON_RAND*normfac_subproton_data/nWindows
         arr_W_SUBPROTON_RAND = arr_W_SUBPROTON_RAND*normfac_subproton_data/nWindows
-        arr_pmiss_SUBPROTON_RAND = arr_pmiss_SUBPROTON_RAND*normfac_subproton_data/nWindows
+        arr_MM_SUBPROTON_RAND = arr_MM_SUBPROTON_RAND*normfac_subproton_data/nWindows
         arr_emiss_SUBPROTON_RAND = arr_emiss_SUBPROTON_RAND*normfac_subproton_data/nWindows
         '''
 
@@ -2427,7 +2427,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPROTON_DUMMY_RAND = arr_phi_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
         arr_Q2_SUBPROTON_DUMMY_RAND = arr_Q2_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
         arr_W_SUBPROTON_DUMMY_RAND = arr_W_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
-        arr_pmiss_SUBPROTON_DUMMY_RAND = arr_pmiss_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
+        arr_MM_SUBPROTON_DUMMY_RAND = arr_MM_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
         arr_emiss_SUBPROTON_DUMMY_RAND = arr_emiss_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
         '''
         
@@ -2464,7 +2464,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_DATA = arr_phi_DATA-arr_phi_RAND
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_RAND
         arr_W_DATA = arr_W_DATA-arr_W_RAND
-        arr_pmiss_DATA = arr_pmiss_DATA-arr_pmiss_RAND
+        arr_MM_DATA = arr_MM_DATA-arr_MM_RAND
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_RAND
         '''
         
@@ -2501,7 +2501,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_DUMMY = arr_phi_DUMMY-arr_phi_RAND
         arr_Q2_DUMMY = arr_Q2_DUMMY-arr_Q2_RAND
         arr_W_DUMMY = arr_W_DUMMY-arr_W_RAND
-        arr_pmiss_DUMMY = arr_pmiss_DUMMY-arr_pmiss_RAND
+        arr_MM_DUMMY = arr_MM_DUMMY-arr_MM_RAND
         arr_emiss_DUMMY = arr_emiss_DUMMY-arr_emiss_RAND
         '''
 
@@ -2538,7 +2538,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA-arr_phi_RAND
         arr_Q2_SUBPION_DATA = arr_Q2_SUBPION_DATA-arr_Q2_RAND
         arr_W_SUBPION_DATA = arr_W_SUBPION_DATA-arr_W_RAND
-        arr_pmiss_SUBPION_DATA = arr_pmiss_SUBPION_DATA-arr_pmiss_RAND
+        arr_MM_SUBPION_DATA = arr_MM_SUBPION_DATA-arr_MM_RAND
         arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA-arr_emiss_RAND
         '''
 
@@ -2575,7 +2575,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPION_DUMMY = arr_phi_SUBPION_DUMMY-arr_phi_RAND
         arr_Q2_SUBPION_DUMMY = arr_Q2_SUBPION_DUMMY-arr_Q2_RAND
         arr_W_SUBPION_DUMMY = arr_W_SUBPION_DUMMY-arr_W_RAND
-        arr_pmiss_SUBPION_DUMMY = arr_pmiss_SUBPION_DUMMY-arr_pmiss_RAND
+        arr_MM_SUBPION_DUMMY = arr_MM_SUBPION_DUMMY-arr_MM_RAND
         arr_emiss_SUBPION_DUMMY = arr_emiss_SUBPION_DUMMY-arr_emiss_RAND
         '''
         
@@ -2612,7 +2612,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA-arr_phi_RAND
         arr_Q2_SUBPROTON_DATA = arr_Q2_SUBPROTON_DATA-arr_Q2_RAND
         arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA-arr_W_RAND
-        arr_pmiss_SUBPROTON_DATA = arr_pmiss_SUBPROTON_DATA-arr_pmiss_RAND
+        arr_MM_SUBPROTON_DATA = arr_MM_SUBPROTON_DATA-arr_MM_RAND
         arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA-arr_emiss_RAND
         '''
         
@@ -2649,7 +2649,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPROTON_DUMMY = arr_phi_SUBPROTON_DUMMY-arr_phi_RAND
         arr_Q2_SUBPROTON_DUMMY = arr_Q2_SUBPROTON_DUMMY-arr_Q2_RAND
         arr_W_SUBPROTON_DUMMY = arr_W_SUBPROTON_DUMMY-arr_W_RAND
-        arr_pmiss_SUBPROTON_DUMMY = arr_pmiss_SUBPROTON_DUMMY-arr_pmiss_RAND
+        arr_MM_SUBPROTON_DUMMY = arr_MM_SUBPROTON_DUMMY-arr_MM_RAND
         arr_emiss_SUBPROTON_DUMMY = arr_emiss_SUBPROTON_DUMMY-arr_emiss_RAND
         '''
         
@@ -2686,7 +2686,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_DATA = arr_phi_DATA-arr_phi_DUMMY
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_DUMMY
         arr_W_DATA = arr_W_DATA-arr_W_DUMMY
-        arr_pmiss_DATA = arr_pmiss_DATA-arr_pmiss_DUMMY
+        arr_MM_DATA = arr_MM_DATA-arr_MM_DUMMY
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_DUMMY
         '''
         
@@ -2723,7 +2723,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA-arr_phi_DUMMY
         arr_Q2_SUBPION_DATA = arr_Q2_SUBPION_DATA-arr_Q2_DUMMY
         arr_W_SUBPION_DATA = arr_W_SUBPION_DATA-arr_W_DUMMY
-        arr_pmiss_SUBPION_DATA = arr_pmiss_SUBPION_DATA-arr_pmiss_DUMMY
+        arr_MM_SUBPION_DATA = arr_MM_SUBPION_DATA-arr_MM_DUMMY
         arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA-arr_emiss_DUMMY
         '''
         
@@ -2760,7 +2760,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA-arr_phi_DUMMY
         arr_Q2_SUBPROTON_DATA = arr_Q2_SUBPROTON_DATA-arr_Q2_DUMMY
         arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA-arr_W_DUMMY
-        arr_pmiss_SUBPROTON_DATA = arr_pmiss_SUBPROTON_DATA-arr_pmiss_DUMMY
+        arr_MM_SUBPROTON_DATA = arr_MM_SUBPROTON_DATA-arr_MM_DUMMY
         arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA-arr_emiss_DUMMY
         '''
         
@@ -2799,7 +2799,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_DATA = arr_phi_DATA-arr_phi_SUBPION_DATA
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_SUBPION_DATA
         arr_W_DATA = arr_W_DATA-arr_W_SUBPION_DATA
-        arr_pmiss_DATA = arr_pmiss_DATA-arr_pmiss_SUBPION_DATA
+        arr_MM_DATA = arr_MM_DATA-arr_MM_SUBPION_DATA
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_SUBPION_DATA
         '''
         
@@ -2836,7 +2836,7 @@ def defineHists(phi_setting, inpDict):
         arr_phi_DATA = arr_phi_DATA-arr_phi_SUBPROTON_DATA
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_SUBPROTON_DATA
         arr_W_DATA = arr_W_DATA-arr_W_SUBPROTON_DATA
-        arr_pmiss_DATA = arr_pmiss_DATA-arr_pmiss_SUBPROTON_DATA
+        arr_MM_DATA = arr_MM_DATA-arr_MM_SUBPROTON_DATA
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_SUBPROTON_DATA
         '''
         
@@ -2937,13 +2937,13 @@ def defineHists(phi_setting, inpDict):
         histDict["arr_phi_SIMC"] = arr_phi_SIMC
         histDict["arr_Q2_SIMC"] = arr_Q2_SIMC
         histDict["arr_W_SIMC"] = arr_W_SIMC
-        histDict["arr_pmiss_SIMC"] = arr_pmiss_SIMC
+        histDict["arr_MM_SIMC"] = arr_MM_SIMC
         histDict["arr_emiss_SIMC"] = arr_emiss_SIMC
         histDict["arr_t_DATA"] = arr_t_DATA
         histDict["arr_phi_DATA"] = arr_phi_DATA
         histDict["arr_Q2_DATA"] = arr_Q2_DATA
         histDict["arr_W_DATA"] = arr_W_DATA
-        histDict["arr_pmiss_DATA"] = arr_pmiss_DATA
+        histDict["arr_MM_DATA"] = arr_MM_DATA
         histDict["arr_emiss_DATA"] = arr_emiss_DATA
         histDict["yieldDictData"] = {}
         histDict["yieldDictSimc"] = {}
