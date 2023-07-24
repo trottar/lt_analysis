@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 14:18:20 trottar"
+# Time-stamp: "2023-07-24 14:24:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -524,6 +524,8 @@ for hist in histlist:
     W = np.append(W, hist_to_numpy(hist["H_W_SIMC"], hist["arr_W_SIMC"]))
     MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"], hist["arr_MM_SIMC"]))
 
+    print("^^^^^^^^^^^^^^^^^^^",t,Weight,"^^^^^^^^^^^^^^^^^^^")
+    
     t = t*Weight
     phi = phi*Weight
     phi_deg = np.append(phi_deg, phi * (180 / math.pi))
