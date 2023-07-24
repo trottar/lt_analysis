@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 20:25:28 trottar"
+# Time-stamp: "2023-07-23 20:30:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -132,6 +132,7 @@ from subtraction import defineHists
 
 ################################################################################################################################################
 
+'''
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram):
     # Convert the histogram data to a NumPy array
@@ -143,6 +144,30 @@ def hist_to_numpy(histogram):
     bin_edges = np.array(bin_edges)
     bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
     return bin_centers
+'''
+
+# Convert TH1F to NumPy array
+def hist_to_numpy(histogram):
+    # Convert the histogram data to a NumPy array
+    bin_weights, bin_edges = rnp.hist2array(histogram,return_edges=True)
+    # Check if bin_edges is a list of lists, and flatten it if necessary
+    if isinstance(bin_edges[0], (list, np.ndarray)):
+        bin_edges = np.concatenate(bin_edges)    
+    # Convert bin_edges to a NumPy array
+    bin_edges = np.array(bin_edges)
+    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+
+    # Calculate the weighted sum of the data in each bin
+    weighted_sum = np.sum(bin_centers * bin_weights)
+
+    # Calculate the weighted average of the data in each bin
+    weighted_average = np.sum(bin_centers * bin_weights) / np.sum(bin_weights)
+
+    # Calculate the weighted standard deviation of the data in each bin
+    mean_value = np.sum(bin_centers * bin_weights) / np.sum(bin_weights)
+    weighted_stddev = np.sqrt(np.sum(bin_weights * (bin_centers - mean_value)**2) / np.sum(bin_weights))    
+
+    return weighted_average
 
 def bin_data(histlist):
 
