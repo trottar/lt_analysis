@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 21:50:47 trottar"
+# Time-stamp: "2023-07-23 21:59:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -148,8 +148,11 @@ def hist_to_numpy(histogram):
 
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram):
+    
     # Convert the histogram data to a NumPy array
     events, edges = rnp.hist2array(histogram,return_edges=True)
+
+    print("^^^^^^^^^^^^^^^^^^^",len(edges),"^^^^^^^^^^^^^^^^^^^")
     
     # Convert to a float array explicitly
     edges = np.array(edges, dtype=float)[0]
@@ -161,7 +164,7 @@ def hist_to_numpy(histogram):
     # Create a 1D dataset (array) representing the event distribution bin-to-bin
     event_distribution = np.repeat(bin_edges[:-1], hist_values)
 
-    print("^^^^^^^^^^^^^^^^^^^",max(bin_edges), len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
+    #print("^^^^^^^^^^^^^^^^^^^",max(bin_edges), len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
     
     return event_distribution
 
@@ -185,8 +188,7 @@ def bin_data(histlist):
         phi = hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
         phi_deg = phi * (180 / math.pi)
         
-        #tmask = (tmin <= t) & (t <= tmax)
-        tmask = 0 < t
+        tmask = (tmin <= t) & (t <= tmax)
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
