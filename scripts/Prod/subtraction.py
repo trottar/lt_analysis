@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 13:56:57 trottar"
+# Time-stamp: "2023-07-24 14:11:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -839,6 +839,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Numpy array for binning
 
+        arr_Weight_SIMC = np.array([])
         arr_t_SIMC = np.array([])
         arr_phi_SIMC = np.array([])
         arr_Q2_SIMC = np.array([])
@@ -955,15 +956,13 @@ def defineHists(phi_setting, inpDict):
           #Fill SIMC events
           if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
+              arr_Weight_SIMC = np.append(arr_Weight_SIMC, evt.Weight)
               arr_t_SIMC = np.append(arr_t_SIMC, evt.Weight*evt.t)
               arr_phi_SIMC = np.append(arr_phi_SIMC, evt.Weight*evt.phipq)
               arr_Q2_SIMC = np.append(arr_Q2_SIMC, evt.Weight*evt.Q2)
               arr_W_SIMC = np.append(arr_W_SIMC, evt.Weight*evt.W)
               arr_MM_SIMC = np.append(arr_MM_SIMC, evt.Weight*np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))))
               arr_emiss_SIMC = np.append(arr_emiss_SIMC, evt.Weight*evt.Em)
-
-
-              #print("@@@@@@@@@@@@@@@@@@",evt.Weight,"@@@@@@@@@@@@@@@@@@")
 
               H_Weight_SIMC.Fill(evt.Weight)
               
@@ -1944,6 +1943,7 @@ def defineHists(phi_setting, inpDict):
         #H_pmz_SIMC.Scale(normfac_simc)
         H_W_SIMC.Scale(normfac_simc)
 
+        arr_Weight_SIMC = arr_Weight_SIMC*normfac_simc
         arr_t_SIMC = arr_t_SIMC*normfac_simc
         arr_phi_SIMC = arr_phi_SIMC*normfac_simc
         arr_Q2_SIMC = arr_Q2_SIMC*normfac_simc
@@ -2940,6 +2940,7 @@ def defineHists(phi_setting, inpDict):
         histDict["phiq_vs_t_DATA"] = phiq_vs_t_DATA
         histDict["polar_phiq_vs_t_DATA"] = polar_phiq_vs_t_DATA
         histDict["Q2_vs_W_DATA"] = Q2_vs_W_DATA
+        histDict["arr_Weight_SIMC"] = arr_Weight_SIMC
         histDict["arr_t_SIMC"] = arr_t_SIMC
         histDict["arr_phi_SIMC"] = arr_phi_SIMC
         histDict["arr_Q2_SIMC"] = arr_Q2_SIMC
@@ -3303,6 +3304,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Plot definitions
 
+        H_Weight_SIMC = ROOT.TH1D("H_Weight_SIMC", "Simc Weight", 200, 0, 1e-8)
         H_hsdelta_SIMC  = ROOT.TH1D("H_hsdelta_SIMC","HMS Delta", 200, -20.0, 20.0)
         H_hsxptar_SIMC  = ROOT.TH1D("H_hsxptar_SIMC","HMS xptar", 200, -0.1, 0.1)
         H_hsyptar_SIMC  = ROOT.TH1D("H_hsyptar_SIMC","HMS yptar", 200, -0.1, 0.1)
@@ -3511,6 +3513,7 @@ def defineHists(phi_setting, inpDict):
         ################################################################################################################################################
         # Numpy array for binning
 
+        arr_Weight_SIMC = np.array([])
         arr_t_SIMC = np.array([])
         arr_phi_SIMC = np.array([])
         arr_Q2_SIMC = np.array([])
@@ -3571,6 +3574,7 @@ def defineHists(phi_setting, inpDict):
           #Fill SIMC events
           if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
+              arr_Weight_SIMC = np.append(arr_Weight_SIMC, evt.Weight)
               arr_t_SIMC = np.append(arr_t_SIMC, evt.Weight*evt.t)
               arr_phi_SIMC = np.append(arr_phi_SIMC, evt.Weight*evt.phipq)
               arr_Q2_SIMC = np.append(arr_Q2_SIMC, evt.Weight*evt.Q2)
@@ -3578,6 +3582,8 @@ def defineHists(phi_setting, inpDict):
               arr_MM_SIMC = np.append(arr_MM_SIMC, evt.Weight*np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))))
               arr_emiss_SIMC = np.append(arr_emiss_SIMC, evt.Weight*evt.Em)
 
+              H_Weight_SIMC.Fill(evt.Weight)
+              
               H_ssxfp_SIMC.Fill(evt.ssxfp, evt.Weight)
               H_ssyfp_SIMC.Fill(evt.ssyfp, evt.Weight)
               H_ssxpfp_SIMC.Fill(evt.ssxpfp, evt.Weight)
@@ -3920,6 +3926,7 @@ def defineHists(phi_setting, inpDict):
         #H_pmz_SIMC.Scale(normfac_simc)
         H_W_SIMC.Scale(normfac_simc)
 
+        arr_Weight_SIMC = arr_Weight_SIMC*normfac_simc
         arr_t_SIMC = arr_t_SIMC*normfac_simc
         arr_phi_SIMC = arr_phi_SIMC*normfac_simc
         arr_Q2_SIMC = arr_Q2_SIMC*normfac_simc
@@ -4262,6 +4269,7 @@ def defineHists(phi_setting, inpDict):
         histDict["phiq_vs_t_DATA"] = phiq_vs_t_DATA
         histDict["polar_phiq_vs_t_DATA"] = polar_phiq_vs_t_DATA
         histDict["Q2_vs_W_DATA"] = Q2_vs_W_DATA
+        histDict["arr_Weight_SIMC"] = arr_Weight_SIMC
         histDict["arr_t_SIMC"] = arr_t_SIMC
         histDict["arr_phi_SIMC"] = arr_phi_SIMC
         histDict["arr_Q2_SIMC"] = arr_Q2_SIMC

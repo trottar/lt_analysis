@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 14:12:11 trottar"
+# Time-stamp: "2023-07-24 14:18:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -505,6 +505,7 @@ c_yield_data.Print(outputpdf)
 c_yield_simc = TCanvas()
 
 # Initialize NumPy arrays before the loop
+Weight = np.array([])
 t = np.array([])
 phi = np.array([])
 phi_deg = np.array([])
