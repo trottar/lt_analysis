@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 16:33:13 trottar"
+# Time-stamp: "2023-07-24 16:41:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -523,9 +523,6 @@ for hist in histlist:
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"], hist["arr_Q2_SIMC"]))
     W = np.append(W, hist_to_numpy(hist["H_W_SIMC"], hist["arr_W_SIMC"]))
     MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"], hist["arr_MM_SIMC"]))
-
-    print("^^^^^^^^^^^^^^^^^^^",t,Weight,"^^^^^^^^^^^^^^^^^^^")
-    
     
 # Initialize NumPy arrays
 tmp_lst = []
@@ -541,7 +538,6 @@ for j in range(len(tbinedges) - 1):
             if len(phibin_indices) > 0:
                 phibin_index = k
                 MM_val = MM[tbin_index]
-                print("-------------------",j, k, t_val, phi_deg[k], Q2_val, W_val, MM_val,"-------------------")
                 tmp_lst.append((tbin_index, phibin_index, MM_val, Q2_val, W_val, t_val))
 
 # Group the tuples by the first two elements using defaultdict
@@ -557,7 +553,6 @@ for hist in histlist:
     
     for key, val in groups.items():
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
-        print("*******************",integrate.simps(MM_tmp)/(100*hist["normfac_simc"]),"*******************")
 
         hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp)/(100*hist["normfac_simc"]))
         hist["yieldDictSimc"][key] = integrate.simps(MM_tmp)/(100*hist["normfac_simc"])
