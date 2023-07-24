@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 23:31:28 trottar"
+# Time-stamp: "2023-07-23 23:32:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,11 +152,15 @@ def hist_to_numpy(histogram):
     # Convert the histogram data to a NumPy array
     events, edges = rnp.hist2array(histogram,return_edges=True)
 
+    # Convert to a float array explicitly
+    edges = np.array(edges, dtype=float)[0]
+    events = np.array(events, dtype=float)
+    
     # Get the histogram values and bin bin_edges
     hist_values, bin_edges = np.histogram(events, bins=edges)
     
     # Convert to a float array explicitly
-    bin_edges = np.array(bin_edges, dtype=float)[0]
+    bin_edges = np.array(bin_edges, dtype=float)
     hist_values = np.array(hist_values, dtype=float)
 
     # Create a 1D dataset (array) representing the event distribution bin-to-bin
