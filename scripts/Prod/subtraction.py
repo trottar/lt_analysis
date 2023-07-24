@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 00:41:38 trottar"
+# Time-stamp: "2023-07-24 00:51:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1908,6 +1908,7 @@ def defineHists(phi_setting, inpDict):
         # Normalize data by effective charge
         
         normfac_simc = (simc_normfactor)/(simc_nevents)
+        '''
         H_ssxfp_SIMC.Scale(normfac_simc)
         H_ssyfp_SIMC.Scale(normfac_simc)
         H_ssxpfp_SIMC.Scale(normfac_simc)
@@ -1936,6 +1937,7 @@ def defineHists(phi_setting, inpDict):
         #H_pmy_SIMC.Scale(normfac_simc)
         #H_pmz_SIMC.Scale(normfac_simc)
         H_W_SIMC.Scale(normfac_simc)
+        '''
 
         arr_t_SIMC = arr_t_SIMC*normfac_simc
         arr_phi_SIMC = arr_phi_SIMC*normfac_simc
@@ -1955,6 +1957,7 @@ def defineHists(phi_setting, inpDict):
             normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
             normfac_data = 1/(data_charge_center)
 
+        '''            
         H_ssxfp_DUMMY.Scale(normfac_dummy)
         H_ssyfp_DUMMY.Scale(normfac_dummy)
         H_ssxpfp_DUMMY.Scale(normfac_dummy)
@@ -1984,6 +1987,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DUMMY.Scale(normfac_dummy)
         H_W_DUMMY.Scale(normfac_dummy)
         H_ct_DUMMY.Scale(normfac_dummy)
+        '''
 
         arr_t_DUMMY = arr_t_DUMMY*normfac_dummy
         arr_phi_DUMMY = arr_phi_DUMMY*normfac_dummy
@@ -1991,7 +1995,8 @@ def defineHists(phi_setting, inpDict):
         arr_W_DUMMY = arr_W_DUMMY*normfac_dummy
         arr_pmiss_DUMMY = arr_pmiss_DUMMY*normfac_dummy
         arr_emiss_DUMMY = arr_emiss_DUMMY*normfac_dummy
-        
+
+        '''        
         H_ssxfp_DATA.Scale(normfac_data)
         H_ssyfp_DATA.Scale(normfac_data)
         H_ssxpfp_DATA.Scale(normfac_data)
@@ -2021,6 +2026,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Scale(normfac_data)
         H_W_DATA.Scale(normfac_data)
         H_ct_DATA.Scale(normfac_data)
+        '''
 
         arr_t_DATA = arr_t_DATA*normfac_data
         arr_phi_DATA = arr_phi_DATA*normfac_data
@@ -2028,7 +2034,8 @@ def defineHists(phi_setting, inpDict):
         arr_W_DATA = arr_W_DATA*normfac_data
         arr_pmiss_DATA = arr_pmiss_DATA*normfac_data
         arr_emiss_DATA = arr_emiss_DATA*normfac_data
-        
+
+        '''        
         # Data Random subtraction
         H_ssxfp_RAND.Scale(normfac_data/nWindows)
         H_ssyfp_RAND.Scale(normfac_data/nWindows)
@@ -2055,14 +2062,16 @@ def defineHists(phi_setting, inpDict):
         H_pmz_RAND.Scale(normfac_data/nWindows)
         H_W_RAND.Scale(normfac_data/nWindows)
         #H_ct_RAND.Scale(normfac_data/nWindows)
-
+        '''
+        
         arr_t_RAND = arr_t_RAND*normfac_data/nWindows
         arr_phi_RAND = arr_phi_RAND*normfac_data/nWindows
         arr_Q2_RAND = arr_Q2_RAND*normfac_data/nWindows
         arr_W_RAND = arr_W_RAND*normfac_data/nWindows
         arr_pmiss_RAND = arr_pmiss_RAND*normfac_data/nWindows
         arr_emiss_RAND = arr_emiss_RAND*normfac_data/nWindows
-        
+
+        '''        
         # Dummy Random subtraction
         H_ssxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_ssyfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
@@ -2089,6 +2098,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_W_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
+        '''
 
         arr_t_DUMMY_RAND = arr_t_DUMMY_RAND*normfac_dummy/nWindows
         arr_phi_DUMMY_RAND = arr_phi_DUMMY_RAND*normfac_dummy/nWindows
@@ -2109,6 +2119,7 @@ def defineHists(phi_setting, inpDict):
             normfac_subpion_dummy = 1/(500000)
             normfac_subpion_data = 1/(500000)
 
+        '''            
         H_ssxfp_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
         H_ssyfp_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
         H_ssxpfp_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
@@ -2138,6 +2149,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
         H_W_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
         H_ct_epi_SUBPION_DUMMY.Scale(normfac_subpion_dummy)
+        '''
 
         arr_t_SUBPION_DUMMY = arr_t_SUBPION_DUMMY*normfac_subpion_dummy
         arr_phi_SUBPION_DUMMY = arr_phi_SUBPION_DUMMY*normfac_subpion_dummy
@@ -2145,7 +2157,8 @@ def defineHists(phi_setting, inpDict):
         arr_W_SUBPION_DUMMY = arr_W_SUBPION_DUMMY*normfac_subpion_dummy
         arr_pmiss_SUBPION_DUMMY = arr_pmiss_SUBPION_DUMMY*normfac_subpion_dummy
         arr_emiss_SUBPION_DUMMY = arr_emiss_SUBPION_DUMMY*normfac_subpion_dummy
-        
+
+        '''        
         H_ssxfp_SUBPION_DATA.Scale(normfac_subpion_data)
         H_ssyfp_SUBPION_DATA.Scale(normfac_subpion_data)
         H_ssxpfp_SUBPION_DATA.Scale(normfac_subpion_data)
@@ -2175,6 +2188,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPION_DATA.Scale(normfac_subpion_data)
         H_W_SUBPION_DATA.Scale(normfac_subpion_data)
         H_ct_epi_SUBPION_DATA.Scale(normfac_subpion_data)
+        '''
 
         arr_t_SUBPION_DATA = arr_t_SUBPION_DATA*normfac_subpion_data
         arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA*normfac_subpion_data
@@ -2182,7 +2196,8 @@ def defineHists(phi_setting, inpDict):
         arr_W_SUBPION_DATA = arr_W_SUBPION_DATA*normfac_subpion_data
         arr_pmiss_SUBPION_DATA = arr_pmiss_SUBPION_DATA*normfac_subpion_data
         arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA*normfac_subpion_data
-        
+
+        '''        
         # Data Random subtraction
         H_ssxfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
         H_ssyfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
@@ -2209,6 +2224,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
         H_W_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
         #H_ct_epi_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
+        '''
 
         arr_t_SUBPION_RAND = arr_t_SUBPION_RAND*normfac_subpion_data/nWindows
         arr_phi_SUBPION_RAND = arr_phi_SUBPION_RAND*normfac_subpion_data/nWindows
@@ -2216,7 +2232,8 @@ def defineHists(phi_setting, inpDict):
         arr_W_SUBPION_RAND = arr_W_SUBPION_RAND*normfac_subpion_data/nWindows
         arr_pmiss_SUBPION_RAND = arr_pmiss_SUBPION_RAND*normfac_subpion_data/nWindows
         arr_emiss_SUBPION_RAND = arr_emiss_SUBPION_RAND*normfac_subpion_data/nWindows
-        
+
+        '''        
         # Dummy Random subtraction
         H_ssxfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
         H_ssyfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
@@ -2243,6 +2260,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
         H_W_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
         #H_ct_epi_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
+        '''
 
         arr_t_SUBPION_DUMMY_RAND = arr_t_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
         arr_phi_SUBPION_DUMMY_RAND = arr_phi_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
@@ -2263,6 +2281,7 @@ def defineHists(phi_setting, inpDict):
             normfac_subproton_dummy = 1/(6500)
             normfac_subproton_data = 1/(6500)
 
+        '''            
         H_ssxfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_ssyfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_ssxpfp_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
@@ -2292,6 +2311,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_W_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
         H_ct_ep_SUBPROTON_DUMMY.Scale(normfac_subproton_dummy)
+        '''
 
         arr_t_SUBPROTON_DUMMY = arr_t_SUBPROTON_DUMMY*normfac_subproton_dummy
         arr_phi_SUBPROTON_DUMMY = arr_phi_SUBPROTON_DUMMY*normfac_subproton_dummy
@@ -2299,7 +2319,8 @@ def defineHists(phi_setting, inpDict):
         arr_W_SUBPROTON_DUMMY = arr_W_SUBPROTON_DUMMY*normfac_subproton_dummy
         arr_pmiss_SUBPROTON_DUMMY = arr_pmiss_SUBPROTON_DUMMY*normfac_subproton_dummy
         arr_emiss_SUBPROTON_DUMMY = arr_emiss_SUBPROTON_DUMMY*normfac_subproton_dummy
-        
+
+        '''        
         H_ssxfp_SUBPROTON_DATA.Scale(normfac_subproton_data)
         H_ssyfp_SUBPROTON_DATA.Scale(normfac_subproton_data)
         H_ssxpfp_SUBPROTON_DATA.Scale(normfac_subproton_data)
@@ -2329,6 +2350,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DATA.Scale(normfac_subproton_data)
         H_W_SUBPROTON_DATA.Scale(normfac_subproton_data)
         H_ct_ep_SUBPROTON_DATA.Scale(normfac_subproton_data)
+        '''
 
         arr_t_SUBPROTON_DATA = arr_t_SUBPROTON_DATA*normfac_subproton_data
         arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA*normfac_subproton_data
@@ -2336,7 +2358,8 @@ def defineHists(phi_setting, inpDict):
         arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA*normfac_subproton_data
         arr_pmiss_SUBPROTON_DATA = arr_pmiss_SUBPROTON_DATA*normfac_subproton_data
         arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA*normfac_subproton_data
-        
+
+        '''        
         # Data Random subtraction
         H_ssxfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
         H_ssyfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
@@ -2363,6 +2386,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
         H_W_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
         #H_ct_ep_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
+        '''
 
         arr_t_SUBPROTON_RAND = arr_t_SUBPROTON_RAND*normfac_subproton_data/nWindows
         arr_phi_SUBPROTON_RAND = arr_phi_SUBPROTON_RAND*normfac_subproton_data/nWindows
@@ -2371,6 +2395,7 @@ def defineHists(phi_setting, inpDict):
         arr_pmiss_SUBPROTON_RAND = arr_pmiss_SUBPROTON_RAND*normfac_subproton_data/nWindows
         arr_emiss_SUBPROTON_RAND = arr_emiss_SUBPROTON_RAND*normfac_subproton_data/nWindows
 
+        '''        
         # Dummy Random subtraction
         H_ssxfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
         H_ssyfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
@@ -2397,6 +2422,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
         H_W_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
         #H_ct_ep_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
+        '''
 
         arr_t_SUBPROTON_DUMMY_RAND = arr_t_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
         arr_phi_SUBPROTON_DUMMY_RAND = arr_phi_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
@@ -3784,7 +3810,6 @@ def defineHists(phi_setting, inpDict):
         # Normalize data by effective charge
 
         normfac_simc = (simc_normfactor)/(simc_nevents)
-        '''
         H_ssxfp_SIMC.Scale(normfac_simc)
         H_ssyfp_SIMC.Scale(normfac_simc)
         H_ssxpfp_SIMC.Scale(normfac_simc)
@@ -3813,7 +3838,6 @@ def defineHists(phi_setting, inpDict):
         #H_pmy_SIMC.Scale(normfac_simc)
         #H_pmz_SIMC.Scale(normfac_simc)
         H_W_SIMC.Scale(normfac_simc)
-        '''
 
         dummy_target_corr = 4.8579
         if phi_setting == "Right":
@@ -3826,7 +3850,6 @@ def defineHists(phi_setting, inpDict):
             normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
             normfac_data = 1/(data_charge_center)
 
-        '''
         H_ssxfp_DUMMY.Scale(normfac_dummy)
         H_ssyfp_DUMMY.Scale(normfac_dummy)
         H_ssxpfp_DUMMY.Scale(normfac_dummy)
@@ -3940,8 +3963,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_W_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        '''
-        
+
         ###
         # Data Random subtraction
         H_ssxfp_DATA.Add(H_ssxfp_RAND,-1)
