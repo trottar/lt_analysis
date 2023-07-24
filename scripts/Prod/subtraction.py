@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 03:13:11 trottar"
+# Time-stamp: "2023-07-24 03:19:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1093,7 +1093,7 @@ def defineHists(phi_setting, inpDict):
               H_t_DATA.Fill(-evt.MandelT)
               H_W_DATA.Fill(evt.W)
               H_epsilon_DATA.Fill(evt.epsilon)
-              H_MM_DATA.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+              H_MM_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
               #H_MM_DATA.Fill(pow(evt.MM, 2))  
               #H_MM_DATA.Fill(evt.Mrecoil)
 
@@ -1196,7 +1196,7 @@ def defineHists(phi_setting, inpDict):
               H_t_DUMMY.Fill(-evt.MandelT)
               H_W_DUMMY.Fill(evt.W)
               H_epsilon_DUMMY.Fill(evt.epsilon)
-              H_MM_DUMMY.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+              H_MM_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
               #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
               #H_MM_DUMMY.Fill(evt.Mrecoil)
 
@@ -1284,7 +1284,7 @@ def defineHists(phi_setting, inpDict):
               H_t_RAND.Fill(-evt.MandelT)
               H_W_RAND.Fill(evt.W)
               H_epsilon_RAND.Fill(evt.epsilon)
-              H_MM_RAND.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+              H_MM_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
 
         ###################################################################################################################################################    
         # Fill dummy random histograms for various trees called above
@@ -1370,7 +1370,7 @@ def defineHists(phi_setting, inpDict):
               H_t_DUMMY_RAND.Fill(-evt.MandelT)
               H_W_DUMMY_RAND.Fill(evt.W)
               H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-              H_MM_DUMMY_RAND.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+              H_MM_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
 
         ################################################################################################################################################
         # Fill histograms for various trees called above
@@ -1437,7 +1437,7 @@ def defineHists(phi_setting, inpDict):
               H_t_SUBPION_DATA.Fill(-evt.MandelT)
               H_W_SUBPION_DATA.Fill(evt.W)
               H_epsilon_SUBPION_DATA.Fill(evt.epsilon)
-              H_MM_SUBPION_DATA.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+              H_MM_SUBPION_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
               #H_MM_SUBPION_DATA.Fill(pow(evt.MM, 2))  
               #H_MM_SUBPION_DATA.Fill(evt.Mrecoil)
 
@@ -1513,7 +1513,7 @@ def defineHists(phi_setting, inpDict):
               H_t_SUBPION_DUMMY.Fill(-evt.MandelT)
               H_W_SUBPION_DUMMY.Fill(evt.W)
               H_epsilon_SUBPION_DUMMY.Fill(evt.epsilon)
-              H_MM_SUBPION_DUMMY.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+              H_MM_SUBPION_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
               #H_MM_SUBPION_DUMMY.Fill(pow(evt.MM, 2))  
               #H_MM_SUBPION_DUMMY.Fill(evt.Mrecoil)
 
@@ -1575,7 +1575,7 @@ def defineHists(phi_setting, inpDict):
               H_t_SUBPION_RAND.Fill(-evt.MandelT)
               H_W_SUBPION_RAND.Fill(evt.W)
               H_epsilon_SUBPION_RAND.Fill(evt.epsilon)
-              H_MM_SUBPION_RAND.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+              H_MM_SUBPION_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
 
         ###################################################################################################################################################    
         # Fill dummy random histograms for various trees called above
@@ -1635,7 +1635,7 @@ def defineHists(phi_setting, inpDict):
               H_t_SUBPION_DUMMY_RAND.Fill(-evt.MandelT)
               H_W_SUBPION_DUMMY_RAND.Fill(evt.W)
               H_epsilon_SUBPION_DUMMY_RAND.Fill(evt.epsilon)
-              H_MM_SUBPION_DUMMY_RAND.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+              H_MM_SUBPION_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
 
         ################################################################################################################################################
         # Fill histograms for various trees called above
@@ -1702,7 +1702,7 @@ def defineHists(phi_setting, inpDict):
               H_t_SUBPROTON_DATA.Fill(-evt.MandelT)
               H_W_SUBPROTON_DATA.Fill(evt.W)
               H_epsilon_SUBPROTON_DATA.Fill(evt.epsilon)
-              H_MM_SUBPROTON_DATA.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+              H_MM_SUBPROTON_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
               #H_MM_SUBPROTON_DATA.Fill(pow(evt.MM, 2))  
               #H_MM_SUBPROTON_DATA.Fill(evt.Mrecoil)
 
@@ -1778,7 +1778,7 @@ def defineHists(phi_setting, inpDict):
               H_t_SUBPROTON_DUMMY.Fill(-evt.MandelT)
               H_W_SUBPROTON_DUMMY.Fill(evt.W)
               H_epsilon_SUBPROTON_DUMMY.Fill(evt.epsilon)
-              H_MM_SUBPROTON_DUMMY.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+              H_MM_SUBPROTON_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
               #H_MM_SUBPROTON_DUMMY.Fill(pow(evt.MM, 2))  
               #H_MM_SUBPROTON_DUMMY.Fill(evt.Mrecoil)
 
@@ -1840,7 +1840,7 @@ def defineHists(phi_setting, inpDict):
               H_t_SUBPROTON_RAND.Fill(-evt.MandelT)
               H_W_SUBPROTON_RAND.Fill(evt.W)
               H_epsilon_SUBPROTON_RAND.Fill(evt.epsilon)
-              H_MM_SUBPROTON_RAND.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+              H_MM_SUBPROTON_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
 
         ###################################################################################################################################################    
         # Fill dummy random histograms for various trees called above
@@ -1900,7 +1900,7 @@ def defineHists(phi_setting, inpDict):
               H_t_SUBPROTON_DUMMY_RAND.Fill(-evt.MandelT)
               H_W_SUBPROTON_DUMMY_RAND.Fill(evt.W)
               H_epsilon_SUBPROTON_DUMMY_RAND.Fill(evt.epsilon)
-              H_MM_SUBPROTON_DUMMY_RAND.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+              H_MM_SUBPROTON_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
               
         ################################################################################################################################################
         # Normalize simc by normfactor/nevents
@@ -3624,7 +3624,7 @@ def defineHists(phi_setting, inpDict):
               H_t_DATA.Fill(-evt.MandelT)
               H_W_DATA.Fill(evt.W)
               H_epsilon_DATA.Fill(evt.epsilon)
-              H_MM_DATA.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+              H_MM_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
               #H_MM_DATA.Fill(pow(evt.MM, 2))  
               #H_MM_DATA.Fill(evt.Mrecoil)
 
@@ -3693,7 +3693,7 @@ def defineHists(phi_setting, inpDict):
               H_t_DUMMY.Fill(-evt.MandelT)
               H_W_DUMMY.Fill(evt.W)
               H_epsilon_DUMMY.Fill(evt.epsilon)
-              H_MM_DUMMY.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+              H_MM_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
               #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
               #H_MM_DUMMY.Fill(evt.Mrecoil)
 
@@ -3748,7 +3748,7 @@ def defineHists(phi_setting, inpDict):
               H_t_RAND.Fill(-evt.MandelT)
               H_W_RAND.Fill(evt.W)
               H_epsilon_RAND.Fill(evt.epsilon)
-              H_MM_RAND.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+              H_MM_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
 
         ###################################################################################################################################################    
         # Fill dummy random histograms for various trees called above
@@ -3801,7 +3801,7 @@ def defineHists(phi_setting, inpDict):
               H_t_DUMMY_RAND.Fill(-evt.MandelT)
               H_W_DUMMY_RAND.Fill(evt.W)
               H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-              H_MM_DUMMY_RAND.Fill(abs(np.sqrt(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+              H_MM_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
 
 
         ################################################################################################################################################
