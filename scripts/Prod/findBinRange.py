@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 04:33:06 trottar"
+# Time-stamp: "2023-07-24 12:54:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -285,26 +285,26 @@ for i,hist in enumerate(histlist):
 #################
 # HARD CODED
 #################
+if ParticleType == "kaon":
+    relYieldPlot = plt.figure(figsize=(12,8))
 
-relYieldPlot = plt.figure(figsize=(12,8))
+    #HMS plot scaler
+    plt.grid(zorder=1)
+    plt.xlim(0,70)
+    #plt.ylim(0.925,1.075)
+    plt.plot([0,70], [1,1], 'r-',zorder=2)
 
-#HMS plot scaler
-plt.grid(zorder=1)
-plt.xlim(0,70)
-#plt.ylim(0.925,1.075)
-plt.plot([0,70], [1,1], 'r-',zorder=2)
+    for i,hist in enumerate(histlist):
+        plt.errorbar(hist["current"],hist["yieldRel_HMS_scaler"], \
+                     yerr=hist["yieldRel_HMS_scaler"]*hist["uncern_yieldRel_HMS_scaler"], \
+                     color='black',linestyle='None',zorder=3,label="_nolegend_")
+        plt.scatter(hist["current"],hist["yieldRel_HMS_scaler"],color='blue',zorder=4,label="_nolegend_")
+        plt.title('HMS LH2 %s-%s' % (int(min(hist["run number"])),int(max(hist["run number"]))), fontsize =16)
 
-for i,hist in enumerate(histlist):
-    plt.errorbar(hist["current"],hist["yieldRel_HMS_scaler"], \
-                 yerr=hist["yieldRel_HMS_scaler"]*hist["uncern_yieldRel_HMS_scaler"], \
-                 color='black',linestyle='None',zorder=3,label="_nolegend_")
-    plt.scatter(hist["current"],hist["yieldRel_HMS_scaler"],color='blue',zorder=4,label="_nolegend_")
-    plt.title('HMS LH2 %s-%s' % (int(min(hist["run number"])),int(max(hist["run number"]))), fontsize =16)
-
-plt.ylabel('Rel. Yield Scaler', fontsize=16)
-plt.xlabel('Current [uA]', fontsize =16)
-plt.legend()
-#plt.show()
+    plt.ylabel('Rel. Yield Scaler', fontsize=16)
+    plt.xlabel('Current [uA]', fontsize =16)
+    plt.legend()
+    #plt.show()
 
 #################
 #################
