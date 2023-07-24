@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 04:26:48 trottar"
+# Time-stamp: "2023-07-24 12:47:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3883,6 +3883,7 @@ def defineHists(phi_setting, inpDict):
         # Normalize data by effective charge
 
         normfac_simc = (simc_normfactor)/(simc_nevents)
+        '''
         H_ssxfp_SIMC.Scale(normfac_simc)
         H_ssyfp_SIMC.Scale(normfac_simc)
         H_ssxpfp_SIMC.Scale(normfac_simc)
@@ -3912,6 +3913,14 @@ def defineHists(phi_setting, inpDict):
         #H_pmz_SIMC.Scale(normfac_simc)
         H_W_SIMC.Scale(normfac_simc)
 
+        arr_t_SIMC = arr_t_SIMC*normfac_simc
+        arr_phi_SIMC = arr_phi_SIMC*normfac_simc
+        arr_Q2_SIMC = arr_Q2_SIMC*normfac_simc
+        arr_W_SIMC = arr_W_SIMC*normfac_simc
+        arr_MM_SIMC = arr_MM_SIMC*normfac_simc
+        arr_emiss_SIMC = arr_emiss_SIMC*normfac_simc
+        '''
+
         dummy_target_corr = 4.8579
         if phi_setting == "Right":
             normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
@@ -3923,6 +3932,7 @@ def defineHists(phi_setting, inpDict):
             normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
             normfac_data = 1/(data_charge_center)
 
+        '''            
         H_ssxfp_DUMMY.Scale(normfac_dummy)
         H_ssyfp_DUMMY.Scale(normfac_dummy)
         H_ssxpfp_DUMMY.Scale(normfac_dummy)
@@ -3953,6 +3963,15 @@ def defineHists(phi_setting, inpDict):
         H_W_DUMMY.Scale(normfac_dummy)
         H_ct_DUMMY.Scale(normfac_dummy)
 
+        arr_t_DUMMY = arr_t_DUMMY*normfac_dummy
+        arr_phi_DUMMY = arr_phi_DUMMY*normfac_dummy
+        arr_Q2_DUMMY = arr_Q2_DUMMY*normfac_dummy
+        arr_W_DUMMY = arr_W_DUMMY*normfac_dummy
+        arr_MM_DUMMY = arr_MM_DUMMY*normfac_dummy
+        arr_emiss_DUMMY = arr_emiss_DUMMY*normfac_dummy
+        '''
+
+        '''        
         H_ssxfp_DATA.Scale(normfac_data)
         H_ssyfp_DATA.Scale(normfac_data)
         H_ssxpfp_DATA.Scale(normfac_data)
@@ -3983,6 +4002,15 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Scale(normfac_data)
         H_ct_DATA.Scale(normfac_data)
 
+        arr_t_DATA = arr_t_DATA*normfac_data
+        arr_phi_DATA = arr_phi_DATA*normfac_data
+        arr_Q2_DATA = arr_Q2_DATA*normfac_data
+        arr_W_DATA = arr_W_DATA*normfac_data
+        arr_MM_DATA = arr_MM_DATA*normfac_data
+        arr_emiss_DATA = arr_emiss_DATA*normfac_data
+        '''
+
+        '''        
         # Data Random subtraction
         H_ssxfp_RAND.Scale(normfac_data/nWindows)
         H_ssyfp_RAND.Scale(normfac_data/nWindows)
@@ -4009,7 +4037,16 @@ def defineHists(phi_setting, inpDict):
         H_pmz_RAND.Scale(normfac_data/nWindows)
         H_W_RAND.Scale(normfac_data/nWindows)
         #H_ct_RAND.Scale(normfac_data/nWindows)
+        
+        arr_t_RAND = arr_t_RAND*normfac_data/nWindows
+        arr_phi_RAND = arr_phi_RAND*normfac_data/nWindows
+        arr_Q2_RAND = arr_Q2_RAND*normfac_data/nWindows
+        arr_W_RAND = arr_W_RAND*normfac_data/nWindows
+        arr_MM_RAND = arr_MM_RAND*normfac_data/nWindows
+        arr_emiss_RAND = arr_emiss_RAND*normfac_data/nWindows
+        '''
 
+        '''        
         # Dummy Random subtraction
         H_ssxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_ssyfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
@@ -4036,6 +4073,14 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         H_W_DUMMY_RAND.Scale(normfac_dummy/nWindows)
         #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
+
+        arr_t_DUMMY_RAND = arr_t_DUMMY_RAND*normfac_dummy/nWindows
+        arr_phi_DUMMY_RAND = arr_phi_DUMMY_RAND*normfac_dummy/nWindows
+        arr_Q2_DUMMY_RAND = arr_Q2_DUMMY_RAND*normfac_dummy/nWindows
+        arr_W_DUMMY_RAND = arr_W_DUMMY_RAND*normfac_dummy/nWindows
+        arr_MM_DUMMY_RAND = arr_MM_DUMMY_RAND*normfac_dummy/nWindows
+        arr_emiss_DUMMY_RAND = arr_emiss_DUMMY_RAND*normfac_dummy/nWindows
+        '''
 
         ###
         # Data Random subtraction
