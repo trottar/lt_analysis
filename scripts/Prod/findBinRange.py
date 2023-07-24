@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 21:59:00 trottar"
+# Time-stamp: "2023-07-23 22:04:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,7 +152,7 @@ def hist_to_numpy(histogram):
     # Convert the histogram data to a NumPy array
     events, edges = rnp.hist2array(histogram,return_edges=True)
 
-    print("^^^^^^^^^^^^^^^^^^^",len(edges),"^^^^^^^^^^^^^^^^^^^")
+    print("^^^^^^^^^^^^^^^^^^^",edges[0],"^^^^^^^^^^^^^^^^^^^")
     
     # Convert to a float array explicitly
     edges = np.array(edges, dtype=float)[0]
