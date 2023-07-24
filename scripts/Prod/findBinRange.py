@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 21:12:28 trottar"
+# Time-stamp: "2023-07-23 21:20:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -149,15 +149,17 @@ def hist_to_numpy(histogram):
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram):
     # Convert the histogram data to a NumPy array
-    hist_values, bin_edges = rnp.hist2array(histogram,return_edges=True)
+    events, bin_edges = rnp.hist2array(histogram,return_edges=True)
     
-    hist_values = hist_values*10
+    # Convert to a float array explicitly
+    bin_edges = np.array(bin_edges, dtype=float)
+    events = np.array(hist_values, dtype=float)
+
+    # Get the histogram values and bin edges
+    hist_values, bin_edges = np.histogram(events, bins=bin_edges)
 
     # Create a 1D dataset (array) representing the event distribution bin-to-bin
     event_distribution = np.repeat(bin_edges[:-1], hist_values)
-
-    # Scale back the event_distribution array to float values
-    event_distribution = event_distribution / 10
 
     print("^^^^^^^^^^^^^^^^^^^",len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
     
