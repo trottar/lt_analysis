@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 20:41:21 trottar"
+# Time-stamp: "2023-07-23 20:46:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -149,28 +149,16 @@ def hist_to_numpy(histogram):
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram):
     # Convert the histogram data to a NumPy array
-    bin_weights, bin_edges = rnp.hist2array(histogram,return_edges=True)
-    # Check if bin_edges is a list of lists, and flatten it if necessary
-    if isinstance(bin_edges[0], (list, np.ndarray)):
-        bin_edges = np.concatenate(bin_edges)    
-    # Convert bin_edges to a NumPy array
-    bin_edges = np.array(bin_edges)
-    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+    hist_values, bin_edges = rnp.hist2array(histogram,return_edges=True)
 
-    # Calculate the weighted sum of the data in each bin
-    weighted_sum = np.sum(bin_centers * bin_weights)
+    # Create a 1D dataset (array) representing the event distribution bin-to-bin
+    event_distribution = []
+    for bin_value, count in zip(bin_edges, hist_values):
+        event_distribution.extend([bin_value] * count)
 
-    # Calculate the weighted average of the data in each bin
-    weighted_average = np.sum(bin_centers * bin_weights) / np.sum(bin_weights)
-
-    # Calculate the weighted standard deviation of the data in each bin
-    mean_value = np.sum(bin_centers * bin_weights) / np.sum(bin_weights)
-    weighted_stddev = np.sqrt(np.sum(bin_weights * (bin_centers - mean_value)**2) / np.sum(bin_weights))    
-
-
-    print("^^^^^^^^^^^^^^^^^^^",len(weighted_average),"^^^^^^^^^^^^^^^^^^^")
+    print("^^^^^^^^^^^^^^^^^^^",len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
     
-    return weighted_average
+    return event_distribution
 
 def bin_data(histlist):
 
