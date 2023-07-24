@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 23:25:17 trottar"
+# Time-stamp: "2023-07-23 23:31:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,17 +150,20 @@ def hist_to_numpy(histogram):
 def hist_to_numpy(histogram):
     
     # Convert the histogram data to a NumPy array
-    hist_values, edges = rnp.hist2array(histogram,return_edges=True)
+    events, edges = rnp.hist2array(histogram,return_edges=True)
+
+    # Get the histogram values and bin bin_edges
+    hist_values, bin_edges = np.histogram(events, bins=edges)
     
     # Convert to a float array explicitly
-    edges = np.array(edges, dtype=float)[0]
+    bin_edges = np.array(bin_edges, dtype=float)[0]
     hist_values = np.array(hist_values, dtype=float)
 
     # Create a 1D dataset (array) representing the event distribution bin-to-bin
-    event_distribution = np.array([val for val, count in zip(edges[:-1], hist_values) for _ in range(count)], dtype=float)
+    event_distribution = np.array([val for val, count in zip(bin_edges[:-1], hist_values) for _ in range(count)], dtype=float)
 
     print(">>>>>>>>>>>>>>>>>>>",hist_values,">>>>>>>>>>>>>>>>>>>")
-    print("<<<<<<<<<<<<<<<<<<<",edges,"<<<<<<<<<<<<<<<<<<<")
+    print("<<<<<<<<<<<<<<<<<<<",bin_edges,"<<<<<<<<<<<<<<<<<<<")
     print("^^^^^^^^^^^^^^^^^^^",event_distribution,"^^^^^^^^^^^^^^^^^^^")
     
     #print("^^^^^^^^^^^^^^^^^^^",max(bin_edges), len(event_distribution),"^^^^^^^^^^^^^^^^^^^")
