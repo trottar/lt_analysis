@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 13:58:31 trottar"
+# Time-stamp: "2023-07-24 14:12:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -515,13 +515,21 @@ MM = np.array([])
 for hist in histlist:
     
     # Convert to NumPy arrays
-    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"]*hist["H_Weight_SIMC"], hist["arr_t_SIMC"])) # Need to change to weight
-    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"]*hist["H_Weight_SIMC"], hist["arr_phi_SIMC"])) # Need to change to weight
-    phi_deg = np.append(phi_deg, phi * (180 / math.pi)) # Need to change to weight
-    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"]*hist["H_Weight_SIMC"], hist["arr_Q2_SIMC"])) # Need to change to weight
-    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"]*hist["H_Weight_SIMC"], hist["arr_W_SIMC"])) # Need to change to weight
-    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"]*hist["H_Weight_SIMC"], hist["arr_MM_SIMC"])) # Need to change to weight
+    Weight = np.append(Weight, hist_to_numpy(hist["H_Weight_SIMC"], hist["arr_Weight_SIMC"]))
+    t = np.append(t, hist_to_numpy(hist["H_t_SIMC"], hist["arr_t_SIMC"]))
+    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"], hist["arr_phi_SIMC"]))
+    phi_deg = np.append(phi_deg, phi * (180 / math.pi))
+    Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"], hist["arr_Q2_SIMC"]))
+    W = np.append(W, hist_to_numpy(hist["H_W_SIMC"], hist["arr_W_SIMC"]))
+    MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"], hist["arr_MM_SIMC"]))
 
+    t = t*Weight
+    phi = phi*Weight
+    phi_deg = np.append(phi_deg, phi * (180 / math.pi))
+    Q2 = Q2*Weight
+    W = W*Weight
+    MM = MM*Weight
+    
 # Initialize NumPy arrays
 tmp_lst = []
 for j in range(len(tbinedges) - 1):
