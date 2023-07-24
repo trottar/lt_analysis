@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 12:47:35 trottar"
+# Time-stamp: "2023-07-24 12:59:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -4255,6 +4255,18 @@ def defineHists(phi_setting, inpDict):
         histDict["phiq_vs_t_DATA"] = phiq_vs_t_DATA
         histDict["polar_phiq_vs_t_DATA"] = polar_phiq_vs_t_DATA
         histDict["Q2_vs_W_DATA"] = Q2_vs_W_DATA
+        histDict["arr_t_SIMC"] = arr_t_SIMC
+        histDict["arr_phi_SIMC"] = arr_phi_SIMC
+        histDict["arr_Q2_SIMC"] = arr_Q2_SIMC
+        histDict["arr_W_SIMC"] = arr_W_SIMC
+        histDict["arr_MM_SIMC"] = arr_MM_SIMC
+        histDict["arr_emiss_SIMC"] = arr_emiss_SIMC
+        histDict["arr_t_DATA"] = arr_t_DATA
+        histDict["arr_phi_DATA"] = arr_phi_DATA
+        histDict["arr_Q2_DATA"] = arr_Q2_DATA
+        histDict["arr_W_DATA"] = arr_W_DATA
+        histDict["arr_MM_DATA"] = arr_MM_DATA
+        histDict["arr_emiss_DATA"] = arr_emiss_DATA        
         histDict["yieldDictData"] = {}
         histDict["yieldDictSimc"] = {}
 
