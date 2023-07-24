@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 14:39:27 trottar"
+# Time-stamp: "2023-07-24 16:46:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -4225,6 +4225,7 @@ def defineHists(phi_setting, inpDict):
         histDict["H_tbins_DATA"] = H_tbins_DATA
         histDict["H_yield_DATA"] = H_yield_DATA
         histDict["normfac_simc"] = normfac_simc
+        histDict["H_Weight_SIMC"] =     H_Weight_SIMC
         histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
         histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC
         histDict["H_hsyptar_SIMC"] =     H_hsyptar_SIMC
