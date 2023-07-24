@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 01:42:27 trottar"
+# Time-stamp: "2023-07-24 01:47:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,7 +158,7 @@ def hist_to_numpy(histogram, data):
     edges = edges[0]
     events = data
 
-    print("!!!!!!!!!!!!!!!!!!!",events,"!!!!!!!!!!!!!!!!!!!")
+    print("!!!!!!!!!!!!!!!!!!!",max(events),"!!!!!!!!!!!!!!!!!!!")
     print("???????????????????",edges,"???????????????????")
     
     # Get the histogram values and bin bin_edges
