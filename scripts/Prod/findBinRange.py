@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 14:24:47 trottar"
+# Time-stamp: "2023-07-24 14:39:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -526,12 +526,6 @@ for hist in histlist:
 
     print("^^^^^^^^^^^^^^^^^^^",t,Weight,"^^^^^^^^^^^^^^^^^^^")
     
-    t = t*Weight
-    phi = phi*Weight
-    phi_deg = np.append(phi_deg, phi * (180 / math.pi))
-    Q2 = Q2*Weight
-    W = W*Weight
-    MM = MM*Weight
     
 # Initialize NumPy arrays
 tmp_lst = []
