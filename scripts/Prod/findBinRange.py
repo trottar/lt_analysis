@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 03:43:34 trottar"
+# Time-stamp: "2023-07-24 03:56:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -636,34 +636,39 @@ c_Wtbin = TCanvas()
 
 c_Wtbin.Divide(3, int(NumtBins/2))
 
-for i,hist in enumerate(histlist):
+# Initialize NumPy arrays before the loop
+t = np.array([])
+W = np.array([])
 
-    InFile_DATA = hist["InFile_DATA"]
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+for hist in histlist:
+    
+    # Convert to NumPy arrays
+    t = np.append(t, hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"]))
+    W = np.append(W, hist_to_numpy(hist["H_W_DATA"], hist["arr_W_DATA"]))
 
-    aver_lst = []
-    for evt in TBRANCH_DATA:
-        for j in range(len(tbinedges) - 1):
-            if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
-                tbin_index = j
-            else:
-                tbin_index = None
-            if tbin_index != None:
-                aver_lst.append((tbin_index, evt.W))
+# Initialize NumPy arrays
+aver_lst = []
+for j in range(len(tbinedges) - 1):
+    tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
+    if len(tbin_indices) > 0:
+        tbin_index = j
+        W_val = W[tbin_indices]
+        # Append tbin_index, W to aver_lst
+        aver_lst.append((tbin_index, W_val))
+        print("-------------------",W_val,"-------------------")
 
-    groups = {}
-    # Group the tuples by the first two elements using a dictionary
-    for t in aver_lst:
-        key = (t[0])
-        if key in groups:
-            groups[key].append((t[1]))
-        else:
-            groups[key] = [(t[1])]
+# Group the tuples by the first two elements using defaultdict
+groups = defaultdict(list)
+for t in aver_lst:
+    key = t[0]
+    groups[key].append((t[1]))
 
+for hist in histlist:    
     # Extract the desired values from each group
     for key, val in groups.items():
         for tup in val:
-            hist["H_W_tbin_DATA_{}".format(key+1)].Fill(tup)
+            for q in tup:
+                hist["H_W_tbin_DATA_{}".format(key+1)].Fill(q)
         c_Wtbin.cd(key+1)
         hist["H_W_tbin_DATA_{}".format(key+1)].Draw("same")
         hist["H_W_tbin_DATA_{}".format(key+1)].SetLineColor(i+1)
@@ -674,34 +679,39 @@ c_ttbin = TCanvas()
 
 c_ttbin.Divide(3, int(NumtBins/2))
 
-for i,hist in enumerate(histlist):
+# Initialize NumPy arrays before the loop
+t = np.array([])
+t = np.array([])
 
-    InFile_DATA = hist["InFile_DATA"]
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+for hist in histlist:
+    
+    # Convert to NumPy arrays
+    t = np.append(t, hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"]))
+    t = np.append(t, hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"]))
 
-    aver_lst = []
-    for evt in TBRANCH_DATA:
-        for j in range(len(tbinedges) - 1):
-            if tbinedges[j] <= -evt.MandelT < tbinedges[j+1]:
-                tbin_index = j
-            else:
-                tbin_index = None
-            if tbin_index != None:
-                aver_lst.append((tbin_index, -evt.MandelT))
+# Initialize NumPy arrays
+aver_lst = []
+for j in range(len(tbinedges) - 1):
+    tbin_indices = np.where((tbinedges[j] <= t) & (t < tbinedges[j + 1]))[0]
+    if len(tbin_indices) > 0:
+        tbin_index = j
+        t_val = t[tbin_indices]
+        # Append tbin_index, t to aver_lst
+        aver_lst.append((tbin_index, t_val))
+        print("-------------------",t_val,"-------------------")
 
-    groups = {}
-    # Group the tuples by the first two elements using a dictionary
-    for t in aver_lst:
-        key = (t[0])
-        if key in groups:
-            groups[key].append((t[1]))
-        else:
-            groups[key] = [(t[1])]
+# Group the tuples by the first two elements using defaultdict
+groups = defaultdict(list)
+for t in aver_lst:
+    key = t[0]
+    groups[key].append((t[1]))
 
+for hist in histlist:    
     # Extract the desired values from each group
     for key, val in groups.items():
         for tup in val:
-            hist["H_t_tbin_DATA_{}".format(key+1)].Fill(tup)
+            for q in tup:
+                hist["H_t_tbin_DATA_{}".format(key+1)].Fill(q)
         c_ttbin.cd(key+1)
         hist["H_t_tbin_DATA_{}".format(key+1)].Draw("same")
         hist["H_t_tbin_DATA_{}".format(key+1)].SetLineColor(i+1)
