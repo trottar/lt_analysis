@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 22:26:48 trottar"
+# Time-stamp: "2023-07-23 22:32:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,7 +152,7 @@ def hist_to_numpy(histogram):
     # Convert the histogram data to a NumPy array
     events, edges = rnp.hist2array(histogram,return_edges=True)
 
-    print("^^^^^^^^^^^^^^^^^^^",edges[0],"^^^^^^^^^^^^^^^^^^^")
+    print("^^^^^^^^^^^^^^^^^^^",events,"^^^^^^^^^^^^^^^^^^^")
     
     # Convert to a float array explicitly
     edges = np.array(edges, dtype=float)[0]
@@ -186,9 +186,7 @@ def bin_data(histlist):
         
         t = hist_to_numpy(hist["H_t_DATA"])
         phi = hist_to_numpy(hist["H_ph_q_DATA"]) + math.pi
-        phi_deg = phi * (180 / math.pi)
-        
-        #tmask = (tmin <= t) & (t <= tmax)
+        phi_deg = phi * (180 / math.pi)        
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
