@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-23 21:26:36 trottar"
+# Time-stamp: "2023-07-23 21:30:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,7 +152,7 @@ def hist_to_numpy(histogram):
     events, bin_edges = rnp.hist2array(histogram,return_edges=True)
     
     # Convert to a float array explicitly
-    bin_edges = np.array(bin_edges, dtype=float)
+    bin_edges = np.array(bin_edges, dtype=float)[0]
     events = np.array(events, dtype=float)
 
     print("^^^^^^^^^^^^^^^^^^^",bin_edges,events,"^^^^^^^^^^^^^^^^^^^")
