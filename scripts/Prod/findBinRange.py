@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-25 03:31:11 trottar"
+# Time-stamp: "2023-07-26 13:39:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -149,22 +149,25 @@ def hist_to_numpy(histogram):
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram, data):
     
-    # Convert the histogram data to a NumPy array
-    events, edges = rnp.hist2array(histogram,return_edges=True)
+    # Get the number of bins in the histogram
+    n_bins = histogram.GetNbinsX()
 
-    # Convert to a float array explicitly
-    #edges = np.array(edges, dtype=float)[0]
-    #events = np.array(events, dtype=float)
-    edges = edges[0]
-    events = data
+    # Calculate the integral for each bin and store it along with the bin edges
+    bin_edges = []
+    bin_integrals = []
+
+    for i in range(1, n_bins + 1):
+        bin_low_edge = histogram.GetXaxis().GetBinLowEdge(i)
+        bin_integral = histogram.Integral(1, i)
+        bin_edges.append(bin_low_edge)
+        bin_integrals.append(bin_integral)
+
+    # The last bin edge is the upper edge of the last bin
+    bin_edges.append(histogram.GetXaxis().GetBinUpEdge(n_bins))
+
+    print("^^^^^^^^^^^^^^^^^",bin_edges,"^^^^^^^^^^^^^^^^^")
     
-    # Get the histogram values and bin bin_edges
-    hist_values, bin_edges = np.histogram(events, bins=edges)
-    
-    # Create a 1D dataset (array) representing the event distribution bin-to-bin
-    event_distribution = np.repeat(bin_edges[:-1], hist_values)
-    
-    return event_distribution
+    return bin_edges
 
 def bin_data(histlist):
 
