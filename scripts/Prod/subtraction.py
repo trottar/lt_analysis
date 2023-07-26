@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-26 12:44:40 trottar"
+# Time-stamp: "2023-07-26 12:58:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -419,7 +419,7 @@ def defineHists(phi_setting, inpDict):
         H_q_DATA        = ROOT.TH1D("H_q_DATA","q", 200, 0.0, 10.0)
         H_Q2_DATA       = ROOT.TH1D("H_Q2_DATA","Q2", 200, Q2min, Q2max)
         H_W_DATA  = ROOT.TH1D("H_W_DATA","W ", 200, Wmin, Wmax)
-        H_t_DATA       = ROOT.TH1D("H_t_DATA","-t", 200, tmin, tmax)  
+        H_t_DATA       = ROOT.TH1D("H_t_DATA","-t", 200, tmin, tmax)
         H_epsilon_DATA  = ROOT.TH1D("H_epsilon_DATA","epsilon", 200, 0., 1.0)
         H_MM_DATA  = ROOT.TH1D("H_MM_DATA","MM_{K}", 200, 0.0, 1.5)
         H_th_DATA  = ROOT.TH1D("H_th_DATA","X' tar", 200, -0.1, 0.1)
@@ -2633,13 +2633,15 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
         H_W_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
         #H_ct_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
-        
+
+        '''
         arr_t_SUBPROTON_DUMMY_RAND = arr_t_SUBPROTON_DUMMY_RAND/nWindows
         arr_phi_SUBPROTON_DUMMY_RAND = arr_phi_SUBPROTON_DUMMY_RAND/nWindows
         arr_Q2_SUBPROTON_DUMMY_RAND = arr_Q2_SUBPROTON_DUMMY_RAND/nWindows
         arr_W_SUBPROTON_DUMMY_RAND = arr_W_SUBPROTON_DUMMY_RAND/nWindows
         arr_MM_SUBPROTON_DUMMY_RAND = arr_MM_SUBPROTON_DUMMY_RAND/nWindows
         arr_emiss_SUBPROTON_DUMMY_RAND = arr_emiss_SUBPROTON_DUMMY_RAND/nWindows
+        '''
         
         ###
         # Data Random subtraction
@@ -2669,12 +2671,14 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_RAND,-1)
         H_ct_DATA.Add(H_ct_RAND,-1)
 
+        '''
         arr_t_DATA = arr_t_DATA-arr_t_RAND
         arr_phi_DATA = arr_phi_DATA-arr_phi_RAND
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_RAND
         arr_W_DATA = arr_W_DATA-arr_W_RAND
         arr_MM_DATA = arr_MM_DATA-arr_MM_RAND
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_RAND
+        '''
         
         ###
         # Dummy Random subtraction
@@ -2704,12 +2708,14 @@ def defineHists(phi_setting, inpDict):
         H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
         H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
+        '''
         arr_t_DUMMY = arr_t_DUMMY-arr_t_DUMMY_RAND
         arr_phi_DUMMY = arr_phi_DUMMY-arr_phi_DUMMY_RAND
         arr_Q2_DUMMY = arr_Q2_DUMMY-arr_Q2_DUMMY_RAND
         arr_W_DUMMY = arr_W_DUMMY-arr_W_DUMMY_RAND
         arr_MM_DUMMY = arr_MM_DUMMY-arr_MM_DUMMY_RAND
         arr_emiss_DUMMY = arr_emiss_DUMMY-arr_emiss_DUMMY_RAND
+        '''
 
         ###
         # Data Random subtraction
@@ -2739,12 +2745,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DATA.Add(H_W_SUBPION_RAND,-1)
         H_ct_epi_SUBPION_DATA.Add(H_ct_epi_SUBPION_RAND,-1)
 
+        '''
         arr_t_SUBPION_DATA = arr_t_SUBPION_DATA-arr_t_SUBPION_RAND
         arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA-arr_phi_SUBPION_RAND
         arr_Q2_SUBPION_DATA = arr_Q2_SUBPION_DATA-arr_Q2_SUBPION_RAND
         arr_W_SUBPION_DATA = arr_W_SUBPION_DATA-arr_W_SUBPION_RAND
         arr_MM_SUBPION_DATA = arr_MM_SUBPION_DATA-arr_MM_SUBPION_RAND
         arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA-arr_emiss_SUBPION_RAND
+        '''
 
         ###
         # Dummy Random subtraction
@@ -2774,12 +2782,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DUMMY.Add(H_W_SUBPION_DUMMY_RAND,-1)
         H_ct_epi_SUBPION_DUMMY.Add(H_ct_epi_SUBPION_DUMMY_RAND,-1)
 
+        '''
         arr_t_SUBPION_DUMMY = arr_t_SUBPION_DUMMY-arr_t_SUBPION_DUMMY_RAND
         arr_phi_SUBPION_DUMMY = arr_phi_SUBPION_DUMMY-arr_phi_SUBPION_DUMMY_RAND
         arr_Q2_SUBPION_DUMMY = arr_Q2_SUBPION_DUMMY-arr_Q2_SUBPION_DUMMY_RAND
         arr_W_SUBPION_DUMMY = arr_W_SUBPION_DUMMY-arr_W_SUBPION_DUMMY_RAND
         arr_MM_SUBPION_DUMMY = arr_MM_SUBPION_DUMMY-arr_MM_SUBPION_DUMMY_RAND
         arr_emiss_SUBPION_DUMMY = arr_emiss_SUBPION_DUMMY-arr_emiss_SUBPION_DUMMY_RAND
+        '''
         
         ###
         # Data Random subtraction
@@ -2809,12 +2819,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_RAND,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_RAND,-1)
 
+        '''
         arr_t_SUBPROTON_DATA = arr_t_SUBPROTON_DATA-arr_t_SUBPROTON_RAND
         arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA-arr_phi_SUBPROTON_RAND
         arr_Q2_SUBPROTON_DATA = arr_Q2_SUBPROTON_DATA-arr_Q2_SUBPROTON_RAND
         arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA-arr_W_SUBPROTON_RAND
         arr_MM_SUBPROTON_DATA = arr_MM_SUBPROTON_DATA-arr_MM_SUBPROTON_RAND
         arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA-arr_emiss_SUBPROTON_RAND
+        '''
         
         ###
         # Dummy Random subtraction
@@ -2844,12 +2856,14 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DUMMY.Add(H_W_SUBPROTON_DUMMY_RAND,-1)
         H_ct_ep_SUBPROTON_DUMMY.Add(H_ct_ep_SUBPROTON_DUMMY_RAND,-1)
 
+        '''
         arr_t_SUBPROTON_DUMMY = arr_t_SUBPROTON_DUMMY-arr_t_SUBPROTON_DUMMY_RAND
         arr_phi_SUBPROTON_DUMMY = arr_phi_SUBPROTON_DUMMY-arr_phi_SUBPROTON_DUMMY_RAND
         arr_Q2_SUBPROTON_DUMMY = arr_Q2_SUBPROTON_DUMMY-arr_Q2_SUBPROTON_DUMMY_RAND
         arr_W_SUBPROTON_DUMMY = arr_W_SUBPROTON_DUMMY-arr_W_SUBPROTON_DUMMY_RAND
         arr_MM_SUBPROTON_DUMMY = arr_MM_SUBPROTON_DUMMY-arr_MM_SUBPROTON_DUMMY_RAND
         arr_emiss_SUBPROTON_DUMMY = arr_emiss_SUBPROTON_DUMMY-arr_emiss_SUBPROTON_DUMMY_RAND
+        '''
         
         ###
         # Dummy Subtraction
