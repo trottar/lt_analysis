@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-26 14:18:04 trottar"
+# Time-stamp: "2023-07-26 14:41:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,7 +186,7 @@ def bin_data(histlist):
     for i,hist in enumerate(histlist):
         
         t = hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"])
-        phi_deg = np.append(phi_deg, [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_phi_DATA"])])
+        phi_deg = [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_phi_DATA"])]
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
@@ -395,7 +395,6 @@ c_yield_data = TCanvas()
 
 # Initialize NumPy arrays before the loop
 t = np.array([])
-phi = np.array([])
 phi_deg = np.array([])
 Q2 = np.array([])
 W = np.array([])
@@ -513,7 +512,6 @@ c_yield_simc = TCanvas()
 # Initialize NumPy arrays before the loop
 Weight = np.array([])
 t = np.array([])
-phi = np.array([])
 phi_deg = np.array([])
 Q2 = np.array([])
 W = np.array([])
