@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-26 14:09:12 trottar"
+# Time-stamp: "2023-07-26 14:18:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,7 +186,7 @@ def bin_data(histlist):
     for i,hist in enumerate(histlist):
         
         t = hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"])
-        phi_deg = np.append(phi, [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_phi_DATA"])])
+        phi_deg = np.append(phi_deg, [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_phi_DATA"])])
         
         if hist["phi_setting"] == 'Right':
             print("\nCreating right t-bin histogram...")
@@ -405,7 +405,7 @@ for hist in histlist:
     
     # Convert to NumPy arrays
     t = np.append(t, hist_to_numpy(hist["H_t_DATA"], hist["arr_t_DATA"]))
-    phi_deg = np.append(phi, [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_phi_DATA"])])
+    phi_deg = np.append(phi_deg, [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_DATA"], hist["arr_phi_DATA"])])
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_DATA"], hist["arr_Q2_DATA"]))
     W = np.append(W, hist_to_numpy(hist["H_W_DATA"], hist["arr_W_DATA"]))
     MM = np.append(MM, hist_to_numpy(hist["H_MM_DATA"], hist["arr_MM_DATA"])) 
@@ -524,8 +524,7 @@ for hist in histlist:
     # Convert to NumPy arrays
     Weight = np.append(Weight, hist_to_numpy(hist["H_Weight_SIMC"], hist["arr_Weight_SIMC"]))
     t = np.append(t, hist_to_numpy(hist["H_t_SIMC"], hist["arr_t_SIMC"]))
-    phi = np.append(phi, hist_to_numpy(hist["H_ph_q_SIMC"], hist["arr_phi_SIMC"]))
-    phi_deg = np.append(phi_deg, phi * (180 / math.pi))
+    phi_deg = np.append(phi_deg, [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_SIMC"], hist["arr_phi_SIMC"])])
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"], hist["arr_Q2_SIMC"]))
     W = np.append(W, hist_to_numpy(hist["H_W_SIMC"], hist["arr_W_SIMC"]))
     MM = np.append(MM, hist_to_numpy(hist["H_MM_SIMC"], hist["arr_MM_SIMC"]))
