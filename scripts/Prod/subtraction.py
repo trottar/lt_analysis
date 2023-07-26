@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-24 14:39:27 trottar"
+# Time-stamp: "2023-07-26 12:44:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2043,75 +2043,143 @@ def defineHists(phi_setting, inpDict):
 
         '''        
         # Data Random subtraction
-        H_ssxfp_RAND.Scale(normfac_data/nWindows)
-        H_ssyfp_RAND.Scale(normfac_data/nWindows)
-        H_ssxpfp_RAND.Scale(normfac_data/nWindows)
-        H_ssypfp_RAND.Scale(normfac_data/nWindows)
-        H_hsxfp_RAND.Scale(normfac_data/nWindows)
-        H_hsyfp_RAND.Scale(normfac_data/nWindows)
-        H_hsxpfp_RAND.Scale(normfac_data/nWindows)
-        H_hsypfp_RAND.Scale(normfac_data/nWindows)
-        H_ssxptar_RAND.Scale(normfac_data/nWindows)
-        H_ssyptar_RAND.Scale(normfac_data/nWindows)
-        H_hsxptar_RAND.Scale(normfac_data/nWindows)
-        H_hsyptar_RAND.Scale(normfac_data/nWindows)
-        H_ssdelta_RAND.Scale(normfac_data/nWindows)
-        H_hsdelta_RAND.Scale(normfac_data/nWindows)
-        H_Q2_RAND.Scale(normfac_data/nWindows)
-        H_t_RAND.Scale(normfac_data/nWindows)
-        H_epsilon_RAND.Scale(normfac_data/nWindows)
-        H_MM_RAND.Scale(normfac_data/nWindows)
-        H_pmiss_RAND.Scale(normfac_data/nWindows)
-        H_emiss_RAND.Scale(normfac_data/nWindows)
-        H_pmx_RAND.Scale(normfac_data/nWindows)
-        H_pmy_RAND.Scale(normfac_data/nWindows)
-        H_pmz_RAND.Scale(normfac_data/nWindows)
-        H_W_RAND.Scale(normfac_data/nWindows)
-        #H_ct_RAND.Scale(normfac_data/nWindows)
+        H_ssxfp_RAND.Scale(normfac_data)
+        H_ssyfp_RAND.Scale(normfac_data)
+        H_ssxpfp_RAND.Scale(normfac_data)
+        H_ssypfp_RAND.Scale(normfac_data)
+        H_hsxfp_RAND.Scale(normfac_data)
+        H_hsyfp_RAND.Scale(normfac_data)
+        H_hsxpfp_RAND.Scale(normfac_data)
+        H_hsypfp_RAND.Scale(normfac_data)
+        H_ssxptar_RAND.Scale(normfac_data)
+        H_ssyptar_RAND.Scale(normfac_data)
+        H_hsxptar_RAND.Scale(normfac_data)
+        H_hsyptar_RAND.Scale(normfac_data)
+        H_ssdelta_RAND.Scale(normfac_data)
+        H_hsdelta_RAND.Scale(normfac_data)
+        H_Q2_RAND.Scale(normfac_data)
+        H_t_RAND.Scale(normfac_data)
+        H_epsilon_RAND.Scale(normfac_data)
+        H_MM_RAND.Scale(normfac_data)
+        H_pmiss_RAND.Scale(normfac_data)
+        H_emiss_RAND.Scale(normfac_data)
+        H_pmx_RAND.Scale(normfac_data)
+        H_pmy_RAND.Scale(normfac_data)
+        H_pmz_RAND.Scale(normfac_data)
+        H_W_RAND.Scale(normfac_data)
+        #H_ct_RAND.Scale(normfac_data)
         
-        arr_t_RAND = arr_t_RAND*normfac_data/nWindows
-        arr_phi_RAND = arr_phi_RAND*normfac_data/nWindows
-        arr_Q2_RAND = arr_Q2_RAND*normfac_data/nWindows
-        arr_W_RAND = arr_W_RAND*normfac_data/nWindows
-        arr_MM_RAND = arr_MM_RAND*normfac_data/nWindows
-        arr_emiss_RAND = arr_emiss_RAND*normfac_data/nWindows
+        arr_t_RAND = arr_t_RAND*normfac_data
+        arr_phi_RAND = arr_phi_RAND*normfac_data
+        arr_Q2_RAND = arr_Q2_RAND*normfac_data
+        arr_W_RAND = arr_W_RAND*normfac_data
+        arr_MM_RAND = arr_MM_RAND*normfac_data
+        arr_emiss_RAND = arr_emiss_RAND*normfac_data
         '''
 
+        # Data Random subtraction window
+        H_ssxfp_RAND.Scale(1/nWindows)
+        H_ssyfp_RAND.Scale(1/nWindows)
+        H_ssxpfp_RAND.Scale(1/nWindows)
+        H_ssypfp_RAND.Scale(1/nWindows)
+        H_hsxfp_RAND.Scale(1/nWindows)
+        H_hsyfp_RAND.Scale(1/nWindows)
+        H_hsxpfp_RAND.Scale(1/nWindows)
+        H_hsypfp_RAND.Scale(1/nWindows)
+        H_ssxptar_RAND.Scale(1/nWindows)
+        H_ssyptar_RAND.Scale(1/nWindows)
+        H_hsxptar_RAND.Scale(1/nWindows)
+        H_hsyptar_RAND.Scale(1/nWindows)
+        H_ssdelta_RAND.Scale(1/nWindows)
+        H_hsdelta_RAND.Scale(1/nWindows)
+        H_Q2_RAND.Scale(1/nWindows)
+        H_t_RAND.Scale(1/nWindows)
+        H_epsilon_RAND.Scale(1/nWindows)
+        H_MM_RAND.Scale(1/nWindows)
+        H_pmiss_RAND.Scale(1/nWindows)
+        H_emiss_RAND.Scale(1/nWindows)
+        H_pmx_RAND.Scale(1/nWindows)
+        H_pmy_RAND.Scale(1/nWindows)
+        H_pmz_RAND.Scale(1/nWindows)
+        H_W_RAND.Scale(1/nWindows)
+        #H_ct_RAND.Scale(1/nWindows)
+        
+        arr_t_RAND = arr_t_RAND/nWindows
+        arr_phi_RAND = arr_phi_RAND/nWindows
+        arr_Q2_RAND = arr_Q2_RAND/nWindows
+        arr_W_RAND = arr_W_RAND/nWindows
+        arr_MM_RAND = arr_MM_RAND/nWindows
+        arr_emiss_RAND = arr_emiss_RAND/nWindows
+        
         '''        
-        # Dummy Random subtraction
-        H_ssxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_ssyfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_ssxpfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_ssypfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_hsxfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_hsyfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_hsxpfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_hsypfp_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_ssxptar_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_ssyptar_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_hsxptar_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_hsyptar_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_ssdelta_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_hsdelta_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_Q2_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_t_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_epsilon_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_MM_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_pmiss_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_emiss_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_pmx_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_pmy_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_pmz_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        H_W_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-        #H_ct_DUMMY_RAND.Scale(normfac_dummy/nWindows)
-
-        arr_t_DUMMY_RAND = arr_t_DUMMY_RAND*normfac_dummy/nWindows
-        arr_phi_DUMMY_RAND = arr_phi_DUMMY_RAND*normfac_dummy/nWindows
-        arr_Q2_DUMMY_RAND = arr_Q2_DUMMY_RAND*normfac_dummy/nWindows
-        arr_W_DUMMY_RAND = arr_W_DUMMY_RAND*normfac_dummy/nWindows
-        arr_MM_DUMMY_RAND = arr_MM_DUMMY_RAND*normfac_dummy/nWindows
-        arr_emiss_DUMMY_RAND = arr_emiss_DUMMY_RAND*normfac_dummy/nWindows
+        # Data Dummy_Random subtraction
+        H_ssxfp_DUMMY_RAND.Scale(normfac_data)
+        H_ssyfp_DUMMY_RAND.Scale(normfac_data)
+        H_ssxpfp_DUMMY_RAND.Scale(normfac_data)
+        H_ssypfp_DUMMY_RAND.Scale(normfac_data)
+        H_hsxfp_DUMMY_RAND.Scale(normfac_data)
+        H_hsyfp_DUMMY_RAND.Scale(normfac_data)
+        H_hsxpfp_DUMMY_RAND.Scale(normfac_data)
+        H_hsypfp_DUMMY_RAND.Scale(normfac_data)
+        H_ssxptar_DUMMY_RAND.Scale(normfac_data)
+        H_ssyptar_DUMMY_RAND.Scale(normfac_data)
+        H_hsxptar_DUMMY_RAND.Scale(normfac_data)
+        H_hsyptar_DUMMY_RAND.Scale(normfac_data)
+        H_ssdelta_DUMMY_RAND.Scale(normfac_data)
+        H_hsdelta_DUMMY_RAND.Scale(normfac_data)
+        H_Q2_DUMMY_RAND.Scale(normfac_data)
+        H_t_DUMMY_RAND.Scale(normfac_data)
+        H_epsilon_DUMMY_RAND.Scale(normfac_data)
+        H_MM_DUMMY_RAND.Scale(normfac_data)
+        H_pmiss_DUMMY_RAND.Scale(normfac_data)
+        H_emiss_DUMMY_RAND.Scale(normfac_data)
+        H_pmx_DUMMY_RAND.Scale(normfac_data)
+        H_pmy_DUMMY_RAND.Scale(normfac_data)
+        H_pmz_DUMMY_RAND.Scale(normfac_data)
+        H_W_DUMMY_RAND.Scale(normfac_data)
+        #H_ct_DUMMY_RAND.Scale(normfac_data)
+        
+        arr_t_DUMMY_RAND = arr_t_DUMMY_RAND*normfac_data
+        arr_phi_DUMMY_RAND = arr_phi_DUMMY_RAND*normfac_data
+        arr_Q2_DUMMY_RAND = arr_Q2_DUMMY_RAND*normfac_data
+        arr_W_DUMMY_RAND = arr_W_DUMMY_RAND*normfac_data
+        arr_MM_DUMMY_RAND = arr_MM_DUMMY_RAND*normfac_data
+        arr_emiss_DUMMY_RAND = arr_emiss_DUMMY_RAND*normfac_data
         '''
+
+        # Data Dummy_Random subtraction window
+        H_ssxfp_DUMMY_RAND.Scale(1/nWindows)
+        H_ssyfp_DUMMY_RAND.Scale(1/nWindows)
+        H_ssxpfp_DUMMY_RAND.Scale(1/nWindows)
+        H_ssypfp_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxfp_DUMMY_RAND.Scale(1/nWindows)
+        H_hsyfp_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxpfp_DUMMY_RAND.Scale(1/nWindows)
+        H_hsypfp_DUMMY_RAND.Scale(1/nWindows)
+        H_ssxptar_DUMMY_RAND.Scale(1/nWindows)
+        H_ssyptar_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxptar_DUMMY_RAND.Scale(1/nWindows)
+        H_hsyptar_DUMMY_RAND.Scale(1/nWindows)
+        H_ssdelta_DUMMY_RAND.Scale(1/nWindows)
+        H_hsdelta_DUMMY_RAND.Scale(1/nWindows)
+        H_Q2_DUMMY_RAND.Scale(1/nWindows)
+        H_t_DUMMY_RAND.Scale(1/nWindows)
+        H_epsilon_DUMMY_RAND.Scale(1/nWindows)
+        H_MM_DUMMY_RAND.Scale(1/nWindows)
+        H_pmiss_DUMMY_RAND.Scale(1/nWindows)
+        H_emiss_DUMMY_RAND.Scale(1/nWindows)
+        H_pmx_DUMMY_RAND.Scale(1/nWindows)
+        H_pmy_DUMMY_RAND.Scale(1/nWindows)
+        H_pmz_DUMMY_RAND.Scale(1/nWindows)
+        H_W_DUMMY_RAND.Scale(1/nWindows)
+        #H_ct_DUMMY_RAND.Scale(1/nWindows)
+        
+        arr_t_DUMMY_RAND = arr_t_DUMMY_RAND/nWindows
+        arr_phi_DUMMY_RAND = arr_phi_DUMMY_RAND/nWindows
+        arr_Q2_DUMMY_RAND = arr_Q2_DUMMY_RAND/nWindows
+        arr_W_DUMMY_RAND = arr_W_DUMMY_RAND/nWindows
+        arr_MM_DUMMY_RAND = arr_MM_DUMMY_RAND/nWindows
+        arr_emiss_DUMMY_RAND = arr_emiss_DUMMY_RAND/nWindows
         
         if phi_setting == "Right":
             normfac_subpion_dummy = 1/(500000)
@@ -2204,76 +2272,144 @@ def defineHists(phi_setting, inpDict):
         '''
 
         '''        
-        # Data Random subtraction
-        H_ssxfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_ssyfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_ssxpfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_ssypfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_hsxfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_hsyfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_hsxpfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_hsypfp_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_ssxptar_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_ssyptar_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_hsxptar_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_hsyptar_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_ssdelta_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_hsdelta_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_Q2_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_t_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_epsilon_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_MM_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_pmiss_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_emiss_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_pmx_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_pmy_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_pmz_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        H_W_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-        #H_ct_epi_SUBPION_RAND.Scale(normfac_subpion_data/nWindows)
-
-        arr_t_SUBPION_RAND = arr_t_SUBPION_RAND*normfac_subpion_data/nWindows
-        arr_phi_SUBPION_RAND = arr_phi_SUBPION_RAND*normfac_subpion_data/nWindows
-        arr_Q2_SUBPION_RAND = arr_Q2_SUBPION_RAND*normfac_subpion_data/nWindows
-        arr_W_SUBPION_RAND = arr_W_SUBPION_RAND*normfac_subpion_data/nWindows
-        arr_MM_SUBPION_RAND = arr_MM_SUBPION_RAND*normfac_subpion_data/nWindows
-        arr_emiss_SUBPION_RAND = arr_emiss_SUBPION_RAND*normfac_subpion_data/nWindows
+        # Data Subpion_Random subtraction
+        H_ssxfp_SUBPION_RAND.Scale(normfac_data)
+        H_ssyfp_SUBPION_RAND.Scale(normfac_data)
+        H_ssxpfp_SUBPION_RAND.Scale(normfac_data)
+        H_ssypfp_SUBPION_RAND.Scale(normfac_data)
+        H_hsxfp_SUBPION_RAND.Scale(normfac_data)
+        H_hsyfp_SUBPION_RAND.Scale(normfac_data)
+        H_hsxpfp_SUBPION_RAND.Scale(normfac_data)
+        H_hsypfp_SUBPION_RAND.Scale(normfac_data)
+        H_ssxptar_SUBPION_RAND.Scale(normfac_data)
+        H_ssyptar_SUBPION_RAND.Scale(normfac_data)
+        H_hsxptar_SUBPION_RAND.Scale(normfac_data)
+        H_hsyptar_SUBPION_RAND.Scale(normfac_data)
+        H_ssdelta_SUBPION_RAND.Scale(normfac_data)
+        H_hsdelta_SUBPION_RAND.Scale(normfac_data)
+        H_Q2_SUBPION_RAND.Scale(normfac_data)
+        H_t_SUBPION_RAND.Scale(normfac_data)
+        H_epsilon_SUBPION_RAND.Scale(normfac_data)
+        H_MM_SUBPION_RAND.Scale(normfac_data)
+        H_pmiss_SUBPION_RAND.Scale(normfac_data)
+        H_emiss_SUBPION_RAND.Scale(normfac_data)
+        H_pmx_SUBPION_RAND.Scale(normfac_data)
+        H_pmy_SUBPION_RAND.Scale(normfac_data)
+        H_pmz_SUBPION_RAND.Scale(normfac_data)
+        H_W_SUBPION_RAND.Scale(normfac_data)
+        #H_ct_SUBPION_RAND.Scale(normfac_data)
+        
+        arr_t_SUBPION_RAND = arr_t_SUBPION_RAND*normfac_data
+        arr_phi_SUBPION_RAND = arr_phi_SUBPION_RAND*normfac_data
+        arr_Q2_SUBPION_RAND = arr_Q2_SUBPION_RAND*normfac_data
+        arr_W_SUBPION_RAND = arr_W_SUBPION_RAND*normfac_data
+        arr_MM_SUBPION_RAND = arr_MM_SUBPION_RAND*normfac_data
+        arr_emiss_SUBPION_RAND = arr_emiss_SUBPION_RAND*normfac_data
         '''
+
+        # Data Subpion_Random subtraction window
+        H_ssxfp_SUBPION_RAND.Scale(1/nWindows)
+        H_ssyfp_SUBPION_RAND.Scale(1/nWindows)
+        H_ssxpfp_SUBPION_RAND.Scale(1/nWindows)
+        H_ssypfp_SUBPION_RAND.Scale(1/nWindows)
+        H_hsxfp_SUBPION_RAND.Scale(1/nWindows)
+        H_hsyfp_SUBPION_RAND.Scale(1/nWindows)
+        H_hsxpfp_SUBPION_RAND.Scale(1/nWindows)
+        H_hsypfp_SUBPION_RAND.Scale(1/nWindows)
+        H_ssxptar_SUBPION_RAND.Scale(1/nWindows)
+        H_ssyptar_SUBPION_RAND.Scale(1/nWindows)
+        H_hsxptar_SUBPION_RAND.Scale(1/nWindows)
+        H_hsyptar_SUBPION_RAND.Scale(1/nWindows)
+        H_ssdelta_SUBPION_RAND.Scale(1/nWindows)
+        H_hsdelta_SUBPION_RAND.Scale(1/nWindows)
+        H_Q2_SUBPION_RAND.Scale(1/nWindows)
+        H_t_SUBPION_RAND.Scale(1/nWindows)
+        H_epsilon_SUBPION_RAND.Scale(1/nWindows)
+        H_MM_SUBPION_RAND.Scale(1/nWindows)
+        H_pmiss_SUBPION_RAND.Scale(1/nWindows)
+        H_emiss_SUBPION_RAND.Scale(1/nWindows)
+        H_pmx_SUBPION_RAND.Scale(1/nWindows)
+        H_pmy_SUBPION_RAND.Scale(1/nWindows)
+        H_pmz_SUBPION_RAND.Scale(1/nWindows)
+        H_W_SUBPION_RAND.Scale(1/nWindows)
+        #H_ct_SUBPION_RAND.Scale(1/nWindows)
+        
+        arr_t_SUBPION_RAND = arr_t_SUBPION_RAND/nWindows
+        arr_phi_SUBPION_RAND = arr_phi_SUBPION_RAND/nWindows
+        arr_Q2_SUBPION_RAND = arr_Q2_SUBPION_RAND/nWindows
+        arr_W_SUBPION_RAND = arr_W_SUBPION_RAND/nWindows
+        arr_MM_SUBPION_RAND = arr_MM_SUBPION_RAND/nWindows
+        arr_emiss_SUBPION_RAND = arr_emiss_SUBPION_RAND/nWindows
 
         '''        
-        # Dummy Random subtraction
-        H_ssxfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_ssyfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_ssxpfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_ssypfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_hsxfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_hsyfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_hsxpfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_hsypfp_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_ssxptar_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_ssyptar_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_hsxptar_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_hsyptar_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_ssdelta_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_hsdelta_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_Q2_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_t_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_epsilon_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_MM_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_pmiss_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_emiss_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_pmx_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_pmy_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_pmz_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        H_W_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-        #H_ct_epi_SUBPION_DUMMY_RAND.Scale(normfac_subpion_dummy/nWindows)
-
-        arr_t_SUBPION_DUMMY_RAND = arr_t_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
-        arr_phi_SUBPION_DUMMY_RAND = arr_phi_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
-        arr_Q2_SUBPION_DUMMY_RAND = arr_Q2_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
-        arr_W_SUBPION_DUMMY_RAND = arr_W_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
-        arr_MM_SUBPION_DUMMY_RAND = arr_MM_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
-        arr_emiss_SUBPION_DUMMY_RAND = arr_emiss_SUBPION_DUMMY_RAND*normfac_subpion_dummy/nWindows
+        # Data Subpion_Dummy_Random subtraction
+        H_ssxfp_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_ssyfp_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_ssxpfp_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_ssypfp_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_hsxfp_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_hsyfp_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_hsxpfp_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_hsypfp_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_ssxptar_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_ssyptar_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_hsxptar_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_hsyptar_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_ssdelta_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_hsdelta_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_Q2_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_t_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_epsilon_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_MM_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_pmiss_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_emiss_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_pmx_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_pmy_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_pmz_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        H_W_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        #H_ct_SUBPION_DUMMY_RAND.Scale(normfac_data)
+        
+        arr_t_SUBPION_DUMMY_RAND = arr_t_SUBPION_DUMMY_RAND*normfac_data
+        arr_phi_SUBPION_DUMMY_RAND = arr_phi_SUBPION_DUMMY_RAND*normfac_data
+        arr_Q2_SUBPION_DUMMY_RAND = arr_Q2_SUBPION_DUMMY_RAND*normfac_data
+        arr_W_SUBPION_DUMMY_RAND = arr_W_SUBPION_DUMMY_RAND*normfac_data
+        arr_MM_SUBPION_DUMMY_RAND = arr_MM_SUBPION_DUMMY_RAND*normfac_data
+        arr_emiss_SUBPION_DUMMY_RAND = arr_emiss_SUBPION_DUMMY_RAND*normfac_data
         '''
+
+        # Data Subpion_Dummy_Random subtraction window
+        H_ssxfp_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_ssyfp_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_ssxpfp_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_ssypfp_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxfp_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_hsyfp_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxpfp_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_hsypfp_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_ssxptar_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_ssyptar_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxptar_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_hsyptar_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_ssdelta_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_hsdelta_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_Q2_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_t_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_epsilon_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_MM_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_pmiss_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_emiss_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_pmx_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_pmy_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_pmz_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        H_W_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        #H_ct_SUBPION_DUMMY_RAND.Scale(1/nWindows)
+        
+        arr_t_SUBPION_DUMMY_RAND = arr_t_SUBPION_DUMMY_RAND/nWindows
+        arr_phi_SUBPION_DUMMY_RAND = arr_phi_SUBPION_DUMMY_RAND/nWindows
+        arr_Q2_SUBPION_DUMMY_RAND = arr_Q2_SUBPION_DUMMY_RAND/nWindows
+        arr_W_SUBPION_DUMMY_RAND = arr_W_SUBPION_DUMMY_RAND/nWindows
+        arr_MM_SUBPION_DUMMY_RAND = arr_MM_SUBPION_DUMMY_RAND/nWindows
+        arr_emiss_SUBPION_DUMMY_RAND = arr_emiss_SUBPION_DUMMY_RAND/nWindows
         
         if phi_setting == "Right":
             normfac_subproton_dummy = 1/(12000)
@@ -2366,76 +2502,144 @@ def defineHists(phi_setting, inpDict):
         arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA*normfac_subproton_data
 
         '''        
-        # Data Random subtraction
-        H_ssxfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_ssyfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_ssxpfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_ssypfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_hsxfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_hsyfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_hsxpfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_hsypfp_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_ssxptar_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_ssyptar_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_hsxptar_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_hsyptar_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_ssdelta_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_hsdelta_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_Q2_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_t_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_epsilon_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_MM_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_pmiss_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_emiss_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_pmx_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_pmy_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_pmz_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        H_W_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-        #H_ct_ep_SUBPROTON_RAND.Scale(normfac_subproton_data/nWindows)
-
-        arr_t_SUBPROTON_RAND = arr_t_SUBPROTON_RAND*normfac_subproton_data/nWindows
-        arr_phi_SUBPROTON_RAND = arr_phi_SUBPROTON_RAND*normfac_subproton_data/nWindows
-        arr_Q2_SUBPROTON_RAND = arr_Q2_SUBPROTON_RAND*normfac_subproton_data/nWindows
-        arr_W_SUBPROTON_RAND = arr_W_SUBPROTON_RAND*normfac_subproton_data/nWindows
-        arr_MM_SUBPROTON_RAND = arr_MM_SUBPROTON_RAND*normfac_subproton_data/nWindows
-        arr_emiss_SUBPROTON_RAND = arr_emiss_SUBPROTON_RAND*normfac_subproton_data/nWindows
+        # Data Subproton_Random subtraction
+        H_ssxfp_SUBPROTON_RAND.Scale(normfac_data)
+        H_ssyfp_SUBPROTON_RAND.Scale(normfac_data)
+        H_ssxpfp_SUBPROTON_RAND.Scale(normfac_data)
+        H_ssypfp_SUBPROTON_RAND.Scale(normfac_data)
+        H_hsxfp_SUBPROTON_RAND.Scale(normfac_data)
+        H_hsyfp_SUBPROTON_RAND.Scale(normfac_data)
+        H_hsxpfp_SUBPROTON_RAND.Scale(normfac_data)
+        H_hsypfp_SUBPROTON_RAND.Scale(normfac_data)
+        H_ssxptar_SUBPROTON_RAND.Scale(normfac_data)
+        H_ssyptar_SUBPROTON_RAND.Scale(normfac_data)
+        H_hsxptar_SUBPROTON_RAND.Scale(normfac_data)
+        H_hsyptar_SUBPROTON_RAND.Scale(normfac_data)
+        H_ssdelta_SUBPROTON_RAND.Scale(normfac_data)
+        H_hsdelta_SUBPROTON_RAND.Scale(normfac_data)
+        H_Q2_SUBPROTON_RAND.Scale(normfac_data)
+        H_t_SUBPROTON_RAND.Scale(normfac_data)
+        H_epsilon_SUBPROTON_RAND.Scale(normfac_data)
+        H_MM_SUBPROTON_RAND.Scale(normfac_data)
+        H_pmiss_SUBPROTON_RAND.Scale(normfac_data)
+        H_emiss_SUBPROTON_RAND.Scale(normfac_data)
+        H_pmx_SUBPROTON_RAND.Scale(normfac_data)
+        H_pmy_SUBPROTON_RAND.Scale(normfac_data)
+        H_pmz_SUBPROTON_RAND.Scale(normfac_data)
+        H_W_SUBPROTON_RAND.Scale(normfac_data)
+        #H_ct_SUBPROTON_RAND.Scale(normfac_data)
+        
+        arr_t_SUBPROTON_RAND = arr_t_SUBPROTON_RAND*normfac_data
+        arr_phi_SUBPROTON_RAND = arr_phi_SUBPROTON_RAND*normfac_data
+        arr_Q2_SUBPROTON_RAND = arr_Q2_SUBPROTON_RAND*normfac_data
+        arr_W_SUBPROTON_RAND = arr_W_SUBPROTON_RAND*normfac_data
+        arr_MM_SUBPROTON_RAND = arr_MM_SUBPROTON_RAND*normfac_data
+        arr_emiss_SUBPROTON_RAND = arr_emiss_SUBPROTON_RAND*normfac_data
         '''
+
+        # Data Subproton_Random subtraction window
+        H_ssxfp_SUBPROTON_RAND.Scale(1/nWindows)
+        H_ssyfp_SUBPROTON_RAND.Scale(1/nWindows)
+        H_ssxpfp_SUBPROTON_RAND.Scale(1/nWindows)
+        H_ssypfp_SUBPROTON_RAND.Scale(1/nWindows)
+        H_hsxfp_SUBPROTON_RAND.Scale(1/nWindows)
+        H_hsyfp_SUBPROTON_RAND.Scale(1/nWindows)
+        H_hsxpfp_SUBPROTON_RAND.Scale(1/nWindows)
+        H_hsypfp_SUBPROTON_RAND.Scale(1/nWindows)
+        H_ssxptar_SUBPROTON_RAND.Scale(1/nWindows)
+        H_ssyptar_SUBPROTON_RAND.Scale(1/nWindows)
+        H_hsxptar_SUBPROTON_RAND.Scale(1/nWindows)
+        H_hsyptar_SUBPROTON_RAND.Scale(1/nWindows)
+        H_ssdelta_SUBPROTON_RAND.Scale(1/nWindows)
+        H_hsdelta_SUBPROTON_RAND.Scale(1/nWindows)
+        H_Q2_SUBPROTON_RAND.Scale(1/nWindows)
+        H_t_SUBPROTON_RAND.Scale(1/nWindows)
+        H_epsilon_SUBPROTON_RAND.Scale(1/nWindows)
+        H_MM_SUBPROTON_RAND.Scale(1/nWindows)
+        H_pmiss_SUBPROTON_RAND.Scale(1/nWindows)
+        H_emiss_SUBPROTON_RAND.Scale(1/nWindows)
+        H_pmx_SUBPROTON_RAND.Scale(1/nWindows)
+        H_pmy_SUBPROTON_RAND.Scale(1/nWindows)
+        H_pmz_SUBPROTON_RAND.Scale(1/nWindows)
+        H_W_SUBPROTON_RAND.Scale(1/nWindows)
+        #H_ct_SUBPROTON_RAND.Scale(1/nWindows)
+        
+        arr_t_SUBPROTON_RAND = arr_t_SUBPROTON_RAND/nWindows
+        arr_phi_SUBPROTON_RAND = arr_phi_SUBPROTON_RAND/nWindows
+        arr_Q2_SUBPROTON_RAND = arr_Q2_SUBPROTON_RAND/nWindows
+        arr_W_SUBPROTON_RAND = arr_W_SUBPROTON_RAND/nWindows
+        arr_MM_SUBPROTON_RAND = arr_MM_SUBPROTON_RAND/nWindows
+        arr_emiss_SUBPROTON_RAND = arr_emiss_SUBPROTON_RAND/nWindows
 
         '''        
-        # Dummy Random subtraction
-        H_ssxfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_ssyfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_ssxpfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_ssypfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_hsxfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_hsyfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_hsxpfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_hsypfp_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_ssxptar_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_ssyptar_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_hsxptar_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_hsyptar_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_ssdelta_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_hsdelta_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_Q2_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_t_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_epsilon_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_MM_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_pmiss_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_emiss_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_pmx_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_pmy_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_pmz_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        H_W_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-        #H_ct_ep_SUBPROTON_DUMMY_RAND.Scale(normfac_subproton_dummy/nWindows)
-
-        arr_t_SUBPROTON_DUMMY_RAND = arr_t_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
-        arr_phi_SUBPROTON_DUMMY_RAND = arr_phi_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
-        arr_Q2_SUBPROTON_DUMMY_RAND = arr_Q2_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
-        arr_W_SUBPROTON_DUMMY_RAND = arr_W_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
-        arr_MM_SUBPROTON_DUMMY_RAND = arr_MM_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
-        arr_emiss_SUBPROTON_DUMMY_RAND = arr_emiss_SUBPROTON_DUMMY_RAND*normfac_subproton_data/nWindows
+        # Data Subproton_Dummy_Random subtraction
+        H_ssxfp_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_ssyfp_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_ssxpfp_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_ssypfp_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_hsxfp_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_hsyfp_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_hsxpfp_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_hsypfp_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_ssxptar_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_ssyptar_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_hsxptar_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_hsyptar_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_ssdelta_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_hsdelta_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_Q2_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_t_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_epsilon_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_MM_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_pmiss_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_emiss_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_pmx_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_pmy_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_pmz_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        H_W_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        #H_ct_SUBPROTON_DUMMY_RAND.Scale(normfac_data)
+        
+        arr_t_SUBPROTON_DUMMY_RAND = arr_t_SUBPROTON_DUMMY_RAND*normfac_data
+        arr_phi_SUBPROTON_DUMMY_RAND = arr_phi_SUBPROTON_DUMMY_RAND*normfac_data
+        arr_Q2_SUBPROTON_DUMMY_RAND = arr_Q2_SUBPROTON_DUMMY_RAND*normfac_data
+        arr_W_SUBPROTON_DUMMY_RAND = arr_W_SUBPROTON_DUMMY_RAND*normfac_data
+        arr_MM_SUBPROTON_DUMMY_RAND = arr_MM_SUBPROTON_DUMMY_RAND*normfac_data
+        arr_emiss_SUBPROTON_DUMMY_RAND = arr_emiss_SUBPROTON_DUMMY_RAND*normfac_data
         '''
+
+        # Data Subproton_Dummy_Random subtraction window
+        H_ssxfp_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_ssyfp_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_ssxpfp_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_ssypfp_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxfp_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_hsyfp_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxpfp_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_hsypfp_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_ssxptar_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_ssyptar_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxptar_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_hsyptar_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_ssdelta_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_hsdelta_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_Q2_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_t_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_epsilon_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_MM_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_pmiss_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_emiss_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_pmx_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_pmy_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_pmz_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        H_W_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        #H_ct_SUBPROTON_DUMMY_RAND.Scale(1/nWindows)
+        
+        arr_t_SUBPROTON_DUMMY_RAND = arr_t_SUBPROTON_DUMMY_RAND/nWindows
+        arr_phi_SUBPROTON_DUMMY_RAND = arr_phi_SUBPROTON_DUMMY_RAND/nWindows
+        arr_Q2_SUBPROTON_DUMMY_RAND = arr_Q2_SUBPROTON_DUMMY_RAND/nWindows
+        arr_W_SUBPROTON_DUMMY_RAND = arr_W_SUBPROTON_DUMMY_RAND/nWindows
+        arr_MM_SUBPROTON_DUMMY_RAND = arr_MM_SUBPROTON_DUMMY_RAND/nWindows
+        arr_emiss_SUBPROTON_DUMMY_RAND = arr_emiss_SUBPROTON_DUMMY_RAND/nWindows
         
         ###
         # Data Random subtraction
@@ -2465,14 +2669,12 @@ def defineHists(phi_setting, inpDict):
         H_W_DATA.Add(H_W_RAND,-1)
         H_ct_DATA.Add(H_ct_RAND,-1)
 
-        '''        
         arr_t_DATA = arr_t_DATA-arr_t_RAND
         arr_phi_DATA = arr_phi_DATA-arr_phi_RAND
         arr_Q2_DATA = arr_Q2_DATA-arr_Q2_RAND
         arr_W_DATA = arr_W_DATA-arr_W_RAND
         arr_MM_DATA = arr_MM_DATA-arr_MM_RAND
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_RAND
-        '''
         
         ###
         # Dummy Random subtraction
@@ -2502,14 +2704,12 @@ def defineHists(phi_setting, inpDict):
         H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
         H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
-        '''
-        arr_t_DUMMY = arr_t_DUMMY-arr_t_RAND
-        arr_phi_DUMMY = arr_phi_DUMMY-arr_phi_RAND
-        arr_Q2_DUMMY = arr_Q2_DUMMY-arr_Q2_RAND
-        arr_W_DUMMY = arr_W_DUMMY-arr_W_RAND
-        arr_MM_DUMMY = arr_MM_DUMMY-arr_MM_RAND
-        arr_emiss_DUMMY = arr_emiss_DUMMY-arr_emiss_RAND
-        '''
+        arr_t_DUMMY = arr_t_DUMMY-arr_t_DUMMY_RAND
+        arr_phi_DUMMY = arr_phi_DUMMY-arr_phi_DUMMY_RAND
+        arr_Q2_DUMMY = arr_Q2_DUMMY-arr_Q2_DUMMY_RAND
+        arr_W_DUMMY = arr_W_DUMMY-arr_W_DUMMY_RAND
+        arr_MM_DUMMY = arr_MM_DUMMY-arr_MM_DUMMY_RAND
+        arr_emiss_DUMMY = arr_emiss_DUMMY-arr_emiss_DUMMY_RAND
 
         ###
         # Data Random subtraction
@@ -2539,14 +2739,12 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DATA.Add(H_W_SUBPION_RAND,-1)
         H_ct_epi_SUBPION_DATA.Add(H_ct_epi_SUBPION_RAND,-1)
 
-        '''
-        arr_t_SUBPION_DATA = arr_t_SUBPION_DATA-arr_t_RAND
-        arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA-arr_phi_RAND
-        arr_Q2_SUBPION_DATA = arr_Q2_SUBPION_DATA-arr_Q2_RAND
-        arr_W_SUBPION_DATA = arr_W_SUBPION_DATA-arr_W_RAND
-        arr_MM_SUBPION_DATA = arr_MM_SUBPION_DATA-arr_MM_RAND
-        arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA-arr_emiss_RAND
-        '''
+        arr_t_SUBPION_DATA = arr_t_SUBPION_DATA-arr_t_SUBPION_RAND
+        arr_phi_SUBPION_DATA = arr_phi_SUBPION_DATA-arr_phi_SUBPION_RAND
+        arr_Q2_SUBPION_DATA = arr_Q2_SUBPION_DATA-arr_Q2_SUBPION_RAND
+        arr_W_SUBPION_DATA = arr_W_SUBPION_DATA-arr_W_SUBPION_RAND
+        arr_MM_SUBPION_DATA = arr_MM_SUBPION_DATA-arr_MM_SUBPION_RAND
+        arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA-arr_emiss_SUBPION_RAND
 
         ###
         # Dummy Random subtraction
@@ -2576,14 +2774,12 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPION_DUMMY.Add(H_W_SUBPION_DUMMY_RAND,-1)
         H_ct_epi_SUBPION_DUMMY.Add(H_ct_epi_SUBPION_DUMMY_RAND,-1)
 
-        '''
-        arr_t_SUBPION_DUMMY = arr_t_SUBPION_DUMMY-arr_t_RAND
-        arr_phi_SUBPION_DUMMY = arr_phi_SUBPION_DUMMY-arr_phi_RAND
-        arr_Q2_SUBPION_DUMMY = arr_Q2_SUBPION_DUMMY-arr_Q2_RAND
-        arr_W_SUBPION_DUMMY = arr_W_SUBPION_DUMMY-arr_W_RAND
-        arr_MM_SUBPION_DUMMY = arr_MM_SUBPION_DUMMY-arr_MM_RAND
-        arr_emiss_SUBPION_DUMMY = arr_emiss_SUBPION_DUMMY-arr_emiss_RAND
-        '''
+        arr_t_SUBPION_DUMMY = arr_t_SUBPION_DUMMY-arr_t_SUBPION_DUMMY_RAND
+        arr_phi_SUBPION_DUMMY = arr_phi_SUBPION_DUMMY-arr_phi_SUBPION_DUMMY_RAND
+        arr_Q2_SUBPION_DUMMY = arr_Q2_SUBPION_DUMMY-arr_Q2_SUBPION_DUMMY_RAND
+        arr_W_SUBPION_DUMMY = arr_W_SUBPION_DUMMY-arr_W_SUBPION_DUMMY_RAND
+        arr_MM_SUBPION_DUMMY = arr_MM_SUBPION_DUMMY-arr_MM_SUBPION_DUMMY_RAND
+        arr_emiss_SUBPION_DUMMY = arr_emiss_SUBPION_DUMMY-arr_emiss_SUBPION_DUMMY_RAND
         
         ###
         # Data Random subtraction
@@ -2613,14 +2809,12 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_RAND,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_RAND,-1)
 
-        '''
-        arr_t_SUBPROTON_DATA = arr_t_SUBPROTON_DATA-arr_t_RAND
-        arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA-arr_phi_RAND
-        arr_Q2_SUBPROTON_DATA = arr_Q2_SUBPROTON_DATA-arr_Q2_RAND
-        arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA-arr_W_RAND
-        arr_MM_SUBPROTON_DATA = arr_MM_SUBPROTON_DATA-arr_MM_RAND
-        arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA-arr_emiss_RAND
-        '''
+        arr_t_SUBPROTON_DATA = arr_t_SUBPROTON_DATA-arr_t_SUBPROTON_RAND
+        arr_phi_SUBPROTON_DATA = arr_phi_SUBPROTON_DATA-arr_phi_SUBPROTON_RAND
+        arr_Q2_SUBPROTON_DATA = arr_Q2_SUBPROTON_DATA-arr_Q2_SUBPROTON_RAND
+        arr_W_SUBPROTON_DATA = arr_W_SUBPROTON_DATA-arr_W_SUBPROTON_RAND
+        arr_MM_SUBPROTON_DATA = arr_MM_SUBPROTON_DATA-arr_MM_SUBPROTON_RAND
+        arr_emiss_SUBPROTON_DATA = arr_emiss_SUBPROTON_DATA-arr_emiss_SUBPROTON_RAND
         
         ###
         # Dummy Random subtraction
@@ -2650,14 +2844,12 @@ def defineHists(phi_setting, inpDict):
         H_W_SUBPROTON_DUMMY.Add(H_W_SUBPROTON_DUMMY_RAND,-1)
         H_ct_ep_SUBPROTON_DUMMY.Add(H_ct_ep_SUBPROTON_DUMMY_RAND,-1)
 
-        '''
-        arr_t_SUBPROTON_DUMMY = arr_t_SUBPROTON_DUMMY-arr_t_RAND
-        arr_phi_SUBPROTON_DUMMY = arr_phi_SUBPROTON_DUMMY-arr_phi_RAND
-        arr_Q2_SUBPROTON_DUMMY = arr_Q2_SUBPROTON_DUMMY-arr_Q2_RAND
-        arr_W_SUBPROTON_DUMMY = arr_W_SUBPROTON_DUMMY-arr_W_RAND
-        arr_MM_SUBPROTON_DUMMY = arr_MM_SUBPROTON_DUMMY-arr_MM_RAND
-        arr_emiss_SUBPROTON_DUMMY = arr_emiss_SUBPROTON_DUMMY-arr_emiss_RAND
-        '''
+        arr_t_SUBPROTON_DUMMY = arr_t_SUBPROTON_DUMMY-arr_t_SUBPROTON_DUMMY_RAND
+        arr_phi_SUBPROTON_DUMMY = arr_phi_SUBPROTON_DUMMY-arr_phi_SUBPROTON_DUMMY_RAND
+        arr_Q2_SUBPROTON_DUMMY = arr_Q2_SUBPROTON_DUMMY-arr_Q2_SUBPROTON_DUMMY_RAND
+        arr_W_SUBPROTON_DUMMY = arr_W_SUBPROTON_DUMMY-arr_W_SUBPROTON_DUMMY_RAND
+        arr_MM_SUBPROTON_DUMMY = arr_MM_SUBPROTON_DUMMY-arr_MM_SUBPROTON_DUMMY_RAND
+        arr_emiss_SUBPROTON_DUMMY = arr_emiss_SUBPROTON_DUMMY-arr_emiss_SUBPROTON_DUMMY_RAND
         
         ###
         # Dummy Subtraction
