@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-27 10:31:54 trottar"
+# Time-stamp: "2023-07-27 10:55:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -432,7 +432,7 @@ for j in range(len(tbinedges) - 1):
                 combined_indices = np.intersect1d(tbin_indices, phibin_indices)
                 MM_val = MM[combined_indices]
                 print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t),"________________")
-                print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val),"----------------")
+                print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val),"----------------\n")
                 mm_lst.append((tbin_index, phibin_index, MM_val))
 
 # Group the tuples by the first two elements using defaultdict
@@ -491,7 +491,7 @@ for hist in histlist:
         phival[0] = np.mean(phibinedges[k:k+2])
 
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
-
+        print("****************",MM_tmp,"****************\n")
         hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp) * hist["normfac_data"])
         hist["yieldDictData"][key] = integrate.simps(MM_tmp) * hist["normfac_data"]
         yieldValData[0] = integrate.simps(MM_tmp) * hist["normfac_data"]
