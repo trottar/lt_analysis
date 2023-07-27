@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-27 11:43:26 trottar"
+# Time-stamp: "2023-07-27 19:57:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -517,7 +517,6 @@ c_yield_data.Print(outputpdf)
 c_yield_simc = TCanvas()
 
 # Initialize NumPy arrays before the loop
-Weight = np.array([])
 t = np.array([])
 phi_deg = np.array([])
 Q2 = np.array([])
@@ -527,7 +526,6 @@ MM = np.array([])
 for hist in histlist:
     
     # Convert to NumPy arrays
-    Weight = np.append(Weight, hist_to_numpy(hist["H_Weight_SIMC"], hist["arr_Weight_SIMC"]))
     t = np.append(t, hist_to_numpy(hist["H_t_SIMC"], hist["arr_t_SIMC"]))
     phi_deg = np.append(phi_deg, [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_SIMC"], hist["arr_phi_SIMC"])])
     Q2 = np.append(Q2, hist_to_numpy(hist["H_Q2_SIMC"], hist["arr_Q2_SIMC"]))
