@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-27 10:54:35 trottar"
+# Time-stamp: "2023-07-27 17:25:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2864,7 +2864,8 @@ def defineHists(phi_setting, inpDict):
         arr_MM_SUBPROTON_DUMMY = arr_MM_SUBPROTON_DUMMY-arr_MM_SUBPROTON_DUMMY_RAND
         arr_emiss_SUBPROTON_DUMMY = arr_emiss_SUBPROTON_DUMMY-arr_emiss_SUBPROTON_DUMMY_RAND
         '''
-        
+
+        '''
         ###
         # Dummy Subtraction
         H_ssxfp_DATA.Add(H_ssxfp_DUMMY,-1)
@@ -2892,6 +2893,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_DUMMY,-1)
         H_W_DATA.Add(H_W_DUMMY,-1)
         H_ct_DATA.Add(H_ct_DUMMY,-1)
+        '''
 
         '''
         arr_t_DATA = arr_t_DATA-arr_t_DUMMY
@@ -2901,7 +2903,8 @@ def defineHists(phi_setting, inpDict):
         arr_MM_DATA = arr_MM_DATA-arr_MM_DUMMY
         arr_emiss_DATA = arr_emiss_DATA-arr_emiss_DUMMY
         '''
-        
+
+        '''        
         ###
         # Dummy Subtraction
         H_ssxfp_SUBPION_DATA.Add(H_ssxfp_SUBPION_DUMMY,-1)
@@ -2929,6 +2932,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPION_DATA.Add(H_pmz_SUBPION_DUMMY,-1)
         H_W_SUBPION_DATA.Add(H_W_SUBPION_DUMMY,-1)
         H_ct_epi_SUBPION_DATA.Add(H_ct_epi_SUBPION_DUMMY,-1)
+        '''
 
         '''
         arr_t_SUBPION_DATA = arr_t_SUBPION_DATA-arr_t_DUMMY
@@ -2938,7 +2942,8 @@ def defineHists(phi_setting, inpDict):
         arr_MM_SUBPION_DATA = arr_MM_SUBPION_DATA-arr_MM_DUMMY
         arr_emiss_SUBPION_DATA = arr_emiss_SUBPION_DATA-arr_emiss_DUMMY
         '''
-        
+
+        '''        
         ###
         # Dummy Subtraction
         H_ssxfp_SUBPROTON_DATA.Add(H_ssxfp_SUBPROTON_DUMMY,-1)
@@ -2966,6 +2971,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_SUBPROTON_DATA.Add(H_pmz_SUBPROTON_DUMMY,-1)
         H_W_SUBPROTON_DATA.Add(H_W_SUBPROTON_DUMMY,-1)
         H_ct_ep_SUBPROTON_DATA.Add(H_ct_ep_SUBPROTON_DUMMY,-1)
+        '''
 
         '''
         arr_t_SUBPROTON_DATA = arr_t_SUBPROTON_DATA-arr_t_DUMMY
@@ -2977,7 +2983,8 @@ def defineHists(phi_setting, inpDict):
         '''
         
         H_MM_DATA_nosub = H_MM_DATA.Clone("H_MM_DATA_nosub")
-        
+
+        '''
         ###
         # Pion Subtraction
         H_ssxfp_DATA.Add(H_ssxfp_SUBPION_DATA,-1)
@@ -3005,6 +3012,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_SUBPION_DATA,-1)
         H_W_DATA.Add(H_W_SUBPION_DATA,-1)
         H_ct_DATA.Add(H_ct_epi_SUBPION_DATA,-1)
+        '''
 
         '''        
         arr_t_DATA = arr_t_DATA-arr_t_SUBPION_DATA
