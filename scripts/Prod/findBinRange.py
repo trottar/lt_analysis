@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-27 10:21:24 trottar"
+# Time-stamp: "2023-07-27 10:31:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -431,7 +431,8 @@ for j in range(len(tbinedges) - 1):
                 # Combine tbin_indices and phibin_indices using logical AND
                 combined_indices = np.intersect1d(tbin_indices, phibin_indices)
                 MM_val = MM[combined_indices]
-                print("----------------",tbin_index, phibin_index, MM_val, Q2_val, W_val, t_val,"----------------")
+                print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t),"________________")
+                print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val),"----------------")
                 mm_lst.append((tbin_index, phibin_index, MM_val))
 
 # Group the tuples by the first two elements using defaultdict
