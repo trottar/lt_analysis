@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-27 11:34:46 trottar"
+# Time-stamp: "2023-07-27 11:43:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -575,10 +575,11 @@ for hist in histlist:
         try:
             hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp[0])/(100*hist["normfac_simc"]))
             hist["yieldDictSimc"][key] = integrate.simps(MM_tmp[0])/(100*hist["normfac_simc"])
+            yieldValSimc[0] = integrate.simps(MM_tmp[0])/(100*hist["normfac_simc"])
         except IndexError:
-            hist["H_yield_SIMC"].Fill(integrate.simps(MM_tmp[0])/(100*hist["normfac_simc"]))
-            hist["yieldDictSimc"][key] = integrate.simps(MM_tmp[0])/(100*hist["normfac_simc"])
-        yieldValSimc[0] = integrate.simps(MM_tmp[0])/(100*hist["normfac_simc"])
+            hist["H_yield_SIMC"].Fill(0)
+            hist["yieldDictSimc"][key] = 0
+            yieldValSimc[0] = 0
         hist["yieldTree"].Fill()
 
         #################
