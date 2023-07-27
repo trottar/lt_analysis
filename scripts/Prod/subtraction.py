@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-27 17:25:28 trottar"
+# Time-stamp: "2023-07-27 19:51:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -4366,6 +4366,7 @@ def defineHists(phi_setting, inpDict):
         H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
         H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
+        '''
         ###
         # Dummy Subtraction
         H_ssxfp_DATA.Add(H_ssxfp_DUMMY,-1)
@@ -4393,6 +4394,7 @@ def defineHists(phi_setting, inpDict):
         H_pmz_DATA.Add(H_pmz_DUMMY,-1)
         H_W_DATA.Add(H_W_DUMMY,-1)
         H_ct_DATA.Add(H_ct_DUMMY,-1)
+        '''
 
         histDict["InFile_DATA"] = InFile_DATA
         histDict["InFile_DUMMY"] = InFile_DUMMY
