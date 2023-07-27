@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-27 11:13:16 trottar"
+# Time-stamp: "2023-07-27 11:21:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -491,7 +491,7 @@ for hist in histlist:
         phival[0] = np.mean(phibinedges[k:k+2])
 
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
-        print("****************",hist["phi_setting"],MM_tmp,"****************\n")
+        print("****************Data",hist["phi_setting"],MM_tmp,"****************\n")
         try:
             hist["H_yield_DATA"].Fill(integrate.simps(MM_tmp) * hist["normfac_data"])
             hist["yieldDictData"][key] = integrate.simps(MM_tmp) * hist["normfac_data"]
@@ -568,7 +568,7 @@ for hist in histlist:
     
     for key, val in groups.items():
         MM_tmp, Q2_tmp, W_tmp, t_tmp = zip(*val)
-
+        print("****************Simc",hist["phi_setting"],MM_tmp,"****************\n")
         #################
         # HARD CODED
         #################
