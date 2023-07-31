@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-31 13:32:33 trottar"
+# Time-stamp: "2023-07-31 13:42:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,14 +151,14 @@ def hist_to_numpy(histogram, data):
     # The last bin edge is the upper edge of the last bin
     bin_edges.append(histogram.GetXaxis().GetBinUpEdge(n_bins))
 
-    print("^^^^^^^^^^^^^^^^^",bin_edges,"^^^^^^^^^^^^^^^^^")
+    print("^^^^^^^^^^^^^^^^^",np.average(bin_edges),"^^^^^^^^^^^^^^^^^")
 
     # Weight the bin edges by the integrated values
     weighted_bin_edges = [edge * integral for edge, integral in zip(bin_edges, bin_integrals)]
 
-    print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",weighted_bin_edges,"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬")
+    print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",np.average(weighted_bin_edges),"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬")
     
-    return bin_edges
+    return weighted_bin_edges
 
 def bin_data(histlist):
 
