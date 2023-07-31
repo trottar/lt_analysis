@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-27 19:57:56 trottar"
+# Time-stamp: "2023-07-31 13:32:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -132,20 +132,6 @@ from subtraction import defineHists
 
 ################################################################################################################################################
 
-'''
-# Convert TH1F to NumPy array
-def hist_to_numpy(histogram):
-    # Convert the histogram data to a NumPy array
-    hist_values, bin_edges = rnp.hist2array(histogram,return_edges=True)
-    # Check if bin_edges is a list of lists, and flatten it if necessary
-    if isinstance(bin_edges[0], (list, np.ndarray)):
-        bin_edges = np.concatenate(bin_edges)    
-    # Convert bin_edges to a NumPy array
-    bin_edges = np.array(bin_edges)
-    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
-    return bin_centers
-'''
-
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram, data):
     
@@ -166,6 +152,11 @@ def hist_to_numpy(histogram, data):
     bin_edges.append(histogram.GetXaxis().GetBinUpEdge(n_bins))
 
     print("^^^^^^^^^^^^^^^^^",bin_edges,"^^^^^^^^^^^^^^^^^")
+
+    # Weight the bin edges by the integrated values
+    weighted_bin_edges = [edge * integral for edge, integral in zip(bin_edges, bin_integrals)]
+
+    print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",weighted_bin_edges,"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬")
     
     return bin_edges
 
