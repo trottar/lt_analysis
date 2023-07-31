@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-31 13:42:32 trottar"
+# Time-stamp: "2023-07-31 13:53:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,9 +153,15 @@ def hist_to_numpy(histogram, data):
 
     print("^^^^^^^^^^^^^^^^^",np.average(bin_edges),"^^^^^^^^^^^^^^^^^")
 
-    # Weight the bin edges by the integrated values
-    weighted_bin_edges = [edge * integral for edge, integral in zip(bin_edges, bin_integrals)]
+    # Calculate the total integral of the histogram (integral up to the last bin)
+    total_integral = histogram.Integral()
 
+    # Calculate the weights for each bin based on their integrals
+    bin_weights = [integral / total_integral for integral in bin_integrals]
+
+    # Weight the bin edges by the bin weights
+    weighted_bin_edges = [edge * weight for edge, weight in zip(bin_edges, bin_weights)]
+    
     print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",np.average(weighted_bin_edges),"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬")
     
     return weighted_bin_edges
