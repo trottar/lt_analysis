@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 13:03:57 trottar"
+# Time-stamp: "2023-08-03 13:07:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,9 +88,9 @@ def find_bins(histlist, inpDict):
 
     ################################################################################################################################################
 
-    foutname = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".root"
-    fouttxt  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".txt"
-    outputpdf  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".pdf"
+    foutname = OUTPATH + "/" + inpDict["ParticleType"] + "_" + inpDict["OutFilename"] + ".root"
+    fouttxt  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + inpDict["OutFilename"] + ".txt"
+    outputpdf  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + inpDict["OutFilename"] + ".pdf"
     
     ################################################################################################################################################
     # Define root file trees of interest
