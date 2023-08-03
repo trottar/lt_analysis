@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 18:35:06 trottar"
+# Time-stamp: "2023-08-03 18:45:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -270,6 +270,9 @@ from compare_simc import compare_simc
 for hist in histlist:
     hist.update(compare_simc(hist, inpDict))
 
+
+### !!!!!!!!!!!! Need to edit t/phi plots, etc. to show bins and labels on plots    
+    
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()
 l_eff_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
@@ -396,11 +399,13 @@ for i,hist in enumerate(histlist):
 binmax = max(binmax)
     
 tBin_line = TLine()
-for i, t in enumerate(t_bins):
+for i,(n,b) in enumerate(zip(tbinvals,tbinedges)):
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
-    tBin_line.DrawLine(tmin,0,tmin,tmax)
-    l_t.AddEntry(tBin_line,"Bin Edge %s" % t)
+    tBin_line.DrawLine(b,0,b,binmax)
+    l_t.AddEntry(tBin_line,"Bin Edge %s" % i )
+    l_t.AddEntry(tBin_line,"Evts = %.0f" % n)
+    l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
 
 l_t.Draw()    
 
@@ -595,12 +600,17 @@ for i,hist in enumerate(histlist):
     binmax.append(hist["H_ph_q_DATA"].GetMaximum())
 binmax = max(binmax)
 
+binned_phi_tmp = []
+for val in binned_phi[1]:
+    binned_phi_tmp.append(((val/180)-1)*math.pi)
 phiBin_line = TLine()
-for i, phi in enumerate(phi_bins):
+for i,(n,b) in enumerate(zip(phibinvals,binned_phi_tmp)):
     phiBin_line.SetLineColor(4)
     phiBin_line.SetLineWidth(4)
-    phiBin_line.DrawLine(0,0,0,360)
-    l_t.AddEntry(phiBin_line,"Bin Edge %s" % phi)
+    phiBin_line.DrawLine(b,0,b,binmax)
+    l_t.AddEntry(phiBin_line,"Bin Edge %s" % i )
+    l_t.AddEntry(phiBin_line,"Evts = %.0f" % n)
+    l_t.AddEntry(phiBin_line,"BinCenter = %.2f" % b)
     
 Cph_q.Print(outputpdf)
 

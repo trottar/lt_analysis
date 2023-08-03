@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 17:19:18 trottar"
+# Time-stamp: "2023-08-03 18:45:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -453,7 +453,5 @@ def compare_simc(hist, inpDict):
     hist["H_pmz_DATA"].Scale(normfac_data)
     hist["H_W_DATA"].Scale(normfac_data)
     hist["H_ct_DATA"].Scale(normfac_data)
-
-    ###!!!!!!!!!!!!!! Add plots
 
     return histDict
