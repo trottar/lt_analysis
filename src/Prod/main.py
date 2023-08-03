@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:12:59 trottar"
+# Time-stamp: "2023-08-03 11:17:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,8 +158,10 @@ Q2max = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
 Wmin = WVal - (2/7)*WVal # min y-range for Q2vsW plot
 Wmax = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 
-# Call diamond cut script and append paramters to dictionary
-inpDict.update(DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax))
+phisetlist = ["Center","Left","Right"]
+for phiset in phisetlist:
+    # Call diamond cut script and append paramters to dictionary
+    inpDict.update(DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phiset, tmin, tmax))
 
 ##############################
 # Step 3 of the lt_analysis: #
