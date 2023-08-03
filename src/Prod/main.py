@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 18:29:46 trottar"
+# Time-stamp: "2023-08-03 18:35:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -596,10 +596,10 @@ for i,hist in enumerate(histlist):
 binmax = max(binmax)
 
 phiBin_line = TLine()
-for i, phi in enumerate(phibinvals):
+for i, phi in enumerate(phi_bins):
     phiBin_line.SetLineColor(4)
     phiBin_line.SetLineWidth(4)
-    phiBin_line.DrawLine(b,0,b,binmax)
+    phiBin_line.DrawLine(0,0,0,360)
     l_t.AddEntry(phiBin_line,"Bin Edge %s" % phi)
     
 Cph_q.Print(outputpdf)
