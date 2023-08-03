@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 17:08:19 trottar"
+# Time-stamp: "2023-08-03 17:14:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,7 +200,7 @@ def compare_simc(hist, inpDict):
     ################################################################################################################################################
     # Grab and calculate efficiency
 
-    sys.path.append('../')
+    sys.path.append('../../scripts/')
     from getDataTable import calculate_effError
 
     tot_effError_data = [calculate_effError(run,efficiency_table) for run in runNums.split(' ')]
