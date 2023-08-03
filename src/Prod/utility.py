@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:49:04 trottar"
+# Time-stamp: "2023-08-03 12:13:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,9 +14,9 @@ import subprocess
 
 ################################################################################################################################################
 
-def show_pdf_with_evince(pdf_file_path):
+def show_pdf_with_evince(file_path):
     try:
-        subprocess.run(['evince', pdf_file_path])
+        subprocess.Popen(['evince', file_path])
     except FileNotFoundError:
         print("Evince not found. Please make sure it is installed.")
     except Exception as e:
