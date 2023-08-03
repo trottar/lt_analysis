@@ -41,7 +41,7 @@ while getopts 'habp' flag; do
         echo "    -a, combine data for each phi setting"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
         echo "    -b, run binning script (!!!required!!!)"
-	echo "        EPSILON=arg1, Q2=arg2, W=arg3"
+	echo "        Q2=arg1, W=arg2"
 	echo
 	echo " Avaliable Kinematics..."	
 	echo "                      Q2=5p5, W=3p02"
@@ -67,23 +67,11 @@ do
     if [[ $b_flag = "true" || $a_flag = "true" ]]; then
 
 	EPSILON=$j
-	Q2=$3
-	W=$4
+	Q2=$2
+	W=$3
 	echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
 	echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
-	if [[ -z "$2" || ! "$EPSILON" =~ high|low ]]; then # Check the 1st argument was provided and that it's one of the valid options
-	    echo ""
-	    echo "I need a valid epsilon..."
-	    while true; do
-		echo ""
-		read -p "Epsilon must be - high - low - Case Sensitive! - or press ctrl-c to exit : " EPSILON
-		case $EPSILON in
-		    '');; # If blank, prompt again
-		    'high'|'low') break;; # If a valid option, break the loop and continue
-		esac
-	    done
-	fi
-	if [[ -z "$3" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
+	if [[ -z "$2" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
 	    echo ""
 	    echo "I need a valid Q2..."
 	    while true; do
@@ -95,7 +83,7 @@ do
 		esac
 	    done
 	fi
-	if [[ -z "$4" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	if [[ -z "$3" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
 	    echo ""
 	    echo "I need a valid W..."
 	    while true; do
@@ -111,23 +99,11 @@ do
     else
 
 	EPSILON=$j
-	Q2=$2
-	W=$3
+	Q2=$1
+	W=$2
 	echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
 	echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
-	if [[ -z "$1" || ! "$EPSILON" =~ high|low ]]; then # Check the 1st argument was provided and that it's one of the valid options
-	    echo ""
-	    echo "I need a valid epsilon..."
-	    while true; do
-		echo ""
-		read -p "Epsilon must be - high - low - Case Sensitive! - or press ctrl-c to exit : " EPSILON
-		case $EPSILON in
-		    '');; # If blank, prompt again
-		    'high'|'low') break;; # If a valid option, break the loop and continue
-		esac
-	    done
-	fi
-	if [[ -z "$2" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
+	if [[ -z "$1" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
 	    echo ""
 	    echo "I need a valid Q2..."
 	    while true; do
@@ -139,7 +115,7 @@ do
 		esac
 	    done
 	fi
-	if [[ -z "$3" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	if [[ -z "$2" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
 	    echo ""
 	    echo "I need a valid W..."
 	    while true; do
