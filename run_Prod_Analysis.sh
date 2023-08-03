@@ -1064,10 +1064,8 @@ do
 	echo
 	echo "High Epsilon Completed!"	
     fi
-    
 
 echo
 echo
 echo
 echo "Script Complete!"
-    
