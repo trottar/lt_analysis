@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:17:59 trottar"
+# Time-stamp: "2023-08-03 11:23:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -162,6 +162,16 @@ phisetlist = ["Center","Left","Right"]
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
     inpDict.update(DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phiset, tmin, tmax))
+    print('''
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    '''.format(inpDict["a1"],inpDict["b1"],inpDict["a2"],inpDict["b2"],inpDict["a3"],inpDict["b3"],inpDict["a4"],inpDict["b4"])
 
 ##############################
 # Step 3 of the lt_analysis: #
