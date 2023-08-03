@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 14:25:29 trottar"
+# Time-stamp: "2023-08-03 14:33:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,9 +217,6 @@ if DEBUG:
 
 from find_bins import find_bins
 
-
-print("@@@@@@@@@@@@@@@@@@@@@@@@@",EPSSET)
-
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
     print(bin_vals)
@@ -231,7 +228,7 @@ try:
         # Check if the file has at least two lines
         if len(all_lines) >= 2:
             # Extract the second line and remove leading/trailing whitespace
-            t_bins = all_lines[1].split("\t")
+            t_bins = all_lines[1].split("\t").pop(0)
 except FileNotFoundError:
     print("{} not found...".format("{}/src/t_bin_interval".format(LTANAPATH)))
 except IOError:
@@ -244,7 +241,7 @@ try:
         # Check if the file has at least two lines
         if len(all_lines) >= 2:
             # Extract the second line and remove leading/trailing whitespace
-            phi_bins = all_lines[1].split("\t")
+            phi_bins = all_lines[1].split("\t").pop(0)
 except FileNotFoundError:
     print("{} not found...".format("{}/src/phi_bin_interval".format(LTANAPATH)))
 except IOError:
