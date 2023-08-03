@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:34:14 trottar"
+# Time-stamp: "2023-08-03 11:42:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,7 +142,7 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 * Make sure to check that high and low eps overlap in...
 
-> lt_analysis/OUTPUT/Analysis/<ANATYPE>LT/<KIN>_<SETTING>_Diamond_Cut.pdf
+> lt_analysis/OUTPUT/Analysis/<ANATYPE>LT/<KIN>_Center_Diamond_Cut.pdf
 
 ** TODO: Add individual setting diamond plots
 '''
@@ -161,11 +161,14 @@ inpDict["Wmax"] = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 # Call diamond cut script and append paramters to dictionary
 inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], "Center", tmin, tmax))
 
+# Show plot pdf
+show_pdf_with_evince(OUTPATH+"/%s_%s_Diamond_Cut.pdf" %((FilenameOverride,"Center")))
+
 ##############################
 # Step 3 of the lt_analysis: #
 ##############################
 '''
-Apply random subtraction to data and dummy
+Apply random subtraction to data and dummy.
 '''
 
 from rand_sub import rand_sub
@@ -186,7 +189,11 @@ for i,hist in enumerate(histlist):
         histlist.remove(hist)
     else:
         settingList.append(hist["phi_setting"])
-    
+
+# Show plot pdf for each setting
+for hist in histlist:        
+    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+        
 ##############################
 # Step 4 of the lt_analysis: #
 ##############################
@@ -238,3 +245,14 @@ for i,hist in enumerate(histlist):
 * Find the mean data values of W,Q2,theta,eps for each t bin of high and low epsilon
   for both data and SIMC.
 '''
+
+
+################################################################################################################################################
+
+def show_pdf_with_evince(pdf_file_path):
+    try:
+        subprocess.run(['evince', pdf_file_path])
+    except FileNotFoundError:
+        print("Evince not found. Please make sure it is installed.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
