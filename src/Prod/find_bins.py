@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 13:52:29 trottar"
+# Time-stamp: "2023-08-03 14:01:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,7 +141,7 @@ def find_bins(histlist, inpDict):
         with open("{}/src/phibin_interval".format(LTANAPATH), "w") as file:
             file.write("{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
             for i,phi in enumerate(bins):
-                lines.append("\t{:.2f}".format(float(phi)))
+                lines.append("\t{}".format(float(phi)))
             file.writelines(lines)        
 
         return [n,bins]
