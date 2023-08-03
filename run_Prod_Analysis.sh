@@ -1014,10 +1014,6 @@ do
     # Run the plotting script if t-flag enabled
     # Checks that array isn't empty
     if [[ $b_flag = "true" ]]; then
-	echo
-	echo
-	echo
-	echo "Finding t/phi bins..."
 	cd "${LTANAPATH}/src/Prod"
 
 	if [ $j = "low" ]; then
