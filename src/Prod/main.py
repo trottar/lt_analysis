@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:43:50 trottar"
+# Time-stamp: "2023-08-03 11:49:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,6 +28,11 @@ from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
+
+##################################################################################################################################################
+# Importing utility functions
+
+from utiliy import show_pdf_with_evince
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -245,14 +250,3 @@ for hist in histlist:
 * Find the mean data values of W,Q2,theta,eps for each t bin of high and low epsilon
   for both data and SIMC.
 '''
-
-
-################################################################################################################################################
-
-def show_pdf_with_evince(pdf_file_path):
-    try:
-        subprocess.run(['evince', pdf_file_path])
-    except FileNotFoundError:
-        print("Evince not found. Please make sure it is installed.")
-    except Exception as e:
-        print("An error occurred: {}".format(e))
