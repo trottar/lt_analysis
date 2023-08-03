@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 17:14:05 trottar"
+# Time-stamp: "2023-08-03 17:19:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -232,9 +232,9 @@ def compare_simc(hist, inpDict):
     H_ssxptar_SIMC  = ROOT.TH1D("H_ssxptar_SIMC","SHMS xptar", 500, -0.1, 0.1)
     H_ssyptar_SIMC  = ROOT.TH1D("H_ssyptar_SIMC","SHMS yptar", 500, -0.04, 0.04)
     H_q_SIMC        = ROOT.TH1D("H_q_SIMC","q", 500, 0.0, 10.0)
-    H_Q2_SIMC       = ROOT.TH1D("H_Q2_SIMC","Q2", 500, Q2min, Q2max)
-    H_W_SIMC  = ROOT.TH1D("H_W_SIMC","W ", 500, Wmin, Wmax)
-    H_t_SIMC       = ROOT.TH1D("H_t_SIMC","-t", 500, tmin, tmax)  
+    H_Q2_SIMC       = ROOT.TH1D("H_Q2_SIMC","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_SIMC  = ROOT.TH1D("H_W_SIMC","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_SIMC       = ROOT.TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])  
     H_epsilon_SIMC  = ROOT.TH1D("H_epsilon_SIMC","epsilon", 500, 0., 1.0)
     H_MM_SIMC  = ROOT.TH1D("H_MM_SIMC","MM_{K}", 500, 0.0, 1.5)
     H_th_SIMC  = ROOT.TH1D("H_th_SIMC","X' tar", 500, -0.1, 0.1)
