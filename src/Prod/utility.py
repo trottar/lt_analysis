@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:13:19 trottar"
+# Time-stamp: "2023-08-03 12:18:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -16,7 +16,8 @@ import subprocess
 
 def show_pdf_with_evince(file_path):
     try:
-        subprocess.Popen(['evince', file_path])
+        process = subprocess.Popen(['evince', file_path])
+        process.wait()  # Pauses the script until Evince is closed
     except FileNotFoundError:
         print("Evince not found. Please make sure it is installed.")
     except Exception as e:
