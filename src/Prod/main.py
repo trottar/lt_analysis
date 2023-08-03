@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:51:31 trottar"
+# Time-stamp: "2023-08-03 11:53:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,7 +167,7 @@ inpDict["Wmax"] = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], "Center", tmin, tmax))
 
 # Show plot pdf
-show_pdf_with_evince(OUTPATH+"/%s_%s_Diamond_Cut.pdf" %((FilenameOverride,"Center")))
+show_pdf_with_evince(OUTPATH+"/%s_%s_Diamond_Cut.pdf" %(('Q'+Q2+'W'+W,"Center")))
 
 ##############################
 # Step 3 of the lt_analysis: #
