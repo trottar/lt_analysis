@@ -1064,7 +1064,7 @@ fi
 
 if [[ $b_flag = "true" ]]; then
     cd "${LTANAPATH}"
-    evince "OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutFullAnalysisFilename}.pdf"
+    #evince "OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutFullAnalysisFilename}.pdf"
 fi
 
 echo

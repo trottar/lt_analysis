@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:41:14 trottar"
+# Time-stamp: "2023-08-03 12:55:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,9 +168,10 @@ for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
     inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))
 
-# Show plot pdf for each setting
-for phiset in phisetlist:
-    show_pdf_with_evince(OUTPATH+"/%s_%s_Diamond_Cut.pdf" %(('Q'+Q2+'W'+W,phiset)))
+if DEBUG:
+    # Show plot pdf for each setting
+    for phiset in phisetlist:
+        show_pdf_with_evince(OUTPATH+"/%s_%s_Diamond_Cut.pdf" %(('Q'+Q2+'W'+W,phiset)))
 
 ##############################
 # Step 3 of the lt_analysis: # DONE
@@ -197,9 +198,10 @@ for i,hist in enumerate(histlist):
     else:
         settingList.append(hist["phi_setting"])
 
-# Show plot pdf for each setting
-for hist in histlist:        
-    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+if DEBUG:        
+    # Show plot pdf for each setting
+    for hist in histlist:        
+        show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
         
 ##############################
 # Step 4 of the lt_analysis: #
