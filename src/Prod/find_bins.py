@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 13:14:50 trottar"
+# Time-stamp: "2023-08-03 13:18:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -172,9 +172,8 @@ def find_bins(histlist, inpDict):
 
         # Write t_bin_interval for lt_analysis scripts
         lines = []
-        #with open("{}/src/t_bin_interval_{}_{:.0f}".format(LTANAPATH,Q2.replace("p",""),float(EPSVAL)*100), "w") as file:
         with open("{}/src/t_bin_interval".format(LTANAPATH), "w") as file:
-            file.write("{}\t{}\t{}\n".format(Q2.replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
+            file.write("{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
             for i,t in enumerate(bins):
                 lines.append("\t{:.2f}".format(float(t)))
             file.writelines(lines)
