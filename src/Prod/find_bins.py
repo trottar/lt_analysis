@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 13:07:16 trottar"
+# Time-stamp: "2023-08-03 13:08:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ OUTPATH=lt.OUTPATH
 ################################################################################################################################################
 
 # Convert TH1F to NumPy array
-def hist_to_numpy(histogram, data):
+def hist_to_numpy(histogram):
     
     # Get the number of bins in the histogram
     n_bins = histogram.GetNbinsX()
