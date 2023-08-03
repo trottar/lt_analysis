@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 17:03:24 trottar"
+# Time-stamp: "2023-08-03 17:10:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -268,7 +268,7 @@ from compare_simc import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    hist.update(compare_simc(hist["phi_setting"], inpDict))
+    hist.update(compare_simc(hist, inpDict))
 
 ##############################
 # Step 6 of the lt_analysis: #
