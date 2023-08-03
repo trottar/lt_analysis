@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 14:11:43 trottar"
+# Time-stamp: "2023-08-03 14:25:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,6 +216,9 @@ if DEBUG:
 '''
 
 from find_bins import find_bins
+
+
+print("@@@@@@@@@@@@@@@@@@@@@@@@@",EPSSET)
 
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
