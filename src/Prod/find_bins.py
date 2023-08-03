@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:53:36 trottar"
+# Time-stamp: "2023-08-03 13:03:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,12 +50,6 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-foutname = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".root"
-fouttxt  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".txt"
-outputpdf  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".pdf"
-
-################################################################################################################################################
-
 # Convert TH1F to NumPy array
 def hist_to_numpy(histogram, data):
     
@@ -92,6 +86,12 @@ def hist_to_numpy(histogram, data):
 
 def find_bins(histlist, inpDict):
 
+    ################################################################################################################################################
+
+    foutname = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".root"
+    fouttxt  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".txt"
+    outputpdf  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".pdf"
+    
     ################################################################################################################################################
     # Define root file trees of interest
 
