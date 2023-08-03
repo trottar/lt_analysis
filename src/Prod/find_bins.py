@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:39:38 trottar"
+# Time-stamp: "2023-08-03 12:50:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,9 +52,9 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
-fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
-outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
+foutname = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".root"
+fouttxt  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".txt"
+outputpdf  = OUTPATH + "/" + inpDict["ParticleType"] + "_" + OutFilename + ".pdf"
 
 ################################################################################################################################################
 
