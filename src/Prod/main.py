@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:11:26 trottar"
+# Time-stamp: "2023-08-03 11:12:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,32 +28,6 @@ from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
-
-###############################################################################################################################################
-
-'''
-ltsep package import and pathing definitions
-'''
-
-# Import package for cuts
-from ltsep import Root
-# Import package for progress bar
-from ltsep import Misc
-
-lt=Root(os.path.realpath(__file__),"Plot_Prod")
-
-# Add this to all files for more dynamic pathing
-USER=lt.USER # Grab user info for file finding
-HOST=lt.HOST
-REPLAYPATH=lt.REPLAYPATH
-UTILPATH=lt.UTILPATH
-LTANAPATH=lt.LTANAPATH
-ANATYPE=lt.ANATYPE
-OUTPATH=lt.OUTPATH
-
-foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
-fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
-outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -120,6 +94,29 @@ inpDict = {
     "efficiency_table" : efficiency_table,
     "ParticleType" : ParticleType,
 }
+
+###############################################################################################################################################
+# ltsep package import and pathing definitions
+
+# Import package for cuts
+from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
+
+lt=Root(os.path.realpath(__file__),"Plot_Prod")
+
+# Add this to all files for more dynamic pathing
+USER=lt.USER # Grab user info for file finding
+HOST=lt.HOST
+REPLAYPATH=lt.REPLAYPATH
+UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH
+ANATYPE=lt.ANATYPE
+OUTPATH=lt.OUTPATH
+
+foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
+fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
+outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 ################################################################################################################################################    
 
