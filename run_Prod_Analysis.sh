@@ -1065,6 +1065,8 @@ do
 	echo "High Epsilon Completed!"	
     fi
 
+done
+    
 echo
 echo
 echo
