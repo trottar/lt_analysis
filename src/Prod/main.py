@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:55:48 trottar"
+# Time-stamp: "2023-08-03 13:32:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,6 +28,7 @@ from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
+import csv
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -37,8 +38,8 @@ from utility import show_pdf_with_evince
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=25:
-    print("!!!!! ERROR !!!!!\n Expected 25 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=26:
+    print("!!!!! ERROR !!!!!\n Expected 25 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -71,6 +72,7 @@ InData_efficiency_left = sys.argv[22]
 InData_efficiency_center = sys.argv[23]
 efficiency_table = sys.argv[24]
 ParticleType = sys.argv[25]
+EPSSET = sys.argv[26]
 
 inpDict = {
     "kinematics" : kinematics,
@@ -98,6 +100,7 @@ inpDict = {
     "InData_efficiency_center" : InData_efficiency_center,
     "efficiency_table" : efficiency_table,
     "ParticleType" : ParticleType,
+    "EPSSET" : EPSSET
 }
 
 ###############################################################################################################################################
@@ -214,9 +217,9 @@ if DEBUG:
 
 from find_bins import find_bins
 
-bin_vals = find_bins(histlist, inpDict)
-
-print(bin_vals)
+if EPSSET == "low":
+    bin_vals = find_bins(histlist, inpDict)
+    print(bin_vals)
 
 ##############################
 # Step 5 of the lt_analysis: #
