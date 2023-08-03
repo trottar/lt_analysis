@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:09:06 trottar"
+# Time-stamp: "2023-08-03 12:41:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -126,7 +126,7 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 ################################################################################################################################################    
 
 ##############################
-# Step 1 of the lt_analysis: #
+# Step 1 of the lt_analysis: # DONE
 ##############################
 '''
 * All analysis cuts per run (i.e. PID, acceptance, timing) are applied. 
@@ -140,7 +140,7 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 '''
 
 ##############################
-# Step 2 of the lt_analysis: #
+# Step 2 of the lt_analysis: # DONE
 ##############################
 '''
 * Diamond cuts are drawn on the CENTER setting.
@@ -173,7 +173,7 @@ for phiset in phisetlist:
     show_pdf_with_evince(OUTPATH+"/%s_%s_Diamond_Cut.pdf" %(('Q'+Q2+'W'+W,phiset)))
 
 ##############################
-# Step 3 of the lt_analysis: #
+# Step 3 of the lt_analysis: # DONE
 ##############################
 '''
 Apply random subtraction to data and dummy.
@@ -210,7 +210,11 @@ for hist in histlist:
 * These bins will also be used of high eps, so check high eps as well.
 '''
 
-#from find_bins import find_bins
+from find_bins import find_bins
+
+bin_vals = find_bins(histlist, inpDict)
+
+print(bin_vals)
 
 ##############################
 # Step 5 of the lt_analysis: #
