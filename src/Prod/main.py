@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 17:47:59 trottar"
+# Time-stamp: "2023-08-03 17:57:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -399,7 +399,7 @@ tBin_line = TLine()
 for i in enumerate(t_bins):
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
-    tBin_line.DrawLine(b,0,tmin,tmax)
+    tBin_line.DrawLine(tmin,0,tmin,tmax)
     l_t.AddEntry(tBin_line,"Bin Edge %s" % i )
 
 l_t.Draw()    
