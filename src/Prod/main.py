@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:23:31 trottar"
+# Time-stamp: "2023-08-03 11:24:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -171,7 +171,7 @@ for phiset in phisetlist:
     {}
     {}
     {}
-    '''.format(inpDict["a1"],inpDict["b1"],inpDict["a2"],inpDict["b2"],inpDict["a3"],inpDict["b3"],inpDict["a4"],inpDict["b4"])
+'''.format(inpDict["a1"],inpDict["b1"],inpDict["a2"],inpDict["b2"],inpDict["a3"],inpDict["b3"],inpDict["a4"],inpDict["b4"])
 
 ##############################
 # Step 3 of the lt_analysis: #
