@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:53:51 trottar"
+# Time-stamp: "2023-08-03 12:09:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -163,11 +163,14 @@ inpDict["Q2max"] = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
 inpDict["Wmin"] = WVal - (2/7)*WVal # min y-range for Q2vsW plot
 inpDict["Wmax"] = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 
-# Call diamond cut script and append paramters to dictionary
-inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], "Center", tmin, tmax))
+phisetlist = ["Center","Left","Right"]
+for phiset in phisetlist:
+    # Call diamond cut script and append paramters to dictionary
+    inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))
 
-# Show plot pdf
-show_pdf_with_evince(OUTPATH+"/%s_%s_Diamond_Cut.pdf" %(('Q'+Q2+'W'+W,"Center")))
+# Show plot pdf for each setting
+for phiset in phisetlist:
+    show_pdf_with_evince(OUTPATH+"/%s_%s_Diamond_Cut.pdf" %(('Q'+Q2+'W'+W,phiset)))
 
 ##############################
 # Step 3 of the lt_analysis: #
@@ -181,7 +184,6 @@ from rand_sub import rand_sub
 # Call histogram function above to define dictonaries for right, left, center settings
 # Put these all into an array so that if we are missing a setting it is easier to remove
 # Plus it makes the code below less repetitive
-phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
     histlist.append(rand_sub(phiset,inpDict))

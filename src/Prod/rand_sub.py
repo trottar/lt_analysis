@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:20:35 trottar"
+# Time-stamp: "2023-08-03 12:00:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,9 +108,9 @@ def rand_sub(phi_setting, inpDict):
 
     InFile_DATA = ROOT.TFile.Open(rootFileData, "OPEN")
 
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType))
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
-    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(ParticleType))
+    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
     ################################################################################################################################################
     # Define dummy root file trees of interest
@@ -122,9 +122,9 @@ def rand_sub(phi_setting, inpDict):
 
     InFile_DUMMY = ROOT.TFile.Open(rootFileDummy, "OPEN")  
 
-    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType))
+    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
-    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType))
+    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
     ################################################################################################################################################
     # Grabs PID cut string
@@ -264,7 +264,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DATA  = ROOT.TH1D("H_pmx_DATA","pmx", 500, -10.0, 10.0)
     H_pmy_DATA  = ROOT.TH1D("H_pmy_DATA","pmy ", 500, -10.0, 10.0)
     H_pmz_DATA  = ROOT.TH1D("H_pmz_DATA","pmz", 500, -10.0, 10.0)
-    H_ct_DATA = ROOT.TH1D("H_ct_DATA", "Electron-{} CTime".format(ParticleType), 500, -10, 10)
+    H_ct_DATA = ROOT.TH1D("H_ct_DATA", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -10, 10)
     H_cal_etottracknorm_DATA = ROOT.TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 500, 0.2, 1.8)
     H_cer_npeSum_DATA = ROOT.TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 500, 0, 30)
     P_cal_etottracknorm_DATA = ROOT.TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 500, 0, 1)
@@ -302,7 +302,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DUMMY  = ROOT.TH1D("H_pmx_DUMMY","pmx", 500, -10.0, 10.0)
     H_pmy_DUMMY  = ROOT.TH1D("H_pmy_DUMMY","pmy ", 500, -10.0, 10.0)
     H_pmz_DUMMY  = ROOT.TH1D("H_pmz_DUMMY","pmz", 500, -10.0, 10.0)
-    H_ct_DUMMY = ROOT.TH1D("H_ct_DUMMY", "Electron-{} CTime".format(ParticleType), 500, -10, 10)
+    H_ct_DUMMY = ROOT.TH1D("H_ct_DUMMY", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -10, 10)
 
     H_hsdelta_RAND  = ROOT.TH1D("H_hsdelta_RAND","HMS Delta", 500, -20.0, 20.0)
     H_hsxptar_RAND  = ROOT.TH1D("H_hsxptar_RAND","HMS xptar", 500, -0.1, 0.1)
@@ -335,7 +335,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_RAND  = ROOT.TH1D("H_pmx_RAND","pmx", 500, -10.0, 10.0)
     H_pmy_RAND  = ROOT.TH1D("H_pmy_RAND","pmy ", 500, -10.0, 10.0)
     H_pmz_RAND  = ROOT.TH1D("H_pmz_RAND","pmz", 500, -10.0, 10.0)
-    H_ct_RAND = ROOT.TH1D("H_ct_RAND", "Electron-{} CTime".format(ParticleType), 500, -10, 10)
+    H_ct_RAND = ROOT.TH1D("H_ct_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -10, 10)
 
     H_hsdelta_DUMMY_RAND  = ROOT.TH1D("H_hsdelta_DUMMY_RAND","HMS Delta", 500, -20.0, 20.0)
     H_hsxptar_DUMMY_RAND  = ROOT.TH1D("H_hsxptar_DUMMY_RAND","HMS xptar", 500, -0.1, 0.1)
@@ -368,7 +368,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DUMMY_RAND  = ROOT.TH1D("H_pmx_DUMMY_RAND","pmx", 500, -10.0, 10.0)
     H_pmy_DUMMY_RAND  = ROOT.TH1D("H_pmy_DUMMY_RAND","pmy ", 500, -10.0, 10.0)
     H_pmz_DUMMY_RAND  = ROOT.TH1D("H_pmz_DUMMY_RAND","pmz", 500, -10.0, 10.0)
-    H_ct_DUMMY_RAND = ROOT.TH1D("H_ct_DUMMY_RAND", "Electron-{} CTime".format(ParticleType), 500, -10, 10)
+    H_ct_DUMMY_RAND = ROOT.TH1D("H_ct_DUMMY_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -10, 10)
 
     ################################################################################################################################################
     # 2D histograms
@@ -934,7 +934,7 @@ def rand_sub(phi_setting, inpDict):
     l_ct.SetTextSize(0.0235)
     H_ct_DATA.SetLineColor(2)
     H_ct_DATA.Draw("same, HIST")
-    l_ct.AddEntry(H_ct_DATA,"{}".format(ParticleType))
+    l_ct.AddEntry(H_ct_DATA,"{}".format(ParticleType.capitalize()))
     l_ct.Draw()
 
     ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+'(')

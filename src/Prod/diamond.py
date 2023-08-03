@@ -48,7 +48,7 @@ print("\n\n!!! Ensure all relevant Analysed_Data.root file names have same preci
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
-def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax):
+def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
 
     Qs = str(Q2Val).replace('.','p')
     Ws = str(WVal).replace('.','p')
@@ -199,12 +199,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         infile = ROOT.TFile.Open(rootName, "READ")
 
 	# Assumes 2021 trees do not have Prompt MM cut, as some do not right now. *** NEED TO BE REPLAYED AGAIN WITH THIS BRANCH ***
-        if ParticleType == "kaon":
-            Cut_Events_all_RF_tree = infile.Get("Cut_Kaon_Events_prompt_RF")
-        if ParticleType == "pion":
-            Cut_Events_all_RF_tree = infile.Get("Cut_Pion_Events_prompt_RF") # No RF unless replayed with pion
-        if ParticleType == "proton":
-            Cut_Events_all_RF_tree = infile.Get("Cut_Proton_Events_prompt_RF") # No RF unless replayed with proton
+        Cut_Events_all_RF_tree = infile.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
 
 	##############################################################################################################################################
         countB = 0
@@ -317,12 +312,22 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 hira = np.array(hir)
                 xla = np.array(xvl)
                 xra = np.array(xvr)
-	
-                a1, b1 = np.polyfit(xla, lola, 1)
-                a2, b2 = np.polyfit(xla, hila, 1)
-                a3, b3 = np.polyfit(xra, lora, 1)
-                a4, b4 = np.polyfit(xra, hira, 1)
-	
+
+                if target == "Center":
+                    a1, b1 = np.polyfit(xla, lola, 1)
+                    a2, b2 = np.polyfit(xla, hila, 1)
+                    a3, b3 = np.polyfit(xra, lora, 1)
+                    a4, b4 = np.polyfit(xra, hira, 1)
+                else:
+                    a1 = inpDict["a1"]
+                    b1 = inpDict["b1"]
+                    a2 = inpDict["a2"]
+                    b2 = inpDict["b2"]
+                    a3 = inpDict["a3"]
+                    b3 = inpDict["b3"]
+                    a4 = inpDict["a4"]
+                    b4 = inpDict["b4"]                    
+	            
                 for event in Cut_Events_all_RF_tree:
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
@@ -365,7 +370,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         print("Histograms filled")
 
         infile.Close()
-        
+
     paramDict = {
             
         "a1" : a1,
