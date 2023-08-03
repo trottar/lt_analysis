@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:27:55 trottar"
+# Time-stamp: "2023-08-03 11:34:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,7 +138,7 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 # Step 2 of the lt_analysis: #
 ##############################
 '''
-* Diamond cuts are drawn on the center setting.
+* Diamond cuts are drawn on the CENTER setting.
 
 * Make sure to check that high and low eps overlap in...
 
@@ -153,25 +153,13 @@ from diamond import DiamondPlot
 Q2Val = float(Q2.replace("p","."))
 WVal = float(W.replace("p","."))
 
-Q2min = Q2Val - (2/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
-Q2max = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
-Wmin = WVal - (2/7)*WVal # min y-range for Q2vsW plot
-Wmax = WVal + (2/7)*WVal # max y-range for Q2vsW plot
+inpDict["Q2min"] = Q2Val - (2/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
+inpDict["Q2max"] = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
+inpDict["Wmin"] = WVal - (2/7)*WVal # min y-range for Q2vsW plot
+inpDict["Wmax"] = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 
-phisetlist = ["Center","Left","Right"]
-for phiset in phisetlist:
-    # Call diamond cut script and append paramters to dictionary
-    inpDict.update(DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phiset, tmin, tmax))
-    print('''
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    '''.format(inpDict["a1"],inpDict["b1"],inpDict["a2"],inpDict["b2"],inpDict["a3"],inpDict["b3"],inpDict["a4"],inpDict["b4"]))
+# Call diamond cut script and append paramters to dictionary
+inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], "Center", tmin, tmax))
 
 ##############################
 # Step 3 of the lt_analysis: #
