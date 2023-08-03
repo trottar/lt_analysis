@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:42:16 trottar"
+# Time-stamp: "2023-08-03 11:43:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -255,4 +255,4 @@ def show_pdf_with_evince(pdf_file_path):
     except FileNotFoundError:
         print("Evince not found. Please make sure it is installed.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print("An error occurred: {}".format(e))
