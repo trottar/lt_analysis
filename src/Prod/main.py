@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 10:35:21 trottar"
+# Time-stamp: "2023-08-03 11:07:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,34 +41,71 @@ foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
 fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
 outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
-################################################################################################################################################
+##################################################################################################################################################
+# Check the number of arguments provided to the script
 
-# Define various inputs 
-kinematics = inpDict["kinematics"] 
-W = inpDict["W"] 
-Q2 = inpDict["Q2"] 
-EPSVAL = inpDict["EPSVAL"] 
-InDATAFilename = inpDict["InDATAFilename"] 
-InDUMMYFilename = inpDict["InDUMMYFilename"] 
-OutFilename = inpDict["OutFilename"] 
-tmin = inpDict["tmin"] 
-tmax = inpDict["tmax"] 
-NumtBins = inpDict["NumtBins"] 
-NumPhiBins = inpDict["NumPhiBins"] 
-runNumRight = inpDict["runNumRight"] 
-runNumLeft = inpDict["runNumLeft"] 
-runNumCenter = inpDict["runNumCenter"]
-data_charge_right = inpDict["data_charge_right"] 
-data_charge_left = inpDict["data_charge_left"] 
-data_charge_center = inpDict["data_charge_center"] 
-dummy_charge_right = inpDict["dummy_charge_right"] 
-dummy_charge_left = inpDict["dummy_charge_left"] 
-dummy_charge_center = inpDict["dummy_charge_center"] 
-InData_efficiency_right = inpDict["InData_efficiency_right"] 
-InData_efficiency_left = inpDict["InData_efficiency_left"] 
-InData_efficiency_center = inpDict["InData_efficiency_center"] 
-efficiency_table = inpDict["efficiency_table"] 
-ParticleType = inpDict["ParticleType"]
+if len(sys.argv)-1!=25:
+    print("!!!!! ERROR !!!!!\n Expected 25 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType\n!!!!! ERROR !!!!!")
+    sys.exit(1)
+
+##################################################################################################################################################    
+
+DEBUG = False # Flag for no cut plots
+
+# Input params
+kinematics = sys.argv[1].split("_")
+W = sys.argv[2]
+Q2 = sys.argv[3]
+EPSVAL = sys.argv[4]
+InDATAFilename = sys.argv[5]
+InDUMMYFilename = sys.argv[6]
+OutFilename = sys.argv[7]
+tmin = float(sys.argv[8])
+tmax = float(sys.argv[9])
+NumtBins = int(sys.argv[10])
+NumPhiBins = int(sys.argv[11])
+runNumRight = sys.argv[12]
+runNumLeft = sys.argv[13]
+runNumCenter = sys.argv[14]
+data_charge_right = int(sys.argv[15])/1000 # Convert from uC to C
+data_charge_left = int(sys.argv[16])/1000 # Convert from uC to C
+data_charge_center = int(sys.argv[17])/1000 # Convert from uC to C
+dummy_charge_right = int(sys.argv[18])/1000 # Convert from uC to C
+dummy_charge_left = int(sys.argv[19])/1000 # Convert from uC to C
+dummy_charge_center = int(sys.argv[20])/1000 # Convert from uC to C
+InData_efficiency_right = sys.argv[21]
+InData_efficiency_left = sys.argv[22]
+InData_efficiency_center = sys.argv[23]
+efficiency_table = sys.argv[24]
+ParticleType = sys.argv[25]
+
+inpDict = {
+    "kinematics" : kinematics,
+    "W" : W,
+    "Q2" : Q2,
+    "EPSVAL" : EPSVAL,
+    "InDATAFilename" : InDATAFilename,
+    "InDUMMYFilename" : InDUMMYFilename,
+    "OutFilename" : OutFilename,
+    "tmin" : tmin,
+    "tmax" : tmax,
+    "NumtBins" : NumtBins,
+    "NumPhiBins" : NumPhiBins,
+    "runNumRight" : runNumRight,
+    "runNumLeft" : runNumLeft,
+    "runNumCenter" : runNumCenter,
+    "data_charge_right" : data_charge_right,
+    "data_charge_left" : data_charge_left,
+    "data_charge_center" : data_charge_center,
+    "dummy_charge_right" : dummy_charge_right,
+    "dummy_charge_left" : dummy_charge_left,
+    "dummy_charge_center" : dummy_charge_center,
+    "InData_efficiency_right" : InData_efficiency_right,
+    "InData_efficiency_left" : InData_efficiency_left,
+    "InData_efficiency_center" : InData_efficiency_center,
+    "efficiency_table" : efficiency_table,
+    "ParticleType" : ParticleType,
+}
 
 ################################################################################################################################################    
 
@@ -95,6 +132,8 @@ ParticleType = inpDict["ParticleType"]
 * Make sure to check that high and low eps overlap in...
 
 > lt_analysis/OUTPUT/Analysis/<ANATYPE>LT/<KIN>_<SETTING>_Diamond_Cut.pdf
+
+** TODO: Add individual setting diamond plots
 '''
 
 #Importing diamond cut script
@@ -108,18 +147,8 @@ Q2max = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
 Wmin = WVal - (2/7)*WVal # min y-range for Q2vsW plot
 Wmax = WVal + (2/7)*WVal # max y-range for Q2vsW plot
 
-# Call diamond cut script
-paramDict = DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax)
-
-# Define diamond cut parameters
-a1 = paramDict["a1"]
-b1 = paramDict["b1"]
-a2 = paramDict["a2"]
-b2 = paramDict["b2"]
-a3 = paramDict["a3"]
-b3 = paramDict["b3"]
-a4 = paramDict["a4"]
-b4 = paramDict["b4"]
+# Call diamond cut script and append paramters to dictionary
+inpDict.update(DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax))
 
 ##############################
 # Step 3 of the lt_analysis: #
@@ -136,7 +165,7 @@ from rand_sub import rand_sub
 phisetlist = ["Center","Left","Right"]
 histlist = []
 for phiset in phisetlist:
-    histlist.append(defineHists(phiset,inpDict))
+    histlist.append(rand_sub(phiset,inpDict))
 
 print("\n\n")
 
@@ -156,7 +185,7 @@ for i,hist in enumerate(histlist):
 * These bins will also be used of high eps, so check high eps as well.
 '''
 
-from find_bins import find_bins
+#from find_bins import find_bins
 
 ##############################
 # Step 5 of the lt_analysis: #
@@ -171,7 +200,7 @@ from find_bins import find_bins
 > lt_analysis/src/SIMC/??????????????.f
 '''
 
-from compare_simc import compare_simc
+#from compare_simc import compare_simc
 
 ##############################
 # Step 6 of the lt_analysis: #
@@ -187,7 +216,7 @@ from compare_simc import compare_simc
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''
 
-from calculate_yield import calculate_yield
+#from calculate_yield import calculate_yield
 
 ##############################
 # Step 7 of the lt_analysis: #
