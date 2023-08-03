@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 11:49:51 trottar"
+# Time-stamp: "2023-08-03 11:51:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,7 +32,7 @@ from functools import reduce
 ##################################################################################################################################################
 # Importing utility functions
 
-from utiliy import show_pdf_with_evince
+from utility import show_pdf_with_evince
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
