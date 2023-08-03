@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 13:32:07 trottar"
+# Time-stamp: "2023-08-03 13:56:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -219,8 +219,42 @@ from find_bins import find_bins
 
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
-    print(bin_vals)
 
+t_bins = []    
+try:
+    with open("{}/src/t_bin_interval".format(LTANAPATH), "r") as file:
+        # Read all lines from the file into a list
+        all_lines = file.readlines()
+        # Check if the file has at least two lines
+        if len(all_lines) >= 2:
+            # Extract the second line and remove leading/trailing whitespace
+            second_line = all_lines[1].strip()
+            # Append the second line to the lines_list
+            t_bins.append(second_line)
+except FileNotFoundError:
+    print("{} not found...".format("{}/src/t_bin_interval".format(LTANAPATH)))
+except IOError:
+    print("Error reading {}...".format("{}/src/t_bin_interval".format(LTANAPATH)))    
+
+phi_bins = []    
+try:
+    with open("{}/src/phi_bin_interval".format(LTANAPATH), "r") as file:
+        # Read all lines from the file into a list
+        all_lines = file.readlines()
+        # Check if the file has at least two lines
+        if len(all_lines) >= 2:
+            # Extract the second line and remove leading/trailing whitespace
+            second_line = all_lines[1].strip()
+            # Append the second line to the lines_list
+            phi_bins.append(second_line)
+except FileNotFoundError:
+    print("{} not found...".format("{}/src/phi_bin_interval".format(LTANAPATH)))
+except IOError:
+    print("Error reading {}...".format("{}/src/phi_bin_interval".format(LTANAPATH)))    
+    
+
+print(t_bins,"\n",phi_bins)
+    
 ##############################
 # Step 5 of the lt_analysis: #
 ##############################
