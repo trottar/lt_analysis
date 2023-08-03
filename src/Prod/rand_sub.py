@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:28:11 trottar"
+# Time-stamp: "2023-08-03 17:21:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -882,6 +882,37 @@ def rand_sub(phi_setting, inpDict):
     histDict["phi_setting"] = phi_setting
     histDict["pid_text"] = pid_text
     histDict["runNums"] = runNums.split(' ')
+    histDict["H_hsdelta_DUMMY"] =     H_hsdelta_DUMMY
+    histDict["H_hsxptar_DUMMY"] =     H_hsxptar_DUMMY
+    histDict["H_hsyptar_DUMMY"] =     H_hsyptar_DUMMY
+    histDict["H_ssxfp_DUMMY"] =     H_ssxfp_DUMMY  
+    histDict["H_ssyfp_DUMMY"] =     H_ssyfp_DUMMY  
+    histDict["H_ssxpfp_DUMMY"] =     H_ssxpfp_DUMMY 
+    histDict["H_ssypfp_DUMMY"] =     H_ssypfp_DUMMY 
+    histDict["H_hsxfp_DUMMY"] =     H_hsxfp_DUMMY  
+    histDict["H_hsyfp_DUMMY"] =     H_hsyfp_DUMMY  
+    histDict["H_hsxpfp_DUMMY"] =     H_hsxpfp_DUMMY 
+    histDict["H_hsypfp_DUMMY"] =     H_hsypfp_DUMMY 
+    histDict["H_ssdelta_DUMMY"] =     H_ssdelta_DUMMY
+    histDict["H_ssxptar_DUMMY"] =     H_ssxptar_DUMMY
+    histDict["H_ssyptar_DUMMY"] =     H_ssyptar_DUMMY
+    histDict["H_q_DUMMY"] =     H_q_DUMMY      
+    histDict["H_Q2_DUMMY"] =     H_Q2_DUMMY     
+    histDict["H_t_DUMMY"] =     H_t_DUMMY     
+    histDict["H_epsilon_DUMMY"] =     H_epsilon_DUMMY
+    histDict["H_MM_DUMMY"] =     H_MM_DUMMY
+    histDict["H_th_DUMMY"] =     H_th_DUMMY
+    histDict["H_ph_DUMMY"] =     H_ph_DUMMY
+    histDict["H_ph_q_DUMMY"] =     H_ph_q_DUMMY
+    histDict["H_th_q_DUMMY"] =     H_th_q_DUMMY
+    histDict["H_ph_recoil_DUMMY"] =     H_ph_recoil_DUMMY
+    histDict["H_th_recoil_DUMMY"] =     H_th_recoil_DUMMY
+    histDict["H_pmiss_DUMMY"] =     H_pmiss_DUMMY
+    histDict["H_emiss_DUMMY"] =     H_emiss_DUMMY
+    histDict["H_pmx_DUMMY"] =     H_pmx_DUMMY
+    histDict["H_pmy_DUMMY"] =     H_pmy_DUMMY
+    histDict["H_pmz_DUMMY"] =     H_pmz_DUMMY
+    histDict["H_W_DUMMY"] =     H_W_DUMMY    
     histDict["H_hsdelta_DATA"] =     H_hsdelta_DATA
     histDict["H_hsxptar_DATA"] =     H_hsxptar_DATA
     histDict["H_hsyptar_DATA"] =     H_hsyptar_DATA
