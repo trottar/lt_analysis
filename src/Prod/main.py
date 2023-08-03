@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 17:40:34 trottar"
+# Time-stamp: "2023-08-03 17:47:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -396,13 +396,11 @@ for i,hist in enumerate(histlist):
 binmax = max(binmax)
     
 tBin_line = TLine()
-for i,(n,b) in enumerate(zip(tbinvals,tbinedges)):
+for i in enumerate(t_bins):
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
-    tBin_line.DrawLine(b,0,b,binmax)
+    tBin_line.DrawLine(b,0,tmin,tmax)
     l_t.AddEntry(tBin_line,"Bin Edge %s" % i )
-    l_t.AddEntry(tBin_line,"Evts = %.0f" % n)
-    l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
 
 l_t.Draw()    
 
