@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 14:37:09 trottar"
+# Time-stamp: "2023-08-03 17:03:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,7 +207,7 @@ if DEBUG:
         show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
         
 ##############################
-# Step 4 of the lt_analysis: #
+# Step 4 of the lt_analysis: # Done
 ##############################
 '''
 * Combine all settings and choose t/phi bins for low eps.
@@ -264,7 +264,11 @@ print(t_bins,"\n",phi_bins)
 > lt_analysis/src/SIMC/??????????????.f
 '''
 
-#from compare_simc import compare_simc
+from compare_simc import compare_simc
+
+# Upate hist dictionary with effective charge and simc histograms
+for hist in histlist:
+    hist.update(compare_simc(hist["phi_setting"], inpDict))
 
 ##############################
 # Step 6 of the lt_analysis: #
