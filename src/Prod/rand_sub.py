@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:24:38 trottar"
+# Time-stamp: "2023-08-03 12:28:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -882,7 +882,6 @@ def rand_sub(phi_setting, inpDict):
     histDict["phi_setting"] = phi_setting
     histDict["pid_text"] = pid_text
     histDict["runNums"] = runNums.split(' ')
-    histDict["normfac_data"] = normfac_data
     histDict["H_hsdelta_DATA"] =     H_hsdelta_DATA
     histDict["H_hsxptar_DATA"] =     H_hsxptar_DATA
     histDict["H_hsyptar_DATA"] =     H_hsyptar_DATA
