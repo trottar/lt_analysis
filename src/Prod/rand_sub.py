@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 12:00:20 trottar"
+# Time-stamp: "2023-08-03 12:24:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -248,9 +248,9 @@ def rand_sub(phi_setting, inpDict):
     H_ssxptar_DATA  = ROOT.TH1D("H_ssxptar_DATA","SHMS xptar", 500, -0.1, 0.1)
     H_ssyptar_DATA  = ROOT.TH1D("H_ssyptar_DATA","SHMS yptar", 500, -0.04, 0.04)
     H_q_DATA        = ROOT.TH1D("H_q_DATA","q", 500, 0.0, 10.0)
-    H_Q2_DATA       = ROOT.TH1D("H_Q2_DATA","Q2", 500, Q2min, Q2max)
-    H_W_DATA  = ROOT.TH1D("H_W_DATA","W ", 500, Wmin, Wmax)
-    H_t_DATA       = ROOT.TH1D("H_t_DATA","-t", 500, tmin, tmax)
+    H_Q2_DATA       = ROOT.TH1D("H_Q2_DATA","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DATA  = ROOT.TH1D("H_W_DATA","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DATA       = ROOT.TH1D("H_t_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DATA  = ROOT.TH1D("H_epsilon_DATA","epsilon", 500, 0., 1.0)
     H_MM_DATA  = ROOT.TH1D("H_MM_DATA","MM_{K}", 500, 0.0, 1.5)
     H_th_DATA  = ROOT.TH1D("H_th_DATA","X' tar", 500, -0.1, 0.1)
@@ -286,9 +286,9 @@ def rand_sub(phi_setting, inpDict):
     H_ssxptar_DUMMY  = ROOT.TH1D("H_ssxptar_DUMMY","SHMS xptar", 500, -0.1, 0.1)
     H_ssyptar_DUMMY  = ROOT.TH1D("H_ssyptar_DUMMY","SHMS yptar", 500, -0.04, 0.04)
     H_q_DUMMY        = ROOT.TH1D("H_q_DUMMY","q", 500, 0.0, 10.0)
-    H_Q2_DUMMY       = ROOT.TH1D("H_Q2_DUMMY","Q2", 500, Q2min, Q2max)
-    H_W_DUMMY  = ROOT.TH1D("H_W_DUMMY","W ", 500, Wmin, Wmax)
-    H_t_DUMMY       = ROOT.TH1D("H_t_DUMMY","-t", 500, tmin, tmax)  
+    H_Q2_DUMMY       = ROOT.TH1D("H_Q2_DUMMY","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DUMMY  = ROOT.TH1D("H_W_DUMMY","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DUMMY       = ROOT.TH1D("H_t_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])  
     H_epsilon_DUMMY  = ROOT.TH1D("H_epsilon_DUMMY","epsilon", 500, 0., 1.0)
     H_MM_DUMMY  = ROOT.TH1D("H_MM_DUMMY","MM_{K}", 500, 0.0, 1.5)
     H_th_DUMMY  = ROOT.TH1D("H_th_DUMMY","X' tar", 500, -0.1, 0.1)
@@ -319,9 +319,9 @@ def rand_sub(phi_setting, inpDict):
     H_ssxptar_RAND  = ROOT.TH1D("H_ssxptar_RAND","SHMS xptar", 500, -0.1, 0.1)
     H_ssyptar_RAND  = ROOT.TH1D("H_ssyptar_RAND","SHMS yptar", 500, -0.04, 0.04)
     H_q_RAND        = ROOT.TH1D("H_q_RAND","q", 500, 0.0, 10.0)
-    H_Q2_RAND       = ROOT.TH1D("H_Q2_RAND","Q2", 500, Q2min, Q2max)
-    H_W_RAND  = ROOT.TH1D("H_W_RAND","W ", 500, Wmin, Wmax)
-    H_t_RAND       = ROOT.TH1D("H_t_RAND","-t", 500, tmin, tmax)
+    H_Q2_RAND       = ROOT.TH1D("H_Q2_RAND","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_RAND  = ROOT.TH1D("H_W_RAND","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_RAND       = ROOT.TH1D("H_t_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_RAND  = ROOT.TH1D("H_epsilon_RAND","epsilon", 500, 0., 1.0)
     H_MM_RAND  = ROOT.TH1D("H_MM_RAND","MM_{K}", 500, 0.0, 1.5)
     H_th_RAND  = ROOT.TH1D("H_th_RAND","X' tar", 500, -0.1, 0.1)
@@ -352,9 +352,9 @@ def rand_sub(phi_setting, inpDict):
     H_ssxptar_DUMMY_RAND  = ROOT.TH1D("H_ssxptar_DUMMY_RAND","SHMS xptar", 500, -0.1, 0.1)
     H_ssyptar_DUMMY_RAND  = ROOT.TH1D("H_ssyptar_DUMMY_RAND","SHMS yptar", 500, -0.04, 0.04)
     H_q_DUMMY_RAND        = ROOT.TH1D("H_q_DUMMY_RAND","q", 500, 0.0, 10.0)
-    H_Q2_DUMMY_RAND       = ROOT.TH1D("H_Q2_DUMMY_RAND","Q2", 500, Q2min, Q2max)
-    H_W_DUMMY_RAND  = ROOT.TH1D("H_W_DUMMY_RAND","W ", 500, Wmin, Wmax)
-    H_t_DUMMY_RAND       = ROOT.TH1D("H_t_DUMMY_RAND","-t", 500, tmin, tmax)
+    H_Q2_DUMMY_RAND       = ROOT.TH1D("H_Q2_DUMMY_RAND","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DUMMY_RAND  = ROOT.TH1D("H_W_DUMMY_RAND","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DUMMY_RAND       = ROOT.TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DUMMY_RAND  = ROOT.TH1D("H_epsilon_DUMMY_RAND","epsilon", 500, 0., 1.0)
     H_MM_DUMMY_RAND  = ROOT.TH1D("H_MM_DUMMY_RAND","MM_{K}", 500, 0.0, 1.5)
     H_th_DUMMY_RAND  = ROOT.TH1D("H_th_DUMMY_RAND","X' tar", 500, -0.1, 0.1)
@@ -376,9 +376,9 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_DATA = ROOT.TH2D("MM_vs_CoinTime_DATA","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -2, 2)
     CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -2, 2, 500, 0, 2)
     MM_vs_beta_DATA = ROOT.TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 500, 0, 2, 500, 0, 2)
-    phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, tmin, tmax)
+    phiq_vs_t_DATA = ROOT.TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
     polar_phiq_vs_t_DATA = ROOT.TGraphPolar()
-    Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 500, Q2min, Q2max, 500, Wmin, Wmax)
+    Q2_vs_W_DATA = ROOT.TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 500, inpDict["Q2min"], inpDict["Q2max"], 500, inpDict["Wmin"], inpDict["Wmax"])
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
