@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 10:34:58 trottar"
+# Time-stamp: "2023-08-04 14:01:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,8 +45,6 @@ def weight_bins(histogram):
     # The last bin edge is the upper edge of the last bin
     bin_edges.append(histogram.GetXaxis().GetBinUpEdge(n_bins))
 
-    print("^^^^^^^^^^^^^^^^^",np.average(bin_edges),"^^^^^^^^^^^^^^^^^")
-
     # Calculate the total integral of the histogram (integral up to the last bin)
     total_integral = histogram.Integral()
 
@@ -55,7 +53,5 @@ def weight_bins(histogram):
 
     # Weight the bin edges by the bin weights
     weighted_bin_edges = [edge * weight for edge, weight in zip(bin_edges, bin_weights)]
-    
-    print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",np.average(weighted_bin_edges),"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬")
     
     return weighted_bin_edges

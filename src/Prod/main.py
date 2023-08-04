@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 13:58:53 trottar"
+# Time-stamp: "2023-08-04 14:02:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -967,7 +967,10 @@ H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tm
 H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
 
 tbinDict = {}
-for i,j in zip(range(NumtBins),range(NumPhiBins)):
+# Loop over each tuple key in the dictionary
+for data_key_tuple in yieldDict["binned_DATA"]:
+    i = data_key_tuple[0] # t bin
+    j = data_key_tuple[1] # phi bin
     tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_Q2_tbin_DATA_{}_{}".format(i+1,j+1), "Q2 (t bin {}, phi bin {}".format(i+1,j+1), 500, inpDict["Q2min"], inpDict["Q2max"])
     tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_W_tbin_DATA_{}_{}".format(i+1,j+1), "W (t bin {}, phi bin {}".format(i+1,j+1), 500, inpDict["Wmin"], inpDict["Wmax"])
     tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_t_tbin_DATA_{}_{}".format(i+1,j+1), "t (t bin {}, phi bin {}".format(i+1,j+1), 500, inpDict["tmin"], inpDict["tmax"])
