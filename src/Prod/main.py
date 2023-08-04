@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 13:15:44 trottar"
+# Time-stamp: "2023-08-04 13:16:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -949,7 +949,7 @@ for data_key_tuple,dummy_key_tuple in zip(yieldDict["binned_DATA"],yieldDict["bi
     # Access the nested dictionary using the tuple key
     data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
     dummy_nested_dict = yieldDict["binned_DUMMY"][dummy_key_tuple]
-    print("Data-> Tuple: {}, Nested Dictionary: {}".format(data_key_tuple,data_nested_dict))
+    print("\n\nData-> Tuple: {}, Nested Dictionary: {}".format(data_key_tuple,data_nested_dict))
     print("Dummy-> Tuple: {}, Nested Dictionary: {}".format(dummy_key_tuple,dummy_nested_dict))
     for hist in histlist:
         print("{} Data-> Tuple: {}, Data yield: {}, ".format(hist["phi_setting"],data_key_tuple,data_nested_dict["nevents"]*hist["normfac_data"]))
