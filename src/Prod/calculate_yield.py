@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 10:30:26 trottar"
+# Time-stamp: "2023-08-04 10:55:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,5 +78,28 @@ def calculate_yield(histlist, inpDict):
     print("@@@@@@@@@@@@@@@@@--> Q2", Q2)
     print("@@@@@@@@@@@@@@@@@--> W", W)
     print("@@@@@@@@@@@@@@@@@--> MM", MM)
+
+    for hist in histlist:
+        t_bins = hist["t_bins"]
+        phi_bins = hist["phi_bins"]
     
-    
+    for j in range(len(t_bins) - 1):
+        tbin_indices = np.where((t_bins[j] <= t) & (t < t_bins[j + 1]))[0]
+        if len(tbin_indices) > 0:
+            tbin_index = j
+            Q2_val = Q2[tbin_indices]
+            W_val = W[tbin_indices]
+            t_val = t[tbin_indices]
+            # Append tbin_index, Q2, W, and t to aver_lst
+            for k in range(len(phi_bins) - 1):
+                phibin_indices = np.where((phi_bins[k] <= phi_deg) & (phi_deg < phi_bins[k + 1]))[0]
+                if len(phibin_indices) > 0:
+                    phibin_index = k
+                    # t binning
+                    #MM_val = MM[tbin_indices]
+                    # t+phi binning
+                    # Combine tbin_indices and phibin_indices using logical AND
+                    combined_indices = np.intersect1d(tbin_indices, phibin_indices)
+                    MM_val = MM[combined_indices]
+                    print("________________",tbin_index, phibin_index, (MM), (Q2), (W), (t),"________________")
+                    print("----------------",tbin_index, phibin_index, (MM_val), (Q2_val), (W_val), (t_val),"----------------\n")

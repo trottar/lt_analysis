@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 10:16:36 trottar"
+# Time-stamp: "2023-08-04 10:54:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,6 +250,10 @@ except IOError:
     print("Error reading {}...".format("{}/src/phi_bin_interval".format(LTANAPATH)))    
     
 print(t_bins,"\n",phi_bins)
+
+for hist in histlist:
+    hist["t_bins"] = t_bins
+    hist["phi_bins"] = phi_bins
     
 ##############################
 # Step 5 of the lt_analysis: # DONE
