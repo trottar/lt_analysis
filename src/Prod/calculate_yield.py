@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 11:01:25 trottar"
+# Time-stamp: "2023-08-04 11:06:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,5 +101,5 @@ def calculate_yield(histlist, inpDict):
                     # Combine tbin_indices and phibin_indices using logical AND
                     combined_indices = np.intersect1d(tbin_indices, phibin_indices)
                     MM_val = MM[combined_indices]
-                    print("________________",tbin_index, phibin_index, (MM), (Q2), (W), (t),"________________")
-                    print("----------------",tbin_index, phibin_index, (MM_val), (Q2_val), (W_val), (t_val),"----------------\n")
+                    print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t),"________________")
+                    print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val),"----------------\n")

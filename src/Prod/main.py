@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 10:54:15 trottar"
+# Time-stamp: "2023-08-04 10:57:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -219,7 +219,6 @@ from find_bins import find_bins
 
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
-    print(bin_vals)
 
 try:
     with open("{}/src/t_bin_interval".format(LTANAPATH), "r") as file:
