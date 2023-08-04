@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 13:51:27 trottar"
+# Time-stamp: "2023-08-04 13:54:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -967,7 +967,7 @@ H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tm
 H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
 
 tbinDict = {}
-for i,j in zip(range(NumtBins),range(NumphiBins)):
+for i,j in zip(range(NumtBins),range(NumPhiBins)):
     tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_Q2_tbin_DATA_{}_{}".format(i+1,j+1), "Q2 (t bin {}, phi bin {}".format(i+1,j+1), 500, Q2min, Q2max)
     tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_W_tbin_DATA_{}_{}".format(i+1,j+1), "W (t bin {}, phi bin {}".format(i+1,j+1), 500, Wmin, Wmax)
     tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_t_tbin_DATA_{}_{}".format(i+1,j+1), "t (t bin {}, phi bin {}".format(i+1,j+1), 500, tmin, tmax)
