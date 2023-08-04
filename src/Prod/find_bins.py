@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 14:11:09 trottar"
+# Time-stamp: "2023-08-04 10:20:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,41 +48,12 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
+##################################################################################################################################################
+# Importing utility functions
+
+from utility import weight_bins
+
 ################################################################################################################################################
-
-# Convert TH1F to NumPy array
-def hist_to_numpy(histogram):
-    
-    # Get the number of bins in the histogram
-    n_bins = histogram.GetNbinsX()
-
-    # Calculate the integral for each bin and store it along with the bin edges
-    bin_edges = []
-    bin_integrals = []
-
-    for i in range(1, n_bins + 1):
-        bin_low_edge = histogram.GetXaxis().GetBinLowEdge(i)
-        bin_integral = histogram.Integral(1, i)
-        bin_edges.append(bin_low_edge)
-        bin_integrals.append(bin_integral)
-
-    # The last bin edge is the upper edge of the last bin
-    bin_edges.append(histogram.GetXaxis().GetBinUpEdge(n_bins))
-
-    print("^^^^^^^^^^^^^^^^^",np.average(bin_edges),"^^^^^^^^^^^^^^^^^")
-
-    # Calculate the total integral of the histogram (integral up to the last bin)
-    total_integral = histogram.Integral()
-
-    # Calculate the weights for each bin based on their integrals
-    bin_weights = [integral / total_integral for integral in bin_integrals]
-
-    # Weight the bin edges by the bin weights
-    weighted_bin_edges = [edge * weight for edge, weight in zip(bin_edges, bin_weights)]
-    
-    print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬",np.average(weighted_bin_edges),"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬")
-    
-    return weighted_bin_edges
 
 def find_bins(histlist, inpDict):
 
@@ -106,8 +77,8 @@ def find_bins(histlist, inpDict):
     
     for i,hist in enumerate(histlist):
         
-        t = hist_to_numpy(hist["H_t_DATA"])
-        phi_deg = [(phi + math.pi)*(180 / math.pi) for phi in hist_to_numpy(hist["H_ph_q_DATA"])]
+        t = weight_bins(hist["H_t_DATA"])
+        phi_deg = [(phi + math.pi)*(180 / math.pi) for phi in weight_bins(hist["H_ph_q_DATA"])]
         
         if hist["phi_setting"] == 'Right':
             H_t_Right = np.append(H_t_Right, t)

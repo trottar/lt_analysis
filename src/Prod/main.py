@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 00:18:58 trottar"
+# Time-stamp: "2023-08-04 10:16:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -917,7 +917,8 @@ for i,hist in enumerate(histlist):
     else:
         Ctext.Print(outputpdf)
 
-show_pdf_with_evince(outputpdf)
+if DEBUG:
+    show_pdf_with_evince(outputpdf)
     
 ##############################
 # Step 6 of the lt_analysis: #
@@ -933,7 +934,14 @@ show_pdf_with_evince(outputpdf)
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''
 
-#from calculate_yield import calculate_yield
+from calculate_yield import calculate_yield
+
+yieldDict = {}
+
+yieldDict.update(calculate_yield(histlist, inpDict))
+
+if DEBUG:
+    show_pdf_with_evince(outputpdf)
 
 ##############################
 # Step 7 of the lt_analysis: #
