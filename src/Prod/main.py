@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 23:51:10 trottar"
+# Time-stamp: "2023-08-03 23:56:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -306,10 +306,7 @@ for i,hist in enumerate(histlist):
 
 l_eff_plt.Draw()
 
-if ParticleType == "kaon":
-    eff_plt.Print(outputpdf)
-else:
-    eff_plt.Print(outputpdf + '(')
+eff_plt.Print(outputpdf + '(')
     
 # Plot histograms
 c_pid = TCanvas()
