@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 13:18:03 trottar"
+# Time-stamp: "2023-08-04 13:49:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -949,8 +949,8 @@ for data_key_tuple,dummy_key_tuple in zip(yieldDict["binned_DATA"],yieldDict["bi
     # Access the nested dictionary using the tuple key
     data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
     dummy_nested_dict = yieldDict["binned_DUMMY"][dummy_key_tuple]
-    print("\n\nData-> Tuple: {}, Nested Dictionary: {}".format(data_key_tuple,data_nested_dict))
-    print("Dummy-> Tuple: {}, Nested Dictionary: {}".format(dummy_key_tuple,dummy_nested_dict))
+    #print("\n\nData-> Tuple: {}, Nested Dictionary: {}".format(data_key_tuple,data_nested_dict))
+    #print("Dummy-> Tuple: {}, Nested Dictionary: {}".format(dummy_key_tuple,dummy_nested_dict))
     for hist in histlist:
         print("{} Data-> Tuple: {}, Data yield: {}, ".format(hist["phi_setting"],data_key_tuple,data_nested_dict["nevents"]*hist["normfac_data"]))
         print("{} Dummy-> Tuple: {}, Dummy yield: {}, ".format(hist["phi_setting"],dummy_key_tuple,dummy_nested_dict["nevents"]*hist["normfac_dummy"]))
@@ -958,11 +958,79 @@ for data_key_tuple,dummy_key_tuple in zip(yieldDict["binned_DATA"],yieldDict["bi
     for hist in histlist:
         # Subtract dummy from data per t/phi bin and get data yield
         data_nested_dict["yield_{}".format(hist["phi_setting"])] = data_nested_dict["nevents"]*hist["normfac_data"] - dummy_nested_dict["nevents"]*hist["normfac_dummy"]
-
+        
 print(yieldDict["binned_DATA"])
 
-if DEBUG:
-    show_pdf_with_evince(outputpdf)
+# t/phi binned histograms
+H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
+H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
+H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
+
+tbinDict = {}
+for i,j in zip(range(NumtBins),range(NumphiBins)):
+    tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_Q2_tbin_DATA_{}_{}".format(i+1,j+1), "Q2 (t bin {}, phi bin {}".format(i+1,j+1), 500, Q2min, Q2max)
+    tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_W_tbin_DATA_{}_{}".format(i+1,j+1), "W (t bin {}, phi bin {}".format(i+1,j+1), 500, Wmin, Wmax)
+    tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_t_tbin_DATA_{}_{}".format(i+1,j+1), "t (t bin {}, phi bin {}".format(i+1,j+1), 500, tmin, tmax)
+    tbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_MM_tbin_DATA_{}_{}".format(i+1,j+1), "MM (t bin {}, phi bin {}".format(i+1,j+1), 500, 0.0, 1.5)   
+
+C_Q2_tbin_DATA = TCanvas()
+# Loop over each tuple key in the dictionary
+for data_key_tuple in yieldDict["binned_DATA"]):
+    i = data_key_tuple[0] # t bin
+    j = data_key_tuple[1] # phi bin
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
+    # Fill histogram
+    for val in data_nested_dict["Q2_arr"]:
+        tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+    tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
+    tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
+C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
+
+C_W_tbin_DATA = TCanvas()
+# Loop over each tuple key in the dictionary
+for data_key_tuple in yieldDict["binned_DATA"]):
+    i = data_key_tuple[0] # t bin
+    j = data_key_tuple[1] # phi bin
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
+    # Fill histogram
+    for val in data_nested_dict["W_arr"]:
+        tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+    tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
+    tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
+C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))    
+
+C_t_tbin_DATA = TCanvas()
+# Loop over each tuple key in the dictionary
+for data_key_tuple in yieldDict["binned_DATA"]):
+    i = data_key_tuple[0] # t bin
+    j = data_key_tuple[1] # phi bin
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
+    # Fill histogram
+    for val in data_nested_dict["t_arr"]:
+        tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+    tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
+    tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
+C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))    
+
+C_MM_tbin_DATA = TCanvas()
+# Loop over each tuple key in the dictionary
+for data_key_tuple in yieldDict["binned_DATA"]):
+    i = data_key_tuple[0] # t bin
+    j = data_key_tuple[1] # phi bin
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
+    # Fill histogram
+    for val in data_nested_dict["MM_arr"]:
+        tbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+    tbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
+    tbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
+C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
+
+#if DEBUG:
+show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 ##############################
 # Step 7 of the lt_analysis: #
