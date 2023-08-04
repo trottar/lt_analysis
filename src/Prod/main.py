@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 14:34:40 trottar"
+# Time-stamp: "2023-08-04 14:39:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -971,10 +971,10 @@ histbinDict = {}
 for data_key_tuple in yieldDict["binned_DATA"]:
     i = data_key_tuple[0] # t bin
     j = data_key_tuple[1] # phi bin
-    histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_Q2_tbin_DATA_{}_{}".format(i+1,j+1), "Q2 (t bin {}, phi bin {}".format(i+1,j+1), 500, inpDict["Q2min"], inpDict["Q2max"])
-    histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_W_tbin_DATA_{}_{}".format(i+1,j+1), "W (t bin {}, phi bin {}".format(i+1,j+1), 500, inpDict["Wmin"], inpDict["Wmax"])
-    histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_t_tbin_DATA_{}_{}".format(i+1,j+1), "t (t bin {}, phi bin {}".format(i+1,j+1), 500, inpDict["tmin"], inpDict["tmax"])
-    histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_MM_tbin_DATA_{}_{}".format(i+1,j+1), "MM (t bin {}, phi bin {}".format(i+1,j+1), 500, 0.0, 1.5)   
+    histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_Q2_tbin_DATA_{}_{}".format(i+1,j+1), "Q2 (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["Q2min"], inpDict["Q2max"])
+    histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_W_tbin_DATA_{}_{}".format(i+1,j+1), "W (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["Wmin"], inpDict["Wmax"])
+    histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_t_tbin_DATA_{}_{}".format(i+1,j+1), "t (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["tmin"], inpDict["tmax"])
+    histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_MM_tbin_DATA_{}_{}".format(i+1,j+1), "MM (t bin {}, phi bin {})".format(i+1,j+1), 500, 0.0, 1.5)   
 
 C_Q2_tbin_DATA = TCanvas()
 C_Q2_tbin_DATA.Divide(NumtBins,NumPhiBins)

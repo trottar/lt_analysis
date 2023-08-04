@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 13:30:39 trottar"
+# Time-stamp: "2023-08-04 14:44:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,26 +80,24 @@ def calculate_yield(histlist, inpDict, DataType):
     aver_lst = []
     for j in range(len(t_bins) - 1):
         tbin_indices = np.where((float(t_bins[j]) <= t) & (t < float(t_bins[j + 1])))[0]
-        if len(tbin_indices) > 0:
-            tbin_index = j
-            Q2_val = Q2[tbin_indices]
-            W_val = W[tbin_indices]
-            t_val = t[tbin_indices]
-            # Append tbin_index, Q2, W, and t to aver_lst
-            for k in range(len(phi_bins) - 1):
-                phibin_indices = np.where((float(phi_bins[k]) <= phi_deg) & (phi_deg < float(phi_bins[k + 1])))[0]
-                if len(phibin_indices) > 0:
-                    phibin_index = k
-                    # t binning
-                    #MM_val = MM[tbin_indices]
-                    # t+phi binning
-                    # Combine tbin_indices and phibin_indices using logical AND
-                    combined_indices = np.intersect1d(tbin_indices, phibin_indices)
-                    MM_val = MM[combined_indices]
-                    print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t),"________________")
-                    print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val),"----------------")
-                    aver_lst.append((tbin_index, phibin_index, Q2_val, W_val, t_val, MM_val))
-                    print("________________",aver_lst,"________________\n")
+        tbin_index = j
+        Q2_val = Q2[tbin_indices]
+        W_val = W[tbin_indices]
+        t_val = t[tbin_indices]
+        # Append tbin_index, Q2, W, and t to aver_lst
+        for k in range(len(phi_bins) - 1):
+            phibin_indices = np.where((float(phi_bins[k]) <= phi_deg) & (phi_deg < float(phi_bins[k + 1])))[0]
+            phibin_index = k
+            # t binning
+            #MM_val = MM[tbin_indices]
+            # t+phi binning
+            # Combine tbin_indices and phibin_indices using logical AND
+            combined_indices = np.intersect1d(tbin_indices, phibin_indices)
+            MM_val = MM[combined_indices]
+            print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t),"________________")
+            print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val),"----------------")
+            aver_lst.append((tbin_index, phibin_index, Q2_val, W_val, t_val, MM_val))
+            print("________________",aver_lst,"________________\n")
 
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
@@ -124,7 +122,5 @@ def calculate_yield(histlist, inpDict, DataType):
             "t_aver" : t_aver,
             "nevents" : nevents
         }
-
-    print(groups)
 
     return {"binned_{}".format(DataType) : groups}
