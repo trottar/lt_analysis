@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 16:09:59 trottar"
+# Time-stamp: "2023-08-04 16:21:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -952,7 +952,18 @@ for data_key_tuple,dummy_key_tuple in zip(yieldDict["binned_DATA"],yieldDict["bi
     # Calculate data yield per t/phi bin
     for hist in histlist:
         # Subtract dummy from data per t/phi bin and get data yield
-        data_nested_dict["yield_{}".format(hist["phi_setting"])] = data_nested_dict["nevents"]*hist["normfac_data"] - dummy_nested_dict["nevents"]*hist["normfac_dummy"]
+        data_nested_dict["yield_data_{}".format(hist["phi_setting"])] = data_nested_dict["nevents"]*hist["normfac_data"] \
+                                                                        - dummy_nested_dict["nevents"]*hist["normfac_dummy"]
+
+# Loop over each tuple key in the dictionary
+for simc_key_tuple in yieldDict["binned_SIMC"]:
+    # Access the nested dictionary using the tuple key
+    simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]
+    #print("\n\nSimc-> Tuple: {}, Nested Dictionary: {}".format(simc_key_tuple,simc_nested_dict))
+    for hist in histlist:
+        # Get simc yield
+        simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])] = simc_nested_dict["nevents"]/(100*hist["normfac_simc"])
+        print("{} Simc-> Tuple: {}, Simc yield: {}, ".format(hist["phi_setting"],simc_key_tuple,simc_nested_dict["nevents"]/(100*hist["normfac_simc"])))    
         
 ## !!!! Add SIMC yield calculation
 ## !!!! Add Ratio
@@ -1067,7 +1078,7 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
     for hist in histlist:
         # Fill histogram
-        H_yield_DATA.Fill(data_nested_dict["yield_{}".format(hist["phi_setting"])])
+        H_yield_DATA.Fill(data_nested_dict["yield_data_{}".format(hist["phi_setting"])])
     H_yield_DATA.Draw("same")
     H_yield_DATA.SetLineColor(i+1)
 C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
