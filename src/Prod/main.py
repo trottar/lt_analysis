@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 16:08:56 trottar"
+# Time-stamp: "2023-08-04 16:09:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1046,7 +1046,7 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         H_tbins_DATA.Fill(float(val))
     H_tbins_DATA.Draw("same")
     H_tbins_DATA.SetLineColor(i+1)
-C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_t_bins_".format(hist["phi_setting"],ParticleType)))
+C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_phi_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
@@ -1058,7 +1058,7 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         H_phibins_DATA.Fill(float(val))
     H_phibins_DATA.Draw("same")
     H_phibins_DATA.SetLineColor(i+1)
-C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_phi_bins_".format(hist["phi_setting"],ParticleType)))
+C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_yield_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
