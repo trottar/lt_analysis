@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 14:53:50 trottar"
+# Time-stamp: "2023-08-04 15:03:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1034,7 +1034,20 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
     C_MM_tbin_DATA.cd(k+1)
     histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
-C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
+C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+C_yield_DATA = TCanvas()
+# Loop over each tuple key in the dictionary
+for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
+    for j, hist in enumerate(histlist):
+        # Fill histogram
+        for val in data_nested_dict["yield_{}".format(hist["phi_setting"])]:
+            H_yield_DATA.Fill(val)
+        H_yield_DATA.Draw("same")
+        H_yield_DATA..SetLineColor(j+1)
+C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
 
 #if DEBUG:
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
