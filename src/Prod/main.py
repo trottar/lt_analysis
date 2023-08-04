@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 13:16:38 trottar"
+# Time-stamp: "2023-08-04 13:18:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -932,7 +932,7 @@ if DEBUG:
 
 * Dummy is subtracted from data bin by bin.
 * The yield is calculated using the effective charge from data and 
-  the normfactor/nevents.
+  normfactor/nevents is applied to normalize simc.
 
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''

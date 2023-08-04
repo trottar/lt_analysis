@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 12:55:18 trottar"
+# Time-stamp: "2023-08-04 13:24:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -111,7 +111,7 @@ def calculate_yield(histlist, inpDict, DataType):
         t_aver = [np.average(tup[4])]
         # Find the number of events per t/phi bin
         try:
-            nevents = abs(integrate.simps(tup[5]))
+            nevents = integrate.simps(tup[5])
         except IndexError:
             nevents = 0
         groups[key] = {"Q2_aver" : Q2_aver, "W_aver" : W_aver, "t_aver" : t_aver, "nevents" : nevents}
