@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 14:33:17 trottar"
+# Time-stamp: "2023-08-04 14:34:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -989,7 +989,7 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
     C_Q2_tbin_DATA.cd(k+1)
     histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
-    histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
+    histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(k+1)
 C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
 
 C_W_tbin_DATA = TCanvas()
@@ -1005,7 +1005,7 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
     C_W_tbin_DATA.cd(k+1)
     histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
-    histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
+    histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(k+1)
 C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_t_tbin_DATA = TCanvas()
@@ -1021,7 +1021,7 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
     C_t_tbin_DATA.cd(k+1)
     histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
-    histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
+    histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(k+1)
 C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_MM_tbin_DATA = TCanvas()
@@ -1037,7 +1037,7 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
     C_MM_tbin_DATA.cd(k+1)
     histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
-    histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
+    histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(k+1)
 C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
 
 #if DEBUG:
