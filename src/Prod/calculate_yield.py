@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 10:23:50 trottar"
+# Time-stamp: "2023-08-04 10:30:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ from utility import weight_bins
 
 ##################################################################################################################################################
 
-def calculate_yield():
+def calculate_yield(histlist, inpDict):
 
     # Initialize NumPy arrays before the loop
     t = np.array([])
