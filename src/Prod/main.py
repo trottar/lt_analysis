@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 15:43:42 trottar"
+# Time-stamp: "2023-08-04 15:52:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -248,8 +248,6 @@ except FileNotFoundError:
 except IOError:
     print("Error reading {}...".format("{}/src/phi_bin_interval".format(LTANAPATH)))    
     
-print(t_bins,"\n",phi_bins)
-
 for hist in histlist:
     hist["t_bins"] = t_bins
     hist["phi_bins"] = phi_bins
@@ -956,6 +954,9 @@ for data_key_tuple,dummy_key_tuple in zip(yieldDict["binned_DATA"],yieldDict["bi
         # Subtract dummy from data per t/phi bin and get data yield
         data_nested_dict["yield_{}".format(hist["phi_setting"])] = data_nested_dict["nevents"]*hist["normfac_data"] - dummy_nested_dict["nevents"]*hist["normfac_dummy"]
         
+## !!!! Add SIMC yield calculation
+## !!!! Add Ratio
+        
 #print(yieldDict["binned_DATA"])
 
 # t/phi binned histograms
@@ -964,7 +965,6 @@ H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tm
 H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
 
 ## !!!! Add yield vs phi variable
-## !!!! Add Ratio
 
 histbinDict = {}
 # Loop over each tuple key in the dictionary
@@ -1038,9 +1038,9 @@ C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_"
 
 C_t_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
-for i, data_key_tuple in enumerate(t_binsDict["binned_DATA"]):
+for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     # Access the nested dictionary using the tuple key
-    data_nested_dict = t_binsDict["binned_DATA"][data_key_tuple]
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
     for val in data_nested_dict["t_bins"]:
         # Fill histogram
         H_t_bins_DATA.Fill(val)
@@ -1050,9 +1050,9 @@ C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_t_bins_"
 
 C_phi_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
-for i, data_key_tuple in enumerate(phi_binsDict["binned_DATA"]):
+for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     # Access the nested dictionary using the tuple key
-    data_nested_dict = phi_binsDict["binned_DATA"][data_key_tuple]
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
     for val in data_nested_dict["phi_bins"]:
         # Fill histogram
         H_phi_bins_DATA.Fill(val)
