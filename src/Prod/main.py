@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 13:49:20 trottar"
+# Time-stamp: "2023-08-04 13:51:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -975,7 +975,7 @@ for i,j in zip(range(NumtBins),range(NumphiBins)):
 
 C_Q2_tbin_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
-for data_key_tuple in yieldDict["binned_DATA"]):
+for data_key_tuple in yieldDict["binned_DATA"]:
     i = data_key_tuple[0] # t bin
     j = data_key_tuple[1] # phi bin
     # Access the nested dictionary using the tuple key
@@ -989,7 +989,7 @@ C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_"
 
 C_W_tbin_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
-for data_key_tuple in yieldDict["binned_DATA"]):
+for data_key_tuple in yieldDict["binned_DATA"]:
     i = data_key_tuple[0] # t bin
     j = data_key_tuple[1] # phi bin
     # Access the nested dictionary using the tuple key
@@ -1003,7 +1003,7 @@ C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".
 
 C_t_tbin_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
-for data_key_tuple in yieldDict["binned_DATA"]):
+for data_key_tuple in yieldDict["binned_DATA"]:
     i = data_key_tuple[0] # t bin
     j = data_key_tuple[1] # phi bin
     # Access the nested dictionary using the tuple key
@@ -1017,7 +1017,7 @@ C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".
 
 C_MM_tbin_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
-for data_key_tuple in yieldDict["binned_DATA"]):
+for data_key_tuple in yieldDict["binned_DATA"]:
     i = data_key_tuple[0] # t bin
     j = data_key_tuple[1] # phi bin
     # Access the nested dictionary using the tuple key
