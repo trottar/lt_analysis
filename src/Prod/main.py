@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 16:23:38 trottar"
+# Time-stamp: "2023-08-04 18:07:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -981,6 +981,23 @@ for data_key_tuple in yieldDict["binned_DATA"]:
     histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_t_tbin_DATA_{}_{}".format(i+1,j+1), "t (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["tmin"], inpDict["tmax"])
     histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_MM_tbin_DATA_{}_{}".format(i+1,j+1), "MM (t bin {}, phi bin {})".format(i+1,j+1), 500, 0.0, 1.5)   
 
+# t/phi binned histograms
+H_phibins_SIMC = ROOT.TH1D("H_phibins_SIMC", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
+H_tbins_SIMC = ROOT.TH1D("H_tbins_SIMC", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
+H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0, 1.0)
+
+## !!!! Add yield vs phi variable
+
+histbinDict = {}
+# Loop over each tuple key in the dictionary
+for simc_key_tuple in yieldDict["binned_SIMC"]:
+    i = simc_key_tuple[0] # t bin
+    j = simc_key_tuple[1] # phi bin
+    histbinDict["H_Q2_tbin_SIMC_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_Q2_tbin_SIMC_{}_{}".format(i+1,j+1), "Q2 (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["Q2min"], inpDict["Q2max"])
+    histbinDict["H_W_tbin_SIMC_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_W_tbin_SIMC_{}_{}".format(i+1,j+1), "W (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["Wmin"], inpDict["Wmax"])
+    histbinDict["H_t_tbin_SIMC_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_t_tbin_SIMC_{}_{}".format(i+1,j+1), "t (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["tmin"], inpDict["tmax"])
+    histbinDict["H_MM_tbin_SIMC_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_MM_tbin_SIMC_{}_{}".format(i+1,j+1), "MM (t bin {}, phi bin {})".format(i+1,j+1), 500, 0.0, 1.5)   
+    
 C_Q2_tbin_DATA = TCanvas()
 C_Q2_tbin_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
@@ -995,6 +1012,21 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     C_Q2_tbin_DATA.cd(k+1)
     histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
 C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
+
+C_Q2_tbin_SIMC = TCanvas()
+C_Q2_tbin_SIMC.Divide(NumtBins,NumPhiBins)
+# Loop over each tuple key in the dictionary
+for k, simc_key_tuple in enumerate(yieldDict["binned_SIMC"]):
+    i = simc_key_tuple[0] # t bin
+    j = simc_key_tuple[1] # phi bin
+    # Access the nested dictionary using the tuple key
+    simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]    
+    # Fill histogram
+    for val in simc_nested_dict["Q2_arr"]:
+        histbinDict["H_Q2_tbin_SIMC_{}_{}".format(i+1,j+1)].Fill(val)
+    C_Q2_tbin_SIMC.cd(k+1)
+    histbinDict["H_Q2_tbin_SIMC_{}_{}".format(i+1,j+1)].Draw("same")
+C_Q2_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_W_tbin_DATA = TCanvas()
 C_W_tbin_DATA.Divide(NumtBins,NumPhiBins)
@@ -1011,6 +1043,21 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
 C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
+C_W_tbin_SIMC = TCanvas()
+C_W_tbin_SIMC.Divide(NumtBins,NumPhiBins)
+# Loop over each tuple key in the dictionary
+for k, simc_key_tuple in enumerate(yieldDict["binned_SIMC"]):
+    i = simc_key_tuple[0] # t bin
+    j = simc_key_tuple[1] # phi bin
+    # Access the nested dictionary using the tuple key
+    simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]    
+    # Fill histogram
+    for val in simc_nested_dict["W_arr"]:
+        histbinDict["H_W_tbin_SIMC_{}_{}".format(i+1,j+1)].Fill(val)
+    C_W_tbin_SIMC.cd(k+1)
+    histbinDict["H_W_tbin_SIMC_{}_{}".format(i+1,j+1)].Draw("same")
+C_W_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
 C_t_tbin_DATA = TCanvas()
 C_t_tbin_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
@@ -1025,6 +1072,21 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     C_t_tbin_DATA.cd(k+1)
     histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
 C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+C_t_tbin_SIMC = TCanvas()
+C_t_tbin_SIMC.Divide(NumtBins,NumPhiBins)
+# Loop over each tuple key in the dictionary
+for k, simc_key_tuple in enumerate(yieldDict["binned_SIMC"]):
+    i = simc_key_tuple[0] # t bin
+    j = simc_key_tuple[1] # phi bin
+    # Access the nested dictionary using the tuple key
+    simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]    
+    # Fill histogram
+    for val in simc_nested_dict["t_arr"]:
+        histbinDict["H_t_tbin_SIMC_{}_{}".format(i+1,j+1)].Fill(val)
+    C_t_tbin_SIMC.cd(k+1)
+    histbinDict["H_t_tbin_SIMC_{}_{}".format(i+1,j+1)].Draw("same")
+C_t_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_MM_tbin_DATA = TCanvas()
 C_MM_tbin_DATA.Divide(NumtBins,NumPhiBins)
@@ -1041,6 +1103,21 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
 C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
+C_MM_tbin_SIMC = TCanvas()
+C_MM_tbin_SIMC.Divide(NumtBins,NumPhiBins)
+# Loop over each tuple key in the dictionary
+for k, simc_key_tuple in enumerate(yieldDict["binned_SIMC"]):
+    i = simc_key_tuple[0] # t bin
+    j = simc_key_tuple[1] # phi bin
+    # Access the nested dictionary using the tuple key
+    simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]    
+    # Fill histogram
+    for val in simc_nested_dict["MM_arr"]:
+        histbinDict["H_MM_tbin_SIMC_{}_{}".format(i+1,j+1)].Fill(val)
+    C_MM_tbin_SIMC.cd(k+1)
+    histbinDict["H_MM_tbin_SIMC_{}_{}".format(i+1,j+1)].Draw("same")
+C_MM_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
 C_t_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
 for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
@@ -1052,6 +1129,18 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     H_tbins_DATA.Draw("same")
     H_tbins_DATA.SetLineColor(i+1)
 C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+C_t_bins_SIMC = TCanvas()
+# Loop over each tuple key in the dictionary
+for i, simc_key_tuple in enumerate(yieldDict["binned_SIMC"]):
+    # Access the nested dictionary using the tuple key
+    simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]
+    for val in simc_nested_dict["t_bins"]:
+        # Fill histogram
+        H_tbins_SIMC.Fill(float(val))
+    H_tbins_SIMC.Draw("same")
+    H_tbins_SIMC.SetLineColor(i+1)
+C_t_bins_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_phi_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
@@ -1065,6 +1154,18 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     H_phibins_DATA.SetLineColor(i+1)
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
+C_phi_bins_SIMC = TCanvas()
+# Loop over each tuple key in the dictionary
+for i, simc_key_tuple in enumerate(yieldDict["binned_SIMC"]):
+    # Access the nested dictionary using the tuple key
+    simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]
+    for val in simc_nested_dict["phi_bins"]:
+        # Fill histogram
+        H_phibins_SIMC.Fill(float(val))
+    H_phibins_SIMC.Draw("same")
+    H_phibins_SIMC.SetLineColor(i+1)
+C_phi_bins_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
 C_yield_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
 for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
@@ -1075,7 +1176,19 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         H_yield_DATA.Fill(data_nested_dict["yield_data_{}".format(hist["phi_setting"])])
     H_yield_DATA.Draw("same")
     H_yield_DATA.SetLineColor(i+1)
-C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
+C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+C_yield_SIMC = TCanvas()
+# Loop over each tuple key in the dictionary
+for i, simc_key_tuple in enumerate(yieldDict["binned_SIMC"]):
+    # Access the nested dictionary using the tuple key
+    simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]
+    for hist in histlist:
+        # Fill histogram
+        H_yield_SIMC.Fill(simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])])
+    H_yield_SIMC.Draw("same")
+    H_yield_SIMC.SetLineColor(i+1)
+C_yield_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
 
 #if DEBUG:
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
