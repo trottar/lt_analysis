@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 23:35:06 trottar"
+# Time-stamp: "2023-08-03 23:40:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,7 +229,6 @@ try:
         if len(all_lines) >= 2:
             # Extract the second line and remove leading/trailing whitespace
             t_bins = all_lines[1].split("\t")
-            t_bins = [float(b.strip()) for b in t_bins]
             del t_bins[0]
 except FileNotFoundError:
     print("{} not found...".format("{}/src/t_bin_interval".format(LTANAPATH)))
@@ -244,7 +243,6 @@ try:
         if len(all_lines) >= 2:
             # Extract the second line and remove leading/trailing whitespace
             phi_bins = all_lines[1].split("\t")
-            phi_bins = [float(b.strip()) for b in phi_bins]
             del phi_bins[0]
 except FileNotFoundError:
     print("{} not found...".format("{}/src/phi_bin_interval".format(LTANAPATH)))
@@ -405,9 +403,9 @@ for i,b in enumerate(t_bins):
     print("@@@@@@@@@@@@@@@@@",type(b))
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
-    tBin_line.DrawLine(b,0,b,binmax)
+    tBin_line.DrawLine(float(b),0,float(b),binmax)
     l_t.AddEntry(tBin_line,"Bin Edge %s" % i )
-    l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
+    l_t.AddEntry(tBin_line,"BinCenter = %.2f" % float(b))
 
 l_t.Draw()    
 
