@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 18:07:08 trottar"
+# Time-stamp: "2023-08-04 18:10:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -958,8 +958,7 @@ for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(yieldDict["binned_DATA"
         # Subtract dummy from data per t/phi bin and get data yield
         data_nested_dict["yield_data_{}".format(hist["phi_setting"])] = data_nested_dict["nevents"]*hist["normfac_data"] \
                                                                         - dummy_nested_dict["nevents"]*hist["normfac_dummy"]
-        
-## !!!! Add SIMC yield calculation
+
 ## !!!! Add Ratio
         
 #print(yieldDict["binned_DATA"])
@@ -988,7 +987,6 @@ H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0, 1
 
 ## !!!! Add yield vs phi variable
 
-histbinDict = {}
 # Loop over each tuple key in the dictionary
 for simc_key_tuple in yieldDict["binned_SIMC"]:
     i = simc_key_tuple[0] # t bin
