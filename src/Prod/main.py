@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 12:35:28 trottar"
+# Time-stamp: "2023-08-04 12:56:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -951,10 +951,13 @@ for data_key_tuple,dummy_key_tuple in zip(yieldDict["binned_DATA"],yieldDict["bi
     dummy_nested_dict = yieldDict["binned_DUMMY"][dummy_key_tuple]
     print("Data-> Tuple: {}, Nested Dictionary: {}".format(data_key_tuple,data_nested_dict))
     print("Dummy-> Tuple: {}, Nested Dictionary: {}".format(dummy_key_tuple,dummy_nested_dict))
-    print("Data yield: {}, Dummy yield: {}".format(data_nested_dict["yield"],dummy_nested_dict["yield"]))
-    data_nested_dict["yield"] = data_nested_dict["yield"] - dummy_nested_dict["yield"]
+    print("Data yield: {}, Dummy yield: {}".format(data_nested_dict["nevents"],dummy_nested_dict["nevents"]))
+    # Subtract dummy from data per t/phi bin
+    data_nested_dict["nevents_dummy_sub"] = data_nested_dict["nevents"] - dummy_nested_dict["nevents"]
+    # Calculate data yield per t/phi bin
+    for hist in histlist:
+        data_nested_dict["yield_{}".format(hist["phi_setting"])] = data_nested_dict["nevents_dummy_sub"]/hist["normfac_data"]
 
-del yieldDict["binned_DUMMY"]
 print(yieldDict["binned_DATA"])
 
 if DEBUG:

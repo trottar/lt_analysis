@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 12:45:15 trottar"
+# Time-stamp: "2023-08-04 12:55:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,7 +63,6 @@ def calculate_yield(histlist, inpDict, DataType):
     Q2 = np.array([])
     W = np.array([])
     MM = np.array([])
-    normfac = np.array([])
 
     for hist in histlist:
 
@@ -73,7 +72,6 @@ def calculate_yield(histlist, inpDict, DataType):
         Q2 = np.append(Q2, weight_bins(hist["H_Q2_{}".format(DataType)]))
         W = np.append(W, weight_bins(hist["H_W_{}".format(DataType)]))
         MM = np.append(MM, weight_bins(hist["H_MM_{}".format(DataType)]))
-        normfac = np.append(normfac, [hist["normfac_{}".format(DataType.lower())]]*len(weight_bins(hist["H_MM_{}".format(DataType)])))
 
     for hist in histlist:
         t_bins = hist["t_bins"]
@@ -98,10 +96,9 @@ def calculate_yield(histlist, inpDict, DataType):
                     # Combine tbin_indices and phibin_indices using logical AND
                     combined_indices = np.intersect1d(tbin_indices, phibin_indices)
                     MM_val = MM[combined_indices]
-                    normfac_val = normfac[combined_indices]
-                    print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t), len(normfac),"________________")
-                    print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val), len(normfac_val),"----------------")
-                    aver_lst.append((tbin_index, phibin_index, Q2_val, W_val, t_val, MM_val, normfac_val))
+                    print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t),"________________")
+                    print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val),"----------------")
+                    aver_lst.append((tbin_index, phibin_index, Q2_val, W_val, t_val, MM_val))
                     print("________________",aver_lst,"________________\n")
 
     # Group the tuples by the first two elements using defaultdict
@@ -114,10 +111,10 @@ def calculate_yield(histlist, inpDict, DataType):
         t_aver = [np.average(tup[4])]
         # Find the number of events per t/phi bin
         try:
-            yield_val = abs(integrate.simps(tup[5]) * tup[6])
+            nevents = abs(integrate.simps(tup[5]))
         except IndexError:
-            yield_val = 0
-        groups[key] = {"Q2_aver" : Q2_aver, "W_aver" : W_aver, "t_aver" : t_aver, "yield" : yield_val}
+            nevents = 0
+        groups[key] = {"Q2_aver" : Q2_aver, "W_aver" : W_aver, "t_aver" : t_aver, "nevents" : nevents}
 
     print(groups)
 
