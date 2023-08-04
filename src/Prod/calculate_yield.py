@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 10:55:11 trottar"
+# Time-stamp: "2023-08-04 11:01:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,7 @@ def calculate_yield(histlist, inpDict):
         phi_bins = hist["phi_bins"]
     
     for j in range(len(t_bins) - 1):
-        tbin_indices = np.where((t_bins[j] <= t) & (t < t_bins[j + 1]))[0]
+        tbin_indices = np.where((float(t_bins[j]) <= t) & (t < float(t_bins[j + 1])))[0]
         if len(tbin_indices) > 0:
             tbin_index = j
             Q2_val = Q2[tbin_indices]
@@ -92,7 +92,7 @@ def calculate_yield(histlist, inpDict):
             t_val = t[tbin_indices]
             # Append tbin_index, Q2, W, and t to aver_lst
             for k in range(len(phi_bins) - 1):
-                phibin_indices = np.where((phi_bins[k] <= phi_deg) & (phi_deg < phi_bins[k + 1]))[0]
+                phibin_indices = np.where((float(phi_bins[k]) <= phi_deg) & (phi_deg < float(phi_bins[k + 1])))[0]
                 if len(phibin_indices) > 0:
                     phibin_index = k
                     # t binning
