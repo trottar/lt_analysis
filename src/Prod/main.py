@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 12:13:35 trottar"
+# Time-stamp: "2023-08-04 12:30:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -944,14 +944,17 @@ yieldDict = {}
 yieldDict.update(calculate_yield(histlist, inpDict))
 
 # Loop over each tuple key in the dictionary
-for key_tuple in yieldDict["binned_DATA"]:
+for data_key_tuple,dummy_key_tuple in zip(yieldDict["binned_DATA"],yieldDict["binned_DUMMY"]):
     # Access the nested dictionary using the tuple key
-    nested_dict = yieldDict["binned_DATA"][key_tuple]
-    print("Tuple: {}, Nested Dictionary: {}".format(key_tuple,nested_dict))
-    # You can access specific values within the nested dictionary like this:
-    Q2_value = nested_dict["Q2_aver"]
-    W_value = nested_dict["W_aver"]
-    print("a value: {}, b value: {}".format(Q2_value,W_value))
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
+    dummy_nested_dict = yieldDict["binned_DUMMY"][dummy_key_tuple]
+    print("Data-> Tuple: {}, Nested Dictionary: {}".format(data_key_tuple,data_nested_dict))
+    print("Dummy-> Tuple: {}, Nested Dictionary: {}".format(dummy_key_tuple,dummy_nested_dict))
+    print("Data yield: {}, Dummy yield: {}".format(data_nested_dict["yield"],dummy_nested_dict["yield"]))
+    data_nested_dict["yield"] = data_nested_dict["yield"] - dummy_nested_dict["yield"]
+
+del yieldDict["binned_DUMMY"]
+print(yieldDict["binned_DATA"])
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
