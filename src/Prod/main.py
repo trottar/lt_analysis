@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 15:03:43 trottar"
+# Time-stamp: "2023-08-04 15:05:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1046,7 +1046,7 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
         for val in data_nested_dict["yield_{}".format(hist["phi_setting"])]:
             H_yield_DATA.Fill(val)
         H_yield_DATA.Draw("same")
-        H_yield_DATA..SetLineColor(j+1)
+        H_yield_DATA.SetLineColor(j+1)
 C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
 
 #if DEBUG:
