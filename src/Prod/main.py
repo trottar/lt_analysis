@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 16:04:29 trottar"
+# Time-stamp: "2023-08-04 16:08:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1065,7 +1065,7 @@ C_yield_DATA = TCanvas()
 for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     # Access the nested dictionary using the tuple key
     data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
-    for j, hist in enumerate(histlist):
+    for hist in histlist:
         # Fill histogram
         H_yield_DATA.Fill(data_nested_dict["yield_{}".format(hist["phi_setting"])])
     H_yield_DATA.Draw("same")
