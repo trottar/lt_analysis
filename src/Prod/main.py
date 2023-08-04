@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 23:08:44 trottar"
+# Time-stamp: "2023-08-03 23:16:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -400,6 +400,7 @@ binmax = max(binmax)
     
 tBin_line = TLine()
 for i,b in enumerate(t_bins):
+    print("@@@@@@@@@@@@@@@@@",b)
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
     tBin_line.DrawLine(b,0,b,binmax)
