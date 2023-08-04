@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 23:56:56 trottar"
+# Time-stamp: "2023-08-04 00:18:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -252,7 +252,7 @@ except IOError:
 print(t_bins,"\n",phi_bins)
     
 ##############################
-# Step 5 of the lt_analysis: #
+# Step 5 of the lt_analysis: # DONE
 ##############################
 '''
 * Compare SIMC to data/dummy setting by setting.
@@ -262,6 +262,8 @@ print(t_bins,"\n",phi_bins)
 * If so, use script...
 
 > lt_analysis/src/SIMC/??????????????.f
+
+** TODO: Fix plots (e.g. polar) and find working simc weight script
 '''
 
 from compare_simc import compare_simc
@@ -665,9 +667,9 @@ Cpmiss_x = TCanvas()
 for i,hist in enumerate(histlist):
     hist["H_pmx_DATA"].SetLineColor(i+1)
     hist["H_pmx_DATA"].Draw("same, E1")
-    #hist["H_pmx_SIMC"].SetLineColor(40)
-    #hist["H_pmx_SIMC"].SetLineStyle(10-i)
-    #hist["H_pmx_SIMC"].Draw("same, E1")
+    hist["H_pmx_SIMC"].SetLineColor(40)
+    hist["H_pmx_SIMC"].SetLineStyle(10-i)
+    hist["H_pmx_SIMC"].Draw("same, E1")
     
 Cpmiss_x.Print(outputpdf)
 
@@ -676,9 +678,9 @@ Cpmiss_y = TCanvas()
 for i,hist in enumerate(histlist):
     hist["H_pmy_DATA"].SetLineColor(i+1)
     hist["H_pmy_DATA"].Draw("same, E1")
-    #hist["H_pmy_SIMC"].SetLineColor(40)
-    #hist["H_pmy_SIMC"].SetLineStyle(10-i)
-    #hist["H_pmy_SIMC"].Draw("same, E1")
+    hist["H_pmy_SIMC"].SetLineColor(40)
+    hist["H_pmy_SIMC"].SetLineStyle(10-i)
+    hist["H_pmy_SIMC"].Draw("same, E1")
     
 Cpmiss_y.Print(outputpdf)
 
@@ -687,9 +689,9 @@ Cpmiss_z = TCanvas()
 for i,hist in enumerate(histlist):
     hist["H_pmz_DATA"].SetLineColor(i+1)
     hist["H_pmz_DATA"].Draw("same, E1")
-    #hist["H_pmz_SIMC"].SetLineColor(40)
-    #hist["H_pmz_SIMC"].SetLineStyle(10-i)
-    #hist["H_pmz_SIMC"].Draw("same, E1")
+    hist["H_pmz_SIMC"].SetLineColor(40)
+    hist["H_pmz_SIMC"].SetLineStyle(10-i)
+    hist["H_pmz_SIMC"].Draw("same, E1")
     
 Cpmiss_z.Print(outputpdf)
 
