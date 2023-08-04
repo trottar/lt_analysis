@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 11:44:04 trottar"
+# Time-stamp: "2023-08-04 11:49:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,8 +105,8 @@ def calculate_yield(histlist, inpDict):
                     combined_indices = np.intersect1d(tbin_indices, phibin_indices)
                     MM_val = MM[combined_indices]
                     normfac_data_val = normfac_data[combined_indices]
-                    print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t), len(normfac_data)"________________")
-                    print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val), len(normfac_data_val)"----------------")
+                    print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t), len(normfac_data),"________________")
+                    print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val), len(normfac_data_val),"----------------")
                     aver_lst.append((tbin_index, phibin_index, Q2_val, W_val, t_val, MM_val, normfac_data_val))
                     print("________________",aver_lst,"________________\n")
 
