@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 12:30:37 trottar"
+# Time-stamp: "2023-08-04 12:35:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -941,7 +941,8 @@ from calculate_yield import calculate_yield
 
 yieldDict = {}
 
-yieldDict.update(calculate_yield(histlist, inpDict))
+for DataType in ["DATA","DUMMY","SIMC"]:
+    yieldDict.update(calculate_yield(histlist, inpDict, DataType))
 
 # Loop over each tuple key in the dictionary
 for data_key_tuple,dummy_key_tuple in zip(yieldDict["binned_DATA"],yieldDict["binned_DUMMY"]):
