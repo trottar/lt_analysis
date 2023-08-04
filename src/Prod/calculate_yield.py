@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 11:18:33 trottar"
+# Time-stamp: "2023-08-04 11:44:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,6 +63,7 @@ def calculate_yield(histlist, inpDict):
     Q2 = np.array([])
     W = np.array([])
     MM = np.array([])
+    normfac_data = np.array([])
 
     for hist in histlist:
 
@@ -72,6 +73,7 @@ def calculate_yield(histlist, inpDict):
         Q2 = np.append(Q2, weight_bins(hist["H_Q2_DATA"]))
         W = np.append(W, weight_bins(hist["H_W_DATA"]))
         MM = np.append(MM, weight_bins(hist["H_MM_DATA"]))
+        normfac_data = np.append(normfac_data, [hist["H_MM_DATA"]]*len(weight_bins(hist["H_MM_DATA"])))
 
     print("@@@@@@@@@@@@@@@@@--> t", t)
     print("@@@@@@@@@@@@@@@@@--> phi_deg", phi_deg)
@@ -102,7 +104,22 @@ def calculate_yield(histlist, inpDict):
                     # Combine tbin_indices and phibin_indices using logical AND
                     combined_indices = np.intersect1d(tbin_indices, phibin_indices)
                     MM_val = MM[combined_indices]
-                    print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t),"________________")
-                    print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val),"----------------\n")
-                    aver_lst.append((tbin_index, phibin_index, Q2_val, W_val, t_val, MM_val))
-                    print("________________",aver_lst,"________________")
+                    normfac_data_val = normfac_data[combined_indices]
+                    print("________________",tbin_index, phibin_index, len(MM), len(Q2), len(W), len(t), len(normfac_data)"________________")
+                    print("----------------",tbin_index, phibin_index, len(MM_val), len(Q2_val), len(W_val), len(t_val), len(normfac_data_val)"----------------")
+                    aver_lst.append((tbin_index, phibin_index, Q2_val, W_val, t_val, MM_val, normfac_data_val))
+                    print("________________",aver_lst,"________________\n")
+
+    # Group the tuples by the first two elements using defaultdict
+    groups = defaultdict(list)
+    for tup in aver_lst:
+        key = (tup[0], tup[1])
+        # Calculate averages for each Q2, W, t value per t-bin
+        Q2_aver = [np.average(tup[2])]
+        W_aver = [np.average(tup[3])]
+        t_aver = [np.average(tup[4])]
+        # Find the number of events per t/phi bin
+        nevents = integrate.simps(tup[5]) * tup[6]
+        groups[key].append((Q2_aver, W_aver, t_aver, nevents))
+
+    print(groups)
