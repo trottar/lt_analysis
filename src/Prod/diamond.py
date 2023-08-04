@@ -44,8 +44,6 @@ OUTPATH=lt.OUTPATH
 
 #################################################################################################################################################
 
-print("\n\n!!! Ensure all relevant Analysed_Data.root file names have same precision of Q2 and W  !!!")
-
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
 def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
@@ -58,9 +56,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     target = phi_setting
     
     if (target == '0'):
-        Analysis_Distributions = OUTPATH+"/%s_Diamond_Cut.pdf" %((FilenameOverride))
+        Analysis_Distributions = OUTPATH+"/{}_{}_Diamond_Cut.pdf".format(ParticleType, FilenameOverride)
     elif (target != '0'):
-        Analysis_Distributions = OUTPATH+"/%s_%s_Diamond_Cut.pdf" %((FilenameOverride,target))
+        Analysis_Distributions = OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, FilenameOverride, target)
 
     #sys.exit(1)
 
