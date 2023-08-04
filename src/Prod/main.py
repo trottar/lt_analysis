@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 15:09:34 trottar"
+# Time-stamp: "2023-08-04 15:43:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,7 +150,7 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 * Make sure to check that high and low eps overlap in...
 
-> lt_analysis/OUTPUT/Analysis/<ANATYPE>LT/<KIN>_Center_Diamond_Cut.pdf
+> lt_analysis/OUTPUT/Analysis/<ANATYPE>LT/<ParticleType>_<KIN>_Center_Diamond_Cut.pdf
 
 ** TODO: Add individual setting diamond plots
 '''
@@ -201,11 +201,11 @@ for i,hist in enumerate(histlist):
     else:
         settingList.append(hist["phi_setting"])
 
-if DEBUG:        
+if DEBUG:
     # Show plot pdf for each setting
     for hist in histlist:        
         show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-        
+
 ##############################
 # Step 4 of the lt_analysis: # Done
 ##############################
@@ -275,9 +275,6 @@ from compare_simc import compare_simc
 for hist in histlist:
     hist.update(compare_simc(hist, inpDict))
 
-
-### !!!!!!!!!!!! Need to edit t/phi plots, etc. to show bins and labels on plots    
-    
 eff_plt = TCanvas()
 G_eff_plt = ROOT.TMultiGraph()
 l_eff_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
@@ -966,6 +963,9 @@ H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0,
 H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
 H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
 
+## !!!! Add yield vs phi variable
+## !!!! Add Ratio
+
 histbinDict = {}
 # Loop over each tuple key in the dictionary
 for data_key_tuple in yieldDict["binned_DATA"]:
@@ -1035,6 +1035,30 @@ for k, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     C_MM_tbin_DATA.cd(k+1)
     histbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
 C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+C_t_bins_DATA = TCanvas()
+# Loop over each tuple key in the dictionary
+for i, data_key_tuple in enumerate(t_binsDict["binned_DATA"]):
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = t_binsDict["binned_DATA"][data_key_tuple]
+    for val in data_nested_dict["t_bins"]:
+        # Fill histogram
+        H_t_bins_DATA.Fill(val)
+    H_t_bins_DATA.Draw("same")
+    H_t_bins_DATA.SetLineColor(i+1)
+C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_t_bins_".format(hist["phi_setting"],ParticleType)))
+
+C_phi_bins_DATA = TCanvas()
+# Loop over each tuple key in the dictionary
+for i, data_key_tuple in enumerate(phi_binsDict["binned_DATA"]):
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = phi_binsDict["binned_DATA"][data_key_tuple]
+    for val in data_nested_dict["phi_bins"]:
+        # Fill histogram
+        H_phi_bins_DATA.Fill(val)
+    H_phi_bins_DATA.Draw("same")
+    H_phi_bins_DATA.SetLineColor(i+1)
+C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_phi_bins_".format(hist["phi_setting"],ParticleType)))
 
 C_yield_DATA = TCanvas()
 # Loop over each tuple key in the dictionary

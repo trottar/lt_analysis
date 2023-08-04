@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 14:44:17 trottar"
+# Time-stamp: "2023-08-04 15:41:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,6 +113,8 @@ def calculate_yield(histlist, inpDict, DataType):
         except IndexError:
             nevents = 0
         groups[key] = {
+            "t_bins" : t_bins,
+            "phi_bins" : phi_bins,            
             "Q2_arr" : tup[2],
             "W_arr" : tup[3],
             "t_arr" : tup[4],
