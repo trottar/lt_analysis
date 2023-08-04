@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 15:52:39 trottar"
+# Time-stamp: "2023-08-04 15:56:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1043,9 +1043,9 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
     for val in data_nested_dict["t_bins"]:
         # Fill histogram
-        H_t_bins_DATA.Fill(val)
-    H_t_bins_DATA.Draw("same")
-    H_t_bins_DATA.SetLineColor(i+1)
+        H_tbins_DATA.Fill(val)
+    H_tbins_DATA.Draw("same")
+    H_tbins_DATA.SetLineColor(i+1)
 C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_t_bins_".format(hist["phi_setting"],ParticleType)))
 
 C_phi_bins_DATA = TCanvas()
@@ -1055,9 +1055,9 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
     for val in data_nested_dict["phi_bins"]:
         # Fill histogram
-        H_phi_bins_DATA.Fill(val)
-    H_phi_bins_DATA.Draw("same")
-    H_phi_bins_DATA.SetLineColor(i+1)
+        H_phibins_DATA.Fill(val)
+    H_phibins_DATA.Draw("same")
+    H_phibins_DATA.SetLineColor(i+1)
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_phi_bins_".format(hist["phi_setting"],ParticleType)))
 
 C_yield_DATA = TCanvas()
