@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 23:47:18 trottar"
+# Time-stamp: "2023-08-03 23:51:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -879,16 +879,16 @@ phithreek.SetLineWidth(2)
 phithreek.Draw()
 Arc = TArc()
 for k in range(0, 10):
-     Arc.SetFillStyle(0)
-     Arc.SetLineWidth(2)
-     # To change the arc radius we have to change number tmax in the lower line.
-     Arc.DrawArc(0,0,tmax*(k+1)/(10),0.,360.,"same")
+    Arc.SetFillStyle(0)
+    Arc.SetLineWidth(2)
+    # To change the arc radius we have to change number tmax in the lower line.
+    Arc.DrawArc(0,0,tmax*(k+1)/(10),0.,360.,"same")
 for i,b in enumerate(t_bins):
     b = float(b)
-     Arc.SetLineColor(9)
-     Arc.SetLineWidth(2)
-     # To change the arc radius we have to change number tmax in the lower line.
-     Arc.DrawArc(0,0,tmax*b,0.,360.,"same")
+    Arc.SetLineColor(9)
+    Arc.SetLineWidth(2)
+    # To change the arc radius we have to change number tmax in the lower line.
+    Arc.DrawArc(0,0,tmax*b,0.,360.,"same")
 tradius = TGaxis(0,0,tmax,0,tmin,tmax,10,"-+")
 tradius.SetLineColor(9)
 tradius.SetLabelColor(9)
