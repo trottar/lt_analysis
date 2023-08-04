@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 12:08:56 trottar"
+# Time-stamp: "2023-08-04 12:19:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -118,7 +118,7 @@ def calculate_yield(histlist, inpDict):
                 yield_val = integrate.simps(tup[5]) * tup[6]
             except IndexError:
                 yield_val = 0
-            groups[key].append({"Q2_aver" : Q2_aver, "W_aver" : W_aver, "t_aver" : t_aver, "yield" : yield_val})
+            groups[key] = {"Q2_aver" : Q2_aver, "W_aver" : W_aver, "t_aver" : t_aver, "yield" : yield_val}
 
         print(groups)
 
