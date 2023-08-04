@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 18:45:54 trottar"
+# Time-stamp: "2023-08-03 23:08:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -310,7 +310,7 @@ if ParticleType == "kaon":
     eff_plt.Print(outputpdf)
 else:
     eff_plt.Print(outputpdf + '(')
-
+    
 # Plot histograms
 c_pid = TCanvas()
 
@@ -399,12 +399,11 @@ for i,hist in enumerate(histlist):
 binmax = max(binmax)
     
 tBin_line = TLine()
-for i,(n,b) in enumerate(zip(tbinvals,tbinedges)):
+for i,b in enumerate(t_bins):
     tBin_line.SetLineColor(4)
     tBin_line.SetLineWidth(4)
     tBin_line.DrawLine(b,0,b,binmax)
     l_t.AddEntry(tBin_line,"Bin Edge %s" % i )
-    l_t.AddEntry(tBin_line,"Evts = %.0f" % n)
     l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
 
 l_t.Draw()    
@@ -601,15 +600,14 @@ for i,hist in enumerate(histlist):
 binmax = max(binmax)
 
 binned_phi_tmp = []
-for val in binned_phi[1]:
+for val in phi_bins:
     binned_phi_tmp.append(((val/180)-1)*math.pi)
 phiBin_line = TLine()
-for i,(n,b) in enumerate(zip(phibinvals,binned_phi_tmp)):
+for i,b in enumerate(binned_phi_tmp):
     phiBin_line.SetLineColor(4)
     phiBin_line.SetLineWidth(4)
     phiBin_line.DrawLine(b,0,b,binmax)
     l_t.AddEntry(phiBin_line,"Bin Edge %s" % i )
-    l_t.AddEntry(phiBin_line,"Evts = %.0f" % n)
     l_t.AddEntry(phiBin_line,"BinCenter = %.2f" % b)
     
 Cph_q.Print(outputpdf)
@@ -883,7 +881,7 @@ for k in range(0, 10):
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number tmax in the lower line.
      Arc.DrawArc(0,0,tmax*(k+1)/(10),0.,360.,"same")
-for i,(n,b) in enumerate(zip(tbinvals,tbinedges)):
+for i,b in enumerate(t_bins):
      Arc.SetLineColor(9)
      Arc.SetLineWidth(2)
      # To change the arc radius we have to change number tmax in the lower line.
@@ -923,7 +921,7 @@ show_pdf_with_evince(outputpdf)
 # Step 6 of the lt_analysis: #
 ##############################
 '''
-* Combine settings again at high and low eps for each 
+* Combine settings again at for each 
   Q2,W,tbin,phibin,eps for data, dummy, and SIMC.
 
 * Dummy is subtracted from data bin by bin.
