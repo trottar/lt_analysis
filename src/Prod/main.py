@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 14:02:47 trottar"
+# Time-stamp: "2023-08-04 14:10:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -986,6 +986,7 @@ for data_key_tuple in yieldDict["binned_DATA"]:
     # Fill histogram
     for val in data_nested_dict["Q2_arr"]:
         tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+    C_Q2_tbin_DATA.cd(i+j+1)
     tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
     tbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
 C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
@@ -1000,9 +1001,10 @@ for data_key_tuple in yieldDict["binned_DATA"]:
     # Fill histogram
     for val in data_nested_dict["W_arr"]:
         tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+    C_W_tbin_DATA.cd(i+j+1)
     tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
     tbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
-C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))    
+C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
 
 C_t_tbin_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
@@ -1014,9 +1016,10 @@ for data_key_tuple in yieldDict["binned_DATA"]:
     # Fill histogram
     for val in data_nested_dict["t_arr"]:
         tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+    C_t_tbin_DATA.cd(i+j+1)
     tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
     tbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
-C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))    
+C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
 
 C_MM_tbin_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
@@ -1028,9 +1031,10 @@ for data_key_tuple in yieldDict["binned_DATA"]:
     # Fill histogram
     for val in data_nested_dict["MM_arr"]:
         tbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+    C_MM_tbin_DATA.cd(i+j+1)
     tbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
     tbinDict["H_MM_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
-C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
+C_MM_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
 
 #if DEBUG:
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
