@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-03 23:31:42 trottar"
+# Time-stamp: "2023-08-03 23:35:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,7 +229,7 @@ try:
         if len(all_lines) >= 2:
             # Extract the second line and remove leading/trailing whitespace
             t_bins = all_lines[1].split("\t")
-            t_bins = [float(b) for b in t_bins.strip()]
+            t_bins = [float(b.strip()) for b in t_bins]
             del t_bins[0]
 except FileNotFoundError:
     print("{} not found...".format("{}/src/t_bin_interval".format(LTANAPATH)))
@@ -244,7 +244,7 @@ try:
         if len(all_lines) >= 2:
             # Extract the second line and remove leading/trailing whitespace
             phi_bins = all_lines[1].split("\t")
-            phi_bins = [float(b) for b in phi_bins.strip()]
+            phi_bins = [float(b.strip()) for b in phi_bins]
             del phi_bins[0]
 except FileNotFoundError:
     print("{} not found...".format("{}/src/phi_bin_interval".format(LTANAPATH)))
