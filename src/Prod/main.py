@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 10:57:06 trottar"
+# Time-stamp: "2023-08-04 12:13:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -942,6 +942,16 @@ from calculate_yield import calculate_yield
 yieldDict = {}
 
 yieldDict.update(calculate_yield(histlist, inpDict))
+
+# Loop over each tuple key in the dictionary
+for key_tuple in yieldDict["binned_DATA"]:
+    # Access the nested dictionary using the tuple key
+    nested_dict = yieldDict["binned_DATA"][key_tuple]
+    print("Tuple: {}, Nested Dictionary: {}".format(key_tuple,nested_dict))
+    # You can access specific values within the nested dictionary like this:
+    Q2_value = nested_dict["Q2_aver"]
+    W_value = nested_dict["W_aver"]
+    print("a value: {}, b value: {}".format(Q2_value,W_value))
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
