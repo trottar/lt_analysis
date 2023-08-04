@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 14:22:52 trottar"
+# Time-stamp: "2023-08-04 14:23:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1006,7 +1006,7 @@ for data_key_tuple in yieldDict["binned_DATA"]:
     C_W_tbin_DATA.cd(i+j+1)
     histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
     histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
-C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))
+C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_t_tbin_DATA = TCanvas()
 C_t_tbin_DATA.Divide(NumtBins,NumPhiBins)
@@ -1022,7 +1022,7 @@ for data_key_tuple in yieldDict["binned_DATA"]:
     C_t_tbin_DATA.cd(i+j+1)
     histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
     histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].SetLineColor(i+1)
-C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))
+C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_MM_tbin_DATA = TCanvas()
 C_MM_tbin_DATA.Divide(NumtBins,NumPhiBins)
