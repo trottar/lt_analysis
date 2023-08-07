@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:33:34 trottar"
+# Time-stamp: "2023-08-07 13:37:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1206,24 +1206,20 @@ for hist in histlist:
         if hist["phi_setting"] == "Center": setting = np.append(setting,0)
         elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
         else: setting = np.append(setting,2)
-        print("@@@@@@@@@@@@@@@@@@@",yield_data)
-        print("%%%%%%%%%%%%%%%%%%%",setting)
 
 G_yield_data = ROOT.TGraphErrors(len(yield_data),setting,yield_data,np.array([0]*len(setting)),np.array([0]*len(yield_data)))
 G_yield_simc = ROOT.TGraphErrors(len(yield_simc),setting,yield_simc,np.array([0]*len(setting)),np.array([0]*len(yield_simc)))
 
-for i,hist in enumerate(histlist):
-    G_yield_data.SetMarkerStyle(21)
-    G_yield_data.SetMarkerSize(1)
-    G_yield_data.SetMarkerColor(i+1)
-    G_yield_data_plt.Add(G_yield_data)
+G_yield_data.SetMarkerStyle(21)
+G_yield_data.SetMarkerSize(1)
+G_yield_data.SetMarkerColor(1)
+G_yield_data_plt.Add(G_yield_data)
 
-for i,hist in enumerate(histlist):
-    G_yield_simc.SetMarkerStyle(21)
-    G_yield_simc.SetMarkerSize(1)
-    G_yield_simc.SetMarkerColor(i+1)
-    G_yield_data_plt.Add(G_yield_simc)
-    
+G_yield_simc.SetMarkerStyle(21)
+G_yield_simc.SetMarkerSize(1)
+G_yield_simc.SetMarkerColor(2)
+G_yield_data_plt.Add(G_yield_simc)
+
 G_yield_data_plt.Draw("AP")
 G_yield_data_plt.SetTitle(" ;Setting; Yield_Data")
 
@@ -1261,16 +1257,13 @@ for hist in histlist:
         if hist["phi_setting"] == "Center": setting = np.append(setting,0)
         elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
         else: setting = np.append(setting,2)
-        print("@@@@@@@@@@@@@@@@@@@",ratio_data)
-        print("%%%%%%%%%%%%%%%%%%%",setting)
 
 G_ratio = ROOT.TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
 
-for i,hist in enumerate(histlist):
-    G_ratio.SetMarkerStyle(21)
-    G_ratio.SetMarkerSize(1)
-    G_ratio.SetMarkerColor(i+1)
-    G_ratio_plt.Add(G_ratio)
+G_ratio.SetMarkerStyle(21)
+G_ratio.SetMarkerSize(1)
+G_ratio.SetMarkerColor(1)
+G_ratio_plt.Add(G_ratio)
 
 G_ratio_plt.Draw("AP")
 
