@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 12:50:07 trottar"
+# Time-stamp: "2023-08-07 12:54:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1211,7 +1211,7 @@ G_ratio_plt.SetTitle(" ;Setting; Ratio")
 
 i=0
 for i,hist in enumerate(histlist):
-    while i <= ratio_plt.GetXaxis().GetXmax():
+    while i <= G_ratio_plt.GetXaxis().GetXmax():
         bin_ix = G_ratio_plt.GetXaxis().FindBin(i)
         if i == 0: 
             G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
