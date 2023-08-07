@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:08:25 trottar"
+# Time-stamp: "2023-08-07 13:10:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1190,6 +1190,7 @@ G_ratio_plt = ROOT.TMultiGraph()
 C_ratio_plt.SetGrid()
 
 ratio_data = np.array([])
+setting = np.array([])
 for hist in histlist:
     # Loop over each tuple key in the dictionary
     for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
