@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 12:54:56 trottar"
+# Time-stamp: "2023-08-07 13:00:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1197,7 +1197,7 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     ratio_data = np.append(ratio_data, [data_nested_dict["ratio_{}".format(hist["phi_setting"])] for hist in histlist])
 setting = np.array([0 if hist["phi_setting"] == "Center" else 1 if hist["phi_setting"] == "Left" else 2 for hist in histlist])
     
-G_ratio = ROOT.TGraphErrors(len(setting),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
+G_ratio = ROOT.TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
 
 for i,hist in enumerate(histlist):
     G_ratio.SetMarkerStyle(21)
