@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-07-17 19:43:59 trottar"
+# Time-stamp: "2023-08-07 13:52:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,7 +56,7 @@ for tree in input_tree_names.split():
             print("WARNING: File {} not found or not opened or corrupted.".format(filepath))
             continue
         # Check if the tree has at least one entry
-        if tempfile.Get(tree).GetEntries() == 0:
+        if tempfile.Get(tree).Get() == 0:
             print("WARNING: Tree {} in file {} is empty.".format(tree, filepath))
             continue
         #print("Adding {}...".format(filepath))
