@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:10:56 trottar"
+# Time-stamp: "2023-08-07 13:15:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1197,6 +1197,7 @@ for hist in histlist:
         # Access the nested dictionary using the tuple key
         data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
         ratio_data = np.append(ratio_data, [data_nested_dict["ratio_{}".format(hist["phi_setting"])]])
+        print("@@@@@@@@@@@@@@@@@@@",ratio_data)
         if hist["phi_setting"] == "Center": setting = np.append(setting,0)
         elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
         else: setting = np.append(setting,2)        
