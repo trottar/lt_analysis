@@ -813,17 +813,9 @@ do
 
 done
 
-    data_right=()
-    data_left=()
-    data_center=()
-    dummy_right=()
-    dummy_left=()
-    dummy_center=()
-    # Get run numbers for left, right, and, center settings
-    declare -a PHI=("RIGHT" "LEFT" "CENTER")
-    for i in "${PHI[@]}"
-    do
-
+declare -a EPS=("low" "high")
+for j in "${EPS[@]}"
+do
 	if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
 	    if [[ $i = "RIGHT" ]]; then
 		# Define run list based off kinematics selected
