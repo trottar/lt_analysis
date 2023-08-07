@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 18:15:01 trottar"
+# Time-stamp: "2023-08-07 10:50:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -958,6 +958,10 @@ for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(yieldDict["binned_DATA"
         # Subtract dummy from data per t/phi bin and get data yield
         data_nested_dict["yield_data_{}".format(hist["phi_setting"])] = data_nested_dict["nevents"]*hist["normfac_data"] \
                                                                         - dummy_nested_dict["nevents"]*hist["normfac_dummy"]
+        print("{}-> Tuple: {}, Ratio: {}, ".format(hist["phi_setting"],simc_key_tuple,simc_nested_dict["ratio_{}".format(hist["phi_setting"])]))        
+        data_nested_dict["ratio_{}".format(hist["phi_setting"])] = \
+                                                                   data_nested_dict["yield_data_{}".format(hist["phi_setting"])] \
+                                                                   / simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])]
 
 ## !!!! Add Ratio
         
@@ -968,6 +972,7 @@ H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0,
 H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
 H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
 H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0, 1.0)
+H_ratio = ROOT.TH1D("H_ratio", "Ratio", NumtBins*NumPhiBins, 0, 1.0)
 
 ## !!!! Add yield vs phi variable
 
@@ -1158,7 +1163,53 @@ for i, simc_key_tuple in enumerate(yieldDict["binned_SIMC"]):
         H_yield_SIMC.Fill(simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])])
     H_yield_SIMC.Draw("same")
     H_yield_SIMC.SetLineColor(i+1)
-C_yield_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
+C_yield_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+C_ratio = TCanvas()
+# Loop over each tuple key in the dictionary
+for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
+    for hist in histlist:
+        # Fill histogram
+        H_ratio.Fill(data_nested_dict["ratio_{}".format(hist["phi_setting"])])
+    H_ratio.Draw("same")
+    H_ratio.SetLineColor(i+1)
+C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+ratio_plt = TCanvas()
+
+ratio_plt.SetGrid()
+
+G_ratio = ROOT.TGraphErrors(len(hist["phi_setting"]), \
+                            np.array(hist["phi_setting"]),np.array(weight_bins(data_nested_dict["ratio_{}".format(hist["phi_setting"])])),\
+                            np.array([0]*len(hist["phi_setting"])), \
+                            np.array([0]*np.array(weight_bins(data_nested_dict["ratio_{}".format(hist["phi_setting"])]))))
+
+for i,hist in enumerate(histlist):
+    G_ratio.SetMarkerStyle(21)
+    G_ratio.SetMarkerSize(1)
+    G_ratio.SetMarkerColor(i+1)
+    ratio_plt.Add(G_ratio)
+
+ratio_plt.Draw("AP")
+
+ratio_plt.SetTitle(" ;Setting; Ratio")
+
+i=0
+for i,hist in enumerate(histlist):
+    while i <= ratio_plt.GetXaxis().GetXmax():
+        bin_ix = ratio_plt.GetXaxis().FindBin(i)
+        if str(i) in hist["phi_setting"]: 
+            ratio_plt.GetXaxis().SetBinLabel(bin_ix,"%d" % i)
+        i+=1
+
+ratio_plt.GetYaxis().SetTitleOffset(1.5)
+ratio_plt.GetXaxis().SetTitleOffset(1.5)
+ratio_plt.GetXaxis().SetLabelSize(0.04)
+
+ratio_plt.Print(outputpdf + ')')
+
 
 #if DEBUG:
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
