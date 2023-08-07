@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:40:43 trottar"
+# Time-stamp: "2023-08-07 13:44:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1222,7 +1222,7 @@ G_yield_simc.SetMarkerColor(2)
 G_yield_data_plt.Add(G_yield_simc)
 
 G_yield_data_plt.Draw("AP")
-G_yield_data_plt.SetTitle(" ;Setting; Yield_Data")
+G_yield_data_plt.SetTitle(" ;Setting; Yield")
 
 i=0
 for i,hist in enumerate(histlist):
