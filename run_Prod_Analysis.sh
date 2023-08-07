@@ -476,7 +476,7 @@ do
 			rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Right.root"
 		    fi
 		    echo
-		    echo "Combining right ${ParticleType} dummy..."
+		    echo "Combining right ${pid} dummy..."
 		    echo
 		    cd "${LTANAPATH}/scripts"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Right" "${dummy_right[*]}" "${pid}"
@@ -502,7 +502,7 @@ do
 			rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Right.root"
 		    fi
 		    echo
-		    echo "Combining right ${ParticleType} data..."
+		    echo "Combining right ${pid} data..."
 		    echo
 		    cd "${LTANAPATH}/scripts"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Right" "${data_right[*]}" "${pid}"
@@ -528,7 +528,7 @@ do
 			rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Left.root"
 		    fi
 		    echo
-		    echo "Combining left ${ParticleType} dummy..."
+		    echo "Combining left ${pid} dummy..."
 		    echo
 		    cd "${LTANAPATH}/scripts"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${pid}"
@@ -554,7 +554,7 @@ do
 			rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Left.root"
 		    fi
 		    echo
-		    echo "Combining left ${ParticleType} data..."
+		    echo "Combining left ${pid} data..."
 		    echo
 		    cd "${LTANAPATH}/scripts"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Left" "${data_left[*]}" "${pid}"
@@ -580,7 +580,7 @@ do
 			rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Center.root"
 		    fi
 		    echo
-		    echo "Combining center ${ParticleType} dummy..."
+		    echo "Combining center ${pid} dummy..."
 		    echo
 		    cd "${LTANAPATH}/scripts"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Center" "${dummy_center[*]}" "${pid}"
@@ -606,7 +606,7 @@ do
 			rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Center.root"
 		    fi
 		    echo
-		    echo "Combining center ${ParticleType} data..."
+		    echo "Combining center ${pid} data..."
 		    echo
 		    cd "${LTANAPATH}/scripts"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Center" "${data_center[*]}" "${pid}"
@@ -645,7 +645,7 @@ do
 		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root"
 		fi
 		echo
-		echo "Combining right dummy..."
+		echo "Combining right ${ParticleType} dummy..."
 		echo
 		cd "${LTANAPATH}/scripts"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Right" "${dummy_right[*]}" "${ParticleType}"
@@ -671,7 +671,7 @@ do
 		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root"
 		fi
 		echo
-		echo "Combining right data..."
+		echo "Combining right ${ParticleType} data..."
 		echo
 		cd "${LTANAPATH}/scripts"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Right" "${data_right[*]}" "${ParticleType}"
@@ -697,7 +697,7 @@ do
 		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root"
 		fi
 		echo
-		echo "Combining left dummy..."
+		echo "Combining left ${ParticleType} dummy..."
 		echo
 		cd "${LTANAPATH}/scripts"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${ParticleType}"
@@ -723,7 +723,7 @@ do
 		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root"
 		fi
 		echo
-		echo "Combining left data..."
+		echo "Combining left ${ParticleType} data..."
 		echo
 		cd "${LTANAPATH}/scripts"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Left" "${data_left[*]}" "${ParticleType}"
@@ -749,7 +749,7 @@ do
 		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root"
 		fi
 		echo
-		echo "Combining center dummy..."
+		echo "Combining center ${ParticleType} dummy..."
 		echo
 		cd "${LTANAPATH}/scripts"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Center" "${dummy_center[*]}" "${ParticleType}"
@@ -775,7 +775,7 @@ do
 		    rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root"
 		fi
 		echo
-		echo "Combining center data..."
+		echo "Combining center ${ParticleType} data..."
 		echo
 		cd "${LTANAPATH}/scripts"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Center" "${data_center[*]}" "${ParticleType}"
