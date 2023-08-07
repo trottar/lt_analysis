@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 12:08:58 trottar"
+# Time-stamp: "2023-08-07 12:20:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1188,10 +1188,10 @@ ratio_plt = TCanvas()
 
 ratio_plt.SetGrid()
 
-G_ratio = ROOT.TGraphErrors(len(hist["phi_setting"]), \
-                            np.array(hist["phi_setting"]),np.array([data_nested_dict["ratio_{}".format(hist["phi_setting"])]]),\
-                            np.array([0]*len(hist["phi_setting"])), \
-                            np.array([0]*len(np.array([data_nested_dict["ratio_{}".format(hist["phi_setting"])]]))))
+ratio_data = np.array([data_nested_dict["ratio_{}".format(hist["phi_setting"])] for hist in histlist])
+setting = np.array([hist["phi_setting"] for hist in histlist])
+    
+G_ratio = ROOT.TGraphErrors(len(setting),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
 
 for i,hist in enumerate(histlist):
     G_ratio.SetMarkerStyle(21)
