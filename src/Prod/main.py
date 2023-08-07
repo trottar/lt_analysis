@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:15:21 trottar"
+# Time-stamp: "2023-08-07 13:20:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -970,6 +970,9 @@ for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(yieldDict["binned_DATA"
                                                                        / simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])]
         except ZeroDivisionError:
             data_nested_dict["ratio_{}".format(hist["phi_setting"])] = 0
+        data_nested_dict["ratio_{}".format(hist["phi_setting"])] = np.where( \
+                                                                             np.isinf(data_nested_dict["ratio_{}".format(hist["phi_setting"])]), \
+                                                                             0, data_nested_dict["ratio_{}".format(hist["phi_setting"])])            
         print("{}-> Tuple: {}, Ratio: {}, ".format(hist["phi_setting"],data_key_tuple,data_nested_dict["ratio_{}".format(hist["phi_setting"])]))        
         
 #print(yieldDict["binned_DATA"])
@@ -1197,10 +1200,11 @@ for hist in histlist:
         # Access the nested dictionary using the tuple key
         data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
         ratio_data = np.append(ratio_data, [data_nested_dict["ratio_{}".format(hist["phi_setting"])]])
-        print("@@@@@@@@@@@@@@@@@@@",ratio_data)
         if hist["phi_setting"] == "Center": setting = np.append(setting,0)
         elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
-        else: setting = np.append(setting,2)        
+        else: setting = np.append(setting,2)
+        print("@@@@@@@@@@@@@@@@@@@",ratio_data)
+        print("%%%%%%%%%%%%%%%%%%%",setting)
 
 G_ratio = ROOT.TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
 
