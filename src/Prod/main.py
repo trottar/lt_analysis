@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:20:12 trottar"
+# Time-stamp: "2023-08-07 13:27:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1186,6 +1186,64 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     H_ratio.Draw("same")
     H_ratio.SetLineColor(i+1)
 C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+C_yield_data_plt = TCanvas()
+G_yield_data_plt = ROOT.TMultiGraph()
+
+C_yield_data_plt.SetGrid()
+
+yield_data = np.array([])
+yield_data = np.array([])
+setting = np.array([])
+for hist in histlist:
+    # Loop over each tuple key in the dictionary
+    for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
+        # Access the nested dictionary using the tuple key
+        data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]
+        simc_nested_dict = yieldDict["binned_SIMC"][simc_key_tuple]
+        yield_data = np.append(yield_data, [data_nested_dict["yield_data_{}".format(hist["phi_setting"])]])
+        yield_simc = np.append(yield_simc, [simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])]])        
+        if hist["phi_setting"] == "Center": setting = np.append(setting,0)
+        elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
+        else: setting = np.append(setting,2)
+        print("@@@@@@@@@@@@@@@@@@@",yield_data)
+        print("%%%%%%%%%%%%%%%%%%%",setting)
+
+G_yield_data = ROOT.TGraphErrors(len(yield_data),setting,yield_data,np.array([0]*len(setting)),np.array([0]*len(yield_data)))
+G_yield_simc = ROOT.TGraphErrors(len(yield_simc),setting,yield_simc,np.array([0]*len(setting)),np.array([0]*len(yield_simc)))
+
+for i,hist in enumerate(histlist):
+    G_yield_data.SetMarkerStyle(21)
+    G_yield_data.SetMarkerSize(1)
+    G_yield_data.SetMarkerColor(i+1)
+    G_yield_data_plt.Add(G_yield_data)
+
+for i,hist in enumerate(histlist):
+    G_yield_simc.SetMarkerStyle(21)
+    G_yield_simc.SetMarkerSize(1)
+    G_yield_simc.SetMarkerColor(i+1)
+    G_yield_simc_plt.Add(G_yield_simc)
+    
+G_yield_data_plt.Draw("AP")
+G_yield_data_plt.SetTitle(" ;Setting; Yield_Data")
+
+i=0
+for i,hist in enumerate(histlist):
+    while i <= G_yield_data_plt.GetXaxis().GetXmax():
+        bin_ix = G_yield_data_plt.GetXaxis().FindBin(i)
+        if i == 0: 
+            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
+        elif i == 1:
+            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Left")
+        else:
+            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Right")
+        i+=1
+
+G_yield_data_plt.GetYaxis().SetTitleOffset(1.5)
+G_yield_data_plt.GetXaxis().SetTitleOffset(1.5)
+G_yield_data_plt.GetXaxis().SetLabelSize(0.04)
+
+C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_ratio_plt = TCanvas()
 G_ratio_plt = ROOT.TMultiGraph()
