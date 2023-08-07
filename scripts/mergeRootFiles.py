@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 14:30:21 trottar"
+# Time-stamp: "2023-08-07 14:36:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,15 +55,13 @@ for tree in input_tree_names.split():
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
             print("WARNING: File {} not found or not opened or corrupted.".format(filepath))
             continue
-        # Check if the tree has at least one entry
         # Get the tree from the temporary file using the tree_name
-        tree = tempfile.Get(tree_name)
-
+        tree_temp = tempfile.Get(tree)
         # Check if the tree exists
-        if tree:
+        if tree_temp:
             # Get the number of entries in the tree
-            num_entries = tree.GetEntries()
-            if num_entries == 0:
+            num_entries = tree_temp.GetEntries()
+            if num_entries == 0:        
                 print("WARNING: Tree {} in file {} is empty.".format(tree, filepath))
                 continue
         #print("Adding {}...".format(filepath))
