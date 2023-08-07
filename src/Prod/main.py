@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:27:41 trottar"
+# Time-stamp: "2023-08-07 13:30:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1193,7 +1193,7 @@ G_yield_data_plt = ROOT.TMultiGraph()
 C_yield_data_plt.SetGrid()
 
 yield_data = np.array([])
-yield_data = np.array([])
+yield_simc = np.array([])
 setting = np.array([])
 for hist in histlist:
     # Loop over each tuple key in the dictionary
