@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 12:32:43 trottar"
+# Time-stamp: "2023-08-07 12:36:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1193,7 +1193,7 @@ ratio_data = np.array([])
 for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     # Access the nested dictionary using the tuple key
     data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
-    ratio_data = np.append(ratio_data, data_nested_dict["ratio_{}".format(hist["phi_setting"])] for hist in histlist)
+    ratio_data = np.append(ratio_data, [data_nested_dict["ratio_{}".format(hist["phi_setting"])] for hist in histlist])
 setting = np.array([0 if hist["phi_setting"] == "Center" else 1 if hist["phi_setting"] == "Left" else 2 for hist in histlist])
     
 G_ratio = ROOT.TGraphErrors(len(setting),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
