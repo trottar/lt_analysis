@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 10:50:05 trottar"
+# Time-stamp: "2023-08-07 11:01:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1208,7 +1208,7 @@ ratio_plt.GetYaxis().SetTitleOffset(1.5)
 ratio_plt.GetXaxis().SetTitleOffset(1.5)
 ratio_plt.GetXaxis().SetLabelSize(0.04)
 
-ratio_plt.Print(outputpdf + ')')
+ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
 
 
 #if DEBUG:
