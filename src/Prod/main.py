@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:00:35 trottar"
+# Time-stamp: "2023-08-07 13:06:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1190,13 +1190,16 @@ G_ratio_plt = ROOT.TMultiGraph()
 C_ratio_plt.SetGrid()
 
 ratio_data = np.array([])
-# Loop over each tuple key in the dictionary
-for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
-    # Access the nested dictionary using the tuple key
-    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
-    ratio_data = np.append(ratio_data, [data_nested_dict["ratio_{}".format(hist["phi_setting"])] for hist in histlist])
-setting = np.array([0 if hist["phi_setting"] == "Center" else 1 if hist["phi_setting"] == "Left" else 2 for hist in histlist])
-    
+for hist in histlist
+    # Loop over each tuple key in the dictionary
+    for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
+        # Access the nested dictionary using the tuple key
+        data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
+        ratio_data = np.append(ratio_data, [data_nested_dict["ratio_{}".format(hist["phi_setting"])]])
+        if hist["phi_setting"] == "Center": setting = np.append(setting,0)
+        elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
+        else: setting = np.append(setting,2)        
+
 G_ratio = ROOT.TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
 
 for i,hist in enumerate(histlist):
