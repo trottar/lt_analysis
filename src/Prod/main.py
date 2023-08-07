@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 11:39:35 trottar"
+# Time-stamp: "2023-08-07 11:52:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -951,10 +951,16 @@ for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(yieldDict["binned_DATA"
     for hist in histlist:
         print("{} Data-> Tuple: {}, Data yield: {}, ".format(hist["phi_setting"],data_key_tuple,data_nested_dict["nevents"]*hist["normfac_data"]))
         print("{} Dummy-> Tuple: {}, Dummy yield: {}, ".format(hist["phi_setting"],dummy_key_tuple,dummy_nested_dict["nevents"]*hist["normfac_dummy"]))
+        
+        #################
+        # HARD CODED
+        #################
         simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])] = simc_nested_dict["nevents"]/(100*hist["normfac_simc"])
+        #################
+        #################
+        #################
+        
         print("{} Simc-> Tuple: {}, Simc yield: {}, ".format(hist["phi_setting"],simc_key_tuple,simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])]))
-    # Calculate data yield per t/phi bin
-    for hist in histlist:
         # Subtract dummy from data per t/phi bin and get data yield
         data_nested_dict["yield_data_{}".format(hist["phi_setting"])] = data_nested_dict["nevents"]*hist["normfac_data"] \
                                                                         - dummy_nested_dict["nevents"]*hist["normfac_dummy"]
@@ -965,8 +971,6 @@ for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(yieldDict["binned_DATA"
         except ZeroDivisionError:
             data_nested_dict["ratio_{}".format(hist["phi_setting"])] = 0
         print("{}-> Tuple: {}, Ratio: {}, ".format(hist["phi_setting"],data_key_tuple,data_nested_dict["ratio_{}".format(hist["phi_setting"])]))        
-
-## !!!! Add Ratio
         
 #print(yieldDict["binned_DATA"])
 
@@ -1185,9 +1189,9 @@ ratio_plt = TCanvas()
 ratio_plt.SetGrid()
 
 G_ratio = ROOT.TGraphErrors(len(hist["phi_setting"]), \
-                            np.array(hist["phi_setting"]),np.array(data_nested_dict["ratio_{}".format(hist["phi_setting"])]),\
+                            np.array(hist["phi_setting"]),np.array([data_nested_dict["ratio_{}".format(hist["phi_setting"])]]),\
                             np.array([0]*len(hist["phi_setting"])), \
-                            np.array([0]*np.array(data_nested_dict["ratio_{}".format(hist["phi_setting"])])))
+                            np.array([0]*np.array([data_nested_dict["ratio_{}".format(hist["phi_setting"])]])))
 
 for i,hist in enumerate(histlist):
     G_ratio.SetMarkerStyle(21)
