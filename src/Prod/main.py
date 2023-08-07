@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:37:49 trottar"
+# Time-stamp: "2023-08-07 13:40:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1189,6 +1189,7 @@ C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format
 
 C_yield_data_plt = TCanvas()
 G_yield_data_plt = ROOT.TMultiGraph()
+l_yield_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
 C_yield_data_plt.SetGrid()
 
@@ -1238,6 +1239,10 @@ for i,hist in enumerate(histlist):
 G_yield_data_plt.GetYaxis().SetTitleOffset(1.5)
 G_yield_data_plt.GetXaxis().SetTitleOffset(1.5)
 G_yield_data_plt.GetXaxis().SetLabelSize(0.04)
+
+l_yield_data_plt.AddEntry(G_yield_data,"Data")
+l_yield_data_plt.AddEntry(G_yield_simc,"Simc")
+l_yield_data_plt.Draw()
 
 C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
