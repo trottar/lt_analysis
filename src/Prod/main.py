@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 11:04:31 trottar"
+# Time-stamp: "2023-08-07 11:09:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -961,7 +961,7 @@ for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(yieldDict["binned_DATA"
         data_nested_dict["ratio_{}".format(hist["phi_setting"])] = \
                                                                    data_nested_dict["yield_data_{}".format(hist["phi_setting"])] \
                                                                    / simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])]
-        print("{}-> Tuple: {}, Ratio: {}, ".format(hist["phi_setting"],simc_key_tuple,simc_nested_dict["ratio_{}".format(hist["phi_setting"])]))        
+        print("{}-> Tuple: {}, Ratio: {}, ".format(hist["phi_setting"],data_key_tuple,data_nested_dict["ratio_{}".format(hist["phi_setting"])]))        
 
 ## !!!! Add Ratio
         
