@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 12:20:04 trottar"
+# Time-stamp: "2023-08-07 12:32:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1188,8 +1188,13 @@ ratio_plt = TCanvas()
 
 ratio_plt.SetGrid()
 
-ratio_data = np.array([data_nested_dict["ratio_{}".format(hist["phi_setting"])] for hist in histlist])
-setting = np.array([hist["phi_setting"] for hist in histlist])
+ratio_data = np.array([])
+# Loop over each tuple key in the dictionary
+for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
+    # Access the nested dictionary using the tuple key
+    data_nested_dict = yieldDict["binned_DATA"][data_key_tuple]    
+    ratio_data = np.append(ratio_data, data_nested_dict["ratio_{}".format(hist["phi_setting"])] for hist in histlist)
+setting = np.array([0 if hist["phi_setting"] == "Center" else 1 if hist["phi_setting"] == "Left" else 2 for hist in histlist])
     
 G_ratio = ROOT.TGraphErrors(len(setting),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
 
@@ -1207,8 +1212,12 @@ i=0
 for i,hist in enumerate(histlist):
     while i <= ratio_plt.GetXaxis().GetXmax():
         bin_ix = ratio_plt.GetXaxis().FindBin(i)
-        if str(i) in hist["phi_setting"]: 
-            ratio_plt.GetXaxis().SetBinLabel(bin_ix,"%d" % i)
+        if i == 0: 
+            ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
+        elif i == 1:
+            ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Left")
+        else:
+            ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Right")
         i+=1
 
 ratio_plt.GetYaxis().SetTitleOffset(1.5)
