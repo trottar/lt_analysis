@@ -150,6 +150,9 @@ do
 		esac
 	    done
 	fi
+	##############
+	##############
+	##############
 	
 	# Function that calls python script to grab run numbers
 	grab_runs () {
@@ -798,6 +801,9 @@ declare -a EPS=("low" "high")
 for j in "${EPS[@]}"
 do
 
+    # Redefine epsilon based on loop
+    EPSILON=$j
+    
     ##############
     # HARD CODED #
     ##############
@@ -830,6 +836,10 @@ do
     #EffData="coin_production_Prod_efficiency_data_2022_12_30.csv"
     EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
 
+    ##############
+    ##############
+    ##############
+    
     # Function that calls python script to grab run numbers
     grab_runs () {
 	RunList=$1
