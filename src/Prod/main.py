@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 11:15:00 trottar"
+# Time-stamp: "2023-08-07 11:24:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,7 +33,7 @@ import csv
 ##################################################################################################################################################
 # Importing utility functions
 
-from utility import show_pdf_with_evince
+from utility import show_pdf_with_evince, weighted_bin_edges
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -1185,9 +1185,9 @@ ratio_plt = TCanvas()
 ratio_plt.SetGrid()
 
 G_ratio = ROOT.TGraphErrors(len(hist["phi_setting"]), \
-                            np.array(hist["phi_setting"]),np.array(weight_bins(data_nested_dict["ratio_{}".format(hist["phi_setting"])])),\
+                            np.array(hist["phi_setting"]),np.array(weighted_bin_edges(data_nested_dict["ratio_{}".format(hist["phi_setting"])])),\
                             np.array([0]*len(hist["phi_setting"])), \
-                            np.array([0]*np.array(weight_bins(data_nested_dict["ratio_{}".format(hist["phi_setting"])]))))
+                            np.array([0]*np.array(weighted_bin_edges(data_nested_dict["ratio_{}".format(hist["phi_setting"])]))))
 
 for i,hist in enumerate(histlist):
     G_ratio.SetMarkerStyle(21)
