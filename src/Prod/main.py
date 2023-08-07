@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 12:36:38 trottar"
+# Time-stamp: "2023-08-07 12:50:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1184,9 +1184,10 @@ for i, data_key_tuple in enumerate(yieldDict["binned_DATA"]):
     H_ratio.SetLineColor(i+1)
 C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
-ratio_plt = TCanvas()
+C_ratio_plt = TCanvas()
+G_ratio_plt = ROOT.TMultiGraph()
 
-ratio_plt.SetGrid()
+C_ratio_plt.SetGrid()
 
 ratio_data = np.array([])
 # Loop over each tuple key in the dictionary
@@ -1202,29 +1203,29 @@ for i,hist in enumerate(histlist):
     G_ratio.SetMarkerStyle(21)
     G_ratio.SetMarkerSize(1)
     G_ratio.SetMarkerColor(i+1)
-    ratio_plt.Add(G_ratio)
+    G_ratio_plt.Add(G_ratio)
 
-ratio_plt.Draw("AP")
+G_ratio_plt.Draw("AP")
 
-ratio_plt.SetTitle(" ;Setting; Ratio")
+G_ratio_plt.SetTitle(" ;Setting; Ratio")
 
 i=0
 for i,hist in enumerate(histlist):
     while i <= ratio_plt.GetXaxis().GetXmax():
-        bin_ix = ratio_plt.GetXaxis().FindBin(i)
+        bin_ix = G_ratio_plt.GetXaxis().FindBin(i)
         if i == 0: 
-            ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
+            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
         elif i == 1:
-            ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Left")
+            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Left")
         else:
-            ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Right")
+            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Right")
         i+=1
 
-ratio_plt.GetYaxis().SetTitleOffset(1.5)
-ratio_plt.GetXaxis().SetTitleOffset(1.5)
-ratio_plt.GetXaxis().SetLabelSize(0.04)
+G_ratio_plt.GetYaxis().SetTitleOffset(1.5)
+G_ratio_plt.GetXaxis().SetTitleOffset(1.5)
+G_ratio_plt.GetXaxis().SetLabelSize(0.04)
 
-ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
+C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
 
 
 #if DEBUG:
