@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 19:26:26 trottar"
+# Time-stamp: "2023-08-10 19:29:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,7 +98,8 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins):
         hist_data.SetBinContent(t_bin, events_dummy_sub)
 
         # Calculate the average hist_data value per t bin
-        bin_width = average_hist_data.GetXaxis().GetBinWidth(t_bin)
+        bin_center = hist_data.GetXaxis().GetBinCenter(t_bin)
+        bin_width = hist_data.GetXaxis().GetBinWidth(t_bin)
         average_value = events_dummy_sub / bin_width
         #average_hist_data.SetBinContent(t_bin, average_value)
         average_hist_data.Fill(bin_center, average_value)
