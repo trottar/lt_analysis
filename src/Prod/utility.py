@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 18:28:28 trottar"
+# Time-stamp: "2023-08-10 18:33:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,6 +11,7 @@
 # Copyright (c) trottar
 #
 import ROOT
+from array import array
 import numpy as np
 import subprocess
 
