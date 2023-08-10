@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 17:53:58 trottar"
+# Time-stamp: "2023-08-10 18:28:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,72 +59,65 @@ def weight_bins(histogram):
 
 ################################################################################################################################################
 
-def calculate_aver_data(H_histogram_DATA, H_histogram_DUMMY, t_bins, phi_bins):
-    
-    # Create histograms to store the sum and count for each t-phi bin
-    sum_histogram = ROOT.TH2F("sum_histogram", "Sum of histogram Values", len(t_bins) - 1, t_bins, len(phi_bins) - 1, phi_bins)
-    count_histogram = ROOT.TH2F("count_histogram", "Number of Entries", len(t_bins) - 1, t_bins, len(phi_bins) - 1, phi_bins)
+def calculate_aver_data(hist_data, hist_dummy, t_bins, phi_bins):
+    """
+    Process histograms hist_data and hist_dummy using provided t_bins and phi_bins.
 
-    # Loop over histogram histogram bins and fill the sum and count histograms
-    for t_bin in range(1, len(t_bins)):
-        for phi_bin in range(1, len(phi_bins)):
-            t_low = t_bins[t_bin - 1]
-            t_high = t_bins[t_bin]
-            phi_low = phi_bins[phi_bin - 1]
-            phi_high = phi_bins[phi_bin]
+    Parameters:
+    hist_data (TH2F): Histogram containing data
+    hist_dummy (TH2F): Histogram containing dummy data
+    t_bins (list): List of bin edges for t
+    phi_bins (list): List of bin edges for phi
 
-            hist_sum = 0.0
-            hist_count = 0
+    Returns:
+    average_hist_data (TH2F): Histogram containing average data after processing
+    """
 
-            for bin_x in range(1, H_histogram_DATA.GetNbinsX() + 1):
-                t_value = H_histogram_DATA.GetXaxis().GetBinCenter(bin_x)
-                phi_value = H_histogram_DATA.GetYaxis().GetBinCenter(bin_y)
+    # Create histograms for storing processed data
+    average_hist_data = ROOT.TH2F("average_hist_data", "Average Data", len(t_bins)-1, array('d', t_bins), len(phi_bins)-1, array('d', phi_bins))
 
-                if t_low <= t_value < t_high and phi_low <= phi_value < phi_high:
-                    hist_sum += (H_histogram_DATA.GetBinContent(bin_x, bin_y) - H_histogram_DUMMY.GetBinContent(bin_x, bin_y))
-                    hist_count += 1
+    for t_bin in range(1, hist_data.GetNbinsX()+1):
+        for phi_bin in range(1, hist_data.GetNbinsY()+1):
+            # Find events in hist_data and hist_dummy within bins of t and phi
+            events_data = hist_data.GetBinContent(t_bin, phi_bin)
+            events_dummy = hist_dummy.GetBinContent(t_bin, phi_bin)
 
-            sum_histogram.SetBinContent(t_bin, phi_bin, hist_sum)
-            count_histogram.SetBinContent(t_bin, phi_bin, hist_count)
+            # Subtract hist_dummy from hist_data per t/phi bin
+            hist_data.SetBinContent(t_bin, phi_bin, events_data - events_dummy)
 
-    # Calculate the average histogram value within each t-phi bin
-    histogram_aver = sum_histogram.Clone("histogram_aver")
-    histogram_aver.Divide(count_histogram)
+            # Calculate the average hist_data value per t/phi bin
+            bin_width = average_hist_data.GetXaxis().GetBinWidth(t_bin) * average_hist_data.GetYaxis().GetBinWidth(phi_bin)
+            average_value = events_data / bin_width
+            average_hist_data.SetBinContent(t_bin, phi_bin, average_value)
 
-    return histogram_aver
+    return average_hist_data
 
 ################################################################################################################################################
 
-def calculate_aver_simc(H_histogram_SIMC, t_bins, phi_bins):
-    
-    # Create histograms to store the sum and count for each t-phi bin
-    sum_histogram = ROOT.TH2F("sum_histogram", "Sum of histogram Values", len(t_bins) - 1, t_bins, len(phi_bins) - 1, phi_bins)
-    count_histogram = ROOT.TH2F("count_histogram", "Number of Entries", len(t_bins) - 1, t_bins, len(phi_bins) - 1, phi_bins)
+def calculate_aver_simc(hist_data, t_bins, phi_bins):
+    """
+    Process histogram hist_data using provided t_bins and phi_bins.
 
-    # Loop over histogram histogram bins and fill the sum and count histograms
-    for t_bin in range(1, len(t_bins)):
-        for phi_bin in range(1, len(phi_bins)):
-            t_low = t_bins[t_bin - 1]
-            t_high = t_bins[t_bin]
-            phi_low = phi_bins[phi_bin - 1]
-            phi_high = phi_bins[phi_bin]
+    Parameters:
+    hist_data (TH2F): Histogram containing data
+    t_bins (list): List of bin edges for t
+    phi_bins (list): List of bin edges for phi
 
-            hist_sum = 0.0
-            hist_count = 0
+    Returns:
+    average_hist_data (TH2F): Histogram containing average data after processing
+    """
 
-            for bin_x in range(1, H_histogram_SIMC.GetNbinsX() + 1):
-                t_value = H_histogram_SIMC.GetXaxis().GetBinCenter(bin_x)
-                phi_value = H_histogram_SIMC.GetYaxis().GetBinCenter(bin_y)
+    # Create histogram for storing processed data
+    average_hist_data = ROOT.TH2F("average_hist_data", "Average Data", len(t_bins)-1, array('d', t_bins), len(phi_bins)-1, array('d', phi_bins))
 
-                if t_low <= t_value < t_high and phi_low <= phi_value < phi_high:
-                    hist_sum += (H_histogram_SIMC.GetBinContent(bin_x, bin_y))
-                    hist_count += 1
+    for t_bin in range(1, hist_data.GetNbinsX()+1):
+        for phi_bin in range(1, hist_data.GetNbinsY()+1):
+            # Find events in hist_data within bins of t and phi
+            events_data = hist_data.GetBinContent(t_bin, phi_bin)
 
-            sum_histogram.SetBinContent(t_bin, phi_bin, hist_sum)
-            count_histogram.SetBinContent(t_bin, phi_bin, hist_count)
+            # Calculate the average hist_data value per t/phi bin
+            bin_width = average_hist_data.GetXaxis().GetBinWidth(t_bin) * average_hist_data.GetYaxis().GetBinWidth(phi_bin)
+            average_value = events_data / bin_width
+            average_hist_data.SetBinContent(t_bin, phi_bin, average_value)
 
-    # Calculate the average histogram value within each t-phi bin
-    histogram_aver = sum_histogram.Clone("histogram_aver")
-    histogram_aver.Divide(count_histogram)
-
-    return histogram_aver
+    return average_hist_data
