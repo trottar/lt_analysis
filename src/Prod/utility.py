@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 19:06:42 trottar"
+# Time-stamp: "2023-08-10 19:09:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,7 +33,7 @@ def convert_TH1F_to_numpy(histogram):
     # Get the bin contents as a 2D NumPy array
     bin_contents = np.zeros((histogram.GetNbinsX()))
     for i in range(histogram.GetNbinsX()):
-        bin_contents[i][j] = histogram.GetBinContent(i+1)
+        bin_contents[i] = histogram.GetBinContent(i+1)
 
     return bin_contents
 
