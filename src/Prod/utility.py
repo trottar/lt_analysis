@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 18:33:29 trottar"
+# Time-stamp: "2023-08-10 18:49:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,6 +25,18 @@ def show_pdf_with_evince(file_path):
         print("Evince not found. Please make sure it is installed.")
     except Exception as e:
         print("An error occurred: {}".format(e))
+
+################################################################################################################################################        
+
+def convert_TH2F_to_numpy(histogram):
+
+    # Get the bin contents as a 2D NumPy array
+    bin_contents = np.zeros((histogram.GetNbinsX(), histogram.GetNbinsY()))
+    for i in range(histogram.GetNbinsX()):
+        for j in range(histogram.GetNbinsY()):
+            bin_contents[i][j] = histogram.GetBinContent(i+1, j+1)
+
+    return bin_contents
 
 ################################################################################################################################################
 
@@ -91,7 +103,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins, phi_bins):
             average_value = events_data / bin_width
             average_hist_data.SetBinContent(t_bin, phi_bin, average_value)
 
-    return average_hist_data
+    return convert_TH2F_to_numpy(average_hist_data)
 
 ################################################################################################################################################
 
@@ -121,4 +133,4 @@ def calculate_aver_simc(hist_data, t_bins, phi_bins):
             average_value = events_data / bin_width
             average_hist_data.SetBinContent(t_bin, phi_bin, average_value)
 
-    return average_hist_data
+    return convert_TH2F_to_numpy(average_hist_data)
