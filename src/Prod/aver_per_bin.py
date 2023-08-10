@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 17:42:18 trottar"
+# Time-stamp: "2023-08-10 18:42:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -252,7 +252,7 @@ def aver_per_bin(histlist, inpDict):
     W_aver_simc = calculate_aver_simc(W_simc, t_bins, phi_bins)
     t_aver_simc = calculate_aver_simc(t_simc, t_bins, phi_bins)
     
-    averDict[key] = {
+    averDict = {
         "t_bins" : t_bins,
         "phi_bins" : phi_bins,                       
         "Q2_aver_data" : Q2_aver_data,
