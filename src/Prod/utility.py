@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 19:09:16 trottar"
+# Time-stamp: "2023-08-10 19:14:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,7 +30,7 @@ def show_pdf_with_evince(file_path):
 
 def convert_TH1F_to_numpy(histogram):
 
-    # Get the bin contents as a 2D NumPy array
+    # Get the bin contents as a 1D NumPy array
     bin_contents = np.zeros((histogram.GetNbinsX()))
     for i in range(histogram.GetNbinsX()):
         bin_contents[i] = histogram.GetBinContent(i+1)
