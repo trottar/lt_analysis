@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 19:14:17 trottar"
+# Time-stamp: "2023-08-10 19:26:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,7 +71,7 @@ def weight_bins(histogram):
 
 ################################################################################################################################################
 
-def calculate_aver_data(hist_data, hist_dummy, t_bins, phi_bins):
+def calculate_aver_data(hist_data, hist_dummy, t_bins):
     """
     Process histograms hist_data and hist_dummy using provided t_bins and phi_bins.
 
@@ -83,7 +83,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins, phi_bins):
     Returns:
     average_hist_data (TH1F): Histogram containing average data after processing
     """
-
+    
     # Create histograms for storing processed data
     average_hist_data = ROOT.TH1F("average_hist_data", "Average Data", len(t_bins)-1, array('d', t_bins))
 
@@ -92,21 +92,23 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins, phi_bins):
         # Find events in hist_data and hist_dummy within bins of t
         events_data = hist_data.GetBinContent(t_bin)
         events_dummy = hist_dummy.GetBinContent(t_bin)
+        events_dummy_sub = events_data - events_dummy
 
         # Subtract hist_dummy from hist_data per t bin
-        hist_data.SetBinContent(t_bin, events_data - events_dummy)
+        hist_data.SetBinContent(t_bin, events_dummy_sub)
 
         # Calculate the average hist_data value per t bin
         bin_width = average_hist_data.GetXaxis().GetBinWidth(t_bin)
-        average_value = events_data / bin_width
-        average_hist_data.SetBinContent(t_bin, average_value)
+        average_value = events_dummy_sub / bin_width
+        #average_hist_data.SetBinContent(t_bin, average_value)
+        average_hist_data.Fill(bin_center, average_value)
         
 
     return convert_TH1F_to_numpy(average_hist_data)
 
 ################################################################################################################################################
 
-def calculate_aver_simc(hist_data, t_bins, phi_bins):
+def calculate_aver_simc(hist_data, t_bins):
     """
     Process histogram hist_data using provided t_bins and phi_bins.
 
