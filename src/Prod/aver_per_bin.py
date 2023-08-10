@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 17:21:25 trottar"
+# Time-stamp: "2023-08-10 17:27:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ from utility import calculate_aver_data, calculate_aver_simc
 
 ##################################################################################################################################################
 
-def aver_per_bin(histlist, inpDict, DataType):
+def aver_per_bin(histlist, inpDict):
 
     # Create empty histograms
     empty_hist = ROOT.TH1F()

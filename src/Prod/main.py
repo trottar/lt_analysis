@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 17:23:29 trottar"
+# Time-stamp: "2023-08-10 17:27:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -936,7 +936,7 @@ from aver_per_bin import aver_per_bin
 
 averDict = {}
 
-averDict.update(aver_per_bin(histlist, inpDict, DataType))
+averDict.update(aver_per_bin(histlist, inpDict))
 
 print("@@@@@@@@@@@@@@@@@",averDict)
 
