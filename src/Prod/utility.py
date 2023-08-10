@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 18:49:14 trottar"
+# Time-stamp: "2023-08-10 18:56:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,6 +90,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins, phi_bins):
     average_hist_data = ROOT.TH2F("average_hist_data", "Average Data", len(t_bins)-1, array('d', t_bins), len(phi_bins)-1, array('d', phi_bins))
 
     for t_bin in range(1, hist_data.GetNbinsX()+1):
+        '''
         for phi_bin in range(1, hist_data.GetNbinsY()+1):
             # Find events in hist_data and hist_dummy within bins of t and phi
             events_data = hist_data.GetBinContent(t_bin, phi_bin)
@@ -102,6 +103,19 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins, phi_bins):
             bin_width = average_hist_data.GetXaxis().GetBinWidth(t_bin) * average_hist_data.GetYaxis().GetBinWidth(phi_bin)
             average_value = events_data / bin_width
             average_hist_data.SetBinContent(t_bin, phi_bin, average_value)
+        '''
+        # Find events in hist_data and hist_dummy within bins of t
+        events_data = hist_data.GetBinContent(t_bin)
+        events_dummy = hist_dummy.GetBinContent(t_bin)
+
+        # Subtract hist_dummy from hist_data per t bin
+        hist_data.SetBinContent(t_bin, events_data - events_dummy)
+
+        # Calculate the average hist_data value per t bin
+        bin_width = average_hist_data.GetXaxis().GetBinWidth(t_bin)
+        average_value = events_data / bin_width
+        average_hist_data.SetBinContent(t_bin, average_value)
+        
 
     return convert_TH2F_to_numpy(average_hist_data)
 
@@ -124,6 +138,7 @@ def calculate_aver_simc(hist_data, t_bins, phi_bins):
     average_hist_data = ROOT.TH2F("average_hist_data", "Average Data", len(t_bins)-1, array('d', t_bins), len(phi_bins)-1, array('d', phi_bins))
 
     for t_bin in range(1, hist_data.GetNbinsX()+1):
+        '''
         for phi_bin in range(1, hist_data.GetNbinsY()+1):
             # Find events in hist_data within bins of t and phi
             events_data = hist_data.GetBinContent(t_bin, phi_bin)
@@ -132,5 +147,14 @@ def calculate_aver_simc(hist_data, t_bins, phi_bins):
             bin_width = average_hist_data.GetXaxis().GetBinWidth(t_bin) * average_hist_data.GetYaxis().GetBinWidth(phi_bin)
             average_value = events_data / bin_width
             average_hist_data.SetBinContent(t_bin, phi_bin, average_value)
+        '''
+        # Find events in hist_data within bins of t
+        events_data = hist_data.GetBinContent(t_bin)
 
+        # Calculate the average hist_data value per t bin
+        bin_width = average_hist_data.GetXaxis().GetBinWidth(t_bin)
+        average_value = events_data / bin_width
+        average_hist_data.SetBinContent(t_bin, average_value)
+
+        
     return convert_TH2F_to_numpy(average_hist_data)
