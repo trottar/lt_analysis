@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-07 13:44:01 trottar"
+# Time-stamp: "2023-08-10 17:23:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -932,6 +932,15 @@ if DEBUG:
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''
 
+from aver_per_bin import aver_per_bin
+
+averDict = {}
+
+averDict.update(aver_per_bin(histlist, inpDict, DataType))
+
+print("@@@@@@@@@@@@@@@@@",averDict)
+
+'''
 from calculate_yield import calculate_yield
 
 yieldDict = {}
@@ -1295,6 +1304,8 @@ C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".fo
 
 #if DEBUG:
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+
+'''
 
 ##############################
 # Step 7 of the lt_analysis: #

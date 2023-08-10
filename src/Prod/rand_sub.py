@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-04 14:55:07 trottar"
+# Time-stamp: "2023-08-07 16:49:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,7 +187,7 @@ def rand_sub(phi_setting, inpDict):
 
     # Section for grabing Prompt/Random selection parameters from PARAM file
     PARAMPATH = "%s/DB/PARAM" % UTILPATH
-    print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER[1], HOST[1], LTANAPATH))
+    print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, LTANAPATH))
     TimingCutFile = "%s/Timing_Parameters.csv" % PARAMPATH # This should match the param file actually being used!
     TimingCutf = open(TimingCutFile)
     try:
