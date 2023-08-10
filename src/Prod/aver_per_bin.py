@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 17:36:31 trottar"
+# Time-stamp: "2023-08-10 17:42:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,7 +207,25 @@ def aver_per_bin(histlist, inpDict):
     for bin in range(1, t_Center_DATA.GetNbinsX() + 1):
         combined_content = t_Center_DATA.GetBinContent(bin) + t_Left_DATA.GetBinContent(bin) + t_Right_DATA.GetBinContent(bin)
         t_data.SetBinContent(bin, combined_content)
-            
+
+    # Combine histograms for Q2_dummy
+    Q2_dummy = ROOT.TH1F("Q2_dummy", "Combined Q2_dummy Histogram", Q2_Center_DUMMY.GetNbinsX(), Q2_Left_DUMMY.GetXaxis().GetXmin(), Q2_Right_DUMMY.GetXaxis().GetXmax())
+    for bin in range(1, Q2_Center_DUMMY.GetNbinsX() + 1):
+        combined_content = Q2_Center_DUMMY.GetBinContent(bin) + Q2_Left_DUMMY.GetBinContent(bin) + Q2_Right_DUMMY.GetBinContent(bin)
+        Q2_dummy.SetBinContent(bin, combined_content)
+
+    # Combine histograms for W_dummy
+    W_dummy = ROOT.TH1F("W_dummy", "Combined W_dummy Histogram", W_Center_DUMMY.GetNbinsX(), W_Left_DUMMY.GetXaxis().GetXmin(), W_Right_DUMMY.GetXaxis().GetXmax())
+    for bin in range(1, W_Center_DUMMY.GetNbinsX() + 1):
+        combined_content = W_Center_DUMMY.GetBinContent(bin) + W_Left_DUMMY.GetBinContent(bin) + W_Right_DUMMY.GetBinContent(bin)
+        W_dummy.SetBinContent(bin, combined_content)
+
+    # Combine histograms for t_dummy
+    t_dummy = ROOT.TH1F("t_dummy", "Combined t_dummy Histogram", t_Center_DUMMY.GetNbinsX(), t_Left_DUMMY.GetXaxis().GetXmin(), t_Right_DUMMY.GetXaxis().GetXmax())
+    for bin in range(1, t_Center_DUMMY.GetNbinsX() + 1):
+        combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin) + t_Right_DUMMY.GetBinContent(bin)
+        t_dummy.SetBinContent(bin, combined_content)
+        
     Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_bins, phi_bins)
     W_aver_data = calculate_aver_data(W_data, W_dummy, t_bins, phi_bins)
     t_aver_data = calculate_aver_data(t_data, t_dummy, t_bins, phi_bins)
