@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 22:13:48 trottar"
+# Time-stamp: "2023-08-10 22:18:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,10 +117,18 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     if not hist_data or not hist_dummy or not t_data or not t_dummy:
         print("Error: Input histograms are not properly initialized.")
         return []
+
+    # Initialize a histogram to hold binned data
+    binned_t_data = ROOT.TH1D("binned_t_data", "Binned t Data", len(t_bins)-1, array('d', t_bins))
+    binned_t_dummy = ROOT.TH1D("binned_t_dummy", "Binned t Dummy", len(t_bins)-1, array('d', t_bins))
     
     # Bin t_data and t_dummy in t_bins
     binned_t_data = t_data.Rebin(len(t_bins)-1, "binned_t_data", array('d', t_bins))
     binned_t_dummy = t_dummy.Rebin(len(t_bins)-1, "binned_t_dummy", array('d', t_bins))
+
+    # Initialize a histogram to hold binned data
+    binned_hist_data = ROOT.TH1D("binned_hist_data", "Binned Histogram Data", len(t_bins)-1, array('d', t_bins))
+    binned_hist_dummy = ROOT.TH1D("binned_hist_dummy", "Binned Histogram Dummy", len(t_bins)-1, array('d', t_bins))
     
     # Bin hist_data and hist_dummy using the binned t_data and t_dummy
     binned_hist_data = hist_data.Rebin(len(t_bins)-1, "binned_hist_data", array('d', t_bins))
