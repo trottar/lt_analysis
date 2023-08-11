@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 13:33:39 trottar"
+# Time-stamp: "2023-08-11 13:43:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,18 +117,15 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     # Bin the hist_data using t_bins
     digitized = np.digitize(t_data_array, t_bins)
 
-    # Initialize a list to store binned data arrays
-    binned_data = []
+    # Initialize an array to store bin averages
+    bin_averages = np.zeros(len(t_bins) - 1)
 
-    # Loop through the bins
+    # Loop through the bins and calculate averages directly
     for i in range(1, len(t_bins)):
         mask = (digitized == i)
-        binned_data.append(hist_data_array[mask])
+        bin_averages[i - 1] = np.mean(hist_data_array[mask])
 
-    # Calculate the average per bin of binned_data
-    bin_averages = [np.mean(data) for data in binned_data]
-    
-    return binned_data
+    return bin_averages
 
 ##################################################################################################################################################
 
