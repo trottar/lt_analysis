@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 19:28:05 trottar"
+# Time-stamp: "2023-08-11 19:36:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,9 +61,9 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     binned_t_data = []
     binned_hist_data = []
     binned_hist_dummy = []
-
+    t_bins = np.append(t_bins, 0.0)
     # Loop through bins in t_data and identify events in specified bins
-    for j in range(len(np.append(t_bins, 0.0))-1):
+    for j in range(len(t_bins)-1):
         for bin_index in range(1, t_data.GetNbinsX() + 1):
             tmp_t_data = []
             tmp_hist_data = []
