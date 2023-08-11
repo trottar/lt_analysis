@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 13:49:36 trottar"
+# Time-stamp: "2023-08-11 13:52:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,7 +127,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     # Loop through the bins, subtract hist_dummy from hist_data, and calculate averages
     for i in range(1, len(t_bins)):
         mask = (digitized == i)
-        print(f"Processing bin {i}:")
+        print("Processing bin %s:" % i )
         print("mask:", mask)
         hist_data_bin = hist_data_array[mask] - hist_dummy_array[mask]
         print("hist_data_bin:", hist_data_bin)
