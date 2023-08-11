@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 22:38:57 trottar"
+# Time-stamp: "2023-08-10 22:42:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,6 +122,9 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     binned_t_data = t_data.Rebin(len(t_bins)-1, "binned_t_data", array('d', t_bins))
     binned_t_dummy = t_dummy.Rebin(len(t_bins)-1, "binned_t_dummy", array('d', t_bins))
 
+    print("Binned t data contents:", [binned_t_data.GetBinContent(i) for i in range(1, binned_t_data.GetNbinsX()+1)])
+    print("Binned t dummy contents:", [binned_t_dummy.GetBinContent(i) for i in range(1, binned_t_dummy.GetNbinsX()+1)])
+    
     # Get the bin numbers of t_data and t_dummy
     bin_numbers_t_data = []
     bin_numbers_t_dummy = []
