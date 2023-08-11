@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 21:01:14 trottar"
+# Time-stamp: "2023-08-10 21:03:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,9 +103,11 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins):
         # Calculate the average value for the current t_bin
         bin_width = t_bin_up - t_bin_low
         average_value = events_dummy_sub / bin_width
-
+        print("_______________",average_value)
+        
         # Fill the histogram with the calculated average value
-        average_hist_data.Fill((t_bin_low + t_bin_up) / 2, average_value)
+        #average_hist_data.Fill((t_bin_low + t_bin_up) / 2, average_value)
+        average_hist_data.Fill(average_value)
 
     return convert_TH1F_to_numpy(average_hist_data)  # Return the processed histogram as a numpy array
 
