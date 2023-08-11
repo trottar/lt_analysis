@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 21:28:32 trottar"
+# Time-stamp: "2023-08-11 11:07:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ OUTPATH=lt.OUTPATH
 ##################################################################################################################################################
 # Importing utility functions
 
-from utility import calculate_aver_data, calculate_aver_simc
+from utility import calculate_aver_data, calculate_aver_simc, weight_bins
 
 ##################################################################################################################################################
 
@@ -225,6 +225,8 @@ def aver_per_bin(histlist, inpDict):
     for bin in range(1, t_Center_DUMMY.GetNbinsX() + 1):
         combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin) + t_Right_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
+
+    print("@@@@@@@@@@@@@@@@@@",Q2_data, Q2_dummy, t_data, t_dummy, t_bins)
         
     Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_dummy, t_bins)
     W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_dummy, t_bins)
