@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 19:36:08 trottar"
+# Time-stamp: "2023-08-11 19:42:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,6 +61,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     binned_t_data = []
     binned_hist_data = []
     binned_hist_dummy = []
+    
     t_bins = np.append(t_bins, 0.0)
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -84,15 +85,18 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     binned_hist_data = np.array(binned_hist_data)
     binned_hist_dummy = np.array(binned_hist_dummy)
 
+    aver_hist = []
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-        aver_hist = np.average(np.array(data) - np.array(dummy))
+        #aver_hist = np.average(np.array(data) - np.array(dummy))
+        #aver_hist.append(np.average(np.array(data) - np.array(dummy)))
+        aver_hist.append(np.average(np.array(data)))
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
-    print("Size of t_bins:", len(t_bins))
+    print("Size of t_bins:", len(t_bins)-1)
     
     return aver_hist    
 
