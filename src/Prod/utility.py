@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 22:18:11 trottar"
+# Time-stamp: "2023-08-10 22:38:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -118,22 +118,26 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
         print("Error: Input histograms are not properly initialized.")
         return []
 
-    # Initialize a histogram to hold binned data
-    binned_t_data = ROOT.TH1D("binned_t_data", "Binned t Data", len(t_bins)-1, array('d', t_bins))
-    binned_t_dummy = ROOT.TH1D("binned_t_dummy", "Binned t Dummy", len(t_bins)-1, array('d', t_bins))
-    
     # Bin t_data and t_dummy in t_bins
     binned_t_data = t_data.Rebin(len(t_bins)-1, "binned_t_data", array('d', t_bins))
     binned_t_dummy = t_dummy.Rebin(len(t_bins)-1, "binned_t_dummy", array('d', t_bins))
 
-    # Initialize a histogram to hold binned data
-    binned_hist_data = ROOT.TH1D("binned_hist_data", "Binned Histogram Data", len(t_bins)-1, array('d', t_bins))
-    binned_hist_dummy = ROOT.TH1D("binned_hist_dummy", "Binned Histogram Dummy", len(t_bins)-1, array('d', t_bins))
-    
-    # Bin hist_data and hist_dummy using the binned t_data and t_dummy
-    binned_hist_data = hist_data.Rebin(len(t_bins)-1, "binned_hist_data", array('d', t_bins))
-    binned_hist_dummy = hist_dummy.Rebin(len(t_bins)-1, "binned_hist_dummy", array('d', t_bins))
-    
+    # Get the bin numbers of t_data and t_dummy
+    bin_numbers_t_data = []
+    bin_numbers_t_dummy = []
+    for bin_idx in range(1, len(t_bins)):
+        bin_center = binned_t_data.GetBinCenter(bin_idx)
+        bin_number = hist_data.FindBin(bin_center)
+        bin_numbers_t_data.append(bin_number)
+
+        bin_center_dummy = binned_t_dummy.GetBinCenter(bin_idx)
+        bin_number_dummy = hist_dummy.FindBin(bin_center_dummy)
+        bin_numbers_t_dummy.append(bin_number_dummy)
+
+    # Bin hist_data and hist_dummy using the calculated bin numbers
+    binned_hist_data = hist_data.Rebin(len(bin_numbers_t_data) - 1, "binned_hist_data", array('i', bin_numbers_t_data))
+    binned_hist_dummy = hist_dummy.Rebin(len(bin_numbers_t_dummy) - 1, "binned_hist_dummy", array('i', bin_numbers_t_dummy))
+
     # Debugging step: Print histogram contents and properties
     print("Binned hist data contents:", [binned_hist_data.GetBinContent(i) for i in range(1, binned_hist_data.GetNbinsX()+1)])
     print("Binned hist dummy contents:", [binned_hist_dummy.GetBinContent(i) for i in range(1, binned_hist_dummy.GetNbinsX()+1)])
