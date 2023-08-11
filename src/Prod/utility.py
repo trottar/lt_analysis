@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 21:03:29 trottar"
+# Time-stamp: "2023-08-10 21:27:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,7 +71,7 @@ def weight_bins(histogram):
 
 ################################################################################################################################################
 
-def calculate_aver_data(hist_data, hist_dummy, t_bins):
+def calculate_aver_data2(hist_data, hist_dummy, t_bins):
     """
     Process histograms hist_data and hist_dummy using provided t_bins and phi_bins.
 
@@ -110,6 +110,30 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins):
         average_hist_data.Fill(average_value)
 
     return convert_TH1F_to_numpy(average_hist_data)  # Return the processed histogram as a numpy array
+
+def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
+    # Bin t_data and t_dummy in t_bins
+    bin_indices_data = [t_bins.FindBin(val) for val in t_data]
+    bin_indices_dummy = [t_bins.FindBin(val) for val in t_dummy]
+    
+    # Bin hist_data and hist_dummy using binned t_data and t_dummy
+    binned_hist_data = ROOT.TH1F("binned_hist_data", "", len(t_bins) - 1, t_bins.GetArray())
+    binned_hist_dummy = ROOT.TH1F("binned_hist_dummy", "", len(t_bins) - 1, t_bins.GetArray())
+    
+    for i, bin_idx in enumerate(bin_indices_data):
+        binned_hist_data.Fill(t_data[i], hist_data[i])
+        
+    for i, bin_idx in enumerate(bin_indices_dummy):
+        binned_hist_dummy.Fill(t_dummy[i], hist_dummy[i])
+    
+    # Subtract hist_dummy from hist_data per bin
+    binned_hist_data.Add(binned_hist_dummy, -1)
+    
+    # Calculate the average per bin of the subtracted bins
+    averaged_subtracted_bins = [binned_hist_data.GetBinContent(i) / (binned_hist_data.GetBinWidth(i)) for i in range(1, binned_hist_data.GetNbinsX() + 1)]
+    
+    return averaged_subtracted_bins
+
 
 ################################################################################################################################################
 
