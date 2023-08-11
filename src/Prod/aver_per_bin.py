@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 14:29:46 trottar"
+# Time-stamp: "2023-08-11 14:41:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -147,6 +147,51 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     print("bin_averages:", bin_averages)
 
     return bin_averages
+
+import numpy as np
+
+def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
+    # Initialize lists for binned_t_data, iter_bins, binned_hist_data, binned_hist_dummy
+    binned_t_data = []
+    iter_bins = []
+    binned_hist_data = []
+    binned_hist_dummy = []
+
+    # Loop through t_data and identify events in specified bins
+    for event in t_data:
+        bin_index = np.digitize(event, t_bins) - 1
+        if 0 <= bin_index < len(t_bins):
+            binned_t_data.append(event)
+            iter_bins.append(bin_index)
+
+    # Loop through hist_data and hist_dummy using iter_bins
+    for i in range(len(hist_data)):
+        if i in iter_bins:
+            binned_hist_data.append(hist_data[i])
+            binned_hist_dummy.append(hist_dummy[i])
+
+    # Convert the lists to numpy arrays for subtraction
+    binned_hist_data = np.array(binned_hist_data)
+    binned_hist_dummy = np.array(binned_hist_dummy)
+
+    # Subtract binned_hist_dummy from binned_hist_data element-wise
+    subtract_hist = binned_hist_data - binned_hist_dummy
+
+    # Calculate the average per bin value of subtract_hist
+    aver_hist = np.mean(subtract_hist, axis=0)
+    
+    # Print statements to check sizes and values
+    print("Size of binned_t_data:", len(binned_t_data))
+    print("Size of binned_hist_data:", len(binned_hist_data))
+    print("Size of binned_hist_dummy:", len(binned_hist_dummy))
+    print("Size of t_bins:", len(t_bins))
+    print("Values in binned_t_data:", binned_t_data)
+    print("Values in binned_hist_data:", binned_hist_data)
+    print("Values in binned_hist_dummy:", binned_hist_dummy)
+    print("Values in t_bins:", t_bins)
+    
+    return aver_hist
+    
 
 ##################################################################################################################################################
 
