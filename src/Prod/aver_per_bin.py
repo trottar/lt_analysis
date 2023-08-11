@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 14:57:44 trottar"
+# Time-stamp: "2023-08-11 15:07:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,7 +106,7 @@ def calculate_aver_data2(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     
     return averaged_values
 
-def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
+def calculate_aver_data3(hist_data, hist_dummy, t_data, t_bins):
     # Convert ROOT TH1F objects to NumPy arrays
     hist_data_array = np.array(hist_data, dtype=np.float64)
     t_data_array = np.array(t_data, dtype=np.float64)
@@ -148,26 +148,24 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
 
     return bin_averages
 
-import numpy as np
-
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
-    # Initialize lists for binned_t_data, iter_bins, binned_hist_data, binned_hist_dummy
+    # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
-    iter_bins = []
     binned_hist_data = []
     binned_hist_dummy = []
 
     # Loop through bins in t_data and identify events in specified bins
+    iter_bins = []  # Initialize a list to keep track of bins that match t_bins
     for bin_index in range(1, t_data.GetNbinsX() + 1):
         bin_center = t_data.GetBinCenter(bin_index)
-        if bin_center >= t_bins[0] and bin_center < t_bins[-1]:
+        if t_bins[0] <= bin_center < t_bins[-1]:
             binned_t_data.append(bin_center)
-            iter_bins.append(bin_index)
+            iter_bins.append(bin_index)  # Keep track of bins that match t_bins
 
-    # Loop through hist_data and hist_dummy using iter_bins
-    for i in iter_bins:
-        binned_hist_data.append(hist_data.GetBinContent(i))
-        binned_hist_dummy.append(hist_dummy.GetBinContent(i))
+    # Loop through hist_data and hist_dummy using bin indices
+    for bin_index in iter_bins:
+        binned_hist_data.append(hist_data.GetBinContent(bin_index))
+        binned_hist_dummy.append(hist_dummy.GetBinContent(bin_index))
 
     # Convert the lists to numpy arrays for subtraction
     binned_hist_data = np.array(binned_hist_data)
