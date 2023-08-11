@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 13:52:44 trottar"
+# Time-stamp: "2023-08-11 13:54:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,10 +108,10 @@ def calculate_aver_data2(hist_data, hist_dummy, t_data, t_dummy, t_bins):
 
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     # Convert hist_data, t_data, hist_dummy, and t_dummy to NumPy arrays
-    hist_data_array = np.array(hist_data, dtype=np.float64)
-    t_data_array = np.array(t_data, dtype=np.float64)
-    hist_dummy_array = np.array(hist_dummy, dtype=np.float64)
-    t_dummy_array = np.array(t_dummy, dtype=np.float64)
+    hist_data_array = np.array(convert_TH1F_to_numpy(hist_data), dtype=np.float64)
+    t_data_array = np.array(convert_TH1F_to_numpy(t_data), dtype=np.float64)
+    hist_dummy_array = np.array(convert_TH1F_to_numpy(hist_dummy), dtype=np.float64)
+    t_dummy_array = np.array(convert_TH1F_to_numpy(t_dummy), dtype=np.float64)
 
     # Calculate the bin centers for t_data
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
