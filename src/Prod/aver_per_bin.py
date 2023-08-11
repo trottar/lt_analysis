@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 13:25:32 trottar"
+# Time-stamp: "2023-08-11 13:33:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,6 +266,10 @@ def aver_per_bin(histlist, inpDict):
         except UnboundLocalError:
             combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
+
+    Cqw = TCanvas()
+
+    Q2_data.Draw("same, COLZ")
         
     Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_dummy, t_bins)
     W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_dummy, t_bins)
