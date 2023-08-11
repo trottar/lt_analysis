@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 12:58:19 trottar"
+# Time-stamp: "2023-08-11 13:11:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -24,7 +24,7 @@ from scipy.integrate import quad
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys, math, os, subprocess
-from ROOT import TH1D, TAxis, array
+from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
@@ -80,12 +80,13 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
         bin_center_dummy = binned_t_dummy.GetBinCenter(bin_idx)
         bin_number_dummy = hist_dummy.GetXaxis().FindBin(bin_center_dummy)  # Corrected line
         bin_numbers_t_dummy.append(bin_number_dummy)
+
         print("@@@@@@@@@@@@@@@@@@",bin_center_data,bin_number_data)
         
     # Bin hist_data and hist_dummy using the calculated bin numbers
-    binned_hist_data = TH1D("binned_hist_data", "Binned Hist Data", len(bin_numbers_t_data) - 1, array('d', bin_numbers_t_data))
-    binned_hist_dummy = TH1D("binned_hist_dummy", "Binned Hist Dummy", len(bin_numbers_t_dummy) - 1, array('d', bin_numbers_t_dummy))
-        
+    binned_hist_data = hist_data.Rebin(len(bin_numbers_t_data) - 1, "binned_hist_data", array('d', bin_numbers_t_data))
+    binned_hist_dummy = hist_dummy.Rebin(len(bin_numbers_t_dummy) - 1, "binned_hist_dummy", array('d', bin_numbers_t_dummy))
+
     # Debugging step: Print histogram contents and properties
     print("Binned hist data contents:", [binned_hist_data.GetBinContent(i) for i in range(1, binned_hist_data.GetNbinsX()+1)])
     print("Binned hist dummy contents:", [binned_hist_dummy.GetBinContent(i) for i in range(1, binned_hist_dummy.GetNbinsX()+1)])
