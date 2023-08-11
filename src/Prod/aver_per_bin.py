@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 13:43:52 trottar"
+# Time-stamp: "2023-08-11 13:49:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,23 +107,32 @@ def calculate_aver_data2(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     return averaged_values
 
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
-    # Convert hist_data and t_data to NumPy arrays
+    # Convert hist_data, t_data, hist_dummy, and t_dummy to NumPy arrays
     hist_data_array = np.array(hist_data, dtype=np.float64)
     t_data_array = np.array(t_data, dtype=np.float64)
+    hist_dummy_array = np.array(hist_dummy, dtype=np.float64)
+    t_dummy_array = np.array(t_dummy, dtype=np.float64)
 
     # Calculate the bin centers for t_data
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
+    print("t_bin_centers:", t_bin_centers)
 
     # Bin the hist_data using t_bins
     digitized = np.digitize(t_data_array, t_bins)
+    print("digitized:", digitized)
 
     # Initialize an array to store bin averages
     bin_averages = np.zeros(len(t_bins) - 1)
 
-    # Loop through the bins and calculate averages directly
+    # Loop through the bins, subtract hist_dummy from hist_data, and calculate averages
     for i in range(1, len(t_bins)):
         mask = (digitized == i)
-        bin_averages[i - 1] = np.mean(hist_data_array[mask])
+        print(f"Processing bin {i}:")
+        print("mask:", mask)
+        hist_data_bin = hist_data_array[mask] - hist_dummy_array[mask]
+        print("hist_data_bin:", hist_data_bin)
+        bin_averages[i - 1] = np.mean(hist_data_bin)
+        print("bin_averages:", bin_averages)
 
     return bin_averages
 
