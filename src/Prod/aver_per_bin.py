@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 12:17:40 trottar"
+# Time-stamp: "2023-08-11 12:32:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,8 +82,8 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
         bin_numbers_t_dummy.append(bin_number_dummy)
 
     # Bin hist_data and hist_dummy using the calculated bin numbers
-    binned_hist_data = hist_data.Rebin(len(bin_numbers_t_data) - 1, "binned_hist_data", array('i', bin_numbers_t_data))
-    binned_hist_dummy = hist_dummy.Rebin(len(bin_numbers_t_dummy) - 1, "binned_hist_dummy", array('i', bin_numbers_t_dummy))
+    binned_hist_data = hist_data.Rebin(len(bin_numbers_t_data) - 1, "binned_hist_data", array('d', bin_numbers_t_data))
+    binned_hist_dummy = hist_dummy.Rebin(len(bin_numbers_t_dummy) - 1, "binned_hist_dummy", array('d', bin_numbers_t_dummy))
 
     # Debugging step: Print histogram contents and properties
     print("Binned hist data contents:", [binned_hist_data.GetBinContent(i) for i in range(1, binned_hist_data.GetNbinsX()+1)])
