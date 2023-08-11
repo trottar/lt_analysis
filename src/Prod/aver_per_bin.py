@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 14:41:36 trottar"
+# Time-stamp: "2023-08-11 14:57:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -157,18 +157,17 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     binned_hist_data = []
     binned_hist_dummy = []
 
-    # Loop through t_data and identify events in specified bins
-    for event in t_data:
-        bin_index = np.digitize(event, t_bins) - 1
-        if 0 <= bin_index < len(t_bins):
-            binned_t_data.append(event)
+    # Loop through bins in t_data and identify events in specified bins
+    for bin_index in range(1, t_data.GetNbinsX() + 1):
+        bin_center = t_data.GetBinCenter(bin_index)
+        if bin_center >= t_bins[0] and bin_center < t_bins[-1]:
+            binned_t_data.append(bin_center)
             iter_bins.append(bin_index)
 
     # Loop through hist_data and hist_dummy using iter_bins
-    for i in range(len(hist_data)):
-        if i in iter_bins:
-            binned_hist_data.append(hist_data[i])
-            binned_hist_dummy.append(hist_dummy[i])
+    for i in iter_bins:
+        binned_hist_data.append(hist_data.GetBinContent(i))
+        binned_hist_dummy.append(hist_dummy.GetBinContent(i))
 
     # Convert the lists to numpy arrays for subtraction
     binned_hist_data = np.array(binned_hist_data)
