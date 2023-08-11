@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 18:25:37 trottar"
+# Time-stamp: "2023-08-11 18:42:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,14 +63,14 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     binned_hist_dummy = []
 
     # Loop through bins in t_data and identify events in specified bins
-    for j in range(1, len(t_bins)+1):
+    for j in range(1, len(t_bins)-1):
         for bin_index in range(1, t_data.GetNbinsX() + 1):
             tmp_t_data = []
             tmp_hist_data = []
             tmp_hist_dummy = []
             bin_center = t_data.GetBinCenter(bin_index)
-            print("Checking if {} <= {} <= {}".format(t_bins[j-1], bin_center, t_bins[j]))
-            if t_bins[j-1] <= bin_center <= t_bins[j]:
+            print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+            if t_bins[j] <= bin_center <= t_bins[j+1]:
                 print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                 tmp_t_data.append(bin_center)
                 tmp_hist_data.append(hist_data.GetBinContent(bin_index))
