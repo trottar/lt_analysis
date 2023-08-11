@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 14:26:24 trottar"
+# Time-stamp: "2023-08-11 14:29:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -287,7 +287,7 @@ def aver_per_bin(histlist, inpDict):
 
     Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_bins)
     W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_bins)
-    t_aver_data = calculate_aver_data(t_data, t_dummy, t_bins)
+    t_aver_data = calculate_aver_data(t_data, t_dummy, t_data, t_bins)
         
     # Combine histograms for Q2_simc
     Q2_simc = ROOT.TH1F("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())
