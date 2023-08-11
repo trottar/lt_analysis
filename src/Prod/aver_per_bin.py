@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 15:38:41 trottar"
+# Time-stamp: "2023-08-11 16:19:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,25 +56,22 @@ from utility import calculate_aver_simc, convert_TH1F_to_numpy
 ##################################################################################################################################################
 
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
+    
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
     binned_hist_data = []
     binned_hist_dummy = []
 
     # Loop through bins in t_data and identify events in specified bins
-    iter_bins = []  # Initialize a list to keep track of bins that match t_bins
     for bin_index in range(1, t_data.GetNbinsX() + 1):
         bin_center = t_data.GetBinCenter(bin_index)
-        if t_bins[0] <= bin_center < t_bins[-1]:
+        if t_bins[0] <= bin_center <= t_bins[-1]:
             binned_t_data.append(bin_center)
-            iter_bins.append(bin_index)  # Keep track of bins that match t_bins
-
-    # Loop through hist_data and hist_dummy using bin indices
-    for bin_index in iter_bins:
-        binned_hist_data.append(hist_data.GetBinContent(bin_index))
-        binned_hist_dummy.append(hist_dummy.GetBinContent(bin_index))
+            binned_hist_data.append(hist_data.GetBinContent(bin_index))
+            binned_hist_dummy.append(hist_dummy.GetBinContent(bin_index))
 
     # Convert the lists to numpy arrays for subtraction
+    binned_t_data = np.array(binned_t_data)
     binned_hist_data = np.array(binned_hist_data)
     binned_hist_dummy = np.array(binned_hist_dummy)
 
@@ -84,18 +81,13 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     # Calculate the average per bin value of subtract_hist
     aver_hist = np.mean(subtract_hist, axis=0)
     
-    # Print statements to check sizes and values
+    # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
     print("Size of t_bins:", len(t_bins))
-    #print("Values in binned_t_data:", binned_t_data)
-    #print("Values in binned_hist_data:", binned_hist_data)
-    #print("Values in binned_hist_dummy:", binned_hist_dummy)
-    #print("Values in t_bins:", t_bins)
     
-    return aver_hist
-    
+    return aver_hist    
 
 ##################################################################################################################################################
 
