@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 18:03:25 trottar"
+# Time-stamp: "2023-08-11 18:09:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
 
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-        subtract_hist = data - dummy
+        subtract_hist = np.array(data) - np.array(dummy)
 
     # Calculate the average per bin value of subtract_hist
     aver_hist = np.mean(subtract_hist, axis=0)
