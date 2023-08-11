@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 11:42:53 trottar"
+# Time-stamp: "2023-08-11 11:48:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -118,128 +118,74 @@ def aver_per_bin(histlist, inpDict):
         # Assign histograms for Q2
         if hist["phi_setting"] == "Center":
             Q2_Center_DATA = hist["H_Q2_DATA"]
-        else:
-            Q2_Center_DATA = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             Q2_Left_DATA = hist["H_Q2_DATA"]
-        else:
-            Q2_Left_DATA = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             Q2_Right_DATA = hist["H_Q2_DATA"]
-        else:
-            Q2_Right_DATA = empty_hist.Clone()
 
         # Assign histograms for W
         if hist["phi_setting"] == "Center":
             W_Center_DATA = hist["H_W_DATA"]
-        else:
-            W_Center_DATA = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             W_Left_DATA = hist["H_W_DATA"]
-        else:
-            W_Left_DATA = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             W_Right_DATA = hist["H_W_DATA"]
-        else:
-            W_Right_DATA = empty_hist.Clone()
 
         # Assign histograms for t
         if hist["phi_setting"] == "Center":
             t_Center_DATA = hist["H_t_DATA"]
-        else:
-            t_Center_DATA = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             t_Left_DATA = hist["H_t_DATA"]
-        else:
-            t_Left_DATA = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             t_Right_DATA = hist["H_t_DATA"]
-        else:
-            t_Right_DATA = empty_hist.Clone()
 
         # Assign histograms for Q2
         if hist["phi_setting"] == "Center":
             Q2_Center_DUMMY = hist["H_Q2_DUMMY"]
-        else:
-            Q2_Center_DUMMY = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             Q2_Left_DUMMY = hist["H_Q2_DUMMY"]
-        else:
-            Q2_Left_DUMMY = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             Q2_Right_DUMMY = hist["H_Q2_DUMMY"]
-        else:
-            Q2_Right_DUMMY = empty_hist.Clone()
 
         # Assign histograms for W
         if hist["phi_setting"] == "Center":
             W_Center_DUMMY = hist["H_W_DUMMY"]
-        else:
-            W_Center_DUMMY = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             W_Left_DUMMY = hist["H_W_DUMMY"]
-        else:
-            W_Left_DUMMY = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             W_Right_DUMMY = hist["H_W_DUMMY"]
-        else:
-            W_Right_DUMMY = empty_hist.Clone()
 
         # Assign histograms for t
         if hist["phi_setting"] == "Center":
             t_Center_DUMMY = hist["H_t_DUMMY"]
-        else:
-            t_Center_DUMMY = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             t_Left_DUMMY = hist["H_t_DUMMY"]
-        else:
-            t_Left_DUMMY = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             t_Right_DUMMY = hist["H_t_DUMMY"]
-        else:
-            t_Right_DUMMY = empty_hist.Clone()
 
         # Assign histograms for Q2
         if hist["phi_setting"] == "Center":
             Q2_Center_SIMC = hist["H_Q2_SIMC"]
-        else:
-            Q2_Center_SIMC = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             Q2_Left_SIMC = hist["H_Q2_SIMC"]
-        else:
-            Q2_Left_SIMC = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             Q2_Right_SIMC = hist["H_Q2_SIMC"]
-        else:
-            Q2_Right_SIMC = empty_hist.Clone()
 
         # Assign histograms for W
         if hist["phi_setting"] == "Center":
             W_Center_SIMC = hist["H_W_SIMC"]
-        else:
-            W_Center_SIMC = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             W_Left_SIMC = hist["H_W_SIMC"]
-        else:
-            W_Left_SIMC = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             W_Right_SIMC = hist["H_W_SIMC"]
-        else:
-            W_Right_SIMC = empty_hist.Clone()
 
         # Assign histograms for t
         if hist["phi_setting"] == "Center":
             t_Center_SIMC = hist["H_t_SIMC"]
-        else:
-            t_Center_SIMC = empty_hist.Clone()
         if hist["phi_setting"] == "Left":
             t_Left_SIMC = hist["H_t_SIMC"]
-        else:
-            t_Left_SIMC = empty_hist.Clone()
         if hist["phi_setting"] == "Right":
             t_Right_SIMC = hist["H_t_SIMC"]
-        else:
-            t_Right_SIMC = empty_hist.Clone()            
             
     # Combine histograms for Q2_data
     Q2_data = ROOT.TH1F("Q2_data", "Combined Q2_data Histogram", Q2_Center_DATA.GetNbinsX(), Q2_Center_DATA.GetXaxis().GetXmin(), Q2_Center_DATA.GetXaxis().GetXmax())
