@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 12:08:16 trottar"
+# Time-stamp: "2023-08-11 12:17:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -211,7 +211,7 @@ def aver_per_bin(histlist, inpDict):
         try:
             combined_content = t_Center_DATA.GetBinContent(bin) + t_Left_DATA.GetBinContent(bin) + t_Right_DATA.GetBinContent(bin)
         except UnboundLocalError:
-            combined_content = t_Center_DATA.GetBinContent(bin) + t_Left_DATA.GetBinContent(bin) + t_Right_DATA.GetBinContent(bin)
+            combined_content = t_Center_DATA.GetBinContent(bin) + t_Left_DATA.GetBinContent(bin)
         t_data.SetBinContent(bin, combined_content)
 
     # Combine histograms for Q2_dummy
@@ -238,7 +238,7 @@ def aver_per_bin(histlist, inpDict):
         try:
             combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin) + t_Right_DUMMY.GetBinContent(bin)
         except UnboundLocalError:
-            combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin) t_Right_DUMMY.GetBinContent(bin)
+            combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
 
     print("@@@@@@@@@@@@@@@@@@",Q2_data.GetNbinsX(), Q2_dummy.GetNbinsX(), t_data.GetNbinsX(), t_dummy.GetNbinsX(), t_bins)
@@ -253,7 +253,7 @@ def aver_per_bin(histlist, inpDict):
         try:
             combined_content = Q2_Center_SIMC.GetBinContent(bin) + Q2_Left_SIMC.GetBinContent(bin) + Q2_Right_SIMC.GetBinContent(bin)
         except UnboundLocalError:
-            combined_content = Q2_Center_SIMC.GetBinContent(bin) + Q2_Left_SIMC.GetBinContent(bin) Q2_Right_SIMC.GetBinContent(bin)
+            combined_content = Q2_Center_SIMC.GetBinContent(bin) + Q2_Left_SIMC.GetBinContent(bin)
         Q2_simc.SetBinContent(bin, combined_content)
 
     # Combine histograms for W_simc
@@ -262,7 +262,7 @@ def aver_per_bin(histlist, inpDict):
         try:
             combined_content = W_Center_SIMC.GetBinContent(bin) + W_Left_SIMC.GetBinContent(bin) + W_Right_SIMC.GetBinContent(bin)
         except UnboundLocalError:
-            combined_content = W_Center_SIMC.GetBinContent(bin) + W_Left_SIMC.GetBinContent(bin) W_Right_SIMC.GetBinContent(bin)
+            combined_content = W_Center_SIMC.GetBinContent(bin) + W_Left_SIMC.GetBinContent(bin)
         W_simc.SetBinContent(bin, combined_content)
 
     # Combine histograms for t_simc
