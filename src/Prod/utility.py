@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 21:27:49 trottar"
+# Time-stamp: "2023-08-10 21:29:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -132,7 +132,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     # Calculate the average per bin of the subtracted bins
     averaged_subtracted_bins = [binned_hist_data.GetBinContent(i) / (binned_hist_data.GetBinWidth(i)) for i in range(1, binned_hist_data.GetNbinsX() + 1)]
     
-    return averaged_subtracted_bins
+    return convert_TH1F_to_numpy(averaged_subtracted_bins)
 
 
 ################################################################################################################################################
