@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 11:36:35 trottar"
+# Time-stamp: "2023-08-11 11:42:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -260,7 +260,7 @@ def aver_per_bin(histlist, inpDict):
         t_data.SetBinContent(bin, combined_content)
 
     # Combine histograms for Q2_dummy
-    Q2_dummy = ROOT.TH1F("Q2_dummy", Q2_Center_DUMMY.GetNbinsX(), Q2_Center_DUMMY.GetXaxis().GetXmin(), Q2_Center_DUMMY.GetXaxis().GetXmax())
+    Q2_dummy = ROOT.TH1F("Q2_dummy", "Combined Q2_dummy Histogram", Q2_Center_DUMMY.GetNbinsX(), Q2_Center_DUMMY.GetXaxis().GetXmin(), Q2_Center_DUMMY.GetXaxis().GetXmax())
     for bin in range(1, Q2_Center_DUMMY.GetNbinsX() + 1):
         combined_content = Q2_Center_DUMMY.GetBinContent(bin) + Q2_Left_DUMMY.GetBinContent(bin) + Q2_Right_DUMMY.GetBinContent(bin)
         Q2_dummy.SetBinContent(bin, combined_content)
