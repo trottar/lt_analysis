@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 20:39:16 trottar"
+# Time-stamp: "2023-08-10 20:43:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,7 +100,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins):
         # Find events in hist_data and hist_dummy within the current t_bin
         events_data = hist_data.Integral(hist_data.FindBin(t_bin_low), hist_data.FindBin(t_bin_up))
         events_dummy = hist_dummy.Integral(hist_dummy.FindBin(t_bin_low), hist_dummy.FindBin(t_bin_up))
-        events_dummy_sub = events_data - events_dummy
+        events_dummy_sub = events_data
 
         # Subtract hist_dummy from hist_data per t bin
         hist_data.Fill((t_bin_low + t_bin_up) / 2, events_dummy_sub)

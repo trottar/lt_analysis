@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 18:10:36 trottar"
+# Time-stamp: "2023-08-10 20:42:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -940,7 +940,7 @@ averDict = {}
 
 averDict.update(aver_per_bin(histlist, inpDict))
 
-print("@@@@@@@@@@@@@@@@@",averDict)
+print(averDict)
 
 '''
 from calculate_yield import calculate_yield
