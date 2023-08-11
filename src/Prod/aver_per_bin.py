@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 14:20:26 trottar"
+# Time-stamp: "2023-08-11 14:26:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,7 +106,7 @@ def calculate_aver_data2(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     
     return averaged_values
 
-def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
+def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     # Convert ROOT TH1F objects to NumPy arrays
     hist_data_array = np.array(hist_data, dtype=np.float64)
     t_data_array = np.array(t_data, dtype=np.float64)
@@ -285,6 +285,10 @@ def aver_per_bin(histlist, inpDict):
             combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
 
+    Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_bins)
+    W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_bins)
+    t_aver_data = calculate_aver_data(t_data, t_dummy, t_bins)
+        
     # Combine histograms for Q2_simc
     Q2_simc = ROOT.TH1F("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())
     for bin in range(1, Q2_Center_SIMC.GetNbinsX() + 1):
