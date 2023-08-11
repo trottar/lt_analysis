@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 20:55:02 trottar"
+# Time-stamp: "2023-08-10 21:01:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,7 +98,8 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins):
         events_data = hist_data.Integral(hist_data.FindBin(t_bin_low), hist_data.FindBin(t_bin_up))
         events_dummy = hist_dummy.Integral(hist_dummy.FindBin(t_bin_low), hist_dummy.FindBin(t_bin_up))
         events_dummy_sub = events_data - events_dummy
-
+        print("---------------",events_data, events_dummy, events_dummy_sub)
+        
         # Calculate the average value for the current t_bin
         bin_width = t_bin_up - t_bin_low
         average_value = events_dummy_sub / bin_width
