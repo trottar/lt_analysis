@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 14:15:33 trottar"
+# Time-stamp: "2023-08-11 14:20:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,9 +107,6 @@ def calculate_aver_data2(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     return averaged_values
 
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
-import numpy as np
-
-def calculate_aver_data(hist_data, t_data, t_bins, hist_dummy):
     # Convert ROOT TH1F objects to NumPy arrays
     hist_data_array = np.array(hist_data, dtype=np.float64)
     t_data_array = np.array(t_data, dtype=np.float64)
