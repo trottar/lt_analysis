@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 21:43:24 trottar"
+# Time-stamp: "2023-08-10 21:51:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,38 +112,29 @@ def calculate_aver_data2(hist_data, hist_dummy, t_bins):
     return convert_TH1F_to_numpy(average_hist_data)  # Return the processed histogram as a numpy array
 
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
-    try:
-        # Create histograms for t_data and t_dummy
-        h_t_data = ROOT.TH1F("h_t_data", "", len(t_bins)-1, np.array(t_bins, dtype=float))
-        h_t_dummy = ROOT.TH1F("h_t_dummy", "", len(t_bins)-1, np.array(t_bins, dtype=float))
 
-        # Fill histograms with data
-        for val in t_data:
-            h_t_data.Fill(val)
-        for val in t_dummy:
-            h_t_dummy.Fill(val)
-
-        # Create histograms for hist_data and hist_dummy using binned t_data and t_dummy
-        h_hist_data = ROOT.TH1F("h_hist_data", "", len(t_bins)-1, np.array(t_bins, dtype=float))
-        h_hist_dummy = ROOT.TH1F("h_hist_dummy", "", len(t_bins)-1, np.array(t_bins, dtype=float))
-
-        # Fill histograms with data and weights
-        for i in range(len(t_data)):
-            h_hist_data.Fill(t_data[i], hist_data[i])
-        for i in range(len(t_dummy)):
-            h_hist_dummy.Fill(t_dummy[i], hist_dummy[i])
-
-        # Subtract hist_dummy from hist_data
-        h_hist_data.Add(h_hist_dummy, -1)
-
-        # Calculate the average per bin of the subtracted bins
-        averaged_bins = np.array([h_hist_data.GetBinContent(bin) / h_t_data.GetBinContent(bin) for bin in range(1, h_hist_data.GetNbinsX() + 1)])
-
-        return averaged_bins
+    # Bin t_data and t_dummy in t_bins
+    binned_t_data = t_data.Rebin(len(t_bins)-1, "binned_t_data", array.array('d', t_bins))
+    binned_t_dummy = t_dummy.Rebin(len(t_bins)-1, "binned_t_dummy", array.array('d', t_bins))
     
-    except ZeroDivisionError:
-        print("Error: Division by zero encountered. Check your input data.")
-        return []
+    # Bin hist_data and hist_dummy using the binned t_data and t_dummy
+    binned_hist_data = hist_data.Rebin(len(t_bins)-1, "binned_hist_data", array.array('d', t_bins))
+    binned_hist_dummy = hist_dummy.Rebin(len(t_bins)-1, "binned_hist_dummy", array.array('d', t_bins))
+    
+    # Subtract hist_dummy from hist_data per bin
+    subtracted_hist = binned_hist_data.Clone("subtracted_hist")
+    subtracted_hist.Add(binned_hist_dummy, -1)
+    
+    # Calculate the average per bin of the subtracted bins
+    num_bins = subtracted_hist.GetNbinsX()
+    averaged_values = []
+    for bin_idx in range(1, num_bins+1):
+        bin_content = subtracted_hist.GetBinContent(bin_idx)
+        bin_width = subtracted_hist.GetBinWidth(bin_idx)
+        average_value = bin_content / bin_width
+        averaged_values.append(average_value)
+    
+    return averaged_values
 
 ################################################################################################################################################
 
