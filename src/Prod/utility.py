@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 21:39:48 trottar"
+# Time-stamp: "2023-08-10 21:43:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,34 +112,38 @@ def calculate_aver_data2(hist_data, hist_dummy, t_bins):
     return convert_TH1F_to_numpy(average_hist_data)  # Return the processed histogram as a numpy array
 
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
-    # Create histograms for t_data and t_dummy
-    h_t_data = ROOT.TH1F("h_t_data", "", len(t_bins)-1, np.array(t_bins, dtype=float))
-    h_t_dummy = ROOT.TH1F("h_t_dummy", "", len(t_bins)-1, np.array(t_bins, dtype=float))
+    try:
+        # Create histograms for t_data and t_dummy
+        h_t_data = ROOT.TH1F("h_t_data", "", len(t_bins)-1, np.array(t_bins, dtype=float))
+        h_t_dummy = ROOT.TH1F("h_t_dummy", "", len(t_bins)-1, np.array(t_bins, dtype=float))
 
-    # Fill histograms with data
-    for val in t_data:
-        h_t_data.Fill(val)
-    for val in t_dummy:
-        h_t_dummy.Fill(val)
+        # Fill histograms with data
+        for val in t_data:
+            h_t_data.Fill(val)
+        for val in t_dummy:
+            h_t_dummy.Fill(val)
 
-    # Create histograms for hist_data and hist_dummy using binned t_data and t_dummy
-    h_hist_data = ROOT.TH1F("h_hist_data", "", len(t_bins)-1, np.array(t_bins, dtype=float))
-    h_hist_dummy = ROOT.TH1F("h_hist_dummy", "", len(t_bins)-1, np.array(t_bins, dtype=float))
+        # Create histograms for hist_data and hist_dummy using binned t_data and t_dummy
+        h_hist_data = ROOT.TH1F("h_hist_data", "", len(t_bins)-1, np.array(t_bins, dtype=float))
+        h_hist_dummy = ROOT.TH1F("h_hist_dummy", "", len(t_bins)-1, np.array(t_bins, dtype=float))
 
-    # Fill histograms with data and weights
-    for i, val in enumerate(t_data):
-        h_hist_data.Fill(val, hist_data[i])
-    for i, val in enumerate(t_dummy):
-        h_hist_dummy.Fill(val, hist_dummy[i])
+        # Fill histograms with data and weights
+        for i in range(len(t_data)):
+            h_hist_data.Fill(t_data[i], hist_data[i])
+        for i in range(len(t_dummy)):
+            h_hist_dummy.Fill(t_dummy[i], hist_dummy[i])
 
-    # Subtract hist_dummy from hist_data
-    h_hist_data.Add(h_hist_dummy, -1)
+        # Subtract hist_dummy from hist_data
+        h_hist_data.Add(h_hist_dummy, -1)
 
-    # Calculate the average per bin of the subtracted bins
-    averaged_bins = np.array([h_hist_data.GetBinContent(bin) / h_t_data.GetBinContent(bin) for bin in range(1, h_hist_data.GetNbinsX() + 1)])
+        # Calculate the average per bin of the subtracted bins
+        averaged_bins = np.array([h_hist_data.GetBinContent(bin) / h_t_data.GetBinContent(bin) for bin in range(1, h_hist_data.GetNbinsX() + 1)])
+
+        return averaged_bins
     
-    return convert_TH1F_to_numpy(averaged_bins)
-
+    except ZeroDivisionError:
+        print("Error: Division by zero encountered. Check your input data.")
+        return []
 
 ################################################################################################################################################
 
