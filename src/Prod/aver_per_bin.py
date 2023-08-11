@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 18:09:06 trottar"
+# Time-stamp: "2023-08-11 18:16:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,13 +63,15 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     binned_hist_dummy = []
 
     # Loop through bins in t_data and identify events in specified bins
-    for j in range(len(t_bins) - 1):
+    for j in range(1, len(t_bins)+1):
         for bin_index in range(1, t_data.GetNbinsX() + 1):
             tmp_t_data = []
             tmp_hist_data = []
             tmp_hist_dummy = []
             bin_center = t_data.GetBinCenter(bin_index)
-            if t_bins[j] <= bin_center <= t_bins[j+1]:
+            print("Checking if {} <= {} <= {}".format(t_bins[j-1], bin_center, t_bins[j]))
+            if t_bins[j-1] <= bin_center <= t_bins[j]:
+                print("{} Passed".format(hist_data.GetBinContent(bin_index)))
                 tmp_t_data.append(bin_center)
                 tmp_hist_data.append(hist_data.GetBinContent(bin_index))
                 tmp_hist_dummy.append(hist_dummy.GetBinContent(bin_index))
@@ -84,10 +86,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
 
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-        subtract_hist = np.array(data) - np.array(dummy)
-
-    # Calculate the average per bin value of subtract_hist
-    aver_hist = np.mean(subtract_hist, axis=0)
+        aver_hist = np.average(np.array(data) - np.array(dummy))
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
