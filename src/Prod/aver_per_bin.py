@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 13:11:35 trottar"
+# Time-stamp: "2023-08-11 13:18:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,7 +93,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     
     # Create subtracted_hist by cloning binned_hist_data
     subtracted_hist = binned_hist_data.Clone("subtracted_hist")
-    subtracted_hist.Add(binned_hist_dummy, -1)
+    #subtracted_hist.Add(binned_hist_dummy, -1)
     
     # Calculate the average per bin of the subtracted bins
     num_bins = subtracted_hist.GetNbinsX()
