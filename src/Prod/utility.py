@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 22:06:10 trottar"
+# Time-stamp: "2023-08-10 22:09:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,12 +114,12 @@ def calculate_aver_data2(hist_data, hist_dummy, t_bins):
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
 
     # Bin t_data and t_dummy in t_bins
-    binned_t_data = t_data.Rebin(len(t_bins)-1, "binned_t_data", array.array('d', t_bins))
-    binned_t_dummy = t_dummy.Rebin(len(t_bins)-1, "binned_t_dummy", array.array('d', t_bins))
+    binned_t_data = t_data.Rebin(len(t_bins)-1, "binned_t_data", array('d', t_bins))
+    binned_t_dummy = t_dummy.Rebin(len(t_bins)-1, "binned_t_dummy", array('d', t_bins))
     
     # Bin hist_data and hist_dummy using the binned t_data and t_dummy
-    binned_hist_data = hist_data.Rebin(len(t_bins)-1, "binned_hist_data", array.array('d', t_bins))
-    binned_hist_dummy = hist_dummy.Rebin(len(t_bins)-1, "binned_hist_dummy", array.array('d', t_bins))
+    binned_hist_data = hist_data.Rebin(len(t_bins)-1, "binned_hist_data", array('d', t_bins))
+    binned_hist_dummy = hist_dummy.Rebin(len(t_bins)-1, "binned_hist_dummy", array('d', t_bins))
     
     # Debugging step: Print histogram contents and properties
     print("Binned hist data contents:", [binned_hist_data.GetBinContent(i) for i in range(1, binned_hist_data.GetNbinsX()+1)])
