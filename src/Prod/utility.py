@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 19:29:08 trottar"
+# Time-stamp: "2023-08-10 20:39:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,6 +71,9 @@ def weight_bins(histogram):
 
 ################################################################################################################################################
 
+import ROOT
+from array import array
+
 def calculate_aver_data(hist_data, hist_dummy, t_bins):
     """
     Process histograms hist_data and hist_dummy using provided t_bins and phi_bins.
@@ -85,27 +88,24 @@ def calculate_aver_data(hist_data, hist_dummy, t_bins):
     """
     
     # Create histograms for storing processed data
-    average_hist_data = ROOT.TH1F("average_hist_data", "Average Data", len(t_bins)-1, array('d', t_bins))
+    num_bins = len(t_bins) - 1
+    bin_edges = array('d', t_bins)
+    average_hist_data = ROOT.TH1F("average_hist_data", "Average Data", num_bins, bin_edges)
 
-    for t_bin in range(1, hist_data.GetNbinsX()+1):
-        
-        # Find events in hist_data and hist_dummy within bins of t
-        events_data = hist_data.GetBinContent(t_bin)
-        events_dummy = hist_dummy.GetBinContent(t_bin)
+    for t_bin in range(1, num_bins+1):
+        # Get the lower and upper edges of the current t_bin
+        t_bin_low = t_bins[t_bin - 1]
+        t_bin_up = t_bins[t_bin]
+
+        # Find events in hist_data and hist_dummy within the current t_bin
+        events_data = hist_data.Integral(hist_data.FindBin(t_bin_low), hist_data.FindBin(t_bin_up))
+        events_dummy = hist_dummy.Integral(hist_dummy.FindBin(t_bin_low), hist_dummy.FindBin(t_bin_up))
         events_dummy_sub = events_data - events_dummy
 
         # Subtract hist_dummy from hist_data per t bin
-        hist_data.SetBinContent(t_bin, events_dummy_sub)
+        hist_data.Fill((t_bin_low + t_bin_up) / 2, events_dummy_sub)
 
-        # Calculate the average hist_data value per t bin
-        bin_center = hist_data.GetXaxis().GetBinCenter(t_bin)
-        bin_width = hist_data.GetXaxis().GetBinWidth(t_bin)
-        average_value = events_dummy_sub / bin_width
-        #average_hist_data.SetBinContent(t_bin, average_value)
-        average_hist_data.Fill(bin_center, average_value)
-        
-
-    return convert_TH1F_to_numpy(average_hist_data)
+    return convert_TH1F_to_numpy(average_hist_data)  # This line returns the processed histogram as a numpy array
 
 ################################################################################################################################################
 
