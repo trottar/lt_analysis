@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 13:54:34 trottar"
+# Time-stamp: "2023-08-11 14:15:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,32 +107,47 @@ def calculate_aver_data2(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     return averaged_values
 
 def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
-    # Convert hist_data, t_data, hist_dummy, and t_dummy to NumPy arrays
-    hist_data_array = np.array(convert_TH1F_to_numpy(hist_data), dtype=np.float64)
-    t_data_array = np.array(convert_TH1F_to_numpy(t_data), dtype=np.float64)
-    hist_dummy_array = np.array(convert_TH1F_to_numpy(hist_dummy), dtype=np.float64)
-    t_dummy_array = np.array(convert_TH1F_to_numpy(t_dummy), dtype=np.float64)
+import numpy as np
+
+def calculate_aver_data(hist_data, t_data, t_bins, hist_dummy):
+    # Convert ROOT TH1F objects to NumPy arrays
+    hist_data_array = np.array(hist_data, dtype=np.float64)
+    t_data_array = np.array(t_data, dtype=np.float64)
+    hist_dummy_array = np.array(hist_dummy, dtype=np.float64)
 
     # Calculate the bin centers for t_data
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
     print("t_bin_centers:", t_bin_centers)
 
-    # Bin the hist_data using t_bins
+    # Bin the t_data using t_bins
     digitized = np.digitize(t_data_array, t_bins)
     print("digitized:", digitized)
 
-    # Initialize an array to store bin averages
-    bin_averages = np.zeros(len(t_bins) - 1)
+    # Initialize arrays to store binned data
+    hist_data_binned = np.zeros(len(t_bins) - 1)
+    hist_dummy_binned = np.zeros(len(t_bins) - 1)
 
-    # Loop through the bins, subtract hist_dummy from hist_data, and calculate averages
+    # Loop through the bins, rebin hist_data and hist_dummy, then subtract and calculate averages
     for i in range(1, len(t_bins)):
         mask = (digitized == i)
-        print("Processing bin %s:" % i )
+        print(f"Processing bin {i}:")
         print("mask:", mask)
-        hist_data_bin = hist_data_array[mask] - hist_dummy_array[mask]
+        
+        hist_data_bin = hist_data_array[mask].sum()  # Rebin hist_data
+        hist_dummy_bin = hist_dummy_array[mask].sum()  # Rebin hist_dummy
+        
         print("hist_data_bin:", hist_data_bin)
-        bin_averages[i - 1] = np.mean(hist_data_bin)
-        print("bin_averages:", bin_averages)
+        print("hist_dummy_bin:", hist_dummy_bin)
+        
+        hist_data_binned[i - 1] = hist_data_bin
+        hist_dummy_binned[i - 1] = hist_dummy_bin
+        
+    # Subtract hist_dummy from hist_data
+    subtracted_data = hist_data_binned - hist_dummy_binned
+    
+    # Calculate bin averages of subtracted data
+    bin_averages = subtracted_data / len(t_data_array)
+    print("bin_averages:", bin_averages)
 
     return bin_averages
 
@@ -272,14 +287,6 @@ def aver_per_bin(histlist, inpDict):
         except UnboundLocalError:
             combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
-
-    Cqw = TCanvas()
-
-    Q2_data.Draw("same, COLZ")
-        
-    Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_dummy, t_bins)
-    W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_dummy, t_bins)
-    t_aver_data = calculate_aver_data(t_data, t_dummy, t_data, t_dummy, t_bins)
 
     # Combine histograms for Q2_simc
     Q2_simc = ROOT.TH1F("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())
