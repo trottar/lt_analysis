@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 13:18:52 trottar"
+# Time-stamp: "2023-08-11 13:25:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ from utility import calculate_aver_simc, convert_TH1F_to_numpy
 
 ##################################################################################################################################################
 
-def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
+def calculate_aver_data2(hist_data, hist_dummy, t_data, t_dummy, t_bins):
 
     # Ensure that the input histograms are properly initialized
     if not hist_data or not hist_dummy or not t_data or not t_dummy:
@@ -93,7 +93,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     
     # Create subtracted_hist by cloning binned_hist_data
     subtracted_hist = binned_hist_data.Clone("subtracted_hist")
-    #subtracted_hist.Add(binned_hist_dummy, -1)
+    subtracted_hist.Add(binned_hist_dummy, -1)
     
     # Calculate the average per bin of the subtracted bins
     num_bins = subtracted_hist.GetNbinsX()
@@ -105,6 +105,30 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
         averaged_values.append(average_value)
     
     return averaged_values
+
+def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
+    # Convert hist_data and t_data to NumPy arrays
+    hist_data_array = np.array(hist_data, dtype=np.float64)
+    t_data_array = np.array(t_data, dtype=np.float64)
+
+    # Calculate the bin centers for t_data
+    t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
+
+    # Bin the hist_data using t_bins
+    digitized = np.digitize(t_data_array, t_bins)
+
+    # Initialize a list to store binned data arrays
+    binned_data = []
+
+    # Loop through the bins
+    for i in range(1, len(t_bins)):
+        mask = (digitized == i)
+        binned_data.append(hist_data_array[mask])
+
+    # Calculate the average per bin of binned_data
+    bin_averages = [np.mean(data) for data in binned_data]
+    
+    return binned_data
 
 ##################################################################################################################################################
 
