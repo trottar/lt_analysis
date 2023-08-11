@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 12:32:17 trottar"
+# Time-stamp: "2023-08-11 12:33:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,14 +73,16 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_dummy, t_bins):
     bin_numbers_t_data = []
     bin_numbers_t_dummy = []
     for bin_idx in range(1, len(t_bins)):
-        bin_center = binned_t_data.GetBinCenter(bin_idx)
-        bin_number = hist_data.FindBin(bin_center)
-        bin_numbers_t_data.append(bin_number)
+        bin_center_data = binned_t_data.GetBinCenter(bin_idx)
+        bin_number_data = hist_data.FindBin(bin_center_data)
+        bin_numbers_t_data.append(bin_number_data)
 
         bin_center_dummy = binned_t_dummy.GetBinCenter(bin_idx)
         bin_number_dummy = hist_dummy.FindBin(bin_center_dummy)
         bin_numbers_t_dummy.append(bin_number_dummy)
 
+        print("@@@@@@@@@@@@@@@@@@",bin_center_data,bin_number_data)
+        
     # Bin hist_data and hist_dummy using the calculated bin numbers
     binned_hist_data = hist_data.Rebin(len(bin_numbers_t_data) - 1, "binned_hist_data", array('d', bin_numbers_t_data))
     binned_hist_dummy = hist_dummy.Rebin(len(bin_numbers_t_dummy) - 1, "binned_hist_dummy", array('d', bin_numbers_t_dummy))
@@ -240,8 +242,6 @@ def aver_per_bin(histlist, inpDict):
         except UnboundLocalError:
             combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
-
-    print("@@@@@@@@@@@@@@@@@@",Q2_data.GetNbinsX(), Q2_dummy.GetNbinsX(), t_data.GetNbinsX(), t_dummy.GetNbinsX(), t_bins)
         
     Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_dummy, t_bins)
     W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_dummy, t_bins)
