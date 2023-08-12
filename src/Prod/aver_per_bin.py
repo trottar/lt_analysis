@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 22:11:27 trottar"
+# Time-stamp: "2023-08-12 01:08:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,8 +75,8 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
                     print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
                     print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_t_data.append(bin_center)
-                    tmp_hist_data.append(hist_data.GetBinContent(bin_index))
-                    tmp_hist_dummy.append(hist_dummy.GetBinContent(bin_index))
+                    tmp_hist_data.append([hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)])
+                    tmp_hist_dummy.append([hist_dummy.GetBinCenter(bin_index), hist_dummy.GetBinContent(bin_index)])
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
@@ -89,8 +89,18 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     aver_hist = []
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-        if not data:
-            aver_hist.append(np.average(np.array(data) - np.array(dummy)))
+        bin_val_data = data[0]
+        hist_val_data = data[1]
+        bin_val_dummy = dummy[0]
+        hist_val_dummy = dummy[1]
+        sub_val = np.array(hist_val_data) - np.array(hist_val_dummy)
+        if not sub_val:
+            # Calculate the weighted sum of frequencies and divide by the total count
+            weighted_sum = np.sum(sub_val * bin_val_data)
+            total_count = np.sum(sub_val)
+            average = weighted_sum / total_count
+            aver_hist.append(average)
+        else:
         #aver_hist.append(np.average(np.array(data) - np.array(dummy)))
     
     # Print statements to check sizes
