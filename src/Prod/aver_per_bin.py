@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:25:57 trottar"
+# Time-stamp: "2023-08-12 16:33:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,7 +83,9 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
     aver_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
+    print("-"*25)
     print("\n\nFinding average {} per t-bin...".format(kin_type))
+    print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
@@ -111,7 +113,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
         print("-"*25)
     
     # Print statements to check sizes
-    print("Size of binned_t_data:", len(binned_t_data))
+    print("\nSize of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
     print("Size of binned_sub_data:", len(binned_sub_data[1]))
@@ -168,7 +170,9 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     aver_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
+    print("-"*25)
     print("\n\nFinding average {} per t-bin...".format(kin_type))
+    print("-"*25)
     for data in binned_hist_data:
         bin_val_data, hist_val_data = data
         sub_val = hist_val_data # No dummy subtraction for simc
@@ -194,7 +198,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
         print("-"*25)
     
     # Print statements to check sizes
-    print("Size of binned_t_data:", len(binned_t_data))
+    print("\nSize of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_sub_data:", len(binned_sub_data[1]))
     print("Size of aver_hist:", len(aver_hist))
@@ -345,6 +349,30 @@ def aver_per_bin_simc(histlist, inpDict):
     for hist in histlist:
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
+
+        # Assign histograms for Q2
+        if hist["phi_setting"] == "Center":
+            Q2_Center_SIMC = hist["H_Q2_SIMC"]
+        if hist["phi_setting"] == "Left":
+            Q2_Left_SIMC = hist["H_Q2_SIMC"]
+        if hist["phi_setting"] == "Right":
+            Q2_Right_SIMC = hist["H_Q2_SIMC"]
+
+        # Assign histograms for W
+        if hist["phi_setting"] == "Center":
+            W_Center_SIMC = hist["H_W_SIMC"]
+        if hist["phi_setting"] == "Left":
+            W_Left_SIMC = hist["H_W_SIMC"]
+        if hist["phi_setting"] == "Right":
+            W_Right_SIMC = hist["H_W_SIMC"]
+
+        # Assign histograms for t
+        if hist["phi_setting"] == "Center":
+            t_Center_SIMC = hist["H_t_SIMC"]
+        if hist["phi_setting"] == "Left":
+            t_Left_SIMC = hist["H_t_SIMC"]
+        if hist["phi_setting"] == "Right":
+            t_Right_SIMC = hist["H_t_SIMC"]        
     
     # Combine histograms for Q2_simc
     Q2_simc = ROOT.TH1F("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())
