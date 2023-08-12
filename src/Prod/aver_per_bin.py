@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:22:42 trottar"
+# Time-stamp: "2023-08-12 16:25:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,7 +130,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
 
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
-    for tup in aver_lst:
+    for tup in dict_lst:
         key = (tup[0], tup[1])
         groups[key] = {
             "{}_arr".format(kin_type) : tup[2],
@@ -211,7 +211,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
 
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
-    for tup in aver_lst:
+    for tup in dict_lst:
         key = (tup[0], tup[1])
         groups[key] = {
             "{}_arr".format(kin_type) : tup[2],
