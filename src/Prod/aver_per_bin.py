@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 01:08:09 trottar"
+# Time-stamp: "2023-08-12 01:12:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,6 +101,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
             average = weighted_sum / total_count
             aver_hist.append(average)
         else:
+            aver_hist.append(0)
         #aver_hist.append(np.average(np.array(data) - np.array(dummy)))
     
     # Print statements to check sizes
