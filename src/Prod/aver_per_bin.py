@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 15:28:03 trottar"
+# Time-stamp: "2023-08-12 15:35:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,6 +82,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
 
     aver_hist = []
     binned_sub_data = [[],[]]
+    i=0 # iter
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
@@ -105,6 +106,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             print("Average for bin {}: 0.0".format(j))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
+        i+=1
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
@@ -161,6 +163,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
 
     aver_hist = []
     binned_sub_data = [[],[]]
+    i=0 # iter
     for data in binned_hist_data:
         bin_val_data, hist_val_data = data
         sub_val = hist_val_data # No dummy subtraction for simc
@@ -172,16 +175,17 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
             aver_hist.append(average)
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
-            print("Average for bin {}:".format(j),average)
+            print("Average for bin {}:".format(i),average)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
             aver_hist.append(0)
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
-            print("Average for bin {}: 0.0".format(j))
+            print("Average for bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
+        i+=1            
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
