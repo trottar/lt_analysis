@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 15:35:16 trottar"
+# Time-stamp: "2023-08-12 15:39:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,14 +96,14 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             aver_hist.append(average)
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
-            print("Average for bin {}:".format(j),average)
+            print("Average for bin {}:".format(i),average)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
             aver_hist.append(0)
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
-            print("Average for bin {}: 0.0".format(j))
+            print("Average for bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1
