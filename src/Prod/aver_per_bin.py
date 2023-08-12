@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 11:31:52 trottar"
+# Time-stamp: "2023-08-12 11:38:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,7 +102,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
             average = weighted_sum / total_count            
             aver_hist.append(average)
             print("Weighted Sum:",weighted_sum)
-            print("Total Count:",weighted_sum)
+            print("Total Count:",total_count)
             print("Average for bin {}:".format(j),average)
         else:
             aver_hist.append(0)
