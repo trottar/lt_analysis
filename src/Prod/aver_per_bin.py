@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:13:48 trottar"
+# Time-stamp: "2023-08-12 16:22:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,7 +83,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
     aver_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
-    print("\n\nFinding average {}...".format(kin_type))
+    print("\n\nFinding average {} per t-bin...".format(kin_type))
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
@@ -108,12 +108,13 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1
+        print("-"*25)
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
-    print("Size of binned_sub_data:", len(binned_sub_data))
+    print("Size of binned_sub_data:", len(binned_sub_data[1]))
     print("Size of aver_hist:", len(aver_hist))
     print("Size of t_bins:", len(t_bins))
 
@@ -122,7 +123,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
-            hist_val = binned_sub_data[j]
+            hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
             aver_val = aver_hist[j]
             print("----------------------",(tbin_index, phibin_index, len(hist_val), aver_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, aver_val))
@@ -167,7 +168,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     aver_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
-    print("\n\nFinding average {}...".format(kin_type))
+    print("\n\nFinding average {} per t-bin...".format(kin_type))
     for data in binned_hist_data:
         bin_val_data, hist_val_data = data
         sub_val = hist_val_data # No dummy subtraction for simc
@@ -189,12 +190,13 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
             print("Average for t-bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
-        i+=1            
+        i+=1
+        print("-"*25)
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
-    print("Size of binned_sub_data:", len(binned_sub_data))
+    print("Size of binned_sub_data:", len(binned_sub_data[1]))
     print("Size of aver_hist:", len(aver_hist))
     print("Size of t_bins:", len(t_bins))
 
@@ -203,7 +205,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
-            hist_val = binned_sub_data[j]
+            hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
             aver_val = aver_hist[j]
             dict_lst.append((tbin_index, phibin_index, hist_val, aver_val))
 
