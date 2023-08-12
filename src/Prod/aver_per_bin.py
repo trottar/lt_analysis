@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 11:54:22 trottar"
+# Time-stamp: "2023-08-12 13:03:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,13 +90,14 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     binned_hist_dummy = np.array(binned_hist_dummy)
 
     aver_hist = []
+    binned_sub_data = [[],[]]
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
-        print("------------------",sub_val)
-        print("__________________",bin_val_data)
+        binned_sub_data[0].append(bin_val_data)
+        binned_sub_data[1].append(sub_val)
         if sub_val.size != 0:
             # Calculate the weighted sum of frequencies and divide by the total count
             weighted_sum = np.sum(sub_val * bin_val_data)
@@ -118,7 +119,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
     print("Size of t_bins:", len(t_bins)-1)
     
-    return aver_hist    
+    return [binned_sub_data, aver_hist]
 
 ##################################################################################################################################################
 
@@ -257,9 +258,9 @@ def aver_per_bin(histlist, inpDict):
             combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
 
-    Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_bins)
-    W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_bins)
-    t_aver_data = calculate_aver_data(t_data, t_dummy, t_data, t_bins)
+    Q2_binned_data, Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_bins)
+    W_binned_data, W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_bins)
+    t_binned_data, t_aver_data = calculate_aver_data(t_data, t_dummy, t_data, t_bins)
         
     # Combine histograms for Q2_simc
     Q2_simc = ROOT.TH1F("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())
@@ -294,7 +295,10 @@ def aver_per_bin(histlist, inpDict):
     
     averDict = {
         "t_bins" : t_bins,
-        "phi_bins" : phi_bins,                       
+        "phi_bins" : phi_bins,
+        "Q2_binned_data" : Q2_binned_data,
+        "W_binned_data" : W_binned_data,
+        "t_binned_data" : t_binned_data,        
         "Q2_aver_data" : Q2_aver_data,
         "W_aver_data" : W_aver_data,
         "t_aver_data" : t_aver_data,
