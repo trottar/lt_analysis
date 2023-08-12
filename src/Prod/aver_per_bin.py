@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 01:16:51 trottar"
+# Time-stamp: "2023-08-12 10:39:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,9 +82,9 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
         binned_hist_dummy.append(tmp_hist_dummy)
 
     # Convert the lists to numpy arrays for subtraction
-    binned_t_data = np.array(binned_t_data)
-    binned_hist_data = np.array(binned_hist_data)
-    binned_hist_dummy = np.array(binned_hist_dummy)
+    #binned_t_data = np.array(binned_t_data)
+    #binned_hist_data = np.array(binned_hist_data)
+    #binned_hist_dummy = np.array(binned_hist_dummy)
 
     aver_hist = []
     # Subtract binned_hist_dummy from binned_hist_data element-wise
