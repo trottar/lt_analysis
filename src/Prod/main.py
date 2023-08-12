@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 13:31:25 trottar"
+# Time-stamp: "2023-08-12 13:34:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1299,8 +1299,6 @@ C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".fo
 
 #if DEBUG:
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
-
-'''
 
 ##############################
 # Step 7 of the lt_analysis: #
