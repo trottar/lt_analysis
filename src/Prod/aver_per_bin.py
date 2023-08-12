@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 20:26:55 trottar"
+# Time-stamp: "2023-08-11 21:36:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,6 +91,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         #aver_hist = np.average(np.array(data) - np.array(dummy))
         #aver_hist.append(np.average(np.array(data) - np.array(dummy)))
+        print("@@@@@@@@@@@@@@@",data)
         aver_hist.append(np.average(data))
     
     # Print statements to check sizes
