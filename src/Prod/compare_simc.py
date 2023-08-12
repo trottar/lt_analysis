@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 20:15:53 trottar"
+# Time-stamp: "2023-08-11 21:20:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -365,6 +365,7 @@ def compare_simc(hist, inpDict):
           
     ################################################################################################################################################
 
+    '''
     H_ssxfp_SIMC.Scale(normfac_simc)
     H_ssyfp_SIMC.Scale(normfac_simc)
     H_ssxpfp_SIMC.Scale(normfac_simc)
@@ -453,5 +454,5 @@ def compare_simc(hist, inpDict):
     hist["H_pmz_DATA"].Scale(normfac_data)
     hist["H_W_DATA"].Scale(normfac_data)
     hist["H_ct_DATA"].Scale(normfac_data)
-
+    '''
     return histDict
