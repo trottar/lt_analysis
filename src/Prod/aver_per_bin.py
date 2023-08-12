@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 15:44:39 trottar"
+# Time-stamp: "2023-08-12 15:48:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -121,7 +121,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             phibin_index = k
             hist_val = binned_sub_data[j]
             aver_val = aver_hist[j]
-            print("----------------------",(tbin_index, phibin_index, hist_val, aver_val))
+            print("----------------------",(tbin_index, phibin_index, len(hist_val), aver_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, aver_val))
 
     # Group the tuples by the first two elements using defaultdict
