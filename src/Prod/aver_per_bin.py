@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:00:53 trottar"
+# Time-stamp: "2023-08-12 16:13:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,8 +67,8 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:
-                    print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
-                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                    #print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+                    #print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
                     tmp_t_data[1].append(t_data.GetBinContent(bin_index))
                     tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
@@ -83,6 +83,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
     aver_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
+    print("\n\nFinding average {}...".format(kin_type))
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
@@ -153,8 +154,8 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:
-                    print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
-                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                    #print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+                    #print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
                     tmp_t_data[1].append(t_data.GetBinContent(bin_index))
                     tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
@@ -166,6 +167,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     aver_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
+    print("\n\nFinding average {}...".format(kin_type))
     for data in binned_hist_data:
         bin_val_data, hist_val_data = data
         sub_val = hist_val_data # No dummy subtraction for simc
