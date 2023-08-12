@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 15:10:31 trottar"
+# Time-stamp: "2023-08-12 15:19:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,6 +78,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
+    t_bins = t_bins[:-1]
 
     aver_hist = []
     binned_sub_data = [[],[]]
@@ -109,7 +110,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
-    print("Size of t_bins:", len(t_bins)-1)
+    print("Size of t_bins:", len(t_bins))
 
     dict_lst = []
     for j in range(len(t_bins) - 1):
@@ -156,6 +157,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
                     tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
+    t_bins = t_bins[:-1]        
 
     aver_hist = []
     binned_sub_data = [[],[]]
@@ -184,7 +186,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
-    print("Size of t_bins:", len(t_bins)-1)
+    print("Size of t_bins:", len(t_bins))
 
     dict_lst = []
     for j in range(len(t_bins) - 1):
