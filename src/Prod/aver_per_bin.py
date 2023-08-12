@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 13:30:09 trottar"
+# Time-stamp: "2023-08-12 13:42:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,8 +112,8 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for bin {}: 0.0".format(j))
-            binned_sub_data[0].append(bin_val_data)
-            binned_sub_data[1].append([0]*len(bin_val_data))
+            #binned_sub_data[0].append(bin_val_data)
+            #binned_sub_data[1].append([0]*len(bin_val_data))
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
