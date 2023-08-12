@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 15:55:00 trottar"
+# Time-stamp: "2023-08-12 16:00:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,14 +96,14 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             aver_hist.append(average)
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
-            print("Average for bin {}:".format(i),average)
+            print("Average for t-bin {}:".format(i),average)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
             aver_hist.append(0)
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
-            print("Average for bin {}: 0.0".format(i))
+            print("Average for t-bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1
@@ -112,6 +112,8 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
+    print("Size of binned_sub_data:", len(binned_sub_data))
+    print("Size of aver_hist:", len(aver_hist))
     print("Size of t_bins:", len(t_bins))
 
     dict_lst = []
@@ -175,14 +177,14 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
             aver_hist.append(average)
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
-            print("Average for bin {}:".format(i),average)
+            print("Average for t-bin {}:".format(i),average)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
             aver_hist.append(0)
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
-            print("Average for bin {}: 0.0".format(i))
+            print("Average for t-bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1            
@@ -190,6 +192,8 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
+    print("Size of binned_sub_data:", len(binned_sub_data))
+    print("Size of aver_hist:", len(aver_hist))
     print("Size of t_bins:", len(t_bins))
 
     dict_lst = []
