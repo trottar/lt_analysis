@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:33:35 trottar"
+# Time-stamp: "2023-08-12 16:37:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -175,7 +175,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     print("-"*25)
     for data in binned_hist_data:
         bin_val_data, hist_val_data = data
-        sub_val = hist_val_data # No dummy subtraction for simc
+        sub_val = np.array(hist_val_data) # No dummy subtraction for simc
         if sub_val.size != 0:
             # Calculate the weighted sum of frequencies and divide by the total count
             weighted_sum = np.sum(sub_val * bin_val_data)
