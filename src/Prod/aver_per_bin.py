@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 20:24:17 trottar"
+# Time-stamp: "2023-08-11 20:26:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,8 +71,8 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
             tmp_hist_dummy = []
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
-                print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
                 if hist_data.GetBinContent(bin_index) > 0:
+                    print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
                     print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_t_data.append(bin_center)
                     tmp_hist_data.append(hist_data.GetBinContent(bin_index))
