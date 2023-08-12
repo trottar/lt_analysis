@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 21:42:13 trottar"
+# Time-stamp: "2023-08-11 21:45:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,10 +65,10 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     t_bins = np.append(t_bins, 0.0)
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
+        tmp_t_data = []
+        tmp_hist_data = []
+        tmp_hist_dummy = []
         for bin_index in range(1, t_data.GetNbinsX() + 1):
-            tmp_t_data = []
-            tmp_hist_data = []
-            tmp_hist_dummy = []
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:
@@ -82,9 +82,9 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
         binned_hist_dummy.append(tmp_hist_dummy)
 
     # Convert the lists to numpy arrays for subtraction
-    #binned_t_data = np.array(binned_t_data)
-    #binned_hist_data = np.array(binned_hist_data)
-    #binned_hist_dummy = np.array(binned_hist_dummy)
+    binned_t_data = np.array(binned_t_data)
+    binned_hist_data = np.array(binned_hist_data)
+    binned_hist_dummy = np.array(binned_hist_dummy)
 
     aver_hist = []
     # Subtract binned_hist_dummy from binned_hist_data element-wise
