@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 13:09:52 trottar"
+# Time-stamp: "2023-08-12 13:20:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,8 +96,6 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
-        binned_sub_data[0].append(bin_val_data)
-        binned_sub_data[1].append(sub_val)
         if sub_val.size != 0:
             # Calculate the weighted sum of frequencies and divide by the total count
             weighted_sum = np.sum(sub_val * bin_val_data)
@@ -107,6 +105,8 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
             print("Average for bin {}:".format(j),average)
+            binned_sub_data[0].append(bin_val_data)
+            binned_sub_data[1].append(sub_val)
         else:
             aver_hist.append(0)
             print("Weighted Sum: N/A")
