@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 11:03:27 trottar"
+# Time-stamp: "2023-08-12 11:03:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,6 +95,7 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
+        print("@@@@@@@@@@@@@@@@@@@@@",sub_val)
         if not sub_val:
             # Calculate the weighted sum of frequencies and divide by the total count
             weighted_sum = np.sum(sub_val * bin_val_data)
