@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 13:20:52 trottar"
+# Time-stamp: "2023-08-12 13:30:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,6 +112,8 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for bin {}: 0.0".format(j))
+            binned_sub_data[0].append(bin_val_data)
+            binned_sub_data[1].append([0]*len(bin_val_data))
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
@@ -261,8 +263,6 @@ def aver_per_bin(histlist, inpDict):
     Q2_binned_data, Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_bins)
     W_binned_data, W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_bins)
     t_binned_data, t_aver_data = calculate_aver_data(t_data, t_dummy, t_data, t_bins)
-
-    print("@@@@@@@@@@@@@@@@",Q2_binned_data)
     
     # Combine histograms for Q2_simc
     Q2_simc = ROOT.TH1F("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())
