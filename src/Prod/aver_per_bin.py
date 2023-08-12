@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 14:51:43 trottar"
+# Time-stamp: "2023-08-12 14:58:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -322,9 +322,9 @@ def aver_per_bin_data(histlist, inpDict):
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
     }
-    averDict.append(calculate_aver_data("Q2", Q2_data, Q2_dummy, t_data, t_bins))
-    averDict.append(calculate_aver_data("W", W_data, W_dummy, t_data, t_bins))
-    averDict.append(calculate_aver_data("t", t_data, t_dummy, t_data, t_bins))
+    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, t_data, t_bins))
+    averDict.update(calculate_aver_data("W", W_data, W_dummy, t_data, t_bins))
+    averDict.update(calculate_aver_data("t", t_data, t_dummy, t_data, t_bins))
     
     return {"binned_DATA" : averDict}
 
@@ -362,9 +362,8 @@ def aver_per_bin_simc(histlist, inpDict):
         t_simc.SetBinContent(bin, combined_content)
 
     averDict = {}        
-    averDict.append(calculate_aver_simc("Q2", Q2_simc, t_simc, t_bins))
-    averDict.append(calculate_aver_simc("W", W_simc, t_simc, t_bins))
-    averDict.append(calculate_aver_simc("t", t_simc, t_simc, t_bins))
-    
+    averDict.update(calculate_aver_simc("Q2", Q2_simc, t_simc, t_bins))
+    averDict.update(calculate_aver_simc("W", W_simc, t_simc, t_bins))
+    averDict.update(calculate_aver_simc("t", t_simc, t_simc, t_bins))
 
     return {"binned_SIMC" : averDict}
