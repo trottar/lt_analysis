@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 13:42:23 trottar"
+# Time-stamp: "2023-08-12 14:51:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,13 +49,8 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
-# Importing utility functions
 
-from utility import calculate_aver_simc, convert_TH1F_to_numpy
-
-##################################################################################################################################################
-
-def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
+def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins):
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
@@ -84,11 +79,6 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
 
-    # Convert the lists to numpy arrays for subtraction
-    binned_t_data = np.array(binned_t_data)
-    binned_hist_data = np.array(binned_hist_data)
-    binned_hist_dummy = np.array(binned_hist_dummy)
-
     aver_hist = []
     binned_sub_data = [[],[]]
     # Subtract binned_hist_dummy from binned_hist_data element-wise
@@ -112,20 +102,112 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for bin {}: 0.0".format(j))
-            #binned_sub_data[0].append(bin_val_data)
-            #binned_sub_data[1].append([0]*len(bin_val_data))
+            binned_sub_data[0].append(bin_val_data)
+            binned_sub_data[1].append([0]*len(bin_val_data))
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
     print("Size of t_bins:", len(t_bins)-1)
+
+    dict_lst = []
+    for j in range(len(t_bins) - 1):
+        tbin_index = j
+        for k in range(len(phi_bins) - 1):
+            phibin_index = k
+            hist_val = binned_sub_data[j]
+            aver_val = aver_hist[j]
+            dict_lst.append((tbin_index, phibin_index, hist_val, aver_val))
+
+    # Group the tuples by the first two elements using defaultdict
+    groups = defaultdict(list)
+    for tup in aver_lst:
+        key = (tup[0], tup[1])
+        groups[key] = {
+            "{}_arr".format(kin_type) : tup[2],
+            "{}_aver".format(kin_type) : tup[3],
+        }            
+        
     
-    return [binned_sub_data, aver_hist]
+    return groups
+
+def calculate_aver_simc(kin_type, hist_data, t_data, t_bins):
+    
+    # Initialize lists for binned_t_data, and binned_hist_data
+    binned_t_data = []
+    binned_hist_data = []
+    
+    t_bins = np.append(t_bins, 0.0)
+    # Loop through bins in t_data and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        tmp_t_data = [[],[]]
+        tmp_hist_data = [[],[]]
+        for bin_index in range(1, t_data.GetNbinsX() + 1):
+            bin_center = t_data.GetBinCenter(bin_index)
+            if t_bins[j] <= bin_center <= t_bins[j+1]:
+                if hist_data.GetBinContent(bin_index) > 0:
+                    print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                    tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
+                    tmp_t_data[1].append(t_data.GetBinContent(bin_index))
+                    tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
+                    tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
+        binned_t_data.append(tmp_t_data)
+        binned_hist_data.append(tmp_hist_data)
+
+    aver_hist = []
+    binned_sub_data = [[],[]]
+    for data in binned_hist_data:
+        bin_val_data, hist_val_data = data
+        sub_val = hist_val_data # No dummy subtraction for simc
+        if sub_val.size != 0:
+            # Calculate the weighted sum of frequencies and divide by the total count
+            weighted_sum = np.sum(sub_val * bin_val_data)
+            total_count = np.sum(sub_val)
+            average = weighted_sum / total_count            
+            aver_hist.append(average)
+            print("Weighted Sum:",weighted_sum)
+            print("Total Count:",total_count)
+            print("Average for bin {}:".format(j),average)
+            binned_sub_data[0].append(bin_val_data)
+            binned_sub_data[1].append(sub_val)
+        else:
+            aver_hist.append(0)
+            print("Weighted Sum: N/A")
+            print("Total Count: N/A")
+            print("Average for bin {}: 0.0".format(j))
+            binned_sub_data[0].append(bin_val_data)
+            binned_sub_data[1].append([0]*len(bin_val_data))
+    
+    # Print statements to check sizes
+    print("Size of binned_t_data:", len(binned_t_data))
+    print("Size of binned_hist_data:", len(binned_hist_data))
+    print("Size of t_bins:", len(t_bins)-1)
+
+    dict_lst = []
+    for j in range(len(t_bins) - 1):
+        tbin_index = j
+        for k in range(len(phi_bins) - 1):
+            phibin_index = k
+            hist_val = binned_sub_data[j]
+            aver_val = aver_hist[j]
+            dict_lst.append((tbin_index, phibin_index, hist_val, aver_val))
+
+    # Group the tuples by the first two elements using defaultdict
+    groups = defaultdict(list)
+    for tup in aver_lst:
+        key = (tup[0], tup[1])
+        groups[key] = {
+            "{}_arr".format(kin_type) : tup[2],
+            "{}_aver".format(kin_type) : tup[3],
+        }                    
+    
+    return groups
 
 ##################################################################################################################################################
 
-def aver_per_bin(histlist, inpDict):
+def aver_per_bin_data(histlist, inpDict):
 
     # Create empty histograms
     empty_hist = ROOT.TH1F()
@@ -181,30 +263,6 @@ def aver_per_bin(histlist, inpDict):
             t_Left_DUMMY = hist["H_t_DUMMY"]
         if hist["phi_setting"] == "Right":
             t_Right_DUMMY = hist["H_t_DUMMY"]
-
-        # Assign histograms for Q2
-        if hist["phi_setting"] == "Center":
-            Q2_Center_SIMC = hist["H_Q2_SIMC"]
-        if hist["phi_setting"] == "Left":
-            Q2_Left_SIMC = hist["H_Q2_SIMC"]
-        if hist["phi_setting"] == "Right":
-            Q2_Right_SIMC = hist["H_Q2_SIMC"]
-
-        # Assign histograms for W
-        if hist["phi_setting"] == "Center":
-            W_Center_SIMC = hist["H_W_SIMC"]
-        if hist["phi_setting"] == "Left":
-            W_Left_SIMC = hist["H_W_SIMC"]
-        if hist["phi_setting"] == "Right":
-            W_Right_SIMC = hist["H_W_SIMC"]
-
-        # Assign histograms for t
-        if hist["phi_setting"] == "Center":
-            t_Center_SIMC = hist["H_t_SIMC"]
-        if hist["phi_setting"] == "Left":
-            t_Left_SIMC = hist["H_t_SIMC"]
-        if hist["phi_setting"] == "Right":
-            t_Right_SIMC = hist["H_t_SIMC"]
             
     # Combine histograms for Q2_data
     Q2_data = ROOT.TH1F("Q2_data", "Combined Q2_data Histogram", Q2_Center_DATA.GetNbinsX(), Q2_Center_DATA.GetXaxis().GetXmin(), Q2_Center_DATA.GetXaxis().GetXmax())
@@ -260,9 +318,21 @@ def aver_per_bin(histlist, inpDict):
             combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
 
-    Q2_binned_data, Q2_aver_data = calculate_aver_data(Q2_data, Q2_dummy, t_data, t_bins)
-    W_binned_data, W_aver_data = calculate_aver_data(W_data, W_dummy, t_data, t_bins)
-    t_binned_data, t_aver_data = calculate_aver_data(t_data, t_dummy, t_data, t_bins)
+    averDict = {
+        "t_bins" : t_bins,
+        "phi_bins" : phi_bins
+    }
+    averDict.append(calculate_aver_data("Q2", Q2_data, Q2_dummy, t_data, t_bins))
+    averDict.append(calculate_aver_data("W", W_data, W_dummy, t_data, t_bins))
+    averDict.append(calculate_aver_data("t", t_data, t_dummy, t_data, t_bins))
+    
+    return {"binned_DATA" : averDict}
+
+def aver_per_bin_simc(histlist, inpDict):
+
+    for hist in histlist:
+        t_bins = hist["t_bins"]
+        phi_bins = hist["phi_bins"]
     
     # Combine histograms for Q2_simc
     Q2_simc = ROOT.TH1F("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())
@@ -290,23 +360,11 @@ def aver_per_bin(histlist, inpDict):
         except UnboundLocalError:
             combined_content = t_Center_SIMC.GetBinContent(bin) + t_Left_SIMC.GetBinContent(bin)
         t_simc.SetBinContent(bin, combined_content)
-    
-    Q2_aver_simc = calculate_aver_simc(Q2_simc, t_bins)
-    W_aver_simc = calculate_aver_simc(W_simc, t_bins)
-    t_aver_simc = calculate_aver_simc(t_simc, t_bins)
-    
-    averDict = {
-        "t_bins" : t_bins,
-        "phi_bins" : phi_bins,
-        "Q2_binned_data" : Q2_binned_data,
-        "W_binned_data" : W_binned_data,
-        "t_binned_data" : t_binned_data,        
-        "Q2_aver_data" : Q2_aver_data,
-        "W_aver_data" : W_aver_data,
-        "t_aver_data" : t_aver_data,
-        "Q2_aver_simc" : Q2_aver_simc,
-        "W_aver_simc" : W_aver_simc,
-        "t_aver_simc" : t_aver_simc,        
-    }
 
-    return averDict
+    averDict = {}        
+    averDict.append(calculate_aver_simc("Q2", Q2_simc, t_simc, t_bins))
+    averDict.append(calculate_aver_simc("W", W_simc, t_simc, t_bins))
+    averDict.append(calculate_aver_simc("t", t_simc, t_simc, t_bins))
+    
+
+    return {"binned_SIMC" : averDict}

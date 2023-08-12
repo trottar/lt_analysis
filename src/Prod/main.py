@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 13:34:07 trottar"
+# Time-stamp: "2023-08-12 14:51:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,7 +33,7 @@ import csv
 ##################################################################################################################################################
 # Importing utility functions
 
-from utility import show_pdf_with_evince, weight_bins
+from utility import show_pdf_with_evince
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -934,11 +934,11 @@ if DEBUG:
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''
 
-from aver_per_bin import aver_per_bin
+from aver_per_bin import aver_per_bin_data, aver_per_bin_simc
 
 averDict = {}
-
-averDict.update(aver_per_bin(histlist, inpDict))
+averDict.update(aver_per_bin_data(histlist, inpDict))
+averDict.update(aver_per_bin_simc(histlist, inpDict))
 
 print(averDict)
 
