@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 15:19:35 trottar"
+# Time-stamp: "2023-08-12 15:28:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,7 +57,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
     binned_hist_data = []
     binned_hist_dummy = []
     
-    t_bins = np.append(t_bins, 0.0)
+    t_bins = np.append(t_bins, 0.0) # Needed to fully finish loop over bins
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         tmp_t_data = [[],[]]
@@ -78,7 +78,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
-    t_bins = t_bins[:-1]
+    t_bins = t_bins[:-1] # Pop last element used for loop
 
     aver_hist = []
     binned_sub_data = [[],[]]
@@ -140,7 +140,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     binned_t_data = []
     binned_hist_data = []
     
-    t_bins = np.append(t_bins, 0.0)
+    t_bins = np.append(t_bins, 0.0) # Needed to fully finish loop over bins
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         tmp_t_data = [[],[]]
@@ -157,7 +157,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
                     tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
-    t_bins = t_bins[:-1]        
+    t_bins = t_bins[:-1] # Pop last element used for loop
 
     aver_hist = []
     binned_sub_data = [[],[]]
