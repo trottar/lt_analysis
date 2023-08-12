@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 10:39:10 trottar"
+# Time-stamp: "2023-08-12 10:55:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,26 +65,29 @@ def calculate_aver_data(hist_data, hist_dummy, t_data, t_bins):
     t_bins = np.append(t_bins, 0.0)
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
-        tmp_t_data = []
-        tmp_hist_data = []
-        tmp_hist_dummy = []
+        tmp_t_data = [[],[]]
+        tmp_hist_data = [[],[]]
+        tmp_hist_dummy = [[],[]]
         for bin_index in range(1, t_data.GetNbinsX() + 1):
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:
                     print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
                     print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
-                    tmp_t_data.append(bin_center)
-                    tmp_hist_data.append([hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)])
-                    tmp_hist_dummy.append([hist_dummy.GetBinCenter(bin_index), hist_dummy.GetBinContent(bin_index)])
+                    tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
+                    tmp_t_data[1].append(t_data.GetBinContent(bin_index))
+                    tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
+                    tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
+                    tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(bin_index))
+                    tmp_hist_dummy[1].append(hist_dummy.GetBinContent(bin_index))
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
 
     # Convert the lists to numpy arrays for subtraction
-    #binned_t_data = np.array(binned_t_data)
-    #binned_hist_data = np.array(binned_hist_data)
-    #binned_hist_dummy = np.array(binned_hist_dummy)
+    binned_t_data = np.array(binned_t_data)
+    binned_hist_data = np.array(binned_hist_data)
+    binned_hist_dummy = np.array(binned_hist_dummy)
 
     aver_hist = []
     # Subtract binned_hist_dummy from binned_hist_data element-wise
