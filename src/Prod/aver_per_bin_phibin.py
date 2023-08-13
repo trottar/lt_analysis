@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 16:34:14 trottar"
+# Time-stamp: "2023-08-13 17:25:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,26 +134,27 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
         i += 1
         print("-" * 25)
 
-    # Write values to a single CSV file with columns
-    csv_filename = '{}_Q{}W{}.csv'.format(ParticleType, Q2, W)
-    file_exists = os.path.exists(csv_filename)
+    if kin_type == "MM":
+        # Write values to a single CSV file with columns
+        csv_filename = '{}_Q{}W{}.csv'.format(ParticleType, Q2, W)
+        file_exists = os.path.exists(csv_filename)
 
-    existing_lines = set()
-    if file_exists:
-        with open(csv_filename, 'r') as file:
-            reader = csv.reader(file)
-            next(reader)  # Skip header
-            existing_lines = set(row[0] for row in reader)
+        existing_lines = set()
+        if file_exists:
+            with open(csv_filename, 'r') as file:
+                reader = csv.reader(file)
+                next(reader)  # Skip header
+                existing_lines = set(row[0] for row in reader)
 
-    with open(csv_filename, 'a', newline='') as file:
-        writer = csv.writer(file)
-        if not file_exists:
-            writer.writerow(['total_count', 'yield_val', 'EPSSET'])
-        for row in data_for_csv:
-            if row[0] not in existing_lines:
-                writer.writerow(row)
-                existing_lines.add(row[0])
-    print("Data saved to {}".format(csv_filename))
+        with open(csv_filename, 'a', newline='') as file:
+            writer = csv.writer(file)
+            if not file_exists:
+                writer.writerow(['total_count', 'yield_val', 'EPSSET'])
+            for row in data_for_csv:
+                if row[0] not in existing_lines:
+                    writer.writerow(row)
+                    existing_lines.add(row[0])
+        print("Data saved to {}".format(csv_filename))
 
     # Print statements to check sizes
     print("\nSize of binned_phi_data:", len(binned_phi_data))
