@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 15:42:28 trottar"
+# Time-stamp: "2023-08-13 16:09:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -263,18 +263,19 @@ def calculate_aver_simc(kin_type, hist_data, phi_data, phi_bins, t_bins):
         i += 1
         print("-" * 25)
 
-    # Write values to CSV files
-    with open('total_count.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(total_count_list)
+    if kin_type == "MM":
+        # Write values to CSV files
+        with open('total_count.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(total_count_list)
 
-    with open('yield_val.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(yield_val_list)
+        with open('yield_val.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(yield_val_list)
 
-    with open('epset.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(epset_list)
+        with open('epset.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(epset_list)
 
     
     # Print statements to check sizes
@@ -337,6 +338,14 @@ def aver_per_bin_data(histlist, inpDict):
         if hist["phi_setting"] == "Right":
             phi_Right_DATA = hist["H_phi_DATA"]
 
+        # Assign histograms for MM
+        if hist["phi_setting"] == "Center":
+            MM_Center_DATA = hist["H_MM_DATA"]
+        if hist["phi_setting"] == "Left":
+            MM_Left_DATA = hist["H_MM_DATA"]
+        if hist["phi_setting"] == "Right":
+            MM_Right_DATA = hist["H_MM_DATA"]
+            
         # Assign histograms for Q2
         if hist["phi_setting"] == "Center":
             Q2_Center_DUMMY = hist["H_Q2_DUMMY"]
@@ -360,6 +369,15 @@ def aver_per_bin_data(histlist, inpDict):
             phi_Left_DUMMY = hist["H_phi_DUMMY"]
         if hist["phi_setting"] == "Right":
             phi_Right_DUMMY = hist["H_phi_DUMMY"]
+
+        # Assign histograms for MM
+        if hist["phi_setting"] == "Center":
+            MM_Center_DUMMY = hist["H_MM_DUMMY"]
+        if hist["phi_setting"] == "Left":
+            MM_Left_DUMMY = hist["H_MM_DUMMY"]
+        if hist["phi_setting"] == "Right":
+            MM_Right_DUMMY = hist["H_MM_DUMMY"]
+            
             
     # Combine histograms for Q2_data
     Q2_data = ROOT.TH1F("Q2_data", "Combined Q2_data Histogram", Q2_Center_DATA.GetNbinsX(), Q2_Center_DATA.GetXaxis().GetXmin(), Q2_Center_DATA.GetXaxis().GetXmax())
@@ -388,6 +406,15 @@ def aver_per_bin_data(histlist, inpDict):
             combined_content = phi_Center_DATA.GetBinContent(bin) + phi_Left_DATA.GetBinContent(bin)
         phi_data.SetBinContent(bin, combined_content)
 
+    # Combine histograms for MM_data
+    MM_data = ROOT.TH1F("MM_data", "Combined MM_data Histogram", MM_Center_DATA.GetNbinsX(), MM_Center_DATA.GetXaxis().GetXmin(), MM_Center_DATA.GetXaxis().GetXmax())
+    for bin in range(1, MM_Center_DATA.GetNbinsX() + 1):
+        try:
+            combined_content = MM_Center_DATA.GetBinContent(bin) + MM_Left_DATA.GetBinContent(bin) + MM_Right_DATA.GetBinContent(bin)
+        except UnboundLocalError:
+            combined_content = MM_Center_DATA.GetBinContent(bin) + MM_Left_DATA.GetBinContent(bin)
+        MM_data.SetBinContent(bin, combined_content)
+        
     # Combine histograms for Q2_dummy
     Q2_dummy = ROOT.TH1F("Q2_dummy", "Combined Q2_dummy Histogram", Q2_Center_DUMMY.GetNbinsX(), Q2_Center_DUMMY.GetXaxis().GetXmin(), Q2_Center_DUMMY.GetXaxis().GetXmax())
     for bin in range(1, Q2_Center_DUMMY.GetNbinsX() + 1):
@@ -415,6 +442,15 @@ def aver_per_bin_data(histlist, inpDict):
             combined_content = phi_Center_DUMMY.GetBinContent(bin) + phi_Left_DUMMY.GetBinContent(bin)
         phi_dummy.SetBinContent(bin, combined_content)
 
+    # Combine histograms for MM_dummy
+    MM_dummy = ROOT.TH1F("MM_dummy", "Combined MM_dummy Histogram", MM_Center_DUMMY.GetNbinsX(), MM_Center_DUMMY.GetXaxis().GetXmin(), MM_Center_DUMMY.GetXaxis().GetXmax())
+    for bin in range(1, MM_Center_DUMMY.GetNbinsX() + 1):
+        try:
+            combined_content = MM_Center_DUMMY.GetBinContent(bin) + MM_Left_DUMMY.GetBinContent(bin) + MM_Right_DUMMY.GetBinContent(bin)
+        except UnboundLocalError:
+            combined_content = MM_Center_DUMMY.GetBinContent(bin) + MM_Left_DUMMY.GetBinContent(bin)
+        MM_dummy.SetBinContent(bin, combined_content)
+        
     averDict = {
         "phi_bins" : phi_bins,
         "t_bins" : t_bins
@@ -422,6 +458,7 @@ def aver_per_bin_data(histlist, inpDict):
     averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
     averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
     averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
+    averDict.update(calculate_aver_data("MM", MM_data, MM_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["MM"], hist["W"], hist["ParticleType"]))
     
     return {"binned_DATA" : averDict}
 
