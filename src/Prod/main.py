@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 10:36:53 trottar"
+# Time-stamp: "2023-08-13 12:18:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,6 +206,10 @@ if DEBUG:
     for hist in histlist:        
         show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
 
+
+for hist in histlist:        
+    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+        
 ##############################
 # Step 4 of the lt_analysis: # Done
 ##############################
