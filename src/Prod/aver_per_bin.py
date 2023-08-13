@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:37:33 trottar"
+# Time-stamp: "2023-08-13 12:03:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,7 +78,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
-    #t_bins = t_bins[:-1] # Pop last element used for loop
+    t_bins = t_bins[:-1] # Pop last element used for loop
 
     aver_hist = []
     binned_sub_data = [[],[]]

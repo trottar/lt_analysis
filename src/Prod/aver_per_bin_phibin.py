@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 11:40:25 trottar"
+# Time-stamp: "2023-08-13 12:08:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,8 +67,8 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             bin_center = phi_data.GetBinCenter(bin_index)
             if phi_bins[j] <= bin_center <= phi_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:
-                    #print("Checking if {} <= {} <= {}".format(phi_bins[j], bin_center, phi_bins[j+1]))
-                    #print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                    print("Checking if {} <= {} <= {}".format(phi_bins[j], bin_center, phi_bins[j+1]))
+                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_phi_data[0].append(phi_data.GetBinCenter(bin_index))
                     tmp_phi_data[1].append(phi_data.GetBinContent(bin_index))
                     tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
@@ -78,7 +78,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
         binned_phi_data.append(tmp_phi_data)
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
-    #phi_bins = phi_bins[:-1] # Pop last element used for loop
+    phi_bins = phi_bins[:-1] # Pop last element used for loop
 
     aver_hist = []
     yield_hist = []
@@ -235,7 +235,7 @@ def calculate_aver_simc(kin_type, hist_data, phi_data, phi_bins, t_bins):
 def aver_per_bin_data(histlist, inpDict):
 
     for hist in histlist:
-        eff_charge = hist["phi_bins"]
+        eff_charge = hist["normfac_data"]
         phi_bins = hist["phi_bins"]
         t_bins = hist["t_bins"]
 
