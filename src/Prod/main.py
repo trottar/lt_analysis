@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 12:29:09 trottar"
+# Time-stamp: "2023-08-13 12:56:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1415,7 +1415,6 @@ else:
     tradius.SetLabelColor(2)
     tradius.Draw()
     Cpht.Update()
-    '''
 
     Cpht.Print(outputpdf)
 
@@ -1471,7 +1470,7 @@ else:
     tradius.Draw()
 
     Cphtsame.Print(outputpdf)
-
+    '''
     for i,hist in enumerate(histlist):
         texlist = []
         Ctext = TCanvas()
