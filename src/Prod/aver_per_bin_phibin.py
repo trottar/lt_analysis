@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 09:50:09 trottar"
+# Time-stamp: "2023-08-13 10:23:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,6 +81,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
     #phi_bins = phi_bins[:-1] # Pop last element used for loop
 
     aver_hist = []
+    yield_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
@@ -97,6 +98,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             total_count = np.sum(sub_val)
             average = weighted_sum / total_count            
             aver_hist.append(average)
+            yield_hist.append(total_count/eff_charge)
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
             print("Average for phi-bin {}:".format(i),average)
@@ -104,6 +106,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             binned_sub_data[1].append(sub_val)
         else:
             aver_hist.append(0)
+            yield_hist.append(0)
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for phi-bin {}: 0.0".format(i))
