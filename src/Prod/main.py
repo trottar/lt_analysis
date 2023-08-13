@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 15:30:02 trottar"
+# Time-stamp: "2023-08-13 15:41:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1515,6 +1515,9 @@ if ParticleType == "pion":
 
     for hist in histlist:
         hist["EPSSET"] = EPSSET
+        hist["Q2"] = Q2
+        hist["W"] = W
+        hist["ParticleType"] = ParticleType
     averDict = {}
     averDict.update(aver_per_bin_data(histlist, inpDict))
     #averDict.update(aver_per_bin_simc(histlist, inpDict))

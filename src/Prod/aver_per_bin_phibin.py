@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 15:29:14 trottar"
+# Time-stamp: "2023-08-13 15:42:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_bins, eff_charge, EPSSET):
+def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_bins, eff_charge, EPSSET, Q2, W, ParticleType):
     
     # Initialize lists for binned_phi_data, binned_hist_data, and binned_hist_dummy
     binned_phi_data = []
@@ -135,16 +135,24 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
         print("-" * 25)
 
     # Write values to a single CSV file with columns
-    csv_filename = 'data.csv'
+    csv_filename = '{}_Q{}W{}.csv'.format(ParticleType, Q2, W)
     file_exists = os.path.exists(csv_filename)
+
+    existing_lines = set()
+    if file_exists:
+        with open(csv_filename, 'r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header
+            existing_lines = set(row[0] for row in reader)
 
     with open(csv_filename, 'a', newline='') as file:
         writer = csv.writer(file)
         if not file_exists:
             writer.writerow(['total_count', 'yield_val', 'EPSSET'])
-        writer.writerows(data_for_csv)
-            writer.writerows(data_for_csv)
-
+        for row in data_for_csv:
+            if row[0] not in existing_lines:
+                writer.writerow(row)
+                existing_lines.add(row[0])
     print("Data saved to {}".format(csv_filename))
 
     # Print statements to check sizes
@@ -411,9 +419,9 @@ def aver_per_bin_data(histlist, inpDict):
         "phi_bins" : phi_bins,
         "t_bins" : t_bins
     }
-    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"]))
-    averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"]))
-    averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"]))
+    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
+    averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
+    averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
     
     return {"binned_DATA" : averDict}
 
