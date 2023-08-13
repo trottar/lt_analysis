@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 13:49:05 trottar"
+# Time-stamp: "2023-08-13 14:08:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,6 +18,7 @@ import uproot as up
 import numpy as np
 import root_numpy as rnp
 import ROOT
+import csv
 import scipy
 import scipy.integrate as integrate
 from scipy.integrate import quad
@@ -50,7 +51,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_bins, eff_charge):
+def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_bins, eff_charge, EPSET):
     
     # Initialize lists for binned_phi_data, binned_hist_data, and binned_hist_dummy
     binned_phi_data = []
@@ -67,8 +68,8 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             bin_center = (phi_data.GetBinCenter(bin_index)+math.pi)*(180 / math.pi)
             if phi_bins[j] <= bin_center <= phi_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:
-                    print("Checking if {} <= {} <= {}".format(phi_bins[j], bin_center, phi_bins[j+1]))
-                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                    #print("Checking if {} <= {} <= {}".format(phi_bins[j], bin_center, phi_bins[j+1]))
+                    #print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_phi_data[0].append(phi_data.GetBinCenter(bin_index))
                     tmp_phi_data[1].append(phi_data.GetBinContent(bin_index))
                     tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
@@ -107,6 +108,9 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
+            aver_hist.append(0)
+            total_count = 0
+            yield_val = 0
             aver_hist.append(0)
             yield_hist.append(0)
             print("Weighted Sum: N/A")
@@ -174,34 +178,71 @@ def calculate_aver_simc(kin_type, hist_data, phi_data, phi_bins, t_bins):
     phi_bins = phi_bins[:-1] # Pop last element used for loop
 
     aver_hist = []
-    binned_sub_data = [[],[]]
-    i=0 # iter
-    print("-"*25)
+    yield_hist = []
+    binned_sub_data = [[], []]
+    i = 0  # iter
+    print("-" * 25)
     print("\n\nFinding average {} per phi-bin...".format(kin_type))
-    print("-"*25)
-    for data in binned_hist_data:
+    print("-" * 25)
+
+    # Create lists to store values for CSV export
+    total_count_list = []
+    yield_val_list = []
+    epset_list = []
+
+    # Subtract binned_hist_dummy from binned_hist_data element-wise
+    for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
-        sub_val = np.array(hist_val_data) # No dummy subtraction for simc
+        bin_val_dummy, hist_val_dummy = dummy
+        sub_val = np.subtract(hist_val_data, hist_val_dummy)
         if sub_val.size != 0:
             # Calculate the weighted sum of frequencies and divide by the total count
             weighted_sum = np.sum(sub_val * bin_val_data)
             total_count = np.sum(sub_val)
-            average = weighted_sum / total_count            
+            average = weighted_sum / total_count
+            yield_val = total_count / eff_charge
             aver_hist.append(average)
-            print("Weighted Sum:",weighted_sum)
-            print("Total Count:",total_count)
-            print("Average for phi-bin {}:".format(i),average)
+            yield_hist.append(yield_val)
+
+            # Append values to CSV lists
+            total_count_list.append(total_count)
+            yield_val_list.append(yield_val)
+            epset_list.append(EPSET)  # Replace 'EPSET' with the actual value
+
+            print("Weighted Sum:", weighted_sum)
+            print("Total Count:", total_count)
+            print("Average for phi-bin {}:".format(i), average)
+            print("Yield for phi-bin {}:".format(i), yield_val)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
             aver_hist.append(0)
+            total_count = 0
+            yield_val = 0
+            aver_hist.append(0)
+            yield_hist.append(0)
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for phi-bin {}: 0.0".format(i))
+            print("Yield for phi-bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
-            binned_sub_data[1].append([0]*len(bin_val_data))
-        i+=1
-        print("-"*25)
+            binned_sub_data[1].append([0] * len(bin_val_data))
+        i += 1
+        print("-" * 25)
+
+    # Write values to CSV files
+    with open('total_count.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(total_count_list)
+
+    with open('yield_val.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(yield_val_list)
+
+    with open('epset.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(epset_list)
+
     
     # Print statements to check sizes
     print("\nSize of binned_phi_data:", len(binned_phi_data))
@@ -345,9 +386,9 @@ def aver_per_bin_data(histlist, inpDict):
         "phi_bins" : phi_bins,
         "t_bins" : t_bins
     }
-    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge))
-    averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge))
-    averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge))
+    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSET"]))
+    averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSET"]))
+    averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSET"]))
     
     return {"binned_DATA" : averDict}
 
