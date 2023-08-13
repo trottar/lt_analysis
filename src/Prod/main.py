@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 12:56:03 trottar"
+# Time-stamp: "2023-08-13 13:07:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1320,6 +1320,7 @@ else:
 
     Cqw.Print(outputpdf)
 
+    '''
     Cpht = TCanvas()
 
     # Removes stat box
@@ -1349,7 +1350,6 @@ else:
 
     Cpht.Update()
 
-    '''
     Cpht.Divide(2,2)
 
     for i,hist in enumerate(histlist):
