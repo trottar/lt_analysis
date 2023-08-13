@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 11:20:15 trottar"
+# Time-stamp: "2023-08-13 11:40:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_bins):
+def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_bins, eff_charge):
     
     # Initialize lists for binned_phi_data, binned_hist_data, and binned_hist_dummy
     binned_phi_data = []
@@ -345,9 +345,9 @@ def aver_per_bin_data(histlist, inpDict):
         "phi_bins" : phi_bins,
         "t_bins" : t_bins
     }
-    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins))
-    averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins))
-    averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins))
+    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge))
+    averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge))
+    averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge))
     
     return {"binned_DATA" : averDict}
 
