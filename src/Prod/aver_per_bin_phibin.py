@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 14:08:46 trottar"
+# Time-stamp: "2023-08-13 14:11:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,11 +83,15 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
 
     aver_hist = []
     yield_hist = []
-    binned_sub_data = [[],[]]
-    i=0 # iter
-    print("-"*25)
+    binned_sub_data = [[], []]
+    i = 0  # iter
+    print("-" * 25)
     print("\n\nFinding average {} per phi-bin...".format(kin_type))
-    print("-"*25)
+    print("-" * 25)
+
+    # Create lists to store values for CSV export
+    data_for_csv = []
+
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
@@ -98,13 +102,17 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             weighted_sum = np.sum(sub_val * bin_val_data)
             total_count = np.sum(sub_val)
             average = weighted_sum / total_count
-            yield_val = total_count/eff_charge
+            yield_val = total_count / eff_charge
             aver_hist.append(average)
             yield_hist.append(yield_val)
-            print("Weighted Sum:",weighted_sum)
-            print("Total Count:",total_count)
-            print("Average for phi-bin {}:".format(i),average)
-            print("Yield for phi-bin {}:".format(i),yield_val)
+
+            # Append values to CSV list
+            data_for_csv.append([total_count, yield_val, EPSET])  # Replace 'EPSET' with the actual value
+
+            print("Weighted Sum:", weighted_sum)
+            print("Total Count:", total_count)
+            print("Average for phi-bin {}:".format(i), average)
+            print("Yield for phi-bin {}:".format(i), yield_val)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
@@ -118,10 +126,19 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             print("Average for phi-bin {}: 0.0".format(i))
             print("Yield for phi-bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
-            binned_sub_data[1].append([0]*len(bin_val_data))
-        i+=1
-        print("-"*25)
-    
+            binned_sub_data[1].append([0] * len(bin_val_data))
+        i += 1
+        print("-" * 25)
+
+    # Write values to a single CSV file with columns
+    csv_filename = 'data.csv'
+    with open(csv_filename, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['total_count', 'yield_val', 'EPSET'])
+        writer.writerows(data_for_csv)
+
+    print(f"Data saved to {csv_filename}")
+
     # Print statements to check sizes
     print("\nSize of binned_phi_data:", len(binned_phi_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
