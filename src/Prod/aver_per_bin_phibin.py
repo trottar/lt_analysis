@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 16:09:34 trottar"
+# Time-stamp: "2023-08-13 16:34:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -458,7 +458,7 @@ def aver_per_bin_data(histlist, inpDict):
     averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
     averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
     averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
-    averDict.update(calculate_aver_data("MM", MM_data, MM_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["MM"], hist["W"], hist["ParticleType"]))
+    averDict.update(calculate_aver_data("MM", MM_data, MM_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"], hist["Q2"], hist["W"], hist["ParticleType"]))
     
     return {"binned_DATA" : averDict}
 
