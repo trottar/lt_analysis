@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 14:55:36 trottar"
+# Time-stamp: "2023-08-13 15:26:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,7 +107,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             yield_hist.append(yield_val)
 
             # Append values to CSV list
-            data_for_csv.append([total_count, yield_val, EPSSET])  # Replace 'EPSSET' with the actual value
+            data_for_csv.append([phi_bins[i], total_count, yield_val, EPSSET])  # Replace 'EPSSET' with the actual value
 
             print("Weighted Sum:", weighted_sum)
             print("Total Count:", total_count)
@@ -121,6 +121,10 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             yield_val = 0
             aver_hist.append(0)
             yield_hist.append(0)
+
+            # Append values to CSV list
+            data_for_csv.append([phi_bins[i], total_count, yield_val, EPSSET])  # Replace 'EPSSET' with the actual value
+            
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for phi-bin {}: 0.0".format(i))
