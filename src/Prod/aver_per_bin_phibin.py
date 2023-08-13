@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 12:08:21 trottar"
+# Time-stamp: "2023-08-13 13:49:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
         tmp_hist_data = [[],[]]
         tmp_hist_dummy = [[],[]]
         for bin_index in range(1, phi_data.GetNbinsX() + 1):
-            bin_center = phi_data.GetBinCenter(bin_index)
+            bin_center = (phi_data.GetBinCenter(bin_index)+math.pi)*(180 / math.pi)
             if phi_bins[j] <= bin_center <= phi_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:
                     print("Checking if {} <= {} <= {}".format(phi_bins[j], bin_center, phi_bins[j+1]))
