@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 14:23:10 trottar"
+# Time-stamp: "2023-08-13 14:55:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_bins, eff_charge, EPSET):
+def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_bins, eff_charge, EPSSET):
     
     # Initialize lists for binned_phi_data, binned_hist_data, and binned_hist_dummy
     binned_phi_data = []
@@ -107,7 +107,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             yield_hist.append(yield_val)
 
             # Append values to CSV list
-            data_for_csv.append([total_count, yield_val, EPSET])  # Replace 'EPSET' with the actual value
+            data_for_csv.append([total_count, yield_val, EPSSET])  # Replace 'EPSSET' with the actual value
 
             print("Weighted Sum:", weighted_sum)
             print("Total Count:", total_count)
@@ -134,7 +134,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
     csv_filename = 'data.csv'
     with open(csv_filename, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['total_count', 'yield_val', 'EPSET'])
+        writer.writerow(['total_count', 'yield_val', 'EPSSET'])
         writer.writerows(data_for_csv)
 
     print("Data saved to {}".format(csv_filename))
@@ -224,7 +224,7 @@ def calculate_aver_simc(kin_type, hist_data, phi_data, phi_bins, t_bins):
             # Append values to CSV lists
             total_count_list.append(total_count)
             yield_val_list.append(yield_val)
-            epset_list.append(EPSET)  # Replace 'EPSET' with the actual value
+            epset_list.append(EPSSET)  # Replace 'EPSSET' with the actual value
 
             print("Weighted Sum:", weighted_sum)
             print("Total Count:", total_count)
@@ -403,9 +403,9 @@ def aver_per_bin_data(histlist, inpDict):
         "phi_bins" : phi_bins,
         "t_bins" : t_bins
     }
-    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSET"]))
-    averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSET"]))
-    averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSET"]))
+    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"]))
+    averDict.update(calculate_aver_data("W", W_data, W_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"]))
+    averDict.update(calculate_aver_data("phi", phi_data, phi_dummy, phi_data, phi_bins, t_bins, eff_charge, hist["EPSSET"]))
     
     return {"binned_DATA" : averDict}
 
