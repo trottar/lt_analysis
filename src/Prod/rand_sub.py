@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 11:19:19 trottar"
+# Time-stamp: "2023-08-13 19:54:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -435,8 +435,8 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
-            #MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
+            #MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
+            MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and MM_cut
 
@@ -551,8 +551,8 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
-            #MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
+            #MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
+            MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and MM_cut
 
@@ -650,8 +650,8 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
-            #MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
+            #MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
+            MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and MM_cut
 
@@ -745,8 +745,8 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
-            #MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
+            #MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
+            MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and MM_cut
 
