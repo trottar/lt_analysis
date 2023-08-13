@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 20:15:40 trottar"
+# Time-stamp: "2023-08-13 09:59:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -435,7 +435,10 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
+            #MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
+
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and MM_cut
 
         # Must be outside diamond cuts to avoid weird overflow errors
         polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), abs(evt.MandelT))
@@ -548,7 +551,10 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
+            #MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
+
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and MM_cut
 
         if(ALLCUTS):
 
@@ -644,7 +650,10 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
+            #MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
+
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and MM_cut
 
         if(ALLCUTS):
 
@@ -731,7 +740,10 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            MM_cut = (evt.MM > 0.90) & (evt.MM < 0.98) # Neutron
+            #MM_cut = (evt.MM > 1.18) & (evt.MM < 1.28) # Delta
+
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and MM_cut
 
         if(ALLCUTS):
 
@@ -767,59 +779,173 @@ def rand_sub(phi_setting, inpDict):
     # Normalize dummy by effective charge and target correction
     # Normalize data by effective charge
 
-    # Data Random subtraction window
-    H_ssxfp_RAND.Scale(1/nWindows)
-    H_ssyfp_RAND.Scale(1/nWindows)
-    H_ssxpfp_RAND.Scale(1/nWindows)
-    H_ssypfp_RAND.Scale(1/nWindows)
-    H_hsxfp_RAND.Scale(1/nWindows)
-    H_hsyfp_RAND.Scale(1/nWindows)
-    H_hsxpfp_RAND.Scale(1/nWindows)
-    H_hsypfp_RAND.Scale(1/nWindows)
-    H_ssxptar_RAND.Scale(1/nWindows)
-    H_ssyptar_RAND.Scale(1/nWindows)
-    H_hsxptar_RAND.Scale(1/nWindows)
-    H_hsyptar_RAND.Scale(1/nWindows)
-    H_ssdelta_RAND.Scale(1/nWindows)
-    H_hsdelta_RAND.Scale(1/nWindows)
-    H_Q2_RAND.Scale(1/nWindows)
-    H_t_RAND.Scale(1/nWindows)
-    H_epsilon_RAND.Scale(1/nWindows)
-    H_MM_RAND.Scale(1/nWindows)
-    H_pmiss_RAND.Scale(1/nWindows)
-    H_emiss_RAND.Scale(1/nWindows)
-    H_pmx_RAND.Scale(1/nWindows)
-    H_pmy_RAND.Scale(1/nWindows)
-    H_pmz_RAND.Scale(1/nWindows)
-    H_W_RAND.Scale(1/nWindows)
-    #H_ct_RAND.Scale(1/nWindows)
+    if ParticleType == "kaon":
+        
+        # Data Random subtraction window
+        H_ssxfp_RAND.Scale(1/nWindows)
+        H_ssyfp_RAND.Scale(1/nWindows)
+        H_ssxpfp_RAND.Scale(1/nWindows)
+        H_ssypfp_RAND.Scale(1/nWindows)
+        H_hsxfp_RAND.Scale(1/nWindows)
+        H_hsyfp_RAND.Scale(1/nWindows)
+        H_hsxpfp_RAND.Scale(1/nWindows)
+        H_hsypfp_RAND.Scale(1/nWindows)
+        H_ssxptar_RAND.Scale(1/nWindows)
+        H_ssyptar_RAND.Scale(1/nWindows)
+        H_hsxptar_RAND.Scale(1/nWindows)
+        H_hsyptar_RAND.Scale(1/nWindows)
+        H_ssdelta_RAND.Scale(1/nWindows)
+        H_hsdelta_RAND.Scale(1/nWindows)
+        H_Q2_RAND.Scale(1/nWindows)
+        H_t_RAND.Scale(1/nWindows)
+        H_epsilon_RAND.Scale(1/nWindows)
+        H_MM_RAND.Scale(1/nWindows)
+        H_pmiss_RAND.Scale(1/nWindows)
+        H_emiss_RAND.Scale(1/nWindows)
+        H_pmx_RAND.Scale(1/nWindows)
+        H_pmy_RAND.Scale(1/nWindows)
+        H_pmz_RAND.Scale(1/nWindows)
+        H_W_RAND.Scale(1/nWindows)
+        #H_ct_RAND.Scale(1/nWindows)
 
-    # Data Dummy_Random subtraction window
-    H_ssxfp_DUMMY_RAND.Scale(1/nWindows)
-    H_ssyfp_DUMMY_RAND.Scale(1/nWindows)
-    H_ssxpfp_DUMMY_RAND.Scale(1/nWindows)
-    H_ssypfp_DUMMY_RAND.Scale(1/nWindows)
-    H_hsxfp_DUMMY_RAND.Scale(1/nWindows)
-    H_hsyfp_DUMMY_RAND.Scale(1/nWindows)
-    H_hsxpfp_DUMMY_RAND.Scale(1/nWindows)
-    H_hsypfp_DUMMY_RAND.Scale(1/nWindows)
-    H_ssxptar_DUMMY_RAND.Scale(1/nWindows)
-    H_ssyptar_DUMMY_RAND.Scale(1/nWindows)
-    H_hsxptar_DUMMY_RAND.Scale(1/nWindows)
-    H_hsyptar_DUMMY_RAND.Scale(1/nWindows)
-    H_ssdelta_DUMMY_RAND.Scale(1/nWindows)
-    H_hsdelta_DUMMY_RAND.Scale(1/nWindows)
-    H_Q2_DUMMY_RAND.Scale(1/nWindows)
-    H_t_DUMMY_RAND.Scale(1/nWindows)
-    H_epsilon_DUMMY_RAND.Scale(1/nWindows)
-    H_MM_DUMMY_RAND.Scale(1/nWindows)
-    H_pmiss_DUMMY_RAND.Scale(1/nWindows)
-    H_emiss_DUMMY_RAND.Scale(1/nWindows)
-    H_pmx_DUMMY_RAND.Scale(1/nWindows)
-    H_pmy_DUMMY_RAND.Scale(1/nWindows)
-    H_pmz_DUMMY_RAND.Scale(1/nWindows)
-    H_W_DUMMY_RAND.Scale(1/nWindows)
-    #H_ct_DUMMY_RAND.Scale(1/nWindows)
+        # Data Dummy_Random subtraction window
+        H_ssxfp_DUMMY_RAND.Scale(1/nWindows)
+        H_ssyfp_DUMMY_RAND.Scale(1/nWindows)
+        H_ssxpfp_DUMMY_RAND.Scale(1/nWindows)
+        H_ssypfp_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxfp_DUMMY_RAND.Scale(1/nWindows)
+        H_hsyfp_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxpfp_DUMMY_RAND.Scale(1/nWindows)
+        H_hsypfp_DUMMY_RAND.Scale(1/nWindows)
+        H_ssxptar_DUMMY_RAND.Scale(1/nWindows)
+        H_ssyptar_DUMMY_RAND.Scale(1/nWindows)
+        H_hsxptar_DUMMY_RAND.Scale(1/nWindows)
+        H_hsyptar_DUMMY_RAND.Scale(1/nWindows)
+        H_ssdelta_DUMMY_RAND.Scale(1/nWindows)
+        H_hsdelta_DUMMY_RAND.Scale(1/nWindows)
+        H_Q2_DUMMY_RAND.Scale(1/nWindows)
+        H_t_DUMMY_RAND.Scale(1/nWindows)
+        H_epsilon_DUMMY_RAND.Scale(1/nWindows)
+        H_MM_DUMMY_RAND.Scale(1/nWindows)
+        H_pmiss_DUMMY_RAND.Scale(1/nWindows)
+        H_emiss_DUMMY_RAND.Scale(1/nWindows)
+        H_pmx_DUMMY_RAND.Scale(1/nWindows)
+        H_pmy_DUMMY_RAND.Scale(1/nWindows)
+        H_pmz_DUMMY_RAND.Scale(1/nWindows)
+        H_W_DUMMY_RAND.Scale(1/nWindows)
+        #H_ct_DUMMY_RAND.Scale(1/nWindows)
+
+    else:
+
+        pion_scale = 0.033
+        
+        # Data Dataom subtraction window
+        H_ssxfp_DATA.Scale(pion_scale)
+        H_ssyfp_DATA.Scale(pion_scale)
+        H_ssxpfp_DATA.Scale(pion_scale)
+        H_ssypfp_DATA.Scale(pion_scale)
+        H_hsxfp_DATA.Scale(pion_scale)
+        H_hsyfp_DATA.Scale(pion_scale)
+        H_hsxpfp_DATA.Scale(pion_scale)
+        H_hsypfp_DATA.Scale(pion_scale)
+        H_ssxptar_DATA.Scale(pion_scale)
+        H_ssyptar_DATA.Scale(pion_scale)
+        H_hsxptar_DATA.Scale(pion_scale)
+        H_hsyptar_DATA.Scale(pion_scale)
+        H_ssdelta_DATA.Scale(pion_scale)
+        H_hsdelta_DATA.Scale(pion_scale)
+        H_Q2_DATA.Scale(pion_scale)
+        H_t_DATA.Scale(pion_scale)
+        H_epsilon_DATA.Scale(pion_scale)
+        H_MM_DATA.Scale(pion_scale)
+        H_pmiss_DATA.Scale(pion_scale)
+        H_emiss_DATA.Scale(pion_scale)
+        H_pmx_DATA.Scale(pion_scale)
+        H_pmy_DATA.Scale(pion_scale)
+        H_pmz_DATA.Scale(pion_scale)
+        H_W_DATA.Scale(pion_scale)
+        #H_ct_DATA.Scale(pion_scale)
+
+        # Data Dummyom subtraction window
+        H_ssxfp_DUMMY.Scale(pion_scale)
+        H_ssyfp_DUMMY.Scale(pion_scale)
+        H_ssxpfp_DUMMY.Scale(pion_scale)
+        H_ssypfp_DUMMY.Scale(pion_scale)
+        H_hsxfp_DUMMY.Scale(pion_scale)
+        H_hsyfp_DUMMY.Scale(pion_scale)
+        H_hsxpfp_DUMMY.Scale(pion_scale)
+        H_hsypfp_DUMMY.Scale(pion_scale)
+        H_ssxptar_DUMMY.Scale(pion_scale)
+        H_ssyptar_DUMMY.Scale(pion_scale)
+        H_hsxptar_DUMMY.Scale(pion_scale)
+        H_hsyptar_DUMMY.Scale(pion_scale)
+        H_ssdelta_DUMMY.Scale(pion_scale)
+        H_hsdelta_DUMMY.Scale(pion_scale)
+        H_Q2_DUMMY.Scale(pion_scale)
+        H_t_DUMMY.Scale(pion_scale)
+        H_epsilon_DUMMY.Scale(pion_scale)
+        H_MM_DUMMY.Scale(pion_scale)
+        H_pmiss_DUMMY.Scale(pion_scale)
+        H_emiss_DUMMY.Scale(pion_scale)
+        H_pmx_DUMMY.Scale(pion_scale)
+        H_pmy_DUMMY.Scale(pion_scale)
+        H_pmz_DUMMY.Scale(pion_scale)
+        H_W_DUMMY.Scale(pion_scale)
+        #H_ct_DUMMY.Scale(pion_scale)        
+
+        # Data Random subtraction window
+        H_ssxfp_RAND.Scale(pion_scale/nWindows)
+        H_ssyfp_RAND.Scale(pion_scale/nWindows)
+        H_ssxpfp_RAND.Scale(pion_scale/nWindows)
+        H_ssypfp_RAND.Scale(pion_scale/nWindows)
+        H_hsxfp_RAND.Scale(pion_scale/nWindows)
+        H_hsyfp_RAND.Scale(pion_scale/nWindows)
+        H_hsxpfp_RAND.Scale(pion_scale/nWindows)
+        H_hsypfp_RAND.Scale(pion_scale/nWindows)
+        H_ssxptar_RAND.Scale(pion_scale/nWindows)
+        H_ssyptar_RAND.Scale(pion_scale/nWindows)
+        H_hsxptar_RAND.Scale(pion_scale/nWindows)
+        H_hsyptar_RAND.Scale(pion_scale/nWindows)
+        H_ssdelta_RAND.Scale(pion_scale/nWindows)
+        H_hsdelta_RAND.Scale(pion_scale/nWindows)
+        H_Q2_RAND.Scale(pion_scale/nWindows)
+        H_t_RAND.Scale(pion_scale/nWindows)
+        H_epsilon_RAND.Scale(pion_scale/nWindows)
+        H_MM_RAND.Scale(pion_scale/nWindows)
+        H_pmiss_RAND.Scale(pion_scale/nWindows)
+        H_emiss_RAND.Scale(pion_scale/nWindows)
+        H_pmx_RAND.Scale(pion_scale/nWindows)
+        H_pmy_RAND.Scale(pion_scale/nWindows)
+        H_pmz_RAND.Scale(pion_scale/nWindows)
+        H_W_RAND.Scale(pion_scale/nWindows)
+        #H_ct_RAND.Scale(pion_scale/nWindows)
+
+        # Data Dummy_Random subtraction window
+        H_ssxfp_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_ssyfp_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_ssxpfp_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_ssypfp_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_hsxfp_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_hsyfp_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_hsxpfp_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_hsypfp_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_ssxptar_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_ssyptar_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_hsxptar_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_hsyptar_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_ssdelta_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_hsdelta_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_Q2_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_t_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_epsilon_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_MM_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_pmiss_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_emiss_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_pmx_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_pmy_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_pmz_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_W_DUMMY_RAND.Scale(pion_scale/nWindows)
+        #H_ct_DUMMY_RAND.Scale(pion_scale/nWindows)
 
     ###
     # Data Random subtraction

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:44:27 trottar"
+# Time-stamp: "2023-08-13 09:51:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -934,13 +934,21 @@ if DEBUG:
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''
 
-from aver_per_bin import aver_per_bin_data, aver_per_bin_simc
+if ParticleType == "pion":
+    from aver_per_bin_phibin import aver_per_bin_data, aver_per_bin_simc
 
-averDict = {}
-averDict.update(aver_per_bin_data(histlist, inpDict))
-averDict.update(aver_per_bin_simc(histlist, inpDict))
-#print(averDict)
+    averDict = {}
+    averDict.update(aver_per_bin_data(histlist, inpDict))
+    averDict.update(aver_per_bin_simc(histlist, inpDict))
+    #print(averDict)
+else:
+    from aver_per_bin import aver_per_bin_data, aver_per_bin_simc
 
+    averDict = {}
+    averDict.update(aver_per_bin_data(histlist, inpDict))
+    averDict.update(aver_per_bin_simc(histlist, inpDict))
+    #print(averDict)
+    
 '''
 # Loop over each tuple key in the dictionary
 for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(averDict["binned_DATA"],averDict["binned_DUMMY"],averDict["binned_SIMC"]):
