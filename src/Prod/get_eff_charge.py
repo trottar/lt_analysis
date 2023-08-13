@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 13:08:45 trottar"
+# Time-stamp: "2023-08-13 13:19:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,6 +91,71 @@ def get_eff_charge(hist, inpDict):
     # Define return dictionary of data
     histDict = {}
 
+    ################################################################################################################################################
+    # Grabs PID cut string
+
+    if phi_setting == "Right":
+        runNums= runNumRight
+        for run in runNumRight.split(' '):
+            runNum = run
+            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+            if os.path.exists(pid_log):
+                    with open(pid_log, 'r') as f_log:
+                        for line in f_log:
+                            if "coin_epi_cut_prompt_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                break
+                            if "coin_ep_cut_prompt_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                break                                
+            else:
+                print("WARNING: Run {} does not have a valid PID log!".format(run))
+                continue
+
+        InData_efficiency = InData_efficiency_right
+    if phi_setting == "Left":
+        runNums= runNumLeft
+        for run in runNumLeft.split(' '):
+            runNum = run
+            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+            if os.path.exists(pid_log):
+                    with open(pid_log, 'r') as f_log:
+                        for line in f_log:
+                            if "coin_epi_cut_prompt_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                break
+                            if "coin_ep_cut_prompt_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                break                                
+            else:
+                print("WARNING: Run {} does not have a valid PID log!".format(run))
+                continue
+        InData_efficiency = InData_efficiency_left
+    if phi_setting == "Center":
+        runNums= runNumCenter
+        for run in runNumCenter.split(' '):
+            runNum = run
+            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+            if os.path.exists(pid_log):
+                    with open(pid_log, 'r') as f_log:
+                        for line in f_log:
+                            if "coin_epi_cut_prompt_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                break
+                            if "coin_ep_cut_prompt_RF" in line:
+                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
+                                break
+            else:
+                print("WARNING: Run {} does not have a valid PID log!".format(run))
+                continue
+        InData_efficiency = InData_efficiency_center
+
+    if 'pid_text' in locals():
+        print('\n\n',phi_setting,'PID Cuts = ',pid_text,'\n\n')
+    else:
+        print("ERROR: Invalid {} log file {}!".format(phi_setting.lower(),pid_log))
+        pid_text = "\nNo {} cuts file found in logs...".format(phi_setting.lower())
+    
     ################################################################################################################################################
     # Grab and calculate efficiency
 
