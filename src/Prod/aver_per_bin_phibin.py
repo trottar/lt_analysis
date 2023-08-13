@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 10:29:29 trottar"
+# Time-stamp: "2023-08-13 11:20:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -257,11 +257,11 @@ def aver_per_bin_data(histlist, inpDict):
 
         # Assign histograms for t
         if hist["phi_setting"] == "Center":
-            phi_Center_DATA = hist["H_phi_data"]
+            phi_Center_DATA = hist["H_phi_DATA"]
         if hist["phi_setting"] == "Left":
-            phi_Left_DATA = hist["H_phi_data"]
+            phi_Left_DATA = hist["H_phi_DATA"]
         if hist["phi_setting"] == "Right":
-            phi_Right_DATA = hist["H_phi_data"]
+            phi_Right_DATA = hist["H_phi_DATA"]
 
         # Assign histograms for Q2
         if hist["phi_setting"] == "Center":
@@ -281,11 +281,11 @@ def aver_per_bin_data(histlist, inpDict):
 
         # Assign histograms for t
         if hist["phi_setting"] == "Center":
-            phi_Center_DUMMY = hist["H_phi_dummy"]
+            phi_Center_DUMMY = hist["H_phi_DUMMY"]
         if hist["phi_setting"] == "Left":
-            phi_Left_DUMMY = hist["H_phi_dummy"]
+            phi_Left_DUMMY = hist["H_phi_DUMMY"]
         if hist["phi_setting"] == "Right":
-            phi_Right_DUMMY = hist["H_phi_dummy"]
+            phi_Right_DUMMY = hist["H_phi_DUMMY"]
             
     # Combine histograms for Q2_data
     Q2_data = ROOT.TH1F("Q2_data", "Combined Q2_data Histogram", Q2_Center_DATA.GetNbinsX(), Q2_Center_DATA.GetXaxis().GetXmin(), Q2_Center_DATA.GetXaxis().GetXmax())
@@ -375,11 +375,11 @@ def aver_per_bin_simc(histlist, inpDict):
 
         # Assign histograms for t
         if hist["phi_setting"] == "Center":
-            phi_Center_SIMC = hist["H_phi_simc"]
+            phi_Center_SIMC = hist["H_phi_SIMC"]
         if hist["phi_setting"] == "Left":
-            phi_Left_SIMC = hist["H_phi_simc"]
+            phi_Left_SIMC = hist["H_phi_SIMC"]
         if hist["phi_setting"] == "Right":
-            phi_Right_SIMC = hist["H_phi_simc"]        
+            phi_Right_SIMC = hist["H_phi_SIMC"]        
     
     # Combine histograms for Q2_simc
     Q2_simc = ROOT.TH1F("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())

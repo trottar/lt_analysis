@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 11:07:10 trottar"
+# Time-stamp: "2023-08-13 11:19:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1071,6 +1071,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_DUMMY"] =     H_MM_DUMMY
     histDict["H_th_DUMMY"] =     H_th_DUMMY
     histDict["H_ph_DUMMY"] =     H_ph_DUMMY
+    histDict["H_phi_DUMMY"] =     H_ph_q_DUMMY
     histDict["H_ph_q_DUMMY"] =     H_ph_q_DUMMY
     histDict["H_th_q_DUMMY"] =     H_th_q_DUMMY
     histDict["H_ph_recoil_DUMMY"] =     H_ph_recoil_DUMMY
@@ -1096,11 +1097,6 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_ssdelta_DATA"] =     H_ssdelta_DATA
     histDict["H_ssxptar_DATA"] =     H_ssxptar_DATA
     histDict["H_ssyptar_DATA"] =     H_ssyptar_DATA
-    histDict["H_phi_DATA"] = H_ph_q_DATA
-    histDict["H_ph_q_DATA"] = H_ph_q_DATA
-    histDict["H_th_q_DATA"] = H_th_q_DATA
-    histDict["H_ph_recoil_DATA"] = H_ph_recoil_DATA
-    histDict["H_th_recoil_DATA"] = H_th_recoil_DATA
     histDict["H_q_DATA"] =     H_q_DATA      
     histDict["H_Q2_DATA"] =     H_Q2_DATA     
     histDict["H_t_DATA"] =     H_t_DATA     
@@ -1108,6 +1104,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_DATA"] =     H_MM_DATA
     histDict["H_th_DATA"] =     H_th_DATA
     histDict["H_ph_DATA"] =     H_ph_DATA
+    histDict["H_phi_DATA"] =     H_ph_q_DATA
     histDict["H_ph_q_DATA"] =     H_ph_q_DATA
     histDict["H_th_q_DATA"] =     H_th_q_DATA
     histDict["H_ph_recoil_DATA"] =     H_ph_recoil_DATA
