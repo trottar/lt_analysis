@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 14:55:19 trottar"
+# Time-stamp: "2023-08-13 15:30:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1492,8 +1492,9 @@ else:
             Ctext.Print(outputpdf+')')
         else:
             Ctext.Print(outputpdf)
-
-    show_pdf_with_evince(outputpdf)    
+            
+    if DEBUG:
+        show_pdf_with_evince(outputpdf)    
         
 ##############################
 # Step 6 of the lt_analysis: #
