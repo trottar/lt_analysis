@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 10:46:37 trottar"
+# Time-stamp: "2023-08-13 10:56:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -196,5 +196,6 @@ def get_eff_charge(hist, inpDict):
     histDict["G_data_eff"] = G_data_eff
     histDict["normfac_data"] = normfac_data
     histDict["normfac_dummy"] = normfac_dummy
+    histDict["pid_text"] = pid_text
 
     return histDict

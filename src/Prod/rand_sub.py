@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 09:59:22 trottar"
+# Time-stamp: "2023-08-13 11:07:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -673,6 +673,11 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_RAND.Fill(evt.hsxptar)	
           H_hsyptar_RAND.Fill(evt.hsyptar)
 
+          H_ph_q_RAND.Fill(evt.ph_q)
+          H_th_q_RAND.Fill(evt.th_q)
+          H_ph_recoil_RAND.Fill(evt.ph_recoil)
+          H_th_recoil_RAND.Fill(evt.th_recoil)
+          
           H_pmiss_RAND.Fill(evt.pmiss)	
           H_emiss_RAND.Fill(evt.emiss)	
           #H_emiss_RAND.Fill(evt.emiss_nuc)
@@ -763,6 +768,11 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_DUMMY_RAND.Fill(evt.hsxptar)	
           H_hsyptar_DUMMY_RAND.Fill(evt.hsyptar)
 
+          H_ph_q_DUMMY_RAND.Fill(evt.ph_q)
+          H_th_q_DUMMY_RAND.Fill(evt.th_q)
+          H_ph_recoil_DUMMY_RAND.Fill(evt.ph_recoil)
+          H_th_recoil_DUMMY_RAND.Fill(evt.th_recoil)
+          
           H_pmiss_DUMMY_RAND.Fill(evt.pmiss)	
           H_emiss_DUMMY_RAND.Fill(evt.emiss)	
           #H_emiss_DUMMY_RAND.Fill(evt.emiss_nuc)
@@ -795,7 +805,11 @@ def rand_sub(phi_setting, inpDict):
         H_hsxptar_RAND.Scale(1/nWindows)
         H_hsyptar_RAND.Scale(1/nWindows)
         H_ssdelta_RAND.Scale(1/nWindows)
-        H_hsdelta_RAND.Scale(1/nWindows)
+        H_hsdelta_RAND.Scale(1/nWindows)        
+        H_ph_q_RAND.Scale(1/nWindows)
+        H_th_q_RAND.Scale(1/nWindows)
+        H_ph_recoil_RAND.Scale(1/nWindows)
+        H_th_recoil_RAND.Scale(1/nWindows)
         H_Q2_RAND.Scale(1/nWindows)
         H_t_RAND.Scale(1/nWindows)
         H_epsilon_RAND.Scale(1/nWindows)
@@ -823,6 +837,10 @@ def rand_sub(phi_setting, inpDict):
         H_hsyptar_DUMMY_RAND.Scale(1/nWindows)
         H_ssdelta_DUMMY_RAND.Scale(1/nWindows)
         H_hsdelta_DUMMY_RAND.Scale(1/nWindows)
+        H_ph_q_DUMMY_RAND.Scale(1/nWindows)
+        H_th_q_DUMMY_RAND.Scale(1/nWindows)
+        H_ph_recoil_DUMMY_RAND.Scale(1/nWindows)
+        H_th_recoil_DUMMY_RAND.Scale(1/nWindows)        
         H_Q2_DUMMY_RAND.Scale(1/nWindows)
         H_t_DUMMY_RAND.Scale(1/nWindows)
         H_epsilon_DUMMY_RAND.Scale(1/nWindows)
@@ -854,6 +872,10 @@ def rand_sub(phi_setting, inpDict):
         H_hsyptar_DATA.Scale(pion_scale)
         H_ssdelta_DATA.Scale(pion_scale)
         H_hsdelta_DATA.Scale(pion_scale)
+        H_ph_q_DATA.Scale(pion_scale)
+        H_th_q_DATA.Scale(pion_scale)
+        H_ph_recoil_DATA.Scale(pion_scale)
+        H_th_recoil_DATA.Scale(pion_scale)
         H_Q2_DATA.Scale(pion_scale)
         H_t_DATA.Scale(pion_scale)
         H_epsilon_DATA.Scale(pion_scale)
@@ -881,6 +903,10 @@ def rand_sub(phi_setting, inpDict):
         H_hsyptar_DUMMY.Scale(pion_scale)
         H_ssdelta_DUMMY.Scale(pion_scale)
         H_hsdelta_DUMMY.Scale(pion_scale)
+        H_ph_q_DUMMY.Scale(pion_scale)
+        H_th_q_DUMMY.Scale(pion_scale)
+        H_ph_recoil_DUMMY.Scale(pion_scale)
+        H_th_recoil_DUMMY.Scale(pion_scale)                
         H_Q2_DUMMY.Scale(pion_scale)
         H_t_DUMMY.Scale(pion_scale)
         H_epsilon_DUMMY.Scale(pion_scale)
@@ -908,6 +934,10 @@ def rand_sub(phi_setting, inpDict):
         H_hsyptar_RAND.Scale(pion_scale/nWindows)
         H_ssdelta_RAND.Scale(pion_scale/nWindows)
         H_hsdelta_RAND.Scale(pion_scale/nWindows)
+        H_ph_q_RAND.Scale(pion_scale/nWindows)
+        H_th_q_RAND.Scale(pion_scale/nWindows)
+        H_ph_recoil_RAND.Scale(pion_scale/nWindows)
+        H_th_recoil_RAND.Scale(pion_scale/nWindows)
         H_Q2_RAND.Scale(pion_scale/nWindows)
         H_t_RAND.Scale(pion_scale/nWindows)
         H_epsilon_RAND.Scale(pion_scale/nWindows)
@@ -935,6 +965,10 @@ def rand_sub(phi_setting, inpDict):
         H_hsyptar_DUMMY_RAND.Scale(pion_scale/nWindows)
         H_ssdelta_DUMMY_RAND.Scale(pion_scale/nWindows)
         H_hsdelta_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_ph_q_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_th_q_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_ph_recoil_DUMMY_RAND.Scale(pion_scale/nWindows)
+        H_th_recoil_DUMMY_RAND.Scale(pion_scale/nWindows)        
         H_Q2_DUMMY_RAND.Scale(pion_scale/nWindows)
         H_t_DUMMY_RAND.Scale(pion_scale/nWindows)
         H_epsilon_DUMMY_RAND.Scale(pion_scale/nWindows)
@@ -963,6 +997,10 @@ def rand_sub(phi_setting, inpDict):
     H_hsyptar_DATA.Add(H_hsyptar_RAND,-1)
     H_ssdelta_DATA.Add(H_ssdelta_RAND,-1)
     H_hsdelta_DATA.Add(H_hsdelta_RAND,-1)
+    H_ph_q_DATA.Add(H_ph_q_RAND,-1)
+    H_th_q_DATA.Add(H_th_q_RAND,-1)
+    H_ph_recoil_DATA.Add(H_ph_recoil_RAND,-1)
+    H_th_recoil_DATA.Add(H_th_recoil_RAND,-1)
     H_Q2_DATA.Add(H_Q2_RAND,-1)
     H_t_DATA.Add(H_t_RAND,-1)
     H_epsilon_DATA.Add(H_epsilon_RAND,-1)
@@ -991,6 +1029,10 @@ def rand_sub(phi_setting, inpDict):
     H_hsyptar_DUMMY.Add(H_hsyptar_DUMMY_RAND,-1)
     H_ssdelta_DUMMY.Add(H_ssdelta_DUMMY_RAND,-1)
     H_hsdelta_DUMMY.Add(H_hsdelta_DUMMY_RAND,-1)
+    H_ph_q_DUMMY.Add(H_ph_q_DUMMY_RAND,-1)
+    H_th_q_DUMMY.Add(H_th_q_DUMMY_RAND,-1)
+    H_ph_recoil_DUMMY.Add(H_ph_recoil_DUMMY_RAND,-1)
+    H_th_recoil_DUMMY.Add(H_th_recoil_DUMMY_RAND,-1)    
     H_Q2_DUMMY.Add(H_Q2_DUMMY_RAND,-1)
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
@@ -1054,6 +1096,11 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_ssdelta_DATA"] =     H_ssdelta_DATA
     histDict["H_ssxptar_DATA"] =     H_ssxptar_DATA
     histDict["H_ssyptar_DATA"] =     H_ssyptar_DATA
+    histDict["H_phi_DATA"] = H_ph_q_DATA
+    histDict["H_ph_q_DATA"] = H_ph_q_DATA
+    histDict["H_th_q_DATA"] = H_th_q_DATA
+    histDict["H_ph_recoil_DATA"] = H_ph_recoil_DATA
+    histDict["H_th_recoil_DATA"] = H_th_recoil_DATA
     histDict["H_q_DATA"] =     H_q_DATA      
     histDict["H_Q2_DATA"] =     H_Q2_DATA     
     histDict["H_t_DATA"] =     H_t_DATA     
