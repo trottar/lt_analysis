@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 15:26:51 trottar"
+# Time-stamp: "2023-08-13 15:29:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -136,10 +136,14 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
 
     # Write values to a single CSV file with columns
     csv_filename = 'data.csv'
-    with open(csv_filename, 'w', newline='') as file:
+    file_exists = os.path.exists(csv_filename)
+
+    with open(csv_filename, 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['total_count', 'yield_val', 'EPSSET'])
+        if not file_exists:
+            writer.writerow(['total_count', 'yield_val', 'EPSSET'])
         writer.writerows(data_for_csv)
+            writer.writerows(data_for_csv)
 
     print("Data saved to {}".format(csv_filename))
 
