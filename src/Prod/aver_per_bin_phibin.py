@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 14:11:07 trottar"
+# Time-stamp: "2023-08-13 14:23:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,7 +137,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
         writer.writerow(['total_count', 'yield_val', 'EPSET'])
         writer.writerows(data_for_csv)
 
-    print(f"Data saved to {csv_filename}")
+    print("Data saved to {}".format(csv_filename))
 
     # Print statements to check sizes
     print("\nSize of binned_phi_data:", len(binned_phi_data))
