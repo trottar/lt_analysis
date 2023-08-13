@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 10:23:27 trottar"
+# Time-stamp: "2023-08-13 10:29:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,12 +96,14 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             # Calculate the weighted sum of frequencies and divide by the total count
             weighted_sum = np.sum(sub_val * bin_val_data)
             total_count = np.sum(sub_val)
-            average = weighted_sum / total_count            
+            average = weighted_sum / total_count
+            yield_val = total_count/eff_charge
             aver_hist.append(average)
-            yield_hist.append(total_count/eff_charge)
+            yield_hist.append(yield_val)
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
             print("Average for phi-bin {}:".format(i),average)
+            print("Yield for phi-bin {}:".format(i),yield_val)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
@@ -110,6 +112,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for phi-bin {}: 0.0".format(i))
+            print("Yield for phi-bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1
@@ -232,6 +235,7 @@ def calculate_aver_simc(kin_type, hist_data, phi_data, phi_bins, t_bins):
 def aver_per_bin_data(histlist, inpDict):
 
     for hist in histlist:
+        eff_charge = hist["phi_bins"]
         phi_bins = hist["phi_bins"]
         t_bins = hist["t_bins"]
 

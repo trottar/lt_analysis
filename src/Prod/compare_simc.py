@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-11 21:20:32 trottar"
+# Time-stamp: "2023-08-13 10:35:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,87 +133,6 @@ def compare_simc(hist, inpDict):
     f_simc.close()    
 
     ################################################################################################################################################
-    # Grabs PID cut string
-
-    if phi_setting == "Right":
-        runNums= runNumRight
-        for run in runNumRight.split(' '):
-            runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
-            if os.path.exists(pid_log):
-                    with open(pid_log, 'r') as f_log:
-                        for line in f_log:
-                            if "coin_epi_cut_prompt_RF" in line:
-                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
-                                break
-                            if "coin_ep_cut_prompt_RF" in line:
-                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
-                                break                                
-            else:
-                print("WARNING: Run {} does not have a valid PID log!".format(run))
-                continue
-
-        InData_efficiency = InData_efficiency_right
-    if phi_setting == "Left":
-        runNums= runNumLeft
-        for run in runNumLeft.split(' '):
-            runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
-            if os.path.exists(pid_log):
-                    with open(pid_log, 'r') as f_log:
-                        for line in f_log:
-                            if "coin_epi_cut_prompt_RF" in line:
-                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
-                                break
-                            if "coin_ep_cut_prompt_RF" in line:
-                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
-                                break                                
-            else:
-                print("WARNING: Run {} does not have a valid PID log!".format(run))
-                continue
-        InData_efficiency = InData_efficiency_left
-    if phi_setting == "Center":
-        runNums= runNumCenter
-        for run in runNumCenter.split(' '):
-            runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
-            if os.path.exists(pid_log):
-                    with open(pid_log, 'r') as f_log:
-                        for line in f_log:
-                            if "coin_epi_cut_prompt_RF" in line:
-                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
-                                break
-                            if "coin_ep_cut_prompt_RF" in line:
-                                pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
-                                break
-            else:
-                print("WARNING: Run {} does not have a valid PID log!".format(run))
-                continue
-        InData_efficiency = InData_efficiency_center
-
-    if 'pid_text' in locals():
-        print('\n\n',phi_setting,'PID Cuts = ',pid_text,'\n\n')
-    else:
-        print("ERROR: Invalid {} log file {}!".format(phi_setting.lower(),pid_log))
-        pid_text = "\nNo {} cuts file found in logs...".format(phi_setting.lower())
-
-    ################################################################################################################################################
-    # Grab and calculate efficiency
-
-    sys.path.append('../../scripts/')
-    from getDataTable import calculate_effError
-
-    tot_effError_data = [calculate_effError(run,efficiency_table) for run in runNums.split(' ')]
-    #print(InData_efficiency)
-    #print(tot_effError_data)
-    eff_errProp_data = sum(tot_effError_data) # Error propagation for addition
-
-    print("\n\nTotal Data Efficiency Uncertainty =",eff_errProp_data)
-
-    # Define total efficiency vs run number plots
-    G_data_eff = ROOT.TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
-
-    ################################################################################################################################################
     # Plot definitions
 
     H_Weight_SIMC = ROOT.TH1D("H_Weight_SIMC", "Simc Weight", 500, 0, 1e-8)
@@ -307,29 +226,12 @@ def compare_simc(hist, inpDict):
 
     ################################################################################################################################################
     # Normalize simc by normfactor/nevents
-    # Normalize dummy by effective charge and target correction
-    # Normalize data by effective charge
 
     normfac_simc = (simc_normfactor)/(simc_nevents)
-    
-    dummy_target_corr = 4.8579
-    if phi_setting == "Right":
-        normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
-        normfac_data = 1/(data_charge_right)
-    if phi_setting == "Left":
-        normfac_dummy = 1/(dummy_charge_left*dummy_target_corr)
-        normfac_data = 1/(data_charge_left)
-    if phi_setting == "Center":
-        normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
-        normfac_data = 1/(data_charge_center)
-          
+              
     ################################################################################################################################################    
 
     histDict["InFile_SIMC"] = InFile_SIMC
-    histDict["InData_efficiency"] = InData_efficiency.split(' ')
-    histDict["G_data_eff"] = G_data_eff
-    histDict["normfac_data"] = normfac_data
-    histDict["normfac_dummy"] = normfac_dummy
     histDict["normfac_simc"] = normfac_simc
     histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
     histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC

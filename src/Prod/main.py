@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 10:26:56 trottar"
+# Time-stamp: "2023-08-13 10:36:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -269,11 +269,17 @@ for hist in histlist:
 ** TODO: Fix plots (e.g. polar) and find working simc weight script
 '''
 
+from get_eff_charge import get_eff_charge
+
+# Upate hist dictionary with effective charge
+for hist in histlist:
+    hist.update(get_eff_charge(hist, inpDict))
+
 if ParticleType == "kaon":
 
     from compare_simc import compare_simc
 
-    # Upate hist dictionary with effective charge and simc histograms
+    # Upate hist dictionary with simc histograms
     for hist in histlist:
         hist.update(compare_simc(hist, inpDict))
 
