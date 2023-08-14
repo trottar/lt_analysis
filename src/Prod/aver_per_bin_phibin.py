@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-13 20:26:58 trottar"
+# Time-stamp: "2023-08-13 20:39:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,9 +150,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, phi_data, phi_bins, t_b
         if not file_exists:
             writer.writerow(['kin_value', 'phi_edges', 'total_count', 'yield_val', 'EPSSET'])
         for row in data_for_csv:
-            if row[0] not in existing_lines:
-                writer.writerow(row)
-                existing_lines.add(row[0])
+            writer.writerow(row)
     print("Data saved to {}".format(csv_filename))
 
     # Print statements to check sizes
