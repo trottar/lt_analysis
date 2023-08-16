@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:44:27 trottar"
+# Time-stamp: "2023-08-16 19:53:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -743,6 +743,7 @@ for i,hist in enumerate(histlist):
 
 Cqw.Print(outputpdf)
 
+'''
 Cpht = TCanvas()
 
 # Removes stat box
@@ -772,7 +773,6 @@ multi_graph.GetYaxis().SetTitleOffset(1.2)
 
 Cpht.Update()
     
-'''
 Cpht.Divide(2,2)
 
 for i,hist in enumerate(histlist):
@@ -838,7 +838,6 @@ tradius.SetLineColor(2)
 tradius.SetLabelColor(2)
 tradius.Draw()
 Cpht.Update()
-'''
 
 Cpht.Print(outputpdf)
 
@@ -894,6 +893,8 @@ tradius.SetLabelColor(9)
 tradius.Draw()
     
 Cphtsame.Print(outputpdf)
+
+'''
 
 for i,hist in enumerate(histlist):
     texlist = []
