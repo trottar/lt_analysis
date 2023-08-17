@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-16 19:53:11 trottar"
+# Time-stamp: "2023-08-16 19:59:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -268,6 +268,12 @@ for hist in histlist:
 
 ** TODO: Fix plots (e.g. polar) and find working simc weight script
 '''
+
+from get_eff_charge import get_eff_charge
+
+# Upate hist dictionary with effective charge
+for hist in histlist:
+    hist.update(get_eff_charge(hist, inpDict))
 
 from compare_simc import compare_simc
 
