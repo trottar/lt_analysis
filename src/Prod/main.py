@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 12:13:43 trottar"
+# Time-stamp: "2023-08-21 12:18:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -758,7 +758,7 @@ polar_graph = TGraphPolar()
 for i, hist in enumerate(histlist):
     # Create TH1Fs for t and phi based on the dictionary settings
     t_hist = ROOT.TH1F("t_hist_{}".format(i), "t Histogram {}".format(i), hist["H_t_DATA"].GetNbinsX(), tmin, tmax)
-    phi_hist = ROOT.TH1F("phi_hist_{}".format(i), "#phi Histogram {}".format(i), hist["H_phi_DATA"].GetNbinsX(), 0, 360)
+    phi_hist = ROOT.TH1F("phi_hist_{}".format(i), "#phi Histogram {}".format(i), hist["H_ph_q_DATA"].GetNbinsX(), 0, 360)
 
     # Fill the t_hist and phi_hist data into the polar graph
     for bin in range(1, t_hist.GetNbinsX() + 1):
@@ -1014,7 +1014,7 @@ for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(averDict["binned_DATA"]
 #print(averDict["binned_DATA"])
 
 # t/phi binned histograms
-H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
+H_ph_qbins_DATA = ROOT.TH1D("H_ph_qbins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
 H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
 H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
 H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0, 1.0)
@@ -1150,9 +1150,9 @@ for i, data_key_tuple in enumerate(averDict["binned_DATA"]):
     data_nested_dict = averDict["binned_DATA"][data_key_tuple]
     for val in data_nested_dict["phi_bins"]:
         # Fill histogram
-        H_phibins_DATA.Fill(float(val))
-    H_phibins_DATA.Draw("same")
-    H_phibins_DATA.SetLineColor(i+1)
+        H_ph_qbins_DATA.Fill(float(val))
+    H_ph_qbins_DATA.Draw("same")
+    H_ph_qbins_DATA.SetLineColor(i+1)
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_yield_DATA = TCanvas()
