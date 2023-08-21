@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 14:03:18 trottar"
+# Time-stamp: "2023-08-21 14:10:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -709,9 +709,7 @@ for i,hist in enumerate(histlist):
     Cmmct.cd(i+1)
     
     # Set color representing zero events to transparent (alpha = 0)
-    hist["MM_vs_CoinTime_DATA"].SetContour(1)
-    hist["MM_vs_CoinTime_DATA"].SetContourLevel(0, 0.0)  # Set level 0 to value 0
-    hist["MM_vs_CoinTime_DATA"].SetFillColor(0)        # Set fill color for level 0 to transparent
+    hist["MM_vs_CoinTime_DATA"].SetMinimum(1)
 
     hist["MM_vs_CoinTime_DATA"].SetLineColor(i+1)
     hist["MM_vs_CoinTime_DATA"].Draw("same, COLZ")
@@ -727,9 +725,7 @@ for i,hist in enumerate(histlist):
     Cctbeta.cd(i+1)
 
     # Set color representing zero events to transparent (alpha = 0)
-    hist["CoinTime_vs_beta_DATA"].SetContour(1)
-    hist["CoinTime_vs_beta_DATA"].SetContourLevel(0, 0.0)  # Set level 0 to value 0
-    hist["CoinTime_vs_beta_DATA"].SetFillColor(0)        # Set fill color for level 0 to transparent    
+    hist["CoinTime_vs_beta_DATA"].SetMinimum(1)
     
     hist["CoinTime_vs_beta_DATA"].SetLineColor(i+1)
     hist["CoinTime_vs_beta_DATA"].Draw("same, COLZ")
@@ -745,9 +741,7 @@ for i,hist in enumerate(histlist):
     Cmmbeta.cd(i+1)
 
     # Set color representing zero events to transparent (alpha = 0)
-    hist["MM_vs_beta_DATA"].SetContour(1)
-    hist["MM_vs_beta_DATA"].SetContourLevel(0, 0.0)  # Set level 0 to value 0
-    hist["MM_vs_beta_DATA"].SetFillColor(0)        # Set fill color for level 0 to transparent        
+    hist["MM_vs_beta_DATA"].SetMinimum(1)
     
     hist["MM_vs_beta_DATA"].SetLineColor(i+1)
     hist["MM_vs_beta_DATA"].Draw("same, COLZ")
@@ -763,9 +757,7 @@ for i,hist in enumerate(histlist):
     Cqw.cd(i+1)
 
     # Set color representing zero events to transparent (alpha = 0)
-    hist["Q2_vs_W_DATA"].SetContour(1)
-    hist["Q2_vs_W_DATA"].SetContourLevel(0, 0.0)  # Set level 0 to value 0
-    hist["Q2_vs_W_DATA"].SetFillColor(0)        # Set fill color for level 0 to transparent        
+    hist["Q2_vs_W_DATA"].SetMinimum(1)
     
     hist["Q2_vs_W_DATA"].SetLineColor(i+1)
     hist["Q2_vs_W_DATA"].Draw("same, COLZ")
