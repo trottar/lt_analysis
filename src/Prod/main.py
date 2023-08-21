@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 14:32:12 trottar"
+# Time-stamp: "2023-08-21 14:32:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -808,8 +808,6 @@ for i,hist in enumerate(histlist):
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
-
-show_pdf_with_evince(outputpdf)
 
 ##############################
 # Step 6 of the lt_analysis: #
