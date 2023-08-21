@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 13:46:17 trottar"
+# Time-stamp: "2023-08-21 13:53:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -391,7 +391,6 @@ def rand_sub(phi_setting, inpDict):
     CoinTime_vs_beta_RAND = ROOT.TH2D("CoinTime_vs_beta_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -2, 2, 500, 0, 2)
     MM_vs_beta_RAND = ROOT.TH2D("MM_vs_beta_RAND", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 500, 0, 2, 500, 0, 2)
     phiq_vs_t_RAND = ROOT.TH2D("phiq_vs_t_RAND","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
-    polar_phiq_vs_t_RAND = ROOT.TGraphPolar()
     Q2_vs_W_RAND = ROOT.TH2D("Q2_vs_W_RAND", "Q^{2} vs W; Q^{2}; W", 500, inpDict["Q2min"], inpDict["Q2max"], 500, inpDict["Wmin"], inpDict["Wmax"])
 
 
@@ -399,7 +398,6 @@ def rand_sub(phi_setting, inpDict):
     CoinTime_vs_beta_DUMMY_RAND = ROOT.TH2D("CoinTime_vs_beta_DUMMY_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -2, 2, 500, 0, 2)
     MM_vs_beta_DUMMY_RAND = ROOT.TH2D("MM_vs_beta_DUMMY_RAND", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 500, 0, 2, 500, 0, 2)
     phiq_vs_t_DUMMY_RAND = ROOT.TH2D("phiq_vs_t_DUMMY_RAND","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
-    polar_phiq_vs_t_DUMMY_RAND = ROOT.TGraphPolar()
     Q2_vs_W_DUMMY_RAND = ROOT.TH2D("Q2_vs_W_DUMMY_RAND", "Q^{2} vs W; Q^{2}; W", 500, inpDict["Q2min"], inpDict["Q2max"], 500, inpDict["Wmin"], inpDict["Wmax"])
     
     ################################################################################################################################################
@@ -465,7 +463,6 @@ def rand_sub(phi_setting, inpDict):
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
-          #polar_phiq_vs_t_DATA.SetPoint(i, evt.ph_q, -evt.MandelT)          
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
           # Must be outside diamond cuts to avoid weird overflow errors
           polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
@@ -577,7 +574,6 @@ def rand_sub(phi_setting, inpDict):
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DUMMY.Fill(evt.ph_q, -evt.MandelT)
-          #polar_phiq_vs_t_DUMMY.SetPoint(i, evt.ph_q, -evt.MandelT)          
           Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
           # Must be outside diamond cuts to avoid weird overflow errors
           polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)            
@@ -682,10 +678,7 @@ def rand_sub(phi_setting, inpDict):
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_RAND.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_RAND.Fill(evt.ph_q, -evt.MandelT)
-          #polar_phiq_vs_t_RAND.SetPoint(i, evt.ph_q, -evt.MandelT)          
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
-          # Must be outside diamond cuts to avoid weird overflow errors
-          polar_phiq_vs_t_RAND.SetPoint(polar_phiq_vs_t_RAND.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)            
 
           H_ct_RAND.Fill(evt.CTime_ROC1)          
           
@@ -780,10 +773,7 @@ def rand_sub(phi_setting, inpDict):
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY_RAND.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DUMMY_RAND.Fill(evt.ph_q, -evt.MandelT)
-          #polar_phiq_vs_t_DUMMY_RAND.SetPoint(i, evt.ph_q, -evt.MandelT)          
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
-          # Must be outside diamond cuts to avoid weird overflow errors
-          polar_phiq_vs_t_DUMMY_RAND.SetPoint(polar_phiq_vs_t_DUMMY_RAND.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)            
 
           H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)                   
 
@@ -825,7 +815,6 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_RAND.Scale(1/nWindows)
     phiq_vs_t_RAND.Scale(1/nWindows)
     Q2_vs_W_RAND.Scale(1/nWindows)
-    polar_phiq_vs_t_RAND.Scale(1/nWindows)
     H_ct_RAND.Fill(evt.CTime_ROC1)              
     H_ssxfp_RAND.Scale(1/nWindows)
     H_ssyfp_RAND.Scale(1/nWindows)
@@ -859,7 +848,6 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DUMMY_RAND.Scale(1/nWindows)
     phiq_vs_t_DUMMY_RAND.Scale(1/nWindows)
     Q2_vs_W_DUMMY_RAND.Scale(1/nWindows)
-    polar_phiq_vs_t_DUMMY_RAND.Scale(1/nWindows)    
     H_ssxfp_DUMMY_RAND.Scale(1/nWindows)
     H_ssyfp_DUMMY_RAND.Scale(1/nWindows)
     H_ssxpfp_DUMMY_RAND.Scale(1/nWindows)
@@ -893,7 +881,6 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DATA.Add(MM_vs_beta_RAND,-1)
     phiq_vs_t_DATA.Add(phiq_vs_t_RAND,-1)
     Q2_vs_W_DATA.Add(Q2_vs_W_RAND,-1)
-    polar_phiq_vs_t_DATA.Add(polar_phiq_vs_t_RAND,-1)    
     H_ssxfp_DATA.Add(H_ssxfp_RAND,-1)
     H_ssyfp_DATA.Add(H_ssyfp_RAND,-1)
     H_ssxpfp_DATA.Add(H_ssxpfp_RAND,-1)
@@ -927,7 +914,6 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DUMMY.Add(MM_vs_beta_DUMMY_RAND,-1)
     phiq_vs_t_DUMMY.Add(phiq_vs_t_DUMMY_RAND,-1)
     Q2_vs_W_DUMMY.Add(Q2_vs_W_DUMMY_RAND,-1)
-    polar_phiq_vs_t_DUMMY.Add(polar_phiq_vs_t_DUMMY_RAND,-1)        
     H_ssxfp_DUMMY.Add(H_ssxfp_DUMMY_RAND,-1)
     H_ssyfp_DUMMY.Add(H_ssyfp_DUMMY_RAND,-1)
     H_ssxpfp_DUMMY.Add(H_ssxpfp_DUMMY_RAND,-1)
@@ -991,6 +977,11 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_pmz_DUMMY"] =     H_pmz_DUMMY
     histDict["H_W_DUMMY"] =     H_W_DUMMY
     histDict["H_ct_DUMMY"] =     H_ct_DUMMY
+    histDict["MM_vs_CoinTime_DUMMY"] = MM_vs_CoinTime_DUMMY
+    histDict["CoinTime_vs_beta_DUMMY"] = CoinTime_vs_beta_DUMMY
+    histDict["MM_vs_beta_DUMMY"] = MM_vs_beta_DUMMY
+    histDict["phiq_vs_t_DUMMY"] = phiq_vs_t_DUMMY
+    histDict["polar_phiq_vs_t_DUMMY"] = polar_phiq_vs_t_DUMMY    
     histDict["H_hsdelta_DATA"] =     H_hsdelta_DATA
     histDict["H_hsxptar_DATA"] =     H_hsxptar_DATA
     histDict["H_hsyptar_DATA"] =     H_hsyptar_DATA

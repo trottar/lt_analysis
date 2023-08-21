@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 13:50:16 trottar"
+# Time-stamp: "2023-08-21 13:51:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -758,7 +758,7 @@ for i,hist in enumerate(histlist):
 
 polar_plot.SetMarkerSize(0.5);
 polar_plot.SetMarkerStyle(20);
-polar_plot.SetTitle("-t vrs. #Phi");
+polar_plot.SetTitle("-t vs. #Phi");
 polar_plot.GetXaxis().SetName("#Phi");	
 polar_plot.GetYaxis().SetName("-t");    
 
