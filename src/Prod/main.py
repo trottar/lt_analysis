@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 12:53:31 trottar"
+# Time-stamp: "2023-08-21 12:56:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -759,7 +759,7 @@ for i, hist in enumerate(histlist):
 
     # Assuming hist["H_t_DATA"] contains the data for t_hist and hist["H_ph_q_DATA"] contains the data for phi_hist
     # Fill the t_hist and phi_hist data into the polar graph
-    for bin in range(1, t_hist.GetNbinsX() + 1):
+    for bin in range(1, hist["H_t_DATA"].GetNbinsX() + 1):
         t_value = hist["H_t_DATA"].GetBinContent(bin)
         phi_value = hist["H_ph_q_DATA"].GetBinContent(bin)
         polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi)*(180/math.pi), t_value)
