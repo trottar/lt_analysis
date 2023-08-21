@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 11:56:53 trottar"
+# Time-stamp: "2023-08-21 12:00:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -752,7 +752,7 @@ Cqw.Print(outputpdf)
 Cpht = TCanvas()
 
 # Create a polar plot
-polar_plot = TGraphPolar()
+polar_graph = TGraphPolar()
 polar_graph.SetRadius(tmin, tmax)
 polar_graph.SetTheta(0, 360)
 
