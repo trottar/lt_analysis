@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 13:06:48 trottar"
+# Time-stamp: "2023-08-21 13:10:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -764,7 +764,8 @@ for i, hist in enumerate(histlist):
     for bin in range(1, hist["H_t_DATA"].GetNbinsX() + 1):
         t_value = hist["H_t_DATA"].GetBinContent(bin)
         phi_value = hist["H_ph_q_DATA"].GetBinContent(bin)
-        polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi)*(180/math.pi), t_value)
+        if tmin <= t_value <= tmax:
+            polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi)*(180/math.pi), t_value)
 
     # Set marker style for points
     polar_graph.SetMarkerStyle(20)  # You can adjust the marker style as needed
