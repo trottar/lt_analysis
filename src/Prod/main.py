@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 11:42:02 trottar"
+# Time-stamp: "2023-08-21 11:43:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -761,8 +761,8 @@ polar_plot.GetAxis(1).CenterTitle()
 # Loop through the histlist
 for i, hist in enumerate(histlist):
     # Create TH1Fs for t and phi based on the dictionary settings
-    t_hist = ROOT.TH1F(f"t_hist_{i}", f"t Histogram {i}", hist["H_t_DATA"].GetNbinsX(), tmin, tmax)
-    phi_hist = ROOT.TH1F(f"phi_hist_{i}", f"#phi Histogram {i}", hist["H_t_DATA"].GetNbinsX(), 0, 360)
+    t_hist = ROOT.TH1F("t_hist_{}".format(i), "t Histogram {}".format(i), num_bins, tmin, tmax)
+    phi_hist = ROOT.TH1F("phi_hist_{}".format(i), "#phi Histogram {}".format(i), num_bins, 0, 360)
 
     # Fill the histograms with data (assuming hist["data_t"] and hist["data_phi"] contain the data)
     for t_value in hist["H_t_DATA"]:
