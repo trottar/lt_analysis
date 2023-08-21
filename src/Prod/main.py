@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 11:52:09 trottar"
+# Time-stamp: "2023-08-21 11:56:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -753,10 +753,8 @@ Cpht = TCanvas()
 
 # Create a polar plot
 polar_plot = TGraphPolar()
-polar_plot.GetAxis(0).SetTitle("t")
-polar_plot.GetAxis(1).SetTitle("#phi")
-polar_plot.GetAxis(0).CenterTitle()
-polar_plot.GetAxis(1).CenterTitle()
+polar_graph.SetRadius(tmin, tmax)
+polar_graph.SetTheta(0, 360)
 
 # Loop through the histlist
 for i, hist in enumerate(histlist):
@@ -764,15 +762,11 @@ for i, hist in enumerate(histlist):
     t_hist = ROOT.TH1F("t_hist_{}".format(i), "t Histogram {}".format(i), hist["H_t_DATA"].GetNbinsX(), tmin, tmax)
     phi_hist = ROOT.TH1F("phi_hist_{}".format(i), "#phi Histogram {}".format(i), hist["H_phi_DATA"].GetNbinsX(), 0, 360)
 
-    # Fill the histograms with data (assuming hist["data_t"] and hist["data_phi"] contain the data)
-    for t_value in hist["H_t_DATA"]:
-        t_hist.Fill(t_value)
-    for phi_value in hist["H_phi_DATA"]:
-        phi_hist.Fill((phi_value+math.pi)*(180/math.pi))
-
-    # Add the histograms to the polar plot with different colors
-    polar_plot.AddHistogram(t_hist, "p{}".format(2 * i), "T")
-    polar_plot.AddHistogram(phi_hist, "p{}".format(2 * i + 1), "T")
+    # Fill the t_hist and phi_hist data into the polar graph
+    for bin in range(1, t_hist.GetNbinsX() + 1):
+        t_value = t_hist.GetBinCenter(bin)
+        phi_value = phi_hist.GetBinContent(bin)
+        polar_graph.SetPoint(polar_graph.GetN(), phi_value, t_value)
 
 # Draw the polar plot on the canvas
 Cpht.cd()
