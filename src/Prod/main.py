@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 12:48:43 trottar"
+# Time-stamp: "2023-08-21 12:49:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -765,7 +765,7 @@ for i, hist in enumerate(histlist):
     for bin in range(1, t_hist.GetNbinsX() + 1):
         t_value = hist["H_t_DATA"].GetBinContent(bin)
         phi_value = hist["H_ph_q_DATA"].GetBinContent(bin)
-        polar_graph.SetPoint(polar_graph.GetN(), phi_value, t_value)
+        polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi)*(180/math.pi), t_value)
 
 # Draw the polar plot on the canvas
 Cpht.cd()
