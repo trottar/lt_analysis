@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-16 19:59:30 trottar"
+# Time-stamp: "2023-08-21 11:39:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -748,6 +748,36 @@ for i,hist in enumerate(histlist):
     hist["Q2_vs_W_DATA"].SetTitle(phisetlist[i])
 
 Cqw.Print(outputpdf)
+
+Cpht = TCanvas()
+
+# Create a polar plot
+polar_plot = ROOT.TPolarPlot()
+polar_plot.GetAxis(0).SetTitle("t")
+polar_plot.GetAxis(1).SetTitle("#phi")
+polar_plot.GetAxis(0).CenterTitle()
+polar_plot.GetAxis(1).CenterTitle()
+
+# Loop through the histlist
+for i, hist in enumerate(histlist):
+    # Create TH1Fs for t and phi based on the dictionary settings
+    t_hist = ROOT.TH1F(f"t_hist_{i}", f"t Histogram {i}", hist["H_t_DATA"].GetNbinsX(), t_min, tmax)
+    phi_hist = ROOT.TH1F(f"phi_hist_{i}", f"#phi Histogram {i}", hist["H_t_DATA"].GetNbinsX(), 0, 360)
+
+    # Fill the histograms with data (assuming hist["data_t"] and hist["data_phi"] contain the data)
+    for t_value in hist["H_t_DATA"]:
+        t_hist.Fill(t_value)
+    for phi_value in hist["H_phi_DATA"]:
+        phi_hist.Fill((phi_value+math.pi)*(180/math.pi))
+
+    # Add the histograms to the polar plot with different colors
+    polar_plot.AddHistogram(t_hist, f"p{2*i}", "T")
+    polar_plot.AddHistogram(phi_hist, f"p{2*i+1}", "T")
+
+# Draw the polar plot on the canvas
+Cpht.cd()
+polar_plot.Draw("A")  # "A" option ensures proper scaling and layout
+
 
 '''
 Cpht = TCanvas()
