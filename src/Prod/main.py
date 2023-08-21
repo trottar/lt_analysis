@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 14:15:12 trottar"
+# Time-stamp: "2023-08-21 14:22:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -779,9 +779,13 @@ for i, hist in enumerate(histlist):
     polar_plot.Draw("AP same")
 
 # Set titles and axes for the last plot
-polar_plots[-1].SetTitle("-t vs. #Phi")
 polar_plots[-1].GetXaxis().SetName("#Phi")
-polar_plots[-1].GetYaxis().SetName("-t")  
+polar_plots[-1].GetYaxis().SetName("-t")
+
+# Customize the radial axis labels
+radial_axis = last_polar_plot.GetRaxis()
+radial_axis.SetLabelSize(0.03)  # Adjust the label size (larger value makes labels bigger)
+radial_axis.SetLabelColor(3)    # Set the label color
 
 Cpht.Print(outputpdf)
 
