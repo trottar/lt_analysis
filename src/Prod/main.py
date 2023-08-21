@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 13:31:55 trottar"
+# Time-stamp: "2023-08-21 13:50:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -749,36 +749,20 @@ for i,hist in enumerate(histlist):
 
 Cqw.Print(outputpdf)
 
+Cpht = TCanvas()
 
-# Loop through the histlist
-for i, hist in enumerate(histlist):
+for i,hist in enumerate(histlist):
+    polar_plot = TGraphPolar(hist["polar_phiq_vs_t_DATA"].GetN(), hist["polar_phiq_vs_t_DATA"].GetX(), hist["polar_phiq_vs_t_DATA"].GetY())
+    polar_plot.SetMarkerColor(i+1);	
+    polar_plot.Draw("AP same");
 
-    Cpht = TCanvas()
+polar_plot.SetMarkerSize(0.5);
+polar_plot.SetMarkerStyle(20);
+polar_plot.SetTitle("-t vrs. #Phi");
+polar_plot.GetXaxis().SetName("#Phi");	
+polar_plot.GetYaxis().SetName("-t");    
 
-    # Create a polar plot
-    polar_graph = TGraphPolar()
-    polar_graph.SetMarkerStyle(20)
-    polar_graph.SetMarkerSize(1)
-    polar_graph.SetMarkerColor(i+1)
-    
-    # Assuming hist["H_t_DATA"] contains the data for t_hist and hist["H_ph_q_DATA"] contains the data for phi_hist
-    # Fill the t_hist and phi_hist data into the polar graph
-    for bin in range(1, hist["H_t_DATA"].GetNbinsX() + 1):
-        t_value = hist["H_t_DATA"].GetBinContent(bin)
-        phi_value = hist["H_ph_q_DATA"].GetBinContent(bin)
-        print("~~~~~~~~~~~~~~~~~~~~~~",polar_graph.GetN(), phi_value, t_value)
-        if tmin <= t_value <= tmax:
-            # TGraphPolar is in radians so no need to convert
-            polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi), t_value)
-
-    # Set marker style for points
-    polar_graph.SetMarkerStyle(20)  # You can adjust the marker style as needed
-
-    # Draw the polar plot on the canvas
-    Cpht.cd()
-    polar_graph.Draw("AOP")
-
-    Cpht.Print(outputpdf)
+Cpht.Print(outputpdf)
 
 
 '''
