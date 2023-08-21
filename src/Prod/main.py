@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 13:27:03 trottar"
+# Time-stamp: "2023-08-21 13:31:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -763,22 +763,20 @@ for i, hist in enumerate(histlist):
     
     # Assuming hist["H_t_DATA"] contains the data for t_hist and hist["H_ph_q_DATA"] contains the data for phi_hist
     # Fill the t_hist and phi_hist data into the polar graph
-    j=0
     for bin in range(1, hist["H_t_DATA"].GetNbinsX() + 1):
         t_value = hist["H_t_DATA"].GetBinContent(bin)
         phi_value = hist["H_ph_q_DATA"].GetBinContent(bin)
-        print("~~~~~~~~~~~~~~~~~~~~~~",j, phi_value, t_value)
+        print("~~~~~~~~~~~~~~~~~~~~~~",polar_graph.GetN(), phi_value, t_value)
         if tmin <= t_value <= tmax:
             # TGraphPolar is in radians so no need to convert
-            polar_graph.SetPoint(j, (phi_value+math.pi), t_value)
-        j+=1
+            polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi), t_value)
 
     # Set marker style for points
     polar_graph.SetMarkerStyle(20)  # You can adjust the marker style as needed
 
     # Draw the polar plot on the canvas
     Cpht.cd()
-    polar_graph.Draw("AP")
+    polar_graph.Draw("AOP")
 
     Cpht.Print(outputpdf)
 
