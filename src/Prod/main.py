@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 14:32:40 trottar"
+# Time-stamp: "2023-08-21 19:26:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -830,44 +830,8 @@ averDict.update(aver_per_bin_data(histlist, inpDict))
 averDict.update(aver_per_bin_simc(histlist, inpDict))
 #print(averDict)
 
-'''
-# Loop over each tuple key in the dictionary
-for data_key_tuple,dummy_key_tuple,simc_key_tuple in zip(averDict["binned_DATA"],averDict["binned_DUMMY"],averDict["binned_SIMC"]):
-    # Access the nested dictionary using the tuple key
-    data_nested_dict = averDict["binned_DATA"][data_key_tuple]
-    dummy_nested_dict = averDict["binned_DUMMY"][dummy_key_tuple]
-    simc_nested_dict = averDict["binned_SIMC"][simc_key_tuple]
-    #print("\n\nData-> Tuple: {}, Nested Dictionary: {}".format(data_key_tuple,data_nested_dict))
-    #print("Dummy-> Tuple: {}, Nested Dictionary: {}".format(dummy_key_tuple,dummy_nested_dict))
-    #print("\n\nSimc-> Tuple: {}, Nested Dictionary: {}".format(simc_key_tuple,simc_nested_dict))
-    for hist in histlist:
-        print("{} Data-> Tuple: {}, Data yield: {}, ".format(hist["phi_setting"],data_key_tuple,data_nested_dict["nevents"]*hist["normfac_data"]))
-        print("{} Dummy-> Tuple: {}, Dummy yield: {}, ".format(hist["phi_setting"],dummy_key_tuple,dummy_nested_dict["nevents"]*hist["normfac_dummy"]))
-        
-        #################
-        # HARD CODED
-        #################
-        simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])] = simc_nested_dict["nevents"]/(100*hist["normfac_simc"])
-        #################
-        #################
-        #################
-        
-        print("{} Simc-> Tuple: {}, Simc yield: {}, ".format(hist["phi_setting"],simc_key_tuple,simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])]))
-        # Subtract dummy from data per t/phi bin and get data yield
-        data_nested_dict["yield_data_{}".format(hist["phi_setting"])] = data_nested_dict["nevents"]*hist["normfac_data"] \
-                                                                        - dummy_nested_dict["nevents"]*hist["normfac_dummy"]
-        try:
-            data_nested_dict["ratio_{}".format(hist["phi_setting"])] = \
-                                                                       data_nested_dict["yield_data_{}".format(hist["phi_setting"])] \
-                                                                       / simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])]
-        except ZeroDivisionError:
-            data_nested_dict["ratio_{}".format(hist["phi_setting"])] = 0
-        data_nested_dict["ratio_{}".format(hist["phi_setting"])] = np.where( \
-                                                                             np.isinf(data_nested_dict["ratio_{}".format(hist["phi_setting"])]), \
-                                                                             0, data_nested_dict["ratio_{}".format(hist["phi_setting"])])            
-        print("{}-> Tuple: {}, Ratio: {}, ".format(hist["phi_setting"],data_key_tuple,data_nested_dict["ratio_{}".format(hist["phi_setting"])]))        
-'''
-#print(averDict["binned_DATA"])
+
+# Run fortran script
 
 # t/phi binned histograms
 H_ph_qbins_DATA = ROOT.TH1D("H_ph_qbins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
