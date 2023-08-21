@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 13:01:16 trottar"
+# Time-stamp: "2023-08-21 13:06:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -750,39 +750,31 @@ for i,hist in enumerate(histlist):
 Cqw.Print(outputpdf)
 
 
-Cpht = TCanvas()
-
-# Create a polar plot
-polar_graph = TGraphPolar()
-
-# Define a list of colors for each iteration
-colors = [2, 4, 6, 8, 9, 30, 38, 46, 50, 62]  # You can adjust the colors as needed
-
 # Loop through the histlist
 for i, hist in enumerate(histlist):
 
-    # Set the color for this iteration
-    color = colors[i % len(colors)]
-    polar_graph.SetLineColor(color)
-    polar_graph.SetFillColor(color)
+    Cpht = TCanvas()
+
+    # Create a polar plot
+    polar_graph = TGraphPolar()
+
     
     # Assuming hist["H_t_DATA"] contains the data for t_hist and hist["H_ph_q_DATA"] contains the data for phi_hist
     # Fill the t_hist and phi_hist data into the polar graph
-    t_hist = hist["H_t_DATA"]  # Get t_hist from hist["H_t_DATA"]
-    phi_hist = hist["H_ph_q_DATA"]  # Get phi_hist from hist["H_ph_q_DATA"]
-    for bin in range(1, t_hist.GetNbinsX() + 1):
-        t_value = t_hist.GetBinContent(bin)
-        phi_value = phi_hist.GetBinContent(bin)
+    for bin in range(1, hist["H_t_DATA"].GetNbinsX() + 1):
+        t_value = hist["H_t_DATA"].GetBinContent(bin)
+        phi_value = hist["H_ph_q_DATA"].GetBinContent(bin)
         polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi)*(180/math.pi), t_value)
 
-    # Draw the polar graph for this iteration
-    polar_graph.Draw("AF" if i == 0 else "F")  # Use "AF" for the first iteration, "F" for subsequent iterations
+    # Set marker style for points
+    polar_graph.SetMarkerStyle(20)  # You can adjust the marker style as needed
 
-# Draw the legend
-legend = Cpht.BuildLegend()
-legend.Draw()
+    # Draw the polar plot on the canvas
+    Cpht.cd()
+    polar_graph.Draw("P")  # "P" option stands for points
 
-Cpht.Print(outputpdf)
+    Cpht.Print(outputpdf)
+
 
 '''
 Cpht = TCanvas()
