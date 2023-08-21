@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 13:14:45 trottar"
+# Time-stamp: "2023-08-21 13:18:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -766,6 +766,7 @@ for i, hist in enumerate(histlist):
         phi_value = hist["H_ph_q_DATA"].GetBinContent(bin)
         if tmin <= t_value <= tmax:
             # TGraphPolar is in radians so no need to convert
+            print("~~~~~~~~~~~~~~~~~~~~~~",polar_graph.GetN())
             polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi), t_value)
 
     # Set marker style for points
