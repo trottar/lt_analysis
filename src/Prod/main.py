@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 14:01:53 trottar"
+# Time-stamp: "2023-08-21 14:03:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -777,170 +777,16 @@ Cpht = TCanvas()
 
 for i,hist in enumerate(histlist):
     polar_plot = TGraphPolar(hist["polar_phiq_vs_t_DATA"].GetN(), hist["polar_phiq_vs_t_DATA"].GetX(), hist["polar_phiq_vs_t_DATA"].GetY())
-    polar_plot.SetMarkerColor(i+1);	
-    polar_plot.Draw("AP same");
+    polar_plot.SetMarkerColor(i+1)
+    polar_plot.SetMarkerSize(0.5)
+    polar_plot.SetMarkerStyle(20)    
+    polar_plot.Draw("AP same")
 
-polar_plot.SetMarkerSize(0.5);
-polar_plot.SetMarkerStyle(20);
-polar_plot.SetTitle("-t vs. #Phi");
-polar_plot.GetXaxis().SetName("#Phi");	
-polar_plot.GetYaxis().SetName("-t");    
-
-Cpht.Print(outputpdf)
-
-
-'''
-Cpht = TCanvas()
-
-# Removes stat box
-ROOT.gStyle.SetOptStat(0)
-
-# Create a new TMultiGraph object
-multi_graph = ROOT.TMultiGraph()
-
-# Loop over each TGraphPolar object and add it to the TMultiGraph
-for i, hist in enumerate(histlist):
-    hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
-    hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    #hist["polar_phiq_vs_t_DATA"].SetMarkerStyle(ROOT.kFullCircle)
-    #hist["polar_phiq_vs_t_DATA"].SetLineColor(i+1)
-    multi_graph.Add(hist["polar_phiq_vs_t_DATA"])
-    Cpht.Update()
-    #hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
-
-multi_graph.Draw("COLZ")
-
-# Customize the polar surface plot
-multi_graph.GetXaxis().SetTitle("p_{T} (GeV/c)")
-multi_graph.GetYaxis().SetTitle("#phi")
-multi_graph.GetYaxis().SetTitleOffset(1.2)
-#multi_graph.GetZaxis().SetTitle("Counts")
-#multi_graph.GetZaxis().SetTitleOffset(1.5)
-
-Cpht.Update()
-    
-Cpht.Divide(2,2)
-
-for i,hist in enumerate(histlist):
-    Cpht.cd(i+1)
-    hist["phiq_vs_t_DATA"].GetYaxis().SetRangeUser(tmin,tmax)
-    hist["phiq_vs_t_DATA"].Draw("SURF2 POL")
-    hist["phiq_vs_t_DATA"].SetTitle(phisetlist[i])
-    
-# Section for polar plotting
-gStyle.SetPalette(55)
-gPad.SetTheta(90)
-gPad.SetPhi(180)
-tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
-tvsphi_title.AddText("-t vs #phi")
-tvsphi_title.Draw()
-Cpht.Update()
-ptphizero = TPaveText(0.923951,0.513932,0.993778,0.574551,"NDC")
-ptphizero.AddText("#phi = 0")
-ptphizero.Draw()
-Cpht.Update()
-phihalfk = TLine(0,0,0,0.6)
-phihalfk.SetLineColor(kBlack)
-phihalfk.SetLineWidth(2)
-phihalfk.Draw()
-Cpht.Update()
-ptphihalfk = TPaveText(0.417855,0.901876,0.486574,0.996358,"NDC")
-ptphihalfk.AddText("#phi = #frac{K}{2}")
-ptphihalfk.Draw()
-Cpht.Update()
-phik = TLine(0,0,-0.6,0)
-phik.SetLineColor(kBlack)
-phik.SetLineWidth(2)
-phik.Draw()
-Cpht.Update()
-ptphik = TPaveText(0.0277092,0.514217,0.096428,0.572746,"NDC")
-ptphik.AddText("#phi = K")
-ptphik.Draw()
-Cpht.Update()
-phithreek = TLine(0,0,0,-0.6)
-phithreek.SetLineColor(kBlack)
-phithreek.SetLineWidth(2)
-phithreek.Draw()
-Cpht.Update()
-ptphithreek = TPaveText(0.419517,0.00514928,0.487128,0.0996315,"NDC")
-ptphithreek.AddText("#phi = #frac{3K}{2}")
-ptphithreek.Draw()
-Cpht.Update()
-Arc = TArc()
-for k in range(0, 10):
-     Arc.SetFillStyle(0)
-     Arc.SetLineWidth(2)
-     # To change the arc radius we have to change number 0.6 in the lower line.
-     Arc.DrawArc(0,0,0.6*(k+1)/(10),0.,360.,"same")
-     Cpht.Update()
-for i,(n,b) in enumerate(zip(tbinvals,tbinedges)):
-     Arc.SetLineColor(3)
-     Arc.SetLineWidth(2)
-     # To change the arc radius we have to change number 0.6 in the lower line.
-     Arc.DrawArc(0,0,0.6*b,0.,360.,"same")
-     Cpht.Update()
-tradius = TGaxis(0,0,0.6,0,tmin,tmax,10,"-+")
-tradius.SetLineColor(2)
-tradius.SetLabelColor(2)
-tradius.Draw()
-Cpht.Update()
+polar_plot.SetTitle("-t vs. #Phi")
+polar_plot.GetXaxis().SetName("#Phi")	
+polar_plot.GetYaxis().SetName("-t")    
 
 Cpht.Print(outputpdf)
-
-Cphtsame = TCanvas()
-
-for i,hist in enumerate(histlist):
-    # set colors for the TGraphPolar object
-    hist["polar_phiq_vs_t_DATA"].SetMarkerSize(2)
-    hist["polar_phiq_vs_t_DATA"].SetMarkerColor(i+1)
-    hist["polar_phiq_vs_t_DATA"].SetMarkerStyle(ROOT.kFullCircle)
-    hist["polar_phiq_vs_t_DATA"].SetLineColor(i+1)
-    hist["polar_phiq_vs_t_DATA"].Draw("AOP")
-    Cphtsame.Update()
-    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRangeRadial(0, 2.0)
-    # Hide radial axis labels since redefined below
-    hist["polar_phiq_vs_t_DATA"].GetPolargram().SetRadialLabelSize(0)
-    Cphtsame.Update()
-
-# Section for polar plotting
-gStyle.SetPalette(55)
-gPad.SetTheta(90)
-gPad.SetPhi(180)
-tvsphi_title = TPaveText(0.0277092,0.89779,0.096428,0.991854,"NDC")
-tvsphi_title.AddText("-t vs #phi")
-tvsphi_title.Draw()
-phihalfk = TLine(0,0,0,tmax)
-phihalfk.SetLineColor(kBlack)
-phihalfk.SetLineWidth(2)
-phihalfk.Draw()
-phik = TLine(0,0,-tmax,0)
-phik.SetLineColor(kBlack)
-phik.SetLineWidth(2)
-phik.Draw()
-phithreek = TLine(0,0,0,-tmax)
-phithreek.SetLineColor(kBlack)
-phithreek.SetLineWidth(2)
-phithreek.Draw()
-Arc = TArc()
-for k in range(0, 10):
-    Arc.SetFillStyle(0)
-    Arc.SetLineWidth(2)
-    # To change the arc radius we have to change number tmax in the lower line.
-    Arc.DrawArc(0,0,tmax*(k+1)/(10),0.,360.,"same")
-for i,b in enumerate(t_bins):
-    b = float(b)
-    Arc.SetLineColor(9)
-    Arc.SetLineWidth(2)
-    # To change the arc radius we have to change number tmax in the lower line.
-    Arc.DrawArc(0,0,tmax*b,0.,360.,"same")
-tradius = TGaxis(0,0,tmax,0,tmin,tmax,10,"-+")
-tradius.SetLineColor(9)
-tradius.SetLabelColor(9)
-tradius.Draw()
-    
-Cphtsame.Print(outputpdf)
-
-'''
 
 for i,hist in enumerate(histlist):
     texlist = []
