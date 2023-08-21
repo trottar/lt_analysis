@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 14:25:19 trottar"
+# Time-stamp: "2023-08-21 14:29:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -782,10 +782,10 @@ for i, hist in enumerate(histlist):
 polar_plots[-1].GetXaxis().SetName("#Phi")
 polar_plots[-1].GetYaxis().SetName("-t")
 
-# Customize the radial axis labels
-radial_axis = polar_plots[-1].GetRaxis()
-radial_axis.SetLabelSize(0.03)  # Adjust the label size (larger value makes labels bigger)
-radial_axis.SetLabelColor(3)    # Set the label color
+# Customize the radius labels (size and color)
+polar_plots[-1].GetPolarGrid().SetRadialLabelOffset(-0.03)  # Adjust the radial label offset
+polar_plots[-1].GetPolarGrid().SetRadialLabelSize(0.02)     # Adjust the radial label size
+polar_plots[-1].GetPolarGrid().SetRadialLabelColor(2)  
 
 Cpht.Print(outputpdf)
 
