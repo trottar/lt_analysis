@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 12:26:22 trottar"
+# Time-stamp: "2023-08-21 12:33:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -771,7 +771,7 @@ for i, hist in enumerate(histlist):
     for bin in range(1, t_hist.GetNbinsX() + 1):
         t_value = t_hist.GetBinCenter(bin)
         phi_value = phi_hist.GetBinContent(bin)
-        polar_graph.AddPoint(phi_value, t_value)
+        polar_graph.SetPoint(polar_graph.GetN(), phi_value, t_value)
 
 # Draw the polar plot on the canvas
 Cpht.cd()
