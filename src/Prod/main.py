@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 12:49:21 trottar"
+# Time-stamp: "2023-08-21 12:53:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -756,9 +756,6 @@ polar_graph = TGraphPolar()
 
 # Loop through the histlist
 for i, hist in enumerate(histlist):
-    # Create TH1Fs for t and phi based on the dictionary settings
-    t_hist = ROOT.TH1F("t_hist_{}".format(i), "t Histogram {}".format(i), hist["H_t_DATA"].GetNbinsX(), tmin, tmax)
-    phi_hist = ROOT.TH1F("phi_hist_{}".format(i), "#phi Histogram {}".format(i), hist["H_ph_q_DATA"].GetNbinsX(), 0, 360)
 
     # Assuming hist["H_t_DATA"] contains the data for t_hist and hist["H_ph_q_DATA"] contains the data for phi_hist
     # Fill the t_hist and phi_hist data into the polar graph
@@ -767,9 +764,12 @@ for i, hist in enumerate(histlist):
         phi_value = hist["H_ph_q_DATA"].GetBinContent(bin)
         polar_graph.SetPoint(polar_graph.GetN(), (phi_value+math.pi)*(180/math.pi), t_value)
 
+# Set marker style for points
+polar_graph.SetMarkerStyle(20)  # You can adjust the marker style as needed
+
 # Draw the polar plot on the canvas
 Cpht.cd()
-polar_graph.Draw("A")  # "A" option ensures proper scaling and layout
+polar_graph.Draw("P")  # "P" option stands for points
 
 Cpht.Print(outputpdf)
 
