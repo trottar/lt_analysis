@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 12:00:08 trottar"
+# Time-stamp: "2023-08-21 12:12:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -753,8 +753,6 @@ Cpht = TCanvas()
 
 # Create a polar plot
 polar_graph = TGraphPolar()
-polar_graph.SetRadius(tmin, tmax)
-polar_graph.SetTheta(0, 360)
 
 # Loop through the histlist
 for i, hist in enumerate(histlist):
