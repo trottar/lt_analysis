@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 11:43:38 trottar"
+# Time-stamp: "2023-08-21 11:45:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -771,8 +771,8 @@ for i, hist in enumerate(histlist):
         phi_hist.Fill((phi_value+math.pi)*(180/math.pi))
 
     # Add the histograms to the polar plot with different colors
-    polar_plot.AddHistogram(t_hist, f"p{2*i}", "T")
-    polar_plot.AddHistogram(phi_hist, f"p{2*i+1}", "T")
+    polar_plot.AddHistogram(t_hist, "p{}".format(2 * i), "T")
+    polar_plot.AddHistogram(phi_hist, "p{}".format(2 * i + 1), "T")
 
 # Draw the polar plot on the canvas
 Cpht.cd()
