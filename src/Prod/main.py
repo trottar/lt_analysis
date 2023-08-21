@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 11:51:22 trottar"
+# Time-stamp: "2023-08-21 11:52:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys, math, os, subprocess
 from array import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly, TPolarPlot
+from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import csv
@@ -752,7 +752,7 @@ Cqw.Print(outputpdf)
 Cpht = TCanvas()
 
 # Create a polar plot
-polar_plot = TPolarPlot()
+polar_plot = TGraphPolar()
 polar_plot.GetAxis(0).SetTitle("t")
 polar_plot.GetAxis(1).SetTitle("#phi")
 polar_plot.GetAxis(0).CenterTitle()
