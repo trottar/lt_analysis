@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 12:18:35 trottar"
+# Time-stamp: "2023-08-21 12:21:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -768,7 +768,7 @@ for i, hist in enumerate(histlist):
 
 # Draw the polar plot on the canvas
 Cpht.cd()
-polar_plot.Draw("A")  # "A" option ensures proper scaling and layout
+polar_graph.Draw("A")  # "A" option ensures proper scaling and layout
 
 Cpht.Print(outputpdf)
 
