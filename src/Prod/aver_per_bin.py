@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 21:54:58 trottar"
+# Time-stamp: "2023-08-21 21:56:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -407,13 +407,12 @@ def aver_per_bin_simc(histlist, inpDict):
     averDict = {
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
-        hist["phi_setting"] : {}
     }
         
     for hist in histlist:
         averDict.update({hist["phi_setting"] : {
-            calculate_aver_simc("Q2", hist["H_Q2_SIMC"], hist["H_Q2_DUMMY"], t_bins, phi_bins, hist["phi_setting"]),
-            calculate_aver_simc("W", hist["H_W_SIMC"], hist["H_W_DUMMY"], t_bins, phi_bins, hist["phi_setting"]),
-            calculate_aver_simc("t", hist["H_t_SIMC"], hist["H_t_DUMMY"], t_bins, phi_bins, hist["phi_setting"])   
+            calculate_aver_simc("Q2", hist["H_Q2_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]),
+            calculate_aver_simc("W", hist["H_W_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]),
+            calculate_aver_simc("t", hist["H_t_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"])
         }})
     return {"binned_SIMC" : averDict}
