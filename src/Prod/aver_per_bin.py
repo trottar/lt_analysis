@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 20:17:32 trottar"
+# Time-stamp: "2023-08-21 21:40:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -139,7 +139,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             "{}_aver".format(kin_type) : tup[3],
         }            
             
-    return {phi_setting : groups}
+    return groups
 
 def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins, phi_setting):
     
@@ -221,7 +221,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins, phi_setti
             "{}_aver".format(kin_type) : tup[3],
         }                    
     
-    return {phi_setting : groups}
+    return groups
 
 ##################################################################################################################################################
 
@@ -408,8 +408,8 @@ def aver_per_bin_simc(histlist, inpDict):
     }
         
     for hist in histlist:          
-        averDict.update(calculate_aver_simc("Q2", hist["H_Q2_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
-        averDict.update(calculate_aver_simc("W", hist["H_W_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
-        averDict.update(calculate_aver_simc("t", hist["H_t_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict[phi_setting].update(calculate_aver_simc("Q2", hist["H_Q2_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict[phi_setting].update(calculate_aver_simc("W", hist["H_W_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict[phi_setting].update(calculate_aver_simc("t", hist["H_t_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
 
     return {"binned_SIMC" : averDict}
