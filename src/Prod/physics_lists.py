@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 21:05:27 trottar"
+# Time-stamp: "2023-08-21 21:09:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,39 +13,6 @@
 import sys, os, math
 import ROOT
 import numpy as np
-
-################################################################################################################################################
-
-kinematics = inpDict["kinematics"] 
-W = inpDict["W"] 
-Q2 = inpDict["Q2"] 
-EPSVAL = inpDict["EPSVAL"] 
-InDATAFilename = inpDict["InDATAFilename"] 
-InDUMMYFilename = inpDict["InDUMMYFilename"] 
-OutFilename = inpDict["OutFilename"] 
-tmin = inpDict["tmin"] 
-tmax = inpDict["tmax"] 
-NumtBins = inpDict["NumtBins"] 
-NumPhiBins = inpDict["NumPhiBins"] 
-runNumRight = inpDict["runNumRight"] 
-runNumLeft = inpDict["runNumLeft"] 
-runNumCenter = inpDict["runNumCenter"]
-data_charge_right = inpDict["data_charge_right"] 
-data_charge_left = inpDict["data_charge_left"] 
-data_charge_center = inpDict["data_charge_center"] 
-dummy_charge_right = inpDict["dummy_charge_right"] 
-dummy_charge_left = inpDict["dummy_charge_left"] 
-dummy_charge_center = inpDict["dummy_charge_center"] 
-InData_efficiency_right = inpDict["InData_efficiency_right"] 
-InData_efficiency_left = inpDict["InData_efficiency_left"] 
-InData_efficiency_center = inpDict["InData_efficiency_center"] 
-efficiency_table = inpDict["efficiency_table"] 
-ParticleType = inpDict["ParticleType"]
-
-if ParticleType == "kaon":
-    PID = "k"
-elif ParticleType == "pion":
-    PID = "pi"
 
 ################################################################################################################################################
 '''
@@ -66,6 +33,41 @@ OUTPATH=lt.OUTPATH
 
 def create_lists(averDict, inpDict):
 
+    ################################################################################################################################################
+
+    kinematics = inpDict["kinematics"] 
+    W = inpDict["W"] 
+    Q2 = inpDict["Q2"] 
+    EPSVAL = inpDict["EPSVAL"] 
+    InDATAFilename = inpDict["InDATAFilename"] 
+    InDUMMYFilename = inpDict["InDUMMYFilename"] 
+    OutFilename = inpDict["OutFilename"] 
+    tmin = inpDict["tmin"] 
+    tmax = inpDict["tmax"] 
+    NumtBins = inpDict["NumtBins"] 
+    NumPhiBins = inpDict["NumPhiBins"] 
+    runNumRight = inpDict["runNumRight"] 
+    runNumLeft = inpDict["runNumLeft"] 
+    runNumCenter = inpDict["runNumCenter"]
+    data_charge_right = inpDict["data_charge_right"] 
+    data_charge_left = inpDict["data_charge_left"] 
+    data_charge_center = inpDict["data_charge_center"] 
+    dummy_charge_right = inpDict["dummy_charge_right"] 
+    dummy_charge_left = inpDict["dummy_charge_left"] 
+    dummy_charge_center = inpDict["dummy_charge_center"] 
+    InData_efficiency_right = inpDict["InData_efficiency_right"] 
+    InData_efficiency_left = inpDict["InData_efficiency_left"] 
+    InData_efficiency_center = inpDict["InData_efficiency_center"] 
+    efficiency_table = inpDict["efficiency_table"] 
+    ParticleType = inpDict["ParticleType"]
+
+    if ParticleType == "kaon":
+        PID = "k"
+    elif ParticleType == "pion":
+        PID = "pi"
+
+    ################################################################################################################################################        
+    
     for k, data_key_tuple in enumerate(averDict["binned_DATA"]):
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
