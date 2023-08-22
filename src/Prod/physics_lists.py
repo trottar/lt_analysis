@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-22 01:12:19 trottar"
+# Time-stamp: "2023-08-22 01:23:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,7 +76,6 @@ def create_lists(averDict, inpDict):
     phisetlist = ["Center","Left","Right"]
     for phiset in phisetlist:
         try:
-            print("!!!!!!!!!!!!!!!!!", phiset)
             for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
                 # Access the nested dictionary using the tuple key
                 data_nested_dict = averDict["binned_DATA"][phiset]
@@ -122,6 +121,7 @@ def create_lists(averDict, inpDict):
                     ebeam_right = float(EbeamValRight[i])
                     break
                 else:
+                    print("!!!!!!!!!!!!!!!!!", pid_log)
                     continue
 
         if phiset == "Left":
