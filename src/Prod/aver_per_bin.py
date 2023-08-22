@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 22:55:51 trottar"
+# Time-stamp: "2023-08-21 23:07:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -338,23 +338,17 @@ def aver_per_bin_data(histlist, inpDict):
         "phi_bins" : phi_bins
     }
         
-
     # List of kinematic types
     kinematic_types = ["Q2", "W", "t"]
 
     # Loop through histlist and update averDict
     for hist in histlist:
         phi_setting = hist["phi_setting"]
-        if phi_setting not in averDict:
-            averDict[phi_setting] = {}
+        averDict[phi_setting] = {}
         for kin_type in kinematic_types:
             averaged_data = calculate_aver_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins, phi_setting)
-            if kin_type not in averDict[phi_setting]:
-                averDict[phi_setting][kin_type] = {}
-            for key, value in averaged_data.items():
-                if key not in averDict[phi_setting][kin_type]:
-                    averDict[phi_setting][kin_type][key] = []
-                averDict[phi_setting][kin_type][key].extend(value)
+            averDict[phi_setting][kin_type] = averaged_data
+
                 
         return {"binned_DATA" : averDict}
 
