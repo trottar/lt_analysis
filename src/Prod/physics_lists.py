@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 23:24:01 trottar"
+# Time-stamp: "2023-08-21 23:27:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,31 +70,35 @@ def create_lists(averDict, inpDict):
 
     phisetlist = ["Center","Left","Right"]
     for phiset in phisetlist:
-        for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
-            # Access the nested dictionary using the tuple key
-            data_nested_dict = averDict["binned_DATA"][phiset]
-            i = data_key_tuple[0] # t bin
-            j = data_key_tuple[1] # phi bin
-            tbin = averDict["binned_DATA"]["t_bins"][i]
-            phibin = averDict["binned_DATA"]["phi_bins"][j]
-            if phiset == "Right":
-                phibin_right_data = phibin
-                tbin_right_data = tbin
-                averQ2_right_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                averW_right_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                avert_right_data = data_nested_dict['t'][data_key_tuple]["t_arr"] 
-            if phiset == "Left":
-                phibin_left_data = phibin
-                tbin_left_data = tbin
-                averQ2_left_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                averW_left_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                avert_left_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
-            if phiset == "Center":
-                phibin_center_data = phibin
-                tbin_center_data = tbin
-                averQ2_center_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                averW_center_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                avert_center_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
+        try:
+            for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
+                # Access the nested dictionary using the tuple key
+                data_nested_dict = averDict["binned_DATA"][phiset]
+                i = data_key_tuple[0] # t bin
+                j = data_key_tuple[1] # phi bin
+                tbin = averDict["binned_DATA"]["t_bins"][i]
+                phibin = averDict["binned_DATA"]["phi_bins"][j]
+                if phiset == "Right":
+                    phibin_right_data = phibin
+                    tbin_right_data = tbin
+                    averQ2_right_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
+                    averW_right_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
+                    avert_right_data = data_nested_dict['t'][data_key_tuple]["t_arr"] 
+                if phiset == "Left":
+                    phibin_left_data = phibin
+                    tbin_left_data = tbin
+                    averQ2_left_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
+                    averW_left_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
+                    avert_left_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
+                if phiset == "Center":
+                    phibin_center_data = phibin
+                    tbin_center_data = tbin
+                    averQ2_center_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
+                    averW_center_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
+                    avert_center_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
+        except KeyError:
+            print("No {} setting found...".format(phiset))
+            continue
 
     ################################################################################################################################################
 
