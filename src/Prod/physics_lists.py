@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 23:33:15 trottar"
+# Time-stamp: "2023-08-22 00:03:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,6 +28,11 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+###############################################################################################################################################
+# Importing utility functions
+
+from utility import write_to_file
 
 ###############################################################################################################################################
 
@@ -99,14 +104,6 @@ def create_lists(averDict, inpDict):
         except KeyError:
             print("No {} setting found...".format(phiset))
             continue
-
-    ################################################################################################################################################
-
-    def write_to_file(f_out,line,write_mode='a'):
-        # Open a file in append mode
-        with open(f_out, write_mode) as f:
-            # Write the value of the variable to the file
-            f.write(line)
 
     ################################################################################################################################################
 

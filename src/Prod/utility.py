@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 14:55:01 trottar"
+# Time-stamp: "2023-08-22 00:02:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,6 +25,14 @@ def show_pdf_with_evince(file_path):
         print("Evince not found. Please make sure it is installed.")
     except Exception as e:
         print("An error occurred: {}".format(e))
+
+################################################################################################################################################
+
+def write_to_file(f_out,line,write_mode='a'):
+    # Open a file in append mode
+    with open(f_out, write_mode) as f:
+        # Write the value of the variable to the file
+        f.write(line)        
 
 ################################################################################################################################################
 
