@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 22:20:19 trottar"
+# Time-stamp: "2023-08-21 22:24:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,6 +72,7 @@ def create_lists(averDict, inpDict):
     for k, data_key_tuple in enumerate(averDict["binned_DATA"]):
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][data_key_tuple]
+        print("--------------------",data_nested_dict)
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
         tbin = averDict["binned_DATA"]["t_bins"][i]
