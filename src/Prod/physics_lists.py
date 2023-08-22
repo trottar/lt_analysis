@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-22 00:49:00 trottar"
+# Time-stamp: "2023-08-22 01:12:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,48 +104,50 @@ def create_lists(averDict, inpDict):
                     avert_center_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
         except KeyError:
             print("No {} setting found...".format(phiset))
+            phisetlist.remove(phiset)
             continue
 
     ################################################################################################################################################
 
     # Define thpq vector relative to middle setting
-    if float(runNumRight[0]) != 0:
-        runNums = runNumRight
-        for i, run in enumerate(runNumRight):
-            runNum = run
-            pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
-            if os.path.exists(pid_log):
-                thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
-                #thpq_right = 3.000
-                ebeam_right = float(EbeamValRight[i])
-                break
-            else:
-                continue
+    for phiset in phisetlist:
+        if phiset == "Right":
+            runNums = runNumRight
+            for i, run in enumerate(runNumRight):
+                runNum = run
+                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                if os.path.exists(pid_log):
+                    thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
+                    #thpq_right = 3.000
+                    ebeam_right = float(EbeamValRight[i])
+                    break
+                else:
+                    continue
 
-    if float(runNumLeft[0]) != 0:
-        runNums = runNumLeft
-        for i, run in enumerate(runNumLeft):
-            runNum = run
-            pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
-            if os.path.exists(pid_log):
-                thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
-                #thpq_left = 3.000
-                ebeam_left = float(EbeamValLeft[i])
-                break
-            else:
-                continue
+        if phiset == "Left":
+            runNums = runNumLeft
+            for i, run in enumerate(runNumLeft):
+                runNum = run
+                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                if os.path.exists(pid_log):
+                    thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
+                    #thpq_left = 3.000
+                    ebeam_left = float(EbeamValLeft[i])
+                    break
+                else:
+                    continue
 
-    if float(runNumCenter[0]) != 0:
-        runNums = runNumCenter
-        for i, run in enumerate(runNumCenter):
-            runNum = run
-            pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
-            if os.path.exists(pid_log):
-                thpq_center = 0.000
-                ebeam_center = float(EbeamValCenter[i])
-                break
-            else:
-                continue
+        if phiset == "Center":
+            runNums = runNumCenter
+            for i, run in enumerate(runNumCenter):
+                runNum = run
+                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                if os.path.exists(pid_log):
+                    thpq_center = 0.000
+                    ebeam_center = float(EbeamValCenter[i])
+                    break
+                else:
+                    continue
 
     ################################################################################################################################################
 
