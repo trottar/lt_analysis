@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 23:37:29 trottar"
+# Time-stamp: "2023-08-21 23:40:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,7 +347,7 @@ def aver_per_bin_data(histlist, inpDict):
         print("\n Finding averages for {}...".format(phi_setting))
         averDict[phi_setting] = {}
         for kin_type in kinematic_types:
-            averaged_data = calculate_aver_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins, phi_setting)
+            averaged_data = calculate_aver_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins)
             averDict[phi_setting][kin_type] = averaged_data
                 
         return {"binned_DATA" : averDict}
@@ -423,7 +423,7 @@ def aver_per_bin_simc(histlist, inpDict):
         print("\n Finding averages for {}...".format(phi_setting))
         averDict[phi_setting] = {}
         for kin_type in kinematic_types:
-            averaged_simc = calculate_aver_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins, phi_setting)
+            averaged_simc = calculate_aver_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins)
             averDict[phi_setting][kin_type] = averaged_simc
 
     return {"binned_SIMC" : averDict}
