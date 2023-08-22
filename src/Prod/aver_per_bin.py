@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-22 00:06:13 trottar"
+# Time-stamp: "2023-08-22 00:14:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -344,15 +344,15 @@ def aver_per_bin_data(histlist, inpDict):
     # Loop through histlist and update averDict
     for hist in histlist:
         phi_setting = hist["phi_setting"]
-        print("\n\n","-"*25)
+        print("\n\n")
         print("-"*25)
-        print("Finding averages for {}...".format(phi_setting))
+        print("-"*25)
+        print("Finding data averages for {}...".format(phi_setting))
         print("-"*25)
         print("-"*25)
         averDict[phi_setting] = {}
         for kin_type in kinematic_types:
-            averaged_data = calculate_aver_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins)
-            averDict[phi_setting][kin_type] = averaged_data
+            averDict[phi_setting][kin_type] = calculate_aver_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins)
                 
         return {"binned_DATA" : averDict}
 
@@ -424,14 +424,14 @@ def aver_per_bin_simc(histlist, inpDict):
     # Loop through histlist and update averDict
     for hist in histlist:
         phi_setting = hist["phi_setting"]
-        print("\n\n","-"*25)
+        print("\n\n")
         print("-"*25)
-        print("Finding averages for {}...".format(phi_setting))
+        print("-"*25)
+        print("Finding simc averages for {}...".format(phi_setting))
         print("-"*25)
         print("-"*25)
         averDict[phi_setting] = {}
         for kin_type in kinematic_types:
-            averaged_simc = calculate_aver_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins)
-            averDict[phi_setting][kin_type] = averaged_simc
+            averDict[phi_setting][kin_type] = calculate_aver_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins)
 
     return {"binned_SIMC" : averDict}
