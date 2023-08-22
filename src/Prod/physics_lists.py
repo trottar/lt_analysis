@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-22 01:33:45 trottar"
+# Time-stamp: "2023-08-22 01:40:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,7 +113,7 @@ def create_lists(averDict, inpDict):
         if phiset == "Right":
             runNums = runNumRight
             for i, run in enumerate(runNumRight.split(' ')):
-                runNum = runright
+                runNum = run
                 pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
                 if os.path.exists(pid_log):
                     thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
