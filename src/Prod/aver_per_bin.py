@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-22 00:14:08 trottar"
+# Time-stamp: "2023-08-22 00:20:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
-    print("\n\nFinding average {} per t-bin...".format(kin_type))
+    print("Finding average {} per t-bin...".format(kin_type))
     print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
@@ -170,7 +170,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
-    print("\n\nFinding average {} per t-bin...".format(kin_type))
+    print("Finding average {} per t-bin...".format(kin_type))
     print("-"*25)
     for data in binned_hist_data:
         bin_val_data, hist_val_data = data
