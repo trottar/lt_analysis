@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 21:45:08 trottar"
+# Time-stamp: "2023-08-21 21:49:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -336,12 +336,13 @@ def aver_per_bin_data(histlist, inpDict):
     averDict = {
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
+        hist["phi_setting"] : {}
     }
         
     for hist in histlist:          
-        averDict.update(calculate_aver_data("Q2", hist["H_Q2_DATA"], hist["H_Q2_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
-        averDict.update(calculate_aver_data("W", hist["H_W_DATA"], hist["H_W_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
-        averDict.update(calculate_aver_data("t", hist["H_t_DATA"], hist["H_t_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict[hist["phi_setting"]].update(calculate_aver_data("Q2", hist["H_Q2_DATA"], hist["H_Q2_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict[hist["phi_setting"]].update(calculate_aver_data("W", hist["H_W_DATA"], hist["H_W_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict[hist["phi_setting"]].update(calculate_aver_data("t", hist["H_t_DATA"], hist["H_t_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
     
     return {"binned_DATA" : averDict}
 
@@ -405,6 +406,7 @@ def aver_per_bin_simc(histlist, inpDict):
     averDict = {
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
+        hist["phi_setting"] : {}
     }
         
     for hist in histlist:          
