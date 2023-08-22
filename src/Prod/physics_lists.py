@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-22 01:23:03 trottar"
+# Time-stamp: "2023-08-22 01:33:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,8 +112,8 @@ def create_lists(averDict, inpDict):
     for phiset in phisetlist:
         if phiset == "Right":
             runNums = runNumRight
-            for i, run in enumerate(runNumRight):
-                runNum = run
+            for i, run in enumerate(runNumRight.split(' ')):
+                runNum = runright
                 pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
                 if os.path.exists(pid_log):
                     thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
@@ -124,9 +124,11 @@ def create_lists(averDict, inpDict):
                     print("!!!!!!!!!!!!!!!!!", pid_log)
                     continue
 
+    # Define thpq vector relative to middle setting
+    for phiset in phisetlist:
         if phiset == "Left":
             runNums = runNumLeft
-            for i, run in enumerate(runNumLeft):
+            for i, run in enumerate(runNumLeft.split(' ')):
                 runNum = run
                 pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
                 if os.path.exists(pid_log):
@@ -135,18 +137,23 @@ def create_lists(averDict, inpDict):
                     ebeam_left = float(EbeamValLeft[i])
                     break
                 else:
+                    print("!!!!!!!!!!!!!!!!!", pid_log)
                     continue
 
+    # Define thpq vector relative to middle setting
+    for phiset in phisetlist:
         if phiset == "Center":
             runNums = runNumCenter
-            for i, run in enumerate(runNumCenter):
+            for i, run in enumerate(runNumCenter.split(' ')):
                 runNum = run
                 pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
                 if os.path.exists(pid_log):
-                    thpq_center = 0.000
+                    thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
+                    #thpq_center = 3.000
                     ebeam_center = float(EbeamValCenter[i])
                     break
                 else:
+                    print("!!!!!!!!!!!!!!!!!", pid_log)
                     continue
 
     ################################################################################################################################################
