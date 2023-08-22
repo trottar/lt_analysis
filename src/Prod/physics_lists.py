@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 20:27:23 trottar"
+# Time-stamp: "2023-08-21 20:29:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,6 @@ OUTPATH=lt.OUTPATH
 ###############################################################################################################################################
 
 for k, data_key_tuple in enumerate(averDict["binned_DATA"]):
-    for phiset in phisetlist:
     i = data_key_tuple[0] # t bin
     j = data_key_tuple[1] # phi bin
     tbin = averDict["t_bins"][i]
