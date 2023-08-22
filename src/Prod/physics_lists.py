@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 23:27:52 trottar"
+# Time-stamp: "2023-08-21 23:33:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,7 +112,7 @@ def create_lists(averDict, inpDict):
 
     # Define thpq vector relative to middle setting
     if float(runNumRight[0]) != 0:
-        runNums= runNumRight
+        runNums = runNumRight
         for i, run in enumerate(runNumRight):
             runNum = run
             pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
@@ -125,7 +125,7 @@ def create_lists(averDict, inpDict):
                 continue
 
     if float(runNumLeft[0]) != 0:
-        runNums= runNumLeft
+        runNums = runNumLeft
         for i, run in enumerate(runNumLeft):
             runNum = run
             pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
@@ -138,7 +138,7 @@ def create_lists(averDict, inpDict):
                 continue
 
     if float(runNumCenter[0]) != 0:
-        runNums= runNumCenter
+        runNums = runNumCenter
         for i, run in enumerate(runNumCenter):
             runNum = run
             pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
@@ -148,8 +148,6 @@ def create_lists(averDict, inpDict):
                 break
             else:
                 continue
-
-    print(thpq_left)
 
     ################################################################################################################################################
 
