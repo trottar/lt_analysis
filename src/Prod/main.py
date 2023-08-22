@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 19:26:16 trottar"
+# Time-stamp: "2023-08-21 19:38:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -830,9 +830,11 @@ averDict.update(aver_per_bin_data(histlist, inpDict))
 averDict.update(aver_per_bin_simc(histlist, inpDict))
 #print(averDict)
 
-
 # Run fortran script
+from physics_lists import create_lists
+create_lists(averDict, inpDict)
 
+'''
 # t/phi binned histograms
 H_ph_qbins_DATA = ROOT.TH1D("H_ph_qbins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
 H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
@@ -1119,6 +1121,7 @@ C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".fo
 
 #if DEBUG:
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
+'''
 
 ##############################
 # Step 7 of the lt_analysis: #

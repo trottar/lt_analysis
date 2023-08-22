@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-12 16:37:33 trottar"
+# Time-stamp: "2023-08-21 20:17:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins):
+def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins, phi_setting):
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
@@ -138,11 +138,10 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             "{}_arr".format(kin_type) : tup[2],
             "{}_aver".format(kin_type) : tup[3],
         }            
-        
-    
-    return groups
+            
+    return {phi_setting : groups}
 
-def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
+def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins, phi_setting):
     
     # Initialize lists for binned_t_data, and binned_hist_data
     binned_t_data = []
@@ -222,7 +221,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
             "{}_aver".format(kin_type) : tup[3],
         }                    
     
-    return groups
+    return {phi_setting : groups}
 
 ##################################################################################################################################################
 
@@ -338,9 +337,11 @@ def aver_per_bin_data(histlist, inpDict):
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
     }
-    averDict.update(calculate_aver_data("Q2", Q2_data, Q2_dummy, t_data, t_bins, phi_bins))
-    averDict.update(calculate_aver_data("W", W_data, W_dummy, t_data, t_bins, phi_bins))
-    averDict.update(calculate_aver_data("t", t_data, t_dummy, t_data, t_bins, phi_bins))
+        
+    for hist in histlist:          
+        averDict.update(calculate_aver_data("Q2", hist["H_Q2_DATA"], hist["H_Q2_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict.update(calculate_aver_data("W", hist["H_W_DATA"], hist["H_W_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict.update(calculate_aver_data("t", hist["H_t_DATA"], hist["H_t_DUMMY"], hist["H_t_DATA"], t_bins, phi_bins, hist["phi_setting"]))
     
     return {"binned_DATA" : averDict}
 
@@ -401,9 +402,14 @@ def aver_per_bin_simc(histlist, inpDict):
             combined_content = t_Center_SIMC.GetBinContent(bin) + t_Left_SIMC.GetBinContent(bin)
         t_simc.SetBinContent(bin, combined_content)
 
-    averDict = {}        
-    averDict.update(calculate_aver_simc("Q2", Q2_simc, t_simc, t_bins, phi_bins))
-    averDict.update(calculate_aver_simc("W", W_simc, t_simc, t_bins, phi_bins))
-    averDict.update(calculate_aver_simc("t", t_simc, t_simc, t_bins, phi_bins))
+    averDict = {
+        "t_bins" : t_bins,
+        "phi_bins" : phi_bins
+    }
+        
+    for hist in histlist:          
+        averDict.update(calculate_aver_simc("Q2", hist["H_Q2_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict.update(calculate_aver_simc("W", hist["H_W_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
+        averDict.update(calculate_aver_simc("t", hist["H_t_SIMC"], hist["H_t_SIMC"], t_bins, phi_bins, hist["phi_setting"]))
 
     return {"binned_SIMC" : averDict}
