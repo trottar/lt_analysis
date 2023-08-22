@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 22:48:31 trottar"
+# Time-stamp: "2023-08-21 23:17:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,14 +70,14 @@ def create_lists(averDict, inpDict):
 
     phisetlist = ["Center","Left","Right"]
     for phiset in phisetlist:
-        for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]):
+        for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
             # Access the nested dictionary using the tuple key
-            data_nested_dict = averDict["binned_DATA"][phiset][data_key_tuple]
-            print("-----------------",averDict["binned_DATA"][phiset][data_key_tuple])
+            data_nested_dict = averDict["binned_DATA"][phiset]['t'][data_key_tuple]
+            print("-----------------",averDict["binned_DATA"][phiset]['t'][data_key_tuple])
             i = data_key_tuple[0] # t bin
             j = data_key_tuple[1] # phi bin
-            tbin = data_nested_dict["t_bins"][i]
-            phibin = data_nested_dict["phi_bins"][j]
+            tbin = averDict["binned_DATA"]["t_bins"][i]
+            phibin = averDict["binned_DATA"]["phi_bins"][j]
             print("_________________",i,tbin,j,phibin)
             if phiset == "Right":
                 phibin_right_data = phibin
