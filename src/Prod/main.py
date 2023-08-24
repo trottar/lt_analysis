@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 15:06:31 trottar"
+# Time-stamp: "2023-08-24 15:20:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -874,12 +874,13 @@ for phiset in phisetlist:
         histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_Q2_tbin_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc Q2 (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 500, inpDict["Q2min"], inpDict["Q2max"])
         histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_W_tbin_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc W (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 500, inpDict["Wmin"], inpDict["Wmax"])
         histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_t_tbin_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc t (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 500, inpDict["tmin"], inpDict["tmax"])
-   
+
 C_Q2_tbin_DATA = TCanvas()
 C_Q2_tbin_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
+    data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
+    for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
@@ -895,7 +896,8 @@ C_Q2_tbin_SIMC = TCanvas()
 C_Q2_tbin_SIMC.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, simc_key_tuple in enumerate(averDict["binned_SIMC"][phiset]['t']):
+    simc_key_tuples = list(averDict["binned_SIMC"][phiset]['t'])
+    for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
         simc_nested_dict = averDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
@@ -905,13 +907,14 @@ for phiset in phisetlist:
             histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_SIMC.cd(k+1)
         histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
-C_Q2_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
+C_Q2_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+'(')
 
 C_W_tbin_DATA = TCanvas()
 C_W_tbin_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
+    data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
+    for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
@@ -927,7 +930,8 @@ C_W_tbin_SIMC = TCanvas()
 C_W_tbin_SIMC.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, simc_key_tuple in enumerate(averDict["binned_SIMC"][phiset]['t']):
+    simc_key_tuples = list(averDict["binned_SIMC"][phiset]['t'])
+    for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
         simc_nested_dict = averDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
@@ -943,7 +947,8 @@ C_t_tbin_DATA = TCanvas()
 C_t_tbin_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
+    data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
+    for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
@@ -959,7 +964,8 @@ C_t_tbin_SIMC = TCanvas()
 C_t_tbin_SIMC.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, simc_key_tuple in enumerate(averDict["binned_SIMC"][phiset]['t']):
+    simc_key_tuples = list(averDict["binned_SIMC"][phiset]['t'])
+    for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
         simc_nested_dict = averDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
@@ -974,7 +980,8 @@ C_t_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_"
 C_t_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
+    data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
+    for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
@@ -989,7 +996,8 @@ C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_"
 C_phi_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
+    data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
+    for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
