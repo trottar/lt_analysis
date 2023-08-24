@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 12:25:39 trottar"
+# Time-stamp: "2023-08-24 13:22:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,13 @@ def create_lists(averDict, inpDict):
     InData_efficiency_center = inpDict["InData_efficiency_center"] 
     efficiency_table = inpDict["efficiency_table"] 
     ParticleType = inpDict["ParticleType"]
-
+    pThetaValRight = inpDict["pThetaValRight"]
+    EbeamValRight = inpDict["EbeamValRight"]
+    pThetaValLeft = inpDict["pThetaValLeft"]
+    EbeamValLeft = inpDict["EbeamValLeft"]
+    pThetaValCenter = inpDict["pThetaValCenter"]
+    EbeamValCenter = inpDict["EbeamValCenter"]
+    
     if ParticleType == "kaon":
         PID = "k"
     elif ParticleType == "pion":
@@ -73,19 +79,7 @@ def create_lists(averDict, inpDict):
 
     ################################################################################################################################################        
 
-    phisetlist = ["Center","Left","Right"]
-
-    for phiset in phisetlist:
-        if phiset == "Right":
-                pThetaValRight = inpDict["pThetaValRight"]
-                EbeamValRight = inpDict["EbeamValRight"]
-        if phiset == "Left":
-                pThetaValLeft = inpDict["pThetaValLeft"]
-                EbeamValLeft = inpDict["EbeamValLeft"]
-        if phiset == "Center":
-                pThetaValCenter = inpDict["pThetaValCenter"]
-                EbeamValCenter = inpDict["EbeamValCenter"]
-                
+    phisetlist = ["Center","Left","Right"]                
     for phiset in phisetlist:
         try:
             for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):

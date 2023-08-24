@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 12:23:36 trottar"
+# Time-stamp: "2023-08-24 13:23:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,7 +107,7 @@ inpDict = {
     "InData_efficiency_center" : InData_efficiency_center,
     "efficiency_table" : efficiency_table,
     "ParticleType" : ParticleType,
-    "EPSSET" : EPSSET
+    "EPSSET" : EPSSET,
     "pThetaValRight" : pThetaValRight,
     "pThetaValLeft" : pThetaValLeft,
     "pThetaValCenter" : pThetaValCenter,
