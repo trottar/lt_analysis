@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 14:11:57 trottar"
+# Time-stamp: "2023-08-24 14:16:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -248,7 +248,7 @@ def create_lists(averDict, inpDict):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin_right_data.append(0.0)
+            tbin_right_data = np.append(tbin_right_data, 0.0)
             for i, Q2val in enumerate(averQ2_right_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
                 write_to_file(f_list,check_line)
@@ -267,7 +267,7 @@ def create_lists(averDict, inpDict):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin_left_data.append(0.0)
+            tbin_left_data = np.append(tbin_left_data, 0.0)
             for i, Q2val in enumerate(averQ2_left_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
                 write_to_file(f_list,check_line)
@@ -286,7 +286,7 @@ def create_lists(averDict, inpDict):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin_center_data.append(0.0)
+            tbin_center_data = np.append(tbin_center_data, 0.0)
             for i, Q2val in enumerate(averQ2_center_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
                 write_to_file(f_list,check_line)
