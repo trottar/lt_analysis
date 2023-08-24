@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 14:07:15 trottar"
+# Time-stamp: "2023-08-24 14:11:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,8 +41,9 @@ def create_lists(averDict, inpDict):
     ################################################################################################################################################
 
     kinematics = inpDict["kinematics"] 
-    W = inpDict["W"] 
-    Q2 = float(inpDict["Q2"].replace("p","."))
+    W = inpDict["W"]
+    Qs = inpDict["Q2"]
+    Q2 = float(Qs.replace("p","."))
     EPSVAL = float(inpDict["EPSVAL"] )
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
@@ -240,7 +241,7 @@ def create_lists(averDict, inpDict):
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
-        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_right*1000))
+        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
 
         if not os.path.exists(f_list):
             open(f_list, "w").close()    
@@ -259,7 +260,7 @@ def create_lists(averDict, inpDict):
             write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumLeft[0]) != 0:
-        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100, int(thpq_left*1000))
+        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
 
         if not os.path.exists(f_list):
             open(f_list, "w").close()    
@@ -278,7 +279,7 @@ def create_lists(averDict, inpDict):
             write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumCenter[0]) != 0:
-        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100)
+        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100)
 
         if not os.path.exists(f_list):
             open(f_list, "w").close()    
