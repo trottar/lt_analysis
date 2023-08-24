@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-22 01:40:11 trottar"
+# Time-stamp: "2023-08-24 12:25:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,6 +74,18 @@ def create_lists(averDict, inpDict):
     ################################################################################################################################################        
 
     phisetlist = ["Center","Left","Right"]
+
+    for phiset in phisetlist:
+        if phiset == "Right":
+                pThetaValRight = inpDict["pThetaValRight"]
+                EbeamValRight = inpDict["EbeamValRight"]
+        if phiset == "Left":
+                pThetaValLeft = inpDict["pThetaValLeft"]
+                EbeamValLeft = inpDict["EbeamValLeft"]
+        if phiset == "Center":
+                pThetaValCenter = inpDict["pThetaValCenter"]
+                EbeamValCenter = inpDict["EbeamValCenter"]
+                
     for phiset in phisetlist:
         try:
             for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
