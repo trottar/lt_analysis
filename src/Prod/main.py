@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 16:31:50 trottar"
+# Time-stamp: "2023-08-24 16:40:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -878,7 +878,7 @@ for phiset in phisetlist:
 C_Q2_tbin_DATA = TCanvas()
 C_Q2_tbin_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
-for phiset in phisetlist:
+for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
@@ -889,13 +889,14 @@ for phiset in phisetlist:
         for val in data_nested_dict["Q2"]["Q2_arr"]:
             histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_DATA.cd(k+1)
+        histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
-C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+'(')
+C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+'(')
 
 C_Q2_tbin_SIMC = TCanvas()
 C_Q2_tbin_SIMC.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
-for phiset in phisetlist:
+for it,phiset in enumerate(phisetlist):
     simc_key_tuples = list(averDict["binned_SIMC"][phiset]['t'])
     for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
@@ -906,13 +907,14 @@ for phiset in phisetlist:
         for val in simc_nested_dict["Q2"]["Q2_arr"]:
             histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_SIMC.cd(k+1)
+        histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
-C_Q2_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+'(')
+C_Q2_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+'(')
 
 C_W_tbin_DATA = TCanvas()
 C_W_tbin_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
-for phiset in phisetlist:
+for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
@@ -923,13 +925,14 @@ for phiset in phisetlist:
         for val in data_nested_dict["W"]["W_arr"]:
             histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_W_tbin_DATA.cd(k+1)
+        histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
-C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
+C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_W_tbin_SIMC = TCanvas()
 C_W_tbin_SIMC.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
-for phiset in phisetlist:
+for it,phiset in enumerate(phisetlist):
     simc_key_tuples = list(averDict["binned_SIMC"][phiset]['t'])
     for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
@@ -940,13 +943,14 @@ for phiset in phisetlist:
         for val in simc_nested_dict["W"]["W_arr"]:
             histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_W_tbin_SIMC.cd(k+1)
+        histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
-C_W_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
+C_W_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_t_tbin_DATA = TCanvas()
 C_t_tbin_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
-for phiset in phisetlist:
+for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
@@ -957,13 +961,14 @@ for phiset in phisetlist:
         for val in data_nested_dict["t"]["t_arr"]:
             histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_t_tbin_DATA.cd(k+1)
+        histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
-C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
+C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_t_tbin_SIMC = TCanvas()
 C_t_tbin_SIMC.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
-for phiset in phisetlist:
+for it,phiset in enumerate(phisetlist):
     simc_key_tuples = list(averDict["binned_SIMC"][phiset]['t'])
     for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
@@ -974,8 +979,9 @@ for phiset in phisetlist:
         for val in simc_nested_dict["t"]["t_arr"]:
             histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_t_tbin_SIMC.cd(k+1)
+        histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
-C_t_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
+C_t_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
     
 C_t_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
@@ -993,7 +999,7 @@ for it,phiset in enumerate(phisetlist):
             H_tbins_DATA.Fill(float())
     H_tbins_DATA.Draw("same")
     H_tbins_DATA.SetLineColor(it+1)
-C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
+C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_phi_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
@@ -1009,9 +1015,9 @@ for it,phiset in enumerate(phisetlist):
             H_phibins_DATA.Fill(float(val))
     H_phibins_DATA.Draw("same")
     H_phibins_DATA.SetLineColor(it+1)
-C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+')')
+C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+')')
 
-show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
+show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 # Run fortran script
 from physics_lists import create_lists
