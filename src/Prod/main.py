@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 13:56:23 trottar"
+# Time-stamp: "2023-08-24 14:06:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,8 +38,8 @@ from utility import show_pdf_with_evince
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=33:
-    print("!!!!! ERROR !!!!!\n Expected 33 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=34:
+    print("!!!!! ERROR !!!!!\n Expected 34 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL KSet\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -80,6 +80,7 @@ EbeamValRight = list(sys.argv[30].split(" "))
 EbeamValLeft = list(sys.argv[31].split(" "))
 EbeamValCenter = list(sys.argv[32].split(" "))
 POL = sys.argv[33]
+KSet = sys.argv[34]
 
 inpDict = {
     "kinematics" : kinematics,
@@ -115,6 +116,7 @@ inpDict = {
     "EbeamValLeft" : EbeamValLeft,
     "EbeamValCenter" : EbeamValCenter,
     "POL" : POL,
+    "KSet" : KSet,
 }
 
 ###############################################################################################################################################

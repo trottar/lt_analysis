@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 14:02:33 trottar"
+# Time-stamp: "2023-08-24 14:07:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,6 +72,7 @@ def create_lists(averDict, inpDict):
     pThetaValCenter = inpDict["pThetaValCenter"]
     EbeamValCenter = inpDict["EbeamValCenter"]
     POL = inpDict["POL"]
+    KSet = inpDict["KSet"]
     
     if ParticleType == "kaon":
         PID = "k"
@@ -215,7 +216,7 @@ def create_lists(averDict, inpDict):
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-            check_line = "{} {} {:.4f} -{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins, Kset)
+            check_line = "{} {} {:.4f} -{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins, KSet)
             # Check if the line already exists
             if check_line not in lines:
                 write_to_file(f_list_settings,check_line)
@@ -224,7 +225,7 @@ def create_lists(averDict, inpDict):
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()        
-            check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins, Kset)
+            check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins, KSet)
             if check_line not in lines:
                 write_to_file(f_list_settings,check_line)
 
@@ -232,7 +233,7 @@ def create_lists(averDict, inpDict):
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()        
-            check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins, Kset)
+            check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins, KSet)
             if check_line not in lines:
                 write_to_file(f_list_settings,check_line)            
 
