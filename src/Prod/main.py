@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 16:26:41 trottar"
+# Time-stamp: "2023-08-24 16:31:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -849,7 +849,7 @@ averDict.update(aver_per_bin_simc(histlist, inpDict))
 #print(averDict)
 
 # t/phi binned histograms
-H_ph_qbins_DATA = ROOT.TH1D("H_ph_qbins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
+H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
 H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
 
 histbinDict = {}
@@ -989,7 +989,8 @@ for it,phiset in enumerate(phisetlist):
         print("~~~~~~~~~~~~~~~~~~",(i),(j))
         print("~~~~~~~~~~~~~~~~~~",type(i),type(j))
         # Fill histogram
-        H_tbins_DATA.Fill(float(averDict["binned_DATA"]["t_bins"]))
+        for val in averDict["binned_DATA"]["t_bins"]:
+            H_tbins_DATA.Fill(float())
     H_tbins_DATA.Draw("same")
     H_tbins_DATA.SetLineColor(it+1)
 C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
@@ -1004,9 +1005,10 @@ for it,phiset in enumerate(phisetlist):
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
         # Fill histogram
-        H_ph_qbins_DATA.Fill(float(averDict["binned_DATA"]["phi_bins"]))
-    H_ph_qbins_DATA.Draw("same")
-    H_ph_qbins_DATA.SetLineColor(it+1)
+        for val in averDict["binned_DATA"]["phi_bins"]:
+            H_phibins_DATA.Fill(float(val))
+    H_phibins_DATA.Draw("same")
+    H_phibins_DATA.SetLineColor(it+1)
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+')')
 
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
@@ -1017,7 +1019,7 @@ create_lists(averDict, inpDict)
 
 '''
 # t/phi binned histograms
-H_ph_qbins_DATA = ROOT.TH1D("H_ph_qbins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
+H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
 H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
 H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
 H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0, 1.0)
@@ -1153,9 +1155,9 @@ for i, data_key_tuple in enumerate(averDict["binned_DATA"]):
     data_nested_dict = averDict["binned_DATA"][data_key_tuple]
     for val in data_nested_dict["phi_bins"]:
         # Fill histogram
-        H_ph_qbins_DATA.Fill(float(val))
-    H_ph_qbins_DATA.Draw("same")
-    H_ph_qbins_DATA.SetLineColor(i+1)
+        H_phibins_DATA.Fill(float(val))
+    H_phibins_DATA.Draw("same")
+    H_phibins_DATA.SetLineColor(i+1)
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_yield_DATA = TCanvas()
