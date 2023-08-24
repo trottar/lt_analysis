@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 13:22:52 trottar"
+# Time-stamp: "2023-08-24 13:41:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,7 +42,7 @@ def create_lists(averDict, inpDict):
 
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
-    Q2 = inpDict["Q2"] 
+    Q2 = inpDict["Q2"].replace("p",".")
     EPSVAL = inpDict["EPSVAL"] 
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
