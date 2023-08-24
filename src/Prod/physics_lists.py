@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 13:49:27 trottar"
+# Time-stamp: "2023-08-24 13:55:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,8 +42,8 @@ def create_lists(averDict, inpDict):
 
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
-    Q2 = inpDict["Q2"].replace("p",".")
-    EPSVAL = inpDict["EPSVAL"] 
+    Q2 = float(inpDict["Q2"].replace("p","."))
+    EPSVAL = float(inpDict["EPSVAL"] )
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
     OutFilename = inpDict["OutFilename"] 
@@ -71,6 +71,7 @@ def create_lists(averDict, inpDict):
     EbeamValLeft = inpDict["EbeamValLeft"]
     pThetaValCenter = inpDict["pThetaValCenter"]
     EbeamValCenter = inpDict["EbeamValCenter"]
+    POL = inpDict["POL"]
     
     if ParticleType == "kaon":
         PID = "k"
