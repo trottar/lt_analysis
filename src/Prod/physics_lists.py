@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 13:41:53 trottar"
+# Time-stamp: "2023-08-24 13:49:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -171,30 +171,39 @@ def create_lists(averDict, inpDict):
     if float(runNumRight[0]) != 0:
         # First check if line exists
         with open(f_list_settings, 'r') as f:
-            lines = f.readlines()    
-            check_line = "{:.3f} {} {:.4f}\n".format(ebeam_right, Q2, EPSVAL)
-            # Check if the line already exists
-            if check_line not in lines:
-                write_to_file(f_list_settings,check_line)
+            lines = f.readlines()
+            try:
+                check_line = "{:.3f} {} {:.4f}\n".format(ebeam_right, Q2, EPSVAL)
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list_settings,check_line)
+            except ValueError:
+                print("Error: Value not float...",type(ebeam_right), type(Q2), type(EPSVAL))
 
     if float(runNumLeft[0]) != 0:
         # First check if line exists
         with open(f_list_settings, 'r') as f:
-            lines = f.readlines()    
-            check_line = "{:.3f} {} {:.4f}\n".format(ebeam_left, Q2, EPSVAL)
-            # Check if the line already exists
-            if check_line not in lines:
-                write_to_file(f_list_settings,check_line)
+            lines = f.readlines()
+            try:
+                check_line = "{:.3f} {} {:.4f}\n".format(ebeam_left, Q2, EPSVAL)
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list_settings,check_line)
+            except ValueError:
+                print("Error: Value not float...",type(ebeam_left), type(Q2), type(EPSVAL))
 
     if float(runNumCenter[0]) != 0:
         # First check if line exists
         with open(f_list_settings, 'r') as f:
-            lines = f.readlines()        
-            check_line = "{:.3f} {} {:.4f}\n".format(ebeam_center, Q2, EPSVAL)
-            # Check if the line already exists
-            if check_line not in lines:
-                write_to_file(f_list_settings,check_line)
-
+            lines = f.readlines()
+            try:
+                check_line = "{:.3f} {} {:.4f}\n".format(ebeam_center, Q2, EPSVAL)
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list_settings,check_line)
+            except ValueError:
+                print("Error: Value not float...",type(ebeam_center), type(Q2), type(EPSVAL))
+                
     ################################################################################################################################################
 
     f_list_settings = '{}/src/list.settings'.format(LTANAPATH)
