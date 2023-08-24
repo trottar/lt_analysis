@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 15:35:52 trottar"
+# Time-stamp: "2023-08-24 15:49:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -952,7 +952,8 @@ for phiset in phisetlist:
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
-        j = data_key_tuple[1] # phi bin    
+        j = data_key_tuple[1] # phi bin
+        print("~~~~~~~~~~~~~~~~~~",type(i),type(j))
         # Fill histogram
         for val in data_nested_dict["t"]["t_arr"]:
             histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
