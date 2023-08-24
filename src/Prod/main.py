@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 14:43:50 trottar"
+# Time-stamp: "2023-08-24 14:50:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -887,9 +887,9 @@ for phiset in phisetlist:
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for val in data_nested_dict["Q2"]["Q2_arr"]:
-            histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,i+1,j+1)].Fill(val)
+            histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_DATA.cd(k+1)
-        histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,i+1,j+1)].Draw("same")
+        histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
 C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+'(')
 
 C_Q2_tbin_SIMC = TCanvas()
@@ -903,9 +903,9 @@ for phiset in phisetlist:
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for val in simc_nested_dict["Q2"]["Q2_arr"]:
-            histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,i+1,j+1)].Fill(val)
+            histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_SIMC.cd(k+1)
-        histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,i+1,j+1)].Draw("same")
+        histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
 C_Q2_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
 
 C_W_tbin_DATA = TCanvas()
@@ -919,9 +919,9 @@ for phiset in phisetlist:
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for val in data_nested_dict["W"]["W_arr"]:
-            histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,i+1,j+1)].Fill(val)
+            histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_W_tbin_DATA.cd(k+1)
-        histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,i+1,j+1)].Draw("same")
+        histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
 C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
 
 C_W_tbin_SIMC = TCanvas()
@@ -935,9 +935,9 @@ for phiset in phisetlist:
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for val in simc_nested_dict["W"]["W_arr"]:
-            histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,i+1,j+1)].Fill(val)
+            histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_W_tbin_SIMC.cd(k+1)
-        histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,i+1,j+1)].Draw("same")
+        histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
 C_W_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
 
 C_t_tbin_DATA = TCanvas()
@@ -951,9 +951,9 @@ for phiset in phisetlist:
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for val in data_nested_dict["t"]["t_arr"]:
-            histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,i+1,j+1)].Fill(val)
+            histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_t_tbin_DATA.cd(k+1)
-        histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,i+1,j+1)].Draw("same")
+        histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
 C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
 
 C_t_tbin_SIMC = TCanvas()
@@ -967,9 +967,9 @@ for phiset in phisetlist:
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for val in simc_nested_dict["t"]["t_arr"]:
-            histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,i+1,j+1)].Fill(val)
+            histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_t_tbin_SIMC.cd(k+1)
-        histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,i+1,j+1)].Draw("same")
+        histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same")
 C_t_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
     
 C_t_bins_DATA = TCanvas()
@@ -1033,9 +1033,9 @@ for data_key_tuple in averDict["binned_DATA"]:
 for simc_key_tuple in averDict["binned_SIMC"]:
     i = simc_key_tuple[0] # t bin
     j = simc_key_tuple[1] # phi bin
-    histbinDict["H_Q2_tbin_SIMC_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_Q2_tbin_SIMC_{}_{}".format(i+1,j+1), "Simc Q2 (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["Q2min"], inpDict["Q2max"])
-    histbinDict["H_W_tbin_SIMC_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_W_tbin_SIMC_{}_{}".format(i+1,j+1), "Simc W (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["Wmin"], inpDict["Wmax"])
-    histbinDict["H_t_tbin_SIMC_{}_{}".format(i+1,j+1)] = ROOT.TH1D("H_t_tbin_SIMC_{}_{}".format(i+1,j+1), "Simc t (t bin {}, phi bin {})".format(i+1,j+1), 500, inpDict["tmin"], inpDict["tmax"])
+    histbinDict["H_Q2_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))] = ROOT.TH1D("H_Q2_tbin_SIMC_{}_{}".format(str(i+1),str(j+1)), "Simc Q2 (t bin {}, phi bin {})".format(str(i+1),str(j+1)), 500, inpDict["Q2min"], inpDict["Q2max"])
+    histbinDict["H_W_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))] = ROOT.TH1D("H_W_tbin_SIMC_{}_{}".format(str(i+1),str(j+1)), "Simc W (t bin {}, phi bin {})".format(str(i+1),str(j+1)), 500, inpDict["Wmin"], inpDict["Wmax"])
+    histbinDict["H_t_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))] = ROOT.TH1D("H_t_tbin_SIMC_{}_{}".format(str(i+1),str(j+1)), "Simc t (t bin {}, phi bin {})".format(str(i+1),str(j+1)), 500, inpDict["tmin"], inpDict["tmax"])
     
 C_Q2_tbin_DATA = TCanvas()
 C_Q2_tbin_DATA.Divide(NumtBins,NumPhiBins)
@@ -1047,9 +1047,9 @@ for k, data_key_tuple in enumerate(averDict["binned_DATA"]):
     data_nested_dict = averDict["binned_DATA"][data_key_tuple]    
     # Fill histogram
     for val in data_nested_dict["Q2_arr"]:
-        histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+        histbinDict["H_Q2_tbin_DATA_{}_{}".format(str(i+1),str(j+1))].Fill(val)
     C_Q2_tbin_DATA.cd(k+1)
-    histbinDict["H_Q2_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
+    histbinDict["H_Q2_tbin_DATA_{}_{}".format(str(i+1),str(j+1))].Draw("same")
 C_Q2_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
 
 C_Q2_tbin_SIMC = TCanvas()
@@ -1062,9 +1062,9 @@ for k, simc_key_tuple in enumerate(averDict["binned_SIMC"]):
     simc_nested_dict = averDict["binned_SIMC"][simc_key_tuple]    
     # Fill histogram
     for val in simc_nested_dict["Q2_arr"]:
-        histbinDict["H_Q2_tbin_SIMC_{}_{}".format(i+1,j+1)].Fill(val)
+        histbinDict["H_Q2_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))].Fill(val)
     C_Q2_tbin_SIMC.cd(k+1)
-    histbinDict["H_Q2_tbin_SIMC_{}_{}".format(i+1,j+1)].Draw("same")
+    histbinDict["H_Q2_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))].Draw("same")
 C_Q2_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_W_tbin_DATA = TCanvas()
@@ -1077,9 +1077,9 @@ for k, data_key_tuple in enumerate(averDict["binned_DATA"]):
     data_nested_dict = averDict["binned_DATA"][data_key_tuple]    
     # Fill histogram
     for val in data_nested_dict["W_arr"]:
-        histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+        histbinDict["H_W_tbin_DATA_{}_{}".format(str(i+1),str(j+1))].Fill(val)
     C_W_tbin_DATA.cd(k+1)
-    histbinDict["H_W_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
+    histbinDict["H_W_tbin_DATA_{}_{}".format(str(i+1),str(j+1))].Draw("same")
 C_W_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_W_tbin_SIMC = TCanvas()
@@ -1092,9 +1092,9 @@ for k, simc_key_tuple in enumerate(averDict["binned_SIMC"]):
     simc_nested_dict = averDict["binned_SIMC"][simc_key_tuple]    
     # Fill histogram
     for val in simc_nested_dict["W_arr"]:
-        histbinDict["H_W_tbin_SIMC_{}_{}".format(i+1,j+1)].Fill(val)
+        histbinDict["H_W_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))].Fill(val)
     C_W_tbin_SIMC.cd(k+1)
-    histbinDict["H_W_tbin_SIMC_{}_{}".format(i+1,j+1)].Draw("same")
+    histbinDict["H_W_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))].Draw("same")
 C_W_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_t_tbin_DATA = TCanvas()
@@ -1107,9 +1107,9 @@ for k, data_key_tuple in enumerate(averDict["binned_DATA"]):
     data_nested_dict = averDict["binned_DATA"][data_key_tuple]    
     # Fill histogram
     for val in data_nested_dict["t_arr"]:
-        histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Fill(val)
+        histbinDict["H_t_tbin_DATA_{}_{}".format(str(i+1),str(j+1))].Fill(val)
     C_t_tbin_DATA.cd(k+1)
-    histbinDict["H_t_tbin_DATA_{}_{}".format(i+1,j+1)].Draw("same")
+    histbinDict["H_t_tbin_DATA_{}_{}".format(str(i+1),str(j+1))].Draw("same")
 C_t_tbin_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_t_tbin_SIMC = TCanvas()
@@ -1122,9 +1122,9 @@ for k, simc_key_tuple in enumerate(averDict["binned_SIMC"]):
     simc_nested_dict = averDict["binned_SIMC"][simc_key_tuple]    
     # Fill histogram
     for val in simc_nested_dict["t_arr"]:
-        histbinDict["H_t_tbin_SIMC_{}_{}".format(i+1,j+1)].Fill(val)
+        histbinDict["H_t_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))].Fill(val)
     C_t_tbin_SIMC.cd(k+1)
-    histbinDict["H_t_tbin_SIMC_{}_{}".format(i+1,j+1)].Draw("same")
+    histbinDict["H_t_tbin_SIMC_{}_{}".format(str(i+1),str(j+1))].Draw("same")
 C_t_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
 
 C_t_bins_DATA = TCanvas()
