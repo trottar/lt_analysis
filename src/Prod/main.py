@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 15:57:22 trottar"
+# Time-stamp: "2023-08-24 16:26:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -979,7 +979,7 @@ C_t_tbin_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_"
     
 C_t_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
-for phiset in phisetlist:
+for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
@@ -988,27 +988,25 @@ for phiset in phisetlist:
         j = data_key_tuple[1] # phi bin
         print("~~~~~~~~~~~~~~~~~~",(i),(j))
         print("~~~~~~~~~~~~~~~~~~",type(i),type(j))
-        for val in averDict["binned_DATA"]["t_bins"]:
-            # Fill histogram
-            H_tbins_DATA.Fill(float(val))
-        H_tbins_DATA.Draw("same")
-        H_tbins_DATA.SetLineColor(int(i+1))
+        # Fill histogram
+        H_tbins_DATA.Fill(float(averDict["binned_DATA"]["t_bins"]))
+    H_tbins_DATA.Draw("same")
+    H_tbins_DATA.SetLineColor(it+1)
 C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
 
 C_phi_bins_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
-for phiset in phisetlist:
+for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(averDict["binned_DATA"][phiset]['t'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        for val in averDict["binned_DATA"]["phi_bins"]:
-            # Fill histogram
-            H_ph_qbins_DATA.Fill(float(val))
-        H_ph_qbins_DATA.Draw("same")
-        H_ph_qbins_DATA.SetLineColor(int(i+1))
+        # Fill histogram
+        H_ph_qbins_DATA.Fill(float(averDict["binned_DATA"]["phi_bins"]))
+    H_ph_qbins_DATA.Draw("same")
+    H_ph_qbins_DATA.SetLineColor(it+1)
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+')')
 
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
