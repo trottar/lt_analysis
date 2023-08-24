@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 14:59:12 trottar"
+# Time-stamp: "2023-08-24 15:02:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -864,7 +864,6 @@ for phiset in phisetlist:
         histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_W_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data W (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 500, inpDict["Wmin"], inpDict["Wmax"])
         histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_t_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data t (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 500, inpDict["tmin"], inpDict["tmax"]) 
 
-histbinDict = {}
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
     for k, simc_key_tuple in enumerate(averDict["binned_SIMC"][phiset]['t']):
