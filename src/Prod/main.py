@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 13:29:59 trottar"
+# Time-stamp: "2023-08-24 13:32:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,8 +38,11 @@ from utility import show_pdf_with_evince
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=31:
-    print("!!!!! ERROR !!!!!\n Expected 31 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter\n!!!!! ERROR !!!!!")
+print(list(sys.argv[27].split(" ")),list(sys.argv[28].split(" ")),list(sys.argv[29].split(" ")),list(sys.argv[30].split(" ")),list(sys.argv[31].split(" ")),list(sys.argv[32].split(" ")))
+
+
+if len(sys.argv)-1!=32:
+    print("!!!!! ERROR !!!!!\n Expected 32 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
