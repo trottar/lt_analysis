@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 15:53:41 trottar"
+# Time-stamp: "2023-08-24 15:57:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -986,6 +986,7 @@ for phiset in phisetlist:
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
+        print("~~~~~~~~~~~~~~~~~~",(i),(j))
         print("~~~~~~~~~~~~~~~~~~",type(i),type(j))
         for val in averDict["binned_DATA"]["t_bins"]:
             # Fill histogram
