@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 15:24:56 trottar"
+# Time-stamp: "2023-08-24 15:29:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -990,7 +990,7 @@ for phiset in phisetlist:
             # Fill histogram
             H_tbins_DATA.Fill(float(val))
         H_tbins_DATA.Draw("same")
-        H_tbins_DATA.SetLineColor(i+1)
+        H_tbins_DATA.SetLineColor(str(i+1))
 C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
 
 C_phi_bins_DATA = TCanvas()
@@ -1005,8 +1005,8 @@ for phiset in phisetlist:
         for val in averDict["binned_DATA"]["phi_bins"]:
             # Fill histogram
             H_ph_qbins_DATA.Fill(float(val))
-    H_ph_qbins_DATA.Draw("same")
-    H_ph_qbins_DATA.SetLineColor(i+1)
+        H_ph_qbins_DATA.Draw("same")
+        H_ph_qbins_DATA.SetLineColor(str(i+1))
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+')')
 
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType)))
