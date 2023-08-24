@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 15:20:36 trottar"
+# Time-stamp: "2023-08-24 15:24:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -986,7 +986,7 @@ for phiset in phisetlist:
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        for val in averDict["binned_DATA"]["t_bins"][i]:
+        for val in averDict["binned_DATA"]["t_bins"]:
             # Fill histogram
             H_tbins_DATA.Fill(float(val))
         H_tbins_DATA.Draw("same")
@@ -1002,9 +1002,9 @@ for phiset in phisetlist:
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-    for val in averDict["binned_DATA"]["phi_bins"][j]:
-        # Fill histogram
-        H_ph_qbins_DATA.Fill(float(val))
+        for val in averDict["binned_DATA"]["phi_bins"]:
+            # Fill histogram
+            H_ph_qbins_DATA.Fill(float(val))
     H_ph_qbins_DATA.Draw("same")
     H_ph_qbins_DATA.SetLineColor(i+1)
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_binned_".format(hist["phi_setting"],ParticleType))+')')
