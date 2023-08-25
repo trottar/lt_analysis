@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 00:08:06 trottar"
+# Time-stamp: "2023-08-25 00:12:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -888,7 +888,7 @@ for it,phiset in enumerate(phisetlist):
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(data_nested_dict["Q2"][(i,j)]["Q2_arr"]):
             print("~~~~~~~~~~~~~~~~Q2", i+1, j+1, val)
-            histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill((itt+jtt)/2)
+            histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_DATA.cd(k+1)
         histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, E1")
@@ -906,7 +906,7 @@ for it,phiset in enumerate(phisetlist):
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(simc_nested_dict["Q2"][(i,j)]["Q2_arr"]):
-            histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill((itt+jtt)/2)
+            histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_SIMC.cd(k+1)
         histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, E1")
@@ -924,7 +924,7 @@ for it,phiset in enumerate(phisetlist):
         j = data_key_tuple[1] # phi bin    
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(data_nested_dict["W"][(i,j)]["W_arr"]):
-            histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill((itt+jtt)/2)
+            histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_W_tbin_DATA.cd(k+1)
         histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, E1")
@@ -942,7 +942,7 @@ for it,phiset in enumerate(phisetlist):
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(simc_nested_dict["W"][(i,j)]["W_arr"]):
-            histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill((itt+jtt)/2)
+            histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_W_tbin_SIMC.cd(k+1)
         histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, E1")
@@ -960,7 +960,7 @@ for it,phiset in enumerate(phisetlist):
         j = data_key_tuple[1] # phi bin
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(data_nested_dict["t"][(i,j)]["t_arr"]):
-            histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill((itt+jtt)/2)
+            histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_t_tbin_DATA.cd(k+1)
         histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, E1")
@@ -978,7 +978,7 @@ for it,phiset in enumerate(phisetlist):
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(simc_nested_dict["t"][(i,j)]["t_arr"]):
-            histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill((itt+jtt)/2)
+            histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_t_tbin_SIMC.cd(k+1)
         histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
         histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, E1")
