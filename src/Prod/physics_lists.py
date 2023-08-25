@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 01:06:20 trottar"
+# Time-stamp: "2023-08-25 01:12:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,6 +82,16 @@ def create_lists(averDict, inpDict):
 
     ################################################################################################################################################        
 
+    averQ2_right_data = []
+    averW_right_data = []
+    avert_right_data = []
+    averQ2_left_data = []
+    averW_left_data = []
+    avert_left_data = []
+    averQ2_center_data = []
+    averW_center_data = []
+    avert_center_data = []
+    
     phisetlist = ["Center","Left","Right"]                
     for phiset in phisetlist:
         try:
@@ -95,21 +105,21 @@ def create_lists(averDict, inpDict):
                 if phiset == "Right":
                     phibin_right_data = phibin
                     tbin_right_data = tbin
-                    averQ2_right_data = data_nested_dict['Q2'][data_key_tuple]["Q2_aver"]
-                    averW_right_data = data_nested_dict['W'][data_key_tuple]["W_aver"]
-                    avert_right_data = data_nested_dict['t'][data_key_tuple]["t_aver"]
+                    averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
+                    averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
+                    avert_right_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
                 if phiset == "Left":
                     phibin_left_data = phibin
                     tbin_left_data = tbin
-                    averQ2_left_data = data_nested_dict['Q2'][data_key_tuple]["Q2_aver"]
-                    averW_left_data = data_nested_dict['W'][data_key_tuple]["W_aver"]
-                    avert_left_data = data_nested_dict['t'][data_key_tuple]["t_aver"]
+                    averQ2_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
+                    averW_left_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
+                    avert_left_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
                 if phiset == "Center":
                     phibin_center_data = phibin
                     tbin_center_data = tbin
-                    averQ2_center_data = data_nested_dict['Q2'][data_key_tuple]["Q2_aver"]
-                    averW_center_data = data_nested_dict['W'][data_key_tuple]["W_aver"]
-                    avert_center_data = data_nested_dict['t'][data_key_tuple]["t_aver"]
+                    averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
+                    averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
+                    avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
         except KeyError:
             print("No {} setting found...".format(phiset))
             phisetlist.remove(phiset)
