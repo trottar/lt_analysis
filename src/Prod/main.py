@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 23:11:07 trottar"
+# Time-stamp: "2023-08-24 23:16:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -887,7 +887,7 @@ for it,phiset in enumerate(phisetlist):
         j = data_key_tuple[1] # phi bin    
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(data_nested_dict["Q2"][(i,j)]["Q2_arr"]):
-            print("~~~~~~~~~~~~~~~~Q2", i+1, j+1, len(val))
+            print("~~~~~~~~~~~~~~~~Q2", i+1, j+1, val)
             histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill((itt+jtt)/2, val)
         C_Q2_tbin_DATA.cd(k+1)
         histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
