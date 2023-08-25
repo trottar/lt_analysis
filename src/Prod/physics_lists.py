@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 00:51:35 trottar"
+# Time-stamp: "2023-08-25 01:06:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,21 +95,21 @@ def create_lists(averDict, inpDict):
                 if phiset == "Right":
                     phibin_right_data = phibin
                     tbin_right_data = tbin
-                    averQ2_right_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                    averW_right_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                    avert_right_data = data_nested_dict['t'][data_key_tuple]["t_arr"] 
+                    averQ2_right_data = data_nested_dict['Q2'][data_key_tuple]["Q2_aver"]
+                    averW_right_data = data_nested_dict['W'][data_key_tuple]["W_aver"]
+                    avert_right_data = data_nested_dict['t'][data_key_tuple]["t_aver"]
                 if phiset == "Left":
                     phibin_left_data = phibin
                     tbin_left_data = tbin
-                    averQ2_left_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                    averW_left_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                    avert_left_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
+                    averQ2_left_data = data_nested_dict['Q2'][data_key_tuple]["Q2_aver"]
+                    averW_left_data = data_nested_dict['W'][data_key_tuple]["W_aver"]
+                    avert_left_data = data_nested_dict['t'][data_key_tuple]["t_aver"]
                 if phiset == "Center":
                     phibin_center_data = phibin
                     tbin_center_data = tbin
-                    averQ2_center_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                    averW_center_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                    avert_center_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
+                    averQ2_center_data = data_nested_dict['Q2'][data_key_tuple]["Q2_aver"]
+                    averW_center_data = data_nested_dict['W'][data_key_tuple]["W_aver"]
+                    avert_center_data = data_nested_dict['t'][data_key_tuple]["t_aver"]
         except KeyError:
             print("No {} setting found...".format(phiset))
             phisetlist.remove(phiset)
@@ -243,12 +243,8 @@ def create_lists(averDict, inpDict):
             lines = f.readlines()[1:-1]
             tbin_right_data = np.append(tbin_right_data, 0.0)
             for i, Q2val in enumerate(averQ2_right_data):
-                try:
-                    check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
-                    write_to_file(f_list,check_line)
-                except TypeError:
-                    check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
-                    write_to_file(f_list,check_line)                    
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
+                write_to_file(f_list,check_line)
             lines = f.readlines()
             first_line = "{:.6f}\n".format(1.0)
             last_line = "{:.6f}".format(1.0)
@@ -266,12 +262,8 @@ def create_lists(averDict, inpDict):
             lines = f.readlines()[1:-1]
             tbin_left_data = np.append(tbin_left_data, 0.0)
             for i, Q2val in enumerate(averQ2_left_data):
-                try:
-                    check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
-                    write_to_file(f_list,check_line)
-                except TypeError:
-                    check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
-                    write_to_file(f_list,check_line)                    
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
+                write_to_file(f_list,check_line)
             lines = f.readlines()
             first_line = "{:.6f}\n".format(1.0)
             last_line = "{:.6f}".format(1.0)
@@ -289,12 +281,8 @@ def create_lists(averDict, inpDict):
             lines = f.readlines()[1:-1]
             tbin_center_data = np.append(tbin_center_data, 0.0)
             for i, Q2val in enumerate(averQ2_center_data):
-                try:
-                    check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
-                    write_to_file(f_list,check_line)
-                except TypeError:
-                    check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
-                    write_to_file(f_list,check_line)                    
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
+                write_to_file(f_list,check_line)
             lines = f.readlines()
             first_line = "{:.6f}\n".format(1.0)
             last_line = "{:.6f}".format(1.0)
