@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 23:08:09 trottar"
+# Time-stamp: "2023-08-24 23:34:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -261,7 +261,7 @@ def create_lists(averDict, inpDict):
             write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumLeft[0]) != 0:
-        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
+        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
 
         if not os.path.exists(f_list):
             open(f_list, "w").close()    
@@ -284,7 +284,7 @@ def create_lists(averDict, inpDict):
             write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumCenter[0]) != 0:
-        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_center*1000))
+        f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_0000.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100)
 
         if not os.path.exists(f_list):
             open(f_list, "w").close()    
