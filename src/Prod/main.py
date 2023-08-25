@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 23:16:49 trottar"
+# Time-stamp: "2023-08-24 23:21:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -993,6 +993,7 @@ for it,phiset in enumerate(phisetlist):
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
+        print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬t",averDict["binned_DATA"]["t_bins"])
         # Fill histogram
         for val in averDict["binned_DATA"]["t_bins"]:
             H_tbins_DATA.Fill(float())
@@ -1009,6 +1010,7 @@ for it,phiset in enumerate(phisetlist):
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
+        print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬phi",averDict["binned_DATA"]["phi_bins"])        
         # Fill histogram
         for val in averDict["binned_DATA"]["phi_bins"]:
             H_phibins_DATA.Fill(float(val))
