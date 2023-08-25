@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 00:42:47 trottar"
+# Time-stamp: "2023-08-25 00:53:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -886,7 +886,7 @@ for it,phiset in enumerate(phisetlist):
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin    
         # Fill histogram
-        for (itt,jtt), val in np.ndenumerate(data_nested_dict["Q2"][(i,j)]["Q2_arr"]):
+        for (itt,jtt), val in np.ndenumerate(data_nested_dict["Q2"][data_key_tuple]["Q2_arr"]):
             print("~~~~~~~~~~~~~~~~Q2", i+1, j+1, val)
             histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_DATA.cd(k+1)
@@ -906,7 +906,7 @@ for it,phiset in enumerate(phisetlist):
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
-        for (itt,jtt), val in np.ndenumerate(simc_nested_dict["Q2"][(i,j)]["Q2_arr"]):
+        for (itt,jtt), val in np.ndenumerate(simc_nested_dict["Q2"][simc_key_tuple]["Q2_arr"]):
             histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_Q2_tbin_SIMC.cd(k+1)
         histbinDict["H_Q2_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
@@ -925,7 +925,7 @@ for it,phiset in enumerate(phisetlist):
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin    
         # Fill histogram
-        for (itt,jtt), val in np.ndenumerate(data_nested_dict["W"][(i,j)]["W_arr"]):
+        for (itt,jtt), val in np.ndenumerate(data_nested_dict["W"][data_key_tuple]["W_arr"]):
             histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_W_tbin_DATA.cd(k+1)
         histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
@@ -944,7 +944,7 @@ for it,phiset in enumerate(phisetlist):
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
-        for (itt,jtt), val in np.ndenumerate(simc_nested_dict["W"][(i,j)]["W_arr"]):
+        for (itt,jtt), val in np.ndenumerate(simc_nested_dict["W"][simc_key_tuple]["W_arr"]):
             histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_W_tbin_SIMC.cd(k+1)
         histbinDict["H_W_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
@@ -963,7 +963,7 @@ for it,phiset in enumerate(phisetlist):
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
         # Fill histogram
-        for (itt,jtt), val in np.ndenumerate(data_nested_dict["t"][(i,j)]["t_arr"]):
+        for (itt,jtt), val in np.ndenumerate(data_nested_dict["t"][data_key_tuple]["t_arr"]):
             histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_t_tbin_DATA.cd(k+1)
         histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
@@ -982,7 +982,7 @@ for it,phiset in enumerate(phisetlist):
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin    
         # Fill histogram
-        for (itt,jtt), val in np.ndenumerate(simc_nested_dict["t"][(i,j)]["t_arr"]):
+        for (itt,jtt), val in np.ndenumerate(simc_nested_dict["t"][simc_key_tuple]["t_arr"]):
             histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_t_tbin_SIMC.cd(k+1)
         histbinDict["H_t_tbin_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
@@ -1016,7 +1016,7 @@ for it,phiset in enumerate(phisetlist):
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬phi",averDict["binned_DATA"]["phi_bins"])        
+        print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬phi",averDict["binned_DATA"]["phi_bins"])
         # Fill histogram
         for val in averDict["binned_DATA"]["phi_bins"]:
             H_phibins_DATA.Fill(float(val))

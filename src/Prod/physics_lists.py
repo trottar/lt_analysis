@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 00:45:06 trottar"
+# Time-stamp: "2023-08-25 00:51:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,21 +95,21 @@ def create_lists(averDict, inpDict):
                 if phiset == "Right":
                     phibin_right_data = phibin
                     tbin_right_data = tbin
-                    averQ2_right_data = data_nested_dict['Q2'][data_key_tuple][(i,j)]["Q2_arr"]
-                    averW_right_data = data_nested_dict['W'][data_key_tuple][(i,j)]["W_arr"]
-                    avert_right_data = data_nested_dict['t'][data_key_tuple][(i,j)]["t_arr"] 
+                    averQ2_right_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
+                    averW_right_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
+                    avert_right_data = data_nested_dict['t'][data_key_tuple]["t_arr"] 
                 if phiset == "Left":
                     phibin_left_data = phibin
                     tbin_left_data = tbin
-                    averQ2_left_data = data_nested_dict['Q2'][data_key_tuple][(i,j)]["Q2_arr"]
-                    averW_left_data = data_nested_dict['W'][data_key_tuple][(i,j)]["W_arr"]
-                    avert_left_data = data_nested_dict['t'][data_key_tuple][(i,j)]["t_arr"]
+                    averQ2_left_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
+                    averW_left_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
+                    avert_left_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
                 if phiset == "Center":
                     phibin_center_data = phibin
                     tbin_center_data = tbin
-                    averQ2_center_data = data_nested_dict['Q2'][data_key_tuple][(i,j)]["Q2_arr"]
-                    averW_center_data = data_nested_dict['W'][data_key_tuple][(i,j)]["W_arr"]
-                    avert_center_data = data_nested_dict['t'][data_key_tuple][(i,j)]["t_arr"]
+                    averQ2_center_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
+                    averW_center_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
+                    avert_center_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
         except KeyError:
             print("No {} setting found...".format(phiset))
             phisetlist.remove(phiset)
@@ -122,23 +122,41 @@ def create_lists(averDict, inpDict):
         if phiset == "Right":
             runNums = runNumRight
             for i, run in enumerate(runNumRight.split(' ')):
-                thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
-                #thpq_right = 3.000
-                ebeam_right = float(EbeamValRight[i])
+                runNum = run
+                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                if os.path.exists(pid_log):
+                    thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
+                    #thpq_right = 3.000
+                    ebeam_right = float(EbeamValRight[i])
+                    break
+                else:
+                    continue
                 
         if phiset == "Left":
             runNums = runNumLeft
             for i, run in enumerate(runNumLeft.split(' ')):
-                thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
-                #thpq_left = 3.000
-                ebeam_left = float(EbeamValLeft[i])
+                runNum = run
+                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                if os.path.exists(pid_log):
+                    thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
+                    #thpq_left = 3.000
+                    ebeam_left = float(EbeamValLeft[i])
+                    break
+                else:
+                    continue
 
         if phiset == "Center":
             runNums = runNumCenter
             for i, run in enumerate(runNumCenter.split(' ')):
-                thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
-                #thpq_center = 3.000
-                ebeam_center = float(EbeamValCenter[i])
+                runNum = run
+                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                if os.path.exists(pid_log):
+                    thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
+                    #thpq_center = 3.000
+                    ebeam_center = float(EbeamValCenter[i])
+                    break
+                else:
+                    continue
 
     ################################################################################################################################################
 
