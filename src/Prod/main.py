@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 22:41:46 trottar"
+# Time-stamp: "2023-08-24 23:11:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -847,10 +847,6 @@ averDict = {}
 averDict.update(aver_per_bin_data(histlist, inpDict))
 averDict.update(aver_per_bin_simc(histlist, inpDict))
 #print(averDict)
-for phiset in phisetlist:
-    print("Q2",averDict["binned_DATA"][phiset]['Q2'])
-    #print("W",averDict["binned_DATA"][phiset]['W'][(0,0)])
-    #print("t",averDict["binned_DATA"][phiset]['t'][(0,0)])
 
 # t/phi binned histograms
 H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
@@ -890,8 +886,8 @@ for it,phiset in enumerate(phisetlist):
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin    
         # Fill histogram
-        print("~~~~~~~~~~~~~~~~Q2_arr", i, j, len(data_nested_dict["Q2"][(i,j)]["Q2_arr"]))
         for (itt,jtt), val in np.ndenumerate(data_nested_dict["Q2"][(i,j)]["Q2_arr"]):
+            print("~~~~~~~~~~~~~~~~Q2", i+1, j+1, len(val))
             histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill((itt+jtt)/2, val)
         C_Q2_tbin_DATA.cd(k+1)
         histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)

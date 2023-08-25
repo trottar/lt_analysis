@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 22:54:31 trottar"
+# Time-stamp: "2023-08-24 23:08:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,7 +130,6 @@ def create_lists(averDict, inpDict):
                     ebeam_right = float(EbeamValRight[i])
                     break
                 else:
-                    print("!!!!!!!!!!!!!!!!!", pid_log)
                     continue
 
     # Define thpq vector relative to middle setting
@@ -146,7 +145,6 @@ def create_lists(averDict, inpDict):
                     ebeam_left = float(EbeamValLeft[i])
                     break
                 else:
-                    print("!!!!!!!!!!!!!!!!!", pid_log)
                     continue
 
     # Define thpq vector relative to middle setting
@@ -162,7 +160,6 @@ def create_lists(averDict, inpDict):
                     ebeam_center = float(EbeamValCenter[i])
                     break
                 else:
-                    print("!!!!!!!!!!!!!!!!!", pid_log)
                     continue
 
     ################################################################################################################################################
