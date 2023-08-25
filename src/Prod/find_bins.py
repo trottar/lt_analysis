@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-10 19:15:46 trottar"
+# Time-stamp: "2023-08-24 23:14:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,7 +138,7 @@ def find_bins(histlist, inpDict):
             # In this case, this returns evenly spaced values within a given interval
             # yp -> np.sort(x) : he y-coordinates of the data points
             # In this case, this returns a sorted copy of the array
-            return np.interp(np.linspace(0, npt, nbin + 1),np.arange(npt),np.sort(x))
+            return np.interp(np.linspace(0, npt, nbin),np.arange(npt),np.sort(x))
 
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
