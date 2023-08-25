@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 12:19:43 trottar"
+# Time-stamp: "2023-08-25 12:45:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -885,7 +885,7 @@ for it,phiset in enumerate(phisetlist):
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["Q2"][data_key_tuple]["Q2_arr"]), data_nested_dict["Q2"][data_key_tuple]["Q2_aver"]))
+        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["Q2"][data_key_tuple]["Q2_arr"]), data_nested_dict["Q2"][data_key_tuple]["Q2_aver"]))
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(data_nested_dict["Q2"][data_key_tuple]["Q2_arr"]):
             histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
@@ -999,7 +999,6 @@ for it,phiset in enumerate(phisetlist):
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬t",averDict["binned_DATA"]["t_bins"])
         # Fill histogram
         for val in averDict["binned_DATA"]["t_bins"]:
             H_tbins_DATA.Fill(float(val))
@@ -1016,7 +1015,6 @@ for it,phiset in enumerate(phisetlist):
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬phi",averDict["binned_DATA"]["phi_bins"])
         # Fill histogram
         for val in averDict["binned_DATA"]["phi_bins"]:
             H_phibins_DATA.Fill(float(val))
