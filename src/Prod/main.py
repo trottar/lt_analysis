@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 20:48:09 trottar"
+# Time-stamp: "2023-08-24 20:52:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -847,9 +847,10 @@ averDict = {}
 averDict.update(aver_per_bin_data(histlist, inpDict))
 averDict.update(aver_per_bin_simc(histlist, inpDict))
 #print(averDict)
-print("Q2",averDict["binned_DATA"][phiset]['Q2'])
-print("W",averDict["binned_DATA"][phiset]['W'])
-print("t",averDict["binned_DATA"][phiset]['t'])
+for phiset in phisetlist:
+    print("Q2",averDict["binned_DATA"][phiset]['Q2'])
+    print("W",averDict["binned_DATA"][phiset]['W'])
+    print("t",averDict["binned_DATA"][phiset]['t'])
 
 # t/phi binned histograms
 H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
