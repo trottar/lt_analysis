@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 14:22:33 trottar"
+# Time-stamp: "2023-08-24 22:54:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,21 +95,21 @@ def create_lists(averDict, inpDict):
                 if phiset == "Right":
                     phibin_right_data = phibin
                     tbin_right_data = tbin
-                    averQ2_right_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                    averW_right_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                    avert_right_data = data_nested_dict['t'][data_key_tuple]["t_arr"] 
+                    averQ2_right_data = data_nested_dict['Q2'][data_key_tuple][(i,j)]["Q2_arr"]
+                    averW_right_data = data_nested_dict['W'][data_key_tuple][(i,j)]["W_arr"]
+                    avert_right_data = data_nested_dict['t'][data_key_tuple][(i,j)]["t_arr"] 
                 if phiset == "Left":
                     phibin_left_data = phibin
                     tbin_left_data = tbin
-                    averQ2_left_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                    averW_left_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                    avert_left_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
+                    averQ2_left_data = data_nested_dict['Q2'][data_key_tuple][(i,j)]["Q2_arr"]
+                    averW_left_data = data_nested_dict['W'][data_key_tuple][(i,j)]["W_arr"]
+                    avert_left_data = data_nested_dict['t'][data_key_tuple][(i,j)]["t_arr"]
                 if phiset == "Center":
                     phibin_center_data = phibin
                     tbin_center_data = tbin
-                    averQ2_center_data = data_nested_dict['Q2'][data_key_tuple]["Q2_arr"]
-                    averW_center_data = data_nested_dict['W'][data_key_tuple]["W_arr"]
-                    avert_center_data = data_nested_dict['t'][data_key_tuple]["t_arr"]
+                    averQ2_center_data = data_nested_dict['Q2'][data_key_tuple][(i,j)]["Q2_arr"]
+                    averW_center_data = data_nested_dict['W'][data_key_tuple][(i,j)]["W_arr"]
+                    avert_center_data = data_nested_dict['t'][data_key_tuple][(i,j)]["t_arr"]
         except KeyError:
             print("No {} setting found...".format(phiset))
             phisetlist.remove(phiset)
