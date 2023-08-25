@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 23:21:58 trottar"
+# Time-stamp: "2023-08-24 23:26:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -996,7 +996,7 @@ for it,phiset in enumerate(phisetlist):
         print("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬t",averDict["binned_DATA"]["t_bins"])
         # Fill histogram
         for val in averDict["binned_DATA"]["t_bins"]:
-            H_tbins_DATA.Fill(float())
+            H_tbins_DATA.Fill(float(val))
     H_tbins_DATA.Draw("same")
     H_tbins_DATA.SetLineColor(it+1)
 C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
