@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 11:50:55 trottar"
+# Time-stamp: "2023-08-25 12:07:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -862,7 +862,7 @@ for phiset in phisetlist:
         j = data_key_tuple[1] # phi bin
         histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_Q2_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data Q2 (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, inpDict["Q2min"], inpDict["Q2max"])
         histbinDict["H_W_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_W_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data W (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, inpDict["Wmin"], inpDict["Wmax"])
-        histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_t_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data t (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, inpDict["tmin"], inpDict["tmax"]) 
+        histbinDict["H_t_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_t_tbin_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data t (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, inpDict["tmin"], inpDict["tmax"])
 
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
@@ -884,7 +884,8 @@ for it,phiset in enumerate(phisetlist):
         # Access the nested dictionary using the tuple key
         data_nested_dict = averDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
-        j = data_key_tuple[1] # phi bin    
+        j = data_key_tuple[1] # phi bin
+        print("~~~~~~~~~~~~~~~~~~~~~~",(tbin_index, phibin_index, len(data_nested_dict["Q2"][data_key_tuple]["Q2_arr"]), data_nested_dict["Q2"][data_key_tuple]["Q2_aver"]))
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(data_nested_dict["Q2"][data_key_tuple]["Q2_arr"]):
             histbinDict["H_Q2_tbin_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
