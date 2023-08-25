@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 21:00:14 trottar"
+# Time-stamp: "2023-08-24 21:11:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -848,7 +848,7 @@ averDict.update(aver_per_bin_data(histlist, inpDict))
 averDict.update(aver_per_bin_simc(histlist, inpDict))
 #print(averDict)
 for phiset in phisetlist:
-    print("Q2",averDict["binned_DATA"][phiset]['Q2']
+    print("Q2",averDict["binned_DATA"][phiset]['Q2'])
     #print("W",averDict["binned_DATA"][phiset]['W'][(0,0)])
     #print("t",averDict["binned_DATA"][phiset]['t'][(0,0)])
 
