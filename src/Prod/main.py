@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 00:37:49 trottar"
+# Time-stamp: "2023-08-25 00:42:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1004,7 +1004,6 @@ for it,phiset in enumerate(phisetlist):
         for val in averDict["binned_DATA"]["t_bins"]:
             H_tbins_DATA.Fill(float(val))
     H_tbins_DATA.SetLineColor(it+1)
-    H_tbins_DATA.Draw("same, E1")
     H_tbins_DATA.Draw("same, hist")
 C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
@@ -1022,7 +1021,6 @@ for it,phiset in enumerate(phisetlist):
         for val in averDict["binned_DATA"]["phi_bins"]:
             H_phibins_DATA.Fill(float(val))
     H_phibins_DATA.SetLineColor(it+1)            
-    H_phibins_DATA.Draw("same, E1")
     H_phibins_DATA.Draw("same, hist")
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+')')
 
