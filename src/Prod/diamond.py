@@ -125,26 +125,26 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
 
     Title = ""
-    Q2vsW_cut = ROOT.TH2D("Q2vsW_cut", labelh, 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
-    Q2vsW_mide_cut = ROOT.TH2D("Q2vsW_mide_cut",labelm, 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
-    Q2vsW_lowe_cut = ROOT.TH2D("Q2vsW_lowe_cut", labell, 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_cut = ROOT.TH2D("Q2vsW_cut", labelh, 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_mide_cut = ROOT.TH2D("Q2vsW_mide_cut",labelm, 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_lowe_cut = ROOT.TH2D("Q2vsW_lowe_cut", labell, 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
     
 
-    Q2vsW_hi_cut = ROOT.TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
-    Q2vsW_mi_cut = ROOT.TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
-    Q2vsW_lo_cut = ROOT.TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_hi_cut = ROOT.TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_mi_cut = ROOT.TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_lo_cut = ROOT.TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
 
 
 
-    W_cut = ROOT.TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
-    Q2_cut = ROOT.TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1)
-    t_cut = ROOT.TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 500, tmin, tmax)
-    t_mi_cut = ROOT.TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 500, tmin, tmax)
+    W_cut = ROOT.TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2_cut = ROOT.TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1)
+    t_cut = ROOT.TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 400, tmin, tmax)
+    t_mi_cut = ROOT.TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 400, tmin, tmax)
 
-    Q2vsW_lolo_cut = ROOT.TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
-    Q2vsW_hilo_cut = ROOT.TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
-    Q2vsW_milo_cut = ROOT.TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
-    Q2vsW_himi_cut = ROOT.TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 500, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 500, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_lolo_cut = ROOT.TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_hilo_cut = ROOT.TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_milo_cut = ROOT.TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
+    Q2vsW_himi_cut = ROOT.TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max-Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax-Wmax*0.1)
 
     a1 = 0
     b1 = 0
