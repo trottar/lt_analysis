@@ -125,26 +125,23 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
 
     Title = ""
-    Q2vsW_cut = ROOT.TH2D("Q2vsW_cut", labelh, 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-    Q2vsW_mide_cut = ROOT.TH2D("Q2vsW_mide_cut",labelm, 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-    Q2vsW_lowe_cut = ROOT.TH2D("Q2vsW_lowe_cut", labell, 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-    
+    Q2vsW_cut = ROOT.TH2D("Q2vsW_cut", labelh, 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_mide_cut = ROOT.TH2D("Q2vsW_mide_cut",labelm, 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_lowe_cut = ROOT.TH2D("Q2vsW_lowe_cut", labell, 400, Q2min, Q2max, 400, Wmin, Wmax)    
 
-    Q2vsW_hi_cut = ROOT.TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-    Q2vsW_mi_cut = ROOT.TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-    Q2vsW_lo_cut = ROOT.TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-
-
+    Q2vsW_hi_cut = ROOT.TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_mi_cut = ROOT.TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_lo_cut = ROOT.TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
 
     W_cut = ROOT.TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", 400, Wmin, Wmax)
     Q2_cut = ROOT.TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", 400, Q2min, Q2max)
     t_cut = ROOT.TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 400, tmin, tmax)
     t_mi_cut = ROOT.TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 400, tmin, tmax)
 
-    Q2vsW_lolo_cut = ROOT.TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-    Q2vsW_hilo_cut = ROOT.TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-    Q2vsW_milo_cut = ROOT.TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-    Q2vsW_himi_cut = ROOT.TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 400, Q2min-Q2min*0.1, Q2max+Q2max*0.1, 400, Wmin-Wmin*0.1, Wmax+Wmax*0.1)
+    Q2vsW_lolo_cut = ROOT.TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_hilo_cut = ROOT.TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_milo_cut = ROOT.TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_himi_cut = ROOT.TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
 
     a1 = 0
     b1 = 0
@@ -392,36 +389,50 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     pages = 2
     if (highe_input !=False):
         #print("test high")
+        Q2vsW_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+        Q2vsW_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
         Q2vsW_cut.Draw("col")
         ex1.Draw()
         Q2vsW_cut.Draw("col same")
         if (mide_input !=False):
             #print("test high mid")
+            Q2vsW_mide_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+            Q2vsW_mide_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
             ex2.Draw()
             Q2vsW_mide_cut.Draw("col same")
             pages = 3
             if (lowe_input !=False):
                 #print("test high mid low")
+                Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+                Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)                
                 ex3.Draw()
                 Q2vsW_lowe_cut.Draw("col same")
                 pages = 6
         elif (lowe_input !=False):
             #print("test high low")
+            Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+            Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
             ex2.Draw()
             Q2vsW_lowe_cut.Draw("col same")
             pages = 4
     elif (mide_input !=False):
 	#print("test mid")
+        Q2vsW_mide_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+        Q2vsW_mide_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
         Q2vsW_mide_cut.Draw("colz")
         ex1.Draw()
         Q2vsW_mide_cut.Draw("col same")
         if (lowe_input !=False):
             #print("test mid low")
+            Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+            Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)            
             ex2.Draw()
             Q2vsW_lowe_cut.Draw("col same")
             pages = 4
     elif (lowe_input !=False):
         #print("test low")
+        Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+        Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
         Q2vsW_lowe_cut.Draw("colz")
         ex1.Draw()
         Q2vsW_lowe_cut.Draw("col same")
@@ -451,17 +462,25 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         c1_kint.Print(Analysis_Distributions)
     if (highe_input != False):
         c1_kinh = TCanvas("c1_kinh", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
+        Q2vsW_hi_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+        Q2vsW_hi_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
         Q2vsW_hi_cut.Draw("colz")
         c1_kinh.Print(Analysis_Distributions+end)
     if (mide_input != False):
         c1_kinm = TCanvas("c1_kinm", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
+        Q2vsW_mi_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+        Q2vsW_mi_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
         Q2vsW_mi_cut.Draw("colz")
         c1_kinm.Print(Analysis_Distributions+end+endm)
     if (lowe_input != False):
         c1_kinl = TCanvas("c1_kinl", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
+        Q2vsW_lo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+        Q2vsW_lo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
         Q2vsW_lo_cut.Draw("colz")
         c1_kinl.Print(Analysis_Distributions)
         c1_kinll = TCanvas("c1_kinll", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
+        Q2vsW_lolo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+        Q2vsW_lolo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
         Q2vsW_lolo_cut.Draw("colz")
         #    lol.clear()
         #   lor.clear()
@@ -508,11 +527,15 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         if (mide_input != False):
             c1_kinml = TCanvas("c1_kinml", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
+            Q2vsW_milo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+            Q2vsW_milo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)            
             Q2vsW_milo_cut.Draw("colz")
             c1_kinml.Print(Analysis_Distributions+endc)
 
         if (highe_input != False):
             c1_kinhl = TCanvas("c1_kinhl", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
+            Q2vsW_hilo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
+            Q2vsW_hilo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
             Q2vsW_hilo_cut.Draw("colz")
             c1_kinhl.Print(Analysis_Distributions+endc+endf)
 	
