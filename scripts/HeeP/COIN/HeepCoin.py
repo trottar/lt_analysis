@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-03 14:18:39 trottar"
+# Time-stamp: "2023-09-03 14:25:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1948,7 +1948,7 @@ if DEBUG:
 
 l_bpm_tar_x.Draw()
 
-bpm_tar_x.Pr(outputpdf)
+bpm_tar_x.Print(outputpdf)
 
 bpm_tar_y = TCanvas()
 l_bpm_tar_y = ROOT.TLegend(0.115,0.55,0.33,0.9)
