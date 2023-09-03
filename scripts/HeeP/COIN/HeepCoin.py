@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-03 14:25:51 trottar"
+# Time-stamp: "2023-09-03 14:28:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1965,10 +1965,10 @@ b_mean_bpm_tar_y_data = (bpm_tar_y_DATA.GetMean())
 b_mean_bpm_tar_y_data_nocut = (bpm_tar_y_DATA_nocut.GetMean())
 b_mean_bpm_tar_y_data_nopid = (bpm_tar_y_DATA_nopid.GetMean())
 
-l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.3f}".format( b_int_bpm_tar_y_data))
+l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.3f}".format( b_mean_bpm_tar_y_data))
 if DEBUG:
-    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = {:.3f}".format( b_int_bpm_tar_y_data_nocut))
-    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = {:.3f}".format( b_int_bpm_tar_y_data_nopid))
+    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = {:.3f}".format( b_mean_bpm_tar_y_data_nocut))
+    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = {:.3f}".format( b_mean_bpm_tar_y_data_nopid))
 
 l_bpm_tar_y.Draw()
 
