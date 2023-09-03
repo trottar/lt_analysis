@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-03 14:28:20 trottar"
+# Time-stamp: "2023-09-03 14:33:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1945,7 +1945,16 @@ l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = {:.3f}".format( b_mean_bpm_tar
 if DEBUG:
     l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nocut,"DATA (no cut), Mean = {:.3f}".format( b_mean_bpm_tar_x_data_nocut))
     l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nopid,"DATA (no PID cut), Mean = {:.3f}".format( b_mean_bpm_tar_x_data_nopid))
+    
+b_stddev_bpm_tar_x_data = (bpm_tar_x_DATA.GetStdDev())
+b_stddev_bpm_tar_x_data_nocut = (bpm_tar_x_DATA_nocut.GetStdDev())
+b_stddev_bpm_tar_x_data_nopid = (bpm_tar_x_DATA_nopid.GetStdDev())
 
+l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Stddev = {:.3f}".format( b_stddev_bpm_tar_x_data))
+if DEBUG:
+    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nocut,"DATA (no cut), Stddev = {:.3f}".format( b_stddev_bpm_tar_x_data_nocut))
+    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nopid,"DATA (no PID cut), Stddev = {:.3f}".format( b_stddev_bpm_tar_x_data_nopid))
+    
 l_bpm_tar_x.Draw()
 
 bpm_tar_x.Print(outputpdf)
@@ -1955,6 +1964,7 @@ l_bpm_tar_y = ROOT.TLegend(0.115,0.55,0.33,0.9)
 
 bpm_tar_y_DATA.SetLineColor(kRed)
 bpm_tar_y_DATA_nocut.SetLineColor(kCyan)
+bpm_tar_y_DATA_nopid.SetLineColor(kMagenta)
 
 bpm_tar_y_DATA.Draw("same, E1")
 if DEBUG:
@@ -1969,7 +1979,16 @@ l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.3f}".format( b_mean_bpm_tar
 if DEBUG:
     l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = {:.3f}".format( b_mean_bpm_tar_y_data_nocut))
     l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = {:.3f}".format( b_mean_bpm_tar_y_data_nopid))
+    
+b_stddev_bpm_tar_y_data = (bpm_tar_y_DATA.GetStdDev())
+b_stddev_bpm_tar_y_data_nocut = (bpm_tar_y_DATA_nocut.GetStdDev())
+b_stddev_bpm_tar_y_data_nopid = (bpm_tar_y_DATA_nopid.GetStdDev())
 
+l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Stddev = {:.3f}".format( b_stddev_bpm_tar_y_data))
+if DEBUG:
+    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Stddev = {:.3f}".format( b_stddev_bpm_tar_y_data_nocut))
+    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Stddev = {:.3f}".format( b_stddev_bpm_tar_y_data_nopid))
+    
 l_bpm_tar_y.Draw()
 
 bpm_tar_y.Print(outputpdf)
