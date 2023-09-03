@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-03 13:59:08 trottar"
+# Time-stamp: "2023-09-03 14:02:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1936,9 +1936,9 @@ if DEBUG:
     bpm_tar_x_DATA_nocut.Draw("same, E1")
     bpm_tar_x_DATA_nopid.Draw("same, E1")
 
-b_int_bpm_tar_x_data = int(bpm_tar_x_DATA.Mean())
-b_int_bpm_tar_x_data_nocut = int(bpm_tar_x_DATA_nocut.Mean())
-b_int_bpm_tar_x_data_nopid = int(bpm_tar_x_DATA_nopid.Mean())
+b_int_bpm_tar_x_data = int(bpm_tar_x_DATA.GetMean())
+b_int_bpm_tar_x_data_nocut = int(bpm_tar_x_DATA_nocut.GetMean())
+b_int_bpm_tar_x_data_nopid = int(bpm_tar_x_DATA_nopid.GetMean())
 
 l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = %s" % b_int_bpm_tar_x_data)
 if DEBUG:
@@ -1960,9 +1960,9 @@ if DEBUG:
     bpm_tar_y_DATA_nocut.Draw("same, E1")
     bpm_tar_y_DATA_nopid.Draw("same, E1")
 
-b_int_bpm_tar_y_data = int(bpm_tar_y_DATA.Mean())
-b_int_bpm_tar_y_data_nocut = int(bpm_tar_y_DATA_nocut.Mean())
-b_int_bpm_tar_y_data_nopid = int(bpm_tar_y_DATA_nopid.Mean())
+b_int_bpm_tar_y_data = int(bpm_tar_y_DATA.GetMean())
+b_int_bpm_tar_y_data_nocut = int(bpm_tar_y_DATA_nocut.GetMean())
+b_int_bpm_tar_y_data_nopid = int(bpm_tar_y_DATA_nopid.GetMean())
 
 l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = %s" % b_int_bpm_tar_y_data)
 if DEBUG:
