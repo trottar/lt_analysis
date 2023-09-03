@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-05-21 15:10:10 trottar"
+# Time-stamp: "2023-09-03 13:59:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -584,6 +584,14 @@ P_cal_etottracknorm_vs_P_hgcer_npeSum_DATA = ROOT.TH2D("P_cal_etottracknorm_vs_P
 P_cal_etottracknorm_vs_P_aero_npeSum_DATA = ROOT.TH2D("P_cal_etottracknorm_vs_P_aero_npeSum_DATA","SHMS Cal etottracknorm vs SHMS Aero Npe Sum;  SHMS Cal etottracknorm; SHMS Aero Npe Sum", 200, 0, 1, 200, 0, 50)
 P_hgcer_npeSum_vs_P_aero_npeSum_DATA = ROOT.TH2D("P_hgcer_npeSum_vs_P_aero_npeSum_DATA","SHMS HGCer Npe Sum vs SHMS Aero Npe Sum;  SHMS HGCer Npe Sum; SHMS Aero Npe Sum", 200, 0, 50, 200, 0, 50)
 
+bpm_tar_x_DATA  = ROOT.TH1D("bpm_tar_x_DATA","BPM Target x", 200, -0.1, 0.1)
+bpm_tar_x_DATA_nocut  = ROOT.TH1D("bpm_tar_x_DATA_nocut","BPM Target x", 200, -0.1, 0.1)
+bpm_tar_x_DATA_nopid  = ROOT.TH1D("bpm_tar_x_DATA_nopid","BPM Target x", 200, -0.1, 0.1)
+
+bpm_tar_y_DATA  = ROOT.TH1D("bpm_tar_y_DATA","BPM Target y", 200, 0.0, 0.1)
+bpm_tar_y_DATA_nocut  = ROOT.TH1D("bpm_tar_y_DATA_nocut","BPM Target y", 200, 0.0, 0.1)
+bpm_tar_y_DATA_nopid  = ROOT.TH1D("bpm_tar_y_DATA_nopid","BPM Target y", 200, 0.0, 0.1)
+
 ################################################################################################################################################
 # Fill histograms for various trees called above
 
@@ -626,7 +634,7 @@ for evt in TBRANCH_SIMC:
       H_W_SIMC.Fill(evt.W, evt.Weight)
       H_epsilon_SIMC.Fill(evt.epsilon, evt.Weight)
       H_MMp2_SIMC.Fill(pow(evt.Em, 2) - pow(evt.Pm, 2), evt.Weight)
-
+      
 ibin = 1
 for evt in TBRANCH_DATA:
 
@@ -734,6 +742,11 @@ for evt in TBRANCH_DATA:
       P_cal_etottracknorm_DATA.SetBinError(ibin,eff_errProp_data*evt.P_cal_etottracknorm)
       P_hgcer_npeSum_DATA.SetBinError(ibin,eff_errProp_data*evt.P_hgcer_npeSum)
       P_aero_npeSum_DATA.SetBinError(ibin,eff_errProp_data*evt.P_aero_npeSum)
+
+      bpm_tar_x_DATA.Fill(evt.bpm_tar_x)
+      bpm_tar_y_DATA.Fill(evt.bpm_tar_y)      
+      bpm_tar_x_DATA.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_x)
+      bpm_tar_y_DATA.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_y)
       
       ###################################################################################################################################################
       
@@ -875,6 +888,11 @@ for evt in TBRANCH_DATA_nocut:
   P_hgcer_npeSum_DATA_nocut.SetBinError(ibin,eff_errProp_data*evt.P_hgcer_npeSum)
   P_aero_npeSum_DATA_nocut.SetBinError(ibin,eff_errProp_data*evt.P_aero_npeSum)
 
+  bpm_tar_x_DATA_nocut.Fill(evt.bpm_tar_x)
+  bpm_tar_y_DATA_nocut.Fill(evt.bpm_tar_y)      
+  bpm_tar_x_DATA_nocut.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_x)
+  bpm_tar_y_DATA_nocut.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_y)
+  
   ###################################################################################################################################################
   ibin+= 1
 
@@ -978,6 +996,11 @@ for evt in TBRANCH_DATA_nopid:
       P_cal_etottracknorm_DATA_nopid.SetBinError(ibin,eff_errProp_data*evt.P_cal_etottracknorm)
       P_hgcer_npeSum_DATA_nopid.SetBinError(ibin,eff_errProp_data*evt.P_hgcer_npeSum)
       P_aero_npeSum_DATA_nopid.SetBinError(ibin,eff_errProp_data*evt.P_aero_npeSum)
+
+      bpm_tar_x_DATA_nopid.Fill(evt.bpm_tar_x)
+      bpm_tar_y_DATA_nopid.Fill(evt.bpm_tar_y)      
+      bpm_tar_x_DATA_nopid.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_x)
+      bpm_tar_y_DATA_nopid.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_y)
       
       ###################################################################################################################################################
       ibin += 1
@@ -1103,7 +1126,7 @@ for evt in TBRANCH_DUMMY:
       H_MMp2_DUMMY.SetBinError(ibin,eff_errProp_data*(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))
       #H_MMp2_DUMMY.SetBinError(ibin,eff_errProp_data*evt.MMp2)
       #H_MMp2_DUMMY.SetBinError(ibin,eff_errProp_data*evt.Mrecoil)
-
+      
       ###################################################################################################################################################
       ibin += 1
       
@@ -1426,6 +1449,9 @@ H_pmy_DATA.Scale(normfac_data)
 H_pmz_DATA.Scale(normfac_data)
 H_W_DATA.Scale(normfac_data)
 H_ct_ep_DATA.Scale(normfac_data)
+bpm_tar_x_DATA.Scale(normfac_data)
+bpm_tar_y_DATA.Scale(normfac_data)
+
 
 H_ssxfp_DATA_nocut.Scale(normfac_data)
 H_ssxfp_DATA_nopid.Scale(normfac_data)
@@ -1483,7 +1509,10 @@ H_W_DATA_nocut.Scale(normfac_data)
 H_W_DATA_nopid.Scale(normfac_data)
 H_ct_ep_DATA_nocut.Scale(normfac_data)
 H_ct_ep_DATA_nopid.Scale(normfac_data)
-
+bpm_tar_x_DATA_nocut.Scale(normfac_data)
+bpm_tar_y_DATA_nocut.Scale(normfac_data)
+bpm_tar_x_DATA_nopid.Scale(normfac_data)
+bpm_tar_y_DATA_nopid.Scale(normfac_data)
 
 '''
 # Data Random subtraction
@@ -1895,6 +1924,54 @@ raster_x_vs_raster_y = TCanvas()
 H_raster_x_vs_H_raster_y_DATA.Draw("colz")
 
 raster_x_vs_raster_y.Print(outputpdf)
+
+bpm_tar_x = TCanvas()
+l_bpm_tar_x = ROOT.TLegend(0.115,0.55,0.33,0.9)
+
+bpm_tar_x_DATA.SetLineColor(kRed)
+bpm_tar_x_DATA_nocut.SetLineColor(kCyan)
+
+bpm_tar_x_DATA.Draw("same, E1")
+if DEBUG:
+    bpm_tar_x_DATA_nocut.Draw("same, E1")
+    bpm_tar_x_DATA_nopid.Draw("same, E1")
+
+b_int_bpm_tar_x_data = int(bpm_tar_x_DATA.Mean())
+b_int_bpm_tar_x_data_nocut = int(bpm_tar_x_DATA_nocut.Mean())
+b_int_bpm_tar_x_data_nopid = int(bpm_tar_x_DATA_nopid.Mean())
+
+l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = %s" % b_int_bpm_tar_x_data)
+if DEBUG:
+    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nocut,"DATA (no cut), Mean = %s" % b_int_bpm_tar_x_data_nocut)
+    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nopid,"DATA (no PID cut), Mean = %s" % b_int_bpm_tar_x_data_nopid)
+
+l_bpm_tar_x.Draw()
+
+bpm_tar_x.Print(outputpdf)
+
+bpm_tar_y = TCanvas()
+l_bpm_tar_y = ROOT.TLegend(0.115,0.55,0.33,0.9)
+
+bpm_tar_y_DATA.SetLineColor(kRed)
+bpm_tar_y_DATA_nocut.SetLineColor(kCyan)
+
+bpm_tar_y_DATA.Draw("same, E1")
+if DEBUG:
+    bpm_tar_y_DATA_nocut.Draw("same, E1")
+    bpm_tar_y_DATA_nopid.Draw("same, E1")
+
+b_int_bpm_tar_y_data = int(bpm_tar_y_DATA.Mean())
+b_int_bpm_tar_y_data_nocut = int(bpm_tar_y_DATA_nocut.Mean())
+b_int_bpm_tar_y_data_nopid = int(bpm_tar_y_DATA_nopid.Mean())
+
+l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = %s" % b_int_bpm_tar_y_data)
+if DEBUG:
+    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = %s" % b_int_bpm_tar_y_data_nocut)
+    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = %s" % b_int_bpm_tar_y_data_nopid)
+
+l_bpm_tar_y.Draw()
+
+bpm_tar_y.Print(outputpdf)
 
 xfp = TCanvas()
 l_xfp = ROOT.TLegend(0.115,0.55,0.33,0.9)
