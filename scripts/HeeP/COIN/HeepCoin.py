@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-03 14:37:09 trottar"
+# Time-stamp: "2023-09-03 14:40:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2980,12 +2980,12 @@ if DEBUG:
     l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_W_data_nocut))
     l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_W_data_nopid))
 l_W.AddEntry(H_W_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_W_dummy))
-l_W.AddEntry(H_W_SIMC,"SIMC, MEAN = {:.3e}".format(b_mean_W_simc))
-l_W.AddEntry(H_W_DATA,"DATA, MEAN = {:.3e}".format(b_mean_W_data))
+l_W.AddEntry(H_W_SIMC,"SIMC, MEAN = {:.2e}".format(b_mean_W_simc))
+l_W.AddEntry(H_W_DATA,"DATA, MEAN = {:.2e}".format(b_mean_W_data))
 if DEBUG:
-    l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), MEAN = {:.3e}".format(b_mean_W_data_nocut))
-    l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), MEAN = {:.3e}".format(b_mean_W_data_nopid))
-l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {:.3e}".format(b_mean_W_dummy))
+    l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), MEAN = {:.2e}".format(b_mean_W_data_nocut))
+    l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), MEAN = {:.2e}".format(b_mean_W_data_nopid))
+l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {:.2e}".format(b_mean_W_dummy))
 
 l_W.Draw()
 
