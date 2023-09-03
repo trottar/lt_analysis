@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-03 14:02:12 trottar"
+# Time-stamp: "2023-09-03 14:06:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1940,10 +1940,10 @@ b_int_bpm_tar_x_data = int(bpm_tar_x_DATA.GetMean())
 b_int_bpm_tar_x_data_nocut = int(bpm_tar_x_DATA_nocut.GetMean())
 b_int_bpm_tar_x_data_nopid = int(bpm_tar_x_DATA_nopid.GetMean())
 
-l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = %s" % b_int_bpm_tar_x_data)
+l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = {:.3f}".format( b_int_bpm_tar_x_data))
 if DEBUG:
-    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nocut,"DATA (no cut), Mean = %s" % b_int_bpm_tar_x_data_nocut)
-    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nopid,"DATA (no PID cut), Mean = %s" % b_int_bpm_tar_x_data_nopid)
+    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nocut,"DATA (no cut), Mean = {:.3f}".format( b_int_bpm_tar_x_data_nocut))
+    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nopid,"DATA (no PID cut), Mean = {:.3f}".format( b_int_bpm_tar_x_data_nopid))
 
 l_bpm_tar_x.Draw()
 
@@ -1964,10 +1964,10 @@ b_int_bpm_tar_y_data = int(bpm_tar_y_DATA.GetMean())
 b_int_bpm_tar_y_data_nocut = int(bpm_tar_y_DATA_nocut.GetMean())
 b_int_bpm_tar_y_data_nopid = int(bpm_tar_y_DATA_nopid.GetMean())
 
-l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = %s" % b_int_bpm_tar_y_data)
+l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.3f}".format( b_int_bpm_tar_y_data))
 if DEBUG:
-    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = %s" % b_int_bpm_tar_y_data_nocut)
-    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = %s" % b_int_bpm_tar_y_data_nopid)
+    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = {:.3f}".format( b_int_bpm_tar_y_data_nocut))
+    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = {:.3f}".format( b_int_bpm_tar_y_data_nopid))
 
 l_bpm_tar_y.Draw()
 
@@ -1994,12 +1994,12 @@ b_int_xfp_dummy = int(H_ssxfp_DUMMY.Integral())
 b_int_xfp_data_nocut = int(H_ssxfp_DATA_nocut.Integral())
 b_int_xfp_data_nopid = int(H_ssxfp_DATA_nopid.Integral())
 
-l_xfp.AddEntry(H_ssxfp_SIMC,"SIMC, INT = %s" % b_int_xfp_simc)
-l_xfp.AddEntry(H_ssxfp_DATA,"DATA, INT = %s" % b_int_xfp_data)
-l_xfp.AddEntry(H_ssxfp_DUMMY,"DUMMY, INT = %s" % b_int_xfp_dummy)
+l_xfp.AddEntry(H_ssxfp_SIMC,"SIMC, INT = {:.0f}".format( b_int_xfp_simc))
+l_xfp.AddEntry(H_ssxfp_DATA,"DATA, INT = {:.0f}".format( b_int_xfp_data))
+l_xfp.AddEntry(H_ssxfp_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_xfp_dummy))
 if DEBUG:
-    l_xfp.AddEntry(H_ssxfp_DATA_nocut,"DATA (no cut), INT = %s" % b_int_xfp_data_nocut)
-    l_xfp.AddEntry(H_ssxfp_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_xfp_data_nopid)
+    l_xfp.AddEntry(H_ssxfp_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_xfp_data_nocut))
+    l_xfp.AddEntry(H_ssxfp_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_xfp_data_nopid))
 
 l_xfp.Draw()
 
@@ -2026,12 +2026,12 @@ b_int_yfp_dummy = int(H_ssyfp_DUMMY.Integral())
 b_int_yfp_data_nocut = int(H_ssyfp_DATA_nocut.Integral())
 b_int_yfp_data_nopid = int(H_ssyfp_DATA_nopid.Integral())
 
-l_yfp.AddEntry(H_ssyfp_SIMC,"SIMC, INT = %s" % b_int_yfp_simc)
-l_yfp.AddEntry(H_ssyfp_DATA,"DATA, INT = %s" % b_int_yfp_data)
-l_yfp.AddEntry(H_ssyfp_DUMMY,"DUMMY, INT = %s" % b_int_yfp_dummy)
+l_yfp.AddEntry(H_ssyfp_SIMC,"SIMC, INT = {:.0f}".format( b_int_yfp_simc))
+l_yfp.AddEntry(H_ssyfp_DATA,"DATA, INT = {:.0f}".format( b_int_yfp_data))
+l_yfp.AddEntry(H_ssyfp_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_yfp_dummy))
 if DEBUG:
-    l_yfp.AddEntry(H_ssyfp_DATA_nocut,"DATA (no cut), INT = %s" % b_int_yfp_data_nocut)
-    l_yfp.AddEntry(H_ssyfp_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_yfp_data_nopid)
+    l_yfp.AddEntry(H_ssyfp_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_yfp_data_nocut))
+    l_yfp.AddEntry(H_ssyfp_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_yfp_data_nopid))
 
 l_yfp.Draw()
 
@@ -2058,12 +2058,12 @@ b_int_xpfp_data_nocut = int(H_ssxpfp_DATA_nocut.Integral())
 b_int_xpfp_data_nopid = int(H_ssxpfp_DATA_nopid.Integral())
 b_int_xpfp_dummy = int(H_ssxpfp_DUMMY.Integral())
 
-l_xpfp.AddEntry(H_ssxpfp_SIMC,"SIMC, INT = %s" % b_int_xpfp_simc)
-l_xpfp.AddEntry(H_ssxpfp_DATA,"DATA, INT = %s" % b_int_xpfp_data)
+l_xpfp.AddEntry(H_ssxpfp_SIMC,"SIMC, INT = {:.0f}".format( b_int_xpfp_simc))
+l_xpfp.AddEntry(H_ssxpfp_DATA,"DATA, INT = {:.0f}".format( b_int_xpfp_data))
 if DEBUG:
-    l_xpfp.AddEntry(H_ssxpfp_DATA_nocut,"DATA (no cut), INT = %s" % b_int_xpfp_data_nocut)
-    l_xpfp.AddEntry(H_ssxpfp_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_xpfp_data_nopid)
-l_xpfp.AddEntry(H_ssxpfp_DUMMY,"DUMMY, INT = %s" % b_int_xpfp_dummy)
+    l_xpfp.AddEntry(H_ssxpfp_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_xpfp_data_nocut))
+    l_xpfp.AddEntry(H_ssxpfp_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_xpfp_data_nopid))
+l_xpfp.AddEntry(H_ssxpfp_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_xpfp_dummy))
 
 l_xpfp.Draw()
 
@@ -2090,12 +2090,12 @@ b_int_ypfp_data_nocut = int(H_ssypfp_DATA_nocut.Integral())
 b_int_ypfp_data_nopid = int(H_ssypfp_DATA_nopid.Integral())
 b_int_ypfp_dummy = int(H_ssypfp_DUMMY.Integral())
 
-l_ypfp.AddEntry(H_ssypfp_SIMC,"SIMC, INT = %s" % b_int_ypfp_simc)
-l_ypfp.AddEntry(H_ssypfp_DATA,"DATA, INT = %s" % b_int_ypfp_data)
+l_ypfp.AddEntry(H_ssypfp_SIMC,"SIMC, INT = {:.0f}".format( b_int_ypfp_simc))
+l_ypfp.AddEntry(H_ssypfp_DATA,"DATA, INT = {:.0f}".format( b_int_ypfp_data))
 if DEBUG:
-    l_ypfp.AddEntry(H_ssypfp_DATA_nocut,"DATA (no cut), INT = %s" % b_int_ypfp_data_nocut)
-    l_ypfp.AddEntry(H_ssypfp_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_ypfp_data_nopid)
-l_ypfp.AddEntry(H_ssypfp_DUMMY,"DUMMY, INT = %s" % b_int_ypfp_dummy)
+    l_ypfp.AddEntry(H_ssypfp_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_ypfp_data_nocut))
+    l_ypfp.AddEntry(H_ssypfp_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_ypfp_data_nopid))
+l_ypfp.AddEntry(H_ssypfp_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_ypfp_dummy))
 
 l_ypfp.Draw()
 
@@ -2122,12 +2122,12 @@ b_int_hxfp_data_nocut = int(H_hsxfp_DATA_nocut.Integral())
 b_int_hxfp_data_nopid = int(H_hsxfp_DATA_nopid.Integral())
 b_int_hxfp_dummy = int(H_hsxfp_DUMMY.Integral())
 
-l_hxfp.AddEntry(H_hsxfp_SIMC,"SIMC, INT = %s" % b_int_hxfp_simc)
-l_hxfp.AddEntry(H_hsxfp_DATA,"DATA, INT = %s" % b_int_hxfp_data)
+l_hxfp.AddEntry(H_hsxfp_SIMC,"SIMC, INT = {:.0f}".format( b_int_hxfp_simc))
+l_hxfp.AddEntry(H_hsxfp_DATA,"DATA, INT = {:.0f}".format( b_int_hxfp_data))
 if DEBUG:
-    l_hxfp.AddEntry(H_hsxfp_DATA_nocut,"DATA (no cut), INT = %s" % b_int_hxfp_data_nocut)
-    l_hxfp.AddEntry(H_hsxfp_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_hxfp_data_nopid)
-l_hxfp.AddEntry(H_hsxfp_DUMMY,"DUMMY, INT = %s" % b_int_hxfp_dummy)
+    l_hxfp.AddEntry(H_hsxfp_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_hxfp_data_nocut))
+    l_hxfp.AddEntry(H_hsxfp_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_hxfp_data_nopid))
+l_hxfp.AddEntry(H_hsxfp_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_hxfp_dummy))
 
 l_hxfp.Draw()
 
@@ -2154,12 +2154,12 @@ b_int_hyfp_data_nocut = int(H_hsyfp_DATA_nocut.Integral())
 b_int_hyfp_data_nopid = int(H_hsyfp_DATA_nopid.Integral())
 b_int_hyfp_dummy = int(H_hsyfp_DUMMY.Integral())
 
-l_hyfp.AddEntry(H_hsyfp_SIMC,"SIMC, INT = %s" % b_int_hyfp_simc)
-l_hyfp.AddEntry(H_hsyfp_DATA,"DATA, INT = %s" % b_int_hyfp_data)
+l_hyfp.AddEntry(H_hsyfp_SIMC,"SIMC, INT = {:.0f}".format( b_int_hyfp_simc))
+l_hyfp.AddEntry(H_hsyfp_DATA,"DATA, INT = {:.0f}".format( b_int_hyfp_data))
 if DEBUG:
-    l_hyfp.AddEntry(H_hsyfp_DATA_nocut,"DATA (no cut), INT = %s" % b_int_hyfp_data_nocut)
-    l_hyfp.AddEntry(H_hsyfp_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_hyfp_data_nopid)
-l_hyfp.AddEntry(H_hsyfp_DUMMY,"DUMMY, INT = %s" % b_int_hyfp_dummy)
+    l_hyfp.AddEntry(H_hsyfp_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_hyfp_data_nocut))
+    l_hyfp.AddEntry(H_hsyfp_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_hyfp_data_nopid))
+l_hyfp.AddEntry(H_hsyfp_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_hyfp_dummy))
 
 l_hyfp.Draw()
 
@@ -2186,12 +2186,12 @@ b_int_hxpfp_data_nocut = int(H_hsxpfp_DATA_nocut.Integral())
 b_int_hxpfp_data_nopid = int(H_hsxpfp_DATA_nopid.Integral())
 b_int_hxpfp_dummy = int(H_hsxpfp_DUMMY.Integral())
 
-l_hxpfp.AddEntry(H_hsxpfp_SIMC,"SIMC, INT = %s" % b_int_hxpfp_simc)
-l_hxpfp.AddEntry(H_hsxpfp_DATA,"DATA, INT = %s" % b_int_hxpfp_data)
+l_hxpfp.AddEntry(H_hsxpfp_SIMC,"SIMC, INT = {:.0f}".format( b_int_hxpfp_simc))
+l_hxpfp.AddEntry(H_hsxpfp_DATA,"DATA, INT = {:.0f}".format( b_int_hxpfp_data))
 if DEBUG:
-    l_hxpfp.AddEntry(H_hsxpfp_DATA_nocut,"DATA (no cut), INT = %s" % b_int_hxpfp_data_nocut)
-    l_hxpfp.AddEntry(H_hsxpfp_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_hxpfp_data_nopid)
-l_hxpfp.AddEntry(H_hsxpfp_DUMMY,"DUMMY, INT = %s" % b_int_hxpfp_dummy)
+    l_hxpfp.AddEntry(H_hsxpfp_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_hxpfp_data_nocut))
+    l_hxpfp.AddEntry(H_hsxpfp_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_hxpfp_data_nopid))
+l_hxpfp.AddEntry(H_hsxpfp_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_hxpfp_dummy))
 
 l_hxpfp.Draw()
 
@@ -2218,12 +2218,12 @@ b_int_hypfp_data_nocut = int(H_hsypfp_DATA_nocut.Integral())
 b_int_hypfp_data_nopid = int(H_hsypfp_DATA_nopid.Integral())
 b_int_hypfp_dummy = int(H_hsypfp_DUMMY.Integral())
 
-l_hypfp.AddEntry(H_hsypfp_SIMC,"SIMC, INT = %s" % b_int_hypfp_simc)
-l_hypfp.AddEntry(H_hsypfp_DATA,"DATA, INT = %s" % b_int_hypfp_data)
+l_hypfp.AddEntry(H_hsypfp_SIMC,"SIMC, INT = {:.0f}".format( b_int_hypfp_simc))
+l_hypfp.AddEntry(H_hsypfp_DATA,"DATA, INT = {:.0f}".format( b_int_hypfp_data))
 if DEBUG:
-    l_hypfp.AddEntry(H_hsypfp_DATA_nocut,"DATA (no cut), INT = %s" % b_int_hypfp_data_nocut)
-    l_hypfp.AddEntry(H_hsypfp_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_hypfp_data_nopid)
-l_hypfp.AddEntry(H_hsypfp_DUMMY,"DUMMY, INT = %s" % b_int_hypfp_dummy)
+    l_hypfp.AddEntry(H_hsypfp_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_hypfp_data_nocut))
+    l_hypfp.AddEntry(H_hsypfp_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_hypfp_data_nopid))
+l_hypfp.AddEntry(H_hsypfp_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_hypfp_dummy))
 
 l_hypfp.Draw()
 
@@ -2250,12 +2250,12 @@ b_int_xptar_data_nocut = int(H_ssxptar_DATA_nocut.Integral())
 b_int_xptar_data_nopid = int(H_ssxptar_DATA_nopid.Integral())
 b_int_xptar_dummy = int(H_ssxptar_DUMMY.Integral())
 
-l_xptar.AddEntry(H_ssxptar_SIMC,"SIMC, INT = %s" % b_int_xptar_simc)
-l_xptar.AddEntry(H_ssxptar_DATA,"DATA, INT = %s" % b_int_xptar_data)
+l_xptar.AddEntry(H_ssxptar_SIMC,"SIMC, INT = {:.0f}".format( b_int_xptar_simc))
+l_xptar.AddEntry(H_ssxptar_DATA,"DATA, INT = {:.0f}".format( b_int_xptar_data))
 if DEBUG:
-    l_xptar.AddEntry(H_ssxptar_DATA_nocut,"DATA (no cut), INT = %s" % b_int_xptar_data_nocut)
-    l_xptar.AddEntry(H_ssxptar_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_xptar_data_nopid)
-l_xptar.AddEntry(H_ssxptar_DUMMY,"DUMMY, INT = %s" % b_int_xptar_dummy)
+    l_xptar.AddEntry(H_ssxptar_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_xptar_data_nocut))
+    l_xptar.AddEntry(H_ssxptar_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_xptar_data_nopid))
+l_xptar.AddEntry(H_ssxptar_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_xptar_dummy))
 
 l_xptar.Draw()
 
@@ -2282,12 +2282,12 @@ b_int_yptar_data_nocut = int(H_ssyptar_DATA_nocut.Integral())
 b_int_yptar_data_nopid = int(H_ssyptar_DATA_nopid.Integral())
 b_int_yptar_dummy = int(H_ssyptar_DUMMY.Integral())
 
-l_yptar.AddEntry(H_ssyptar_SIMC,"SIMC, INT = %s" % b_int_yptar_simc)
-l_yptar.AddEntry(H_ssyptar_DATA,"DATA, INT = %s" % b_int_yptar_data)
+l_yptar.AddEntry(H_ssyptar_SIMC,"SIMC, INT = {:.0f}".format( b_int_yptar_simc))
+l_yptar.AddEntry(H_ssyptar_DATA,"DATA, INT = {:.0f}".format( b_int_yptar_data))
 if DEBUG:
-    l_yptar.AddEntry(H_ssyptar_DATA_nocut,"DATA (no cut), INT = %s" % b_int_yptar_data_nocut)
-    l_yptar.AddEntry(H_ssyptar_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_yptar_data_nopid)
-l_yptar.AddEntry(H_ssyptar_DUMMY,"DUMMY, INT = %s" % b_int_yptar_dummy)
+    l_yptar.AddEntry(H_ssyptar_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_yptar_data_nocut))
+    l_yptar.AddEntry(H_ssyptar_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_yptar_data_nopid))
+l_yptar.AddEntry(H_ssyptar_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_yptar_dummy))
 
 l_yptar.Draw()
 
@@ -2314,12 +2314,12 @@ b_int_hxptar_data_nocut = int(H_hsxptar_DATA_nocut.Integral())
 b_int_hxptar_data_nopid = int(H_hsxptar_DATA_nopid.Integral())
 b_int_hxptar_dummy = int(H_hsxptar_DUMMY.Integral())
 
-l_hxptar.AddEntry(H_hsxptar_SIMC,"SIMC, INT = %s" % b_int_hxptar_simc)
-l_hxptar.AddEntry(H_hsxptar_DATA,"DATA, INT = %s" % b_int_hxptar_data)
+l_hxptar.AddEntry(H_hsxptar_SIMC,"SIMC, INT = {:.0f}".format( b_int_hxptar_simc))
+l_hxptar.AddEntry(H_hsxptar_DATA,"DATA, INT = {:.0f}".format( b_int_hxptar_data))
 if DEBUG:
-    l_hxptar.AddEntry(H_hsxptar_DATA_nocut,"DATA (no cut), INT = %s" % b_int_hxptar_data_nocut)
-    l_hxptar.AddEntry(H_hsxptar_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_hxptar_data_nopid)
-l_hxptar.AddEntry(H_hsxptar_DUMMY,"DUMMY, INT = %s" % b_int_hxptar_dummy)
+    l_hxptar.AddEntry(H_hsxptar_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_hxptar_data_nocut))
+    l_hxptar.AddEntry(H_hsxptar_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_hxptar_data_nopid))
+l_hxptar.AddEntry(H_hsxptar_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_hxptar_dummy))
 
 l_hxptar.Draw()
 
@@ -2346,12 +2346,12 @@ b_int_hyptar_data_nocut = int(H_hsyptar_DATA_nocut.Integral())
 b_int_hyptar_data_nopid = int(H_hsyptar_DATA_nopid.Integral())
 b_int_hyptar_dummy = int(H_hsyptar_DUMMY.Integral())
 
-l_hyptar.AddEntry(H_hsyptar_SIMC,"SIMC, INT = %s" % b_int_hyptar_simc)
-l_hyptar.AddEntry(H_hsyptar_DATA,"DATA, INT = %s" % b_int_hyptar_data)
+l_hyptar.AddEntry(H_hsyptar_SIMC,"SIMC, INT = {:.0f}".format( b_int_hyptar_simc))
+l_hyptar.AddEntry(H_hsyptar_DATA,"DATA, INT = {:.0f}".format( b_int_hyptar_data))
 if DEBUG:
-    l_hyptar.AddEntry(H_hsyptar_DATA_nocut,"DATA (no cut), INT = %s" % b_int_hyptar_data_nocut)
-    l_hyptar.AddEntry(H_hsyptar_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_hyptar_data_nopid)
-l_hyptar.AddEntry(H_hsyptar_DUMMY,"DUMMY, INT = %s" % b_int_hyptar_dummy)
+    l_hyptar.AddEntry(H_hsyptar_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_hyptar_data_nocut))
+    l_hyptar.AddEntry(H_hsyptar_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_hyptar_data_nopid))
+l_hyptar.AddEntry(H_hsyptar_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_hyptar_dummy))
 
 l_hyptar.Draw()
 
@@ -2378,12 +2378,12 @@ b_int_Delta_data_nocut = int(H_ssdelta_DATA_nocut.Integral())
 b_int_Delta_data_nopid = int(H_ssdelta_DATA_nopid.Integral())
 b_int_Delta_dummy = int(H_ssdelta_DUMMY.Integral())
 
-l_Delta.AddEntry(H_ssdelta_SIMC,"SIMC, INT = %s" % b_int_Delta_simc)
-l_Delta.AddEntry(H_ssdelta_DATA,"DATA, INT = %s" % b_int_Delta_data)
+l_Delta.AddEntry(H_ssdelta_SIMC,"SIMC, INT = {:.0f}".format( b_int_Delta_simc))
+l_Delta.AddEntry(H_ssdelta_DATA,"DATA, INT = {:.0f}".format( b_int_Delta_data))
 if DEBUG:
-    l_Delta.AddEntry(H_ssdelta_DATA_nocut,"DATA (no cut), INT = %s" % b_int_Delta_data_nocut)
-    l_Delta.AddEntry(H_ssdelta_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_Delta_data_nopid)
-l_Delta.AddEntry(H_ssdelta_DUMMY,"DUMMY, INT = %s" % b_int_Delta_dummy)
+    l_Delta.AddEntry(H_ssdelta_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_Delta_data_nocut))
+    l_Delta.AddEntry(H_ssdelta_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_Delta_data_nopid))
+l_Delta.AddEntry(H_ssdelta_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_Delta_dummy))
 
 l_Delta.Draw()
 
@@ -2410,12 +2410,12 @@ b_int_hDelta_data_nocut = int(H_hsdelta_DATA_nocut.Integral())
 b_int_hDelta_data_nopid = int(H_hsdelta_DATA_nopid.Integral())
 b_int_hDelta_dummy = int(H_hsdelta_DUMMY.Integral())
 
-l_hDelta.AddEntry(H_hsdelta_SIMC,"SIMC, INT = %s" % b_int_hDelta_simc)
-l_hDelta.AddEntry(H_hsdelta_DATA,"DATA, INT = %s" % b_int_hDelta_data)
+l_hDelta.AddEntry(H_hsdelta_SIMC,"SIMC, INT = {:.0f}".format( b_int_hDelta_simc))
+l_hDelta.AddEntry(H_hsdelta_DATA,"DATA, INT = {:.0f}".format( b_int_hDelta_data))
 if DEBUG:
-    l_hDelta.AddEntry(H_hsdelta_DATA_nocut,"DATA (no cut), INT = %s" % b_int_hDelta_data_nocut)
-    l_hDelta.AddEntry(H_hsdelta_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_hDelta_data_nopid)
-l_hDelta.AddEntry(H_hsdelta_DUMMY,"DUMMY, INT = %s" % b_int_hDelta_dummy)
+    l_hDelta.AddEntry(H_hsdelta_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_hDelta_data_nocut))
+    l_hDelta.AddEntry(H_hsdelta_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_hDelta_data_nopid))
+l_hDelta.AddEntry(H_hsdelta_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_hDelta_dummy))
 
 l_hDelta.Draw()
 
@@ -2442,12 +2442,12 @@ b_int_Q2_data_nocut = int(H_Q2_DATA_nocut.Integral())
 b_int_Q2_data_nopid = int(H_Q2_DATA_nopid.Integral())
 b_int_Q2_dummy = int(H_Q2_DUMMY.Integral())
 
-l_Q2.AddEntry(H_Q2_SIMC,"SIMC, INT = %s" % b_int_Q2_simc)
-l_Q2.AddEntry(H_Q2_DATA,"DATA, INT = %s" % b_int_Q2_data)
+l_Q2.AddEntry(H_Q2_SIMC,"SIMC, INT = {:.0f}".format( b_int_Q2_simc))
+l_Q2.AddEntry(H_Q2_DATA,"DATA, INT = {:.0f}".format( b_int_Q2_data))
 if DEBUG:
-    l_Q2.AddEntry(H_Q2_DATA_nocut,"DATA (no cut), INT = %s" % b_int_Q2_data_nocut)
-    l_Q2.AddEntry(H_Q2_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_Q2_data_nopid)
-l_Q2.AddEntry(H_Q2_DUMMY,"DUMMY, INT = %s" % b_int_Q2_dummy)
+    l_Q2.AddEntry(H_Q2_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_Q2_data_nocut))
+    l_Q2.AddEntry(H_Q2_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_Q2_data_nopid))
+l_Q2.AddEntry(H_Q2_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_Q2_dummy))
 
 l_Q2.Draw()
 
@@ -2474,12 +2474,12 @@ b_int_epsilon_data_nocut = int(H_epsilon_DATA_nocut.Integral())
 b_int_epsilon_data_nopid = int(H_epsilon_DATA_nopid.Integral())
 b_int_epsilon_dummy = int(H_epsilon_DUMMY.Integral())
 
-l_epsilon.AddEntry(H_epsilon_SIMC,"SIMC, INT = %s" % b_int_epsilon_simc)
-l_epsilon.AddEntry(H_epsilon_DATA,"DATA, INT = %s" % b_int_epsilon_data)
+l_epsilon.AddEntry(H_epsilon_SIMC,"SIMC, INT = {:.0f}".format( b_int_epsilon_simc))
+l_epsilon.AddEntry(H_epsilon_DATA,"DATA, INT = {:.0f}".format( b_int_epsilon_data))
 if DEBUG:
-    l_epsilon.AddEntry(H_epsilon_DATA_nocut,"DATA (no cut), INT = %s" % b_int_epsilon_data_nocut)
-    l_epsilon.AddEntry(H_epsilon_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_epsilon_data_nopid)
-l_epsilon.AddEntry(H_epsilon_DUMMY,"DUMMY, INT = %s" % b_int_epsilon_dummy)
+    l_epsilon.AddEntry(H_epsilon_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_epsilon_data_nocut))
+    l_epsilon.AddEntry(H_epsilon_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_epsilon_data_nopid))
+l_epsilon.AddEntry(H_epsilon_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_epsilon_dummy))
 
 l_epsilon.Draw()
 
@@ -2512,18 +2512,18 @@ b_mean_MMp2_data_nocut = H_MMp2_DATA_nocut.GetMean()
 b_mean_MMp2_data_nopid = H_MMp2_DATA_nopid.GetMean()
 b_mean_MMp2_dummy = H_MMp2_DUMMY.GetMean()
 
-l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = %s" % b_int_MMp2_simc)
-l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = %s" % b_int_MMp2_data)
+l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
+l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
 if DEBUG:
-    l_MMp2.AddEntry(H_MMp2_DATA_nocut,"DATA (no cut), INT = %s" % b_int_MMp2_data_nocut)
-    l_MMp2.AddEntry(H_MMp2_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_MMp2_data_nopid)
-l_MMp2.AddEntry(H_MMp2_DUMMY,"DUMMY, INT = %s" % b_int_MMp2_dummy)
-l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_MMp2_simc))
-l_MMp2.AddEntry(H_MMp2_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_MMp2_data))
+    l_MMp2.AddEntry(H_MMp2_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_MMp2_data_nocut))
+    l_MMp2.AddEntry(H_MMp2_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_MMp2_data_nopid))
+l_MMp2.AddEntry(H_MMp2_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_MMp2_dummy))
+l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_MMp2_simc)))
+l_MMp2.AddEntry(H_MMp2_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_MMp2_data)))
 if DEBUG:
-    l_MMp2.AddEntry(H_MMp2_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_MMp2_data_nocut))
-    l_MMp2.AddEntry(H_MMp2_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_MMp2_data_nopid))
-l_MMp2.AddEntry(H_MMp2_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_MMp2_dummy))
+    l_MMp2.AddEntry(H_MMp2_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_MMp2_data_nocut)))
+    l_MMp2.AddEntry(H_MMp2_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_MMp2_data_nopid)))
+l_MMp2.AddEntry(H_MMp2_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_MMp2_dummy)))
 
 l_MMp2.Draw()
 
@@ -2556,18 +2556,18 @@ b_mean_ph_q_data_nocut = H_ph_q_DATA_nocut.GetMean()
 b_mean_ph_q_data_nopid = H_ph_q_DATA_nopid.GetMean()
 b_mean_ph_q_dummy = H_ph_q_DUMMY.GetMean()
 
-l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, INT = %s" % b_int_ph_q_simc)
-l_ph_q.AddEntry(H_ph_q_DATA,"DATA, INT = %s" % b_int_ph_q_data)
+l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, INT = {:.0f}".format( b_int_ph_q_simc))
+l_ph_q.AddEntry(H_ph_q_DATA,"DATA, INT = {:.0f}".format( b_int_ph_q_data))
 if DEBUG:
-    l_ph_q.AddEntry(H_ph_q_DATA_nocut,"DATA (no cut), INT = %s" % b_int_ph_q_data_nocut)
-    l_ph_q.AddEntry(H_ph_q_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_ph_q_data_nopid)
-l_ph_q.AddEntry(H_ph_q_DUMMY,"DUMMY, INT = %s" % b_int_ph_q_dummy)
-l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_ph_q_simc))
-l_ph_q.AddEntry(H_ph_q_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_ph_q_data))
+    l_ph_q.AddEntry(H_ph_q_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_ph_q_data_nocut))
+    l_ph_q.AddEntry(H_ph_q_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_ph_q_data_nopid))
+l_ph_q.AddEntry(H_ph_q_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_ph_q_dummy))
+l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_ph_q_simc)))
+l_ph_q.AddEntry(H_ph_q_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_ph_q_data)))
 if DEBUG:
-    l_ph_q.AddEntry(H_ph_q_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_ph_q_data_nocut))
-    l_ph_q.AddEntry(H_ph_q_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_ph_q_data_nopid))
-l_ph_q.AddEntry(H_ph_q_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_ph_q_dummy))
+    l_ph_q.AddEntry(H_ph_q_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_ph_q_data_nocut)))
+    l_ph_q.AddEntry(H_ph_q_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_ph_q_data_nopid)))
+l_ph_q.AddEntry(H_ph_q_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_ph_q_dummy)))
 
 l_ph_q.Draw()
 
@@ -2600,18 +2600,18 @@ b_mean_th_q_data_nocut = H_th_q_DATA_nocut.GetMean()
 b_mean_th_q_data_nopid = H_th_q_DATA_nopid.GetMean()
 b_mean_th_q_dummy = H_th_q_DUMMY.GetMean()
 
-l_th_q.AddEntry(H_th_q_SIMC,"SIMC, INT = %s" % b_int_th_q_simc)
-l_th_q.AddEntry(H_th_q_DATA,"DATA, INT = %s" % b_int_th_q_data)
+l_th_q.AddEntry(H_th_q_SIMC,"SIMC, INT = {:.0f}".format( b_int_th_q_simc))
+l_th_q.AddEntry(H_th_q_DATA,"DATA, INT = {:.0f}".format( b_int_th_q_data))
 if DEBUG:
-    l_th_q.AddEntry(H_th_q_DATA_nocut,"DATA (no cut), INT = %s" % b_int_th_q_data_nocut)
-    l_th_q.AddEntry(H_th_q_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_th_q_data_nopid)
-l_th_q.AddEntry(H_th_q_DUMMY,"DUMMY, INT = %s" % b_int_th_q_dummy)
-l_th_q.AddEntry(H_th_q_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_th_q_simc))
-l_th_q.AddEntry(H_th_q_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_th_q_data))
+    l_th_q.AddEntry(H_th_q_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_th_q_data_nocut))
+    l_th_q.AddEntry(H_th_q_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_th_q_data_nopid))
+l_th_q.AddEntry(H_th_q_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_th_q_dummy))
+l_th_q.AddEntry(H_th_q_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_th_q_simc)))
+l_th_q.AddEntry(H_th_q_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_th_q_data)))
 if DEBUG:
-    l_th_q.AddEntry(H_th_q_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_th_q_data_nocut))
-    l_th_q.AddEntry(H_th_q_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_th_q_data_nopid))
-l_th_q.AddEntry(H_th_q_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_th_q_dummy))
+    l_th_q.AddEntry(H_th_q_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_th_q_data_nocut)))
+    l_th_q.AddEntry(H_th_q_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_th_q_data_nopid)))
+l_th_q.AddEntry(H_th_q_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_th_q_dummy)))
 
 l_th_q.Draw()
 
@@ -2645,18 +2645,18 @@ b_mean_ph_recoil_data_nocut = H_ph_recoil_DATA_nocut.GetMean()
 b_mean_ph_recoil_data_nopid = H_ph_recoil_DATA_nopid.GetMean()
 b_mean_ph_recoil_dummy = H_ph_recoil_DUMMY.GetMean()
 
-#l_ph_recoil.AddEntry(H_ph_recoil_SIMC,"SIMC, INT = %s" % b_int_ph_recoil_simc)
-l_ph_recoil.AddEntry(H_ph_recoil_DATA,"DATA, INT = %s" % b_int_ph_recoil_data)
+#l_ph_recoil.AddEntry(H_ph_recoil_SIMC,"SIMC, INT = {:.0f}".format( b_int_ph_recoil_simc))
+l_ph_recoil.AddEntry(H_ph_recoil_DATA,"DATA, INT = {:.0f}".format( b_int_ph_recoil_data))
 if DEBUG:
-    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nocut,"DATA (no cut), INT = %s" % b_int_ph_recoil_data_nocut)
-    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_ph_recoil_data_nopid)
-l_ph_recoil.AddEntry(H_ph_recoil_DUMMY,"DUMMY, INT = %s" % b_int_ph_recoil_dummy)
-#l_ph_recoil.AddEntry(H_ph_recoil_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_ph_recoil_simc))
-l_ph_recoil.AddEntry(H_ph_recoil_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_ph_recoil_data))
+    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_ph_recoil_data_nocut))
+    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_ph_recoil_data_nopid))
+l_ph_recoil.AddEntry(H_ph_recoil_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_ph_recoil_dummy))
+#l_ph_recoil.AddEntry(H_ph_recoil_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_ph_recoil_simc)))
+l_ph_recoil.AddEntry(H_ph_recoil_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_ph_recoil_data)))
 if DEBUG:
-    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_ph_recoil_data_nocut))
-    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_ph_recoil_data_nopid))
-l_ph_recoil.AddEntry(H_ph_recoil_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_ph_recoil_dummy))
+    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_ph_recoil_data_nocut)))
+    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_ph_recoil_data_nopid)))
+l_ph_recoil.AddEntry(H_ph_recoil_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_ph_recoil_dummy)))
 
 l_ph_recoil.Draw()
 
@@ -2689,18 +2689,18 @@ b_mean_th_recoil_data_nocut = H_th_recoil_DATA_nocut.GetMean()
 b_mean_th_recoil_data_nopid = H_th_recoil_DATA_nopid.GetMean()
 b_mean_th_recoil_dummy = H_th_recoil_DUMMY.GetMean()
 
-#l_th_recoil.AddEntry(H_th_recoil_SIMC,"SIMC, INT = %s" % b_int_th_recoil_simc)
-l_th_recoil.AddEntry(H_th_recoil_DATA,"DATA, INT = %s" % b_int_th_recoil_data)
+#l_th_recoil.AddEntry(H_th_recoil_SIMC,"SIMC, INT = {:.0f}".format( b_int_th_recoil_simc))
+l_th_recoil.AddEntry(H_th_recoil_DATA,"DATA, INT = {:.0f}".format( b_int_th_recoil_data))
 if DEBUG:
-    l_th_recoil.AddEntry(H_th_recoil_DATA_nocut,"DATA (no cut), INT = %s" % b_int_th_recoil_data_nocut)
-    l_th_recoil.AddEntry(H_th_recoil_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_th_recoil_data_nopid)
-l_th_recoil.AddEntry(H_th_recoil_DUMMY,"DUMMY, INT = %s" % b_int_th_recoil_dummy)
-#l_th_recoil.AddEntry(H_th_recoil_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_th_recoil_simc))
-l_th_recoil.AddEntry(H_th_recoil_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_th_recoil_data))
+    l_th_recoil.AddEntry(H_th_recoil_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_th_recoil_data_nocut))
+    l_th_recoil.AddEntry(H_th_recoil_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_th_recoil_data_nopid))
+l_th_recoil.AddEntry(H_th_recoil_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_th_recoil_dummy))
+#l_th_recoil.AddEntry(H_th_recoil_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_th_recoil_simc)))
+l_th_recoil.AddEntry(H_th_recoil_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_th_recoil_data)))
 if DEBUG:
-    l_th_recoil.AddEntry(H_th_recoil_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_th_recoil_data_nocut))
-    l_th_recoil.AddEntry(H_th_recoil_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_th_recoil_data_nopid))
-l_th_recoil.AddEntry(H_th_recoil_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_th_recoil_dummy))
+    l_th_recoil.AddEntry(H_th_recoil_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_th_recoil_data_nocut)))
+    l_th_recoil.AddEntry(H_th_recoil_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_th_recoil_data_nopid)))
+l_th_recoil.AddEntry(H_th_recoil_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_th_recoil_dummy)))
 
 l_th_recoil.Draw()
 
@@ -2734,18 +2734,18 @@ b_mean_pmiss_data_nocut = H_pmiss_DATA_nocut.GetMean()
 b_mean_pmiss_data_nopid = H_pmiss_DATA_nopid.GetMean()
 b_mean_pmiss_dummy = H_pmiss_DUMMY.GetMean()
 
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = %s" % b_int_pmiss_simc)
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = %s" % b_int_pmiss_data)
+l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
+l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
 if DEBUG:
-    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), INT = %s" % b_int_pmiss_data_nocut)
-    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_pmiss_data_nopid)
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, INT = %s" % b_int_pmiss_dummy)
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_pmiss_simc))
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_pmiss_data))
+    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmiss_data_nocut))
+    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmiss_data_nopid))
+l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmiss_dummy))
+l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_pmiss_simc)))
+l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_pmiss_data)))
 if DEBUG:
-    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_pmiss_data_nocut))
-    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_pmiss_data_nopid))
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_pmiss_dummy))
+    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_pmiss_data_nocut)))
+    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_pmiss_data_nopid)))
+l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_pmiss_dummy)))
 
 l_pmiss.Draw()
 
@@ -2778,18 +2778,18 @@ b_mean_emiss_data_nocut = H_emiss_DATA_nocut.GetMean()
 b_mean_emiss_data_nopid = H_emiss_DATA_nopid.GetMean()
 b_mean_emiss_dummy = H_emiss_DUMMY.GetMean()
 
-l_emiss.AddEntry(H_emiss_SIMC,"SIMC, INT = %s" % b_int_emiss_simc)
-l_emiss.AddEntry(H_emiss_DATA,"DATA, INT = %s" % b_int_emiss_data)
+l_emiss.AddEntry(H_emiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_emiss_simc))
+l_emiss.AddEntry(H_emiss_DATA,"DATA, INT = {:.0f}".format( b_int_emiss_data))
 if DEBUG:
-    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), INT = %s" % b_int_emiss_data_nocut)
-    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_emiss_data_nopid)
-l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, INT = %s" % b_int_emiss_dummy)
-l_emiss.AddEntry(H_emiss_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_emiss_simc))
-l_emiss.AddEntry(H_emiss_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_emiss_data))
+    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_emiss_data_nocut))
+    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_emiss_data_nopid))
+l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_emiss_dummy))
+l_emiss.AddEntry(H_emiss_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_emiss_simc)))
+l_emiss.AddEntry(H_emiss_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_emiss_data)))
 if DEBUG:
-    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_emiss_data_nocut))
-    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_emiss_data_nopid))
-l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_emiss_dummy))
+    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_emiss_data_nocut)))
+    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_emiss_data_nopid)))
+l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_emiss_dummy)))
 
 l_emiss.Draw()
 
@@ -2822,18 +2822,18 @@ b_mean_pmx_data_nocut = H_pmx_DATA_nocut.GetMean()
 b_mean_pmx_data_nopid = H_pmx_DATA_nopid.GetMean()
 b_mean_pmx_dummy = H_pmx_DUMMY.GetMean()
 
-l_pmx.AddEntry(H_pmx_SIMC,"SIMC, INT = %s" % b_int_pmx_simc)
-l_pmx.AddEntry(H_pmx_DATA,"DATA, INT = %s" % b_int_pmx_data)
+l_pmx.AddEntry(H_pmx_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmx_simc))
+l_pmx.AddEntry(H_pmx_DATA,"DATA, INT = {:.0f}".format( b_int_pmx_data))
 if DEBUG:
-    l_pmx.AddEntry(H_pmx_DATA_nocut,"DATA (no cut), INT = %s" % b_int_pmx_data_nocut)
-    l_pmx.AddEntry(H_pmx_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_pmx_data_nopid)
-l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, INT = %s" % b_int_pmx_dummy)
-l_pmx.AddEntry(H_pmx_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_pmx_simc))
-l_pmx.AddEntry(H_pmx_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_pmx_data))
+    l_pmx.AddEntry(H_pmx_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmx_data_nocut))
+    l_pmx.AddEntry(H_pmx_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmx_data_nopid))
+l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmx_dummy))
+l_pmx.AddEntry(H_pmx_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_pmx_simc)))
+l_pmx.AddEntry(H_pmx_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_pmx_data)))
 if DEBUG:
-    l_pmx.AddEntry(H_pmx_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_pmx_data_nocut))
-    l_pmx.AddEntry(H_pmx_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_pmx_data_nopid))
-l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_pmx_dummy))
+    l_pmx.AddEntry(H_pmx_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_pmx_data_nocut)))
+    l_pmx.AddEntry(H_pmx_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_pmx_data_nopid)))
+l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_pmx_dummy)))
 
 l_pmx.Draw()
 
@@ -2866,18 +2866,18 @@ b_mean_pmy_data_nocut = H_pmy_DATA_nocut.GetMean()
 b_mean_pmy_data_nopid = H_pmy_DATA_nopid.GetMean()
 b_mean_pmy_dummy = H_pmy_DUMMY.GetMean()
 
-l_pmy.AddEntry(H_pmy_SIMC,"SIMC, INT = %s" % b_int_pmy_simc)
-l_pmy.AddEntry(H_pmy_DATA,"DATA, INT = %s" % b_int_pmy_data)
+l_pmy.AddEntry(H_pmy_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmy_simc))
+l_pmy.AddEntry(H_pmy_DATA,"DATA, INT = {:.0f}".format( b_int_pmy_data))
 if DEBUG:
-    l_pmy.AddEntry(H_pmy_DATA_nocut,"DATA (no cut), INT = %s" % b_int_pmy_data_nocut)
-    l_pmy.AddEntry(H_pmy_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_pmy_data_nopid)
-l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, INT = %s" % b_int_pmy_dummy)
-l_pmy.AddEntry(H_pmy_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_pmy_simc))
-l_pmy.AddEntry(H_pmy_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_pmy_data))
+    l_pmy.AddEntry(H_pmy_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmy_data_nocut))
+    l_pmy.AddEntry(H_pmy_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmy_data_nopid))
+l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmy_dummy))
+l_pmy.AddEntry(H_pmy_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_pmy_simc)))
+l_pmy.AddEntry(H_pmy_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_pmy_data)))
 if DEBUG:
-    l_pmy.AddEntry(H_pmy_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_pmy_data_nocut))
-    l_pmy.AddEntry(H_pmy_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_pmy_data_nopid))
-l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_pmy_dummy))
+    l_pmy.AddEntry(H_pmy_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_pmy_data_nocut)))
+    l_pmy.AddEntry(H_pmy_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_pmy_data_nopid)))
+l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_pmy_dummy)))
 
 l_pmy.Draw()
 
@@ -2910,18 +2910,18 @@ b_mean_pmz_data_nocut = H_pmz_DATA_nocut.GetMean()
 b_mean_pmz_data_nopid = H_pmz_DATA_nopid.GetMean()
 b_mean_pmz_dummy = H_pmz_DUMMY.GetMean()
 
-l_pmz.AddEntry(H_pmz_SIMC,"SIMC, INT = %s" % b_int_pmz_simc)
-l_pmz.AddEntry(H_pmz_DATA,"DATA, INT = %s" % b_int_pmz_data)
+l_pmz.AddEntry(H_pmz_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmz_simc))
+l_pmz.AddEntry(H_pmz_DATA,"DATA, INT = {:.0f}".format( b_int_pmz_data))
 if DEBUG:
-    l_pmz.AddEntry(H_pmz_DATA_nocut,"DATA (no cut), INT = %s" % b_int_pmz_data_nocut)
-    l_pmz.AddEntry(H_pmz_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_pmz_data_nopid)
-l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, INT = %s" % b_int_pmz_dummy)
-l_pmz.AddEntry(H_pmz_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_pmz_simc))
-l_pmz.AddEntry(H_pmz_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_pmz_data))
+    l_pmz.AddEntry(H_pmz_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmz_data_nocut))
+    l_pmz.AddEntry(H_pmz_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmz_data_nopid))
+l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmz_dummy))
+l_pmz.AddEntry(H_pmz_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_pmz_simc)))
+l_pmz.AddEntry(H_pmz_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_pmz_data)))
 if DEBUG:
-    l_pmz.AddEntry(H_pmz_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_pmz_data_nocut))
-    l_pmz.AddEntry(H_pmz_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_pmz_data_nopid))
-l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_pmz_dummy))
+    l_pmz.AddEntry(H_pmz_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_pmz_data_nocut)))
+    l_pmz.AddEntry(H_pmz_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_pmz_data_nopid)))
+l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_pmz_dummy)))
 
 l_pmz.Draw()
 
@@ -2954,18 +2954,18 @@ b_mean_W_data_nocut = H_W_DATA_nocut.GetMean()
 b_mean_W_data_nopid = H_W_DATA_nopid.GetMean()
 b_mean_W_dummy = H_W_DUMMY.GetMean()
 
-l_W.AddEntry(H_W_SIMC,"SIMC, INT = %s" % b_int_W_simc)
-l_W.AddEntry(H_W_DATA,"DATA, INT = %s" % b_int_W_data)
+l_W.AddEntry(H_W_SIMC,"SIMC, INT = {:.0f}".format( b_int_W_simc))
+l_W.AddEntry(H_W_DATA,"DATA, INT = {:.0f}".format( b_int_W_data))
 if DEBUG:
-    l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), INT = %s" % b_int_W_data_nocut)
-    l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), INT = %s" % b_int_W_data_nopid)
-l_W.AddEntry(H_W_DUMMY,"DUMMY, INT = %s" % b_int_W_dummy)
-l_W.AddEntry(H_W_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_W_simc))
-l_W.AddEntry(H_W_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_W_data))
+    l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_W_data_nocut))
+    l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_W_data_nopid))
+l_W.AddEntry(H_W_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_W_dummy))
+l_W.AddEntry(H_W_SIMC,"SIMC, MEAN = {0:.3f}".format(b_mean_W_simc)))
+l_W.AddEntry(H_W_DATA,"DATA, MEAN = {0:.3f}".format(b_mean_W_data)))
 if DEBUG:
-    l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_W_data_nocut))
-    l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_W_data_nopid))
-l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_W_dummy))
+    l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), MEAN = {0:.3f}".format(b_mean_W_data_nocut)))
+    l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), MEAN = {0:.3f}".format(b_mean_W_data_nopid)))
+l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {0:.3f}".format(b_mean_W_dummy)))
 
 l_W.Draw()
 
