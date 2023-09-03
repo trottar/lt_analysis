@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-03 14:44:06 trottar"
+# Time-stamp: "2023-09-03 15:55:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -588,9 +588,9 @@ bpm_tar_x_DATA  = ROOT.TH1D("bpm_tar_x_DATA","BPM Target x", 200, -0.1, 0.1)
 bpm_tar_x_DATA_nocut  = ROOT.TH1D("bpm_tar_x_DATA_nocut","BPM Target x", 200, -0.1, 0.1)
 bpm_tar_x_DATA_nopid  = ROOT.TH1D("bpm_tar_x_DATA_nopid","BPM Target x", 200, -0.1, 0.1)
 
-bpm_tar_y_DATA  = ROOT.TH1D("bpm_tar_y_DATA","BPM Target y", 200, 0.0, 0.1)
-bpm_tar_y_DATA_nocut  = ROOT.TH1D("bpm_tar_y_DATA_nocut","BPM Target y", 200, 0.0, 0.1)
-bpm_tar_y_DATA_nopid  = ROOT.TH1D("bpm_tar_y_DATA_nopid","BPM Target y", 200, 0.0, 0.1)
+bpm_tar_y_DATA  = ROOT.TH1D("bpm_tar_y_DATA","BPM Target y", 200, 0.0, 0.2)
+bpm_tar_y_DATA_nocut  = ROOT.TH1D("bpm_tar_y_DATA_nocut","BPM Target y", 200, 0.0, 0.2)
+bpm_tar_y_DATA_nopid  = ROOT.TH1D("bpm_tar_y_DATA_nopid","BPM Target y", 200, 0.0, 0.2)
 
 ################################################################################################################################################
 # Fill histograms for various trees called above
