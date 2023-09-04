@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 12:44:41 trottar"
+# Time-stamp: "2023-09-04 18:44:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins):
+def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins):
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
@@ -80,7 +80,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
 
-    aver_hist = []
+    ave_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
@@ -96,14 +96,14 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
             weighted_sum = np.sum(sub_val * bin_val_data)
             total_count = np.sum(sub_val)
             average = weighted_sum / total_count            
-            aver_hist.append(average)
+            ave_hist.append(average)
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
             print("Average for t-bin {}:".format(i),average)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
-            aver_hist.append(0)
+            ave_hist.append(0)
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for t-bin {}: 0.0".format(i))
@@ -117,7 +117,7 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
     print("Size of binned_sub_data:", len(binned_sub_data[1]))
-    print("Size of aver_hist:", len(aver_hist))
+    print("Size of ave_hist:", len(ave_hist))
     print("Size of t_bins:", len(t_bins))
     print("Size of phi_bins:", len(phi_bins), "\n")
 
@@ -127,9 +127,9 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
         for k in range(len(phi_bins) - 1):
             phibin_index = k
             hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
-            aver_val = aver_hist[j]
-            #print("----------------------",(tbin_index, phibin_index, len(hist_val), aver_val))
-            dict_lst.append((tbin_index, phibin_index, hist_val, aver_val))
+            ave_val = ave_hist[j]
+            #print("----------------------",(tbin_index, phibin_index, len(hist_val), ave_val))
+            dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
 
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
@@ -137,12 +137,12 @@ def calculate_aver_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bin
         key = (tup[0], tup[1])
         groups[key] = {
             "{}_arr".format(kin_type) : tup[2],
-            "{}_aver".format(kin_type) : tup[3],
+            "{}_ave".format(kin_type) : tup[3],
         }            
             
     return groups
 
-def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
+def calculate_ave_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     
     # Initialize lists for binned_t_data, and binned_hist_data
     binned_t_data = []
@@ -167,7 +167,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
 
-    aver_hist = []
+    ave_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
@@ -181,14 +181,14 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
             weighted_sum = np.sum(sub_val * bin_val_data)
             total_count = np.sum(sub_val)
             average = weighted_sum / total_count            
-            aver_hist.append(average)
+            ave_hist.append(average)
             print("Weighted Sum:",weighted_sum)
             print("Total Count:",total_count)
             print("Average for t-bin {}:".format(i),average)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
-            aver_hist.append(0)
+            ave_hist.append(0)
             print("Weighted Sum: N/A")
             print("Total Count: N/A")
             print("Average for t-bin {}: 0.0".format(i))
@@ -201,7 +201,7 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
     print("Size of binned_t_data:", len(binned_t_data))
     print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_sub_data:", len(binned_sub_data[1]))
-    print("Size of aver_hist:", len(aver_hist))
+    print("Size of ave_hist:", len(ave_hist))
     print("Size of t_bins:", len(t_bins))
     print("Size of phi_bins:", len(phi_bins), "\n")
 
@@ -211,8 +211,8 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
         for k in range(len(phi_bins) - 1):
             phibin_index = k
             hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
-            aver_val = aver_hist[j]
-            dict_lst.append((tbin_index, phibin_index, hist_val, aver_val))
+            ave_val = ave_hist[j]
+            dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
 
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
@@ -220,14 +220,14 @@ def calculate_aver_simc(kin_type, hist_data, t_data, t_bins, phi_bins):
         key = (tup[0], tup[1])
         groups[key] = {
             "{}_arr".format(kin_type) : tup[2],
-            "{}_aver".format(kin_type) : tup[3],
+            "{}_ave".format(kin_type) : tup[3],
         }                    
     
     return groups
 
 ##################################################################################################################################################
 
-def aver_per_bin_data(histlist, inpDict):
+def ave_per_bin_data(histlist, inpDict):
 
     for hist in histlist:
         t_bins = hist["t_bins"]
@@ -335,7 +335,7 @@ def aver_per_bin_data(histlist, inpDict):
             combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
         t_dummy.SetBinContent(bin, combined_content)
 
-    averDict = {
+    aveDict = {
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
     }
@@ -343,7 +343,7 @@ def aver_per_bin_data(histlist, inpDict):
     # List of kinematic types
     kinematic_types = ["Q2", "W", "t"]
 
-    # Loop through histlist and update averDict
+    # Loop through histlist and update aveDict
     for hist in histlist:
         print("\n\n")
         print("-"*25)
@@ -351,13 +351,13 @@ def aver_per_bin_data(histlist, inpDict):
         print("Finding data averages for {}...".format(hist["phi_setting"]))
         print("-"*25)
         print("-"*25)
-        averDict[hist["phi_setting"]] = {}
+        aveDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            averDict[hist["phi_setting"]][kin_type] = calculate_aver_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins)
+            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins)
                 
-    return {"binned_DATA" : averDict}
+    return {"binned_DATA" : aveDict}
 
-def aver_per_bin_simc(histlist, inpDict):
+def ave_per_bin_simc(histlist, inpDict):
 
     for hist in histlist:
         t_bins = hist["t_bins"]
@@ -414,7 +414,7 @@ def aver_per_bin_simc(histlist, inpDict):
             combined_content = t_Center_SIMC.GetBinContent(bin) + t_Left_SIMC.GetBinContent(bin)
         t_simc.SetBinContent(bin, combined_content)
 
-    averDict = {
+    aveDict = {
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
     }
@@ -422,7 +422,7 @@ def aver_per_bin_simc(histlist, inpDict):
     # List of kinematic types
     kinematic_types = ["Q2", "W", "t"]
 
-    # Loop through histlist and update averDict
+    # Loop through histlist and update aveDict
     for hist in histlist:
         print("\n\n")
         print("-"*25)
@@ -430,8 +430,8 @@ def aver_per_bin_simc(histlist, inpDict):
         print("Finding simc averages for {}...".format(hist["phi_setting"]))
         print("-"*25)
         print("-"*25)
-        averDict[hist["phi_setting"]] = {}
+        aveDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            averDict[hist["phi_setting"]][kin_type] = calculate_aver_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins)
+            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins)
 
-    return {"binned_SIMC" : averDict}
+    return {"binned_SIMC" : aveDict}
