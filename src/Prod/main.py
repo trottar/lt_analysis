@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 19:11:30 trottar"
+# Time-stamp: "2023-09-04 19:18:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,7 +44,7 @@ if len(sys.argv)-1!=34:
 
 ##################################################################################################################################################    
 
-DEBUG = True # Flag for plots
+DEBUG = False # Flag for plots
 
 # Input params
 kinematics = sys.argv[1].split("_")
@@ -841,7 +841,7 @@ if DEBUG:
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''
 
-from calculate_yield import find_yield_data, find_yield_simc
+from calculate_yield import find_yield_data
 
 yieldDict = {}
 yieldDict.update(yield_per_bin_data(histlist, inpDict))
