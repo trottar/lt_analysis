@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 19:10:46 trottar"
+# Time-stamp: "2023-09-04 19:33:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,7 +152,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             
     return groups
 
-def find_yield_data(histlist, inpDict, DataType):
+def find_yield_data(histlist, inpDict):
     
     for hist in histlist:
         eff_charge = hist["normfac_data"]
