@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 19:41:47 trottar"
+# Time-stamp: "2023-09-04 19:49:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,7 +77,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
                                     print("Checking if {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
                                     print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(tbin_index), hist_data.GetBinContent(tbin_index)))
                                     print("Checking if {} <= {} <= {}".format(phi_bins[j], phibin_center, phi_bins[j+1]))
-                                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hisphi_data.GetBinCenter(phi_bin_index), hisphi_data.GetBinContent(phi_bin_index)))
+                                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(phi_bin_index), hist_data.GetBinContent(phi_bin_index)))
                                     tmp_t_data[0].append(t_data.GetBinCenter(tbin_index))
                                     tmp_t_data[1].append(t_data.GetBinContent(tbin_index))
                                     tmp_phi_data[0].append(phi_data.GetBinCenter(phibin_index))
