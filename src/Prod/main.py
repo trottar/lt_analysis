@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:07:01 trottar"
+# Time-stamp: "2023-09-04 22:14:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -891,7 +891,7 @@ for phiset in phisetlist:
         data_nested_dict = yieldDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        histbinDict["H_Q2_yield_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_Q2_yield_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data Q2 (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, inpDict["Q2min"], inpDict["Q2max"])
+        histbinDict["H_Q2_yield_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_Q2_yield_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data Q2 (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 100.0)
 
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
@@ -900,7 +900,7 @@ for phiset in phisetlist:
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
-        histbinDict["H_Q2_yield_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_Q2_yield_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc Q2 (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, inpDict["Q2min"], inpDict["Q2max"])
+        histbinDict["H_Q2_yield_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_Q2_yield_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc Q2 (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 100.0)
         
 C_Q2_tbin_DATA = TCanvas()
 C_Q2_tbin_DATA.Divide(NumtBins,NumPhiBins)
@@ -1059,9 +1059,9 @@ for it,phiset in enumerate(phisetlist):
         data_nested_dict = aveDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["Q2"][data_key_tuple]["arr"]), data_nested_dict["Q2"][data_key_tuple]["ave"]))
+        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["MM"][data_key_tuple]["arr"]), data_nested_dict["MM"][data_key_tuple]["ave"]))
         # Fill histogram
-        for (itt,jtt), val in np.ndenumerate(data_nested_dict["Q2"][data_key_tuple]["arr"]):
+        for (itt,jtt), val in np.ndenumerate(data_nested_dict["MM"][data_key_tuple]["arr"]):
             histbinDict["H_yield_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_yield_DATA.cd(k+1)
         histbinDict["H_yield_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
@@ -1079,9 +1079,9 @@ for it,phiset in enumerate(phisetlist):
         simc_nested_dict = aveDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
-        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["Q2"][simc_key_tuple]["arr"]), simc_nested_dict["Q2"][simc_key_tuple]["ave"]))
+        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["MM"][simc_key_tuple]["arr"]), simc_nested_dict["MM"][simc_key_tuple]["ave"]))
         # Fill histogram
-        for (itt,jtt), val in np.ndenumerate(simc_nested_dict["Q2"][simc_key_tuple]["arr"]):
+        for (itt,jtt), val in np.ndenumerate(simc_nested_dict["MM"][simc_key_tuple]["arr"]):
             histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
         C_yield_SIMC.cd(k+1)
         histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
