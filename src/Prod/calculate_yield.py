@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 19:55:03 trottar"
+# Time-stamp: "2023-09-04 20:04:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,10 +74,10 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
                             phibin_center = (phi_data.GetBinCenter(phibin_index)+math.pi)*(180 / math.pi)
                             if phi_bins[k] <= phibin_center <= phi_bins[k+1]:
                                 if hist_data.GetBinContent(phibin_index) > 0:
-                                    print("Checking if {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
-                                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(tbin_index), hist_data.GetBinContent(tbin_index)))
-                                    print("Checking if {} <= {} <= {}".format(phi_bins[j], phibin_center, phi_bins[j+1]))
-                                    print("Bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(phibin_index), hist_data.GetBinContent(phibin_index)))
+                                    print("Checking if t: {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
+                                    print("t-bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(tbin_index), hist_data.GetBinContent(tbin_index)))
+                                    print("Checking if phi: {} <= {} <= {}".format(phi_bins[k], phibin_center, phi_bins[k+1]))
+                                    print("phi-bin {}, Hist bin {} Passed with content {}".format(k, hist_data.GetBinCenter(phibin_index), hist_data.GetBinContent(phibin_index)))
                                     tmp_t_data[0].append(t_data.GetBinCenter(tbin_index))
                                     tmp_t_data[1].append(t_data.GetBinContent(tbin_index))
                                     tmp_phi_data[0].append(phi_data.GetBinCenter(phibin_index))
@@ -108,14 +108,14 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             yield_hist.append(yld)
             print("Total Count:",total_count)
             print("Effective Charge:",eff_charge)
-            print("Yield for t-bin {} phi-bin {}:".format(binned_t_data[0][i],i),yld)
+            #print("Yield for t-bin {} phi-bin {}:".format(binned_t_data[0][i],i),yld)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
             yield_hist.append(0)
             print("Total Count: N/A")
             print("Effective Charge:",eff_charge)
-            print("Yield for t-bin {} phi-bin {}: 0.0".format(binned_t_data[0][i],i))
+            #print("Yield for t-bin {} phi-bin {}: 0.0".format(binned_t_data[0][i],i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1
