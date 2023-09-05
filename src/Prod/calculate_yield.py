@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 21:13:11 trottar"
+# Time-stamp: "2023-09-04 21:22:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_data, phi_bins, eff_charge):
+def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_data, phi_bins, normfac_data):
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
     binned_phi_data = []
@@ -104,7 +104,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
         if sub_val.size != 0:
             total_count = np.sum(sub_val)
-            yld = total_count/eff_charge
+            yld = total_count*normfac_data
             yield_hist.append(yld)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
@@ -150,7 +150,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
 def find_yield_data(histlist, inpDict):
     
     for hist in histlist:
-        eff_charge = hist["normfac_data"]*1e6 # Convert C to uC
+        normfac_data = hist["normfac_data"]
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
 
@@ -172,6 +172,6 @@ def find_yield_data(histlist, inpDict):
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            yieldDict[hist["phi_setting"]][kin_type] = calculate_yield_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, hist["H_ph_q_DATA"], phi_bins, eff_charge)
-                
+            yieldDict[hist["phi_setting"]][kin_type] = calculate_yield_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, hist["H_ph_q_DATA"], phi_bins, normfac_data)
+            
     return {"binned_DATA" : yieldDict}
