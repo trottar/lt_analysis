@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-24 14:55:39 trottar"
+# Time-stamp: "2023-09-05 11:28:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -816,7 +816,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_RAND.Scale(1/nWindows)
     phiq_vs_t_RAND.Scale(1/nWindows)
     Q2_vs_W_RAND.Scale(1/nWindows)
-    H_ct_RAND.Fill(evt.CTime_ROC1)              
+    H_ct_RAND.Scale(1/nWindows)
     H_ssxfp_RAND.Scale(1/nWindows)
     H_ssyfp_RAND.Scale(1/nWindows)
     H_ssxpfp_RAND.Scale(1/nWindows)
@@ -841,7 +841,6 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_RAND.Scale(1/nWindows)
     H_pmz_RAND.Scale(1/nWindows)
     H_W_RAND.Scale(1/nWindows)
-    #H_ct_RAND.Scale(1/nWindows)
 
     # Data Dummy_Random subtraction window
     MM_vs_CoinTime_DUMMY_RAND.Scale(1/nWindows)
