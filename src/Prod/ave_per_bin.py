@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 21:15:06 trottar"
+# Time-stamp: "2023-09-04 21:28:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,13 +113,13 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
         print("-"*25)
     
     # Print statements to check sizes
-    print("Size of binned_t_data:", len(binned_t_data))
-    print("Size of binned_hist_data:", len(binned_hist_data))
-    print("Size of binned_hist_dummy:", len(binned_hist_dummy))
-    print("Size of binned_sub_data:", len(binned_sub_data[1]))
-    print("Size of ave_hist:", len(ave_hist))
-    print("Size of t_bins:", len(t_bins))
-    print("Size of phi_bins:", len(phi_bins), "\n")
+    #print("Size of binned_t_data:", len(binned_t_data))
+    #print("Size of binned_hist_data:", len(binned_hist_data))
+    #print("Size of binned_hist_dummy:", len(binned_hist_dummy))
+    #print("Size of binned_sub_data:", len(binned_sub_data[1]))
+    #print("Size of ave_hist:", len(ave_hist))
+    #print("Size of t_bins:", len(t_bins))
+    #print("Size of phi_bins:", len(phi_bins), "\n")
 
     dict_lst = []
     for j in range(len(t_bins) - 1):
