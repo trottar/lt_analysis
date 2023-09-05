@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 19:26:01 trottar"
+# Time-stamp: "2023-09-04 20:17:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -847,12 +847,14 @@ yieldDict = {}
 yieldDict.update(find_yield_data(histlist, inpDict))
 print(yieldDict)
 
+'''
 from ave_per_bin import ave_per_bin_data, ave_per_bin_simc
 
 aveDict = {}
 aveDict.update(ave_per_bin_data(histlist, inpDict))
 aveDict.update(ave_per_bin_simc(histlist, inpDict))
 #print(aveDict)
+'''
 
 # t/phi binned histograms
 H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
