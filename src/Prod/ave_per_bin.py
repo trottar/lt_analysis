@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 18:44:48 trottar"
+# Time-stamp: "2023-09-04 21:15:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,16 +97,16 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
             total_count = np.sum(sub_val)
             average = weighted_sum / total_count            
             ave_hist.append(average)
-            print("Weighted Sum:",weighted_sum)
-            print("Total Count:",total_count)
-            print("Average for t-bin {}:".format(i),average)
+            #print("Weighted Sum:",weighted_sum)
+            #print("Total Count:",total_count)
+            #print("Average for t-bin {}:".format(i),average)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
             ave_hist.append(0)
-            print("Weighted Sum: N/A")
-            print("Total Count: N/A")
-            print("Average for t-bin {}: 0.0".format(i))
+            #print("Weighted Sum: N/A")
+            #print("Total Count: N/A")
+            #print("Average for t-bin {}: 0.0".format(i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1
@@ -128,6 +128,7 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
             phibin_index = k
             hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
             ave_val = ave_hist[j]
+            print("Average {} for t-bin {} phi-bin {}: {}".format(kin_type, j, k, ave_val))
             #print("----------------------",(tbin_index, phibin_index, len(hist_val), ave_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
 
