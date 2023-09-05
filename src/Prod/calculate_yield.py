@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 21:45:34 trottar"
+# Time-stamp: "2023-09-04 21:53:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ OUTPATH=lt.OUTPATH
 ##################################################################################################################################################
 
 def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_data, phi_bins, normfac_data):
-    # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
+    # Initialize lists
     binned_t_data = []
     binned_phi_data = []
     binned_hist_data = []
@@ -143,6 +143,91 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             
     return groups
 
+def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins, normfac_simc):
+    # Initialize lists
+    binned_t_simc = []
+    binned_phi_simc = []
+    binned_hist_simc = []
+    
+    t_bins = np.append(t_bins, 0.0) # Needed to fully finish loop over bins
+    phi_bins = np.append(phi_bins, 0.0) # Needed to fully finish loop over bins
+    # Loop through bins in t_simc and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
+            tmp_t_simc = [[],[]]
+            tmp_phi_simc = [[],[]]
+            tmp_hist_simc = [[],[]]
+            for tbin_index in range(1, t_simc.GetNbinsX() + 1):
+                tbin_center = t_simc.GetBinCenter(tbin_index)
+                if t_bins[j] <= tbin_center <= t_bins[j+1]:
+                    if hist_simc.GetBinContent(tbin_index) > 0:
+                        for phibin_index in range(1, phi_simc.GetNbinsX() + 1):
+                            phibin_center = (phi_simc.GetBinCenter(phibin_index)+math.pi)*(180 / math.pi)
+                            if phi_bins[k] <= phibin_center <= phi_bins[k+1]:
+                                if hist_simc.GetBinContent(phibin_index) > 0:
+                                    #print("Checking if t: {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
+                                    #print("t-bin {}, Hist bin {} Passed with content {}".format(j, hist_simc.GetBinCenter(tbin_index), hist_simc.GetBinContent(tbin_index)))
+                                    #print("Checking if phi: {} <= {} <= {}".format(phi_bins[k], phibin_center, phi_bins[k+1]))
+                                    #print("phi-bin {}, Hist bin {} Passed with content {}".format(k, hist_simc.GetBinCenter(phibin_index), hist_simc.GetBinContent(phibin_index)))
+                                    tmp_t_simc[0].append(t_simc.GetBinCenter(tbin_index))
+                                    tmp_t_simc[1].append(t_simc.GetBinContent(tbin_index))
+                                    tmp_phi_simc[0].append(phi_simc.GetBinCenter(phibin_index))
+                                    tmp_phi_simc[1].append(phi_simc.GetBinContent(phibin_index))                                    
+                                    tmp_hist_simc[0].append(hist_simc.GetBinCenter(phibin_index))
+                                    tmp_hist_simc[1].append(hist_simc.GetBinContent(phibin_index))
+            binned_t_simc.append(tmp_t_simc)
+            binned_phi_simc.append(tmp_phi_simc)
+            binned_hist_simc.append(tmp_hist_simc)
+
+    yield_hist = []
+    binned_sub_simc = [[],[]]
+    i=0 # iter
+    print("-"*25)
+    for simc in binned_hist_simc:
+        bin_val_simc, hist_val_simc = simc
+        val = hist_val_simc
+        if val.size != 0:
+            total_count = np.sum(val)
+            yld = total_count*normfac_simc
+            yield_hist.append(yld)
+            binned_sub_simc[0].append(bin_val_simc)
+            binned_sub_simc[1].append(val)
+        else:
+            yield_hist.append(0)
+            binned_sub_simc[0].append(bin_val_simc)
+            binned_sub_simc[1].append([0]*len(bin_val_simc))
+        i+=1
+    
+    # Print statements to check sizes
+    #print("Size of binned_t_simc:", len(binned_t_simc))
+    #print("Size of binned_phi_simc:", len(binned_phi_simc))
+    #print("Size of binned_hist_simc:", len(binned_hist_simc))
+    #print("Size of binned_sub_simc:", len(binned_sub_simc[1]))
+    #print("Size of yield_hist:", len(yield_hist))
+    #print("Size of t_bins:", len(t_bins)-1)
+    #print("Size of phi_bins:", len(phi_bins)-1, "\n")
+
+    dict_lst = []
+    for j in range(len(t_bins) - 1):
+        tbin_index = j
+        for k in range(len(phi_bins) - 1):
+            phibin_index = k
+            hist_val = [binned_sub_simc[0][j], binned_sub_simc[1][j]]
+            yield_val = yield_hist[j]
+            print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j, k, yield_val))
+            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
+
+    # Group the tuples by the first two elements using defaultdict
+    groups = defaultdict(list)
+    for tup in dict_lst:
+        key = (tup[0], tup[1])
+        groups[key] = {
+            "{}_arr".format(kin_type) : tup[2],
+            "{}_yield".format(kin_type) : tup[3],
+        }            
+            
+    return groups
+
 def find_yield_data(histlist, inpDict):
     
     for hist in histlist:
@@ -170,3 +255,31 @@ def find_yield_data(histlist, inpDict):
             yieldDict[hist["phi_setting"]][kin_type] = calculate_yield_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, hist["H_ph_q_DATA"], phi_bins, hist["normfac_data"])
             
     return {"binned_DATA" : yieldDict}
+
+def find_yield_simc(histlist, inpDict):
+    
+    for hist in histlist:
+        t_bins = hist["t_bins"]
+        phi_bins = hist["phi_bins"]
+
+    yieldDict = {
+        "t_bins" : t_bins,
+        "phi_bins" : phi_bins
+    }
+        
+    # List of kinematic types
+    kinematic_types = ["MM"]
+
+    # Loop through histlist and update yieldDict
+    for hist in histlist:
+        print("\n\n")
+        print("-"*25)
+        print("-"*25)
+        print("Finding simc yields for {}...".format(hist["phi_setting"]))
+        print("-"*25)
+        print("-"*25)
+        yieldDict[hist["phi_setting"]] = {}
+        for kin_type in kinematic_types:
+            yieldDict[hist["phi_setting"]][kin_type] = calculate_yield_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, hist["H_ph_q_SIMC"], phi_bins, hist["normfac_simc"])
+            
+    return {"binned_SIMC" : yieldDict}
