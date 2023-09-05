@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 20:32:34 trottar"
+# Time-stamp: "2023-09-04 21:05:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,16 +106,10 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             total_count = np.sum(sub_val)
             yld = total_count/eff_charge
             yield_hist.append(yld)
-            print("Total Count:",total_count)
-            print("Effective Charge:",eff_charge)
-            print("Yield for t-bin {} phi-bin {}:".format(binned_t_data[0],i),yld)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
             yield_hist.append(0)
-            print("Total Count: N/A")
-            print("Effective Charge:",eff_charge)
-            #print("Yield for t-bin {} phi-bin {}: 0.0".format(binned_t_data[0][i],i))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1
@@ -138,6 +132,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             phibin_index = k
             hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
             yield_val = yield_hist[j]
+            print("Yield for t-bin {} phi-bin {}: {}".format(j, k, yield_val)
             #print("----------------------",(tbin_index, phibin_index, len(hist_val), yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
 
@@ -155,7 +150,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
 def find_yield_data(histlist, inpDict):
     
     for hist in histlist:
-        eff_charge = hist["normfac_data"]
+        eff_charge = hist["normfac_data"]/1e6 # Convert to uC
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
 
