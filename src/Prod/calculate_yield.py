@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 20:04:01 trottar"
+# Time-stamp: "2023-09-04 20:05:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,10 +86,10 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
                                     tmp_hist_data[1].append(hist_data.GetBinContent(phibin_index))
                                     tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(phibin_index))
                                     tmp_hist_dummy[1].append(hist_dummy.GetBinContent(phibin_index))
-        binned_t_data.append(tmp_t_data)
-        binned_phi_data.append(tmp_phi_data)
-        binned_hist_data.append(tmp_hist_data)
-        binned_hist_dummy.append(tmp_hist_dummy)
+            binned_t_data.append(tmp_t_data)
+            binned_phi_data.append(tmp_phi_data)
+            binned_hist_data.append(tmp_hist_data)
+            binned_hist_dummy.append(tmp_hist_dummy)
 
     yield_hist = []
     binned_sub_data = [[],[]]
