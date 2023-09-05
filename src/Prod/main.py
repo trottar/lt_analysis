@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:37:59 trottar"
+# Time-stamp: "2023-09-04 22:45:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -886,7 +886,7 @@ for phiset in phisetlist:
 
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, data_key_tuple in enumerate(yieldDict["binned_DATA"][phiset]['t']):
+    for k, data_key_tuple in enumerate(yieldDict["binned_DATA"][phiset]['MM']):
         # Access the nested dictionary using the tuple key
         data_nested_dict = yieldDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
@@ -895,7 +895,7 @@ for phiset in phisetlist:
 
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
-    for k, simc_key_tuple in enumerate(yieldDict["binned_SIMC"][phiset]['t']):
+    for k, simc_key_tuple in enumerate(yieldDict["binned_SIMC"][phiset]['MM']):
         # Access the nested dictionary using the tuple key
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
