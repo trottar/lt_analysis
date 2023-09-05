@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:25:25 trottar"
+# Time-stamp: "2023-09-04 22:26:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1100,7 +1100,7 @@ for it,phiset in enumerate(phisetlist):
         j = data_key_tuple[1] # phi bin
         #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["MM"][data_key_tuple]["MM_yield"]), data_nested_dict["MM"][data_key_tuple]["ave"]))
         # Fill histogram
-        val = data_nested_dict["MM"][data_key_tuple]["MM_yield"]:
+        val = data_nested_dict["MM"][data_key_tuple]["MM_yield"]
         histbinDict["H_yield_DATA"].Fill(val)
     histbinDict["H_yield_DATA"].SetLineColor(it+1)
     histbinDict["H_yield_DATA"].Draw("same, E1")
@@ -1118,7 +1118,7 @@ for it,phiset in enumerate(phisetlist):
         j = simc_key_tuple[1] # phi bin
         #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["MM"][simc_key_tuple]["MM_yield"]), simc_nested_dict["MM"][simc_key_tuple]["ave"]))
         # Fill histogram
-        val = simc_nested_dict["MM"][simc_key_tuple]["MM_yield"]:
+        val = simc_nested_dict["MM"][simc_key_tuple]["MM_yield"]
         histbinDict["H_yield_SIMC"].Fill(val)
     histbinDict["H_yield_SIMC"].SetLineColor(it+1)
     histbinDict["H_yield_SIMC"].Draw("same, E1")
