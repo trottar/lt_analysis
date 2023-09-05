@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:53:30 trottar"
+# Time-stamp: "2023-09-04 23:00:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -853,15 +853,17 @@ aveDict = {}
 aveDict.update(ave_per_bin_data(histlist, inpDict))
 aveDict.update(ave_per_bin_simc(histlist, inpDict))
 
+histbinDict = {}
+
 # t/phi binned histograms
-H_phibins_DATA = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
-H_tbins_DATA = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
+histbinDict["H_phibins_DATA"] = ROOT.TH1D("H_phibins_DATA", "Phi Bins", NumtBins*NumPhiBins, 0, 360.0)
+histbinDict["H_tbins_DATA"] = ROOT.TH1D("H_tbins_DATA", "t Bins", NumtBins*NumPhiBins, tmin, tmax)
 
 # Yield histograms
-H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
-H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0, 1.0)
+for phiset in phisetlist:
+    histbinDict["H_yield_DATA_{}".format(phiset)] = ROOT.TH1D("H_yield_DATA_{}".format(phiset), "{} Data Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.0)
+    histbinDict["H_yield_SIMC_{}".format(phiset)] = ROOT.TH1D("H_yield_SIMC_{}".format(phiset), "{} Simc Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.0)
 
-histbinDict = {}
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
     for k, data_key_tuple in enumerate(aveDict["binned_DATA"][phiset]['t']):
@@ -1028,9 +1030,9 @@ for it,phiset in enumerate(phisetlist):
         j = data_key_tuple[1] # phi bin
         # Fill histogram
         for val in aveDict["binned_DATA"]["t_bins"]:
-            H_tbins_DATA.Fill(float(val))
-    H_tbins_DATA.SetLineColor(it+1)
-    H_tbins_DATA.Draw("same, hist")
+            histbinDict["H_tbins_DATA"].Fill(float(val))
+    histbinDict["H_tbins_DATA"].SetLineColor(it+1)
+    histbinDict["H_tbins_DATA"].Draw("same, hist")
 C_t_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_phi_bins_DATA = TCanvas()
@@ -1044,9 +1046,9 @@ for it,phiset in enumerate(phisetlist):
         j = data_key_tuple[1] # phi bin
         # Fill histogram
         for val in aveDict["binned_DATA"]["phi_bins"]:
-            H_phibins_DATA.Fill(float(val))
-    H_phibins_DATA.SetLineColor(it+1)            
-    H_phibins_DATA.Draw("same, hist")
+            histbinDict["H_phibins_DATA"].Fill(float(val))
+    histbinDict["H_phibins_DATA"].SetLineColor(it+1)            
+    histbinDict["H_phibins_DATA"].Draw("same, hist")
 C_phi_bins_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_totevts_DATA = TCanvas()
@@ -1101,10 +1103,10 @@ for it,phiset in enumerate(phisetlist):
         #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["MM"][data_key_tuple]["MM_yield"]), data_nested_dict["MM"][data_key_tuple]["yield"]))
         # Fill histogram
         val = data_nested_dict["MM"][data_key_tuple]["MM_yield"]
-        histbinDict["H_yield_DATA"].Fill(val)
-    histbinDict["H_yield_DATA"].SetLineColor(it+1)
-    histbinDict["H_yield_DATA"].Draw("same, E1")
-    histbinDict["H_yield_DATA"].Draw("same, hist")
+        histbinDict["H_yield_DATA_{}".format(phiset)].Fill(val)
+    histbinDict["H_yield_DATA_{}".format(phiset)].SetLineColor(it+1)
+    histbinDict["H_yield_DATA_{}".format(phiset)].Draw("same, E1")
+    histbinDict["H_yield_DATA_{}".format(phiset)].Draw("same, hist")
 C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_yield_SIMC = TCanvas()
@@ -1119,10 +1121,10 @@ for it,phiset in enumerate(phisetlist):
         #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["MM"][simc_key_tuple]["MM_yield"]), simc_nested_dict["MM"][simc_key_tuple]["yield"]))
         # Fill histogram
         val = simc_nested_dict["MM"][simc_key_tuple]["MM_yield"]
-        histbinDict["H_yield_SIMC"].Fill(val)
-    histbinDict["H_yield_SIMC"].SetLineColor(it+1)
-    histbinDict["H_yield_SIMC"].Draw("same, E1")
-    histbinDict["H_yield_SIMC"].Draw("same, hist")
+        histbinDict["H_yield_SIMC_{}".format(phiset)].Fill(val)
+    histbinDict["H_yield_SIMC_{}".format(phiset)].SetLineColor(it+1)
+    histbinDict["H_yield_SIMC_{}".format(phiset)].Draw("same, E1")
+    histbinDict["H_yield_SIMC_{}".format(phiset)].Draw("same, hist")
 C_yield_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+')')
 
 if DEBUG:
