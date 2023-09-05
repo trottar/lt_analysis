@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 20:17:08 trottar"
+# Time-stamp: "2023-09-04 20:25:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -845,7 +845,7 @@ from calculate_yield import find_yield_data
 
 yieldDict = {}
 yieldDict.update(find_yield_data(histlist, inpDict))
-print(yieldDict)
+#print(yieldDict)
 
 '''
 from ave_per_bin import ave_per_bin_data, ave_per_bin_simc
