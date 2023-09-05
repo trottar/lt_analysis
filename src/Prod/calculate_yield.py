@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 21:08:00 trottar"
+# Time-stamp: "2023-09-04 21:11:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,7 +150,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
 def find_yield_data(histlist, inpDict):
     
     for hist in histlist:
-        eff_charge = hist["normfac_data"]/1e6 # Convert to uC
+        eff_charge = hist["normfac_data"]*1e6 # Convert C to uC
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
 
