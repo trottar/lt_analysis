@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 21:37:01 trottar"
+# Time-stamp: "2023-09-04 21:42:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,8 +95,6 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
-    print("Finding yield per t/phi-bin...")
-    print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
@@ -113,7 +111,6 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
         i+=1
-        print("-"*25)
     
     # Print statements to check sizes
     #print("Size of binned_t_data:", len(binned_t_data))
