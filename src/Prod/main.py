@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:02:13 trottar"
+# Time-stamp: "2023-09-04 22:07:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -841,7 +841,7 @@ if DEBUG:
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''
 
-from calculate_yield import find_yield_data
+from calculate_yield import find_yield_data, find_yield_simc
 
 yieldDict = {}
 yieldDict.update(find_yield_data(histlist, inpDict))
