@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:45:43 trottar"
+# Time-stamp: "2023-09-04 22:48:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1053,13 +1053,13 @@ C_totevts_DATA = TCanvas()
 C_totevts_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
-    data_key_tuples = list(aveDict["binned_DATA"][phiset]['MM'])
+    data_key_tuples = list(yieldDict["binned_DATA"][phiset]['MM'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
-        data_nested_dict = aveDict["binned_DATA"][phiset]
+        data_nested_dict = yieldDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["MM"][data_key_tuple]["MM_arr"]), data_nested_dict["MM"][data_key_tuple]["ave"]))
+        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["MM"][data_key_tuple]["MM_arr"]), data_nested_dict["MM"][data_key_tuple]["yield"]))
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(data_nested_dict["MM"][data_key_tuple]["MM_arr"]):
             histbinDict["H_totevts_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
@@ -1073,13 +1073,13 @@ C_totevts_SIMC = TCanvas()
 C_totevts_SIMC.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
-    simc_key_tuples = list(aveDict["binned_SIMC"][phiset]['MM'])
+    simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['MM'])
     for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
-        simc_nested_dict = aveDict["binned_SIMC"][phiset]
+        simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
-        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["MM"][simc_key_tuple]["MM_arr"]), simc_nested_dict["MM"][simc_key_tuple]["ave"]))
+        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["MM"][simc_key_tuple]["MM_arr"]), simc_nested_dict["MM"][simc_key_tuple]["yield"]))
         # Fill histogram
         for (itt,jtt), val in np.ndenumerate(simc_nested_dict["MM"][simc_key_tuple]["MM_arr"]):
             histbinDict["H_totevts_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
@@ -1092,13 +1092,13 @@ C_totevts_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".f
 C_yield_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
-    data_key_tuples = list(aveDict["binned_DATA"][phiset]['MM'])
+    data_key_tuples = list(yieldDict["binned_DATA"][phiset]['MM'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
-        data_nested_dict = aveDict["binned_DATA"][phiset]
+        data_nested_dict = yieldDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["MM"][data_key_tuple]["MM_yield"]), data_nested_dict["MM"][data_key_tuple]["ave"]))
+        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["MM"][data_key_tuple]["MM_yield"]), data_nested_dict["MM"][data_key_tuple]["yield"]))
         # Fill histogram
         val = data_nested_dict["MM"][data_key_tuple]["MM_yield"]
         histbinDict["H_yield_DATA"].Fill(val)
@@ -1110,13 +1110,13 @@ C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".for
 C_yield_SIMC = TCanvas()
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
-    simc_key_tuples = list(aveDict["binned_SIMC"][phiset]['MM'])
+    simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['MM'])
     for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
-        simc_nested_dict = aveDict["binned_SIMC"][phiset]
+        simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
-        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["MM"][simc_key_tuple]["MM_yield"]), simc_nested_dict["MM"][simc_key_tuple]["ave"]))
+        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["MM"][simc_key_tuple]["MM_yield"]), simc_nested_dict["MM"][simc_key_tuple]["yield"]))
         # Fill histogram
         val = simc_nested_dict["MM"][simc_key_tuple]["MM_yield"]
         histbinDict["H_yield_SIMC"].Fill(val)
