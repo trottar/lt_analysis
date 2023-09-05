@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:26:17 trottar"
+# Time-stamp: "2023-09-04 22:37:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1053,7 +1053,7 @@ C_totevts_DATA = TCanvas()
 C_totevts_DATA.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
-    data_key_tuples = list(aveDict["binned_DATA"][phiset]['t'])
+    data_key_tuples = list(aveDict["binned_DATA"][phiset]['MM'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = aveDict["binned_DATA"][phiset]
@@ -1073,7 +1073,7 @@ C_totevts_SIMC = TCanvas()
 C_totevts_SIMC.Divide(NumtBins,NumPhiBins)
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
-    simc_key_tuples = list(aveDict["binned_SIMC"][phiset]['t'])
+    simc_key_tuples = list(aveDict["binned_SIMC"][phiset]['MM'])
     for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
         simc_nested_dict = aveDict["binned_SIMC"][phiset]
@@ -1092,7 +1092,7 @@ C_totevts_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".f
 C_yield_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
-    data_key_tuples = list(aveDict["binned_DATA"][phiset]['t'])
+    data_key_tuples = list(aveDict["binned_DATA"][phiset]['MM'])
     for k, data_key_tuple in enumerate(data_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = aveDict["binned_DATA"][phiset]
@@ -1110,7 +1110,7 @@ C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".for
 C_yield_SIMC = TCanvas()
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
-    simc_key_tuples = list(aveDict["binned_SIMC"][phiset]['t'])
+    simc_key_tuples = list(aveDict["binned_SIMC"][phiset]['MM'])
     for k, simc_key_tuple in enumerate(simc_key_tuples):
         # Access the nested dictionary using the tuple key
         simc_nested_dict = aveDict["binned_SIMC"][phiset]
