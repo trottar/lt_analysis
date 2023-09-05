@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 20:13:24 trottar"
+# Time-stamp: "2023-09-04 20:32:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,7 +95,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
-    print("Finding yield {} per t/phi-bin...".format(kin_type))
+    print("Finding yield per t/phi-bin...")
     print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
@@ -108,7 +108,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             yield_hist.append(yld)
             print("Total Count:",total_count)
             print("Effective Charge:",eff_charge)
-            #print("Yield for t-bin {} phi-bin {}:".format(binned_t_data[0][i],i),yld)
+            print("Yield for t-bin {} phi-bin {}:".format(binned_t_data[0],i),yld)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
@@ -122,9 +122,9 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
         print("-"*25)
     
     # Print statements to check sizes
-    print("Size of binned_t_data:", len(binned_t_data[0]))
-    print("Size of binned_phi_data:", len(binned_phi_data[0]))
-    print("Size of binned_hist_data:", len(binned_hist_data[0]))
+    print("Size of binned_t_data:", len(binned_t_data))
+    print("Size of binned_phi_data:", len(binned_phi_data))
+    print("Size of binned_hist_data:", len(binned_hist_data))
     print("Size of binned_hist_dummy:", len(binned_hist_dummy))
     print("Size of binned_sub_data:", len(binned_sub_data[1]))
     print("Size of yield_hist:", len(yield_hist))
