@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 16:39:57 trottar"
+# Time-stamp: "2023-09-06 16:46:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1215,28 +1215,32 @@ C_yieldvsphi_data_plt = TCanvas()
 C_yieldvsphi_data_plt.Divide(1,NumtBins)
 #l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
-yield_data = [[],[]]
-yield_simc = [[],[]]
+yield_data = []
+yield_simc = []
 tbin = np.array([])
 phibin = np.array([])
 for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
     simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
     for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
+        tmp_yield_data = [[],[]]
+        tmp_yield_simc = [[],[]]
         # Access the nested dictionary using the tuple key
         data_nested_dict = yieldDict["binned_DATA"][phiset]
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
         # Fill histogram
-        yield_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
-        yield_data[1].append(data_nested_dict["yield"][data_key_tuple]["yield"])
-        yield_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
-        yield_simc[1].append(simc_nested_dict["yield"][simc_key_tuple]["yield"])        
+        tmp_yield_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
+        tmp_yield_data[1].append(data_nested_dict["yield"][data_key_tuple]["yield"])
+        tmp_yield_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
+        tmp_yield_simc[1].append(simc_nested_dict["yield"][simc_key_tuple]["yield"])        
         tbin = np.append(tbin, [yieldDict["binned_DATA"]["t_bins"][i]])
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
+        yield_data.append(tmp_yield_data)
+        yield_simc.append(tmp_yield_simc)
         print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, yield_data[0], yield_simc[0]))
-        print("----------------------",(i, j, yield_data[1], yield_simc[1]))
+        print("----------------------",(i, j, yield_data[1], yield_simc[1]))        
 print("======================",(yield_data[0], yield_simc[0]))
 print("______________________",(yield_data[1], yield_simc[1]))
 
