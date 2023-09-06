@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 17:34:40 trottar"
+# Time-stamp: "2023-09-06 17:42:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1239,8 +1239,6 @@ for it,phiset in enumerate(phisetlist):
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
         yield_data.append(tmp_yield_data)
         yield_simc.append(tmp_yield_simc)
-        print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, tmp_yield_data[0], tmp_yield_simc[0]))
-        print("----------------------",(i, j, tmp_yield_data[1], tmp_yield_simc[1]))
 
 # Match t-bins with list of yields
 yield_data = match_to_bin(yield_data)
@@ -1249,10 +1247,8 @@ yield_simc = match_to_bin(yield_simc)
 yieldvsphi_data_lst = []        
 for i, val in enumerate(t_bins):
 
-    print("!!!!!!!!!!!!!!!!!!!!!!",(yield_data[i], yield_simc[i]))
     if val == yield_data[i][0]:
-        print("======================",(yield_data[i][0], yield_simc[i][0]))
-        print("______________________",(yield_data[i][1], yield_simc[i][1]))
+        
         G_yieldvsphi_data_plt = ROOT.TMultiGraph()
         G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibin,yield_data[i][1],np.array([0]*len(phibin)),np.array([0]*len(yield_data[i][1])))
         G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibin,yield_simc[i][1],np.array([0]*len(phibin)),np.array([0]*len(yield_simc[i][1])))
@@ -1274,7 +1270,7 @@ for plot in G_yieldvsphi_data_plt:
     
     C_yieldvsphi_data_plt.cd(i+1)
 
-    plot.Draw("AP")
+    plot.Draw("AP, same")
     plot.SetTitle(" ;#phi; Yield")
 
     plot.GetYaxis().SetTitleOffset(1.5)
