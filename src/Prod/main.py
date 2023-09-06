@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 18:27:39 trottar"
+# Time-stamp: "2023-09-06 19:03:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1212,7 +1212,7 @@ C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 C_yieldvsphi_data_plt = TCanvas()
 #C_yieldvsphi_data_plt.SetGrid()
-C_yieldvsphi_data_plt.Divide(1,NumtBins)
+#C_yieldvsphi_data_plt.Divide(1,NumtBins)
 #l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
 yield_data = []
@@ -1232,7 +1232,6 @@ for it,phiset in enumerate(phisetlist):
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
-        # Fill histogram
         tmp_yield_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
         tmp_yield_data[1].append(data_nested_dict["yield"][data_key_tuple]["yield"])
         tmp_yield_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
@@ -1253,13 +1252,13 @@ phibins_data = match_to_bin(phibins_data)
 phibins_simc = match_to_bin(phibins_simc)
    
 for i, val in enumerate(t_bins):
-
-    G_yieldvsphi_data_plt = ROOT.TMultiGraph()
     
     if val == yield_data[i][0] and val == yield_simc[i][0]:
 
         print("---------------------", i, yield_data[i][1], phibins_data[i][1])
         print("_____________________", i, yield_simc[i][1], phibins_simc[i][1])
+
+        G_yieldvsphi_data_plt = ROOT.TMultiGraph()
         
         G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(yield_data[i][1])))
         G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1])),np.array([0]*len(yield_simc[i][1])))
@@ -1306,7 +1305,6 @@ for it,phiset in enumerate(phisetlist):
         i = key_tuple[0] # t bin
         j = key_tuple[1] # phi bin
         #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(nested_dict["ratio"][key_tuple]["ratio"]), nested_dict["ratio"][key_tuple]["ratio"]))
-        # Fill histogram
         ratio_data = np.append(ratio_data, [nested_dict["ratio"][key_tuple]["ratio"]])
         if hist["phi_setting"] == "Center": setting = np.append(setting,0)
         elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
