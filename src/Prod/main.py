@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 15:23:52 trottar"
+# Time-stamp: "2023-09-06 15:30:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1218,81 +1218,64 @@ l_yield_data_plt.Draw()
 
 C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
-import ROOT
-import numpy as np
+C_yieldvsphi_data_plt = TCanvas()
+C_yieldvsphi_data_plt.Divide(1,NumtBins)
+l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
-# Create a canvas
-C_yieldvsphi_data_plt = ROOT.TCanvas()
-
-# Set grid for the canvas
-C_yieldvsphi_data_plt.SetGrid()
-
-# Create a legend
-l_yieldvsphi_data_plt = ROOT.TLegend(0.115, 0.35, 0.33, 0.5)
-
-# Create arrays for data
 yield_data = np.array([])
 yield_simc = np.array([])
 tbin = np.array([])
 phibin = np.array([])
-
-# Loop over your data and create multigraphs for each tbin
-for it, phiset in enumerate(phisetlist):
+for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
     simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
-    
-    for data_key_tuple, simc_key_tuple in zip(data_key_tuples, simc_key_tuples):
+    for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = yieldDict["binned_DATA"][phiset]
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
-        i = simc_key_tuple[0]  # t bin
-        j = simc_key_tuple[1]  # phi bin
-        
+        i = simc_key_tuple[0] # t bin
+        j = simc_key_tuple[1] # phi bin
+        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
         # Fill histogram
         yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"]])
         yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"]])
         tbin = np.append(tbin, [yieldDict["binned_DATA"]["t_bins"][i]])
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
 
-        # Create a new multigraph for each tbin
-        G_yieldvsphi_data_plt = ROOT.TMultiGraph()
+yieldvsphi_data_lst = []        
+for i, val in enumerate(tbin):
+    
+    G_yieldvsphi_data_plt = ROOT.TMultiGraph()
+    C_yieldvsphi_data_plt.SetGrid()
+    
+    G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data),phibin,yield_data,np.array([0]*len(phibin)),np.array([0]*len(yield_data)))
+    G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc),phibin,yield_simc,np.array([0]*len(phibin)),np.array([0]*len(yield_simc)))
 
-        # Create TGraphErrors for data and simc
-        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data), phibin, yield_data, np.array([0] * len(phibin)),
-                                               np.array([0] * len(yield_data)))
-        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc), phibin, yield_simc, np.array([0] * len(phibin)),
-                                               np.array([0] * len(yield_simc)))
+    G_yieldvsphi_data.SetMarkerStyle(21)
+    G_yieldvsphi_data.SetMarkerSize(1)
+    G_yieldvsphi_data.SetMarkerColor(1)
+    G_yieldvsphi_data_plt.Add(G_yieldvsphi_data)
 
-        # Set marker style and size for data
-        G_yieldvsphi_data.SetMarkerStyle(21)
-        G_yieldvsphi_data.SetMarkerSize(1)
-        G_yieldvsphi_data.SetMarkerColor(1)
-        
-        # Add data to the multigraph
-        G_yieldvsphi_data_plt.Add(G_yieldvsphi_data)
+    G_yieldvsphi_simc.SetMarkerStyle(21)
+    G_yieldvsphi_simc.SetMarkerSize(1)
+    G_yieldvsphi_simc.SetMarkerColor(2)
+    G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
 
-        # Set marker style and size for simc
-        G_yieldvsphi_simc.SetMarkerStyle(21)
-        G_yieldvsphi_simc.SetMarkerSize(1)
-        G_yieldvsphi_simc.SetMarkerColor(2)
-        
-        # Add simc to the multigraph
-        G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
+    yieldvsphi_data_lst.append(G_yieldvsphi_data_plt)
 
-        # Draw the multigraph with the title and labels
-        G_yieldvsphi_data_plt.Draw("AP")
-        G_yieldvsphi_data_plt.SetTitle(" ;#phi; Yield")
+for plot in G_yieldvsphi_data_plt:
+    
+    C_yieldvsphi_data_plt.cd(i)
 
-        G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
-        G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
-        G_yieldvsphi_data_plt.GetXaxis().SetLabelSize(0.04)
+    plot.Draw("AP")
+    plot.SetTitle(" ;#phi; Yield")
 
-        # Add entries to the legend
-        l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data, "Data")
-        l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc, "Simc")
-        l_yieldvsphi_data_plt.Draw()
+    plot.GetYaxis().SetTitleOffset(1.5)
+    plot.GetXaxis().SetTitleOffset(1.5)
+    plot.GetXaxis().SetLabelSize(0.04)
 
-# Draw the legend
+l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
+l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
 l_yieldvsphi_data_plt.Draw()
 
 C_yieldvsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
