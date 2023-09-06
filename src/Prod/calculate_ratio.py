@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:37:08 trottar"
+# Time-stamp: "2023-09-06 13:50:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,6 +56,7 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
     for it,phiset in enumerate(phisetlist):
         data_key_tuples = list(yieldDict["binned_DATA"][phiset][kin_type])
         simc_key_tuples = list(yieldDict["binned_SIMC"][phiset][kin_type])
+
         for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
             # Access the nested dictionary using the tuple key
             data_nested_dict = yieldDict["binned_DATA"][phiset]
@@ -67,7 +68,8 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
             yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]
             yield_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}".format(kin_type)]
             ratio = yield_data/yield_simc
-            dict_lst.append((tbin_index, phibin_index, ratio))
+            print("Ratio for t-bin {} phi-bin {}: {:.3f}".format(i, j, ratio))
+            dict_lst.append((i, j, ratio))
     
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
