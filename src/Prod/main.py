@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 16:02:09 trottar"
+# Time-stamp: "2023-09-06 16:07:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1233,7 +1233,8 @@ for it,phiset in enumerate(phisetlist):
         yield_simc = np.append(yield_simc, [yieldDict["binned_DATA"]["t_bins"][i], simc_nested_dict["yield"][simc_key_tuple]["yield"]])
         tbin = np.append(tbin, [yieldDict["binned_DATA"]["t_bins"][i]])
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
-        print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, yield_data, yield_simc))
+        print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, yield_data[0], yield_simc[0]))
+        print("----------------------",(i, j, yield_data[1], yield_simc[1]))
 
 yieldvsphi_data_lst = []        
 for i, val in enumerate(tbin):
