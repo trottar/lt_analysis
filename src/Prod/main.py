@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 15:10:32 trottar"
+# Time-stamp: "2023-09-06 15:23:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1224,6 +1224,9 @@ import numpy as np
 # Create a canvas
 C_yieldvsphi_data_plt = ROOT.TCanvas()
 
+# Set grid for the canvas
+C_yieldvsphi_data_plt.SetGrid()
+
 # Create a legend
 l_yieldvsphi_data_plt = ROOT.TLegend(0.115, 0.35, 0.33, 0.5)
 
@@ -1232,9 +1235,6 @@ yield_data = np.array([])
 yield_simc = np.array([])
 tbin = np.array([])
 phibin = np.array([])
-
-# Create a canvas to hold all the multigraphs
-C_multigraph = ROOT.TCanvas()
 
 # Loop over your data and create multigraphs for each tbin
 for it, phiset in enumerate(phisetlist):
@@ -1278,12 +1278,6 @@ for it, phiset in enumerate(phisetlist):
         
         # Add simc to the multigraph
         G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
-
-        # Create a new canvas for each tbin
-        C_yieldvsphi_data_plt = ROOT.TCanvas()
-
-        # Set grid for the canvas
-        C_yieldvsphi_data_plt.SetGrid()
 
         # Draw the multigraph with the title and labels
         G_yieldvsphi_data_plt.Draw("AP")
