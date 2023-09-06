@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 17:55:17 trottar"
+# Time-stamp: "2023-09-06 17:58:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1217,7 +1217,7 @@ C_yieldvsphi_data_plt.Divide(1,NumtBins)
 
 yield_data = []
 yield_simc = []
-phibin = np.array([])
+phibins = np.array([])
 for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
     simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
@@ -1235,24 +1235,24 @@ for it,phiset in enumerate(phisetlist):
         tmp_yield_data[1].append(data_nested_dict["yield"][data_key_tuple]["yield"])
         tmp_yield_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
         tmp_yield_simc[1].append(simc_nested_dict["yield"][simc_key_tuple]["yield"])
-        tmp_phibin[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
-        tmp_phibin[1].append(yieldDict["binned_DATA"]["phi_bins"][j])
+        tmp_phibins[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
+        tmp_phibins[1].append(yieldDict["binned_DATA"]["phi_bins"][j])
         yield_data.append(tmp_yield_data)
         yield_simc.append(tmp_yield_simc)
-        phibin.append(tmp_phibin)
+        phibins.append(tmp_phibins)
 
 # Match t-bins with list of yields
 yield_data = match_to_bin(yield_data)
 yield_simc = match_to_bin(yield_simc)
-phibin = match_to_bin(phibin)
+phibins = match_to_bin(phibins)
    
 for i, val in enumerate(t_bins):
 
     if val == yield_data[i][0]:
         
         G_yieldvsphi_data_plt = ROOT.TMultiGraph()
-        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibin[i][1],yield_data[i][1],np.array([0]*len(phibin[i][1])),np.array([0]*len(yield_data[i][1])))
-        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibin[i][1],yield_simc[i][1],np.array([0]*len(phibin[i][1])),np.array([0]*len(yield_simc[i][1])))
+        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibins[i][1],yield_data[i][1],np.array([0]*len(phibins[i][1])),np.array([0]*len(yield_data[i][1])))
+        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibins[i][1],yield_simc[i][1],np.array([0]*len(phibins[i][1])),np.array([0]*len(yield_simc[i][1])))
 
         G_yieldvsphi_data.SetMarkerStyle(21)
         G_yieldvsphi_data.SetMarkerSize(1)
