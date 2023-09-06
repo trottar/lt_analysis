@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 14:24:38 trottar"
+# Time-stamp: "2023-09-06 14:28:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1155,7 +1155,7 @@ for it,phiset in enumerate(phisetlist):
 C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_yieldvsphi_data_plt = TCanvas()
-G_yield_data_plt = ROOT.TMultiGraph()
+G_yieldvsphi_data_plt = ROOT.TMultiGraph()
 l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
 C_yieldvsphi_data_plt.SetGrid()
