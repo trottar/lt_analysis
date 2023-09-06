@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 19:42:52 trottar"
+# Time-stamp: "2023-09-06 19:45:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1253,32 +1253,33 @@ phibins_simc = match_to_bin(phibins_simc)
    
 for i, val in enumerate(t_bins):
 
-    print("---------------------", i, yield_data[i][1], phibins_data[i][1])
-    print("_____________________", i, yield_simc[i][1], phibins_simc[i][1])
-    
-    G_yieldvsphi_data_plt = ROOT.TMultiGraph()
-    
-    G_yieldvsphi_data = ROOT.TGraphErrors(yield_data[i][1].size,phibins_data[i][1],yield_data[i][1],np.array([0]*phibins_data[i][1].size),np.array([0]*yield_data[i][1].size))
-    G_yieldvsphi_simc = ROOT.TGraphErrors(yield_simc[i][1].size,phibins_simc[i][1],yield_simc[i][1],np.array([0]*phibins_simc[i][1].size),np.array([0]*yield_simc[i][1].size))
+    if yield_data[i][1].any() !=0 and yield_simc[i][1].any() != 0:
+        print("---------------------", i, yield_data[i][1], phibins_data[i][1])
+        print("_____________________", i, yield_simc[i][1], phibins_simc[i][1])
 
-    G_yieldvsphi_data.SetMarkerStyle(21)
-    G_yieldvsphi_data.SetMarkerSize(1)
-    G_yieldvsphi_data.SetMarkerColor(1)
-    G_yieldvsphi_data_plt.Add(G_yieldvsphi_data)
+        G_yieldvsphi_data_plt = ROOT.TMultiGraph()
 
-    G_yieldvsphi_simc.SetMarkerStyle(21)
-    G_yieldvsphi_simc.SetMarkerSize(1)
-    G_yieldvsphi_simc.SetMarkerColor(2)
-    G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
+        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(yield_data[i][1])))
+        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1])),np.array([0]*len(yield_simc[i][1])))
 
-    C_yieldvsphi_data_plt.cd(i+1)
-        
-    G_yieldvsphi_data_plt.Draw("AP, same")
-    G_yieldvsphi_data_plt.SetTitle("t = {};#phi; Yield".format(val))
+        G_yieldvsphi_data.SetMarkerStyle(21)
+        G_yieldvsphi_data.SetMarkerSize(1)
+        G_yieldvsphi_data.SetMarkerColor(1)
+        G_yieldvsphi_data_plt.Add(G_yieldvsphi_data)
 
-    G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
-    G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
-    G_yieldvsphi_data_plt.GetXaxis().SetLabelSize(0.04)
+        G_yieldvsphi_simc.SetMarkerStyle(21)
+        G_yieldvsphi_simc.SetMarkerSize(1)
+        G_yieldvsphi_simc.SetMarkerColor(2)
+        G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
+
+        C_yieldvsphi_data_plt.cd(i+1)
+
+        G_yieldvsphi_data_plt.Draw("AP, same")
+        G_yieldvsphi_data_plt.SetTitle("t = {};#phi; Yield".format(val))
+
+        G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
+        G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
+        G_yieldvsphi_data_plt.GetXaxis().SetLabelSize(0.04)
 
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
