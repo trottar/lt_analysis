@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 19:20:11 trottar"
+# Time-stamp: "2023-09-06 19:22:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1250,8 +1250,7 @@ yield_data = match_to_bin(yield_data)
 yield_simc = match_to_bin(yield_simc)
 phibins_data = match_to_bin(phibins_data)
 phibins_simc = match_to_bin(phibins_simc)
-
-yieldvsphi_lst = []
+   
 for i, val in enumerate(t_bins):
     
     print("---------------------", i, yield_data[i][1], phibins_data[i][1])
@@ -1271,24 +1270,23 @@ for i, val in enumerate(t_bins):
     G_yieldvsphi_simc.SetMarkerSize(1)
     G_yieldvsphi_simc.SetMarkerColor(2)
     G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
-    
-    yieldvsphi_lst.append(G_yieldvsphi_data_plt)
 
-for plot in yieldvsphi_lst:    
     C_yieldvsphi_data_plt.cd(i+1)
         
-    plot.Draw("AP")
-    plot.SetTitle("t = {};#phi; Yield".format(val))
+    G_yieldvsphi_data_plt.Draw("AP, same")
+    G_yieldvsphi_data_plt.SetTitle("t = {};#phi; Yield".format(val))
 
-    plot.GetYaxis().SetTitleOffset(1.5)
-    plot.GetXaxis().SetTitleOffset(1.5)
-    plot.GetXaxis().SetLabelSize(0.04)
+    G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
+    G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
+    G_yieldvsphi_data_plt.GetXaxis().SetLabelSize(0.04)
 
+    C_yieldvsphi_data_plt.Draw()
+    
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
 #l_yieldvsphi_data_plt.Draw()
 
-C_yieldvsphi_data_plt.Draw()
+#C_yieldvsphi_data_plt.Draw()
 
 C_yieldvsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
