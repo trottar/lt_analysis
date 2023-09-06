@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 14:51:19 trottar"
+# Time-stamp: "2023-09-06 14:54:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1258,7 +1258,7 @@ for i, val in enumerate(tbin):
     G_yieldvsphi_simc.SetMarkerColor(2)
     G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)    
     
-    C_yieldvsphi_data_plt.cd()
+    C_yieldvsphi_data_plt.cd(i)
 
     G_yieldvsphi_data_plt.Draw("AP")
     G_yieldvsphi_data_plt.SetTitle(" ;#phi; Yield")
