@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 17:03:15 trottar"
+# Time-stamp: "2023-09-06 17:06:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1245,12 +1245,13 @@ for it,phiset in enumerate(phisetlist):
 # Match t-bins with list of yields
 yield_data = match_to_bin(yield_data)
 yield_simc = match_to_bin(yield_simc)
-print("______________________",(yield_data, yield_simc))        
 
 yieldvsphi_data_lst = []        
 for i, val in enumerate(tbin):
 
     if val == yield_data[i][0]:
+        print("======================",(yield_data[i][11], yield_simc[i][1]))
+        print("______________________",(yield_data[i][1], yield_simc[i][1]))
         G_yieldvsphi_data_plt = ROOT.TMultiGraph()
         G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibin,yield_data[i][1],np.array([0]*len(phibin)),np.array([0]*len(yield_data[i][1])))
         G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibin,yield_simc[i][1],np.array([0]*len(phibin)),np.array([0]*len(yield_simc[i][1])))
