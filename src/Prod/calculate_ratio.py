@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:50:30 trottar"
+# Time-stamp: "2023-09-06 13:53:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,7 +67,10 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
             # Fill histogram
             yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]
             yield_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}".format(kin_type)]
-            ratio = yield_data/yield_simc
+            if yield_simc == 0:
+                ratio = 0
+            else:
+                ratio = yield_data/yield_simc
             print("Ratio for t-bin {} phi-bin {}: {:.3f}".format(i, j, ratio))
             dict_lst.append((i, j, ratio))
     
