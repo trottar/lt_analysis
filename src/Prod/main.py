@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 14:33:33 trottar"
+# Time-stamp: "2023-09-06 14:37:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1232,18 +1232,18 @@ for it,phiset in enumerate(phisetlist):
     simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
     for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
         # Access the nested dictionary using the tuple key
-        data_nested_dict = yieldDict["binned_DATA"][phiset]        
+        data_nested_dict = yieldDict["binned_DATA"][phiset]
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
         #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
         # Fill histogram
-        yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"]])        
+        yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"]])
         yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"]])
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
 
-G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data),yield_data,phibin,np.array([0]*len(yield_data)),np.array([0]*len(phibin)))
-G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc),yield_simc,phibin,np.array([0]*len(yield_simc)),np.array([0]*len(phibin)))
+G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data),phibin,yield_data,np.array([0]*len(phibin)),np.array([0]*len(yield_data)))
+G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc),phibin,yield_simc,np.array([0]*len(phibin)),np.array([0]*len(yield_simc)))
 
 G_yieldvsphi_data.SetMarkerStyle(21)
 G_yieldvsphi_data.SetMarkerSize(1)
@@ -1256,7 +1256,7 @@ G_yieldvsphi_simc.SetMarkerColor(2)
 G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
 
 G_yieldvsphi_data_plt.Draw("AP")
-G_yieldvsphi_data_plt.SetTitle(" ;Yield; #phi")
+G_yieldvsphi_data_plt.SetTitle(" ;#phi; Yield")
 
 G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
 G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
