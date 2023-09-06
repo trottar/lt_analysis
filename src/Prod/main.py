@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 15:46:57 trottar"
+# Time-stamp: "2023-09-06 15:53:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1228,12 +1228,12 @@ for it,phiset in enumerate(phisetlist):
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
-        #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
         # Fill histogram
         yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"]])
         yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"]])
         tbin = np.append(tbin, [yieldDict["binned_DATA"]["t_bins"][i]])
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
+        print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, yield_data, yield_simc))
 
 yieldvsphi_data_lst = []        
 for i, val in enumerate(tbin):
