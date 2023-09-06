@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 17:42:32 trottar"
+# Time-stamp: "2023-09-06 17:46:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1265,17 +1265,15 @@ for i, val in enumerate(t_bins):
         G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
 
         yieldvsphi_data_lst.append(G_yieldvsphi_data_plt)
-
-for plot in G_yieldvsphi_data_plt:
     
-    C_yieldvsphi_data_plt.cd(i+1)
+        C_yieldvsphi_data_plt.cd(i+1)
+        
+        G_yieldvsphi_data_plt.Draw("AP, same")
+        G_yieldvsphi_data_plt.SetTitle("t = {};#phi; Yield".format(val))
 
-    plot.Draw("AP, same")
-    plot.SetTitle(" ;#phi; Yield")
-
-    plot.GetYaxis().SetTitleOffset(1.5)
-    plot.GetXaxis().SetTitleOffset(1.5)
-    plot.GetXaxis().SetLabelSize(0.04)
+        G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
+        G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
+        G_yieldvsphi_data_plt.GetXaxis().SetLabelSize(0.04)
 
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
