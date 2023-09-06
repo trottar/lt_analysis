@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 16:17:40 trottar"
+# Time-stamp: "2023-09-06 16:21:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1215,8 +1215,8 @@ C_yieldvsphi_data_plt = TCanvas()
 C_yieldvsphi_data_plt.Divide(1,NumtBins)
 #l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
-yield_data = np.array([[],[]])
-yield_simc = np.array([[],[]])
+yield_data = np.array([])
+yield_simc = np.array([])
 tbin = np.array([])
 phibin = np.array([])
 for it,phiset in enumerate(phisetlist):
