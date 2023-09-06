@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 15:38:52 trottar"
+# Time-stamp: "2023-09-06 15:46:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1196,17 +1196,9 @@ G_yield_data_plt.Add(G_yield_simc)
 G_yield_data_plt.Draw("AP")
 G_yield_data_plt.SetTitle(" ;Setting; Yield")
 
-i=0
 for i,hist in enumerate(histlist):
-    while i <= G_yield_data_plt.GetXaxis().GetXmax():
-        bin_ix = G_yield_data_plt.GetXaxis().FindBin(i)
-        if i == 0: 
-            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
-        elif i == 1:
-            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Left")
-        else:
-            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Right")
-        i+=1
+    bin_ix = G_yield_data_plt.GetXaxis().FindBin(i)
+    G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,hist["phi_setting"])
 
 G_yield_data_plt.GetYaxis().SetTitleOffset(1.5)
 G_yield_data_plt.GetXaxis().SetTitleOffset(1.5)
@@ -1219,9 +1211,9 @@ l_yield_data_plt.Draw()
 C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_yieldvsphi_data_plt = TCanvas()
-C_yieldvsphi_data_plt.SetGrid()
+#C_yieldvsphi_data_plt.SetGrid()
 C_yieldvsphi_data_plt.Divide(1,NumtBins)
-l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
+#l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
 yield_data = np.array([])
 yield_simc = np.array([])
@@ -1274,9 +1266,9 @@ for plot in G_yieldvsphi_data_plt:
     plot.GetXaxis().SetTitleOffset(1.5)
     plot.GetXaxis().SetLabelSize(0.04)
 
-l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
-l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
-l_yieldvsphi_data_plt.Draw()
+#l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
+#l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
+#l_yieldvsphi_data_plt.Draw()
 
 C_yieldvsphi_data_plt.Draw()
 
@@ -1314,17 +1306,9 @@ G_ratio_plt.Draw("AP")
 
 G_ratio_plt.SetTitle(" ;Setting; Ratio")
 
-i=0
 for i,hist in enumerate(histlist):
-    while i <= G_ratio_plt.GetXaxis().GetXmax():
-        bin_ix = G_ratio_plt.GetXaxis().FindBin(i)
-        if i == 0: 
-            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
-        elif i == 1:
-            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Left")
-        else:
-            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Right")
-        i+=1
+    bin_ix = G_ratio_plt.GetXaxis().FindBin(i)
+    G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,hist["phi_setting"])
 
 G_ratio_plt.GetYaxis().SetTitleOffset(1.5)
 G_ratio_plt.GetXaxis().SetTitleOffset(1.5)
