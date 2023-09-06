@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 17:19:22 trottar"
+# Time-stamp: "2023-09-06 17:34:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1247,7 +1247,7 @@ yield_data = match_to_bin(yield_data)
 yield_simc = match_to_bin(yield_simc)
 
 yieldvsphi_data_lst = []        
-for i, val in enumerate(tbin):
+for i, val in enumerate(t_bins):
 
     print("!!!!!!!!!!!!!!!!!!!!!!",(yield_data[i], yield_simc[i]))
     if val == yield_data[i][0]:
