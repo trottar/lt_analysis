@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 15:30:29 trottar"
+# Time-stamp: "2023-09-06 15:35:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1219,6 +1219,7 @@ l_yield_data_plt.Draw()
 C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_yieldvsphi_data_plt = TCanvas()
+C_yieldvsphi_data_plt.SetGrid()
 C_yieldvsphi_data_plt.Divide(1,NumtBins)
 l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
@@ -1246,7 +1247,6 @@ yieldvsphi_data_lst = []
 for i, val in enumerate(tbin):
     
     G_yieldvsphi_data_plt = ROOT.TMultiGraph()
-    C_yieldvsphi_data_plt.SetGrid()
     
     G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data),phibin,yield_data,np.array([0]*len(phibin)),np.array([0]*len(yield_data)))
     G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc),phibin,yield_simc,np.array([0]*len(phibin)),np.array([0]*len(yield_simc)))
@@ -1265,7 +1265,7 @@ for i, val in enumerate(tbin):
 
 for plot in G_yieldvsphi_data_plt:
     
-    C_yieldvsphi_data_plt.cd(i)
+    C_yieldvsphi_data_plt.cd(i+1)
 
     plot.Draw("AP")
     plot.SetTitle(" ;#phi; Yield")
