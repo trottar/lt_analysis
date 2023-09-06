@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 17:58:59 trottar"
+# Time-stamp: "2023-09-06 18:01:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1217,7 +1217,7 @@ C_yieldvsphi_data_plt.Divide(1,NumtBins)
 
 yield_data = []
 yield_simc = []
-phibins = np.array([])
+phibins = []
 for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
     simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
