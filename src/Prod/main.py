@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 19:03:12 trottar"
+# Time-stamp: "2023-09-06 19:06:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1273,14 +1273,14 @@ for i, val in enumerate(t_bins):
         G_yieldvsphi_simc.SetMarkerColor(2)
         G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
 
-        C_yieldvsphi_data_plt.cd(i+1)
+    C_yieldvsphi_data_plt.cd(i+1)
         
-        G_yieldvsphi_data_plt.Draw("AP, same")
-        G_yieldvsphi_data_plt.SetTitle("t = {};#phi; Yield".format(val))
+    G_yieldvsphi_data_plt.Draw("AP, same")
+    G_yieldvsphi_data_plt.SetTitle("t = {};#phi; Yield".format(val))
 
-        G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
-        G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
-        G_yieldvsphi_data_plt.GetXaxis().SetLabelSize(0.04)
+    G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
+    G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
+    G_yieldvsphi_data_plt.GetXaxis().SetLabelSize(0.04)
 
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
