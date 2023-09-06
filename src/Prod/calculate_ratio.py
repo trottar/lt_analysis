@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:17:04 trottar"
+# Time-stamp: "2023-09-06 13:20:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,6 +103,6 @@ def find_ratio(histlist, inpDict, phisetlist, yieldDict):
         print("-"*25)
         ratioDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            ratioDict[hist["phi_setting"]]["ratio"] = calculate_ratio(kin_type, yieldDict)
+            ratioDict[hist["phi_setting"]]["ratio"] = calculate_ratio(kin_type, phisetlist, yieldDict)
             
     return {"binned_DATA" : yieldDict}
