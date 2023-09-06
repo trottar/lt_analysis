@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:15:13 trottar"
+# Time-stamp: "2023-09-06 13:17:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -850,7 +850,7 @@ yieldDict.update(find_yield_simc(histlist, inpDict))
 from calculate_ratio import find_ratio
 
 ratioDict = {}
-ratioDict.update(find_ratio(histlist, inpDict, yieldDict))
+ratioDict.update(find_ratio(histlist, inpDict, phisetlist, yieldDict))
 
 from ave_per_bin import ave_per_bin_data, ave_per_bin_simc
 
