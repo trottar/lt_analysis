@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:26:13 trottar"
+# Time-stamp: "2023-09-06 13:42:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -280,6 +280,6 @@ def find_yield_simc(histlist, inpDict):
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, hist["H_ph_q_SIMC"], phi_bins, hist["normfac_simc"])
+            yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, hist["H_ph_q_SIMC"], phi_bins, hist["normfac_simc"])
             
     return {"binned_SIMC" : yieldDict}
