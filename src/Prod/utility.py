@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 16:59:41 trottar"
+# Time-stamp: "2023-09-06 17:12:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,6 +84,6 @@ def match_to_bin(data):
             match_dict[match] = [value]
 
     # Convert the dictionary to the desired format
-    return [[match, values] for match, values in match_dict.items()]
+    return [[match, np.array(values)] for match, values in match_dict.items()]
 
 ################################################################################################################################################
