@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 18:06:46 trottar"
+# Time-stamp: "2023-09-06 18:09:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1226,6 +1226,7 @@ for it,phiset in enumerate(phisetlist):
         tmp_yield_data = [[],[]]
         tmp_yield_simc = [[],[]]
         tmp_phibins_data = [[],[]]
+        tmp_phibins_simc = [[],[]]
         # Access the nested dictionary using the tuple key
         data_nested_dict = yieldDict["binned_DATA"][phiset]
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
