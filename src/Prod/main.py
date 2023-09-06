@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 16:21:58 trottar"
+# Time-stamp: "2023-09-06 16:28:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1215,8 +1215,8 @@ C_yieldvsphi_data_plt = TCanvas()
 C_yieldvsphi_data_plt.Divide(1,NumtBins)
 #l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
-yield_data = np.array([])
-yield_simc = np.array([])
+yield_data = [[],[]]
+yield_simc = [[],[]]
 tbin = np.array([])
 phibin = np.array([])
 for it,phiset in enumerate(phisetlist):
@@ -1229,8 +1229,8 @@ for it,phiset in enumerate(phisetlist):
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
         # Fill histogram
-        yield_data = np.append(yield_data, [yieldDict["binned_DATA"]["t_bins"][i], data_nested_dict["yield"][data_key_tuple]["yield"]])
-        yield_simc = np.append(yield_simc, [yieldDict["binned_DATA"]["t_bins"][i], simc_nested_dict["yield"][simc_key_tuple]["yield"]])
+        yield_data.append([yieldDict["binned_DATA"]["t_bins"][i], data_nested_dict["yield"][data_key_tuple]["yield"]])
+        yield_simc.append([yieldDict["binned_DATA"]["t_bins"][i], simc_nested_dict["yield"][simc_key_tuple]["yield"]])
         tbin = np.append(tbin, [yieldDict["binned_DATA"]["t_bins"][i]])
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
         print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, yield_data[0], yield_simc[0]))
