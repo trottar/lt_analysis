@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:06:07 trottar"
+# Time-stamp: "2023-09-06 13:17:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_ratio(kin_type, yieldDict):
+def calculate_ratio(kin_type, phisetlist, yieldDict):
 
     dict_lst = []
     for it,phiset in enumerate(phisetlist):
@@ -79,7 +79,7 @@ def calculate_ratio(kin_type, yieldDict):
             
     return groups
 
-def find_ratio(histlist, inpDict, yieldDict):
+def find_ratio(histlist, inpDict, phisetlist, yieldDict):
 
     for hist in histlist:
         t_bins = hist["t_bins"]
