@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 16:46:02 trottar"
+# Time-stamp: "2023-09-06 16:49:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1239,10 +1239,9 @@ for it,phiset in enumerate(phisetlist):
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
         yield_data.append(tmp_yield_data)
         yield_simc.append(tmp_yield_simc)
-        print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, yield_data[0], yield_simc[0]))
-        print("----------------------",(i, j, yield_data[1], yield_simc[1]))        
-print("======================",(yield_data[0], yield_simc[0]))
-print("______________________",(yield_data[1], yield_simc[1]))
+        print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, tmp_yield_data[0], tmp_yield_simc[0]))
+        print("----------------------",(i, j, tmp_yield_data[1], tmp_yield_simc[1]))
+print("______________________",(yield_data, yield_simc))
 
 yieldvsphi_data_lst = []        
 for i, val in enumerate(tbin):
