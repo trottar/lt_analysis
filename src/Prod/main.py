@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 15:02:49 trottar"
+# Time-stamp: "2023-09-06 15:10:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1256,9 +1256,6 @@ for it, phiset in enumerate(phisetlist):
 
         # Create a new multigraph for each tbin
         G_yieldvsphi_data_plt = ROOT.TMultiGraph()
-        
-        # Set grid for the multigraph
-        G_yieldvsphi_data_plt.SetGrid()
 
         # Create TGraphErrors for data and simc
         G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data), phibin, yield_data, np.array([0] * len(phibin)),
