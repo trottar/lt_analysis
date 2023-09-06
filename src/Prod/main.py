@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 18:20:36 trottar"
+# Time-stamp: "2023-09-06 18:27:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1254,12 +1254,13 @@ phibins_simc = match_to_bin(phibins_simc)
    
 for i, val in enumerate(t_bins):
 
-    if val == yield_data[i][0]:
+    G_yieldvsphi_data_plt = ROOT.TMultiGraph()
+    
+    if val == yield_data[i][0] and val == yield_simc[i][0]:
 
         print("---------------------", i, yield_data[i][1], phibins_data[i][1])
         print("_____________________", i, yield_simc[i][1], phibins_simc[i][1])
         
-        G_yieldvsphi_data_plt = ROOT.TMultiGraph()
         G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(yield_data[i][1])))
         G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1])),np.array([0]*len(yield_simc[i][1])))
 
