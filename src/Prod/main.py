@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 15:53:52 trottar"
+# Time-stamp: "2023-09-06 15:59:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1215,8 +1215,8 @@ C_yieldvsphi_data_plt = TCanvas()
 C_yieldvsphi_data_plt.Divide(1,NumtBins)
 #l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
-yield_data = np.array([])
-yield_simc = np.array([])
+yield_data = np.array([[],[]])
+yield_simc = np.array([[],[]])
 tbin = np.array([])
 phibin = np.array([])
 for it,phiset in enumerate(phisetlist):
@@ -1229,31 +1229,32 @@ for it,phiset in enumerate(phisetlist):
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
         # Fill histogram
-        yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"]])
-        yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"]])
+        yield_data = np.append(yield_data, [yieldDict["binned_DATA"]["t_bins"][i], data_nested_dict["yield"][data_key_tuple]["yield"]])
+        yield_simc = np.append(yield_simc, [yieldDict["binned_DATA"]["t_bins"][i], simc_nested_dict["yield"][simc_key_tuple]["yield"]])
         tbin = np.append(tbin, [yieldDict["binned_DATA"]["t_bins"][i]])
         phibin = np.append(phibin, [yieldDict["binned_DATA"]["phi_bins"][j]])
         print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, yield_data, yield_simc))
 
 yieldvsphi_data_lst = []        
 for i, val in enumerate(tbin):
-    
-    G_yieldvsphi_data_plt = ROOT.TMultiGraph()
-    
-    G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data),phibin,yield_data,np.array([0]*len(phibin)),np.array([0]*len(yield_data)))
-    G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc),phibin,yield_simc,np.array([0]*len(phibin)),np.array([0]*len(yield_simc)))
 
-    G_yieldvsphi_data.SetMarkerStyle(21)
-    G_yieldvsphi_data.SetMarkerSize(1)
-    G_yieldvsphi_data.SetMarkerColor(1)
-    G_yieldvsphi_data_plt.Add(G_yieldvsphi_data)
+    if val == yield_data[0][i]
+        G_yieldvsphi_data_plt = ROOT.TMultiGraph()
+        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[1][i]),phibin,yield_data[1][i],np.array([0]*len(phibin)),np.array([0]*len(yield_data[1][i])))
+        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[1][i]),phibin,yield_simc[1][i],np.array([0]*len(phibin)),np.array([0]*len(yield_simc[1][i])))
 
-    G_yieldvsphi_simc.SetMarkerStyle(21)
-    G_yieldvsphi_simc.SetMarkerSize(1)
-    G_yieldvsphi_simc.SetMarkerColor(2)
-    G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
 
-    yieldvsphi_data_lst.append(G_yieldvsphi_data_plt)
+        G_yieldvsphi_data.SetMarkerStyle(21)
+        G_yieldvsphi_data.SetMarkerSize(1)
+        G_yieldvsphi_data.SetMarkerColor(1)
+        G_yieldvsphi_data_plt.Add(G_yieldvsphi_data)
+
+        G_yieldvsphi_simc.SetMarkerStyle(21)
+        G_yieldvsphi_simc.SetMarkerSize(1)
+        G_yieldvsphi_simc.SetMarkerColor(2)
+        G_yieldvsphi_data_plt.Add(G_yieldvsphi_simc)
+
+        yieldvsphi_data_lst.append(G_yieldvsphi_data_plt)
 
 for plot in G_yieldvsphi_data_plt:
     
