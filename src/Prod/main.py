@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 18:17:23 trottar"
+# Time-stamp: "2023-09-06 18:20:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1211,7 +1211,7 @@ l_yield_data_plt.Draw()
 C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_yieldvsphi_data_plt = TCanvas()
-C_yieldvsphi_data_plt.SetGrid()
+#C_yieldvsphi_data_plt.SetGrid()
 C_yieldvsphi_data_plt.Divide(1,NumtBins)
 #l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
 
