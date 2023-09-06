@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 16:59:50 trottar"
+# Time-stamp: "2023-09-06 17:03:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1250,10 +1250,10 @@ print("______________________",(yield_data, yield_simc))
 yieldvsphi_data_lst = []        
 for i, val in enumerate(tbin):
 
-    if val == yield_data[0][i]:
+    if val == yield_data[i][0]:
         G_yieldvsphi_data_plt = ROOT.TMultiGraph()
-        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[1][i]),phibin,yield_data[1][i],np.array([0]*len(phibin)),np.array([0]*len(yield_data[1][i])))
-        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[1][i]),phibin,yield_simc[1][i],np.array([0]*len(phibin)),np.array([0]*len(yield_simc[1][i])))
+        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibin,yield_data[i][1],np.array([0]*len(phibin)),np.array([0]*len(yield_data[i][1])))
+        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibin,yield_simc[i][1],np.array([0]*len(phibin)),np.array([0]*len(yield_simc[i][1])))
 
 
         G_yieldvsphi_data.SetMarkerStyle(21)
