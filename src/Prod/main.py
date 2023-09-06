@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 15:35:33 trottar"
+# Time-stamp: "2023-09-06 15:38:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1277,6 +1277,8 @@ for plot in G_yieldvsphi_data_plt:
 l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
 l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
 l_yieldvsphi_data_plt.Draw()
+
+C_yieldvsphi_data_plt.Draw()
 
 C_yieldvsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
