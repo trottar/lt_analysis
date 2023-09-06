@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:17:20 trottar"
+# Time-stamp: "2023-09-06 13:37:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1166,7 +1166,7 @@ setting = np.array([])
 for it,phiset in enumerate(phisetlist):
     data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
     simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
-    for k, simc_key_tuple in enumerate(simc_key_tuples):
+    for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
         # Access the nested dictionary using the tuple key
         data_nested_dict = yieldDict["binned_DATA"][phiset]        
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
