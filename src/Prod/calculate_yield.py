@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:18:23 trottar"
+# Time-stamp: "2023-09-06 13:05:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,7 +138,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
         key = (tup[0], tup[1])
         groups[key] = {
             "{}_arr".format(kin_type) : tup[2],
-            "{}_yield".format(kin_type) : tup[3],
+            "{}".format(kin_type) : tup[3],
         }            
             
     return groups
@@ -223,7 +223,7 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
         key = (tup[0], tup[1])
         groups[key] = {
             "{}_arr".format(kin_type) : tup[2],
-            "{}_yield".format(kin_type) : tup[3],
+            "{}".format(kin_type) : tup[3],
         }            
             
     return groups
@@ -252,7 +252,7 @@ def find_yield_data(histlist, inpDict):
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            yieldDict[hist["phi_setting"]][kin_type] = calculate_yield_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, hist["H_ph_q_DATA"], phi_bins, hist["normfac_data"])
+            yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, hist["H_ph_q_DATA"], phi_bins, hist["normfac_data"])
             
     return {"binned_DATA" : yieldDict}
 
@@ -280,6 +280,6 @@ def find_yield_simc(histlist, inpDict):
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            yieldDict[hist["phi_setting"]][kin_type] = calculate_yield_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, hist["H_ph_q_SIMC"], phi_bins, hist["normfac_simc"])
+            yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, hist["H_ph_q_SIMC"], phi_bins, hist["normfac_simc"])
             
     return {"binned_SIMC" : yieldDict}
