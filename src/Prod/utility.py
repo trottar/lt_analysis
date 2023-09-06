@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-22 00:02:15 trottar"
+# Time-stamp: "2023-09-06 16:59:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,5 +65,25 @@ def weight_bins(histogram):
     weighted_bin_edges = [edge * weight for edge, weight in zip(bin_edges, bin_weights)]
     
     return weighted_bin_edges
+
+################################################################################################################################################
+
+def match_to_bin(data):
+    # Initialize a dictionary to store the matches
+    match_dict = {}
+
+    # Iterate through the given data
+    for item in data:
+        match = item[0][0]  # Extract the match value (e.g., 0.33)
+        value = item[1][0]  # Extract the corresponding value
+
+        # Check if the match exists in the dictionary
+        if match in match_dict:
+            match_dict[match].append(value)
+        else:
+            match_dict[match] = [value]
+
+    # Convert the dictionary to the desired format
+    return [[match, values] for match, values in match_dict.items()]
 
 ################################################################################################################################################

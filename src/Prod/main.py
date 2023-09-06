@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 16:49:28 trottar"
+# Time-stamp: "2023-09-06 16:59:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,7 +33,7 @@ import csv
 ##################################################################################################################################################
 # Importing utility functions
 
-from utility import show_pdf_with_evince
+from utility import show_pdf_with_evince, match_to_bin
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -1241,7 +1241,11 @@ for it,phiset in enumerate(phisetlist):
         yield_simc.append(tmp_yield_simc)
         print("~~~~~~~~~~~~~~~~~~~~~~",(i, j, tmp_yield_data[0], tmp_yield_simc[0]))
         print("----------------------",(i, j, tmp_yield_data[1], tmp_yield_simc[1]))
-print("______________________",(yield_data, yield_simc))
+
+# Match t-bins with list of yields
+yield_data = match_to_bin(yield_data)
+yield_simc = match_to_bin(yield_simc)
+print("______________________",(yield_data, yield_simc))        
 
 yieldvsphi_data_lst = []        
 for i, val in enumerate(tbin):
