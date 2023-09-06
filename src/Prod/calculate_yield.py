@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:05:43 trottar"
+# Time-stamp: "2023-09-06 13:26:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -252,7 +252,7 @@ def find_yield_data(histlist, inpDict):
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, hist["H_ph_q_DATA"], phi_bins, hist["normfac_data"])
+            yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_data("yield", hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, hist["H_ph_q_DATA"], phi_bins, hist["normfac_data"])
             
     return {"binned_DATA" : yieldDict}
 
