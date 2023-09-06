@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 19:39:10 trottar"
+# Time-stamp: "2023-09-06 19:42:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1258,8 +1258,8 @@ for i, val in enumerate(t_bins):
     
     G_yieldvsphi_data_plt = ROOT.TMultiGraph()
     
-    G_yieldvsphi_data = ROOT.TGraphErrors(yield_data[i][1].size(),phibins_data[i][1],yield_data[i][1],np.array([0]*phibins_data[i][1].size()),np.array([0]*yield_data[i][1].size()))
-    G_yieldvsphi_simc = ROOT.TGraphErrors(yield_simc[i][1].size(),phibins_simc[i][1],yield_simc[i][1],np.array([0]*phibins_simc[i][1].size()),np.array([0]*yield_simc[i][1].size()))
+    G_yieldvsphi_data = ROOT.TGraphErrors(yield_data[i][1].size,phibins_data[i][1],yield_data[i][1],np.array([0]*phibins_data[i][1].size),np.array([0]*yield_data[i][1].size))
+    G_yieldvsphi_simc = ROOT.TGraphErrors(yield_simc[i][1].size,phibins_simc[i][1],yield_simc[i][1],np.array([0]*phibins_simc[i][1].size),np.array([0]*yield_simc[i][1].size))
 
     G_yieldvsphi_data.SetMarkerStyle(21)
     G_yieldvsphi_data.SetMarkerSize(1)
