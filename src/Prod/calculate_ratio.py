@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 13:20:59 trottar"
+# Time-stamp: "2023-09-06 13:23:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,7 +91,7 @@ def find_ratio(histlist, inpDict, phisetlist, yieldDict):
     }
 
     # List of kinematic types
-    kinematic_types = ["MM"]    
+    kinematic_types = ["yield"]    
 
     # Loop through histlist and update yieldDict
     for hist in histlist:
