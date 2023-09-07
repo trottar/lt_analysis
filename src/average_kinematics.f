@@ -110,20 +110,12 @@ c     Get low, high eps. and neg., pos. polarity data.
                   else
                      stop '*** aver: wrong pol ***'
                   endif
-! Add a print statement to check variables before read
-                  print *, '(a4,''kindata/kindata.'',a2,''_'',i3.3,
-     *                 ''_'',i2.2,''_'',i5.4,S,''.''dat'')', pid, pol, 
-     *                 nint(q2_set*100.), nint(eps_set(lh)*100.), 
-     *                 nint(th_pq*1000.)
-! Add a print statement to indicate reading from file
-                  print *, '(a4,''kindata/kindata.'',a2,''_'',i3.3,
-     *                 ''_'',i2.2,''_'',i5.4,S,''.''dat'')', pid,
-     *                 pol, nint(q2_set*100.), nint(eps_set(lh)*100.), 
-     *                 nint(th_pq*1000.)
-                  write(fn,'(a4,''kindata/kindata.'',a2,''_'',i3.3,''_'',i2.2,
-     *                 ''_'',SP,i5.4,S,''.dat'')') pid, pol,
-     *                 nint(q2_set*10.),
-     *                 nint(eps_set(lh)*100.), nint(th_pq*1000.)
+                  print '(A, A)', "Debug: pid =", pid
+                  print '(A, A)', "Debug: pol =", pol
+                  print '(A, A)', "Debug: q2_set =", nint(q2_set*100.)
+                  print '(A, A)', "Debug: eps_set(lh) =",
+     *                  nint(eps_set(lh)*100.)
+                  print '(A, A)', "Debug: th_pq =", nint(th_pq*1000.)
                   print*,'fn=',fn
 c                 pause
 
