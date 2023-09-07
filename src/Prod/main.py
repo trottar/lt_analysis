@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 20:38:35 trottar"
+# Time-stamp: "2023-09-06 20:43:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1251,6 +1251,7 @@ yield_simc = match_to_bin(yield_simc)
 phibins_data = match_to_bin(phibins_data)
 phibins_simc = match_to_bin(phibins_simc)
 
+multiDict = {}
 for i, val in enumerate(t_bins):
 
     print("---------------------", i, yield_data[i][1], phibins_data[i][1])
