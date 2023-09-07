@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:17:07 trottar"
+# Time-stamp: "2023-09-07 00:19:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,9 +92,9 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
     averW_center_data = []
     avert_center_data = []
 
-    ratio_right_data = []
-    ratio_left_data = []
-    ratio_center_data = []    
+    ratio_right = []
+    ratio_left = []
+    ratio_center = []    
 
     for phiset in phisetlist:
         for k, data_key_tuple in enumerate(aveDict["binned_DATA"][phiset]['t']):
