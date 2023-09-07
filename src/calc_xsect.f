@@ -74,8 +74,6 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       real phi
 
-      include './kin_xyz.inc'
-
       ipol=0
       q2=0.
       eps=0.
@@ -158,7 +156,7 @@ c      pause
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
                write(6,*)' Angle error ',th_mod,th_cm
-c               stop
+               stop
             endif
 
             x_real=x_mod*r
