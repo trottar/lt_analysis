@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 01:46:26 trottar"
+# Time-stamp: "2023-09-07 01:53:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,7 +179,6 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
                 runNum = run
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
                 if os.path.exists(pid_log):
-                    print("!!!!!!!!!!!!!!!Center",pid_log)
                     thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
                     #thpq_center = 3.000
                     ebeam_center = float(EbeamValCenter[i])
