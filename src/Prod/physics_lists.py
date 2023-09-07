@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:25:02 trottar"
+# Time-stamp: "2023-09-07 00:29:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,7 +72,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
     EbeamValLeft = inpDict["EbeamValLeft"]
     pThetaValCenter = inpDict["pThetaValCenter"]
     EbeamValCenter = inpDict["EbeamValCenter"]
-    POL = inpDict["POL"]
+    POL = float(inpDict["POL"])
     KSet = inpDict["KSet"]
     
     if ParticleType == "kaon":
