@@ -1,4 +1,4 @@
-      subroutine eps_n_theta(npol,Eb,w,q2,tm,thetacm,eps)
+      subroutine eps_n_theta(pid,npol,Eb,w,q2,tm,thetacm,eps)
 
 c     To calculate model theta_pq in CM and epsilon. This subroutine is largely
 c     based on theta_cm.f function, which in turn is based Jochen's script.
@@ -14,16 +14,28 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       REAL m2,m3,m4
       REAL m12,m22,m32,m42
 
-      real mp,mp2,mpi,mpi2,mn,mn2
+      real mp,mp2,mpi,mpi2,mn,mn2,mK,mK2
       parameter (mp=.93827231)   !mp
       parameter (mp2=.88035493)  !mp^2
       parameter (mpi=.13956995)   !mpi
       parameter (mpi2=.01947977)  !mpi^2
       parameter (mn=.93956563)   !mn
-      parameter (mn2=.88278357)  !mn^2
+      parameter (mn2=.88278357) !mn^2
+      parameter (mK=0.493677)   !mK
+      parameter (mK2=0.24387)   !mK2    
 
-      parameter (m3=mpi)
-      parameter (m32=mpi2)
+      real(kind=8) :: m3, m32
+
+      ! Check particle type and set parameters accordingly
+      if (pid == "kaon") then
+        m3 = mK
+        m32 = mK2
+      else if (pid == "pion") then
+        m3 = mpi
+        m32 = mpi2
+      else
+        print *, "Invalid particle type"
+      endif
 
       if(npol.gt.0) then
          m2=mp
@@ -54,7 +66,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
          thetacm=2*asin(sqrt((tm-tmin)/(4*p1cm*p3cm)))
       else
          thetacm=-1.
-         print*, 'eps_n_theta: *** tm=',tm,' <  tmin=',tmin,' ! ***'
+         print*, 'eps_n_theta: tm=',tm,' <  tmin=',tmin
       endif
 
       eps=1.+2.*(q2+omega**2)/(4.*Eb*(Eb-omega)-q2)

@@ -41,7 +41,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       end if
 
 *     Calculate model thetacm and epsilon at first.
-      call eps_n_theta(npol_set,Eb,w,q2,tm,thetacm,eps_mod)
+      call eps_n_theta(pid,npol_set,Eb,w,q2,tm,thetacm,eps_mod)
 
 *     Model fit parameters.
 
