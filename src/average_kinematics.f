@@ -273,7 +273,7 @@ c     Get Beam energy at first.
 
 c     Save data.
 
-      write(fn,'(a4,''/averages/avek.'',i2.2,''_.dat'')') pid,
+      write(fn,'(a4,''/averages/avek.'',i2.2,''.dat'')') pid,
      *     nint(q2_set*10.)
       print*,'fn=',fn
       print*
