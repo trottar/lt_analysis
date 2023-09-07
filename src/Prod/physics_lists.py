@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:09:59 trottar"
+# Time-stamp: "2023-09-07 00:14:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -308,7 +308,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
             
     ################################################################################################################################################
 
-    f_list = '{}/src/averages/aver.{}_{}_{:.0f}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100)
+    f_list = '{}/src/averages/aver.{}_{}_{:.0f}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100)
 
     if not os.path.exists(f_list):
         open(f_list, "w").close()
