@@ -42,7 +42,7 @@ c     and save result in averages/avek.* .
       real aW(nt,2,2),eW(nt,2,2),aQ2(nt,2,2),eQ2(nt,2,2),
      &      att(nt,2,2),ett(nt,2,2)
 
-      real thetacm_neg(nt),thetacm_pos(nt)
+      real thetacm_only(nt)
 
       real eps_lo(nt),eps_hi(nt)
 
