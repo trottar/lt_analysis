@@ -54,7 +54,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       character*80 r_fn, kin_fn, xunsep_fn
       character*2 pol
-      character*4 pid      
+      character*4 pid
 
       integer it,ip
       real Eb,eps
@@ -146,7 +146,7 @@ c      pause
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
 
-            call xmodel(npol_set,Eb,q2_set,w,q2,tm,phi,
+            call xmodel(pid,npol_set,Eb,q2_set,w,q2,tm,phi,
      *           eps_mod,th_mod,x_mod)
 
 c angle check

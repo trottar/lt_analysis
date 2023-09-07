@@ -1,6 +1,6 @@
 *=======================================================================
 
-      subroutine xmodel(npol_set,Eb,q2_set,w,q2,tm,phi,
+      subroutine xmodel(pid,npol_set,Eb,q2_set,w,q2,tm,phi,
      *     eps_mod,th_mod,x_mod)
 
 c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
@@ -26,6 +26,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
       character*80 fn
       character*2 pol
+      character*4 pid
 
       real par(12)
       real p,e
@@ -44,10 +45,10 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
 *     Model fit parameters.
 
-c      write(fn,10) prv_it,pol,nint(100*q2_set)
-c 10   format('fit_params/it',a2,'/par.',a2,'_',i3.3)
-      write(fn,10) pol,nint(100*q2_set),pol,nint(100*q2_set)
- 10   format('parameters/par.',a2,'_',i3.3,'/par.',a2,'_',i3.3)
+c      write(fn,10) prv_it,pol,nint(q2_set*10)
+c 10   format('fit_params/it',a2,'/par.',a2,'_',i2.2)
+      write(fn,10) pid,pol,nint(q2_set*10)
+ 10   format(a4,'parameters/par.',a2,'_',i2.2)
       if (phi.lt.0.3) then
          print*, 'xmodel: fn=',fn
       endif
