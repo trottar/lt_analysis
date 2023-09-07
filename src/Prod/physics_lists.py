@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 15:37:21 trottar"
+# Time-stamp: "2023-09-07 15:46:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -319,7 +319,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumCenter[0]) != 0:
-        f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100)
+        f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100)
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
             
