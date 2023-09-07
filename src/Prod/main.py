@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:55:09 trottar"
+# Time-stamp: "2023-09-06 22:10:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -902,7 +902,7 @@ for phiset in phisetlist:
         data_nested_dict = yieldDict["binned_DATA"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
-        histbinDict["H_totevts_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_totevts_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data Q2 (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 100.0)
+        histbinDict["H_totevts_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_totevts_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data Total Events (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 100.0)
 
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
@@ -911,7 +911,7 @@ for phiset in phisetlist:
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
-        histbinDict["H_totevts_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_totevts_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc Q2 (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 100.0)
+        histbinDict["H_totevts_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = ROOT.TH1D("H_totevts_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc Total Events (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 100.0)
         
 C_Q2_tbin_DATA = TCanvas()
 C_Q2_tbin_DATA.Divide(NumtBins,NumPhiBins)
