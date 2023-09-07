@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 11:18:52 trottar"
+# Time-stamp: "2023-09-07 11:24:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -146,9 +146,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
                         tbin_left.append(k)
+                print("---------------------",j,phi_bins, ratioDict["binned"]["phi_bins"])
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == ratioDict["binned"]["phi_bins"][i]:
-                        print("!!!!!!!!!!!!!!!!!!!!!",k,phi_bin)                        
+                        print("!!!!!!!!!!!!!!!!!!!!!",k,phi_bin)
                         phibin_left.append(k)                        
                 ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Center":
