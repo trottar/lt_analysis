@@ -12,8 +12,7 @@ c     Output: averages/averages.*.dat
       character*4 inp_pid
       integer inp_pol
       real inp_Q2, inp_loeps, inp_hieps
-      write(*,*) "Please input your particle, polarity, 
-     *           Q2 and low+high epsilon:"
+      write(*,*) "Inputing particle, polarity, Q2 and both epsilons:"
       read(*,*) inp_pid, inp_pol, inp_Q2, inp_loeps, inp_hieps
 
       write(*,*) "PID = ",inp_pid,"POL = ",inp_pol,"Q2 = ",inp_Q2,

@@ -11,7 +11,7 @@ set inp_hieps [lindex $argv 4]
 spawn ./average_kinematics
 
 # If  this message is encounter do...
-expect "Please input your particle, polarity, Q2 and low+high epsilon:" {
+expect "Inputing particle, polarity, Q2 and both epsilons:" {
     #... we send it our first argument
     send "$inp_pid\r"
     send "$inp_pol\r"
