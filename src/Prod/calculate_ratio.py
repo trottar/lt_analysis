@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:30:52 trottar"
+# Time-stamp: "2023-09-06 21:47:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,15 +54,17 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
 
     dict_lst = []
     for it,phiset in enumerate(phisetlist):
-        data_key_tuples = list(yieldDict["binned_DATA"][phiset]["yield"])
-        simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]["yield"])
+        data_key_tuples = list(yieldDict["binned_DATA"][phiset][kin_type])
+        simc_key_tuples = list(yieldDict["binned_SIMC"][phiset][kin_type])
         for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
             # Access the nested dictionary using the tuple key
             data_nested_dict = yieldDict["binned_DATA"][phiset]
             simc_nested_dict = yieldDict["binned_SIMC"][phiset]
-            i = data_key_tuple[0] # t bin
-            j = data_key_tuple[1] # phi bin
-            #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]), data_nested_dict[kin_type][data_key_tuple]["yield"]))
+            idata = data_key_tuple[0] # t bin
+            jdata = data_key_tuple[1] # phi bin
+            isimc = simc_key_tuple[0] # t bin
+            jsimc = simc_key_tuple[1] # phi bin
+            #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]), data_nested_dict[kin_type][data_key_tuple][kin_type]))
             # Fill histogram
             yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]
             yield_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}".format(kin_type)]
@@ -70,8 +72,9 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
                 ratio = yield_data/yield_simc
             except ZeroDivisionError:
                 ratio = 0.0
-            print("Ratio for t-bin {} phi-bin {}: {:.3f}".format(i, j, ratio))
-            dict_lst.append((i, j, ratio))
+            print("Data Ratio for t-bin {} phi-bin {}: {:.3f}".format(idata, jdata, ratio))
+            print("Simc Ratio for t-bin {} phi-bin {}: {:.3f}".format(isimc, jsimc, ratio))            
+            dict_lst.append((idata, jdata, ratio))
     
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
