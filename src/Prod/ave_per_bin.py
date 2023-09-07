@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-04 22:11:14 trottar"
+# Time-stamp: "2023-09-06 23:26:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -118,16 +118,18 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
     #print("Size of t_bins:", len(t_bins))
     #print("Size of phi_bins:", len(phi_bins), "\n")
 
+    i = 0
     dict_lst = []
     for j in range(len(t_bins) - 1):
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
-            hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
-            ave_val = ave_hist[j]
+            hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
+            ave_val = ave_hist[i]
             print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j, k, ave_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
-
+            i+=1
+            
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
     for tup in dict_lst:
@@ -199,16 +201,18 @@ def calculate_ave_simc(kin_type, hist_simc, t_simc, t_bins, phi_bins):
     #print("Size of t_bins:", len(t_bins))
     #print("Size of phi_bins:", len(phi_bins), "\n")
 
+    i = 0
     dict_lst = []
     for j in range(len(t_bins) - 1):
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
-            hist_val = [binned_sub_simc[0][j], binned_sub_simc[1][j]]
-            ave_val = ave_hist[j]
+            hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
+            ave_val = ave_hist[i]
             print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j, k, ave_val))            
             dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
-
+            i+=1
+            
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
     for tup in dict_lst:
