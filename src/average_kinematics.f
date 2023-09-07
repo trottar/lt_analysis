@@ -261,7 +261,7 @@ c     Get Beam energy at first.
          if(q2.eq.q2_set.and.eps.eq.eps_hi_set) go to 5
       end do
  5    close(55)
-      Eb=Eb/1000.               !Mev -> Gev units.
+c      Eb=Eb/1000.               !Mev -> Gev units.
       print*,'xsect: Eb=',Eb,'   at Q2=',q2,'  eps=',eps,'  pol=',pol
 
       do it=1,ntbins
