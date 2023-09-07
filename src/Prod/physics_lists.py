@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:01:58 trottar"
+# Time-stamp: "2023-09-07 00:05:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,13 +97,13 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
     ratio_center_data = []    
 
     for phiset in phisetlist:
-        for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
+        for k, data_key_tuple in enumerate(aveDict["binned_DATA"][phiset]['t']):
             # Access the nested dictionary using the tuple key
-            data_nested_dict = averDict["binned_DATA"][phiset]
+            data_nested_dict = aveDict["binned_DATA"][phiset]
             i = data_key_tuple[0] # t bin
             j = data_key_tuple[1] # phi bin
-            tbin = averDict["binned_DATA"]["t_bins"][i]
-            phibin = averDict["binned_DATA"]["phi_bins"][j]
+            tbin = aveDict["binned_DATA"]["t_bins"][i]
+            phibin = aveDict["binned_DATA"]["phi_bins"][j]
             if phiset == "Right":
                 averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
                 averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
