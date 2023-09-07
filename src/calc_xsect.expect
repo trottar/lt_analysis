@@ -1,18 +1,20 @@
 #!/usr/bin/expect -f
 
 # Store the content of the arguments
-set inp_pol [lindex $argv 0]
-set inp_Q2 [lindex $argv 1]
-set inp_loeps [lindex $argv 2]
-set inp_hieps [lindex $argv 3]
+set inp_pid [lindex $argv 0]
+set inp_pol [lindex $argv 1]
+set inp_Q2 [lindex $argv 2]
+set inp_loeps [lindex $argv 3]
+set inp_hieps [lindex $argv 4]
 
 # Process to interract with
 spawn ./calc_xsect
 
 # If  this message is encounter do...
-expect "Please input your polarity, Q2 and low+high epsilon:" {
+expect "Inputing particle, polarity, Q2 and both epsilons:" {
     #... we send it our first argument
-    send "$inp_pol\r"    
+    send "$inp_pid\r"
+    send "$inp_pol\r"
     send "$inp_Q2\r"
     send "$inp_loeps\r"
     send "$inp_hieps\r"    
