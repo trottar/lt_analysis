@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:01:14 trottar"
+# Time-stamp: "2023-09-06 21:04:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1183,18 +1183,18 @@ for it,phiset in enumerate(phisetlist):
 
     ratio_data = []
     phibins_data = []
-    data_key_tuples = list(ratioDict["binned_DATA"][phiset]['ratio'])
+    data_key_tuples = list(ratioDict["binned"][phiset]['ratio'])
     for data_key_tuple in data_key_tuples:
         tmp_ratio_data = [[],[]]
         tmp_phibins_data = [[],[]]
         # Access the nested dictionary using the tuple key
-        data_nested_dict = ratioDict["binned_DATA"][phiset]
+        data_nested_dict = ratioDict["binned"][phiset]
         i = simc_key_tuple[0] # t bin
         j = simc_key_tuple[1] # phi bin
-        tmp_ratio_data[0].append(ratioDict["binned_DATA"]["t_bins"][i])
+        tmp_ratio_data[0].append(ratioDict["binned"]["t_bins"][i])
         tmp_ratio_data[1].append(data_nested_dict["ratio"][data_key_tuple]["ratio"])
-        tmp_phibins_data[0].append(ratioDict["binned_DATA"]["t_bins"][i])
-        tmp_phibins_data[1].append(ratioDict["binned_DATA"]["phi_bins"][j])
+        tmp_phibins_data[0].append(ratioDict["binned"]["t_bins"][i])
+        tmp_phibins_data[1].append(ratioDict["binned"]["phi_bins"][j])
         ratio_data.append(tmp_ratio_data)
         phibins_data.append(tmp_phibins_data)
 
