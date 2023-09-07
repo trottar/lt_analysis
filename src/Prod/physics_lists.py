@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 01:06:46 trottar"
+# Time-stamp: "2023-09-07 01:22:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,6 +105,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
     phibin_center = []
     
     for phiset in phisetlist:
+        print("!!!!!!!!!!!!!!!!!!",phiset)        
         data_key_tuples = list(aveDict["binned_DATA"][phiset]['t'])
         for k, data_key_tuple in enumerate(data_key_tuples):
             # Access the nested dictionary using the tuple key

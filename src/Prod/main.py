@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 01:16:22 trottar"
+# Time-stamp: "2023-09-07 01:22:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1379,9 +1379,6 @@ C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".form
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))                   
-
-for it,phiset in enumerate(phisetlist):
-    print("!!!!!!!!!!!!!!!!!!",phiset)
 
 # Run fortran script
 from physics_lists import create_lists
