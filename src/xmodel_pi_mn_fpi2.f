@@ -45,8 +45,6 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
 *     Model fit parameters.
 
-c      write(fn,10) prv_it,pol,nint(q2_set*10)
-c 10   format('fit_params/it',a2,'/par.',a2,'_',i2.2)
       write(fn,10) pid,pol,nint(q2_set*10)
  10   format(a4,'/parameters/par.',a2,'_',i2.2)
       if (phi.lt.0.3) then

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 17:15:50 trottar"
+# Time-stamp: "2023-09-07 17:59:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -177,10 +177,10 @@ KIN="Q${Q2}W${W}"
 # Define input and output file names
 OutUnsepxsectsFilename="unsep_xsects_${KIN}"
 
-python3 plot_unsep.py ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
+#python3 plot_unsep.py ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
 
 cd "${LTANAPATH}"
-evince "OUTPUT/Analysis/${ANATYPE}LT/${OutUnsepxsectsFilename}.pdf"
+#evince "OUTPUT/Analysis/${ANATYPE}LT/${OutUnsepxsectsFilename}.pdf"
 
 echo
 echo
