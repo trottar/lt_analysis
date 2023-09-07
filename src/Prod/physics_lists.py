@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:19:59 trottar"
+# Time-stamp: "2023-09-07 00:25:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,8 +102,6 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
             data_nested_dict = aveDict["binned_DATA"][phiset]
             i = data_key_tuple[0] # t bin
             j = data_key_tuple[1] # phi bin
-            tbin = aveDict["binned_DATA"]["t_bins"][i]
-            phibin = aveDict["binned_DATA"]["phi_bins"][j]
             if phiset == "Right":
                 averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
                 averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
@@ -257,12 +255,11 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin = np.append(tbin, 0.0)
             for i, Q2val in enumerate(averQ2_right_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
                 write_to_file(f_list,check_line)
             lines = f.readlines()
-            first_line = "{:.6f}\n".format(1.0)
+            first_line = "{:.6f}\n".format(POL)
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
@@ -276,12 +273,11 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin = np.append(tbin, 0.0)
             for i, Q2val in enumerate(averQ2_left_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
                 write_to_file(f_list,check_line)
             lines = f.readlines()
-            first_line = "{:.6f}\n".format(1.0)
+            first_line = "{:.6f}\n".format(POL)
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
@@ -295,12 +291,11 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin = np.append(tbin, 0.0)
             for i, Q2val in enumerate(averQ2_center_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
                 write_to_file(f_list,check_line)
             lines = f.readlines()
-            first_line = "{:.6f}\n".format(1.0)
+            first_line = "{:.6f}\n".format(POL)
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
