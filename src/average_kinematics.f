@@ -35,12 +35,12 @@ c     and save result in averages/avek.* .
       integer pol_set
       real q2_set,eps_set      
 
-      real aveW(nt),errW(nt),aveQ2(nt),errQ2(nt), &
-      avett(nt),errtt(nt)
-      real avW(nt,2),erW(nt,2),avQ2(nt,2),erQ2(nt,2), &
-      avtt(nt,2),ertt(nt,2)
-      real aW(nt,2,2),eW(nt,2,2),aQ2(nt,2,2),eQ2(nt,2,2), &
-      att(nt,2,2),ett(nt,2,2)        
+      real aveW(nt),errW(nt),aveQ2(nt),errQ2(nt),
+     &      avett(nt),errtt(nt)
+      real avW(nt,2),erW(nt,2),avQ2(nt,2),erQ2(nt,2),
+     &      avtt(nt,2),ertt(nt,2)
+      real aW(nt,2,2),eW(nt,2,2),aQ2(nt,2,2),eQ2(nt,2,2),
+     &      att(nt,2,2),ett(nt,2,2)
 
       real thetacm_neg(nt),thetacm_pos(nt)
 
