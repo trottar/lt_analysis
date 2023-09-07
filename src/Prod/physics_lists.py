@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 15:31:47 trottar"
+# Time-stamp: "2023-09-07 15:37:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -280,14 +280,16 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
-            
+
+        processed_Q2vals = set()
         # Open a file in read mode
-        with open(f_list, 'r') as f:        
+        with open(f_list, 'r') as f:
             for i, Q2val in enumerate(averQ2_right_data):
-                lines = f.readlines()
+                if Q2val in processed_Q2vals:
+                    continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
-                if check_line not in lines:
-                    write_to_file(f_list,check_line)
+                write_to_file(f_list,check_line)
+                processed_Q2vals.add(Q2val)
             lines = f.readlines()
             first_line = "{:.6f}\n".format(POL)
             last_line = "{:.6f}".format(1.0)
@@ -300,13 +302,15 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
             
+        processed_Q2vals = set()
         # Open a file in read mode
         with open(f_list, 'r') as f:
             for i, Q2val in enumerate(averQ2_left_data):
-                lines = f.readlines()
+                if Q2val in processed_Q2vals:
+                    continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
-                if check_line not in lines:
-                    write_to_file(f_list,check_line)
+                write_to_file(f_list,check_line)
+                processed_Q2vals.add(Q2val)
             lines = f.readlines()
             first_line = "{:.6f}\n".format(POL)
             last_line = "{:.6f}".format(1.0)
@@ -319,13 +323,15 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
             
+        processed_Q2vals = set()
         # Open a file in read mode
         with open(f_list, 'r') as f:
             for i, Q2val in enumerate(averQ2_center_data):
-                lines = f.readlines()
+                if Q2val in processed_Q2vals:
+                    continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
-                if check_line not in lines:
-                    write_to_file(f_list,check_line)
+                write_to_file(f_list,check_line)
+                processed_Q2vals.add(Q2val)
             lines = f.readlines()
             first_line = "{:.6f}\n".format(POL)
             last_line = "{:.6f}".format(1.0)
