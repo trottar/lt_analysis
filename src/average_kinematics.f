@@ -9,6 +9,7 @@ c
 c     Input:  kindata/kindata.*.dat
 c     Output: averages/averages.*.dat
 
+      character*4 inp_pid
       integer inp_pol
       real inp_Q2, inp_loeps, inp_hieps
       write(*,*) "Please input your polarity, Q2 and low+high epsilon:"
