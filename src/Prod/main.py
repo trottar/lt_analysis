@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 20:22:11 trottar"
+# Time-stamp: "2023-09-06 20:25:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1260,18 +1260,18 @@ for i, val in enumerate(t_bins):
 
     multiDict["G_yieldvsphi_data_plt_{}".format(i)] = ROOT.TMultiGraph()
     
-    G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(yield_data[i][1])))
-    G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1])),np.array([0]*len(yield_simc[i][1])))
+    multiDict["G_yieldvsphi_data_plt_{}".format(i)] = ROOT.TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(yield_data[i][1])))
+    multiDict["G_yieldvsphi_simc_plt_{}".format(i)] = ROOT.TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1])),np.array([0]*len(yield_simc[i][1])))
 
-    G_yieldvsphi_data.SetMarkerStyle(21)
-    G_yieldvsphi_data.SetMarkerSize(1)
-    G_yieldvsphi_data.SetMarkerColor(1)
-    multiDict["G_yieldvsphi_data_plt_{}".format(i)].Add(G_yieldvsphi_data)
+    multiDict["G_yieldvsphi_data_plt_{}".format(i)].SetMarkerStyle(21)
+    multiDict["G_yieldvsphi_data_plt_{}".format(i)].SetMarkerSize(1)
+    multiDict["G_yieldvsphi_data_plt_{}".format(i)].SetMarkerColor(1)
+    multiDict["G_yieldvsphi_data_plt_{}".format(i)].Add(multiDict["G_yieldvsphi_data_plt_{}".format(i)])
 
-    G_yieldvsphi_simc.SetMarkerStyle(21)
-    G_yieldvsphi_simc.SetMarkerSize(1)
-    G_yieldvsphi_simc.SetMarkerColor(2)
-    multiDict["G_yieldvsphi_data_plt_{}".format(i)].Add(G_yieldvsphi_simc)
+    multiDict["G_yieldvsphi_simc_plt_{}".format(i)].SetMarkerStyle(21)
+    multiDict["G_yieldvsphi_simc_plt_{}".format(i)].SetMarkerSize(1)
+    multiDict["G_yieldvsphi_simc_plt_{}".format(i)].SetMarkerColor(2)
+    multiDict["G_yieldvsphi_data_plt_{}".format(i)].Add(multiDict["G_yieldvsphi_simc_plt_{}".format(i)])
 
     C_yieldvsphi_data_plt.cd(i+1)
         
