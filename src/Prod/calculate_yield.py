@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 23:16:02 trottar"
+# Time-stamp: "2023-09-06 23:23:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,8 +86,6 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
                                     tmp_hist_data[1].append(hist_data.GetBinContent(phibin_index))
                                     tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(phibin_index))
                                     tmp_hist_dummy[1].append(hist_dummy.GetBinContent(phibin_index))
-            print("-----------------------------", j, k, np.average(tmp_hist_data[0])) 
-            print("-----------------------------data", j, k, np.sum(tmp_hist_data[1])-np.sum(tmp_hist_dummy[1]))
             binned_t_data.append(tmp_t_data)
             binned_phi_data.append(tmp_phi_data)
             binned_hist_data.append(tmp_hist_data)
@@ -101,13 +99,10 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
-        print("_____________________________", np.average(bin_val_data))
-        print("_____________________________data", np.sum(hist_val_data)-np.sum(hist_val_dummy))
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
         total_count = np.sum(sub_val)
-        yld = total_count
+        yld = total_count*normfac_data
         yield_hist.append(yld)
-        print("!!!!!!!!!!!!!!!!!!!",yield_hist[i])
         binned_sub_data[0].append(bin_val_data)
         binned_sub_data[1].append(sub_val)
         i+=1
@@ -122,15 +117,17 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
     #print("Size of t_bins:", len(t_bins)-1)
     #print("Size of phi_bins:", len(phi_bins)-1, "\n")
 
+    i = 0
     dict_lst = []
     for j in range(len(t_bins) - 1):
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
-            hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
-            yield_val = yield_hist[k]
+            hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
+            yield_val = yield_hist[i]
             print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j, k, yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
+            i+=1
 
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
@@ -186,16 +183,11 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
     for simc in binned_hist_simc:
         bin_val_simc, hist_val_simc = simc
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc
-        if sub_val.size != 0:
-            total_count = np.sum(sub_val)
-            yld = total_count*normfac_simc
-            yield_hist.append(yld)
-            binned_sub_simc[0].append(bin_val_simc)
-            binned_sub_simc[1].append(sub_val)
-        else:
-            yield_hist.append(0)
-            binned_sub_simc[0].append(bin_val_simc)
-            binned_sub_simc[1].append([0]*len(bin_val_simc))
+        total_count = np.sum(sub_val)
+        yld = total_count*normfac_simc
+        yield_hist.append(yld)
+        binned_sub_simc[0].append(bin_val_simc)
+        binned_sub_simc[1].append(sub_val)
         i+=1
     
     # Print statements to check sizes
@@ -207,16 +199,18 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
     #print("Size of t_bins:", len(t_bins)-1)
     #print("Size of phi_bins:", len(phi_bins)-1, "\n")
 
+    i = 0
     dict_lst = []
     for j in range(len(t_bins) - 1):
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
-            hist_val = [binned_sub_simc[0][j], binned_sub_simc[1][j]]
-            yield_val = yield_hist[j]
+            hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
+            yield_val = yield_hist[i]
             print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j, k, yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
-
+            i+=1
+            
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
     for tup in dict_lst:
