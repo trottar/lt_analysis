@@ -46,7 +46,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     Model fit parameters.
 
       write(fn,10) pid,pol,nint(q2_set*10)
- 10   format(a4,'/parameters/par.',a2,'_',i2.2)
+ 10   format(a4,'/parameters/par.',a2,'_',i2.2,'.dat'))
       if (phi.lt.0.3) then
          print*, 'xmodel: fn=',fn
       endif

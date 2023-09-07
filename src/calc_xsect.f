@@ -124,7 +124,7 @@ c     construct kinematics data file name.
 
 *     construct output file name.
       write(xunsep_fn,30) pid,pol,nint(q2_set*10),nint(eps_set*100)
- 30   format(a4,'/xsects/x_unsep.',a2,'_',i2.2,'_',i2)
+ 30   format(a4,'/xsects/x_unsep.',a2,'_',i2.2,'_',i2,'.dat')
       print*,'xsect: xunsep_fn=',xunsep_fn
 c      pause
 
@@ -155,17 +155,8 @@ c angle check
                stop
             endif
 
-c ratio is data/simc - see GH logbook, p.55
             x_real=x_mod*r
             dx_real=x_mod*dr
-c ratio is simc/data - see GH logbook, p.55
-c            if (r.ne.0) then
-c               x_real=x_mod/r
-c               dx_real=x_mod*dr/r**2
-c            else
-c               x_real=0.
-c               dx_real=0.
-c            endif
 
             write(61,40) x_real,dx_real,x_mod,eps_mod,
      *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
