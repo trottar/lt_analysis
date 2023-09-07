@@ -89,12 +89,27 @@ c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx,nbin
 c 2       format(i5,5f10.5,2i5)
       end do
       close(55)
+      open(55,file=trim(pid) // '/list.settings')
+      do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.eps.ne.eps_set)
+         read(55,*) ipol,q2,eps,th_pq,tmn,tmx,nbin
+c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx,nbin
+c 2       format(i5,5f10.5,2i5)
+      end do
+      close(55)      
       write(6,3)tmn,tmx,kset
  3    format(' tmn, tmx: ',2f10.5,'  for kset=',i5)
       if(tmn.eq.0..or.tmx.eq.0.) 
      *     stop '*** setting is not found in list.settings'
 
-      Eb=Ebeam(kset)
+      Eb=0.
+      open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
+      do while(.true.)
+         read(55,*) Eb,q2,eps
+c         write(*,*) Eb,q2,eps
+      end do
+ 5    close(55)
+      Eb=Eb/1000.               !Mev -> Gev units.
+      print*,'xsect: Eb=',Eb,'   at Q2=',q2,'  eps=',eps,'  pol=',pol      
 
       if(npol_set.lt.0) then
          pol='mn'
