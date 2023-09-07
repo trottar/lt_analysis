@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:46:31 trottar"
+# Time-stamp: "2023-09-07 00:49:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -325,7 +325,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()
             for i, ratio in enumerate(ratio_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_right), int(tbin_right))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_right[i]), int(tbin_right[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -335,7 +335,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_left):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_left), int(tbin_left))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_left[i]), int(tbin_left[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -345,7 +345,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_center), int(tbin_center))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_center[i]), int(tbin_center[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
