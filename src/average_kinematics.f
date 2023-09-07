@@ -254,7 +254,7 @@ c     So calculate for high eps., neg.-s and pos.-s.
 
 c     Get Beam energy at first.
       Eb=0.
-      open(55, file=trim(pid) // '_beam/Eb_KLT.dat')
+      open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
          read(55,*) Eb,q2,eps
          write(*,*) Eb,q2,eps
