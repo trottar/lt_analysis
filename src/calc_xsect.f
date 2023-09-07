@@ -64,7 +64,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer nt,nphi
       parameter (nt=6,nphi=16)
 
-      real r,dr,w,dw,q2,dq2,th_cm
+      real r,dr,w,dw,q2,dq2,th_only,th_cm
       real tm,tmn,tmx
       real eps_mod,th_mod,x_mod
       real x_real,dx_real
