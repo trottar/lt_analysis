@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 15:12:23 trottar"
+# Time-stamp: "2023-09-07 15:31:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -284,7 +284,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:        
             for i, Q2val in enumerate(averQ2_right_data):
-                lines = f.readlines()[1:-1]
+                lines = f.readlines()
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -303,7 +303,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             for i, Q2val in enumerate(averQ2_left_data):
-                lines = f.readlines()[1:-1]
+                lines = f.readlines()
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -322,7 +322,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             for i, Q2val in enumerate(averQ2_center_data):
-                lines = f.readlines()[1:-1]
+                lines = f.readlines()
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
