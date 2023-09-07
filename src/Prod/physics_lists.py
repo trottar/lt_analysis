@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:29:01 trottar"
+# Time-stamp: "2023-09-07 00:32:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -323,6 +323,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_left):
+                print("!!!!!!!!!!!!!!",phibin)
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin[i]), int(tbin[i]))
                 # Check if the line already exists
                 if check_line not in lines:
