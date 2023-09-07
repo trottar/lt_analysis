@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:32:05 trottar"
+# Time-stamp: "2023-09-07 00:38:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,14 +114,14 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
                 averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
                 averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
                 avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
-                
+
+        t_bin = ratioDict["binned"]["t_bins"]
+        phi_bin = ratioDict["binned"]["phi_bins"]                
         for k, key_tuple in enumerate(ratioDict["binned"][phiset]['ratio']):
             # Access the nested dictionary using the tuple key
             nested_dict = ratioDict["binned"][phiset]
             i = key_tuple[0] # t bin
             j = key_tuple[1] # phi bin
-            tbin = ratioDict["binned"]["t_bins"][i]
-            phibin = ratioDict["binned"]["phi_bins"][j]
             if phiset == "Right":
                 ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Left":
@@ -313,7 +313,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()
             for i, ratio in enumerate(ratio_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin[i]), int(tbin[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phi_bin[i]), int(t_bin[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -323,8 +323,8 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_left):
-                print("!!!!!!!!!!!!!!",phibin)
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin[i]), int(tbin[i]))
+                print("!!!!!!!!!!!!!!",phi_bin)
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phi_bin[i]), int(t_bin[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -334,7 +334,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin[i]), int(tbin[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phi_bin[i]), int(t_bin[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
