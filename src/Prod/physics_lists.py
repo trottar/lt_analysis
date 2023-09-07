@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 11:01:41 trottar"
+# Time-stamp: "2023-09-07 11:08:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,7 +110,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
     
     for phiset in phisetlist:
         data_key_tuples = list(aveDict["binned_DATA"][phiset]['t'])
-        for k, data_key_tuple in enumerate(data_key_tuples):
+        for data_key_tuple in data_key_tuples:
             # Access the nested dictionary using the tuple key
             data_nested_dict = aveDict["binned_DATA"][phiset]
             i = data_key_tuple[0] # t bin
@@ -129,7 +129,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                 avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
                 
         key_tuples = list(ratioDict["binned"][phiset]['ratio'])
-        for k, key_tuple in enumerate(ratioDict["binned"][phiset]['ratio']):
+        for key_tuple in ratioDict["binned"][phiset]['ratio']:
             # Access the nested dictionary using the tuple key
             nested_dict = ratioDict["binned"][phiset]
             i = key_tuple[0] # t bin
@@ -170,7 +170,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
                 if os.path.exists(pid_log):
                     thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
-                    #thpq_right = 3.000
                     ebeam_right = float(EbeamValRight[i])
                     break
                 else:
@@ -183,7 +182,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
                 if os.path.exists(pid_log):
                     thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
-                    #thpq_left = 3.000
                     ebeam_left = float(EbeamValLeft[i])
                     break
                 else:
@@ -196,7 +194,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
                 if os.path.exists(pid_log):
                     thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
-                    #thpq_center = 3.000
                     ebeam_center = float(EbeamValCenter[i])
                     break
                 else:

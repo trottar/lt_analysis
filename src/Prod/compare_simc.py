@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-21 19:26:47 trottar"
+# Time-stamp: "2023-09-07 11:02:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -270,31 +270,31 @@ def compare_simc(hist, inpDict):
     #################
     # HARD CODED
     #################    
-    H_ssxfp_SIMC.Scale(1/100)
-    H_ssyfp_SIMC.Scale(1/100)
-    H_ssxpfp_SIMC.Scale(1/100)
-    H_ssypfp_SIMC.Scale(1/100)
-    H_hsxfp_SIMC.Scale(1/100)
-    H_hsyfp_SIMC.Scale(1/100)
-    H_hsxpfp_SIMC.Scale(1/100)
-    H_hsypfp_SIMC.Scale(1/100)
-    H_ssxptar_SIMC.Scale(1/100)
-    H_ssyptar_SIMC.Scale(1/100)
-    H_hsxptar_SIMC.Scale(1/100)
-    H_hsyptar_SIMC.Scale(1/100)
-    H_ssdelta_SIMC.Scale(1/100)
-    H_hsdelta_SIMC.Scale(1/100)
-    H_Q2_SIMC.Scale(1/100)
-    H_t_SIMC.Scale(1/100)
-    H_epsilon_SIMC.Scale(1/100)
-    H_MM_SIMC.Scale(1/100)
-    H_ph_q_SIMC.Scale(1/100)
-    H_th_q_SIMC.Scale(1/100)
-    H_ph_recoil_SIMC.Scale(1/100)
-    H_th_recoil_SIMC.Scale(1/100)
-    H_pmiss_SIMC.Scale(1/100)
-    H_emiss_SIMC.Scale(1/100)
-    H_W_SIMC.Scale(1/100)
+    H_ssxfp_SIMC.Scale(100)
+    H_ssyfp_SIMC.Scale(100)
+    H_ssxpfp_SIMC.Scale(100)
+    H_ssypfp_SIMC.Scale(100)
+    H_hsxfp_SIMC.Scale(100)
+    H_hsyfp_SIMC.Scale(100)
+    H_hsxpfp_SIMC.Scale(100)
+    H_hsypfp_SIMC.Scale(100)
+    H_ssxptar_SIMC.Scale(100)
+    H_ssyptar_SIMC.Scale(100)
+    H_hsxptar_SIMC.Scale(100)
+    H_hsyptar_SIMC.Scale(100)
+    H_ssdelta_SIMC.Scale(100)
+    H_hsdelta_SIMC.Scale(100)
+    H_Q2_SIMC.Scale(100)
+    H_t_SIMC.Scale(100)
+    H_epsilon_SIMC.Scale(100)
+    H_MM_SIMC.Scale(100)
+    H_ph_q_SIMC.Scale(100)
+    H_th_q_SIMC.Scale(100)
+    H_ph_recoil_SIMC.Scale(100)
+    H_th_recoil_SIMC.Scale(100)
+    H_pmiss_SIMC.Scale(100)
+    H_emiss_SIMC.Scale(100)
+    H_W_SIMC.Scale(100)
     #################
     #################
     #################    
