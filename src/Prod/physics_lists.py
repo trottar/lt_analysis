@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 01:31:36 trottar"
+# Time-stamp: "2023-09-07 01:42:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,7 +151,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
             runNums = runNumRight
             for i, run in enumerate(runNumRight.split(' ')):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "{}/log/Analysed_Prod_{}_{}.log".format(LTANAPATH,ParticleType,runNum)
                 if os.path.exists(pid_log):
                     thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
                     #thpq_right = 3.000
@@ -164,7 +164,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
             runNums = runNumLeft
             for i, run in enumerate(runNumLeft.split(' ')):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "{}/log/Analysed_Prod_{}_{}.log".format(LTANAPATH,ParticleType,runNum)
                 if os.path.exists(pid_log):
                     thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
                     #thpq_left = 3.000
@@ -177,7 +177,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
             runNums = runNumCenter
             for i, run in enumerate(runNumCenter.split(' ')):
                 runNum = run
-                pid_log = "%s/log/Analysed_Prod_%s.log" % (LTANAPATH,runNum)
+                pid_log = "{}/log/Analysed_Prod_{}_{}.log".format(LTANAPATH,ParticleType,runNum)
                 if os.path.exists(pid_log):
                     print("!!!!!!!!!!!!!!!Center",pid_log)
                     thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
