@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 11:25:45 trottar"
+# Time-stamp: "2023-09-07 11:35:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -146,10 +146,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
                         tbin_left.append(k)
-                print("---------------------",j,phi_bins, ratioDict["binned"]["phi_bins"])
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
-                        print("!!!!!!!!!!!!!!!!!!!!!",k,phi_bin)
                         phibin_left.append(k)                        
                 ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Center":
@@ -280,9 +278,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
 
         if not os.path.exists(f_list):
-            open(f_list, "w").close()    
+            open(f_list, "w").close()
+            
         # Open a file in read mode
-        with open(f_list, 'r') as f:
+        with open(f_list, 'w') as f:
             lines = f.readlines()[1:-1]
             for i, Q2val in enumerate(averQ2_right_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
@@ -298,9 +297,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
 
         if not os.path.exists(f_list):
-            open(f_list, "w").close()    
+            open(f_list, "w").close()
+            
         # Open a file in read mode
-        with open(f_list, 'r') as f:
+        with open(f_list, 'w') as f:
             lines = f.readlines()[1:-1]
             for i, Q2val in enumerate(averQ2_left_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
@@ -316,9 +316,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_0000.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100)
 
         if not os.path.exists(f_list):
-            open(f_list, "w").close()    
+            open(f_list, "w").close()
+            
         # Open a file in read mode
-        with open(f_list, 'r') as f:
+        with open(f_list, 'w') as f:
             lines = f.readlines()[1:-1]
             for i, Q2val in enumerate(averQ2_center_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
@@ -339,7 +340,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     if float(runNumRight[0]) != 0:        
         # Open a file in read mode
-        with open(f_list, 'r') as f:
+        with open(f_list, 'w') as f:
             lines = f.readlines()
             for i, ratio in enumerate(ratio_right):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_right[i]), int(tbin_right[i]))
@@ -349,7 +350,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     if float(runNumLeft[0]) != 0:                    
         # Open a file in read mode
-        with open(f_list, 'r') as f:
+        with open(f_list, 'w') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_left):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_left[i]), int(tbin_left[i]))
@@ -359,7 +360,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     if float(runNumCenter[0]) != 0:                    
         # Open a file in read mode
-        with open(f_list, 'r') as f:
+        with open(f_list, 'w') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_center):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_center[i]), int(tbin_center[i]))
