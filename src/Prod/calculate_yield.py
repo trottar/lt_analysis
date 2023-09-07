@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 22:57:20 trottar"
+# Time-stamp: "2023-09-06 23:06:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,16 +104,11 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
         print("_____________________________", np.average(bin_val_data))
         print("_____________________________data", np.sum(hist_val_data)-np.sum(hist_val_dummy))
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
-        if sub_val.size != 0:
-            total_count = np.sum(sub_val)
-            yld = total_count*normfac_data
-            yield_hist.append(yld)
-            binned_sub_data[0].append(bin_val_data)
-            binned_sub_data[1].append(sub_val)
-        else:
-            yield_hist.append(0)
-            binned_sub_data[0].append(bin_val_data)
-            binned_sub_data[1].append([0]*len(bin_val_data))
+        total_count = np.sum(sub_val)
+        yld = total_count
+        yield_hist.append(yld)
+        binned_sub_data[0].append(bin_val_data)
+        binned_sub_data[1].append(sub_val)
         i+=1
     
     # Print statements to check sizes
@@ -132,7 +127,6 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
         for k in range(len(phi_bins) - 1):
             phibin_index = k
             hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
-            yield_val = yield_hist[j]
             print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j, k, yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
 
