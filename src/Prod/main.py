@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 20:52:33 trottar"
+# Time-stamp: "2023-09-06 20:55:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1176,8 +1176,8 @@ for it,phiset in enumerate(phisetlist):
         # Fill histogram
         yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"]])        
         yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"]])
-        if hist["phi_setting"] == "Center": setting = np.append(setting,0)
-        elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
+        if phiset == "Center": setting = np.append(setting,0)
+        elif phiset == "Left": setting = np.append(setting,1)
         else: setting = np.append(setting,2)
 
 print("------------------------", setting, yield_data)        
