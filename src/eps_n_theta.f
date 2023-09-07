@@ -24,8 +24,6 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       parameter (mK=0.493677)   !mK
       parameter (mK2=0.24387)   !mK2    
 
-      real(kind=8) :: m3, m32
-
       ! Check particle type and set parameters accordingly
       if (pid == "kaon") then
         m3 = mK
