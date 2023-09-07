@@ -110,7 +110,7 @@ c     Get low, high eps. and neg., pos. polarity data.
                   else
                      stop '*** aver: wrong pol ***'
                   endif
-                  write(fn,'(a4,''/kindata/kindata.'',a2,''_'',i3.3,
+                  write(fn,'(a4,''/kindata/kindata.'',a2,''_'',i2.2,
      *                 ''_'',i2.2,''_'',SP,i5.4,S,''.dat'')') pid, pol,
      *                 nint(q2_set*10.), nint(eps_set(lh)*100.),
      *                 nint(th_pq*1000.)
@@ -121,7 +121,7 @@ c                 pause
                   read(66,*) one
                   do it=1,nbt
                      read(66,*) W,dW,Q2,dQ2,tt,dtt
-c                    print*,W,dW,Q2,dQ2,it
+                     print*,W,dW,Q2,dQ2,it
                      if(dW.gt.0.) then
                         aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
                         eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
@@ -273,7 +273,7 @@ c     Get Beam energy at first.
 
 c     Save data.
 
-      write(fn,'(a4,''averages/avek.'',i3.3,''_.dat'')') pid,
+      write(fn,'(a4,''/averages/avek.'',i2.2,''_.dat'')') pid,
      *     nint(q2_set*10.)
       print*,'fn=',fn
       print*
