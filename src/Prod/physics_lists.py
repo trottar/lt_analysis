@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 11:08:28 trottar"
+# Time-stamp: "2023-09-07 11:13:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -145,6 +145,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
+                        print("!!!!!!!!!!!!!!!!!!!!!",k,t_bin)
                         tbin_left.append(k)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == ratioDict["binned"]["phi_bins"][i]:
