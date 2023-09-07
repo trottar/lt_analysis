@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 13:50:58 trottar"
+# Time-stamp: "2023-09-07 13:55:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -239,7 +239,7 @@ if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
 
 try:
-    with open("{}/src/{}/t_bin_interval".format(LTANAPATH,ParticleType), "r") as file:
+    with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -249,12 +249,12 @@ try:
             del t_bins[0]
             t_bins = np.array([float(element) for element in t_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/t_bin_interval".format(LTANAPATH,ParticleType)))
+    print("{} not found...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
 except IOError:
-    print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH,ParticleType)))    
+    print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
 
 try:
-    with open("{}/src/{}/phi_bin_interval".format(LTANAPATH,ParticleType), "r") as file:
+    with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -264,9 +264,9 @@ try:
             del phi_bins[0]
             phi_bins = np.array([float(element) for element in phi_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH,ParticleType)))
+    print("{} not found...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
 except IOError:
-    print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH,ParticleType)))    
+    print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
     
 for hist in histlist:
     hist["t_bins"] = t_bins
