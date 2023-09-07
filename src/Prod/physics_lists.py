@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:49:23 trottar"
+# Time-stamp: "2023-09-07 01:06:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,7 +105,8 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
     phibin_center = []
     
     for phiset in phisetlist:
-        for k, data_key_tuple in enumerate(aveDict["binned_DATA"][phiset]['t']):
+        data_key_tuples = list(aveDict["binned_DATA"][phiset]['t'])
+        for k, data_key_tuple in enumerate(data_key_tuples):
             # Access the nested dictionary using the tuple key
             data_nested_dict = aveDict["binned_DATA"][phiset]
             i = data_key_tuple[0] # t bin
@@ -122,7 +123,8 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
                 averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
                 averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
                 avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
-
+                
+        key_tuples = list(ratioDict["binned"][phiset]['ratio'])
         for k, key_tuple in enumerate(ratioDict["binned"][phiset]['ratio']):
             # Access the nested dictionary using the tuple key
             nested_dict = ratioDict["binned"][phiset]
