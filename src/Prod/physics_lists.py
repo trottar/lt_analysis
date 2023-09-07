@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 11:51:40 trottar"
+# Time-stamp: "2023-09-07 11:55:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -292,7 +292,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
-            write_to_file(f_list,"".join(lines),write_mode='r')
+            write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumLeft[0]) != 0:
         f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
@@ -310,7 +310,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
-            write_to_file(f_list,"".join(lines),write_mode='r')
+            write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumCenter[0]) != 0:
         f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_0000.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100)
@@ -328,7 +328,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
-            write_to_file(f_list,"".join(lines),write_mode='r')
+            write_to_file(f_list,"".join(lines),write_mode='w')
             
     ################################################################################################################################################
 
