@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 11:24:25 trottar"
+# Time-stamp: "2023-09-07 11:25:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -139,7 +139,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
                         tbin_right.append(k)
                 for k, phi_bin in enumerate(phi_bins):
-                    if phi_bin == ratioDict["binned"]["phi_bins"][i]:
+                    if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         phibin_right.append(k)                        
                 ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Left":
@@ -148,7 +148,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                         tbin_left.append(k)
                 print("---------------------",j,phi_bins, ratioDict["binned"]["phi_bins"])
                 for k, phi_bin in enumerate(phi_bins):
-                    if phi_bin == ratioDict["binned"]["phi_bins"][i]:
+                    if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         print("!!!!!!!!!!!!!!!!!!!!!",k,phi_bin)
                         phibin_left.append(k)                        
                 ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
@@ -157,7 +157,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
                         tbin_center.append(k)
                 for k, phi_bin in enumerate(phi_bins):
-                    if phi_bin == ratioDict["binned"]["phi_bins"][i]:
+                    if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         phibin_center.append(k)                        
                 ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
 
