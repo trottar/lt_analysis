@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 13:27:17 trottar"
+# Time-stamp: "2023-09-07 14:22:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,7 +101,7 @@ fi
 # HARD CODED #
 ##############
 
-ParticleType="kaon"
+PID="kaon"
 
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity
@@ -136,6 +136,10 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
     HIEPS=0.6979
 fi
 
+##############
+##############
+##############
+
 echo
 echo "---------------------------------------------------------"
 echo
@@ -156,7 +160,7 @@ echo "Compiling average_kinematics.f..."
 eval "gfortran -o average_kinematics average_kinematics.f"
 echo
 echo "Running average_kinematics..."
-./average_kinematics.expect ${POL} ${Q2} ${LOEPS} ${HIEPS}
+./average_kinematics.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
