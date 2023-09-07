@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:54:04 trottar"
+# Time-stamp: "2023-09-06 23:36:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,6 +69,8 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
             try:
                 ratio = yield_data/yield_simc
             except ZeroDivisionError:
+                ratio = 0.0
+            if math.isnan(ratio):
                 ratio = 0.0
             print("Ratio for t-bin {} phi-bin {}: {:.3f}".format(i, j, ratio))
             dict_lst.append((i, j, ratio))
