@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 13:49:44 trottar"
+# Time-stamp: "2023-09-07 14:06:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,11 +74,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
     EbeamValCenter = inpDict["EbeamValCenter"]
     POL = float(inpDict["POL"])
     KSet = inpDict["KSet"]
-    
-    if ParticleType == "kaon":
-        PID = "k"
-    elif ParticleType == "pion":
-        PID = "pi"
         
     if POL > 0:
         polID = 'pl'
@@ -206,7 +201,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     ################################################################################################################################################
 
-    f_list_settings = '{}/src/{}/beam/Eb_KLT.dat'.format(LTANAPATH)
+    f_list_settings = '{}/src/{}/beam/Eb_KLT.dat'.format(LTANAPATH, ParticleType)
     # Checks if file exists and creates if not
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
@@ -249,7 +244,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
                 
     ################################################################################################################################################
 
-    f_list_settings = '{}/src/{}/list.settings'.format(LTANAPATH)
+    f_list_settings = '{}/src/{}/list.settings'.format(LTANAPATH, ParticleType)
     # Checks if file exists and creates if not
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
