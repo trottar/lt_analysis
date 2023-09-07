@@ -5,6 +5,8 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
 
       implicit none
 
+      character*4 pid      
+      
       integer npol
       real Eb,w,q2,tm,thetacm,eps
 
