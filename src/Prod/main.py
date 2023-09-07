@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:04:02 trottar"
+# Time-stamp: "2023-09-06 21:08:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1204,6 +1204,8 @@ for it,phiset in enumerate(phisetlist):
 
     multiDict = {}
     for i, val in enumerate(t_bins):
+
+        print("------------------", i, phibins_data[i][1], ratio_data[i][1])
 
         multiDict["G_ratiovsphi_plt_{}".format(i)] = ROOT.TMultiGraph()
 
