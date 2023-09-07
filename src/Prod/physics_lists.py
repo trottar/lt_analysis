@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:38:40 trottar"
+# Time-stamp: "2023-09-07 00:46:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -94,8 +94,16 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
 
     ratio_right = []
     ratio_left = []
-    ratio_center = []    
+    ratio_center = []
 
+    tbin_right = []
+    tbin_left = []
+    tbin_center = []
+
+    phibin_right = []
+    phibin_left = []
+    phibin_center = []
+    
     for phiset in phisetlist:
         for k, data_key_tuple in enumerate(aveDict["binned_DATA"][phiset]['t']):
             # Access the nested dictionary using the tuple key
@@ -115,18 +123,22 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
                 averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
                 avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
 
-        t_bin = ratioDict["binned"]["t_bins"]
-        phi_bin = ratioDict["binned"]["phi_bins"]                
         for k, key_tuple in enumerate(ratioDict["binned"][phiset]['ratio']):
             # Access the nested dictionary using the tuple key
             nested_dict = ratioDict["binned"][phiset]
             i = key_tuple[0] # t bin
             j = key_tuple[1] # phi bin
             if phiset == "Right":
+                tbin_right.append(i)
+                phibin_right.append(j)
                 ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Left":
+                tbin_left.append(i)
+                phibin_left.append(j)                
                 ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Center":
+                tbin_center.append(i)
+                phibin_center.append(j)                
                 ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
 
     ################################################################################################################################################
@@ -313,7 +325,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()
             for i, ratio in enumerate(ratio_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phi_bin[i]), int(t_bin[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_right), int(tbin_right))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -323,8 +335,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_left):
-                print("!!!!!!!!!!!!!!",phi_bin)
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phi_bin[i]), int(t_bin[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_left), int(tbin_left))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -334,7 +345,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phi_bin[i]), int(t_bin[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_center), int(tbin_center))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
