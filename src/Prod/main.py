@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 20:31:31 trottar"
+# Time-stamp: "2023-09-06 20:33:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1279,6 +1279,8 @@ for i, val in enumerate(t_bins):
     G_yieldvsphi_data_plt.GetYaxis().SetTitleOffset(1.5)
     G_yieldvsphi_data_plt.GetXaxis().SetTitleOffset(1.5)
     G_yieldvsphi_data_plt.GetXaxis().SetLabelSize(0.04)
+
+    G_yieldvsphi_data_plt.Clear()
     
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
 #l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
