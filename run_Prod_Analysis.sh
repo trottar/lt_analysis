@@ -159,7 +159,7 @@ do
 	    RunList=$1
 	    INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
 	    if [[ -e $INPDIR ]]; then
-		cd "${LTANAPATH}/scripts"
+		cd "${LTANAPATH}/src/setup"
 		RunNumArr=$(python3 getRunNumbers.py $INPDIR)
 		echo $RunNumArr
 	    else
@@ -478,7 +478,7 @@ do
 		    echo
 		    echo "Combining right ${pid} dummy..."
 		    echo
-		    cd "${LTANAPATH}/scripts"
+		    cd "${LTANAPATH}/src/setup"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Right" "${dummy_right[*]}" "${pid}"
 		    echo
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Right.root" ]; then
@@ -504,7 +504,7 @@ do
 		    echo
 		    echo "Combining right ${pid} data..."
 		    echo
-		    cd "${LTANAPATH}/scripts"
+		    cd "${LTANAPATH}/src/setup"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Right" "${data_right[*]}" "${pid}"
 		    echo
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Right.root" ]; then
@@ -530,7 +530,7 @@ do
 		    echo
 		    echo "Combining left ${pid} dummy..."
 		    echo
-		    cd "${LTANAPATH}/scripts"
+		    cd "${LTANAPATH}/src/setup"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${pid}"
 		    echo
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Left.root" ]; then
@@ -556,7 +556,7 @@ do
 		    echo
 		    echo "Combining left ${pid} data..."
 		    echo
-		    cd "${LTANAPATH}/scripts"
+		    cd "${LTANAPATH}/src/setup"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Left" "${data_left[*]}" "${pid}"
 		    echo
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Left.root" ]; then
@@ -582,7 +582,7 @@ do
 		    echo
 		    echo "Combining center ${pid} dummy..."
 		    echo
-		    cd "${LTANAPATH}/scripts"
+		    cd "${LTANAPATH}/src/setup"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Center" "${dummy_center[*]}" "${pid}"
 		    echo
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Center.root" ]; then
@@ -608,7 +608,7 @@ do
 		    echo
 		    echo "Combining center ${pid} data..."
 		    echo
-		    cd "${LTANAPATH}/scripts"
+		    cd "${LTANAPATH}/src/setup"
 		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Center" "${data_center[*]}" "${pid}"
 		    echo
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
@@ -647,7 +647,7 @@ do
 		echo
 		echo "Combining right ${ParticleType} dummy..."
 		echo
-		cd "${LTANAPATH}/scripts"
+		cd "${LTANAPATH}/src/setup"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Right" "${dummy_right[*]}" "${ParticleType}"
 		echo
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root" ]; then
@@ -673,7 +673,7 @@ do
 		echo
 		echo "Combining right ${ParticleType} data..."
 		echo
-		cd "${LTANAPATH}/scripts"
+		cd "${LTANAPATH}/src/setup"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Right" "${data_right[*]}" "${ParticleType}"
 		echo
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root" ]; then
@@ -699,7 +699,7 @@ do
 		echo
 		echo "Combining left ${ParticleType} dummy..."
 		echo
-		cd "${LTANAPATH}/scripts"
+		cd "${LTANAPATH}/src/setup"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${ParticleType}"
 		echo
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root" ]; then
@@ -725,7 +725,7 @@ do
 		echo
 		echo "Combining left ${ParticleType} data..."
 		echo
-		cd "${LTANAPATH}/scripts"
+		cd "${LTANAPATH}/src/setup"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Left" "${data_left[*]}" "${ParticleType}"
 		echo
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root" ]; then
@@ -751,7 +751,7 @@ do
 		echo
 		echo "Combining center ${ParticleType} dummy..."
 		echo
-		cd "${LTANAPATH}/scripts"
+		cd "${LTANAPATH}/src/setup"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Center" "${dummy_center[*]}" "${ParticleType}"
 		echo
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root" ]; then
@@ -777,7 +777,7 @@ do
 		echo
 		echo "Combining center ${ParticleType} data..."
 		echo
-		cd "${LTANAPATH}/scripts"
+		cd "${LTANAPATH}/src/setup"
 		python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Center" "${data_center[*]}" "${ParticleType}"
 		echo
 		if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
@@ -845,7 +845,7 @@ do
 	RunList=$1
 	INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
 	if [[ -e $INPDIR ]]; then
-	    cd "${LTANAPATH}/scripts"
+	    cd "${LTANAPATH}/src/setup"
 	    RunNumArr=$(python3 getRunNumbers.py $INPDIR)
 	    echo $RunNumArr
 	else
@@ -1143,7 +1143,7 @@ do
     OutDUMMYFilename="Analysed_Dummy_${KIN}"
     OutFullAnalysisFilename="FullAnalysis_${KIN}"
     
-    cd "${LTANAPATH}/scripts"
+    cd "${LTANAPATH}/src/setup"
 
     # Checks that array isn't empty
     if [[ ${#data_right[@]} -ne 0 ]]; then
@@ -1346,7 +1346,7 @@ do
     # Run the plotting script if t-flag enabled
     # Checks that array isn't empty
     if [[ $b_flag = "true" ]]; then
-	cd "${LTANAPATH}/src/Prod"
+	cd "${LTANAPATH}/src/binning"
 
 	if [ $j = "low" ]; then
 	    echo
@@ -1361,24 +1361,6 @@ do
 	else
 	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${KSet}
 	fi
-    fi
-
-#    echo
-#    echo
-#    echo
-#    echo "Creating analysis lists..."
-#    cd "${LTANAPATH}/scripts/Prod/"
-#
-#    # Create input for lt_analysis code
-#    if [ ${#data_right[@]} -eq 0 ]; then
-#	python3 createPhysicsList.py ${Q2} ${POL} ${EPSVAL} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} ${KSet} "0" "${data_left[*]}" "${data_center[*]}" "0" #"${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" #"${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" "0" "${DataChargeValLeft[*]}" "${DataChargeValCenter[*]}" "0" "${DataChargeErrLeft[*]}" "${DataChargeErrCenter[*]}" #${KIN} ${OutFullAnalysisFilename}
-#    else
-#	python3 createPhysicsList.py ${Q2} ${POL} ${EPSVAL} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} ${KSet} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" #"${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" #"${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" #"${DataChargeValRight[*]}" "${DataChargeValLeft[*]}" "${DataChargeValCenter[*]}" "${DataChargeErrRight[*]}" "${DataChargeErrLeft[*]}" "${DataChargeErrCenter[*]}" ${KIN} #${OutFullAnalysisFilename}
-#    fi
-
-    if [[ $b_flag = "true" ]]; then
-	cd "${LTANAPATH}"
-	#evince "OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutFullAnalysisFilename}.pdf"
     fi
 
     if [ $j = "low" ]; then

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 13:55:35 trottar"
+# Time-stamp: "2023-09-07 19:25:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,7 +151,7 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 * All analysis cuts per run (i.e. PID, acceptance, timing) are applied. 
 * This should have been completed before this script using...
 
-> lt_analysis/scripts/Prod/analyze_prod.py
+> lt_analysis/init/analyze_prod.py
 
 * This is script is called when using the '-a' flag in...
 
