@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 01:53:01 trottar"
+# Time-stamp: "2023-09-07 10:53:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ from utility import write_to_file
 
 ###############################################################################################################################################
 
-def create_lists(aveDict, ratioDict, inpDict, phisetlist):
+def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     ################################################################################################################################################
 
@@ -80,6 +80,10 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
     elif ParticleType == "pion":
         PID = "pi"
 
+    for hist in histlist:
+        t_bins = hist["t_bins"]
+        phi_bins = hist["phi_bins"]
+        
     ################################################################################################################################################        
 
     averQ2_right_data = []
@@ -131,16 +135,28 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
             i = key_tuple[0] # t bin
             j = key_tuple[1] # phi bin
             if phiset == "Right":
-                tbin_right.append(i)
-                phibin_right.append(j)
+                for t_bin in t_bins:
+                    if t_bin == ratioDict["binned"]["t_bins"][i]:
+                        tbin_right.append(k)
+                for phi_bin in phi_bins:
+                    if phi_bin == ratioDict["binned"]["phi_bins"][i]:
+                        phibin_right.append(k)                        
                 ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Left":
-                tbin_left.append(i)
-                phibin_left.append(j)                
+                for t_bin in t_bins:
+                    if t_bin == ratioDict["binned"]["t_bins"][i]:
+                        tbin_left.append(k)
+                for phi_bin in phi_bins:
+                    if phi_bin == ratioDict["binned"]["phi_bins"][i]:
+                        phibin_left.append(k)                        
                 ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Center":
-                tbin_center.append(i)
-                phibin_center.append(j)                
+                for t_bin in t_bins:
+                    if t_bin == ratioDict["binned"]["t_bins"][i]:
+                        tbin_center.append(k)
+                for phi_bin in phi_bins:
+                    if phi_bin == ratioDict["binned"]["phi_bins"][i]:
+                        phibin_center.append(k)                        
                 ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
 
     ################################################################################################################################################
