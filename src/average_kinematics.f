@@ -33,7 +33,7 @@ c     and save result in averages/avek.* .
       parameter (nt=6)
 
       integer pol_set
-      real q2_set,eps_set      
+      real q2_set
 
       real aveW(nt),errW(nt),aveQ2(nt),errQ2(nt),
      &      avett(nt),errtt(nt)
