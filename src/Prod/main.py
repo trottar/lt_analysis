@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:45:39 trottar"
+# Time-stamp: "2023-09-06 21:51:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1121,18 +1121,16 @@ for it,phiset in enumerate(phisetlist):
         # Access the nested dictionary using the tuple key
         data_nested_dict = yieldDict["binned_DATA"][phiset]
         simc_nested_dict = yieldDict["binned_SIMC"][phiset]
-        idata = data_key_tuple[0] # t bin
-        jdata = data_key_tuple[1] # phi bin
-        isimc = simc_key_tuple[0] # t bin
-        jsimc = simc_key_tuple[1] # phi bin        
-        tmp_yield_data[0].append(yieldDict["binned_DATA"]["t_bins"][idata])
+        i = data_key_tuple[0] # t bin
+        j = data_key_tuple[1] # phi bin
+        tmp_yield_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
         tmp_yield_data[1].append(data_nested_dict["yield"][data_key_tuple]["yield"])
-        tmp_yield_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][isimc])
+        tmp_yield_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
         tmp_yield_simc[1].append(simc_nested_dict["yield"][simc_key_tuple]["yield"])
-        tmp_phibins_data[0].append(yieldDict["binned_DATA"]["t_bins"][idata])
-        tmp_phibins_data[1].append(yieldDict["binned_DATA"]["phi_bins"][jdata])
-        tmp_phibins_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][isimc])
-        tmp_phibins_simc[1].append(yieldDict["binned_SIMC"]["phi_bins"][jsimc])
+        tmp_phibins_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
+        tmp_phibins_data[1].append(yieldDict["binned_DATA"]["phi_bins"][j])
+        tmp_phibins_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
+        tmp_phibins_simc[1].append(yieldDict["binned_SIMC"]["phi_bins"][j])
         yield_data.append(tmp_yield_data)
         yield_simc.append(tmp_yield_simc)
         phibins_data.append(tmp_phibins_data)

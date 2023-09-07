@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:47:24 trottar"
+# Time-stamp: "2023-09-06 21:50:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,10 +60,8 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
             # Access the nested dictionary using the tuple key
             data_nested_dict = yieldDict["binned_DATA"][phiset]
             simc_nested_dict = yieldDict["binned_SIMC"][phiset]
-            idata = data_key_tuple[0] # t bin
-            jdata = data_key_tuple[1] # phi bin
-            isimc = simc_key_tuple[0] # t bin
-            jsimc = simc_key_tuple[1] # phi bin
+            i = data_key_tuple[0] # t bin
+            j = data_key_tuple[1] # phi bin
             #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]), data_nested_dict[kin_type][data_key_tuple][kin_type]))
             # Fill histogram
             yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]
@@ -72,15 +70,14 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
                 ratio = yield_data/yield_simc
             except ZeroDivisionError:
                 ratio = 0.0
-            print("Data Ratio for t-bin {} phi-bin {}: {:.3f}".format(idata, jdata, ratio))
-            print("Simc Ratio for t-bin {} phi-bin {}: {:.3f}".format(isimc, jsimc, ratio))            
-            dict_lst.append((idata, jdata, ratio))
+            print("Ratio for t-bin {} phi-bin {}: {:.3f}".format(i, j, ratio))
+            dict_lst.append((i, j, ratio))
     
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
     for tup in dict_lst:
         key = (tup[0], tup[1])
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",i,j)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",key)
         groups[key] = {
             "ratio".format(kin_type) : tup[2],
         }            
