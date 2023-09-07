@@ -121,7 +121,7 @@ c                 pause
                   read(66,*) one
                   do it=1,nbt
                      read(66,*) W,dW,Q2,dQ2,tt,dtt
-                     print*,W,dW,Q2,dQ2,it
+c                     print*,W,dW,Q2,dQ2,it
                      if(dW.gt.0.) then
                         aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
                         eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
@@ -282,9 +282,9 @@ c     Save data.
       do it=1,ntbins
          write(77,'(4f8.5,2f10.5,i3)')
      *        aveW(it),errW(it),aveQ2(it),errQ2(it),
-     *        avett(it), errtt(it), thetacm_only(it),it
+     *        avett(it), errtt(it), thetacm_only(it),nint(it)
 
-c         write(*,'(4f8.5,i3)') aveW(it),errW(it),aveQ2(it),errQ2(it),it
+         write(*,'(4f8.5,i3)') aveW(it),errW(it),aveQ2(it),errQ2(it),it
       end do
       close(77)
 
