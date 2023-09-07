@@ -121,8 +121,8 @@ c     Correct for W.
 
       if (phi.lt.0.3) then
          write(6,102) eps_mod,tm,sigL,sigT,sigTT,sigLT,x_mod
- 102     format('xmodel: eps=',f5.3,' t=',f5.3,' sigL=',f6.2,' sigT=',f6.2,
-     1        ' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f5.2)
+ 102     format('xmodel: eps=',f5.3,' t=',f5.3,' sigL=',f6.2,' sigT=',
+     1        f6.2,' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f5.2)
       endif
 
       end
