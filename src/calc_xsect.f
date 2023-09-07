@@ -106,7 +106,7 @@ c 2       format(i5,5f10.5,2i5)
       do while(.true.)
          read(55,*) Eb,q2,eps
          write(*,*) Eb,q2,eps
-         if(q2.eq.q2_set.and.eps.eq.eps_hi_set) go to 5         
+         if(q2.eq.q2_set.and.eps.eq.eps_set) go to 5         
       end do
  5    close(55)
       Eb=Eb/1000.               !Mev -> Gev units.
