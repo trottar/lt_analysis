@@ -265,8 +265,7 @@ c     Get Beam energy at first.
          tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
          call eps_n_theta(pol_set,Eb,aveW(it),aveQ2(it),tm,th_mod
      &         ,eps_mod)
-         thetacm_only(it)=th_mod*180./3.14159
-         endif
+         thetacm_only(it)=th_mod*180./3.14159   
       end do
 
 c     Save data.
