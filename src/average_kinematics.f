@@ -282,7 +282,7 @@ c     Save data.
       do it=1,ntbins
          write(77,'(4f8.5,2f10.5,i3)')
      *        aveW(it),errW(it),aveQ2(it),errQ2(it),
-     *        avett(it), errtt(it), thetacm_only(it),nint(it)
+     *        avett(it), errtt(it), thetacm_only(it),int(it)
 
          write(*,'(4f8.5,i3)') aveW(it),errW(it),aveQ2(it),errQ2(it),it
       end do
