@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 20:55:49 trottar"
+# Time-stamp: "2023-09-06 21:01:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1100,6 +1100,131 @@ for it,phiset in enumerate(phisetlist):
         histbinDict["H_totevts_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, hist")
 C_totevts_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
+for it,phiset in enumerate(phisetlist):
+    
+    C_yieldvsphi_data_plt = TCanvas()
+    C_yieldvsphi_data_plt.SetGrid()
+    C_yieldvsphi_data_plt.Divide(1,NumtBins)
+    l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
+
+    yield_data = []
+    yield_simc = []
+    phibins_data = []
+    phibins_simc = []    
+    data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
+    simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
+    for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
+        tmp_yield_data = [[],[]]
+        tmp_yield_simc = [[],[]]
+        tmp_phibins_data = [[],[]]
+        tmp_phibins_simc = [[],[]]
+        # Access the nested dictionary using the tuple key
+        data_nested_dict = yieldDict["binned_DATA"][phiset]
+        simc_nested_dict = yieldDict["binned_SIMC"][phiset]
+        i = simc_key_tuple[0] # t bin
+        j = simc_key_tuple[1] # phi bin
+        tmp_yield_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
+        tmp_yield_data[1].append(data_nested_dict["yield"][data_key_tuple]["yield"])
+        tmp_yield_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
+        tmp_yield_simc[1].append(simc_nested_dict["yield"][simc_key_tuple]["yield"])
+        tmp_phibins_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
+        tmp_phibins_data[1].append(yieldDict["binned_DATA"]["phi_bins"][j])
+        tmp_phibins_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
+        tmp_phibins_simc[1].append(yieldDict["binned_SIMC"]["phi_bins"][j])        
+        yield_data.append(tmp_yield_data)
+        yield_simc.append(tmp_yield_simc)
+        phibins_data.append(tmp_phibins_data)
+        phibins_simc.append(tmp_phibins_simc)
+
+    # Match t-bins with list of yields
+    yield_data = match_to_bin(yield_data)
+    yield_simc = match_to_bin(yield_simc)
+    phibins_data = match_to_bin(phibins_data)
+    phibins_simc = match_to_bin(phibins_simc)
+
+    multiDict = {}
+    for i, val in enumerate(t_bins):
+
+        multiDict["G_yieldvsphi_plt_{}".format(i)] = ROOT.TMultiGraph()
+
+        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(yield_data[i][1])))
+        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1])),np.array([0]*len(yield_simc[i][1])))
+
+        G_yieldvsphi_data.SetMarkerStyle(21)
+        G_yieldvsphi_data.SetMarkerSize(1)
+        G_yieldvsphi_data.SetMarkerColor(1)
+        multiDict["G_yieldvsphi_plt_{}".format(i)].Add(G_yieldvsphi_data)
+
+        G_yieldvsphi_simc.SetMarkerStyle(21)
+        G_yieldvsphi_simc.SetMarkerSize(1)
+        G_yieldvsphi_simc.SetMarkerColor(2)
+        multiDict["G_yieldvsphi_plt_{}".format(i)].Add(G_yieldvsphi_simc)
+
+        C_yieldvsphi_data_plt.cd(i+1)
+
+        multiDict["G_yieldvsphi_plt_{}".format(i)].Draw("AP")
+        multiDict["G_yieldvsphi_plt_{}".format(i)].SetTitle("{} t = {};#phi; Yield".format(phiset,val))
+
+        multiDict["G_yieldvsphi_plt_{}".format(i)].GetYaxis().SetTitleOffset(1.5)
+        multiDict["G_yieldvsphi_plt_{}".format(i)].GetXaxis().SetTitleOffset(1.5)
+        multiDict["G_yieldvsphi_plt_{}".format(i)].GetXaxis().SetLabelSize(0.04)
+
+    l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
+    l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
+    l_yieldvsphi_data_plt.Draw()
+
+    C_yieldvsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+
+for it,phiset in enumerate(phisetlist):
+    
+    C_ratiovsphi_data_plt = TCanvas()
+    C_ratiovsphi_data_plt.SetGrid()
+    C_ratiovsphi_data_plt.Divide(1,NumtBins)
+
+    ratio_data = []
+    phibins_data = []
+    data_key_tuples = list(ratioDict["binned_DATA"][phiset]['ratio'])
+    for data_key_tuple in data_key_tuples:
+        tmp_ratio_data = [[],[]]
+        tmp_phibins_data = [[],[]]
+        # Access the nested dictionary using the tuple key
+        data_nested_dict = ratioDict["binned_DATA"][phiset]
+        i = simc_key_tuple[0] # t bin
+        j = simc_key_tuple[1] # phi bin
+        tmp_ratio_data[0].append(ratioDict["binned_DATA"]["t_bins"][i])
+        tmp_ratio_data[1].append(data_nested_dict["ratio"][data_key_tuple]["ratio"])
+        tmp_phibins_data[0].append(ratioDict["binned_DATA"]["t_bins"][i])
+        tmp_phibins_data[1].append(ratioDict["binned_DATA"]["phi_bins"][j])
+        ratio_data.append(tmp_ratio_data)
+        phibins_data.append(tmp_phibins_data)
+
+    # Match t-bins with list of ratios
+    ratio_data = match_to_bin(ratio_data)
+    phibins_data = match_to_bin(phibins_data)
+
+    multiDict = {}
+    for i, val in enumerate(t_bins):
+
+        multiDict["G_ratiovsphi_plt_{}".format(i)] = ROOT.TMultiGraph()
+
+        G_ratiovsphi_data = ROOT.TGraphErrors(len(ratio_data[i][1]),phibins_data[i][1],ratio_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(ratio_data[i][1])))
+
+        G_ratiovsphi_data.SetMarkerStyle(21)
+        G_ratiovsphi_data.SetMarkerSize(1)
+        G_ratiovsphi_data.SetMarkerColor(1)
+        multiDict["G_ratiovsphi_plt_{}".format(i)].Add(G_ratiovsphi_data)
+
+        C_ratiovsphi_data_plt.cd(i+1)
+
+        multiDict["G_ratiovsphi_plt_{}".format(i)].Draw("AP")
+        multiDict["G_ratiovsphi_plt_{}".format(i)].SetTitle("{} t = {};#phi; Ratio".format(phiset,val))
+
+        multiDict["G_ratiovsphi_plt_{}".format(i)].GetYaxis().SetTitleOffset(1.5)
+        multiDict["G_ratiovsphi_plt_{}".format(i)].GetXaxis().SetTitleOffset(1.5)
+        multiDict["G_ratiovsphi_plt_{}".format(i)].GetXaxis().SetLabelSize(0.04)
+
+    C_ratiovsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+
 C_yield_DATA = TCanvas()
 # Loop over each tuple key in the dictionary
 for it,phiset in enumerate(phisetlist):
@@ -1211,82 +1336,7 @@ l_yield_data_plt.AddEntry(G_yield_simc,"Simc")
 l_yield_data_plt.Draw()
 
 C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
-
-for it,phiset in enumerate(phisetlist):
     
-    C_yieldvsphi_data_plt = TCanvas()
-    C_yieldvsphi_data_plt.SetGrid()
-    C_yieldvsphi_data_plt.Divide(1,NumtBins)
-    l_yieldvsphi_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
-
-    yield_data = []
-    yield_simc = []
-    phibins_data = []
-    phibins_simc = []    
-    data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
-    simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
-    for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
-        tmp_yield_data = [[],[]]
-        tmp_yield_simc = [[],[]]
-        tmp_phibins_data = [[],[]]
-        tmp_phibins_simc = [[],[]]
-        # Access the nested dictionary using the tuple key
-        data_nested_dict = yieldDict["binned_DATA"][phiset]
-        simc_nested_dict = yieldDict["binned_SIMC"][phiset]
-        i = simc_key_tuple[0] # t bin
-        j = simc_key_tuple[1] # phi bin
-        tmp_yield_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
-        tmp_yield_data[1].append(data_nested_dict["yield"][data_key_tuple]["yield"])
-        tmp_yield_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
-        tmp_yield_simc[1].append(simc_nested_dict["yield"][simc_key_tuple]["yield"])
-        tmp_phibins_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
-        tmp_phibins_data[1].append(yieldDict["binned_DATA"]["phi_bins"][j])
-        tmp_phibins_simc[0].append(yieldDict["binned_SIMC"]["t_bins"][i])
-        tmp_phibins_simc[1].append(yieldDict["binned_SIMC"]["phi_bins"][j])        
-        yield_data.append(tmp_yield_data)
-        yield_simc.append(tmp_yield_simc)
-        phibins_data.append(tmp_phibins_data)
-        phibins_simc.append(tmp_phibins_simc)
-
-    # Match t-bins with list of yields
-    yield_data = match_to_bin(yield_data)
-    yield_simc = match_to_bin(yield_simc)
-    phibins_data = match_to_bin(phibins_data)
-    phibins_simc = match_to_bin(phibins_simc)
-
-    multiDict = {}
-    for i, val in enumerate(t_bins):
-
-        multiDict["G_yieldvsphi_plt_{}".format(i)] = ROOT.TMultiGraph()
-
-        G_yieldvsphi_data = ROOT.TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(yield_data[i][1])))
-        G_yieldvsphi_simc = ROOT.TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1])),np.array([0]*len(yield_simc[i][1])))
-
-        G_yieldvsphi_data.SetMarkerStyle(21)
-        G_yieldvsphi_data.SetMarkerSize(1)
-        G_yieldvsphi_data.SetMarkerColor(1)
-        multiDict["G_yieldvsphi_plt_{}".format(i)].Add(G_yieldvsphi_data)
-
-        G_yieldvsphi_simc.SetMarkerStyle(21)
-        G_yieldvsphi_simc.SetMarkerSize(1)
-        G_yieldvsphi_simc.SetMarkerColor(2)
-        multiDict["G_yieldvsphi_plt_{}".format(i)].Add(G_yieldvsphi_simc)
-
-        C_yieldvsphi_data_plt.cd(i+1)
-
-        multiDict["G_yieldvsphi_plt_{}".format(i)].Draw("AP")
-        multiDict["G_yieldvsphi_plt_{}".format(i)].SetTitle("{} t = {};#phi; Yield".format(phiset,val))
-
-        multiDict["G_yieldvsphi_plt_{}".format(i)].GetYaxis().SetTitleOffset(1.5)
-        multiDict["G_yieldvsphi_plt_{}".format(i)].GetXaxis().SetTitleOffset(1.5)
-        multiDict["G_yieldvsphi_plt_{}".format(i)].GetXaxis().SetLabelSize(0.04)
-
-    l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
-    l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
-    l_yieldvsphi_data_plt.Draw()
-
-    C_yieldvsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
-
 C_ratio_plt = TCanvas()
 G_ratio_plt = ROOT.TMultiGraph()
 
@@ -1303,8 +1353,8 @@ for it,phiset in enumerate(phisetlist):
         j = key_tuple[1] # phi bin
         #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(nested_dict["ratio"][key_tuple]["ratio"]), nested_dict["ratio"][key_tuple]["ratio"]))
         ratio_data = np.append(ratio_data, [nested_dict["ratio"][key_tuple]["ratio"]])
-        if hist["phi_setting"] == "Center": setting = np.append(setting,0)
-        elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
+        if phiset == "Center": setting = np.append(setting,0)
+        elif phiset == "Left": setting = np.append(setting,1)
         else: setting = np.append(setting,2)
 
 G_ratio = ROOT.TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
