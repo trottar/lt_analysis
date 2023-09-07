@@ -48,6 +48,8 @@ c     and save result in averages/avek.* .
 
       real eps_set(2)
 
+      real th_mod
+      
       character*40 fn
       character*2 pol
 
