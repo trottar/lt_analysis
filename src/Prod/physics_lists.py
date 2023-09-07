@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-08-25 01:12:50 trottar"
+# Time-stamp: "2023-09-06 23:59:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ from utility import write_to_file
 
 ###############################################################################################################################################
 
-def create_lists(averDict, inpDict):
+def create_lists(aveDict, ratioDict, inpDict, phisetlist):
 
     ################################################################################################################################################
 
@@ -91,39 +91,51 @@ def create_lists(averDict, inpDict):
     averQ2_center_data = []
     averW_center_data = []
     avert_center_data = []
-    
-    phisetlist = ["Center","Left","Right"]                
+
+    ratio_right_data = []
+    ratio_left_data = []
+    ratio_center_data = []    
+
     for phiset in phisetlist:
-        try:
-            for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
-                # Access the nested dictionary using the tuple key
-                data_nested_dict = averDict["binned_DATA"][phiset]
-                i = data_key_tuple[0] # t bin
-                j = data_key_tuple[1] # phi bin
-                tbin = averDict["binned_DATA"]["t_bins"][i]
-                phibin = averDict["binned_DATA"]["phi_bins"][j]
-                if phiset == "Right":
-                    phibin_right_data = phibin
-                    tbin_right_data = tbin
-                    averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
-                    averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
-                    avert_right_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
-                if phiset == "Left":
-                    phibin_left_data = phibin
-                    tbin_left_data = tbin
-                    averQ2_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
-                    averW_left_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
-                    avert_left_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
-                if phiset == "Center":
-                    phibin_center_data = phibin
-                    tbin_center_data = tbin
-                    averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
-                    averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
-                    avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
-        except KeyError:
-            print("No {} setting found...".format(phiset))
-            phisetlist.remove(phiset)
-            continue
+        for k, data_key_tuple in enumerate(averDict["binned_DATA"][phiset]['t']):
+            # Access the nested dictionary using the tuple key
+            data_nested_dict = averDict["binned_DATA"][phiset]
+            i = data_key_tuple[0] # t bin
+            j = data_key_tuple[1] # phi bin
+            tbin = averDict["binned_DATA"]["t_bins"][i]
+            phibin = averDict["binned_DATA"]["phi_bins"][j]
+            if phiset == "Right":
+                phibin_right_data = phibin
+                tbin_right_data = tbin
+                averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
+                averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
+                avert_right_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
+            if phiset == "Left":
+                phibin_left_data = phibin
+                tbin_left_data = tbin
+                averQ2_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
+                averW_left_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
+                avert_left_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
+            if phiset == "Center":
+                phibin_center_data = phibin
+                tbin_center_data = tbin
+                averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
+                averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
+                avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
+                
+        for k, data_key_tuple in enumerate(ratioDict["binned"][phiset]['ratio']):
+            # Access the nested dictionary using the tuple key
+            data_nested_dict = ratioDict["binned"][phiset]
+            i = data_key_tuple[0] # t bin
+            j = data_key_tuple[1] # phi bin
+            tbin = ratioDict["binned"]["t_bins"][i]
+            phibin = ratioDict["binned"]["phi_bins"][j]
+            if phiset == "Right":
+                ratioratio_right_data.append(data_nested_dict['ratio'][data_key_tuple]["ratio"])
+            if phiset == "Left":
+                ratioratio_left_data.append(data_nested_dict['ratio'][data_key_tuple]["ratio"])
+            if phiset == "Center":
+                ratioratio_center_data.append(data_nested_dict['ratio'][data_key_tuple]["ratio"])
 
     ################################################################################################################################################
 
@@ -302,3 +314,40 @@ def create_lists(averDict, inpDict):
             
     ################################################################################################################################################
 
+    f_list = '{}/src/averages/aver.{}_{}_{:.0f}.dat'.format(LTANAPATH, PID, Q2.replace(".",""), float(EPSVAL)*100)
+
+    if not os.path.exists(f_list):
+        open(f_list, "w").close()
+
+    if float(runNumRight[0]) != 0:        
+        # Open a file in read mode
+        with open(f_list, 'r') as f:
+            lines = f.readlines()
+            for i, ratio in enumerate(ratio_right):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_right_data[i]), int(tbin_right_data[i]))
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
+
+    if float(runNumLeft[0]) != 0:                    
+        # Open a file in read mode
+        with open(f_list, 'r') as f:
+            lines = f.readlines()                    
+            for i, ratio in enumerate(ratio_left):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_left_data[i]), int(tbin_left_data[i]))
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
+
+    if float(runNumCenter[0]) != 0:                    
+        # Open a file in read mode
+        with open(f_list, 'r') as f:
+            lines = f.readlines()                    
+            for i, ratio in enumerate(ratio_center):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_center_data[i]), int(tbin_center_data[i]))
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
+                
+    ################################################################################################################################################
+    

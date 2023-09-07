@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 22:36:30 trottar"
+# Time-stamp: "2023-09-06 23:54:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -871,7 +871,7 @@ for phiset in phisetlist:
 
 # Ratio histogram
 for phiset in phisetlist:
-    histbinDict["H_ratio_{}".format(phiset)] = ROOT.TH1D("H_ratio_{}".format(phiset), "{} Simc Ratio".format(phiset), NumtBins*NumPhiBins, -100.0, 100.0)
+    histbinDict["H_ratio_{}".format(phiset)] = ROOT.TH1D("H_ratio_{}".format(phiset), "{} Ratio".format(phiset), NumtBins*NumPhiBins, -100.0, 100.0)
     
 # Loop over each tuple key in the dictionary
 for phiset in phisetlist:
@@ -1197,7 +1197,6 @@ for it,phiset in enumerate(phisetlist):
         tmp_phibins[1].append(ratioDict["binned"]["phi_bins"][j])
         ratio.append(tmp_ratio)
         phibins.append(tmp_phibins)
-        #print("__________________", i, j, tmp_phibins, tmp_ratio)
         
     # Match t-bins with list of ratios
     ratio = match_to_bin(ratio)
@@ -1205,8 +1204,6 @@ for it,phiset in enumerate(phisetlist):
 
     multiDict = {}
     for i, val in enumerate(t_bins):
-
-        print("------------------", i, phibins[i][1], ratio[i][1])
 
         multiDict["G_ratiovsphi_plt_{}".format(i)] = ROOT.TMultiGraph()
 
@@ -1307,8 +1304,6 @@ for it,phiset in enumerate(phisetlist):
         if phiset == "Center": setting = np.append(setting,0)
         elif phiset == "Left": setting = np.append(setting,1)
         else: setting = np.append(setting,2)
-
-print("------------------------", setting, yield_data)        
         
 G_yield_data = ROOT.TGraphErrors(len(yield_data),setting,yield_data,np.array([0]*len(setting)),np.array([0]*len(yield_data)))
 G_yield_simc = ROOT.TGraphErrors(len(yield_simc),setting,yield_simc,np.array([0]*len(setting)),np.array([0]*len(yield_simc)))
@@ -1381,168 +1376,13 @@ G_ratio_plt.GetXaxis().SetLabelSize(0.04)
 
 C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+')')
 
-
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))                   
 
 # Run fortran script
 from physics_lists import create_lists
-create_lists(aveDict, inpDict)
-
-'''
-# Yield binned histograms
-H_yield_DATA = ROOT.TH1D("H_yield_DATA", "Data Yield", NumtBins*NumPhiBins, 0, 1.0)
-H_yield_SIMC = ROOT.TH1D("H_yield_SIMC", "Simc Yield", NumtBins*NumPhiBins, 0, 1.0)
-H_ratio = ROOT.TH1D("H_ratio", "Ratio", NumtBins*NumPhiBins, 0, 1.0)
-
-## !!!! Add yield vs phi variable
-
-C_yield_DATA = TCanvas()
-# Loop over each tuple key in the dictionary
-for i, data_key_tuple in enumerate(aveDict["binned_DATA"]):
-    # Access the nested dictionary using the tuple key
-    data_nested_dict = aveDict["binned_DATA"][data_key_tuple]
-    for hist in histlist:
-        # Fill histogram
-        H_yield_DATA.Fill(data_nested_dict["yield_data_{}".format(hist["phi_setting"])])
-    H_yield_DATA.Draw("same")
-    H_yield_DATA.SetLineColor(i+1)
-C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+'(')
-
-C_yield_SIMC = TCanvas()
-# Loop over each tuple key in the dictionary
-for i, simc_key_tuple in enumerate(aveDict["binned_SIMC"]):
-    # Access the nested dictionary using the tuple key
-    simc_nested_dict = aveDict["binned_SIMC"][simc_key_tuple]
-    for hist in histlist:
-        # Fill histogram
-        H_yield_SIMC.Fill(simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])])
-    H_yield_SIMC.Draw("same")
-    H_yield_SIMC.SetLineColor(i+1)
-C_yield_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
-
-C_ratio = TCanvas()
-# Loop over each tuple key in the dictionary
-for i, data_key_tuple in enumerate(aveDict["binned_DATA"]):
-    # Access the nested dictionary using the tuple key
-    data_nested_dict = aveDict["binned_DATA"][data_key_tuple]
-    for hist in histlist:
-        # Fill histogram
-        H_ratio.Fill(data_nested_dict["ratio_{}".format(hist["phi_setting"])])
-    H_ratio.Draw("same")
-    H_ratio.SetLineColor(i+1)
-C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
-
-C_yield_data_plt = TCanvas()
-G_yield_data_plt = ROOT.TMultiGraph()
-l_yield_data_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
-
-C_yield_data_plt.SetGrid()
-
-yield_data = np.array([])
-yield_simc = np.array([])
-setting = np.array([])
-for hist in histlist:
-    # Loop over each tuple key in the dictionary
-    for i, data_key_tuple in enumerate(aveDict["binned_DATA"]):
-        # Access the nested dictionary using the tuple key
-        data_nested_dict = aveDict["binned_DATA"][data_key_tuple]
-        simc_nested_dict = aveDict["binned_SIMC"][simc_key_tuple]
-        yield_data = np.append(yield_data, [data_nested_dict["yield_data_{}".format(hist["phi_setting"])]])
-        yield_simc = np.append(yield_simc, [simc_nested_dict["yield_simc_{}".format(hist["phi_setting"])]])        
-        if hist["phi_setting"] == "Center": setting = np.append(setting,0)
-        elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
-        else: setting = np.append(setting,2)
-
-G_yield_data = ROOT.TGraphErrors(len(yield_data),setting,yield_data,np.array([0]*len(setting)),np.array([0]*len(yield_data)))
-G_yield_simc = ROOT.TGraphErrors(len(yield_simc),setting,yield_simc,np.array([0]*len(setting)),np.array([0]*len(yield_simc)))
-
-G_yield_data.SetMarkerStyle(21)
-G_yield_data.SetMarkerSize(1)
-G_yield_data.SetMarkerColor(1)
-G_yield_data_plt.Add(G_yield_data)
-
-G_yield_simc.SetMarkerStyle(21)
-G_yield_simc.SetMarkerSize(1)
-G_yield_simc.SetMarkerColor(2)
-G_yield_data_plt.Add(G_yield_simc)
-
-G_yield_data_plt.Draw("AP")
-G_yield_data_plt.SetTitle(" ;Setting; Yield")
-
-i=0
-for i,hist in enumerate(histlist):
-    while i <= G_yield_data_plt.GetXaxis().GetXmax():
-        bin_ix = G_yield_data_plt.GetXaxis().FindBin(i)
-        if i == 0: 
-            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
-        elif i == 1:
-            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Left")
-        else:
-            G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,"Right")
-        i+=1
-
-G_yield_data_plt.GetYaxis().SetTitleOffset(1.5)
-G_yield_data_plt.GetXaxis().SetTitleOffset(1.5)
-G_yield_data_plt.GetXaxis().SetLabelSize(0.04)
-
-l_yield_data_plt.AddEntry(G_yield_data,"Data")
-l_yield_data_plt.AddEntry(G_yield_simc,"Simc")
-l_yield_data_plt.Draw()
-
-C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
-
-C_ratio_plt = TCanvas()
-G_ratio_plt = ROOT.TMultiGraph()
-
-C_ratio_plt.SetGrid()
-
-ratio_data = np.array([])
-setting = np.array([])
-for hist in histlist:
-    # Loop over each tuple key in the dictionary
-    for i, data_key_tuple in enumerate(aveDict["binned_DATA"]):
-        # Access the nested dictionary using the tuple key
-        data_nested_dict = aveDict["binned_DATA"][data_key_tuple]    
-        ratio_data = np.append(ratio_data, [data_nested_dict["ratio_{}".format(hist["phi_setting"])]])
-        if hist["phi_setting"] == "Center": setting = np.append(setting,0)
-        elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
-        else: setting = np.append(setting,2)
-
-G_ratio = ROOT.TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),np.array([0]*len(ratio_data)))
-
-G_ratio.SetMarkerStyle(21)
-G_ratio.SetMarkerSize(1)
-G_ratio.SetMarkerColor(1)
-G_ratio_plt.Add(G_ratio)
-
-G_ratio_plt.Draw("AP")
-
-G_ratio_plt.SetTitle(" ;Setting; Ratio")
-
-i=0
-for i,hist in enumerate(histlist):
-    while i <= G_ratio_plt.GetXaxis().GetXmax():
-        bin_ix = G_ratio_plt.GetXaxis().FindBin(i)
-        if i == 0: 
-            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Center")
-        elif i == 1:
-            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Left")
-        else:
-            G_ratio_plt.GetXaxis().SetBinLabel(bin_ix,"Right")
-        i+=1
-
-G_ratio_plt.GetYaxis().SetTitleOffset(1.5)
-G_ratio_plt.GetXaxis().SetTitleOffset(1.5)
-G_ratio_plt.GetXaxis().SetLabelSize(0.04)
-
-C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType))+')')
-
-
-#if DEBUG:
-show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_yield_".format(hist["phi_setting"],ParticleType)))
-'''
+create_lists(aveDict, ratioDict, inpDict, phisetlist)
 
 ##############################
 # Step 7 of the lt_analysis: #
