@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:05:22 trottar"
+# Time-stamp: "2023-09-07 00:07:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,17 +105,17 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
             tbin = aveDict["binned_DATA"]["t_bins"][i]
             phibin = aveDict["binned_DATA"]["phi_bins"][j]
             if phiset == "Right":
-                averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
-                averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
-                avert_right_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
+                averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
+                averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
+                avert_right_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
             if phiset == "Left":
-                averQ2_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
-                averW_left_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
-                avert_left_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
+                averQ2_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
+                averW_left_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
+                avert_left_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
             if phiset == "Center":
-                averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
-                averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
-                avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
+                averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
+                averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
+                avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
                 
         for k, data_key_tuple in enumerate(ratioDict["binned"][phiset]['ratio']):
             # Access the nested dictionary using the tuple key
