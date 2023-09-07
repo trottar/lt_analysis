@@ -87,7 +87,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx,nbin
 c 2       format(i5,5f10.5,2i5)
       end do
-      close(55)      
+      close(55)
       write(6,3)tmn,tmx
  3    format(' tmn, tmx: ',2f10.5)
       if(tmn.eq.0..or.tmx.eq.0.) 
@@ -103,12 +103,11 @@ c 2       format(i5,5f10.5,2i5)
       open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
          read(55,*) Eb,q2,eps
-         write(*,*) Eb,q2,eps
+c         write(*,*) Eb,q2,eps
          if(q2.eq.q2_set.and.eps.eq.eps_set) go to 5         
       end do
  5    close(55)
       Eb=Eb/1000.               !Mev -> Gev units.
-      print*,'xsect: Eb=',Eb,'   at Q2=',q2,'  eps=',eps,'  pol=',pol
       
       write(6,4)Eb,q2,eps,pol
  4    format(' xsect: Eb=',f8.5,'   at Q2=',f7.4,
@@ -160,7 +159,7 @@ c      pause
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
                write(6,*)' Angle error ',th_mod,th_cm
-               stop
+c               stop
             endif
 
             x_real=x_mod*r
