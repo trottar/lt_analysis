@@ -50,7 +50,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer npol_set
       real q2_set,eps_set
 
-      integer kset,nbin
+      integer nbin
 
       character*80 r_fn, kin_fn, xunsep_fn
       character*2 pol
@@ -81,14 +81,6 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       eps=0.
       tmn=0.
       tmx=0.
-      kset=0
-      open(55,file=trim(pid) // '/list.settings')
-      do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.eps.ne.eps_set)
-         read(55,*) ipol,q2,eps,th_pq,tmn,tmx,nbin
-c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx,nbin
-c 2       format(i5,5f10.5,2i5)
-      end do
-      close(55)
       open(55,file=trim(pid) // '/list.settings')
       do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.eps.ne.eps_set)
          read(55,*) ipol,q2,eps,th_pq,tmn,tmx,nbin
@@ -96,10 +88,16 @@ c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx,nbin
 c 2       format(i5,5f10.5,2i5)
       end do
       close(55)      
-      write(6,3)tmn,tmx,kset
- 3    format(' tmn, tmx: ',2f10.5,'  for kset=',i5)
+      write(6,3)tmn,tmx
+ 3    format(' tmn, tmx: ',2f10.5)
       if(tmn.eq.0..or.tmx.eq.0.) 
      *     stop '*** setting is not found in list.settings'
+
+      if(npol_set.lt.0) then
+         pol='mn'
+      else
+         pol='pl'
+      end if
 
       Eb=0.
       open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
@@ -110,14 +108,8 @@ c 2       format(i5,5f10.5,2i5)
       end do
  5    close(55)
       Eb=Eb/1000.               !Mev -> Gev units.
-      print*,'xsect: Eb=',Eb,'   at Q2=',q2,'  eps=',eps,'  pol=',pol      
-
-      if(npol_set.lt.0) then
-         pol='mn'
-      else
-         pol='pl'
-      end if
-
+      print*,'xsect: Eb=',Eb,'   at Q2=',q2,'  eps=',eps,'  pol=',pol
+      
       write(6,4)Eb,q2,eps,pol
  4    format(' xsect: Eb=',f8.5,'   at Q2=',f7.4,
      *     '  eps=',f6.4,'  pol=',a2)
