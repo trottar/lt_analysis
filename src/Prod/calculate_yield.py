@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 22:32:44 trottar"
+# Time-stamp: "2023-09-06 22:44:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,7 +86,8 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
                                     tmp_hist_data[1].append(hist_data.GetBinContent(phibin_index))
                                     tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(phibin_index))
                                     tmp_hist_dummy[1].append(hist_dummy.GetBinContent(phibin_index))
-            print("-----------------------------", j, k, np.average(tmp_hist_data[1]))
+            print("-----------------------------data", j, k, np.average(tmp_hist_data[1]))
+            print("-----------------------------dummy", j, k, np.average(tmp_hist_dummy[1]))
             binned_t_data.append(tmp_t_data)
             binned_phi_data.append(tmp_phi_data)
             binned_hist_data.append(tmp_hist_data)
@@ -100,7 +101,8 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
-        print("_____________________________", np.average(hist_val_data))
+        print("_____________________________data", np.average(hist_val_data))
+        print("_____________________________dummy", np.average(hist_val_dummy))
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
         if sub_val.size != 0:
             total_count = np.sum(sub_val)
