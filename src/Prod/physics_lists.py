@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 11:55:50 trottar"
+# Time-stamp: "2023-09-07 12:35:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -253,7 +253,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-            check_line = "{} {} {:.4f} -{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins, KSet)
+            check_line = "{} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(POL, Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins)
             # Check if the line already exists
             if check_line not in lines:
                 write_to_file(f_list_settings,check_line)
@@ -262,7 +262,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()        
-            check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins, KSet)
+            check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(POL, Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
             if check_line not in lines:
                 write_to_file(f_list_settings,check_line)
 
@@ -270,7 +270,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()        
-            check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {} {}\n".format(POL, Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins, KSet)
+            check_line = "{} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(POL, Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
             if check_line not in lines:
                 write_to_file(f_list_settings,check_line)            
 
