@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 14:05:38 trottar"
+# Time-stamp: "2023-09-06 21:20:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,7 +56,6 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
     for it,phiset in enumerate(phisetlist):
         data_key_tuples = list(yieldDict["binned_DATA"][phiset][kin_type])
         simc_key_tuples = list(yieldDict["binned_SIMC"][phiset][kin_type])
-
         for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
             # Access the nested dictionary using the tuple key
             data_nested_dict = yieldDict["binned_DATA"][phiset]
@@ -78,6 +77,7 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
     groups = defaultdict(list)
     for tup in dict_lst:
         key = (tup[0], tup[1])
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",i,j)
         groups[key] = {
             "ratio".format(kin_type) : tup[2],
         }            
