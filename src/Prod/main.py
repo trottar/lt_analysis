@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 20:47:20 trottar"
+# Time-stamp: "2023-09-06 20:52:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1180,6 +1180,8 @@ for it,phiset in enumerate(phisetlist):
         elif hist["phi_setting"] == "Left": setting = np.append(setting,1)
         else: setting = np.append(setting,2)
 
+print("------------------------", setting, yield_data)        
+        
 G_yield_data = ROOT.TGraphErrors(len(yield_data),setting,yield_data,np.array([0]*len(setting)),np.array([0]*len(yield_data)))
 G_yield_simc = ROOT.TGraphErrors(len(yield_simc),setting,yield_simc,np.array([0]*len(setting)),np.array([0]*len(yield_simc)))
 
@@ -1254,9 +1256,6 @@ for it,phiset in enumerate(phisetlist):
 
     multiDict = {}
     for i, val in enumerate(t_bins):
-
-        print("---------------------", i, yield_data[i][1], phibins_data[i][1])
-        print("_____________________", i, yield_simc[i][1], phibins_simc[i][1])
 
         multiDict["G_yieldvsphi_plt_{}".format(i)] = ROOT.TMultiGraph()
 
