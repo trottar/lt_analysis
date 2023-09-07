@@ -280,11 +280,11 @@ c     Save data.
 
       open(77,file=fn)
       do it=1,ntbins
-         write(77,'(4f8.5,2f10.5,i3)')
+         write(77,'(6f9.5,f10.2,i3)')
      *        aveW(it),errW(it),aveQ2(it),errQ2(it),
-     *        avett(it), errtt(it), thetacm_only(it),int(it)
+     *        avett(it), errtt(it), thetacm_only(it),it
 
-         write(*,'(4f8.5,i3)') aveW(it),errW(it),aveQ2(it),errQ2(it),it
+c         write(*,'(4f8.5,i3)') aveW(it),errW(it),aveQ2(it),errQ2(it),it
       end do
       close(77)
 
