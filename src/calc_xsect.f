@@ -64,7 +64,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer nt,nphi
       parameter (nt=6,nphi=16)
 
-      real r,dr,w,dw,q2,dq2,th_only,th_cm
+      real r,dr,w,dw,q2,dq2,tt,dtt,th_cm
       real tm,tmn,tmx
       real eps_mod,th_mod,x_mod
       real x_real,dx_real
@@ -133,10 +133,12 @@ c      pause
       do it=1,nbin
 
          tm=tmn+(it-0.5)*(tmx-tmn)/nbin
-         read(52,*) w,dw,q2,dq2,th_cm
-         write(6,32) w,dw,q2,dq2,th_cm
- 32      format('xsect: ',6f10.4)
+         read(52,*) w,dw,q2,dq2,tt,dtt,th_cm
+         write(6,32) w,dw,q2,dq2,tt,dtt,th_cm
+ 32      format('xsect: ',7f10.4)
 
+         tm = tt
+         
          th_cm=th_cm*3.14159D0/180.D0
          
          do ip=1,nphi
