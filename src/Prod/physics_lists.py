@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 23:59:33 trottar"
+# Time-stamp: "2023-09-07 00:01:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,20 +105,14 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
             tbin = averDict["binned_DATA"]["t_bins"][i]
             phibin = averDict["binned_DATA"]["phi_bins"][j]
             if phiset == "Right":
-                phibin_right_data = phibin
-                tbin_right_data = tbin
                 averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
                 averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
                 avert_right_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
             if phiset == "Left":
-                phibin_left_data = phibin
-                tbin_left_data = tbin
                 averQ2_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
                 averW_left_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
                 avert_left_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
             if phiset == "Center":
-                phibin_center_data = phibin
-                tbin_center_data = tbin
                 averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_aver"])
                 averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_aver"])
                 avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_aver"])
@@ -263,7 +257,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin_right_data = np.append(tbin_right_data, 0.0)
+            tbin = np.append(tbin, 0.0)
             for i, Q2val in enumerate(averQ2_right_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
                 write_to_file(f_list,check_line)
@@ -282,7 +276,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin_left_data = np.append(tbin_left_data, 0.0)
+            tbin = np.append(tbin, 0.0)
             for i, Q2val in enumerate(averQ2_left_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
                 write_to_file(f_list,check_line)
@@ -301,7 +295,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         # Open a file in read mode
         with open(f_list, 'r') as f:
             lines = f.readlines()[1:-1]
-            tbin_center_data = np.append(tbin_center_data, 0.0)
+            tbin = np.append(tbin, 0.0)
             for i, Q2val in enumerate(averQ2_center_data):
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
                 write_to_file(f_list,check_line)
@@ -324,7 +318,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()
             for i, ratio in enumerate(ratio_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_right_data[i]), int(tbin_right_data[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin[i]), int(tbin[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -334,7 +328,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_left):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_left_data[i]), int(tbin_left_data[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin[i]), int(tbin[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -344,7 +338,7 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_center_data[i]), int(tbin_center_data[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin[i]), int(tbin[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
