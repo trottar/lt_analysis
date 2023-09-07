@@ -26,13 +26,13 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
 
       ! Check particle type and set parameters accordingly
       if (pid == "kaon") then
-         parameter (m3=mK)
-         parameter (m32=mK2)
+         m3=mK
+         m32=mK2
       else if (pid == "pion") then
-         parameter (m3=mpi)
-         parameter (m32=mpi2)
+         m3=mpi
+         m32=mpi2
       else
-        print *, "Invalid particle type"
+        print *, "*** Invalid particle type: ",pid
       endif
 
       if(npol.gt.0) then
