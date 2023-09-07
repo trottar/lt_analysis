@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 00:14:07 trottar"
+# Time-stamp: "2023-09-07 00:17:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,19 +117,19 @@ def create_lists(aveDict, ratioDict, inpDict, phisetlist):
                 averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
                 avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
                 
-        for k, data_key_tuple in enumerate(ratioDict["binned"][phiset]['ratio']):
+        for k, key_tuple in enumerate(ratioDict["binned"][phiset]['ratio']):
             # Access the nested dictionary using the tuple key
-            data_nested_dict = ratioDict["binned"][phiset]
-            i = data_key_tuple[0] # t bin
-            j = data_key_tuple[1] # phi bin
+            nested_dict = ratioDict["binned"][phiset]
+            i = key_tuple[0] # t bin
+            j = key_tuple[1] # phi bin
             tbin = ratioDict["binned"]["t_bins"][i]
             phibin = ratioDict["binned"]["phi_bins"][j]
             if phiset == "Right":
-                ratio_right_data.append(data_nested_dict['ratio'][data_key_tuple]["ratio"])
+                ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Left":
-                ratio_left_data.append(data_nested_dict['ratio'][data_key_tuple]["ratio"])
+                ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Center":
-                ratio_center_data.append(data_nested_dict['ratio'][data_key_tuple]["ratio"])
+                ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
 
     ################################################################################################################################################
 
