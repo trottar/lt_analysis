@@ -12,19 +12,19 @@ c     Output: averages/averages.*.dat
       integer inp_pol
       real inp_Q2, inp_loeps, inp_hieps
       write(*,*) "Please input your polarity, Q2 and low+high epsilon:"
-      read(*,*) inp_pol, inp_Q2, inp_loeps, inp_hieps
+      read(*,*) inp_pid, inp_pol, inp_Q2, inp_loeps, inp_hieps
 
-      write(*,*) "POL = ",inp_pol,"Q2 = ",inp_Q2,
+      write(*,*) "PID = ",inp_pid,"POL = ",inp_pol,"Q2 = ",inp_Q2,
      *           "low_eps = ",inp_loeps,"high_eps = ",inp_hieps
       
-      call average_k(inp_pol, inp_Q2, inp_loeps, inp_hieps)
+      call average_k(inp_pid, inp_pol, inp_Q2, inp_loeps, inp_hieps)
       print*,  "-------------------------------------------------"
       
       stop
       end
 
 *-----------------------------------------------------------------------
-      subroutine average_k(pol_set,q2_set,eps_lo_set,eps_hi_set)
+      subroutine average_k(pid,pol_set,q2_set,eps_lo_set,eps_hi_set)
 
 c     Average W and Q2 over theta_pq settings, then over low and high epsilon
 c     settings, then over neg. and pos. settings,
@@ -52,6 +52,7 @@ c     and save result in averages/avek.* .
       
       character*40 fn
       character*2 pol
+      character*4 pid
 
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set
@@ -94,7 +95,7 @@ c     Get low, high eps. and neg., pos. polarity data.
          do lh=1,2
 
             nset=0
-            open(55,file='list.settings')
+            open(55, file=trim(pid) // '/list.settings')
             do while(.true.)
 
                read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
@@ -108,11 +109,10 @@ c     Get low, high eps. and neg., pos. polarity data.
                   else
                      stop '*** aver: wrong pol ***'
                   endif
-
-                  write(fn,'(''kindata/kindata.'',a2,''_'',i3.3,''_'',i2.2,
-     *                 ''_'',SP,i5.4,S,''.dat'')')
-     *                 pol,nint(q2_set*100.),nint(eps_set(lh)*100.),
-     *                 nint(th_pq*1000.)
+                  write(fn,'(a2,''kindata/kindata.'',a2,''_'',i3.3,''_'',i2.2,
+     *                 ''_'',SP,i5.4,S,''.dat'')') pid, pol,
+     *                 nint(q2_set*100.),
+     *                 nint(eps_set(lh)*100.), nint(th_pq*1000.)
                   print*,'fn=',fn
 c                 pause
 
@@ -253,7 +253,7 @@ c     So calculate for high eps., neg.-s and pos.-s.
 
 c     Get Beam energy at first.
       Eb=0.
-      open(55,file='beam/Eb_KLT.dat')
+      open(55, file=trim(pid) // '_beam/Eb_KLT.dat')
       do while(.true.)
          read(55,*) Eb,q2,eps
          write(*,*) Eb,q2,eps
@@ -272,7 +272,7 @@ c     Get Beam energy at first.
 
 c     Save data.
 
-      write(fn,'(''averages/avek.'',i3.3,''.dat'')')
+      write(fn,'(a2,''averages/avek.'',i3.3,''_.dat'')') pid,
      *     nint(q2_set*100.)
       print*,'fn=',fn
       print*

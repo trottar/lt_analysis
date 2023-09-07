@@ -1,0 +1,21 @@
+#!/usr/bin/expect -f
+
+# Store the content of the arguments
+set inp_pol [lindex $argv 0]
+set inp_Q2 [lindex $argv 1]
+set inp_loeps [lindex $argv 2]
+set inp_hieps [lindex $argv 3]
+
+# Process to interract with
+spawn ./average_ratios
+
+# If  this message is encounter do...
+expect "Please input your polarity, Q2 and low+high epsilon:" {
+    #... we send it our first argument
+    send "$inp_pol\r"    
+    send "$inp_Q2\r"
+    send "$inp_loeps\r"
+    send "$inp_hieps\r"    
+}
+# Resume normal interaction with script
+interact

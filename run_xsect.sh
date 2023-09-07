@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-03-02 11:23:14 trottar"
+# Time-stamp: "2023-09-07 13:27:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,6 +100,8 @@ fi
 ##############
 # HARD CODED #
 ##############
+
+ParticleType="kaon"
 
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity

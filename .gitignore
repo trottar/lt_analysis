@@ -17,7 +17,7 @@ Tmp*
 # Data files
 list.*
 *.dat
-t_bin_interval*
+*_bin_interval*
 x_unsep.*
 
 # Fortran
