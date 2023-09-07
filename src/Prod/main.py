@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:51:43 trottar"
+# Time-stamp: "2023-09-06 21:55:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1177,47 +1177,47 @@ for it,phiset in enumerate(phisetlist):
 
 for it,phiset in enumerate(phisetlist):
     
-    C_ratiovsphi_data_plt = TCanvas()
-    C_ratiovsphi_data_plt.SetGrid()
-    C_ratiovsphi_data_plt.Divide(1,NumtBins)
+    C_ratiovsphi_plt = TCanvas()
+    C_ratiovsphi_plt.SetGrid()
+    C_ratiovsphi_plt.Divide(1,NumtBins)
 
-    ratio_data = []
-    phibins_data = []
-    data_key_tuples = list(ratioDict["binned"][phiset]['ratio'])
-    for data_key_tuple in data_key_tuples:
-        tmp_ratio_data = [[],[]]
-        tmp_phibins_data = [[],[]]
+    ratio = []
+    phibins = []
+    key_tuples = list(ratioDict["binned"][phiset]['ratio'])
+    for key_tuple in key_tuples:
+        tmp_ratio = [[],[]]
+        tmp_phibins = [[],[]]
         # Access the nested dictionary using the tuple key
-        data_nested_dict = ratioDict["binned"][phiset]
-        i = simc_key_tuple[0] # t bin
-        j = simc_key_tuple[1] # phi bin
-        tmp_ratio_data[0].append(ratioDict["binned"]["t_bins"][i])
-        tmp_ratio_data[1].append(data_nested_dict["ratio"][data_key_tuple]["ratio"])
-        tmp_phibins_data[0].append(ratioDict["binned"]["t_bins"][i])
-        tmp_phibins_data[1].append(ratioDict["binned"]["phi_bins"][j])
-        ratio_data.append(tmp_ratio_data)
-        phibins_data.append(tmp_phibins_data)
-        print("__________________", i, j, tmp_phibins_data, tmp_ratio_data)
+        nested_dict = ratioDict["binned"][phiset]
+        i = key_tuple[0] # t bin
+        j = key_tuple[1] # phi bin
+        tmp_ratio[0].append(ratioDict["binned"]["t_bins"][i])
+        tmp_ratio[1].append(nested_dict["ratio"][key_tuple]["ratio"])
+        tmp_phibins[0].append(ratioDict["binned"]["t_bins"][i])
+        tmp_phibins[1].append(ratioDict["binned"]["phi_bins"][j])
+        ratio.append(tmp_ratio)
+        phibins.append(tmp_phibins)
+        print("__________________", i, j, tmp_phibins, tmp_ratio)
         
     # Match t-bins with list of ratios
-    ratio_data = match_to_bin(ratio_data)
-    phibins_data = match_to_bin(phibins_data)
+    ratio = match_to_bin(ratio)
+    phibins = match_to_bin(phibins)
 
     multiDict = {}
     for i, val in enumerate(t_bins):
 
-        print("------------------", i, phibins_data[i][1], ratio_data[i][1])
+        print("------------------", i, phibins[i][1], ratio[i][1])
 
         multiDict["G_ratiovsphi_plt_{}".format(i)] = ROOT.TMultiGraph()
 
-        G_ratiovsphi_data = ROOT.TGraphErrors(len(ratio_data[i][1]),phibins_data[i][1],ratio_data[i][1],np.array([0]*len(phibins_data[i][1])),np.array([0]*len(ratio_data[i][1])))
+        G_ratiovsphi = ROOT.TGraphErrors(len(ratio[i][1]),phibins[i][1],ratio[i][1],np.array([0]*len(phibins[i][1])),np.array([0]*len(ratio[i][1])))
 
-        G_ratiovsphi_data.SetMarkerStyle(21)
-        G_ratiovsphi_data.SetMarkerSize(1)
-        G_ratiovsphi_data.SetMarkerColor(1)
-        multiDict["G_ratiovsphi_plt_{}".format(i)].Add(G_ratiovsphi_data)
+        G_ratiovsphi.SetMarkerStyle(21)
+        G_ratiovsphi.SetMarkerSize(1)
+        G_ratiovsphi.SetMarkerColor(1)
+        multiDict["G_ratiovsphi_plt_{}".format(i)].Add(G_ratiovsphi)
 
-        C_ratiovsphi_data_plt.cd(i+1)
+        C_ratiovsphi_plt.cd(i+1)
 
         multiDict["G_ratiovsphi_plt_{}".format(i)].Draw("AP")
         multiDict["G_ratiovsphi_plt_{}".format(i)].SetTitle("{} t = {};#phi; Ratio".format(phiset,val))
@@ -1226,7 +1226,7 @@ for it,phiset in enumerate(phisetlist):
         multiDict["G_ratiovsphi_plt_{}".format(i)].GetXaxis().SetTitleOffset(1.5)
         multiDict["G_ratiovsphi_plt_{}".format(i)].GetXaxis().SetLabelSize(0.04)
 
-    C_ratiovsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+    C_ratiovsphi_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
 C_yield_DATA = TCanvas()
 # Loop over each tuple key in the dictionary

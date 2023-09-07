@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:50:52 trottar"
+# Time-stamp: "2023-09-06 21:54:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,7 +77,6 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
     groups = defaultdict(list)
     for tup in dict_lst:
         key = (tup[0], tup[1])
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",key)
         groups[key] = {
             "ratio".format(kin_type) : tup[2],
         }            
