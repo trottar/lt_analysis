@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 10:52:05 trottar"
+# Time-stamp: "2023-09-07 12:01:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1383,6 +1383,12 @@ show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".f
 # Run fortran script
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist)
+
+'''
+*****************************************
+* NEED TO ADD ROOT FILES FOR OTHERS USE *
+*****************************************
+'''
 
 ##############################
 # Step 7 of the lt_analysis: #
