@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 22:29:14 trottar"
+# Time-stamp: "2023-09-06 22:32:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,6 +100,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
+        print("_____________________________", np.average(hist_val_data))
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
         if sub_val.size != 0:
             total_count = np.sum(sub_val)
