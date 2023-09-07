@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 11:43:59 trottar"
+# Time-stamp: "2023-09-07 11:51:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -278,9 +278,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     if float(runNumRight[0]) != 0:
         f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
-        # Checks if file exists and creates if not
-        if not os.path.exists(f_list):
-            open(f_list, "w").close()
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_list, "w").close()
             
         # Open a file in read mode
         with open(f_list, 'r') as f:
@@ -293,13 +292,12 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
-            write_to_file(f_list,"".join(lines),write_mode='w')
+            write_to_file(f_list,"".join(lines),write_mode='r')
 
     if float(runNumLeft[0]) != 0:
         f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
-        # Checks if file exists and creates if not
-        if not os.path.exists(f_list):
-            open(f_list, "w").close()
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_list, "w").close()
             
         # Open a file in read mode
         with open(f_list, 'r') as f:
@@ -312,13 +310,12 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
-            write_to_file(f_list,"".join(lines),write_mode='w')
+            write_to_file(f_list,"".join(lines),write_mode='r')
 
     if float(runNumCenter[0]) != 0:
         f_list = '{}/src/kindata/kindata.{}_{}_{:.0f}_0000.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100)
-        # Checks if file exists and creates if not
-        if not os.path.exists(f_list):
-            open(f_list, "w").close()
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_list, "w").close()
             
         # Open a file in read mode
         with open(f_list, 'r') as f:
@@ -331,14 +328,13 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             last_line = "{:.6f}".format(1.0)
             lines.insert(0,first_line)
             lines.append(last_line)
-            write_to_file(f_list,"".join(lines),write_mode='w')
+            write_to_file(f_list,"".join(lines),write_mode='r')
             
     ################################################################################################################################################
 
     f_list = '{}/src/averages/aver.{}_{}_{:.0f}.dat'.format(LTANAPATH, PID, Qs.replace("p",""), float(EPSVAL)*100)
-    # Checks if file exists and creates if not
-    if not os.path.exists(f_list):
-        open(f_list, "w").close()
+    # Open the file in write mode, which creates a new empty file or overwrites the existing one
+    open(f_list, "w").close()
 
     if float(runNumRight[0]) != 0:        
         # Open a file in read mode
@@ -346,7 +342,9 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             lines = f.readlines()
             for i, ratio in enumerate(ratio_right):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_right[i]), int(tbin_right[i]))
-                write_to_file(f_list,check_line,write_mode='w')
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
 
     if float(runNumLeft[0]) != 0:                    
         # Open a file in read mode
@@ -354,7 +352,9 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_left):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_left[i]), int(tbin_left[i]))
-                write_to_file(f_list,check_line,write_mode='w')
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
 
     if float(runNumCenter[0]) != 0:                    
         # Open a file in read mode
@@ -362,7 +362,9 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_center):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 1.0000, int(phibin_center[i]), int(tbin_center[i]))
-                write_to_file(f_list,check_line,write_mode='w')
+                # Check if the line already exists
+                if check_line not in lines:
+                    write_to_file(f_list,check_line)
                 
     ################################################################################################################################################
     
