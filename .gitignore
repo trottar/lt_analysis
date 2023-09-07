@@ -20,6 +20,7 @@ list.*
 *_bin_interval*
 x_unsep.*
 Eb*
+par.*
 
 # Fortran
 average_kinematics
