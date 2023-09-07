@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 21:08:52 trottar"
+# Time-stamp: "2023-09-06 21:12:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1197,7 +1197,8 @@ for it,phiset in enumerate(phisetlist):
         tmp_phibins_data[1].append(ratioDict["binned"]["phi_bins"][j])
         ratio_data.append(tmp_ratio_data)
         phibins_data.append(tmp_phibins_data)
-
+        print("__________________", i, j, tmp_phibins_data, tmp_ratio_data)
+        
     # Match t-bins with list of ratios
     ratio_data = match_to_bin(ratio_data)
     phibins_data = match_to_bin(phibins_data)
