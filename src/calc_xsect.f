@@ -107,7 +107,7 @@ c         write(*,*) Eb,q2,eps
          if(q2.eq.q2_set.and.eps.eq.eps_set) go to 5         
       end do
  5    close(55)
-      Eb=Eb/1000.               !Mev -> Gev units.
+c      Eb=Eb/1000.               !Mev -> Gev units.
       
       write(6,4)Eb,q2,eps,pol
  4    format(' xsect: Eb=',f8.5,'   at Q2=',f7.4,
