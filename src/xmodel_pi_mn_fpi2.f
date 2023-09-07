@@ -95,7 +95,8 @@ c      sigTT=(par(11)*q2*exp(-q2)+par(12)/q2**2)*f_tm*sin(thetacm)**2
       tav=(0.0735+0.028*log(q2_set))*q2_set
       f_tav=(tm-tav)/tav
 
-      sigL=(par(1)+par(2)*log(q2))*exp((par(3)+par(4)*log(q2))*(abs(tm)-0.2))
+      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+     >     +par(4)*log(q2))*(abs(tm)-0.2))
       sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
