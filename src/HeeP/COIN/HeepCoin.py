@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 22:04:19 trottar"
+# Time-stamp: "2023-09-07 22:08:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1714,12 +1714,14 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 ################################################################################################################################################
 
 # Define a function for fitting a Gaussian
-def fit_gaussian(hist, min_range, max_range, DATA=True):
+def fit_gaussian(hist, min_range, max_range, dtype="data"):
     fit_func = ROOT.TF1("fitFunc", "gaus", min_range, max_range)
     hist.Fit(fit_func, "R")
     mean = fit_func.GetParameter(1)
-    if DATA:
+    if dtype == "data":
         fit_func.SetLineColor(kRed)
+    if dtype == "dummy":
+        fit_func.SetLineColor(kGreen)
     fit_func.Draw("same")
     return mean
 
@@ -2543,8 +2545,9 @@ min_range = H_MMp2_DATA.GetMean() - 2*H_MMp2_DATA.GetRMS()
 max_range = H_MMp2_DATA.GetMean() + 2*H_MMp2_DATA.GetRMS()
 
 # Perform Gaussian fits for each histogram
-b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, min_range, max_range, DATA=False)
-b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA, min_range, max_range)
+b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, min_range, max_range, dtype="simc")
+b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA, min_range, max_range, dtype="data")
+b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY, min_range, max_range, dtype="dummy")
 
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
 l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
