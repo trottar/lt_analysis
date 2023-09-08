@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 21:25:09 trottar"
+# Time-stamp: "2023-09-07 21:32:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2546,6 +2546,8 @@ fit_func_data_nocut, b_mean_MMp2_data_nocut = fit_gaussian(H_MMp2_DATA_nocut, mi
 fit_func_data_nopid, b_mean_MMp2_data_nopid = fit_gaussian(H_MMp2_DATA_nopid, min_range, max_range)
 fit_func_dummy, b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY, min_range, max_range)
 
+fit_func_data.Draw("same")
+
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
 l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
 if DEBUG:
@@ -2559,7 +2561,6 @@ if DEBUG:
     l_MMp2.AddEntry(H_MMp2_DATA_nopid,"DATA (no PID cut), MEAN = {:.2e}".format(b_mean_MMp2_data_nopid))
 l_MMp2.AddEntry(H_MMp2_DUMMY,"DUMMY, MEAN = {:.2e}".format(b_mean_MMp2_dummy))
 
-fit_func_data.Draw()
 l_MMp2.Draw()
 
 CMMp2.Print(outputpdf)
