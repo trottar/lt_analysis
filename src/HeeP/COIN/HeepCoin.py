@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 22:18:27 trottar"
+# Time-stamp: "2023-09-07 22:23:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1714,8 +1714,10 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 ################################################################################################################################################
 
 # Define a function for fitting a Gaussian
-def fit_gaussian(hist, min_range, max_range, dtype="data"):
+def fit_gaussian(hist, min_range, max_range, dtype):
     fit_func = ROOT.TF1("fitFunc", "gaus", min_range, max_range)
+    if dtype == "simc":
+        fit_func.SetLineColor(kBlack)
     if dtype == "data":
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
@@ -2540,14 +2542,10 @@ b_int_MMp2_data_nocut = int(H_MMp2_DATA_nocut.Integral())
 b_int_MMp2_data_nopid = int(H_MMp2_DATA_nopid.Integral())
 b_int_MMp2_dummy = int(H_MMp2_DUMMY.Integral())
 
-# Define your fitting ranges
-min_range = H_MMp2_DATA.GetMean() - 2*H_MMp2_DATA.GetRMS()
-max_range = H_MMp2_DATA.GetMean() + 2*H_MMp2_DATA.GetRMS()
-
-# Perform Gaussian fits for each histogram
-b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, min_range, max_range, dtype="simc")
-b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA, min_range, max_range, dtype="data")
-b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY, min_range, max_range, dtype="dummy")
+# Perform Gaussian fits for each histogra
+b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, H_MMp2_SIMC.GetMean() - 2*H_MMp2_SIMC.GetRMS(), H_MMp2_SIMC.GetMean() - 2*H_MMp2_SIMC.GetRMS(), "simc")
+b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA, H_MMp2_DATA.GetMean() - 2*H_MMp2_DATA.GetRMS(), H_MMp2_DATA.GetMean() - 2*H_MMp2_DATA.GetRMS(), "data")
+b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY, H_MMp2_DUMMY.GetMean() - 2*H_MMp2_DUMMY.GetRMS(), H_MMp2_DUMMY.GetMean() - 2*H_MMp2_DUMMY.GetRMS(), "dummy")
 
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
 l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
