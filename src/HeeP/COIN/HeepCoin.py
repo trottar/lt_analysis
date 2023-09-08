@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 21:45:37 trottar"
+# Time-stamp: "2023-09-07 21:49:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2529,8 +2529,8 @@ b_int_MMp2_data_nopid = int(H_MMp2_DATA_nopid.Integral())
 b_int_MMp2_dummy = int(H_MMp2_DUMMY.Integral())
 
 # Define your fitting ranges
-min_range = -0.01  # Set your specific range
-max_range = 0.01  # Set your specific range
+min_range = H_MMp2_DATA.GetMean() - 2*H_MMp2_DATA.GetRMS()
+max_range = H_MMp2_DATA.GetMean() + 2*H_MMp2_DATA.GetRMS()
 
 # Perform Gaussian fits for each histogram
 fit_func_simc, b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, min_range, max_range)
