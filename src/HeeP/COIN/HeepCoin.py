@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 21:40:18 trottar"
+# Time-stamp: "2023-09-07 21:45:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2546,8 +2546,6 @@ if DEBUG:
     H_MMp2_DATA_nopid.Draw("same, E1")
 H_MMp2_DUMMY.Draw("same, E1")
 
-fit_func_data.SetLineColor(ROOT.kPurple)
-fit_func_data.SetLineWidth(2)
 fit_func_data.Draw("same")
 
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
