@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 21:22:54 trottar"
+# Time-stamp: "2023-09-07 21:25:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1718,7 +1718,7 @@ def fit_gaussian(hist, min_range, max_range):
     fit_func = ROOT.TF1("fitFunc", "gaus", min_range, max_range)
     hist.Fit(fit_func, "R")
     mean = fit_func.GetParameter(1)
-    return fit_fun, mean
+    return fit_func, mean
 
 ################################################################################################################################################
 # Removes stat box
