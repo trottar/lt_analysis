@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 21:58:13 trottar"
+# Time-stamp: "2023-09-07 22:01:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2523,6 +2523,13 @@ H_MMp2_DATA_nocut.SetLineColor(kCyan)
 H_MMp2_DATA_nopid.SetLineColor(kMagenta)
 H_MMp2_DUMMY.SetLineColor(kGreen)
 
+H_MMp2_SIMC.Draw("E1")
+H_MMp2_DATA.Draw("same, E1")
+if DEBUG:
+    H_MMp2_DATA_nocut.Draw("same, E1")
+    H_MMp2_DATA_nopid.Draw("same, E1")
+H_MMp2_DUMMY.Draw("same, E1")
+
 b_int_MMp2_simc = int(H_MMp2_SIMC.Integral())
 b_int_MMp2_data = int(H_MMp2_DATA.Integral())
 b_int_MMp2_data_nocut = int(H_MMp2_DATA_nocut.Integral())
@@ -2535,13 +2542,7 @@ max_range = H_MMp2_DATA.GetMean() + 2*H_MMp2_DATA.GetRMS()
 
 # Perform Gaussian fits for each histogram
 b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, min_range, max_range)
-
-H_MMp2_SIMC.Draw("E1")
-H_MMp2_DATA.Draw("same, E1")
-if DEBUG:
-    H_MMp2_DATA_nocut.Draw("same, E1")
-    H_MMp2_DATA_nopid.Draw("same, E1")
-H_MMp2_DUMMY.Draw("same, E1")
+b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA, min_range, max_range)
 
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
 l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
