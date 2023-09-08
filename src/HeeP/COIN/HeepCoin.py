@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 22:31:46 trottar"
+# Time-stamp: "2023-09-07 22:34:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2543,9 +2543,9 @@ b_int_MMp2_data_nopid = int(H_MMp2_DATA_nopid.Integral())
 b_int_MMp2_dummy = int(H_MMp2_DUMMY.Integral())
 
 # Perform Gaussian fits for each histogra
-b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, H_MMp2_SIMC.GetMean() - H_MMp2_SIMC.GetRMS()/2, H_MMp2_SIMC.GetMean() - H_MMp2_SIMC.GetRMS()/2, "simc")
-b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA, H_MMp2_DATA.GetMean() - H_MMp2_DATA.GetRMS()/2, H_MMp2_DATA.GetMean() - H_MMp2_DATA.GetRMS()/2, "data")
-b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY, H_MMp2_DUMMY.GetMean() - H_MMp2_DUMMY.GetRMS()/2, H_MMp2_DUMMY.GetMean() - H_MMp2_DUMMY.GetRMS()/2, "dummy")
+b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, H_MMp2_SIMC.GetMean() - 2*H_MMp2_SIMC.GetRMS(), H_MMp2_SIMC.GetMean() + 2*H_MMp2_SIMC.GetRMS(), "simc")
+b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA, H_MMp2_DATA.GetMean() - 2*H_MMp2_DATA.GetRMS(), H_MMp2_DATA.GetMean() + 2*H_MMp2_DATA.GetRMS(), "data")
+b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY, H_MMp2_DUMMY.GetMean() - 2*H_MMp2_DUMMY.GetRMS(), H_MMp2_DUMMY.GetMean() + 2*H_MMp2_DUMMY.GetRMS(), "dummy")
 
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
 l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
