@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 21:49:30 trottar"
+# Time-stamp: "2023-09-07 21:53:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1718,6 +1718,7 @@ def fit_gaussian(hist, min_range, max_range):
     fit_func = ROOT.TF1("fitFunc", "gaus", min_range, max_range)
     hist.Fit(fit_func, "R")
     mean = fit_func.GetParameter(1)
+    fit_func.Draw("same")
     return fit_func, mean
 
 ################################################################################################################################################
@@ -2545,8 +2546,6 @@ if DEBUG:
     H_MMp2_DATA_nocut.Draw("same, E1")
     H_MMp2_DATA_nopid.Draw("same, E1")
 H_MMp2_DUMMY.Draw("same, E1")
-
-fit_func_data.Draw("same")
 
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
 l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
