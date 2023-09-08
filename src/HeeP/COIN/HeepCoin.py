@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 21:32:24 trottar"
+# Time-stamp: "2023-09-07 21:39:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2522,13 +2522,6 @@ H_MMp2_DATA_nocut.SetLineColor(kCyan)
 H_MMp2_DATA_nopid.SetLineColor(kMagenta)
 H_MMp2_DUMMY.SetLineColor(kGreen)
 
-H_MMp2_SIMC.Draw("E1")
-H_MMp2_DATA.Draw("same, E1")
-if DEBUG:
-    H_MMp2_DATA_nocut.Draw("same, E1")
-    H_MMp2_DATA_nopid.Draw("same, E1")
-H_MMp2_DUMMY.Draw("same, E1")
-
 b_int_MMp2_simc = int(H_MMp2_SIMC.Integral())
 b_int_MMp2_data = int(H_MMp2_DATA.Integral())
 b_int_MMp2_data_nocut = int(H_MMp2_DATA_nocut.Integral())
@@ -2546,6 +2539,15 @@ fit_func_data_nocut, b_mean_MMp2_data_nocut = fit_gaussian(H_MMp2_DATA_nocut, mi
 fit_func_data_nopid, b_mean_MMp2_data_nopid = fit_gaussian(H_MMp2_DATA_nopid, min_range, max_range)
 fit_func_dummy, b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY, min_range, max_range)
 
+H_MMp2_SIMC.Draw("E1")
+H_MMp2_DATA.Draw("same, E1")
+if DEBUG:
+    H_MMp2_DATA_nocut.Draw("same, E1")
+    H_MMp2_DATA_nopid.Draw("same, E1")
+H_MMp2_DUMMY.Draw("same, E1")
+
+fit_func_data.SetLineColor(ROOT.kPurple)
+fit_func_data.SetLineWidth(2)
 fit_func_data.Draw("same")
 
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
