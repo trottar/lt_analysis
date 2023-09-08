@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 22:14:33 trottar"
+# Time-stamp: "2023-09-07 22:18:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1716,12 +1716,12 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 # Define a function for fitting a Gaussian
 def fit_gaussian(hist, min_range, max_range, dtype="data"):
     fit_func = ROOT.TF1("fitFunc", "gaus", min_range, max_range)
-    hist.Fit(fit_func, "R")
-    mean = fit_func.GetParameter(1)
     if dtype == "data":
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
-        fit_func.SetLineColor(kGreen)
+        fit_func.SetLineColor(kGreen)    
+    hist.Fit(fit_func, "R")
+    mean = fit_func.GetParameter(1)
     #fit_func.Draw("same")
     return mean
 
