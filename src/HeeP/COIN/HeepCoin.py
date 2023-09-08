@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 21:00:27 trottar"
+# Time-stamp: "2023-09-07 21:04:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1937,9 +1937,9 @@ if DEBUG:
     bpm_tar_x_DATA_nocut.Draw("same, E1")
     bpm_tar_x_DATA_nopid.Draw("same, E1")
 
-b_mean_bpm_tar_x_data = (bpm_tar_x_DATA.Fit("gaus", "Q", "", bpm_tar_x_DATA.GetMean() - 2 * bpm_tar_x_DATA.GetRMS(), bpm_tar_x_DATA.GetMean() + 2 * bpm_tar_x_DATA.GetRMS()).Parameter(1))
-b_mean_bpm_tar_x_data_nocut = (bpm_tar_x_DATA_nocut.Fit("gaus", "Q", "", bpm_tar_x_DATA_nocut.GetMean() - 2 * bpm_tar_x_DATA_nocut.GetRMS(), bpm_tar_x_DATA_nocut.GetMean() + 2 * bpm_tar_x_DATA_nocut.GetRMS()).Parameter(1))
-b_mean_bpm_tar_x_data_nopid = (bpm_tar_x_DATA_nopid.Fit("gaus", "Q", "", bpm_tar_x_DATA_nopid.GetMean() - 2 * bpm_tar_x_DATA_nopid.GetRMS(), bpm_tar_x_DATA_nopid.GetMean() + 2 * bpm_tar_x_DATA_nopid.GetRMS()).Parameter(1))
+b_mean_bpm_tar_x_data = (bpm_tar_x_DATA.Fit("gaus", "Q").Parameter(1))
+b_mean_bpm_tar_x_data_nocut = (bpm_tar_x_DATA_nocut.Fit("gaus", "Q").Parameter(1))
+b_mean_bpm_tar_x_data_nopid = (bpm_tar_x_DATA_nopid.Fit("gaus", "Q").Parameter(1))
 
 l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = {:.2e}".format( b_mean_bpm_tar_x_data))
 if DEBUG:
