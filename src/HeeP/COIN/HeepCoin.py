@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 22:08:25 trottar"
+# Time-stamp: "2023-09-07 22:14:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1722,7 +1722,7 @@ def fit_gaussian(hist, min_range, max_range, dtype="data"):
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
         fit_func.SetLineColor(kGreen)
-    fit_func.Draw("same")
+    #fit_func.Draw("same")
     return mean
 
 ################################################################################################################################################
