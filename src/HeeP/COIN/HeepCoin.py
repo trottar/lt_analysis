@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-10 15:28:20 trottar"
+# Time-stamp: "2023-09-10 15:41:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2843,8 +2843,8 @@ b_int_pmx_data_nocut = int(H_pmx_DATA_nocut.Integral())
 b_int_pmx_data_nopid = int(H_pmx_DATA_nopid.Integral())
 b_int_pmx_dummy = int(H_pmx_DUMMY.Integral())
 
-b_mean_pmx_simc = fit_gaussian(H_pmx_SIMC, H_pmx_SIMC.GetMean() - H_pmx_SIMC.GetRMS(), H_pmx_SIMC.GetMean() + H_pmx_SIMC.GetRMS(), "simc")
-b_mean_pmx_data = fit_gaussian(H_pmx_DATA, H_pmx_DATA.GetMean() - H_pmx_DATA.GetRMS(), H_pmx_DATA.GetMean() + H_pmx_DATA.GetRMS(), "data")
+b_mean_pmx_simc = fit_gaussian(H_pmx_SIMC, H_pmx_SIMC.GetMean(), H_pmx_SIMC.GetMean() + H_pmx_SIMC.GetRMS()*0.75, "simc")
+b_mean_pmx_data = fit_gaussian(H_pmx_DATA, H_pmx_DATA.GetMean(), H_pmx_DATA.GetMean() + H_pmx_DATA.GetRMS()*0.95, "data")
 b_mean_pmx_dummy = fit_gaussian(H_pmx_DUMMY, H_pmx_DUMMY.GetMean() - H_pmx_DUMMY.GetRMS(), H_pmx_DUMMY.GetMean() + H_pmx_DUMMY.GetRMS(), "dummy")
 
 l_pmx.AddEntry(H_pmx_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmx_simc))
@@ -2885,8 +2885,8 @@ b_int_pmy_data_nocut = int(H_pmy_DATA_nocut.Integral())
 b_int_pmy_data_nopid = int(H_pmy_DATA_nopid.Integral())
 b_int_pmy_dummy = int(H_pmy_DUMMY.Integral())
 
-b_mean_pmy_simc = fit_gaussian(H_pmy_SIMC, H_pmy_SIMC.GetMean() - H_pmy_SIMC.GetRMS(), H_pmy_SIMC.GetMean() + H_pmy_SIMC.GetRMS(), "simc")
-b_mean_pmy_data = fit_gaussian(H_pmy_DATA, H_pmy_DATA.GetMean() - H_pmy_DATA.GetRMS(), H_pmy_DATA.GetMean() + H_pmy_DATA.GetRMS(), "data")
+b_mean_pmy_simc = fit_gaussian(H_pmy_SIMC, H_pmy_SIMC.GetMean() - H_pmy_SIMC.GetRMS()*0.75, H_pmy_SIMC.GetMean() + H_pmy_SIMC.GetRMS()*0.75, "simc")
+b_mean_pmy_data = fit_gaussian(H_pmy_DATA, H_pmy_DATA.GetMean() - H_pmy_DATA.GetRMS()*0.95, H_pmy_DATA.GetMean() + H_pmy_DATA.GetRMS()*0.95, "data")
 b_mean_pmy_dummy = fit_gaussian(H_pmy_DUMMY, H_pmy_DUMMY.GetMean() - H_pmy_DUMMY.GetRMS(), H_pmy_DUMMY.GetMean() + H_pmy_DUMMY.GetRMS(), "dummy")
 
 l_pmy.AddEntry(H_pmy_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmy_simc))
@@ -2927,8 +2927,8 @@ b_int_pmz_data_nocut = int(H_pmz_DATA_nocut.Integral())
 b_int_pmz_data_nopid = int(H_pmz_DATA_nopid.Integral())
 b_int_pmz_dummy = int(H_pmz_DUMMY.Integral())
 
-b_mean_pmz_simc = fit_gaussian(H_pmz_SIMC, H_pmz_SIMC.GetMean() - H_pmz_SIMC.GetRMS(), H_pmz_SIMC.GetMean() + H_pmz_SIMC.GetRMS(), "simc")
-b_mean_pmz_data = fit_gaussian(H_pmz_DATA, H_pmz_DATA.GetMean() - H_pmz_DATA.GetRMS(), H_pmz_DATA.GetMean() + H_pmz_DATA.GetRMS(), "data")
+b_mean_pmz_simc = fit_gaussian(H_pmz_SIMC, H_pmz_SIMC.GetMean(), H_pmz_SIMC.GetMean() + H_pmz_SIMC.GetRMS()*0.75, "simc")
+b_mean_pmz_data = fit_gaussian(H_pmz_DATA, H_pmz_DATA.GetMean(), H_pmz_DATA.GetMean() + H_pmz_DATA.GetRMS()*0.95, "data")
 b_mean_pmz_dummy = fit_gaussian(H_pmz_DUMMY, H_pmz_DUMMY.GetMean() - H_pmz_DUMMY.GetRMS(), H_pmz_DUMMY.GetMean() + H_pmz_DUMMY.GetRMS(), "dummy")
 
 l_pmz.AddEntry(H_pmz_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmz_simc))
@@ -2969,8 +2969,8 @@ b_int_W_data_nocut = int(H_W_DATA_nocut.Integral())
 b_int_W_data_nopid = int(H_W_DATA_nopid.Integral())
 b_int_W_dummy = int(H_W_DUMMY.Integral())
 
-b_mean_W_simc = fit_gaussian(H_W_SIMC, H_W_SIMC.GetMean() - H_W_SIMC.GetRMS(), H_W_SIMC.GetMean() + H_W_SIMC.GetRMS(), "simc")
-b_mean_W_data = fit_gaussian(H_W_DATA, H_W_DATA.GetMean() - H_W_DATA.GetRMS(), H_W_DATA.GetMean() + H_W_DATA.GetRMS(), "data")
+b_mean_W_simc = fit_gaussian(H_W_SIMC, H_W_SIMC.GetMean() - H_W_SIMC.GetRMS()*0.75, H_W_SIMC.GetMean(), "simc")
+b_mean_W_data = fit_gaussian(H_W_DATA, H_W_DATA.GetMean() - H_W_DATA.GetRMS()*0.95, H_W_DATA.GetMean(), "data")
 b_mean_W_dummy = fit_gaussian(H_W_DUMMY, H_W_DUMMY.GetMean() - H_W_DUMMY.GetRMS(), H_W_DUMMY.GetMean() + H_W_DUMMY.GetRMS(), "dummy")
 
 l_W.AddEntry(H_W_SIMC,"SIMC, INT = {:.0f}".format( b_int_W_simc))
