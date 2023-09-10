@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-10 14:15:22 trottar"
+# Time-stamp: "2023-09-10 14:18:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2759,8 +2759,8 @@ b_int_pmiss_data_nocut = int(H_pmiss_DATA_nocut.Integral())
 b_int_pmiss_data_nopid = int(H_pmiss_DATA_nopid.Integral())
 b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
 
-b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC, H_pmiss_SIMC.GetMean() - H_pmiss_SIMC.GetRMS()*0.75, H_pmiss_SIMC.GetMean() + H_pmiss_SIMC.GetRMS()*0.5, "simc")
-b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA, H_pmiss_DATA.GetMean() - H_pmiss_DATA.GetRMS()*0.95, H_pmiss_DATA.GetMean() + H_pmiss_DATA.GetRMS()*0.5, "data")
+b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC, H_pmiss_SIMC.GetMean() - H_pmiss_SIMC.GetRMS()*0.75, H_pmiss_SIMC.GetMean() + H_pmiss_SIMC.GetRMS()*0.2, "simc")
+b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA, H_pmiss_DATA.GetMean() - H_pmiss_DATA.GetRMS()*0.95, H_pmiss_DATA.GetMean() + H_pmiss_DATA.GetRMS()*0.2, "data")
 b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY, H_pmiss_DUMMY.GetMean() - H_pmiss_DUMMY.GetRMS()*0.75, H_pmiss_DUMMY.GetMean() + H_pmiss_DUMMY.GetRMS()*0.75, "dummy")
 
 l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
