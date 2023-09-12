@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 13:42:00 trottar"
+# Time-stamp: "2023-09-12 13:51:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -812,7 +812,7 @@ Cpht.Print(outputpdf)
 
 for i,hist in enumerate(histlist):
     texlist = []
-    cut_lst = ""
+    cut_summary_lst = ""
     Ctext = TCanvas()
     for j,line in enumerate(hist["pid_text"]):
         if j == 0:
@@ -820,34 +820,34 @@ for i,hist in enumerate(histlist):
             tex.SetTextSize(0.03)
             tex.SetTextColor(i+1)
             texlist.append(tex)
-            cut_lst = cut_lst+hist["phi_setting"]
+            cut_summary_lst = cut_summary_lst+"\n"+hist["phi_setting"]
         tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"{}".format(line))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
-        cut_lst = cut_lst+line
+        cut_summary_lst = cut_summary_lst+"\n"+line
     j = len(hist["pid_text"])
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+1)/2))),"t_range = ({}-{})".format(tmin,tmax))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    cut_lst = cut_lst+"t_range = ({}-{})".format(tmin,tmax)
+    cut_summary_lst = cut_summary_lst+"\n"+"t_range = ({}-{})".format(tmin,tmax)
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+2)/2))),"t_bins-> {}".format(t_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    cut_lst = cut_lst+"t_bins-> {}".format(t_bins)
+    cut_summary_lst = cut_summary_lst+"\n"+"t_bins-> {}".format(t_bins)
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3)/2))),"phi_bins-> {}".format(phi_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    cut_lst = cut_lst+"phi_bins-> {}".format(phi_bins)
+    cut_summary_lst = cut_summary_lst+"\n"+"phi_bins-> {}".format(phi_bins)
     for p in [1,2,3,4]:
         tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3+p)/2))),"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
-        cut_lst = cut_lst+"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p])
+        cut_summary_lst = cut_summary_lst+"\n"+"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p])
             
     for j, tex in enumerate(texlist):
         tex.Draw()
@@ -857,9 +857,9 @@ for i,hist in enumerate(histlist):
     else:
         Ctext.Print(outputpdf)
 
-    inpDict["cut_lst"] = cut_lst
+    inpDict["cut_summary_lst"] = cut_summary_lst
 
-    print("~~~~~~~~~~~~~~",cut_lst)
+    print("~~~~~~~~~~~~~~",cut_summary_lst)
         
 if DEBUG:
     show_pdf_with_evince(outputpdf)
@@ -1434,19 +1434,19 @@ print("\n\n")
 # Create a new directory for each iteration
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
 if EPSSET == "low":
-    #os.mkdir(new_dir)
+    os.mkdir(new_dir)
     print("")
 
 for f in output_file_lst:
     if OUTPATH in f:
         if ".pdf" in f:
-            #os.mkdir(new_dir+"/plots")
+            os.mkdir(new_dir+"/plots")
             f_new = f.replace(OUTPATH,new_dir+"/plots")
         if ".root" in f:
-            #os.mkdir(new_dir+"/rootfiles")
+            os.mkdir(new_dir+"/rootfiles")
             f_new = f.replace(OUTPATH,new_dir+"/rootfiles")
         print("Copying {} to {}".format(f,f_new))
-        #shutil.copy(f, f_new)
+        shutil.copy(f, f_new)
     if "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
@@ -1455,11 +1455,14 @@ for f in output_file_lst:
         print(f_tmp)
         for f_dir in f_arr:
             if "{}/".format(ParticleType) not in f_dir:
-                #os.mkdir(new_dir+"/"+f_dir)
+                os.mkdir(new_dir+"/"+f_dir)
                 f_new = new_dir+"/"+f_dir+"/"+f_tmp
         
         print("Copying {} to {}".format(f,f_new))
-        #shutil.copy(f, f_new)        
+        shutil.copy(f, f_new)
+        
+with open(new_dir+'/{}_{}_summary.txt'.format(ParticleType,OutFilename), 'w') as file:        
+    file.write(inpDict["cut_summary_lst"])
 
 ##############################
 # Step 7 of the lt_analysis: #
