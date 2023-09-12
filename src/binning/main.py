@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 12:25:26 trottar"
+# Time-stamp: "2023-09-12 12:43:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1412,10 +1412,11 @@ for f in output_file_lst:
         print(f)
         print(f_arr)
         print(f_tmp)
-
-        #os.mkdir(new_dir+)
-        #### NEED TO FIX PHYSICS_LISTS (the dirs are an issue)
-        f_new = new_dir+f.split("beam/")[1]
+        for f_dir in f_arr:
+            if "{}/".format(ParticleType) not in f_dir:
+                #os.mkdir(new_dir+f_dir)
+                f_new = new_dir++f_dir+f_tmp
+        
         print("Copying {} to {}".format(f,f_new))
         #shutil.copy(f, f_new)
         
