@@ -378,6 +378,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         "b4" : b4
     }
 
+    for p in [1,2,3,4]:
+        print("~~~~~~~~~~~~~~~~~~",paramDict["a%i" % p],paramDict["b%i" % p])
+
     ##############################################################################################################################################
     c1_kin = TCanvas("c1_kin", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
     gStyle.SetTitleFontSize(0.03)
