@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 13:35:24 trottar"
+# Time-stamp: "2023-09-12 13:42:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -820,34 +820,34 @@ for i,hist in enumerate(histlist):
             tex.SetTextSize(0.03)
             tex.SetTextColor(i+1)
             texlist.append(tex)
-            cut_lst = cut_lst.append+(hist["phi_setting"])
+            cut_lst = cut_lst+hist["phi_setting"]
         tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"{}".format(line))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
-        cut_lst = cut_lst.append+(line)        
+        cut_lst = cut_lst+line
     j = len(hist["pid_text"])
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+1)/2))),"t_range = ({}-{})".format(tmin,tmax))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    cut_lst = cut_lst.append+("t_range = ({}-{})".format(tmin,tmax))    
+    cut_lst = cut_lst+"t_range = ({}-{})".format(tmin,tmax)
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+2)/2))),"t_bins-> {}".format(t_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    cut_lst = cut_lst.append+("t_bins-> {}".format(t_bins))    
+    cut_lst = cut_lst+"t_bins-> {}".format(t_bins)
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3)/2))),"phi_bins-> {}".format(phi_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    cut_lst = cut_lst.append+("phi_bins-> {}".format(phi_bins))    
+    cut_lst = cut_lst+"phi_bins-> {}".format(phi_bins)
     for p in [1,2,3,4]:
         tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3+p)/2))),"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
-        cut_lst = cut_lst.append+("a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
+        cut_lst = cut_lst+"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p])
             
     for j, tex in enumerate(texlist):
         tex.Draw()
