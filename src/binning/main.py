@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 14:14:47 trottar"
+# Time-stamp: "2023-09-12 14:19:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -857,12 +857,14 @@ for i,hist in enumerate(histlist):
     else:
         Ctext.Print(outputpdf)
 
-print("Cut Summary...",cut_summary_lst)        
+print("\n\n")
+print("="*25)
+print("Cut Summary...",cut_summary_lst)
+print("="*25)
 inpDict["cut_summary_lst"] = cut_summary_lst
         
 if DEBUG:
-    show_pdf_with_evince(outputpdf)
-show_pdf_with_evince(outputpdf)    
+    show_pdf_with_evince(outputpdf)   
 output_file_lst.append(outputpdf)
     
 ##############################
