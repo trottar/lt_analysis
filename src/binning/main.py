@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 23:05:50 trottar"
+# Time-stamp: "2023-09-11 23:10:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1390,7 +1390,7 @@ from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 for f in output_file_lst:
-    print(f)
+    print("--------------",f)
 
 '''
 *****************************************
