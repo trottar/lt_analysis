@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 00:23:02 trottar"
+# Time-stamp: "2023-09-12 00:27:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,6 +29,7 @@ from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import csv
+import shutil
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -1403,6 +1404,7 @@ for f in output_file_lst:
     if OUTPATH in f:
         f_new = f.replace(OUTPATH,new_dir)
         print("Copying {} to {}".format(f,f_new))
+        shutil.copy(f, f_new)  # This line will actually copy the file.
         
 '''
 *****************************************
