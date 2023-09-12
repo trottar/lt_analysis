@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 12:50:26 trottar"
+# Time-stamp: "2023-09-12 12:54:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1409,7 +1409,8 @@ if EPSSET == "low":
 
 for f in output_file_lst:
     if OUTPATH in f:
-        f_new = f.replace(OUTPATH,new_dir)
+        os.mkdir(new_dir+"/plots")
+        f_new = f.replace(OUTPATH,new_dir+"/plots")
         print("Copying {} to {}".format(f,f_new))
         #shutil.copy(f, f_new)
     if "{}/".format(ParticleType) in f:
