@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 14:13:40 trottar"
+# Time-stamp: "2023-09-12 14:14:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1461,7 +1461,7 @@ for f in output_file_lst:
                 if not os.path.exists(new_dir+"/"+f_dir):
                     os.mkdir(new_dir+"/"+f_dir)
                 f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                print("Copying {} to {}".format(f,f_new))
+                print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
                 shutil.copy(LTANAPATH+"/src/"+f, f_new)
         
 with open(new_dir+'/{}_{}_summary.txt'.format(ParticleType,OutFilename), 'w') as file:        
