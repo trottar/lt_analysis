@@ -67,7 +67,7 @@ done
 # - `+%Y` extracts the year.
 # - `+%B` extracts the full month name.
 # - `%d` extracts the day of the month.
-formatted_date=$(date +H%H%M%M%S_%Y%B%d)
+formatted_date=$(date +H%HM%MS%M%S_%Y%B%d)
 
 declare -a EPS=("low" "high")
 for j in "${EPS[@]}"
