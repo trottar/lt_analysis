@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 13:11:47 trottar"
+# Time-stamp: "2023-09-12 13:15:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -832,7 +832,7 @@ for i,hist in enumerate(histlist):
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3)/2))),"phi_bins{}".format(phi_bins))
+    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3)/2))),"phi_bins-> {}".format(phi_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
