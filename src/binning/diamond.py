@@ -379,7 +379,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     }
 
     for p in [1,2,3,4]:
-        print("~~~~~~~~~~~~~~~~~~",paramDict["a%i" % p],paramDict["b%i" % p])
+        print(target,"~~~~~~~~~~~~~~~~~~",paramDict["a%i" % p],paramDict["b%i" % p])
 
     ##############################################################################################################################################
     c1_kin = TCanvas("c1_kin", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
