@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 13:03:23 trottar"
+# Time-stamp: "2023-09-12 13:07:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -835,8 +835,8 @@ for i,hist in enumerate(histlist):
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    for i in [1,2,3,4]:
-        tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"a{} = {}, b{} = {}".format(i,inpDict["a%i" % i ],i,inpDict["b%i" % i ]))
+    for p in [1,2,3,4]:
+        tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
