@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 23:15:21 trottar"
+# Time-stamp: "2023-09-12 00:13:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,7 +73,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     pThetaValCenter = inpDict["pThetaValCenter"]
     EbeamValCenter = inpDict["EbeamValCenter"]
     POL = float(inpDict["POL"])
-    KSet = inpDict["KSet"]
         
     if POL > 0:
         polID = 'pl'
