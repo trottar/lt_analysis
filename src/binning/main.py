@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 00:09:44 trottar"
+# Time-stamp: "2023-09-12 00:23:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1396,7 +1396,8 @@ print("\n\n")
 
 # Create a new directory for each iteration
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
-os.mkdir(new_dir)
+if EPSSET == "low":
+    os.mkdir(new_dir)
 
 for f in output_file_lst:    
     if OUTPATH in f:
