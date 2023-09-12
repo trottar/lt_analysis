@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 23:10:33 trottar"
+# Time-stamp: "2023-09-11 23:25:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,6 +137,7 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+CACHEPATH=lt.CACHEPATH
 
 foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
 fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
@@ -193,7 +194,8 @@ if DEBUG:
     # Show plot pdf for each setting
     for phiset in phisetlist:
         show_pdf_with_evince(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
-output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
+for phiset in phisetlist:
+    output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
         
 ##############################
 # Step 3 of the lt_analysis: # DONE
@@ -226,7 +228,8 @@ if DEBUG:
     # Show plot pdf for each setting
     for hist in histlist:        
         show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+for hist in histlist:
+    output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
 
 ##############################
 # Step 4 of the lt_analysis: # Done
@@ -1389,8 +1392,11 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
-for f in output_file_lst:
-    print("--------------",f)
+for f in output_file_lst:    
+    if OUTPATH in f:
+        f_new = f.replace(OUTPATH,CACHEPATH)
+        print("Moving {} to {}...".format(f,f_new))
+        
 
 '''
 *****************************************

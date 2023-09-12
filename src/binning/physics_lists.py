@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 23:05:17 trottar"
+# Time-stamp: "2023-09-11 23:15:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -382,4 +382,3 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     write_to_file(f_list,check_line)
                 
     ################################################################################################################################################
-    
