@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 12:54:12 trottar"
+# Time-stamp: "2023-09-12 13:03:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -823,7 +823,24 @@ for i,hist in enumerate(histlist):
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
-
+    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"t_range = ({}-{})".format(tmin,tmax))
+    tex.SetTextSize(0.03)
+    tex.SetTextColor(i+1)
+    texlist.append(tex)        
+    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"t_bins-> {}".format(t_bins))
+    tex.SetTextSize(0.03)
+    tex.SetTextColor(i+1)
+    texlist.append(tex)
+    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"phi_bins{}".format(phi_bins))
+    tex.SetTextSize(0.03)
+    tex.SetTextColor(i+1)
+    texlist.append(tex)
+    for i in [1,2,3,4]:
+        tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"a{} = {}, b{} = {}".format(i,inpDict["a%i" % i ],i,inpDict["b%i" % i ]))
+        tex.SetTextSize(0.03)
+        tex.SetTextColor(i+1)
+        texlist.append(tex)
+            
     for j, tex in enumerate(texlist):
         tex.Draw()
         
@@ -834,6 +851,7 @@ for i,hist in enumerate(histlist):
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
+show_pdf_with_evince(outputpdf)    
 output_file_lst.append(outputpdf)
     
 ##############################
@@ -1409,8 +1427,12 @@ if EPSSET == "low":
 
 for f in output_file_lst:
     if OUTPATH in f:
-        os.mkdir(new_dir+"/plots")
-        f_new = f.replace(OUTPATH,new_dir+"/plots")
+        if ".pdf" in f:
+            #os.mkdir(new_dir+"/plots")
+            f_new = f.replace(OUTPATH,new_dir+"/plots")
+        if ".root" in f:
+            #os.mkdir(new_dir+"/rootfiles")
+            f_new = f.replace(OUTPATH,new_dir+"/rootfiles")
         print("Copying {} to {}".format(f,f_new))
         #shutil.copy(f, f_new)
     if "{}/".format(ParticleType) in f:
