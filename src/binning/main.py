@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 23:25:43 trottar"
+# Time-stamp: "2023-09-11 23:37:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,6 +28,7 @@ from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
+import datetime
 import csv
 
 ##################################################################################################################################################
@@ -1392,12 +1393,19 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
+# Get the current date and time
+now = datetime.datetime.now()
+# Format the date and time as a string to use in the file name
+formatted_date = now.strftime("%H%M%S_%Y%M%D")
+
 for f in output_file_lst:    
     if OUTPATH in f:
-        f_new = f.replace(OUTPATH,CACHEPATH)
-        print("Moving {} to {}...".format(f,f_new))
+        new_dir = CACHEPATH+"/"+formatted_date
+        # Create a new directory
+        os.mkdir(new_dir)
+        f_new = f.replace(OUTPATH,new_dir)
+        print("Copying {} to {}...".format(f,f_new))
         
-
 '''
 *****************************************
 * NEED TO ADD ROOT FILES FOR OTHERS USE *
