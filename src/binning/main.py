@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 23:51:45 trottar"
+# Time-stamp: "2023-09-12 00:09:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,7 +28,6 @@ from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
-import datetime
 import csv
 
 ##################################################################################################################################################
@@ -40,7 +39,7 @@ from utility import show_pdf_with_evince, match_to_bin
 # Check the number of arguments provided to the script
 
 if len(sys.argv)-1!=34:
-    print("!!!!! ERROR !!!!!\n Expected 34 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL KSet\n!!!!! ERROR !!!!!")
+    print("!!!!! ERROR !!!!!\n Expected 34 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -81,7 +80,7 @@ EbeamValRight = list(sys.argv[30].split(" "))
 EbeamValLeft = list(sys.argv[31].split(" "))
 EbeamValCenter = list(sys.argv[32].split(" "))
 POL = sys.argv[33]
-KSet = sys.argv[34]
+formatted_date = sys.argv[34]
 
 inpDict = {
     "kinematics" : kinematics,
@@ -117,7 +116,7 @@ inpDict = {
     "EbeamValLeft" : EbeamValLeft,
     "EbeamValCenter" : EbeamValCenter,
     "POL" : POL,
-    "KSet" : KSet,
+    "formatted_date" : formatted_date,
 }
 
 ###############################################################################################################################################
@@ -1395,11 +1394,6 @@ create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 print("\n\n")
 
-# Get the current date and time
-now = datetime.datetime.now()
-# Format the date and time as HourMinuteSecond_YearMonthDay
-formatted_date = now.strftime("H%HM%MS%S_%Y%B%d")
-
 # Create a new directory for each iteration
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
 os.mkdir(new_dir)
@@ -1407,7 +1401,7 @@ os.mkdir(new_dir)
 for f in output_file_lst:    
     if OUTPATH in f:
         f_new = f.replace(OUTPATH,new_dir)
-        print("Copying {} to {}...".format(f,f_new))
+        print("Copying {} to {}".format(f,f_new))
         
 '''
 *****************************************
