@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 23:39:05 trottar"
+# Time-stamp: "2023-09-11 23:43:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1396,7 +1396,7 @@ create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 # Get the current date and time
 now = datetime.datetime.now()
 # Format the date and time as a string to use in the file name
-formatted_date = now.strftime("%H%M%S_%Y%M%D")
+formatted_date = now.strftime("%H%M%S_%Y%B%D")
 
 for f in output_file_lst:    
     if OUTPATH in f:
