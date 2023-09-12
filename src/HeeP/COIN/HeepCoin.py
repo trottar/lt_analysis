@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 15:50:43 trottar"
+# Time-stamp: "2023-09-11 16:09:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1304,7 +1304,7 @@ for evt in TBRANCH_DUMMY_nopid:
 ################################################################################################################################################
 # Normalize simc by normfactor/nevents
 # Normalize data by effective charge
-'''
+
 normfac_simc = (simc_normfactor)/(simc_nevents)
 H_ssxfp_SIMC.Scale(normfac_simc)                                                                                                                                   
 H_ssyfp_SIMC.Scale(normfac_simc)                                                                                                                                  
@@ -1331,7 +1331,7 @@ H_Q2_SIMC.Scale(normfac_simc)
 H_W_SIMC.Scale(normfac_simc)                                                                                                                                                         
 H_epsilon_SIMC.Scale(normfac_simc)                                                                                                                                                    
 H_MMp2_SIMC.Scale(normfac_simc)
-'''
+
 dummy_target_corr = 4.8579
 normfac_dummy = 1/(dummy_charge*dummy_target_corr)
 H_ssxfp_DUMMY.Scale(normfac_dummy)

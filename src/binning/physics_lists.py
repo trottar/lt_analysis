@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 15:46:18 trottar"
+# Time-stamp: "2023-09-11 23:05:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ from utility import write_to_file
 
 ###############################################################################################################################################
 
-def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
+def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst):
 
     ################################################################################################################################################
 
@@ -202,6 +202,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
     ################################################################################################################################################
 
     f_list_settings = '{}/src/{}/beam/Eb_KLT.dat'.format(LTANAPATH, ParticleType)
+    output_file_lst.append(f_list_settings)
     # Checks if file exists and creates if not
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
@@ -245,6 +246,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
     ################################################################################################################################################
 
     f_list_settings = '{}/src/{}/list.settings'.format(LTANAPATH, ParticleType)
+    output_file_lst.append(f_list_settings)    
     # Checks if file exists and creates if not
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
@@ -278,6 +280,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     if float(runNumRight[0]) != 0:
         f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
+        output_file_lst.append(f_list)
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
 
@@ -299,6 +302,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     if float(runNumLeft[0]) != 0:
         f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
+        output_file_lst.append(f_list)
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
             
@@ -320,6 +324,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
 
     if float(runNumCenter[0]) != 0:
         f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100)
+        output_file_lst.append(f_list)
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
             
@@ -342,6 +347,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist):
     ################################################################################################################################################
 
     f_list = '{}/src/{}/averages/aver.{}_{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100)
+    output_file_lst.append(f_list)
     # Open the file in write mode, which creates a new empty file or overwrites the existing one
     open(f_list, "w").close()
 

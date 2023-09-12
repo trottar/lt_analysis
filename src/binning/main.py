@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-08 16:15:28 trottar"
+# Time-stamp: "2023-09-11 23:05:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,6 +142,8 @@ foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
 fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
 outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
+output_file_lst = []
+
 ################################################################################################################################################    
 
 ##############################
@@ -191,6 +193,7 @@ if DEBUG:
     # Show plot pdf for each setting
     for phiset in phisetlist:
         show_pdf_with_evince(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
+output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
         
 ##############################
 # Step 3 of the lt_analysis: # DONE
@@ -223,6 +226,7 @@ if DEBUG:
     # Show plot pdf for each setting
     for hist in histlist:        
         show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
 
 ##############################
 # Step 4 of the lt_analysis: # Done
@@ -826,7 +830,8 @@ for i,hist in enumerate(histlist):
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
-
+output_file_lst.append(outputpdf)
+    
 ##############################
 # Step 6 of the lt_analysis: #
 ##############################
@@ -1377,11 +1382,15 @@ G_ratio_plt.GetXaxis().SetLabelSize(0.04)
 C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+')')
 
 if DEBUG:
-    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))                
-
+    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+    
 # Run fortran script
 from physics_lists import create_lists
-create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist)
+create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
+
+for f in output_file_lst:
+    print(f)
 
 '''
 *****************************************
