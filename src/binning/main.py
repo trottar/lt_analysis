@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 12:46:37 trottar"
+# Time-stamp: "2023-09-12 12:50:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1393,6 +1393,12 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
+'''
+*****************************************
+* NEED TO ADD ROOT FILES FOR OTHERS USE *
+*****************************************
+'''
+
 print("\n\n")
 
 # Create a new directory for each iteration
@@ -1414,17 +1420,11 @@ for f in output_file_lst:
         print(f_tmp)
         for f_dir in f_arr:
             if "{}/".format(ParticleType) not in f_dir:
-                #os.mkdir(new_dir+f_dir)
-                f_new = new_dir+f_dir+f_tmp
+                #os.mkdir(new_dir+"/"+f_dir)
+                f_new = new_dir+"/"+f_dir+"/"+f_tmp
         
         print("Copying {} to {}".format(f,f_new))
-        #shutil.copy(f, f_new)
-        
-'''
-*****************************************
-* NEED TO ADD ROOT FILES FOR OTHERS USE *
-*****************************************
-'''
+        #shutil.copy(f, f_new)        
 
 ##############################
 # Step 7 of the lt_analysis: #
