@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 13:51:34 trottar"
+# Time-stamp: "2023-09-12 14:04:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -810,9 +810,9 @@ polar_plots[-1].GetYaxis().SetName("-t")
 
 Cpht.Print(outputpdf)
 
+cut_summary_lst = ""
 for i,hist in enumerate(histlist):
     texlist = []
-    cut_summary_lst = ""
     Ctext = TCanvas()
     for j,line in enumerate(hist["pid_text"]):
         if j == 0:
@@ -857,9 +857,8 @@ for i,hist in enumerate(histlist):
     else:
         Ctext.Print(outputpdf)
 
-    inpDict["cut_summary_lst"] = cut_summary_lst
-
-    print("~~~~~~~~~~~~~~",cut_summary_lst)
+print("Cut Summary...",cut_summary_lst)        
+inpDict["cut_summary_lst"] = cut_summary_lst
         
 if DEBUG:
     show_pdf_with_evince(outputpdf)
@@ -1433,20 +1432,23 @@ print("\n\n")
 
 # Create a new directory for each iteration
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
-if EPSSET == "low":
+if not os.path.exists(new_dir):
     os.mkdir(new_dir)
-    print("")
 
 for f in output_file_lst:
     if OUTPATH in f:
         if ".pdf" in f:
-            os.mkdir(new_dir+"/plots")
+            if not os.path.exists(new_dir+"/plots"):
+                os.mkdir(new_dir+"/plots")
             f_new = f.replace(OUTPATH,new_dir+"/plots")
+            print("Copying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)            
         if ".root" in f:
-            os.mkdir(new_dir+"/rootfiles")
+            if not os.path.exists(new_dir+"/rootfiles"):
+                os.mkdir(new_dir+"/rootfiles")
             f_new = f.replace(OUTPATH,new_dir+"/rootfiles")
-        print("Copying {} to {}".format(f,f_new))
-        shutil.copy(f, f_new)
+            print("Copying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)
     if "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
@@ -1455,11 +1457,11 @@ for f in output_file_lst:
         print(f_tmp)
         for f_dir in f_arr:
             if "{}/".format(ParticleType) not in f_dir:
-                os.mkdir(new_dir+"/"+f_dir)
-                f_new = new_dir+"/"+f_dir+"/"+f_tmp
-        
-        print("Copying {} to {}".format(f,f_new))
-        shutil.copy(f, f_new)
+                if not os.path.exists(new_dir+"/"+f_dir):
+                    os.mkdir(new_dir+"/"+f_dir)
+                f_new = new_dir+"/"+f_dir+"/"+f_tmp    
+                print("Copying {} to {}".format(f,f_new))
+                shutil.copy(f, f_new)
         
 with open(new_dir+'/{}_{}_summary.txt'.format(ParticleType,OutFilename), 'w') as file:        
     file.write(inpDict["cut_summary_lst"])
