@@ -366,20 +366,26 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         infile.Close()
 
-    paramDict = {
-            
-        "a1" : a1,
-        "b1" : b1,
-        "a2" : a2,
-        "b2" : b2,
-        "a3" : a3,
-        "b3" : b3,
-        "a4" : a4,
-        "b4" : b4
-    }
 
-    for p in [1,2,3,4]:
-        print(target,"~~~~~~~~~~~~~~~~~~",paramDict["a%i" % p],paramDict["b%i" % p])
+    if target == "Center":        
+        paramDict = {
+
+            "a1" : a1,
+            "b1" : b1,
+            "a2" : a2,
+            "b2" : b2,
+            "a3" : a3,
+            "b3" : b3,
+            "a4" : a4,
+            "b4" : b4
+        }
+
+        for p in [1,2,3,4]:
+            print(target,"~~~~~~~~~~~~~~~~~~",paramDict["a%i" % p],paramDict["b%i" % p])
+
+    else:
+
+        paramDict = {}
 
     ##############################################################################################################################################
     c1_kin = TCanvas("c1_kin", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
