@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 13:07:33 trottar"
+# Time-stamp: "2023-09-12 13:11:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -823,20 +823,21 @@ for i,hist in enumerate(histlist):
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
-    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"t_range = ({}-{})".format(tmin,tmax))
+    j = len(hist["pid_text"])
+    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+1)/2))),"t_range = ({}-{})".format(tmin,tmax))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)        
-    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"t_bins-> {}".format(t_bins))
+    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+2)/2))),"t_bins-> {}".format(t_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
-    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"phi_bins{}".format(phi_bins))
+    tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3)/2))),"phi_bins{}".format(phi_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
     for p in [1,2,3,4]:
-        tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
+        tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3+p)/2))),"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
