@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-11 23:50:20 trottar"
+# Time-stamp: "2023-09-11 23:51:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1400,11 +1400,12 @@ now = datetime.datetime.now()
 # Format the date and time as HourMinuteSecond_YearMonthDay
 formatted_date = now.strftime("H%HM%MS%S_%Y%B%d")
 
+# Create a new directory for each iteration
+new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
+os.mkdir(new_dir)
+
 for f in output_file_lst:    
     if OUTPATH in f:
-        new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
-        # Create a new directory
-        os.mkdir(new_dir)
         f_new = f.replace(OUTPATH,new_dir)
         print("Copying {} to {}...".format(f,f_new))
         
