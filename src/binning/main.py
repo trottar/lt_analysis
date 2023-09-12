@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 11:58:17 trottar"
+# Time-stamp: "2023-09-12 12:16:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1406,9 +1406,12 @@ for f in output_file_lst:
         f_new = f.replace(OUTPATH,new_dir)
         print("Copying {} to {}".format(f,f_new))
         #shutil.copy(f, f_new)
-    if LTANAPATH in f:
+    if "{}/".format(ParticleType) in f:
+        f_arr = f.split("/")
+        print(f_arr)
+        #os.mkdir(new_dir+)
         #### NEED TO FIX PHYSICS_LISTS (the dirs are an issue)
-        f_new = f.replace(LTANAPATH,new_dir)
+        f_new = new_dir+f.split("beam/")[1]
         print("Copying {} to {}".format(f,f_new))
         #shutil.copy(f, f_new)
         
