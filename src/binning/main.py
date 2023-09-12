@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 00:41:55 trottar"
+# Time-stamp: "2023-09-12 11:58:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1398,13 +1398,14 @@ print("\n\n")
 # Create a new directory for each iteration
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
 if EPSSET == "low":
-    os.mkdir(new_dir)
+    #os.mkdir(new_dir)
+    print("")
 
 for f in output_file_lst:
     if OUTPATH in f:
         f_new = f.replace(OUTPATH,new_dir)
         print("Copying {} to {}".format(f,f_new))
-        shutil.copy(f, f_new)
+        #shutil.copy(f, f_new)
     if LTANAPATH in f:
         #### NEED TO FIX PHYSICS_LISTS (the dirs are an issue)
         f_new = f.replace(LTANAPATH,new_dir)
