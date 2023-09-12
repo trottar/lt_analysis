@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 14:04:06 trottar"
+# Time-stamp: "2023-09-12 14:09:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1432,6 +1432,7 @@ print("\n\n")
 
 # Create a new directory for each iteration
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
+# Check if dir exists
 if not os.path.exists(new_dir):
     os.mkdir(new_dir)
 
@@ -1456,7 +1457,7 @@ for f in output_file_lst:
         print(f_arr)
         print(f_tmp)
         for f_dir in f_arr:
-            if "{}/".format(ParticleType) not in f_dir:
+            if "{}".format(ParticleType) not in f_dir:
                 if not os.path.exists(new_dir+"/"+f_dir):
                     os.mkdir(new_dir+"/"+f_dir)
                 f_new = new_dir+"/"+f_dir+"/"+f_tmp    
