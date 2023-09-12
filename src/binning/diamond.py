@@ -380,9 +380,6 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             "b4" : b4
         }
 
-        for p in [1,2,3,4]:
-            print(target,"~~~~~~~~~~~~~~~~~~",paramDict["a%i" % p],paramDict["b%i" % p])
-
     else:
 
         paramDict = {}

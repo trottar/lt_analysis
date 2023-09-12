@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 13:15:04 trottar"
+# Time-stamp: "2023-09-12 13:35:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -812,6 +812,7 @@ Cpht.Print(outputpdf)
 
 for i,hist in enumerate(histlist):
     texlist = []
+    cut_lst = ""
     Ctext = TCanvas()
     for j,line in enumerate(hist["pid_text"]):
         if j == 0:
@@ -819,28 +820,34 @@ for i,hist in enumerate(histlist):
             tex.SetTextSize(0.03)
             tex.SetTextColor(i+1)
             texlist.append(tex)
+            cut_lst = cut_lst.append+(hist["phi_setting"])
         tex = TLatex(0.,0.+(0.95-(0.3+(0.05*j/2))),"{}".format(line))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
+        cut_lst = cut_lst.append+(line)        
     j = len(hist["pid_text"])
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+1)/2))),"t_range = ({}-{})".format(tmin,tmax))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
-    texlist.append(tex)        
+    texlist.append(tex)
+    cut_lst = cut_lst.append+("t_range = ({}-{})".format(tmin,tmax))    
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+2)/2))),"t_bins-> {}".format(t_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
+    cut_lst = cut_lst.append+("t_bins-> {}".format(t_bins))    
     tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3)/2))),"phi_bins-> {}".format(phi_bins))
     tex.SetTextSize(0.03)
     tex.SetTextColor(i+1)
     texlist.append(tex)
+    cut_lst = cut_lst.append+("phi_bins-> {}".format(phi_bins))    
     for p in [1,2,3,4]:
         tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3+p)/2))),"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
         tex.SetTextSize(0.03)
         tex.SetTextColor(i+1)
         texlist.append(tex)
+        cut_lst = cut_lst.append+("a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
             
     for j, tex in enumerate(texlist):
         tex.Draw()
@@ -850,6 +857,10 @@ for i,hist in enumerate(histlist):
     else:
         Ctext.Print(outputpdf)
 
+    inpDict["cut_lst"] = cut_lst
+
+    print("~~~~~~~~~~~~~~",cut_lst)
+        
 if DEBUG:
     show_pdf_with_evince(outputpdf)
 show_pdf_with_evince(outputpdf)    
