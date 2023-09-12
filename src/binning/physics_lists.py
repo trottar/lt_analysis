@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 00:41:06 trottar"
+# Time-stamp: "2023-09-12 12:03:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,7 +245,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     ################################################################################################################################################
 
     f_list_settings = '{}/src/{}/list.settings'.format(LTANAPATH, ParticleType)
-    output_file_lst.append(f_list_settings)   .split('/src/')[1] 
+    output_file_lst.append(f_list_settings.split('/src/')[1])
     # Checks if file exists and creates if not
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
