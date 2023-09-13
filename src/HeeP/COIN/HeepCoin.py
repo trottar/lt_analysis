@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 18:35:13 trottar"
+# Time-stamp: "2023-09-13 18:44:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1714,13 +1714,20 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 ################################################################################################################################################
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
-def fit_gaussian(hist, dtype):
+def fit_gaussian(hist, x_min, x_max, dtype):
     
-    max_bin = hist.GetMaximumBin()
+    # Find the corresponding bin numbers
+    bin_min = hist.GetXaxis().FindBin(x_min)
+    bin_max = hist.GetXaxis().FindBin(x_max)
+
+    # Find the maximum value within the specified range
+    max_bin = hist.GetMaximumBin(bin_min, bin_max)
     max_value = hist.GetBinContent(max_bin)
+
+    # Print the results
     print("-"*25)
-    print("max_bin",max_bin)
-    print("max_value",max_value)
+    print("max_bin", max_bin)
+    print("max_value", max_value)
     
     half_max = max_value / 2
     
@@ -2566,9 +2573,9 @@ b_int_MMp2_data_nopid = int(H_MMp2_DATA_nopid.Integral())
 b_int_MMp2_dummy = int(H_MMp2_DUMMY.Integral())
 
 # Perform Gaussian fits for each histogra
-b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC, "simc")
-b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA, "data")
-b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY, "dummy")
+b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC,-0.01, 0.01, "simc")
+b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA,-0.01, 0.01, "data")
+b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY,-0.01, 0.01, "dummy")
 
 l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
 l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
@@ -2608,23 +2615,6 @@ b_int_ph_q_data_nocut = int(H_ph_q_DATA_nocut.Integral())
 b_int_ph_q_data_nopid = int(H_ph_q_DATA_nopid.Integral())
 b_int_ph_q_dummy = int(H_ph_q_DUMMY.Integral())
 
-b_mean_ph_q_simc = fit_gaussian(H_ph_q_SIMC, "simc")
-b_mean_ph_q_data = fit_gaussian(H_ph_q_DATA, "data")
-b_mean_ph_q_dummy = fit_gaussian(H_ph_q_DUMMY, "dummy")
-
-l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, INT = {:.0f}".format( b_int_ph_q_simc))
-l_ph_q.AddEntry(H_ph_q_DATA,"DATA, INT = {:.0f}".format( b_int_ph_q_data))
-if DEBUG:
-    l_ph_q.AddEntry(H_ph_q_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_ph_q_data_nocut))
-    l_ph_q.AddEntry(H_ph_q_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_ph_q_data_nopid))
-l_ph_q.AddEntry(H_ph_q_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_ph_q_dummy))
-l_ph_q.AddEntry(H_ph_q_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_ph_q_simc))
-l_ph_q.AddEntry(H_ph_q_DATA,"DATA, MEAN = {:.4e}".format(b_mean_ph_q_data))
-if DEBUG:
-    l_ph_q.AddEntry(H_ph_q_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_ph_q_data_nocut))
-    l_ph_q.AddEntry(H_ph_q_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_ph_q_data_nopid))
-l_ph_q.AddEntry(H_ph_q_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_ph_q_dummy))
-
 l_ph_q.Draw()
 
 Cph_q.Print(outputpdf)
@@ -2649,23 +2639,6 @@ b_int_th_q_data = int(H_th_q_DATA.Integral())
 b_int_th_q_data_nocut = int(H_th_q_DATA_nocut.Integral())
 b_int_th_q_data_nopid = int(H_th_q_DATA_nopid.Integral())
 b_int_th_q_dummy = int(H_th_q_DUMMY.Integral())
-
-b_mean_th_q_simc = fit_gaussian(H_th_q_SIMC, "simc")
-b_mean_th_q_data = fit_gaussian(H_th_q_DATA, "data")
-b_mean_th_q_dummy = fit_gaussian(H_th_q_DUMMY, "dummy")
-
-l_th_q.AddEntry(H_th_q_SIMC,"SIMC, INT = {:.0f}".format( b_int_th_q_simc))
-l_th_q.AddEntry(H_th_q_DATA,"DATA, INT = {:.0f}".format( b_int_th_q_data))
-if DEBUG:
-    l_th_q.AddEntry(H_th_q_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_th_q_data_nocut))
-    l_th_q.AddEntry(H_th_q_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_th_q_data_nopid))
-l_th_q.AddEntry(H_th_q_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_th_q_dummy))
-l_th_q.AddEntry(H_th_q_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_th_q_simc))
-l_th_q.AddEntry(H_th_q_DATA,"DATA, MEAN = {:.4e}".format(b_mean_th_q_data))
-if DEBUG:
-    l_th_q.AddEntry(H_th_q_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_th_q_data_nocut))
-    l_th_q.AddEntry(H_th_q_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_th_q_data_nopid))
-l_th_q.AddEntry(H_th_q_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_th_q_dummy))
 
 l_th_q.Draw()
 
@@ -2782,9 +2755,9 @@ b_int_pmiss_data_nocut = int(H_pmiss_DATA_nocut.Integral())
 b_int_pmiss_data_nopid = int(H_pmiss_DATA_nopid.Integral())
 b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
 
-b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC, "simc")
-b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA, "data")
-b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY, "dummy")
+b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.03, -0.04, "simc")
+b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.03, -0.04, "data")
+b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.03, -0.04, "dummy")
 
 l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
 l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
@@ -2824,9 +2797,9 @@ b_int_emiss_data_nocut = int(H_emiss_DATA_nocut.Integral())
 b_int_emiss_data_nopid = int(H_emiss_DATA_nopid.Integral())
 b_int_emiss_dummy = int(H_emiss_DUMMY.Integral())
 
-b_mean_emiss_simc = fit_gaussian(H_emiss_SIMC, "simc")
-b_mean_emiss_data = fit_gaussian(H_emiss_DATA, "data")
-b_mean_emiss_dummy = fit_gaussian(H_emiss_DUMMY, "dummy")
+b_mean_emiss_simc = fit_gaussian(H_emiss_SIMC,-0.03, -0.04, "simc")
+b_mean_emiss_data = fit_gaussian(H_emiss_DATA,-0.03, -0.04, "data")
+b_mean_emiss_dummy = fit_gaussian(H_emiss_DUMMY,-0.03, -0.04, "dummy")
 
 l_emiss.AddEntry(H_emiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_emiss_simc))
 l_emiss.AddEntry(H_emiss_DATA,"DATA, INT = {:.0f}".format( b_int_emiss_data))
@@ -2866,9 +2839,9 @@ b_int_pmx_data_nocut = int(H_pmx_DATA_nocut.Integral())
 b_int_pmx_data_nopid = int(H_pmx_DATA_nopid.Integral())
 b_int_pmx_dummy = int(H_pmx_DUMMY.Integral())
 
-b_mean_pmx_simc = fit_gaussian(H_pmx_SIMC, "simc")
-b_mean_pmx_data = fit_gaussian(H_pmx_DATA, "data")
-b_mean_pmx_dummy = fit_gaussian(H_pmx_DUMMY, "dummy")
+b_mean_pmx_simc = fit_gaussian(H_pmx_SIMC,-0.1, 0.1, "simc")
+b_mean_pmx_data = fit_gaussian(H_pmx_DATA,-0.1, 0.1, "data")
+b_mean_pmx_dummy = fit_gaussian(H_pmx_DUMMY,-0.1, 0.1, "dummy")
 
 l_pmx.AddEntry(H_pmx_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmx_simc))
 l_pmx.AddEntry(H_pmx_DATA,"DATA, INT = {:.0f}".format( b_int_pmx_data))
@@ -2908,9 +2881,9 @@ b_int_pmy_data_nocut = int(H_pmy_DATA_nocut.Integral())
 b_int_pmy_data_nopid = int(H_pmy_DATA_nopid.Integral())
 b_int_pmy_dummy = int(H_pmy_DUMMY.Integral())
 
-b_mean_pmy_simc = fit_gaussian(H_pmy_SIMC, "simc")
-b_mean_pmy_data = fit_gaussian(H_pmy_DATA, "data")
-b_mean_pmy_dummy = fit_gaussian(H_pmy_DUMMY, "dummy")
+b_mean_pmy_simc = fit_gaussian(H_pmy_SIMC,-0.1, 0.1, "simc")
+b_mean_pmy_data = fit_gaussian(H_pmy_DATA,-0.1, 0.1, "data")
+b_mean_pmy_dummy = fit_gaussian(H_pmy_DUMMY,-0.1, 0.1, "dummy")
 
 l_pmy.AddEntry(H_pmy_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmy_simc))
 l_pmy.AddEntry(H_pmy_DATA,"DATA, INT = {:.0f}".format( b_int_pmy_data))
@@ -2950,9 +2923,9 @@ b_int_pmz_data_nocut = int(H_pmz_DATA_nocut.Integral())
 b_int_pmz_data_nopid = int(H_pmz_DATA_nopid.Integral())
 b_int_pmz_dummy = int(H_pmz_DUMMY.Integral())
 
-b_mean_pmz_simc = fit_gaussian(H_pmz_SIMC, "simc")
-b_mean_pmz_data = fit_gaussian(H_pmz_DATA, "data")
-b_mean_pmz_dummy = fit_gaussian(H_pmz_DUMMY, "dummy")
+b_mean_pmz_simc = fit_gaussian(H_pmz_SIMC,-0.1, 0.1, "simc")
+b_mean_pmz_data = fit_gaussian(H_pmz_DATA,-0.1, 0.1, "data")
+b_mean_pmz_dummy = fit_gaussian(H_pmz_DUMMY,-0.1, 0.1, "dummy")
 
 l_pmz.AddEntry(H_pmz_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmz_simc))
 l_pmz.AddEntry(H_pmz_DATA,"DATA, INT = {:.0f}".format( b_int_pmz_data))
@@ -2992,9 +2965,9 @@ b_int_W_data_nocut = int(H_W_DATA_nocut.Integral())
 b_int_W_data_nopid = int(H_W_DATA_nopid.Integral())
 b_int_W_dummy = int(H_W_DUMMY.Integral())
 
-b_mean_W_simc = fit_gaussian(H_W_SIMC, "simc")
-b_mean_W_data = fit_gaussian(H_W_DATA, "data")
-b_mean_W_dummy = fit_gaussian(H_W_DUMMY, "dummy")
+b_mean_W_simc = fit_gaussian(H_W_SIMC,0.7, 1.1, "simc")
+b_mean_W_data = fit_gaussian(H_W_DATA,0.7, 1.1, "data")
+b_mean_W_dummy = fit_gaussian(H_W_DUMMY,0.7, 1.1, "dummy")
 
 l_W.AddEntry(H_W_SIMC,"SIMC, INT = {:.0f}".format( b_int_W_simc))
 l_W.AddEntry(H_W_DATA,"DATA, INT = {:.0f}".format( b_int_W_data))
