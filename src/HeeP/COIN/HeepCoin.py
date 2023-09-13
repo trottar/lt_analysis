@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 18:23:01 trottar"
+# Time-stamp: "2023-09-13 18:26:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1724,6 +1724,7 @@ def fit_gaussian(hist, dtype):
         bin_content = hist.GetBinContent(bin)
         if bin_content > max_value:
             max_value = bin_content
+            max_bin = bin
             
     print("-"*25)
     print("max_value",max_value)
