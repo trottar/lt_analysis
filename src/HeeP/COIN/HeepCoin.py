@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 19:05:49 trottar"
+# Time-stamp: "2023-09-13 19:19:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1717,8 +1717,8 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 def fit_gaussian(hist, x_min, x_max, dtype):
     
     # Find the corresponding bin numbers
-    bin_min = hist.GetXaxis().FindBin(x_min)
-    bin_max = hist.GetXaxis().FindBin(x_max)
+    bin_min = hist.GetXaxis().FindBin(x_min) # CHECK, returns bin 1
+    bin_max = hist.GetXaxis().FindBin(x_max) # CHECK, returns bin 201
     
     # Find the maximum value within the specified range
     max_bin = bin_min
@@ -1727,6 +1727,8 @@ def fit_gaussian(hist, x_min, x_max, dtype):
         if hist.GetBinContent(i) > max_value:
             max_bin = i
             max_value = hist.GetBinContent(i)
+            print("~~~~~~~~~~~max_bin", max_bin)
+            print("!!!!!!!!!!!max_value", max_value)
 
     # Print the results
     print("-"*25)
