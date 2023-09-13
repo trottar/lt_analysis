@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 17:12:33 trottar"
+# Time-stamp: "2023-09-13 17:33:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1717,7 +1717,7 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 def fit_gaussian(hist, dtype):
     max_bin = hist.GetMaximumBin()
     max_value = hist.GetBinContent(max_bin)
-    half_max = max_value / 2.0
+    half_max = max_value / 100.0
     
     # Find left and right bins closest to half-max value
     left_bin = max_bin
@@ -3005,7 +3005,7 @@ l_W.Draw()
 
 CW.Print(outputpdf + ')')
 
-print(b_mean_W_simc,b_mean_W_data,b_mean_pmz_simc,b_mean_pmz_data,b_mean_pmy_simc,b_mean_pmy_data,b_mean_pmx_simc,b_mean_pmx_data,b_mean_emiss_simc,b_mean_emiss_data)
+print("{:.5e} {:.5e} {:.5e} {:.5e} {:.5e} {:.5e} {:.5e} {:.5e} {:.5e} {:.5e}".format(b_mean_W_simc,b_mean_W_data,b_mean_pmz_simc,b_mean_pmz_data,b_mean_pmy_simc,b_mean_pmy_data,b_mean_pmx_simc,b_mean_pmx_data,b_mean_emiss_simc,b_mean_emiss_data))
 
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
