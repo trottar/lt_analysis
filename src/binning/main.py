@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-12 14:19:13 trottar"
+# Time-stamp: "2023-09-12 15:13:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1455,9 +1455,6 @@ for f in output_file_lst:
     if "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
-        print(f)
-        print(f_arr)
-        print(f_tmp)
         for f_dir in f_arr:
             if "{}".format(ParticleType) not in f_dir:
                 if not os.path.exists(new_dir+"/"+f_dir):
