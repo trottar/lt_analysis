@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 18:44:37 trottar"
+# Time-stamp: "2023-09-13 18:50:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1721,9 +1721,9 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     bin_max = hist.GetXaxis().FindBin(x_max)
 
     # Find the maximum value within the specified range
-    max_bin = hist.GetMaximumBin(bin_min, bin_max)
-    max_value = hist.GetBinContent(max_bin)
-
+    max_bin = ROOT.Long(0)  # Create a Long to store the max_bin value
+    max_value = hist.GetMaximumBin(max_bin, bin_min, bin_max)
+    
     # Print the results
     print("-"*25)
     print("max_bin", max_bin)
@@ -1747,11 +1747,11 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     
     fit_func = ROOT.TF1("fitFunc", "gaus", min_range, max_range)
     if dtype == "simc":
-        fit_func.SetLineColor(kBlack)
+        fit_func.SetLineColor(ROOT.kBlack)
     if dtype == "data":
-        fit_func.SetLineColor(kRed)
+        fit_func.SetLineColor(ROOT.kRed)
     if dtype == "dummy":
-        fit_func.SetLineColor(kGreen)    
+        fit_func.SetLineColor(ROOT.kGreen)    
     hist.Fit(fit_func, "QR")
     mean = fit_func.GetParameter(1)
     #fit_func.Draw("same")
