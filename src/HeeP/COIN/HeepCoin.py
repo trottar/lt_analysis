@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 19:23:48 trottar"
+# Time-stamp: "2023-09-13 19:31:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1738,7 +1738,7 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     print("max_bin", max_bin)
     print("max_value", max_value)
     
-    half_max = max_value / 2
+    half_max = max_value*0.75
     
     # Find left and right bins closest to half-max value
     left_bin = max_bin
