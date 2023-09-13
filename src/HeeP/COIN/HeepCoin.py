@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 19:31:09 trottar"
+# Time-stamp: "2023-09-13 19:35:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1737,6 +1737,7 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     print("bin_max",bin_max)    
     print("max_bin", max_bin)
     print("max_value", max_value)
+    print("bin_center",hist.GetBinCenter(max_bin))
     
     half_max = max_value*0.75
     
