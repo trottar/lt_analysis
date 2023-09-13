@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 18:13:04 trottar"
+# Time-stamp: "2023-09-13 18:17:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1715,21 +1715,12 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist, dtype):
-
-    x_axis = hist.GetXaxis()
     
-    # Get the minimum and maximum values from the x-axis range
-    min_range = x_axis.GetXmin()
-    max_range = x_axis.GetXmax()
-    
-    x_axis = hist.GetXaxis()
-    
-    # Get the minimum and maximum values from the x-axis range
-    min_range = x_axis.GetXmin()
-    max_range = x_axis.GetXmax()
-    
+    max_bin = hist.GetMaximumBin()
+    max_value = min(hist.GetBinContent(max_bin), 1)  # Ensure max_value is not greater than 1
     print("-"*25)
-    print("max_value",max_value)
+    print("max_value", max_value)
+    
     half_max = max_value / 2
     
     # Find left and right bins closest to half-max value
