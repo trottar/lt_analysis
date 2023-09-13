@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 18:31:40 trottar"
+# Time-stamp: "2023-09-13 18:35:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1716,17 +1716,10 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist, dtype):
     
-    # Assuming 'hist' is your histogram
-    max_value = -float("inf")  # Initialize max_value to negative infinity
-
-    # Loop over all bins to find the maximum value
-    for bin in range(1, hist.GetNbinsX() + 1):
-        bin_content = hist.GetBinContent(bin)
-        if 1.0 > bin_content > max_value:
-            max_value = bin_content
-            max_bin = bin
-            
+    max_bin = hist.GetMaximumBin()
+    max_value = hist.GetBinContent(max_bin)
     print("-"*25)
+    print("max_bin",max_bin)
     print("max_value",max_value)
     
     half_max = max_value / 2
