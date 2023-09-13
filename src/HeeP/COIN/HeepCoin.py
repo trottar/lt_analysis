@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 19:43:14 trottar"
+# Time-stamp: "2023-09-13 19:52:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1747,8 +1747,12 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     right_bin = max_bin
     while hist.GetBinContent(left_bin) > half_max and left_bin > 1:
         left_bin -= 1
+        print("~~~~~~~~~~~left_bin", left_bin)
+        print("~~~~~~~~~~~bin_center",hist.GetBinCenter(left_bin))
     while hist.GetBinContent(right_bin) > half_max and right_bin < hist.GetNbinsX():
         right_bin += 1
+        print("~~~~~~~~~~~right_bin", right_bin)
+        print("~~~~~~~~~~~bin_center",hist.GetBinCenter(right_bin))        
     
     min_range = hist.GetBinCenter(left_bin)
     print("min_range",min_range)
