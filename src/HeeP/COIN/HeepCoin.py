@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 14:03:46 trottar"
+# Time-stamp: "2023-09-13 14:26:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2989,6 +2989,8 @@ l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_W_dummy))
 l_W.Draw()
 
 CW.Print(outputpdf + ')')
+
+print(b_mean_W_simc,b_mean_W_data,b_mean_pmz_simc,b_mean_pmz_data,b_mean_pmy_simc,b_mean_pmy_data,b_mean_pmx_simc,b_mean_pmx_data,b_mean_emiss_simc,b_mean_emiss_data)
 
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
