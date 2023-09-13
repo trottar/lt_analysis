@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 18:00:18 trottar"
+# Time-stamp: "2023-09-13 18:04:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1715,7 +1715,13 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist, dtype):
-    max_bin = hist.GetMaximumBin()
+    
+    # Define the range you're interested in
+    min_bin = hist.FindBin(min_range)  # Assuming min_range is defined elsewhere
+    max_bin = hist.FindBin(max_range)  # Assuming max_range is defined elsewhere
+    
+    # Find maximum bin within the specified range
+    max_bin = hist.GetMaximumBin(min_bin, max_bin)
     max_value = hist.GetBinContent(max_bin)
     print("-"*25)
     print("max_value",max_value)
