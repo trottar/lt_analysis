@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 17:52:30 trottar"
+# Time-stamp: "2023-09-13 18:00:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1717,6 +1717,8 @@ H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 def fit_gaussian(hist, dtype):
     max_bin = hist.GetMaximumBin()
     max_value = hist.GetBinContent(max_bin)
+    print("-"*25)
+    print("max_value",max_value)
     half_max = max_value / 1e-15
     
     # Find left and right bins closest to half-max value
@@ -1728,7 +1730,10 @@ def fit_gaussian(hist, dtype):
         right_bin += 1
     
     min_range = hist.GetBinCenter(left_bin)
+    print("min_range",min_range)
     max_range = hist.GetBinCenter(right_bin)
+    print("max_range",max_range)
+    print("-"*25)
     
     fit_func = ROOT.TF1("fitFunc", "gaus", min_range, max_range)
     if dtype == "simc":
