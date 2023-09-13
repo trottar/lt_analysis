@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 18:09:15 trottar"
+# Time-stamp: "2023-09-13 18:13:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1722,13 +1722,12 @@ def fit_gaussian(hist, dtype):
     min_range = x_axis.GetXmin()
     max_range = x_axis.GetXmax()
     
-    # Define the range you're interested in
-    min_bin = hist.FindBin(min_range)  # Assuming min_range is defined elsewhere
-    max_bin = hist.FindBin(max_range)  # Assuming max_range is defined elsewhere
+    x_axis = hist.GetXaxis()
     
-    # Find maximum bin within the specified range
-    max_bin = hist.GetMaximumBin(min_bin, max_bin)
-    max_value = hist.GetBinContent(max_bin)
+    # Get the minimum and maximum values from the x-axis range
+    min_range = x_axis.GetXmin()
+    max_range = x_axis.GetXmax()
+    
     print("-"*25)
     print("max_value",max_value)
     half_max = max_value / 2
