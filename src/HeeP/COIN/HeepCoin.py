@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 10:00:11 trottar"
+# Time-stamp: "2023-09-14 10:06:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1766,14 +1766,14 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     print("max_range",max_range)
     print("-"*25)
 
-    fit_func = ROOT.TF1("fit_func", "gaus")
+    fit_func = ROOT.TF1("fit_{}".format( hist.GetName()), "gaus")
     if dtype == "simc":
         fit_func.SetLineColor(kBlack)
     if dtype == "data":
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
         fit_func.SetLineColor(kGreen)    
-    hist.Fit("fit_func", "", "", min_range, max_range)
+    hist.Fit("fit_{}".format( hist.GetName()), "", "", min_range, max_range)
     mean = fit_func.GetParameter(1)
     fit_func.Draw("same")
     return mean
