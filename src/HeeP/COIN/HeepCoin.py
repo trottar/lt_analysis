@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 11:19:53 trottar"
+# Time-stamp: "2023-09-14 11:22:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1769,8 +1769,6 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     hist.Fit("gaus", "", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
     
-    if dtype == "simc":
-        fit_func.SetLineColor(kBlack)
     if dtype == "data":
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
@@ -2657,6 +2655,10 @@ H_pmiss_DATA_nocut.SetLineColor(kCyan)
 H_pmiss_DATA_nopid.SetLineColor(kMagenta)
 H_pmiss_DUMMY.SetLineColor(kGreen)
 
+b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.03, 0.04, "simc")
+b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.03, 0.04, "data")
+b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.03, 0.04, "dummy")
+
 H_pmiss_SIMC.Draw("E1")
 H_pmiss_DATA.Draw("same, E1")
 if DEBUG:
@@ -2670,6 +2672,19 @@ b_int_pmiss_data_nocut = int(H_pmiss_DATA_nocut.Integral())
 b_int_pmiss_data_nopid = int(H_pmiss_DATA_nopid.Integral())
 b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
 
+l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
+l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
+if DEBUG:
+    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmiss_data_nocut))
+    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmiss_data_nopid))
+l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmiss_dummy))
+l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_pmiss_simc))
+l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}".format(b_mean_pmiss_data))
+if DEBUG:
+    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_pmiss_data_nocut))
+    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_pmiss_data_nopid))
+l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_pmiss_dummy))
+
 l_pmiss.Draw()
 
 Cpmiss.Print(outputpdf)
@@ -2681,6 +2696,10 @@ H_emiss_DATA.SetLineColor(kRed)
 H_emiss_DATA_nocut.SetLineColor(kCyan)
 H_emiss_DATA_nopid.SetLineColor(kMagenta)
 H_emiss_DUMMY.SetLineColor(kGreen)
+
+b_mean_emiss_simc = fit_gaussian(H_emiss_SIMC,-0.03, 0.04, "simc")
+b_mean_emiss_data = fit_gaussian(H_emiss_DATA,-0.03, 0.04, "data")
+b_mean_emiss_dummy = fit_gaussian(H_emiss_DUMMY,-0.03, 0.04, "dummy")
 
 H_emiss_SIMC.Draw("same, E1")
 H_emiss_DATA.Draw("same, E1")
@@ -2694,6 +2713,19 @@ b_int_emiss_data = int(H_emiss_DATA.Integral())
 b_int_emiss_data_nocut = int(H_emiss_DATA_nocut.Integral())
 b_int_emiss_data_nopid = int(H_emiss_DATA_nopid.Integral())
 b_int_emiss_dummy = int(H_emiss_DUMMY.Integral())
+
+l_emiss.AddEntry(H_emiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_emiss_simc))
+l_emiss.AddEntry(H_emiss_DATA,"DATA, INT = {:.0f}".format( b_int_emiss_data))
+if DEBUG:
+    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_emiss_data_nocut))
+    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_emiss_data_nopid))
+l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_emiss_dummy))
+l_emiss.AddEntry(H_emiss_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_emiss_simc))
+l_emiss.AddEntry(H_emiss_DATA,"DATA, MEAN = {:.4e}".format(b_mean_emiss_data))
+if DEBUG:
+    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_emiss_data_nocut))
+    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_emiss_data_nopid))
+l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_emiss_dummy))
 
 l_emiss.Draw()
 
