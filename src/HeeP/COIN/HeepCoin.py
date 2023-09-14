@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 20:55:29 trottar"
+# Time-stamp: "2023-09-13 21:00:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1765,8 +1765,16 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     #max_range = hist.GetBinCenter(right_bin)
     print("max_range",max_range)
     print("-"*25)
+
+
+    initial_mean = hist.GetMean()
+    initial_rms = hist.GetRMS()
     
     fit_func = ROOT.TF1("fit_func", "gaus", min_range, max_range)
+    fit_func.SetParameter(0, hist.GetMaximum())  # Initial guess for amplitude
+    fit_func.SetParameter(1, initial_mean)      # Initial guess for mean
+    fit_func.SetParameter(2, initial_rms)       # Initial guess for sigma
+    
     if dtype == "simc":
         fit_func.SetLineColor(kBlack)
     if dtype == "data":
