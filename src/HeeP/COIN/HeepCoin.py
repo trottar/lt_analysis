@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 21:04:19 trottar"
+# Time-stamp: "2023-09-13 21:13:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1766,27 +1766,18 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     print("max_range",max_range)
     print("-"*25)
 
-
-    # Define a Gaussian function
-    def gaussian(x, par):
-        return par[0]*ROOT.TMath.Gaus(x[0], par[1], par[2], False)
-
+    # Create a new histogram with the selected range
+    hist_selected = hist.Clone()
+    hist_selected.GetXaxis().SetRangeUser(fit_min, fit_max)
     
-    initial_mean = hist.GetMean()
-    initial_rms = hist.GetRMS()
-    
-    fit_func = ROOT.TF1("fit_func", gaussian, min_range, max_range, 3)
-    fit_func.SetParameter(0, hist.GetMaximum())  # Initial guess for amplitude
-    fit_func.SetParameter(1, initial_mean)      # Initial guess for mean
-    fit_func.SetParameter(2, initial_rms)       # Initial guess for sigma
-    
+    fit_func = ROOT.TF1("fit_func", "gaus", min_range, max_range)
     if dtype == "simc":
         fit_func.SetLineColor(kBlack)
     if dtype == "data":
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
         fit_func.SetLineColor(kGreen)    
-    hist.Fit(fit_func, "QR", "", min_range, max_range)
+    hist_selected.Fit(fit_func, "QR", "", min_range, max_range)
     mean = fit_func.GetParameter(1)
     #fit_func.Draw("same")
     return mean
