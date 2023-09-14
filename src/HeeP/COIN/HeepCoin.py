@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 12:18:23 trottar"
+# Time-stamp: "2023-09-14 12:24:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1989,14 +1989,12 @@ bpm_tar_x_DATA.SetLineColor(kRed)
 bpm_tar_x_DATA_nocut.SetLineColor(kCyan)
 bpm_tar_x_DATA_nopid.SetLineColor(kMagenta)
 
-bpm_tar_x_DATA.Draw("same, E1")
+b_mean_bpm_tar_x_data = fit_gaussian(bpm_tar_x_DATA, -0.1, 0.1, "data")
+
+bpm_tar_x_DATA.Draw("E1")
 if DEBUG:
     bpm_tar_x_DATA_nocut.Draw("same, E1")
     bpm_tar_x_DATA_nopid.Draw("same, E1")
-
-b_mean_bpm_tar_x_data = (bpm_tar_x_DATA.GetMean())
-b_mean_bpm_tar_x_data_nocut = (bpm_tar_x_DATA_nocut.GetMean())
-b_mean_bpm_tar_x_data_nopid = (bpm_tar_x_DATA_nopid.GetMean())
 
 l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = {:.4e}".format( b_mean_bpm_tar_x_data))
 if DEBUG:
@@ -2023,14 +2021,12 @@ bpm_tar_y_DATA.SetLineColor(kRed)
 bpm_tar_y_DATA_nocut.SetLineColor(kCyan)
 bpm_tar_y_DATA_nopid.SetLineColor(kMagenta)
 
-bpm_tar_y_DATA.Draw("same, E1")
+b_mean_bpm_tar_y_data = fit_gaussian(bpm_tar_y_DATA, 0.0, 0.2, "data")
+
+bpm_tar_y_DATA.Draw("E1")
 if DEBUG:
     bpm_tar_y_DATA_nocut.Draw("same, E1")
     bpm_tar_y_DATA_nopid.Draw("same, E1")
-
-b_mean_bpm_tar_y_data = (bpm_tar_y_DATA.GetMean())
-b_mean_bpm_tar_y_data_nocut = (bpm_tar_y_DATA_nocut.GetMean())
-b_mean_bpm_tar_y_data_nopid = (bpm_tar_y_DATA_nopid.GetMean())
 
 l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.4e}".format( b_mean_bpm_tar_y_data))
 if DEBUG:
