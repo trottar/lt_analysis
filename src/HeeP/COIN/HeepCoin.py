@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 21:13:53 trottar"
+# Time-stamp: "2023-09-13 21:22:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1768,7 +1768,7 @@ def fit_gaussian(hist, x_min, x_max, dtype):
 
     # Create a new histogram with the selected range
     hist_selected = hist.Clone()
-    hist_selected.GetXaxis().SetRangeUser(fit_min, fit_max)
+    hist_selected.GetXaxis().SetRangeUser(min_range, max_range)
     
     fit_func = ROOT.TF1("fit_func", "gaus", min_range, max_range)
     if dtype == "simc":
