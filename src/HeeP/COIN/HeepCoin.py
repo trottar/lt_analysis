@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 21:37:36 trottar"
+# Time-stamp: "2023-09-14 09:44:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1712,7 +1712,7 @@ H_ct_ep_DATA_nocut.Add(H_ct_ep_DUMMY_nocut,-1)
 H_ct_ep_DATA_nopid.Add(H_ct_ep_DUMMY_nopid,-1)
 
 ################################################################################################################################################
-
+fiter=0
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist, x_min, x_max, dtype):
 
@@ -1766,14 +1766,14 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     print("max_range",max_range)
     print("-"*25)
 
-    fit_func = ROOT.TF1("fit_func", "gaus", min_range, max_range)
+    fit_func = ROOT.TF1("fit_func_{}".format(fiter), "gaus", min_range, max_range)
     if dtype == "simc":
         fit_func.SetLineColor(kBlack)
     if dtype == "data":
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
         fit_func.SetLineColor(kGreen)    
-    hist.Fit("fit_func", "QR+", "", min_range, max_range)
+    hist.Fit("fit_func_{}".format(fiter), "QR")
     mean = fit_func.GetParameter(1)
     #fit_func.Draw("same")
     return mean
