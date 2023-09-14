@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 11:09:11 trottar"
+# Time-stamp: "2023-09-14 11:19:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -476,25 +476,25 @@ H_th_recoil_DUMMY_nopid  = ROOT.TH1D("H_th_recoil_DUMMY_nopid","Theta Recoil (th
 #H_th_recoil_DUMMY_rand  = ROOT.TH1D("H_th_recoil_DUMMY_rand","Theta Recoil (th_bq)", 200, -10.0, 10.0)
 H_th_recoil_SIMC  = ROOT.TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 200, -10.0, 10.0)
 
-H_pmiss_DATA  = ROOT.TH1D("H_pmiss_DATA","pmiss", 200, -0.1, 0.)
-H_pmiss_DATA_nocut  = ROOT.TH1D("H_pmiss_DATA_nocut","pmiss", 200, -0.1, 0.)
-H_pmiss_DATA_nopid  = ROOT.TH1D("H_pmiss_DATA_nopid","pmiss", 200, -0.1, 0.)
-#H_pmiss_DATA_rand  = ROOT.TH1D("H_pmiss_DATA_rand","pmiss", 200, -0.1, 0.)
-H_pmiss_DUMMY  = ROOT.TH1D("H_pmiss_DUMMY","pmiss", 200, -0.1, 0.)
-H_pmiss_DUMMY_nocut  = ROOT.TH1D("H_pmiss_DUMMY_nocut","pmiss", 200, -0.1, 0.)
-H_pmiss_DUMMY_nopid  = ROOT.TH1D("H_pmiss_DUMMY_nopid","pmiss", 200, -0.1, 0.)
-#H_pmiss_DUMMY_rand  = ROOT.TH1D("H_pmiss_DUMMY_rand","pmiss", 200, -0.1, 0.)
-H_pmiss_SIMC  = ROOT.TH1D("H_pmiss_SIMC","pmiss", 200, -0.1, 0.)
+H_pmiss_DATA  = ROOT.TH1D("H_pmiss_DATA","pmiss", 200, -0.03, 0.04)
+H_pmiss_DATA_nocut  = ROOT.TH1D("H_pmiss_DATA_nocut","pmiss", 200, -0.03, 0.04)
+H_pmiss_DATA_nopid  = ROOT.TH1D("H_pmiss_DATA_nopid","pmiss", 200, -0.03, 0.04)
+#H_pmiss_DATA_rand  = ROOT.TH1D("H_pmiss_DATA_rand","pmiss", 200, -0.03, 0.04)
+H_pmiss_DUMMY  = ROOT.TH1D("H_pmiss_DUMMY","pmiss", 200, -0.03, 0.04)
+H_pmiss_DUMMY_nocut  = ROOT.TH1D("H_pmiss_DUMMY_nocut","pmiss", 200, -0.03, 0.04)
+H_pmiss_DUMMY_nopid  = ROOT.TH1D("H_pmiss_DUMMY_nopid","pmiss", 200, -0.03, 0.04)
+#H_pmiss_DUMMY_rand  = ROOT.TH1D("H_pmiss_DUMMY_rand","pmiss", 200, -0.03, 0.04)
+H_pmiss_SIMC  = ROOT.TH1D("H_pmiss_SIMC","pmiss", 200, -0.03, 0.04)
 
-H_emiss_DATA  = ROOT.TH1D("H_emiss_DATA","emiss", 200, -0.1, 0.)
-H_emiss_DATA_nocut  = ROOT.TH1D("H_emiss_DATA_nocut","emiss", 200, -0.1, 0.)
-H_emiss_DATA_nopid  = ROOT.TH1D("H_emiss_DATA_nopid","emiss", 200, -0.1, 0.)
-#H_emiss_DATA_rand  = ROOT.TH1D("H_emiss_DATA_rand","emiss", 200, -0.1, 0.)
-H_emiss_DUMMY  = ROOT.TH1D("H_emiss_DUMMY","emiss", 200, -0.1, 0.)
-H_emiss_DUMMY_nocut  = ROOT.TH1D("H_emiss_DUMMY_nocut","emiss", 200, -0.1, 0.)
-H_emiss_DUMMY_nopid  = ROOT.TH1D("H_emiss_DUMMY_nopid","emiss", 200, -0.1, 0.)
-#H_emiss_DUMMY_rand  = ROOT.TH1D("H_emiss_DUMMY_rand","emiss", 200, -0.1, 0.)
-H_emiss_SIMC  = ROOT.TH1D("H_emiss_SIMC","emiss", 200, -0.1, 0.)
+H_emiss_DATA  = ROOT.TH1D("H_emiss_DATA","emiss", 200, -0.03, 0.04)
+H_emiss_DATA_nocut  = ROOT.TH1D("H_emiss_DATA_nocut","emiss", 200, -0.03, 0.04)
+H_emiss_DATA_nopid  = ROOT.TH1D("H_emiss_DATA_nopid","emiss", 200, -0.03, 0.04)
+#H_emiss_DATA_rand  = ROOT.TH1D("H_emiss_DATA_rand","emiss", 200, -0.03, 0.04)
+H_emiss_DUMMY  = ROOT.TH1D("H_emiss_DUMMY","emiss", 200, -0.03, 0.04)
+H_emiss_DUMMY_nocut  = ROOT.TH1D("H_emiss_DUMMY_nocut","emiss", 200, -0.03, 0.04)
+H_emiss_DUMMY_nopid  = ROOT.TH1D("H_emiss_DUMMY_nopid","emiss", 200, -0.03, 0.04)
+#H_emiss_DUMMY_rand  = ROOT.TH1D("H_emiss_DUMMY_rand","emiss", 200, -0.03, 0.04)
+H_emiss_SIMC  = ROOT.TH1D("H_emiss_SIMC","emiss", 200, -0.03, 0.04)
 
 H_pmx_DATA  = ROOT.TH1D("H_pmx_DATA","pmx", 200, -0.1, 0.1)
 H_pmx_DATA_nocut  = ROOT.TH1D("H_pmx_DATA_nocut","pmx", 200, -0.1, 0.1)
@@ -2657,10 +2657,6 @@ H_pmiss_DATA_nocut.SetLineColor(kCyan)
 H_pmiss_DATA_nopid.SetLineColor(kMagenta)
 H_pmiss_DUMMY.SetLineColor(kGreen)
 
-b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.1, 0., "simc")
-b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.1, 0., "data")
-b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.1, 0., "dummy")
-
 H_pmiss_SIMC.Draw("E1")
 H_pmiss_DATA.Draw("same, E1")
 if DEBUG:
@@ -2674,19 +2670,6 @@ b_int_pmiss_data_nocut = int(H_pmiss_DATA_nocut.Integral())
 b_int_pmiss_data_nopid = int(H_pmiss_DATA_nopid.Integral())
 b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
 
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
-if DEBUG:
-    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmiss_data_nocut))
-    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmiss_data_nopid))
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmiss_dummy))
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_pmiss_simc))
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}".format(b_mean_pmiss_data))
-if DEBUG:
-    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_pmiss_data_nocut))
-    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_pmiss_data_nopid))
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_pmiss_dummy))
-
 l_pmiss.Draw()
 
 Cpmiss.Print(outputpdf)
@@ -2698,10 +2681,6 @@ H_emiss_DATA.SetLineColor(kRed)
 H_emiss_DATA_nocut.SetLineColor(kCyan)
 H_emiss_DATA_nopid.SetLineColor(kMagenta)
 H_emiss_DUMMY.SetLineColor(kGreen)
-
-b_mean_emiss_simc = fit_gaussian(H_emiss_SIMC,-0.1, 0., "simc")
-b_mean_emiss_data = fit_gaussian(H_emiss_DATA,-0.1, 0., "data")
-b_mean_emiss_dummy = fit_gaussian(H_emiss_DUMMY,-0.1, 0., "dummy")
 
 H_emiss_SIMC.Draw("same, E1")
 H_emiss_DATA.Draw("same, E1")
@@ -2715,19 +2694,6 @@ b_int_emiss_data = int(H_emiss_DATA.Integral())
 b_int_emiss_data_nocut = int(H_emiss_DATA_nocut.Integral())
 b_int_emiss_data_nopid = int(H_emiss_DATA_nopid.Integral())
 b_int_emiss_dummy = int(H_emiss_DUMMY.Integral())
-
-l_emiss.AddEntry(H_emiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_emiss_simc))
-l_emiss.AddEntry(H_emiss_DATA,"DATA, INT = {:.0f}".format( b_int_emiss_data))
-if DEBUG:
-    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_emiss_data_nocut))
-    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_emiss_data_nopid))
-l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_emiss_dummy))
-l_emiss.AddEntry(H_emiss_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_emiss_simc))
-l_emiss.AddEntry(H_emiss_DATA,"DATA, MEAN = {:.4e}".format(b_mean_emiss_data))
-if DEBUG:
-    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_emiss_data_nocut))
-    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_emiss_data_nopid))
-l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_emiss_dummy))
 
 l_emiss.Draw()
 
