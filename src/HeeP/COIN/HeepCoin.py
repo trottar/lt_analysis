@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 10:23:54 trottar"
+# Time-stamp: "2023-09-14 10:28:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1757,26 +1757,24 @@ def fit_gaussian(hist, x_min, x_max, dtype):
         #print("~~~~~~~~~~~right_center",hist.GetBinCenter(right_bin))
 
 
-    min_range = hist.GetBinCenter(max_bin-100)
-    max_range = hist.GetBinCenter(max_bin+100)
+    #min_range = hist.GetBinCenter(max_bin-100)
+    #max_range = hist.GetBinCenter(max_bin+100)
         
-    #min_range = hist.GetBinCenter(left_bin)
+    min_range = hist.GetBinCenter(left_bin)
     print("min_range",min_range)
-    #max_range = hist.GetBinCenter(right_bin)
+    max_range = hist.GetBinCenter(right_bin)
     print("max_range",max_range)
     print("-"*25)
 
-    hist.Fit("gaus", "", "", 0, 100)
+    hist.Fit("gaus", "", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
     
-    #fit_func = ROOT.TF1("fit_{}".format( hist.GetName()), "gaus")
     if dtype == "simc":
         fit_func.SetLineColor(kBlack)
     if dtype == "data":
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
         fit_func.SetLineColor(kGreen)    
-    #hist.Fit("fit_{}".format( hist.GetName()), "RQ", "", min_range, max_range)
     
     mean = fit_func.GetParameter(1)
     
