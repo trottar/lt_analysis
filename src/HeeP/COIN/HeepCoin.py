@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 12:09:32 trottar"
+# Time-stamp: "2023-09-14 12:14:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1725,12 +1725,12 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     # Find the maximum value within the specified range
     max_bin = bin_min
     max_value = hist.GetBinContent(max_bin)
-    for i in range(bin_min, bin_max + 1):
+    for i in range(bin_min, bin_max):
         if hist.GetBinContent(i) > max_value:
             print("~~~~~~~~~~~~~~~~~~max_value",max_value)
             print("!!!!!!!!!!!!!!!!!!max_bin",max_bin)
-            max_bin = i-1
-            max_value = hist.GetBinContent(i-1)
+            max_bin = i
+            max_value = hist.GetBinContent(i)
 
     # Print the results
     print("max_bin", max_bin)
