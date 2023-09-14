@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 10:06:13 trottar"
+# Time-stamp: "2023-09-14 10:14:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1773,9 +1773,8 @@ def fit_gaussian(hist, x_min, x_max, dtype):
         fit_func.SetLineColor(kRed)
     if dtype == "dummy":
         fit_func.SetLineColor(kGreen)    
-    hist.Fit("fit_{}".format( hist.GetName()), "", "", min_range, max_range)
+    hist.Fit("fit_{}".format( hist.GetName()), "RQ", "", min_range, max_range)
     mean = fit_func.GetParameter(1)
-    fit_func.Draw("same")
     return mean
 
 ################################################################################################################################################
@@ -2593,24 +2592,6 @@ b_int_MMp2_data_nocut = int(H_MMp2_DATA_nocut.Integral())
 b_int_MMp2_data_nopid = int(H_MMp2_DATA_nopid.Integral())
 b_int_MMp2_dummy = int(H_MMp2_DUMMY.Integral())
 
-# Perform Gaussian fits for each histogra
-b_mean_MMp2_simc = fit_gaussian(H_MMp2_SIMC,-0.01, 0.01, "simc")
-b_mean_MMp2_data = fit_gaussian(H_MMp2_DATA,-0.01, 0.01, "data")
-b_mean_MMp2_dummy = fit_gaussian(H_MMp2_DUMMY,-0.01, 0.01, "dummy")
-
-l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, INT = {:.0f}".format( b_int_MMp2_simc))
-l_MMp2.AddEntry(H_MMp2_DATA,"DATA, INT = {:.0f}".format( b_int_MMp2_data))
-if DEBUG:
-    l_MMp2.AddEntry(H_MMp2_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_MMp2_data_nocut))
-    l_MMp2.AddEntry(H_MMp2_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_MMp2_data_nopid))
-l_MMp2.AddEntry(H_MMp2_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_MMp2_dummy))
-l_MMp2.AddEntry(H_MMp2_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_MMp2_simc))
-l_MMp2.AddEntry(H_MMp2_DATA,"DATA, MEAN = {:.4e}".format(b_mean_MMp2_data))
-if DEBUG:
-    l_MMp2.AddEntry(H_MMp2_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_MMp2_data_nocut))
-    l_MMp2.AddEntry(H_MMp2_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_MMp2_data_nopid))
-l_MMp2.AddEntry(H_MMp2_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_MMp2_dummy))
-
 l_MMp2.Draw()
 
 CMMp2.Print(outputpdf)
@@ -2665,96 +2646,6 @@ l_th_q.Draw()
 
 Cth_q.Print(outputpdf)
 
-'''
-Cph_recoil = TCanvas()
-l_ph_recoil = ROOT.TLegend(0.115,0.55,0.33,0.9)
-
-H_ph_recoil_DATA.SetLineColor(kRed)
-H_ph_recoil_DATA_nocut.SetLineColor(kCyan)
-H_ph_recoil_DATA_nopid.SetLineColor(kMagenta)
-H_ph_recoil_DUMMY.SetLineColor(kGreen)
-
-#H_ph_recoil_SIMC.Draw("E1")
-H_ph_recoil_DATA.Draw("same, E1")
-if DEBUG:
-    H_ph_recoil_DATA_nocut.Draw("same, E1")
-    H_ph_recoil_DATA_nopid.Draw("same, E1")
-H_ph_recoil_DUMMY.Draw("same, E1")
-
-#b_int_ph_recoil_simc = int(H_ph_recoil_SIMC.Integral())
-b_int_ph_recoil_data = int(H_ph_recoil_DATA.Integral())
-b_int_ph_recoil_data_nocut = int(H_ph_recoil_DATA_nocut.Integral())
-b_int_ph_recoil_data_nopid = int(H_ph_recoil_DATA_nopid.Integral())
-b_int_ph_recoil_dummy = int(H_ph_recoil_DUMMY.Integral())
-
-#b_mean_ph_recoil_simc = H_ph_recoil_SIMC.GetMean()
-b_mean_ph_recoil_data = H_ph_recoil_DATA.GetMean()
-b_mean_ph_recoil_data_nocut = H_ph_recoil_DATA_nocut.GetMean()
-b_mean_ph_recoil_data_nopid = H_ph_recoil_DATA_nopid.GetMean()
-b_mean_ph_recoil_dummy = H_ph_recoil_DUMMY.GetMean()
-
-#l_ph_recoil.AddEntry(H_ph_recoil_SIMC,"SIMC, INT = {:.0f}".format( b_int_ph_recoil_simc))
-l_ph_recoil.AddEntry(H_ph_recoil_DATA,"DATA, INT = {:.0f}".format( b_int_ph_recoil_data))
-if DEBUG:
-    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_ph_recoil_data_nocut))
-    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_ph_recoil_data_nopid))
-l_ph_recoil.AddEntry(H_ph_recoil_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_ph_recoil_dummy))
-#l_ph_recoil.AddEntry(H_ph_recoil_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_ph_recoil_simc))
-l_ph_recoil.AddEntry(H_ph_recoil_DATA,"DATA, MEAN = {:.4e}".format(b_mean_ph_recoil_data))
-if DEBUG:
-    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_ph_recoil_data_nocut))
-    l_ph_recoil.AddEntry(H_ph_recoil_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_ph_recoil_data_nopid))
-l_ph_recoil.AddEntry(H_ph_recoil_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_ph_recoil_dummy))
-
-l_ph_recoil.Draw()
-
-Cph_recoil.Print(outputpdf)
-
-Cth_recoil = TCanvas()
-l_th_recoil = ROOT.TLegend(0.115,0.55,0.33,0.9)
-
-H_th_recoil_DATA.SetLineColor(kRed)
-H_th_recoil_DATA_nocut.SetLineColor(kCyan)
-H_th_recoil_DATA_nopid.SetLineColor(kMagenta)
-H_th_recoil_DUMMY.SetLineColor(kGreen)
-
-#H_th_recoil_SIMC.Draw("E1")
-H_th_recoil_DATA.Draw("same, E1")
-if DEBUG:
-    H_th_recoil_DATA_nocut.Draw("same, E1")
-    H_th_recoil_DATA_nopid.Draw("same, E1")
-H_th_recoil_DUMMY.Draw("same, E1")
-
-#b_int_th_recoil_simc = int(H_th_recoil_SIMC.Integral())
-b_int_th_recoil_data = int(H_th_recoil_DATA.Integral())
-b_int_th_recoil_data_nocut = int(H_th_recoil_DATA_nocut.Integral())
-b_int_th_recoil_data_nopid = int(H_th_recoil_DATA_nopid.Integral())
-b_int_th_recoil_dummy = int(H_th_recoil_DUMMY.Integral())
-
-#b_mean_th_recoil_simc = H_th_recoil_SIMC.GetMean()
-b_mean_th_recoil_data = H_th_recoil_DATA.GetMean()
-b_mean_th_recoil_data_nocut = H_th_recoil_DATA_nocut.GetMean()
-b_mean_th_recoil_data_nopid = H_th_recoil_DATA_nopid.GetMean()
-b_mean_th_recoil_dummy = H_th_recoil_DUMMY.GetMean()
-
-#l_th_recoil.AddEntry(H_th_recoil_SIMC,"SIMC, INT = {:.0f}".format( b_int_th_recoil_simc))
-l_th_recoil.AddEntry(H_th_recoil_DATA,"DATA, INT = {:.0f}".format( b_int_th_recoil_data))
-if DEBUG:
-    l_th_recoil.AddEntry(H_th_recoil_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_th_recoil_data_nocut))
-    l_th_recoil.AddEntry(H_th_recoil_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_th_recoil_data_nopid))
-l_th_recoil.AddEntry(H_th_recoil_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_th_recoil_dummy))
-#l_th_recoil.AddEntry(H_th_recoil_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_th_recoil_simc))
-l_th_recoil.AddEntry(H_th_recoil_DATA,"DATA, MEAN = {:.4e}".format(b_mean_th_recoil_data))
-if DEBUG:
-    l_th_recoil.AddEntry(H_th_recoil_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_th_recoil_data_nocut))
-    l_th_recoil.AddEntry(H_th_recoil_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_th_recoil_data_nopid))
-l_th_recoil.AddEntry(H_th_recoil_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_th_recoil_dummy))
-
-l_th_recoil.Draw()
-
-Cth_recoil.Print(outputpdf)
-'''
-
 Cpmiss = TCanvas()
 l_pmiss = ROOT.TLegend(0.115,0.55,0.33,0.9)
 
@@ -2762,6 +2653,10 @@ H_pmiss_DATA.SetLineColor(kRed)
 H_pmiss_DATA_nocut.SetLineColor(kCyan)
 H_pmiss_DATA_nopid.SetLineColor(kMagenta)
 H_pmiss_DUMMY.SetLineColor(kGreen)
+
+b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.03, -0.04, "simc")
+b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.03, -0.04, "data")
+b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.03, -0.04, "dummy")
 
 H_pmiss_SIMC.Draw("E1")
 H_pmiss_DATA.Draw("same, E1")
@@ -2775,10 +2670,6 @@ b_int_pmiss_data = int(H_pmiss_DATA.Integral())
 b_int_pmiss_data_nocut = int(H_pmiss_DATA_nocut.Integral())
 b_int_pmiss_data_nopid = int(H_pmiss_DATA_nopid.Integral())
 b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
-
-b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.03, -0.04, "simc")
-b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.03, -0.04, "data")
-b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.03, -0.04, "dummy")
 
 l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
 l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
