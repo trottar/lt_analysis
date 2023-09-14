@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 11:02:56 trottar"
+# Time-stamp: "2023-09-14 11:05:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1757,16 +1757,16 @@ def fit_gaussian(hist, x_min, x_max, dtype):
         #print("~~~~~~~~~~~right_center",hist.GetBinCenter(right_bin))
 
 
-    min_range = hist.GetBinCenter(max_bin-5)
-    max_range = hist.GetBinCenter(max_bin+5)
+    #min_range = hist.GetBinCenter(max_bin-5)
+    #max_range = hist.GetBinCenter(max_bin+5)
         
-    #min_range = hist.GetBinCenter(left_bin)
+    min_range = hist.GetBinCenter(left_bin)
     print("min_range",min_range)
-    #max_range = hist.GetBinCenter(right_bin)
+    max_range = hist.GetBinCenter(right_bin)
     print("max_range",max_range)
     print("-"*25)
 
-    #hist.Fit("gaus", "", "", min_range, max_range)
+    hist.Fit("gaus", "", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
     
     if dtype == "simc":
@@ -2657,10 +2657,6 @@ H_pmiss_DATA_nocut.SetLineColor(kCyan)
 H_pmiss_DATA_nopid.SetLineColor(kMagenta)
 H_pmiss_DUMMY.SetLineColor(kGreen)
 
-b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.03, 0.04, "simc")
-b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.03, 0.04, "data")
-b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.03, 0.04, "dummy")
-
 H_pmiss_SIMC.Draw("E1")
 H_pmiss_DATA.Draw("same, E1")
 if DEBUG:
@@ -2673,19 +2669,6 @@ b_int_pmiss_data = int(H_pmiss_DATA.Integral())
 b_int_pmiss_data_nocut = int(H_pmiss_DATA_nocut.Integral())
 b_int_pmiss_data_nopid = int(H_pmiss_DATA_nopid.Integral())
 b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
-
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
-if DEBUG:
-    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmiss_data_nocut))
-    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmiss_data_nopid))
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmiss_dummy))
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_pmiss_simc))
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}".format(b_mean_pmiss_data))
-if DEBUG:
-    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_pmiss_data_nocut))
-    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_pmiss_data_nopid))
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_pmiss_dummy))
 
 l_pmiss.Draw()
 
