@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 12:42:57 trottar"
+# Time-stamp: "2023-09-14 12:46:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,7 +107,7 @@ rootFile_SIMC = OUTPATH+"/"+InSIMCFilename
 
 foutname = OUTPATH+"/" + OutFilename + ".root"
 fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
-outputpdf  = OUTPATH+"/" + OutFilename+"_norecon" + ".pdf"
+outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 
 ###############################################################################################################################################
 
