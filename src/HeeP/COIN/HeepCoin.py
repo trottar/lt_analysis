@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-13 20:23:43 trottar"
+# Time-stamp: "2023-09-13 20:26:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1755,15 +1755,16 @@ def fit_gaussian(hist, x_min, x_max, dtype):
         print("~~~~~~~~~~~right_bin", right_bin)
         print("!!!!!!!!!!!right_value", hist.GetBinContent(right_bin))
         print("~~~~~~~~~~~right_center",hist.GetBinCenter(right_bin))
-    
+
+
+    min_range = hist.GetBinCenter(max_bin-10)
+    max_range = hist.GetBinCenter(max_bin+10)
+        
     #min_range = hist.GetBinCenter(left_bin)
     print("min_range",min_range)
     #max_range = hist.GetBinCenter(right_bin)
     print("max_range",max_range)
     print("-"*25)
-
-    min_range = hist.GetBinCenter(max_bin-10)
-    max_range = hist.GetBinCenter(max_bin+10)
     
     fit_func = ROOT.TF1("fitFunc", "gaus", min_range, max_range)
     if dtype == "simc":
