@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 11:43:35 trottar"
+# Time-stamp: "2023-09-14 11:54:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1729,9 +1729,6 @@ def fit_gaussian(hist, x_min, x_max, dtype):
         if hist.GetBinContent(i) > max_value:
             max_bin = i
             max_value = hist.GetBinContent(i)
-            #print("~~~~~~~~~~~max_bin", max_bin)
-            #print("!!!!!!!!!!!max_value", max_value)
-            #print("~~~~~~~~~~~bin_center",hist.GetBinCenter(max_bin))
 
     # Print the results
     print("bin_min",bin_min)
@@ -1740,22 +1737,15 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     print("max_value", max_value)
     print("bin_center",hist.GetBinCenter(max_bin))
     
-    half_max = max_value*0.75
+    half_max = max_value*0.5
     
     # Find left and right bins closest to half-max value
     left_bin = max_bin
     right_bin = max_bin
     while hist.GetBinContent(left_bin) > half_max and left_bin > 1:
         left_bin -= 1
-        #print("~~~~~~~~~~~left_bin", left_bin)
-        #print("!!!!!!!!!!!left_value", hist.GetBinContent(left_bin))
-        #print("~~~~~~~~~~~left_center",hist.GetBinCenter(left_bin))
     while hist.GetBinContent(right_bin) > half_max and right_bin < hist.GetNbinsX():
         right_bin += 1
-        #print("~~~~~~~~~~~right_bin", right_bin)
-        #print("!!!!!!!!!!!right_value", hist.GetBinContent(right_bin))
-        #print("~~~~~~~~~~~right_center",hist.GetBinCenter(right_bin))
-
 
     #min_range = hist.GetBinCenter(max_bin-100)
     #max_range = hist.GetBinCenter(max_bin+100)
