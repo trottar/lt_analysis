@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 09:48:43 trottar"
+# Time-stamp: "2023-09-14 09:49:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1776,7 +1776,7 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     hist.Fit("fit_func_{}".format(fiter), "QR")
     mean = fit_func.GetParameter(1)
     #fit_func.Draw("same")
-    fiter+=1_
+    fiter+=1
     return mean
 
 ################################################################################################################################################
