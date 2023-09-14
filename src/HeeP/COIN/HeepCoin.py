@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 11:00:29 trottar"
+# Time-stamp: "2023-09-14 11:02:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1766,7 +1766,7 @@ def fit_gaussian(hist, x_min, x_max, dtype):
     print("max_range",max_range)
     print("-"*25)
 
-    hist.Fit("gaus", "", "", min_range, max_range)
+    #hist.Fit("gaus", "", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
     
     if dtype == "simc":
