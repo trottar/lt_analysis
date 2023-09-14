@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 11:38:26 trottar"
+# Time-stamp: "2023-09-14 11:43:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2703,7 +2703,7 @@ b_mean_emiss_simc = fit_gaussian(H_emiss_SIMC,-0.1, 0.1, "simc")
 b_mean_emiss_data = fit_gaussian(H_emiss_DATA,-0.1, 0.1, "data")
 b_mean_emiss_dummy = fit_gaussian(H_emiss_DUMMY,-0.1, 0.1, "dummy")
 
-H_emiss_SIMC.Draw("same, E1")
+H_emiss_SIMC.Draw("E1")
 H_emiss_DATA.Draw("same, E1")
 if DEBUG:
     H_emiss_DATA_nocut.Draw("same, E1")
