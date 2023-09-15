@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:19:01 trottar"
+# Time-stamp: "2023-09-14 23:21:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -326,6 +326,10 @@ for hist in histlist:
 
 cut_summary_lst = plot_data_vs_simc(hist,outputpdf)
 
+if DEBUG:
+    show_pdf_with_evince(outputpdf)   
+output_file_lst.append(outputpdf)
+    
 ##############################
 # Step 6 of the lt_analysis: #
 ##############################

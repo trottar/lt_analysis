@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:20:10 trottar"
+# Time-stamp: "2023-09-14 23:21:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -565,9 +565,5 @@ def plot_data_vs_simc(hist,outputpdf):
             Ctext.Print(outputpdf+')')
         else:
             Ctext.Print(outputpdf)
-
-    if DEBUG:
-        show_pdf_with_evince(outputpdf)   
-    output_file_lst.append(outputpdf)
-    
+            
     return cut_summary_lst
