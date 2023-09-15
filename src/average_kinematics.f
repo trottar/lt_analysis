@@ -274,8 +274,8 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
 
 c     Save data.
 
-      write(fn,'(''../out_data/'',a4,''/averages/avek.'',i2.2,''.dat'')')
-     *     pid,nint(q2_set*10.)
+      write(fn,'(''../out_data/'',a4,''/averages/avek.'',i2.2,
+     *     ''.dat'')') pid,nint(q2_set*10.)
       print*,'fn=',fn
       print*
 
