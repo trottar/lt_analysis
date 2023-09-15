@@ -155,6 +155,10 @@ c      pause
 
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
+            print*,'it',it
+            print*,'nbin',nbin            
+            print*,'ip',ip
+            print*,'nphi',nphi
             print*,'ratio',r
             print*,'dratio',dr
 
