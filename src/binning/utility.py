@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-06 17:12:13 trottar"
+# Time-stamp: "2023-09-14 20:46:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,6 +33,14 @@ def write_to_file(f_out,line,write_mode='a'):
     with open(f_out, write_mode) as f:
         # Write the value of the variable to the file
         f.write(line)        
+
+################################################################################################################################################
+
+# Create a new dir specified by argument
+def create_dir(dir_name):
+    # Check if dir exists
+    if not os.path.exists(dir_name):
+        os.mkdir(dir_name)
 
 ################################################################################################################################################
 

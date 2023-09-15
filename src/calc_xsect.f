@@ -183,7 +183,9 @@ c        Write out kinematics for Henk.
 
 *=======================================================================
 
-      include 'xmodel_pi_mn_fpi2.f'
+!     Dynamically construct and include
+!     the model file based off PID and polarity
+      include trim(pid) // '_' // trim(pol) // '.f'
       
 *=======================================================================
 
