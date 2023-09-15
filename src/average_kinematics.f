@@ -113,6 +113,7 @@ c     Get low, high eps. and neg., pos. polarity data.
                   endif
                   WRITE(*,*) 'Values read:'
                   WRITE(*,*) 'ipol = ', ipol
+                  WRITE(*,*) 'pol = ', pol
                   WRITE(*,*) 'q2 = ', q2
                   WRITE(*,*) 'eps = ', eps
                   WRITE(*,*) 'th_pq = ', th_pq
