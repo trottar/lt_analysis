@@ -43,7 +43,9 @@ mv worksim/$1.root OUTPUTS
 cd recon_hcana/
 if [[ $2 -eq "" ]]; then
     echo "No reaction provided, assuming heep" 
-    #REACTION="heep"
-    REACTION="production"
+    REACTION="heep"
+else
+    echo "Reaction selected: $2" 
+    REACTION=$2
 fi
 root "recon_hcana.C(\"$1\", \"$REACTION\" )"

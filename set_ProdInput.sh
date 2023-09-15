@@ -107,7 +107,7 @@ if [[ -f "${LTANAPATH}/input/${InputSIMC_right}.inp" ]]; then
     echo 
     echo "Running simc analysis for ${InputSIMC_right}..."
     echo
-    ./run_simc_tree "${InputSIMC_right}"
+    ./run_simc_tree "${InputSIMC_right}" "production"
 fi
 
 if [[ -f "${LTANAPATH}/input/${InputSIMC_left}.inp" ]]; then
@@ -115,7 +115,7 @@ if [[ -f "${LTANAPATH}/input/${InputSIMC_left}.inp" ]]; then
     echo 
     echo "Running simc analysis for ${InputSIMC_left}..."
     echo
-    ./run_simc_tree "${InputSIMC_left}"
+    ./run_simc_tree "${InputSIMC_left}" "production"
 fi
 
 if [[ -f "${LTANAPATH}/input/${InputSIMC_center}.inp" ]]; then
@@ -123,5 +123,5 @@ if [[ -f "${LTANAPATH}/input/${InputSIMC_center}.inp" ]]; then
     echo 
     echo "Running simc analysis for ${InputSIMC_center}..."
     echo
-    ./run_simc_tree "${InputSIMC_center}"
+    ./run_simc_tree "${InputSIMC_center}" "production"
 fi

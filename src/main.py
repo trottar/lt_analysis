@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 09:57:31 trottar"
+# Time-stamp: "2023-09-15 10:05:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -427,8 +427,8 @@ if EPSSET == "high":
 
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
-    fort_param_active = 'models/param.f'
-    fort_xmodel_active = 'models/xmodel.f'
+    fort_param_active = 'models/param_active.f'
+    fort_xmodel_active = 'models/xmodel_active.f'
     # Copying content of used models to actively used files
     print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
     shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
