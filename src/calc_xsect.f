@@ -52,10 +52,9 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       integer nbin
 
-      character*80 r_fn, kin_fn, xunsep_fn
+      character*80 r_fn, kin_fn, xunsep_fn, mod_fn
       character*2 pol
       character*4 pid
-      character*80 mod_str
 
       integer it,ip
       real Eb,eps
@@ -137,8 +136,8 @@ c      pause
 
       open(61,file=xunsep_fn,status='replace')
 
-      mod_str='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
-      print*,'model used: ',mod_str
+      mod_fn='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
+      print*,'xmodel: file=',mod_fn
 
       do it=1,nbin
 
