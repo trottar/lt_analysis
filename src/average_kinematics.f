@@ -51,10 +51,10 @@ c     and save result in averages/avek.* .
      *     action='read')
       read (22,*) q2_bin, t_bin, phi_bin
 
+      close(22)
+      
       parameter (nt = t_bin)
       parameter (nphi = phi_bin)
-
-      close(22)
 
       real, dimension(nt) :: aveW,errW,aveQ2,errQ2
       real, dimension(nt) :: avett,errtt
