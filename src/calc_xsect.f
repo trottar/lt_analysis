@@ -185,6 +185,8 @@ c        Write out kinematics for Henk.
       close(61)
       print*,' '
 
+      end
+
 *=======================================================================
 
 !     Dynamically construct and include
@@ -192,24 +194,8 @@ c        Write out kinematics for Henk.
 !     Fortran compiler will crash if files that
 !     don't exist yet are added, so add files
 !     as they are created.
-      if (pid == 'kaon') then
-         if (pol == 'pl') then
-            include 'models/xmodel_kaon_pl.f'
-         else
-     *           stop '*** Invalid polarity!'
-         endif
-      else if (pid == 'pion') then
-         if (pol == 'mn') then
-            include 'models/xmodel_pion_mn.f'
-         else
-     *           stop '*** Invalid polarity!'
-         endif
-      else
-     *        stop '*** Invalid PID!'
-      endif
+      include 'models/xmodel_active.f'
       
 *=======================================================================
 
       include 'eps_n_theta.f'
-      
-      end

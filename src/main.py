@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 01:54:05 trottar"
+# Time-stamp: "2023-09-15 09:55:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -418,6 +418,21 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 '''
 
 if EPSSET == "high":
+
+    # Save fortran scripts that contain iteration functional form of parameterization
+    fort_param = 'models/param_{}_{}.f'.format(ParticleType, pol_str)
+    output_file_lst.append(fort_param) 
+    fort_xmodel = 'models/xmodel_{}_{}.f'.format(ParticleType, pol_str)
+    output_file_lst.append(fort_xmodel)
+
+    # Active scripts to make file selection dynamic
+    # Needs to be done this way because of fortran compiler limitations
+    fort_param_active = 'models/param.f'
+    fort_xmodel_active = 'models/xmodel.f'
+    # Copying content of used models to actively used files
+    shutil.copy(fort_xmodel, fort_xmodel_active)
+    shutil.copy(fort_param, fort_param_active)    
+    
     subprocess.call(['bash','{}/run_xsect.sh'.format(LTANAPATH), Q2, W])
 
     # Save new parameters and unsep values from current iteration
@@ -426,13 +441,7 @@ if EPSSET == "high":
     new_param_file = '{}/parameters/par.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""))
     output_file_lst.append(new_param_file) 
     xsect_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
-    output_file_lst.append(xsect_file)
-
-    # Save fortran scripts that contain iteration functional form of parameterization
-    fort_param = 'models/param_{}_{}.f'.format(ParticleType, pol_str)
-    output_file_lst.append(fort_param) 
-    fort_xmodel = 'models/xmodel_{}_{}.f'.format(ParticleType, pol_str)
-    output_file_lst.append(fort_xmodel) 
+    output_file_lst.append(xsect_file) 
 
 ##############################
 # Step 8 of the lt_analysis: #
