@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:44:34 trottar"
+# Time-stamp: "2023-09-14 23:47:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,7 +49,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, outputpdf):
+def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
