@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:27:25 trottar"
+# Time-stamp: "2023-09-14 23:32:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,14 +317,15 @@ for hist in histlist:
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
 
-sys.path.append("plotting")
-from data_vs_simc import plot_data_vs_simc
-
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     hist.update(compare_simc(hist, inpDict))
 
-cut_summary_lst = plot_data_vs_simc(histlist, outputpdf)
+sys.path.append("plotting")
+from data_vs_simc import plot_data_vs_simc
+    
+# Variable defines string of cuts applied during analysis
+cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, outputpdf)
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)   
