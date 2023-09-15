@@ -3,17 +3,28 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:37:27 trottar"
+# Time-stamp: "2023-09-14 23:37:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
+# Import relevant packages
+import uproot as up
+import numpy as np
+import root_numpy as rnp
 import ROOT
+import scipy
+import scipy.integrate as integrate
+from scipy.integrate import quad
+import matplotlib.pyplot as plt
+from collections import defaultdict
+import sys, math, os, subprocess
+from array import array
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
-import os, math
+from functools import reduce
 
 ################################################################################################################################################
 '''
