@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 22:41:48 trottar"
+# Time-stamp: "2023-09-14 23:08:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,7 +158,7 @@ def get_eff_charge(hist, inpDict):
     ################################################################################################################################################
     # Grab and calculate efficiency
 
-    sys.path.append('../setup/')
+    sys.path.append('setup')
     from getDataTable import calculate_effError
 
     tot_effError_data = [calculate_effError(run,efficiency_table) for run in runNums.split(' ')]
