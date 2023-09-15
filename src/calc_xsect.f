@@ -77,7 +77,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       mod_str='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
 
-      print*,'model used: ',mod_str
+c      print*,'model used: ',mod_str
       
       ipol=0
       q2=0.
