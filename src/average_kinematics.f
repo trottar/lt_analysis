@@ -39,6 +39,23 @@ c     and save result in averages/avek.* .
 
       integer nt,nphi
       
+      real eps_set(2)
+
+      real th_mod
+      
+      character*60 fn
+      character*2 pol
+      character*4 pid
+
+      open (unit = 22, file =trim(pid) // "/t_bin_interval", 
+     *     action='read')
+      read (22,*) q2_bin, t_bin, phi_bin
+
+      nt = t_bin
+      nphi = phi_bin
+
+      close(22)
+
       real aveW(nt),errW(nt),aveQ2(nt),errQ2(nt),
      &      avett(nt),errtt(nt)
       real avW(nt,2),erW(nt,2),avQ2(nt,2),erQ2(nt,2),
@@ -49,26 +66,9 @@ c     and save result in averages/avek.* .
       real thetacm_only(nt)
 
       real eps_lo(nt),eps_hi(nt)
-
-      real eps_set(2)
-
-      real th_mod
       
-      character*60 fn
-      character*2 pol
-      character*4 pid
-
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set
-
-      open (unit = 22, file =trim(pid) // "/t_bin_interval", 
-     *     action='read')
-      read (22,*) q2_bin, t_bin, phi_bin
-
-      nt = t_bin
-      nphi = phi_bin
-
-      close(22)
       
       do it=1,nt
 
