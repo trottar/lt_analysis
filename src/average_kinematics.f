@@ -101,6 +101,14 @@ c     Get low, high eps. and neg., pos. polarity data.
             do while(.true.)
 
                read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
+               WRITE(*,*) 'Values read:'
+               WRITE(*,*) 'ipol = ', ipol
+               WRITE(*,*) 'q2 = ', q2
+               WRITE(*,*) 'eps = ', eps
+               WRITE(*,*) 'th_pq = ', th_pq
+               WRITE(*,*) 'tmn = ', tmn
+               WRITE(*,*) 'tmx = ', tmx
+               WRITE(*,*) 'nbt = ', nbt
                if(ipol.eq.pol_set.and.q2.eq.q2_set.and.
      &              eps.eq.eps_set(lh)) then
 
@@ -119,6 +127,7 @@ c     Get low, high eps. and neg., pos. polarity data.
 c                 pause
 
                   open(66,file=fn)
+                  read(66,*) one
                   do it=1,nbt
                      read(66,*) W,dW,Q2,dQ2,tt,dtt
 c                     print*,W,dW,Q2,dQ2,it
@@ -133,7 +142,7 @@ c                     print*,W,dW,Q2,dQ2,it
                      if(dtt.gt.0.) then
                         att(it,lh,ip)=att(it,lh,ip)+tt/dtt**2
                         ett(it,lh,ip)=ett(it,lh,ip)+1./dtt**2
-                     end if
+                     end if                     
                   end do
                   close(66)
 
