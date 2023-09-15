@@ -79,7 +79,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       eps=0.
       tmn=0.
       tmx=0.
-      open(55,file='../out_data' // trim(pid) // '/list.settings')
+      open(55,file='../out_data/' // trim(pid) // '/list.settings')
       do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.eps.ne.eps_set)
          read(55,*) ipol,q2,eps,th_pq,tmn,tmx,nbin
 c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx,nbin
@@ -98,7 +98,7 @@ c 2       format(i5,5f10.5,2i5)
       end if
 
       Eb=0.
-      open(55, file='../out_data' // trim(pid) // '/beam/Eb_KLT.dat')
+      open(55, file='../out_data/' // trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
          read(55,*) Eb,q2,eps
 c         write(*,*) Eb,q2,eps
@@ -113,7 +113,7 @@ c         write(*,*) Eb,q2,eps
 c     construct ratio data file name.
 
       write(r_fn,10) pid,pol,nint(q2*10),nint(eps*100)
- 10   format('../out_data',a4,'/averages/aver.'
+ 10   format('../out_data/',a4,'/averages/aver.'
      *     ,a2,'_',i2.2,'_',i2,'.dat')
       print*,'xsect: r_fn=',r_fn
 
@@ -122,14 +122,14 @@ c     construct ratio data file name.
 c     construct kinematics data file name.
 
       write(kin_fn,20) pid,nint(q2*10)
- 20   format('../out_data',a4,'/averages/avek.',i2.2,'.dat')
+ 20   format('../out_data/',a4,'/averages/avek.',i2.2,'.dat')
       print*,'xsect: kin_fn=',kin_fn
 
       open(52,file=kin_fn)
 
 *     construct output file name.
       write(xunsep_fn,30) pid,pol,nint(q2_set*10),nint(eps_set*100)
- 30   format('../out_data',a4,'/xsects/x_unsep.',a2,'_',
+ 30   format('../out_data/',a4,'/xsects/x_unsep.',a2,'_',
      *     i2.2,'_',i2,'.dat')
       print*,'xsect: xunsep_fn=',xunsep_fn
 c      pause
