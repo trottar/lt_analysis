@@ -191,19 +191,22 @@ c        Write out kinematics for Henk.
 
 !     Dynamically construct and include
 !     the model file based off PID and polarity
-      if(pid == 'kaon') then
-         if(pol == 'pl') then
+!     Fortran compiler will crash if files that
+!     don't exist yet are added, so add files
+!     as they are created.
+      if (pid == 'kaon') then
+         if (pol == 'pl') then
             include 'models/xmodel_kaon_pl.f'
-         else then
+         else
      *           stop '*** Invalid polarity!'
          endif
-      elseif(pid == 'pion') then
-         if(pol == 'mn') then
+      else if (pid == 'pion') then
+         if (pol == 'mn') then
             include 'models/xmodel_pion_mn.f'
-         else then
+         else
      *           stop '*** Invalid polarity!'
          endif
-      else then
+      else
      *        stop '*** Invalid PID!'
       endif
       
