@@ -35,7 +35,7 @@ c     Fortran is annoying and can't find parameters
 c     dynamically (since they must be known at compile time).
 c     Therefore, I am setting is arbitrarily to allocate
 c     enough space for the sets
-      parameter (nt = 10)
+      parameter (nbin = 10)
       
       integer pol_set
       real q2_set
@@ -43,7 +43,7 @@ c     enough space for the sets
       real q2_bin
       integer t_bin, phi_bin
 
-      integer nt
+      integer nt,nphi
       
       real eps_set(2)
 
@@ -59,16 +59,19 @@ c     enough space for the sets
 
       close(22)
 
-      real, dimension(nt) :: aveW,errW,aveQ2,errQ2
-      real, dimension(nt) :: avett,errtt
-      real, dimension(nt,2) :: avW,erW,avQ2,erQ2
-      real, dimension(nt,2) :: avtt,ertt
-      real, dimension(nt,2,2) :: aW,eW,aQ2,eQ2
-      real, dimension(nt,2,2) :: att,ett
+      nt = t_bin
+      nphi = phi_bin
+      
+      real, dimension(nbin) :: aveW,errW,aveQ2,errQ2
+      real, dimension(nbin) :: avett,errtt
+      real, dimension(nbin,2) :: avW,erW,avQ2,erQ2
+      real, dimension(nbin,2) :: avtt,ertt
+      real, dimension(nbin,2,2) :: aW,eW,aQ2,eQ2
+      real, dimension(nbin,2,2) :: att,ett
 
-      real, dimension(nt) :: thetacm_only
+      real, dimension(nbin) :: thetacm_only
 
-      real, dimension(nt) :: eps_lo,eps_hi
+      real, dimension(nbin) :: eps_lo,eps_hi
       
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set
