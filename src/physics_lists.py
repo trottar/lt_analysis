@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 01:20:03 trottar"
+# Time-stamp: "2023-09-15 01:47:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -293,6 +293,12 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 1.0, averW_right_data[i], 1.0, avert_right_data[i], 1.0)
                 write_to_file(f_list,check_line)
                 processed_Q2vals.add(Q2val)
+            lines = f.readlines()
+            first_line = "{:.6f}\n".format(POL)
+            last_line = "{:.6f}".format(1.0)
+            lines.insert(0,first_line)
+            lines.append(last_line)
+            write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumLeft[0]) != 0:
         f_list = '{}/out_data/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
@@ -309,6 +315,12 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 1.0, averW_left_data[i], 1.0, avert_left_data[i], 1.0)
                 write_to_file(f_list,check_line)
                 processed_Q2vals.add(Q2val)
+            lines = f.readlines()
+            first_line = "{:.6f}\n".format(POL)
+            last_line = "{:.6f}".format(1.0)
+            lines.insert(0,first_line)
+            lines.append(last_line)
+            write_to_file(f_list,"".join(lines),write_mode='w')
 
     if float(runNumCenter[0]) != 0:
         f_list = '{}/out_data/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100)
@@ -325,6 +337,12 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 1.0, averW_center_data[i], 1.0, avert_center_data[i], 1.0)
                 write_to_file(f_list,check_line)
                 processed_Q2vals.add(Q2val)
+            lines = f.readlines()
+            first_line = "{:.6f}\n".format(POL)
+            last_line = "{:.6f}".format(1.0)
+            lines.insert(0,first_line)
+            lines.append(last_line)
+            write_to_file(f_list,"".join(lines),write_mode='w')
             
     ################################################################################################################################################
 

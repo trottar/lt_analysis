@@ -96,8 +96,7 @@ c     Get low, high eps. and neg., pos. polarity data.
          do lh=1,2
 
             nset=0
-            open(55, file='../out_data/' // trim(pid) // 
-     &           '/list.settings')
+            open(55, file=trim(pid) // '/list.settings')
             do while(.true.)
 
                read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
@@ -120,7 +119,7 @@ c     Get low, high eps. and neg., pos. polarity data.
                   WRITE(*,*) 'tmn = ', tmn
                   WRITE(*,*) 'tmx = ', tmx
                   WRITE(*,*) 'nbt = ', nbt                  
-                  write(fn,'(''../out_data/'',a4,''/kindata/kindata.'',a2,''_'',i2.2,
+                  write(fn,'(a4,''/kindata/kindata.'',a2,''_'',i2.2,
      *                 ''_'',i2.2,''_'',SP,i5.4,S,''.dat'')') pid, pol,
      *                 nint(q2_set*10.), nint(eps_set(lh)*100.),
      *                 nint(th_pq*1000.)
@@ -263,7 +262,7 @@ c     So calculate for high eps., neg.-s and pos.-s.
 
 c     Get Beam energy at first.
       Eb=0.
-      open(55, file='../out_data/' // trim(pid) // '/beam/Eb_KLT.dat')
+      open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
          read(55,*) Eb,q2,eps
          write(*,*) Eb,q2,eps
@@ -282,7 +281,7 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
 
 c     Save data.
 
-      write(fn,'(''../out_data/'',a4,''/averages/avek.'',i2.2,
+      write(fn,'(a4,''/averages/avek.'',i2.2,
      *     ''.dat'')') pid,nint(q2_set*10.)
       print*,'fn=',fn
       print*
