@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 10:42:38 trottar"
+# Time-stamp: "2023-09-15 16:41:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -304,11 +304,18 @@ for hist in histlist:
 
 ** Need to put physics_iterate.f (found in src/simc_ana) in simc_gfortran (adjust reaction for specific needs)
 ** Once physics_iterate.f is in simc_gfortran, change object in Makefile from physics_<PID>.o to physics_iterate.o
+   Note: This also needs initial parameterization. 
+         par_pl (rename to par.pl in SIMC )is currently in there, Q2=2.45 of FPI2 analysis
 ** Run SIMC with this new cross section. There is no need to rerun SIMC from this point on unless model functional
    form changes.
-** 
-
-> lt_analysis/src/SIMC/??????????????.f
+** Run this script (i.e. src/main.py) for first iteration. This will generate json and root file with data info
+   and current simc info. It will generate new parameters (located src/<PID>/parameters/par.<pol>_<Q2>.dat) from
+   calc_xsect.f script.
+** With these new parameters, you will be prompted if you would like to rerun script. Keep rerunning until ratio of
+   data/simc yields start to approach unity. Once they approach unity, the correct parameterization has been found.
+   If after many iterations, things don't improve, the functional form (i.e. defined in physics_iterate.f and in
+   src/models/param*.f and src/models/xmodel*.f) may need to be changed. Make sure to change these across all files.
+** Once unseparated cross sections are achieved with good parameterization, cross section separation can be performed.
 
 '''
 
@@ -352,6 +359,7 @@ output_file_lst.append(outputpdf)
   normfactor/nevents is applied to normalize simc.
 
 * The data and SIMC yields are compared and the R value per bin is obtained.
+
 '''
 
 sys.path.append("binning")
@@ -417,7 +425,7 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 # Step 7 of the lt_analysis: #
 ##############################
 '''
-* Calculate error weighted average of data and SIMC.
+* Calculate error weighted average of data
 
 * Calculate the unseparated cross section
 '''
@@ -439,7 +447,10 @@ if EPSSET == "high":
     shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
     print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_param, LTANAPATH+"/src/"+fort_param_active))    
     shutil.copy(LTANAPATH+"/src/"+fort_param, LTANAPATH+"/src/"+fort_param_active)    
-    
+
+    # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
+    # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
+    # if still iterating weights
     subprocess.call(['bash','{}/run_xsect.sh'.format(LTANAPATH), Q2, W])
 
     # Save new parameters and unsep values from current iteration
@@ -461,9 +472,26 @@ if EPSSET == "high":
     
     print("\n\n")
 
-    # Create a new directory for each iteration
+    # Create a new directory for each iteration in cache
     new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
     create_dir(new_dir)
+
+    f_path = new_dir+"/"+"{}_iter.dat"
+    # Check if the file exists
+    if os.path.exists(f_path):
+        # If it exists, update it with the string
+        with open(f_path, 'w') as file:
+            file.write(formatted_date)
+    else:
+        # If not, create it and fill it with the string
+        with open(f_path, 'x') as file:
+            file.write(formatted_date)
+
+    # Get the total number of lines in the file
+    with open(f_path, 'r') as file:
+        total_lines = len(file.readlines())
+
+    os.rename(f_path.replace("iter","iter_{}".format(total_lines)))
 
     for f in output_file_lst:
         if OUTPATH in f:
@@ -471,7 +499,7 @@ if EPSSET == "high":
                 create_dir(new_dir+"/plots")
                 f_new = f.replace(OUTPATH,new_dir+"/plots")
                 print("Copying {} to {}".format(f,f_new))
-                shutil.copy(f, f_new)            
+                shutil.copy(f, f_new)
             if ".root" in f:
                 create_dir(new_dir+"/rootfiles")
                 f_new = f.replace(OUTPATH,new_dir+"/rootfiles")
