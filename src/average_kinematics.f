@@ -51,7 +51,7 @@ c     and save result in averages/avek.* .
 
       real th_mod
       
-      character*40 fn
+      character*60 fn
       character*2 pol
       character*4 pid
 
