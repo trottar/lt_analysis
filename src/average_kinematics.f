@@ -56,16 +56,16 @@ c     and save result in averages/avek.* .
 
       close(22)
 
-      real aveW(nt),errW(nt),aveQ2(nt),errQ2(nt)
-      real avett(nt),errtt(nt)
-      real avW(nt,2),erW(nt,2),avQ2(nt,2),erQ2(nt,2),
-      real avtt(nt,2),ertt(nt,2)
-      real aW(nt,2,2),eW(nt,2,2),aQ2(nt,2,2),eQ2(nt,2,2),
-      real att(nt,2,2),ett(nt,2,2)
+      real, dimension(nt) :: aveW,errW,aveQ2,errQ2
+      real, dimension(nt) :: avett,errtt
+      real, dimension(nt,2) :: avW,erW,avQ2,erQ2,
+      real, dimension(nt,2) :: avtt,ertt
+      real, dimension(nt,2,2) :: aW,eW,aQ2,eQ2,
+      real, dimension(nt,2,2) :: att,ett
 
-      real thetacm_only(nt)
+      real, dimension(nt) :: thetacm_only
 
-      real eps_lo(nt),eps_hi(nt)
+      real, dimension(nt) :: eps_lo,eps_hi
       
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set

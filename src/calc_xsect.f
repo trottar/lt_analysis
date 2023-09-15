@@ -175,7 +175,7 @@ c      pause
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
                write(6,*)' Angle error ',th_mod,th_cm
-c               stop
+               stop
             endif
 
             x_real=x_mod*r
