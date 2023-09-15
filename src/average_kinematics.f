@@ -119,10 +119,9 @@ c     Get low, high eps. and neg., pos. polarity data.
 c                 pause
 
                   open(66,file=fn)
-                  read(66,*) one
                   do it=1,nbt
                      read(66,*) W,dW,Q2,dQ2,tt,dtt
-                     print*,W,dW,Q2,dQ2,it
+c                     print*,W,dW,Q2,dQ2,it
                      if(dW.gt.0.) then
                         aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
                         eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
@@ -134,7 +133,7 @@ c                 pause
                      if(dtt.gt.0.) then
                         att(it,lh,ip)=att(it,lh,ip)+tt/dtt**2
                         ett(it,lh,ip)=ett(it,lh,ip)+1./dtt**2
-                     end if                     
+                     end if
                   end do
                   close(66)
 
