@@ -47,11 +47,13 @@ c     and save result in averages/avek.* .
       character*2 pol
       character*4 pid
 
-      open (unit = 22, file =trim(pid) // "/t_bin_interval", 
+      integer, parameter :: file_unit = 22
+      
+      open (unit = file_unit, file =trim(pid) // "/t_bin_interval", 
      *     action='read')
-      read (22,*) q2_bin, t_bin, phi_bin
+      read (file_unit,*) q2_bin, t_bin, phi_bin
 
-      close(22)
+      close(file_unit)
       
       parameter (nt = t_bin)
       parameter (nphi = phi_bin)
