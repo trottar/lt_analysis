@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 09:55:16 trottar"
+# Time-stamp: "2023-09-15 09:56:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -430,8 +430,8 @@ if EPSSET == "high":
     fort_param_active = 'models/param.f'
     fort_xmodel_active = 'models/xmodel.f'
     # Copying content of used models to actively used files
-    shutil.copy(fort_xmodel, fort_xmodel_active)
-    shutil.copy(fort_param, fort_param_active)    
+    shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
+    shutil.copy(LTANAPATH+"/src/"+fort_param, LTANAPATH+"/src/"+fort_param_active)
     
     subprocess.call(['bash','{}/run_xsect.sh'.format(LTANAPATH), Q2, W])
 
