@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 10:05:48 trottar"
+# Time-stamp: "2023-09-15 10:42:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -293,18 +293,23 @@ for hist in histlist:
     hist["phi_bins"] = phi_bins
     
 ##############################
-# Step 5 of the lt_analysis: # DONE
+# Step 5 of the lt_analysis: #
 ##############################
 '''
 * Compare SIMC to data/dummy setting by setting.
 
 * SIMC weight may need to be recalculated.
 
-* If so, use script...
+* If so...
+
+** Need to put physics_iterate.f (found in src/simc_ana) in simc_gfortran (adjust reaction for specific needs)
+** Once physics_iterate.f is in simc_gfortran, change object in Makefile from physics_<PID>.o to physics_iterate.o
+** Run SIMC with this new cross section. There is no need to rerun SIMC from this point on unless model functional
+   form changes.
+** 
 
 > lt_analysis/src/SIMC/??????????????.f
 
-** TODO: Fix plots (e.g. polar) and find working simc weight script
 '''
 
 sys.path.append("normalize")
