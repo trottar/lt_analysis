@@ -31,6 +31,12 @@ c     Average W and Q2 over theta_pq settings, then over low and high epsilon
 c     settings, then over neg. and pos. settings,
 c     and save result in averages/avek.* .
 
+c     Fortran is annoying and can't find parameters
+c     dynamically (since they must be known at compile time).
+c     Therefore, I am setting is arbitrarily to allocate
+c     enough space for the sets
+      parameter (nt = 10)
+      
       integer pol_set
       real q2_set
 
@@ -52,11 +58,6 @@ c     and save result in averages/avek.* .
       read (22,*) q2_bin, t_bin, phi_bin
 
       close(22)
-
-c     Fortran is annoying and can't find parameters
-c     dynamically (since they must be known at compile time).
-c     Therefore, I am setting is arbitrarily 
-      parameter (nt = 10)
 
       real, dimension(nt) :: aveW,errW,aveQ2,errQ2
       real, dimension(nt) :: avett,errtt
