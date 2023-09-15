@@ -50,8 +50,6 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer npol_set
       real q2_set,eps_set
 
-      integer nbin
-
       character*80 r_fn, kin_fn, xunsep_fn, mod_fn
       character*2 pol
       character*4 pid
@@ -60,7 +58,6 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       real Eb,eps
 
       real q2_bin
-
       integer t_bin, phi_bin
       
       integer nt,nphi
@@ -91,8 +88,8 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       tmx=0.
       open(55,file=trim(pid) // '/list.settings')
       do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.eps.ne.eps_set)
-         read(55,*) ipol,q2,eps,th_pq,tmn,tmx,nbin
-c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx,nbin
+         read(55,*) ipol,q2,eps,th_pq,tmn,tmx
+c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx
 c 2       format(i5,5f10.5,2i5)
       end do
       close(55)
@@ -100,9 +97,7 @@ c 2       format(i5,5f10.5,2i5)
  3    format(' tmn, tmx: ',2f10.5)
       if(tmn.eq.0..or.tmx.eq.0.) 
      *     stop '*** setting is not found in list.settings'
-      if(nt.eq.nbin) 
-     *     stop '*** t-bin mismatch'
-            
+                  
       if(npol_set.lt.0) then
          pol='mn'
       else
@@ -152,9 +147,9 @@ c      pause
       mod_fn='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
       print*,'xmodel: file=',mod_fn
 
-      do it=1,nbin
+      do it=1,nt
 
-         tm=tmn+(it-0.5)*(tmx-tmn)/nbin
+         tm=tmn+(it-0.5)*(tmx-tmn)/nt
          read(52,*) w,dw,q2,dq2,tt,dtt,th_cm
          write(6,32) w,dw,q2,dq2,tt,dtt,th_cm
  32      format('xsect: ',7f10.4)
@@ -168,7 +163,7 @@ c      pause
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
             print*,'it',it
-            print*,'nbin',nbin            
+            print*,'nt',nt            
             print*,'ip',ip
             print*,'nphi',nphi
             print*,'ratio',r
