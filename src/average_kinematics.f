@@ -37,7 +37,7 @@ c     and save result in averages/avek.* .
       real q2_bin
       integer t_bin, phi_bin
 
-      integer nt,nphi
+      integer,parameter :: nt,nphi
       
       real eps_set(2)
 
@@ -58,9 +58,9 @@ c     and save result in averages/avek.* .
 
       real, dimension(nt) :: aveW,errW,aveQ2,errQ2
       real, dimension(nt) :: avett,errtt
-      real, dimension(nt,2) :: avW,erW,avQ2,erQ2,
+      real, dimension(nt,2) :: avW,erW,avQ2,erQ2
       real, dimension(nt,2) :: avtt,ertt
-      real, dimension(nt,2,2) :: aW,eW,aQ2,eQ2,
+      real, dimension(nt,2,2) :: aW,eW,aQ2,eQ2
       real, dimension(nt,2,2) :: att,ett
 
       real, dimension(nt) :: thetacm_only
