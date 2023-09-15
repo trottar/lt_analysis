@@ -37,7 +37,7 @@ c     and save result in averages/avek.* .
       real q2_bin
       integer t_bin, phi_bin
 
-      integer,parameter :: nt,nphi
+      integer nt,nphi
       
       real eps_set(2)
 
@@ -51,8 +51,8 @@ c     and save result in averages/avek.* .
      *     action='read')
       read (22,*) q2_bin, t_bin, phi_bin
 
-      nt = t_bin
-      nphi = phi_bin
+      parameter (nt = t_bin)
+      parameter (nphi = phi_bin)
 
       close(22)
 
