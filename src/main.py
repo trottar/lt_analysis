@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:21:37 trottar"
+# Time-stamp: "2023-09-14 23:24:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -324,7 +324,7 @@ from data_vs_simc import plot_data_vs_simc
 for hist in histlist:
     hist.update(compare_simc(hist, inpDict))
 
-cut_summary_lst = plot_data_vs_simc(hist,outputpdf)
+cut_summary_lst = plot_data_vs_simc(histlist,outputpdf)
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)   
