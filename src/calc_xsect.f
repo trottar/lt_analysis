@@ -141,7 +141,7 @@ c      pause
       print*,'model used: ',mod_str
 
       open(10,file=mod_str,status='old')
-      read(10, '(A)', end=80)
+      read(10, '(A)', end=100)
       close(unit=10)
       
       do it=1,nbin
