@@ -128,7 +128,6 @@ c     Get low, high eps. and neg., pos. polarity data.
 c                 pause
 
                   open(66,file=fn)
-                  read(66,*) one
                   do it=1,nbt
                      read(66,*) W,dW,Q2,dQ2,tt,dtt
 c                     print*,W,dW,Q2,dQ2,it
