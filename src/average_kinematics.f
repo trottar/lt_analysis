@@ -117,7 +117,7 @@ c     Get low, high eps. and neg., pos. polarity data.
             open(55, file=trim(pid) // '/list.settings')
             do while(.true.)
 
-               read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
+               read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx
                if(ipol.eq.pol_set.and.q2.eq.q2_set.and.
      &              eps.eq.eps_set(lh)) then
 
@@ -136,7 +136,6 @@ c     Get low, high eps. and neg., pos. polarity data.
                   WRITE(*,*) 'th_pq = ', th_pq
                   WRITE(*,*) 'tmn = ', tmn
                   WRITE(*,*) 'tmx = ', tmx
-                  WRITE(*,*) 'nbt = ', nbt                  
                   write(fn,'(a4,''/kindata/kindata.'',a2,''_'',i2.2,
      *                 ''_'',i2.2,''_'',SP,i5.4,S,''.dat'')') pid, pol,
      *                 nint(q2_set*10.), nint(eps_set(lh)*100.),
@@ -145,9 +144,16 @@ c     Get low, high eps. and neg., pos. polarity data.
 c                 pause
 
                   open(66,file=fn)
-                  do it=1,nbt
+                  do it=1,nt
                      read(66,*) W,dW,Q2,dQ2,tt,dtt
-c                     print*,W,dW,Q2,dQ2,it
+                     WRITE(*,*) 'it = ', it
+                     WRITE(*,*) 'nt = ', nt
+                     WRITE(*,*) 'W = ', W
+                     WRITE(*,*) 'dW = ', dW
+                     WRITE(*,*) 'Q2 = ', Q2
+                     WRITE(*,*) 'dQ2 = ', dQ2
+                     WRITE(*,*) 'tt = ', tt
+                     WRITE(*,*) 'dtt = ', dtt                     
                      if(dW.gt.0.) then
                         aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
                         eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
@@ -165,7 +171,7 @@ c                     print*,W,dW,Q2,dQ2,it
 
                   tmin=tmn
                   tmax=tmx
-                  ntbins=nbt
+                  ntbins=nt
 
                   nset=nset+1
 
