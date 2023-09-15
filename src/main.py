@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:41:30 trottar"
+# Time-stamp: "2023-09-14 23:43:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -325,7 +325,7 @@ sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
     
 # Variable defines string of cuts applied during analysis
-cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, outputpdf)
+cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict)
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)

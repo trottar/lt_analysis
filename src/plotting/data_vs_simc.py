@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:41:38 trottar"
+# Time-stamp: "2023-09-14 23:44:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,6 +50,40 @@ OUTPATH=lt.OUTPATH
 ################################################################################################################################################
 
 def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, outputpdf):
+
+    kinematics = inpDict["kinematics"] 
+    W = inpDict["W"] 
+    Q2 = inpDict["Q2"] 
+    EPSVAL = inpDict["EPSVAL"] 
+    InDATAFilename = inpDict["InDATAFilename"] 
+    InDUMMYFilename = inpDict["InDUMMYFilename"] 
+    OutFilename = inpDict["OutFilename"] 
+    tmin = inpDict["tmin"] 
+    tmax = inpDict["tmax"] 
+    NumtBins = inpDict["NumtBins"] 
+    NumPhiBins = inpDict["NumPhiBins"] 
+    runNumRight = inpDict["runNumRight"] 
+    runNumLeft = inpDict["runNumLeft"] 
+    runNumCenter = inpDict["runNumCenter"]
+    data_charge_right = inpDict["data_charge_right"] 
+    data_charge_left = inpDict["data_charge_left"] 
+    data_charge_center = inpDict["data_charge_center"] 
+    dummy_charge_right = inpDict["dummy_charge_right"] 
+    dummy_charge_left = inpDict["dummy_charge_left"] 
+    dummy_charge_center = inpDict["dummy_charge_center"] 
+    InData_efficiency_right = inpDict["InData_efficiency_right"] 
+    InData_efficiency_left = inpDict["InData_efficiency_left"] 
+    InData_efficiency_center = inpDict["InData_efficiency_center"] 
+    efficiency_table = inpDict["efficiency_table"] 
+    ParticleType = inpDict["ParticleType"]
+
+    ################################################################################################################################################
+
+    foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
+    fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
+    outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
+
+    ################################################################################################################################################
     
     eff_plt = TCanvas()
     G_eff_plt = ROOT.TMultiGraph()
