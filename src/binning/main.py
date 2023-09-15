@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 21:29:40 trottar"
+# Time-stamp: "2023-09-14 21:39:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1434,6 +1434,7 @@ create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 * NEED TO ADD ROOT FILES FOR OTHERS USE *
 *****************************************
 '''
+
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
@@ -1451,7 +1452,7 @@ except FileNotFoundError:
     
 print("\n\n")
 print("="*25)
-print("Cut Summary...",cut_summary_lst)
+print("{} Cut Summary...".format(EPSSET.capitalize()),cut_summary_lst)
 print("="*25)
 inpDict["cut_summary_lst"] = cut_summary_lst
 
@@ -1465,7 +1466,7 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 '''
 
 if EPSSET == "high":
-    subprocess.run(['bash','{}/run_xsect.sh'.format(LTANAPATH)])
+    subprocess.call(['bash','{}/run_xsect.sh'.format(LTANAPATH)])
 
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***
