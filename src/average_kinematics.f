@@ -37,7 +37,7 @@ c     and save result in averages/avek.* .
       real q2_bin
       integer t_bin, phi_bin
 
-      integer nt,nphi
+      integer nt
       
       real eps_set(2)
 
@@ -47,16 +47,16 @@ c     and save result in averages/avek.* .
       character*2 pol
       character*4 pid
 
-      integer, parameter :: file_unit = 22
-      
-      open (unit = file_unit, file =trim(pid) // "/t_bin_interval", 
+      open (unit = 22, file =trim(pid) // "/t_bin_interval", 
      *     action='read')
-      read (file_unit,*) q2_bin, t_bin, phi_bin
+      read (22,*) q2_bin, t_bin, phi_bin
 
-      close(file_unit)
-      
-      parameter (nt = t_bin)
-      parameter (nphi = phi_bin)
+      close(22)
+
+c     Fortran is annoying and can't find parameters
+c     dynamically (since they must be known at compile time).
+c     Therefore, I am setting is arbitrarily 
+      parameter (nt = 10)
 
       real, dimension(nt) :: aveW,errW,aveQ2,errQ2
       real, dimension(nt) :: avett,errtt
