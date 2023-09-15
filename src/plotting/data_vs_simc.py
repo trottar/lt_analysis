@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:21:11 trottar"
+# Time-stamp: "2023-09-14 23:27:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,7 +14,7 @@ import ROOT
 from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 
-def plot_data_vs_simc(hist,outputpdf):
+def plot_data_vs_simc(histlist, outputpdf):
     eff_plt = TCanvas()
     G_eff_plt = ROOT.TMultiGraph()
     l_eff_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
