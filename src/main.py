@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 22:16:47 trottar"
+# Time-stamp: "2023-09-14 23:02:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -34,6 +34,7 @@ import shutil
 ##################################################################################################################################################
 # Importing utility functions
 
+sys.path.append("utility")
 from utility import show_pdf_with_evince, match_to_bin, create_dir
 
 ##################################################################################################################################################
@@ -184,6 +185,7 @@ output_file_lst = []
 '''
 
 #Importing diamond cut script
+sys.path.append("cuts")
 from diamond import DiamondPlot
 
 Q2Val = float(Q2.replace("p","."))
@@ -213,6 +215,7 @@ for phiset in phisetlist:
 Apply random subtraction to data and dummy.
 '''
 
+sys.path.append("cuts")
 from rand_sub import rand_sub
 
 # Call histogram function above to define dictonaries for right, left, center settings
@@ -249,13 +252,14 @@ for hist in histlist:
 * These bins will also be used of high eps, so check high eps as well.
 '''
 
+sys.path.append("binning")
 from find_bins import find_bins
 
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
 
 try:
-    with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+    with open("{}/out_data/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -265,12 +269,12 @@ try:
             del t_bins[0]
             t_bins = np.array([float(element) for element in t_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
+    print("{} not found...".format("{}/out_data/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
 except IOError:
-    print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
+    print("Error reading {}...".format("{}/out_data/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
 
 try:
-    with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+    with open("{}/out_data/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -280,9 +284,9 @@ try:
             del phi_bins[0]
             phi_bins = np.array([float(element) for element in phi_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
+    print("{} not found...".format("{}/out_data/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
 except IOError:
-    print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
+    print("Error reading {}...".format("{}/out_data/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
     
 for hist in histlist:
     hist["t_bins"] = t_bins
@@ -303,12 +307,14 @@ for hist in histlist:
 ** TODO: Fix plots (e.g. polar) and find working simc weight script
 '''
 
+sys.path.append("normalize")
 from get_eff_charge import get_eff_charge
 
 # Upate hist dictionary with effective charge
 for hist in histlist:
     hist.update(get_eff_charge(hist, inpDict))
 
+sys.path.append("simc_ana")    
 from compare_simc import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
@@ -887,17 +893,20 @@ output_file_lst.append(outputpdf)
 * The data and SIMC yields are compared and the R value per bin is obtained.
 '''
 
+sys.path.append("binning")
 from calculate_yield import find_yield_data, find_yield_simc
 
 yieldDict = {}
 yieldDict.update(find_yield_data(histlist, inpDict))
 yieldDict.update(find_yield_simc(histlist, inpDict))
 
+sys.path.append("binning")
 from calculate_ratio import find_ratio
 
 ratioDict = {}
 ratioDict.update(find_ratio(histlist, inpDict, phisetlist, yieldDict))
 
+sys.path.append("binning")
 from ave_per_bin import ave_per_bin_data, ave_per_bin_simc
 
 aveDict = {}
@@ -1427,6 +1436,7 @@ if DEBUG:
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
     
 # Run fortran script
+
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
@@ -1438,7 +1448,7 @@ create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
-old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
+old_param_file = '{}/out_data/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
 try:
     cut_summary_lst += "\nUnsep Parameterization for {}...".format(formatted_date)
     with open(old_param_file, 'r') as file:
@@ -1474,7 +1484,7 @@ if EPSSET == "high":
     # ***The old parameters, used for this iteration, are saved in the summary!***
     new_param_file = '{}/parameters/par.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""))
     output_file_lst.append(new_param_file) 
-    xsect_file = '{}/xsects/x_unsep.{}_{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
+    xsect_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
     output_file_lst.append(xsect_file)
 
     # Save fortran scripts that contain iteration functional form of parameterization
@@ -1517,12 +1527,12 @@ if EPSSET == "high":
                 if "{}".format(ParticleType) not in f_dir:
                     create_dir(new_dir+"/"+f_dir)
                     f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
+                    print("Copying {} to {}".format(LTANAPATH+"/out_data/"+f,f_new))
+                    shutil.copy(LTANAPATH+"/out_data/"+f, f_new)
         else:
             f_new = new_dir
-            print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-            shutil.copy(LTANAPATH+"/src/"+f, f_new)
+            print("Copying {} to {}".format(LTANAPATH+"/out_data/"+f,f_new))
+            shutil.copy(LTANAPATH+"/out_data/"+f, f_new)
 
     with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
         file.write(inpDict["cut_summary_lst"])

@@ -1354,7 +1354,7 @@ do
     # Run the plotting script if t-flag enabled
     # Checks that array isn't empty
     if [[ $b_flag = "true" ]]; then
-	cd "${LTANAPATH}/src/binning"
+	cd "${LTANAPATH}/src"
 
 	if [ $j = "low" ]; then
 	    echo

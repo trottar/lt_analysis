@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 20:02:04 trottar"
+# Time-stamp: "2023-09-14 22:41:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,8 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_eff_charge(hist, inpDict):
-    
+def get_eff_charge(hist, inpDict):    
 
     phi_setting = hist["phi_setting"]
     
