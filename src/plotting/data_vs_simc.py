@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:37:58 trottar"
+# Time-stamp: "2023-09-14 23:41:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,7 +49,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def plot_data_vs_simc(t_bins, phi_bins, histlist, outputpdf):
+def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, outputpdf):
     
     eff_plt = TCanvas()
     G_eff_plt = ROOT.TMultiGraph()
