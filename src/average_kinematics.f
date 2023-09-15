@@ -36,6 +36,17 @@ c     dynamically (since they must be known at compile time).
 c     Therefore, I am setting is arbitrarily to allocate
 c     enough space for the sets
       parameter (nbin = 10)
+
+      real, dimension(nbin) :: aveW,errW,aveQ2,errQ2
+      real, dimension(nbin) :: avett,errtt
+      real, dimension(nbin,2) :: avW,erW,avQ2,erQ2
+      real, dimension(nbin,2) :: avtt,ertt
+      real, dimension(nbin,2,2) :: aW,eW,aQ2,eQ2
+      real, dimension(nbin,2,2) :: att,ett
+
+      real, dimension(nbin) :: thetacm_only
+
+      real, dimension(nbin) :: eps_lo,eps_hi
       
       integer pol_set
       real q2_set
@@ -61,18 +72,7 @@ c     enough space for the sets
 
       nt = t_bin
       nphi = phi_bin
-      
-      real, dimension(nbin) :: aveW,errW,aveQ2,errQ2
-      real, dimension(nbin) :: avett,errtt
-      real, dimension(nbin,2) :: avW,erW,avQ2,erQ2
-      real, dimension(nbin,2) :: avtt,ertt
-      real, dimension(nbin,2,2) :: aW,eW,aQ2,eQ2
-      real, dimension(nbin,2,2) :: att,ett
-
-      real, dimension(nbin) :: thetacm_only
-
-      real, dimension(nbin) :: eps_lo,eps_hi
-      
+            
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set
       
