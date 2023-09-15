@@ -139,6 +139,10 @@ c      pause
 
       mod_str='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
       print*,'model used: ',mod_str
+
+      open(10,file=mod_str,status='old')
+      read(10, '(A)', end=80)
+      close(unit=10)
       
       do it=1,nbin
 
@@ -191,7 +195,7 @@ c        Write out kinematics for Henk.
 
 !     Dynamically construct and include
 !     the model file based off PID and polarity
-      include mod_str
+!      include mod_str
 !     include 'models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
 !      include 'models/xmodel_kaon_pl.f'
       
