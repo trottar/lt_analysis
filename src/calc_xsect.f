@@ -77,7 +77,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       mod_str='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
 
-c      print*,'model used: ',mod_str
+      print*,'model used: ',mod_str
       
       ipol=0
       q2=0.
@@ -193,7 +193,8 @@ c        Write out kinematics for Henk.
 !     Dynamically construct and include
 !     the model file based off PID and polarity
 !     include mod_str
-!      include 'models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
+!     include 'models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
+      include 'models/xmodel_kaon_pl.f'
       
 *=======================================================================
 
