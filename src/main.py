@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 00:01:07 trottar"
+# Time-stamp: "2023-09-15 00:02:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -376,9 +376,7 @@ plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDic
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
-output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
-    
-# Run fortran script
+output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
 
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
