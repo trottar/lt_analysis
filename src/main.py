@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 00:02:16 trottar"
+# Time-stamp: "2023-09-15 00:13:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,7 +35,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, match_to_bin, create_dir
+from utility import show_pdf_with_evince, create_dir
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
