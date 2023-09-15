@@ -191,15 +191,13 @@ c        Write out kinematics for Henk.
 
 !     Dynamically construct and include
 !     the model file based off PID and polarity
-!      include mod_str
-!     include 'models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
       if(pid.eq.'kaon') then
          if(pol.eq.'pl') then
             include 'models/xmodel_kaon_pl.f'
          elseif(pol.eq.'mn') then
             include 'models/xmodel_kaon_mn.f'
          else then
-            include 'models/xmodel_kaon_mn.f'
+     *           stop '*** Invalid polarity!'
          endif
       elseif(pid.eq.'pion') then
          if(pol.eq.'pl') then
@@ -207,10 +205,10 @@ c        Write out kinematics for Henk.
          elseif(pol.eq.'mn') then
             include 'models/xmodel_pion_mn.f'
          else then
-            include 'models/xmodel.f'
+     *           stop '*** Invalid polarity!'
          endif
       else then
-         include 'models/xmodel.f'
+     *        stop '*** Invalid PID!'
       endif
       
 *=======================================================================
