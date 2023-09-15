@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 09:01:34 trottar"
+# Time-stamp: "2023-09-15 10:32:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -381,4 +381,13 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
 
+    # Check if the last character is a newline and remove if so
+    with open(f_list, "rb") as f:
+        f.seek(-1, os.SEEK_END)
+        last_char = f.read(1)
+        if last_char == b'\n':
+            # Remove the final line
+            with open(f_list, "rb+") as f:
+                f.seek(-1, os.SEEK_END)
+                f.truncate()                    
     ################################################################################################################################################
