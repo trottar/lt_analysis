@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 22:10:59 trottar"
+# Time-stamp: "2023-09-14 22:16:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1474,7 +1474,7 @@ if EPSSET == "high":
     # ***The old parameters, used for this iteration, are saved in the summary!***
     new_param_file = '{}/parameters/par.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""))
     output_file_lst.append(new_param_file) 
-    xsect_file = '{}/xsects/x_unsep.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
+    xsect_file = '{}/xsects/x_unsep.{}_{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
     output_file_lst.append(xsect_file)
 
     # Save fortran scripts that contain iteration functional form of parameterization
@@ -1523,7 +1523,6 @@ if EPSSET == "high":
             f_new = new_dir
             print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
             shutil.copy(LTANAPATH+"/src/"+f, f_new)
-
 
     with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
         file.write(inpDict["cut_summary_lst"])
