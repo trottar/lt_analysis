@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 00:37:17 trottar"
+# Time-stamp: "2023-09-15 01:54:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,7 +259,7 @@ if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
 
 try:
-    with open("{}/out_data/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+    with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -269,12 +269,12 @@ try:
             del t_bins[0]
             t_bins = np.array([float(element) for element in t_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/out_data/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
+    print("{} not found...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
 except IOError:
-    print("Error reading {}...".format("{}/out_data/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
+    print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
 
 try:
-    with open("{}/out_data/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+    with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -284,9 +284,9 @@ try:
             del phi_bins[0]
             phi_bins = np.array([float(element) for element in phi_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/out_data/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
+    print("{} not found...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
 except IOError:
-    print("Error reading {}...".format("{}/out_data/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
+    print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
     
 for hist in histlist:
     hist["t_bins"] = t_bins
@@ -389,7 +389,7 @@ create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
-old_param_file = '{}/out_data/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
+old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
 try:
     cut_summary_lst += "\nUnsep Parameterization for {}...".format(formatted_date)
     with open(old_param_file, 'r') as file:
@@ -468,12 +468,12 @@ if EPSSET == "high":
                 if "{}".format(ParticleType) not in f_dir:
                     create_dir(new_dir+"/"+f_dir)
                     f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("Copying {} to {}".format(LTANAPATH+"/out_data/"+f,f_new))
-                    shutil.copy(LTANAPATH+"/out_data/"+f, f_new)
+                    print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
         else:
             f_new = new_dir
-            print("Copying {} to {}".format(LTANAPATH+"/out_data/"+f,f_new))
-            shutil.copy(LTANAPATH+"/out_data/"+f, f_new)
+            print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+            shutil.copy(LTANAPATH+"/src/"+f, f_new)
 
     with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
         file.write(inpDict["cut_summary_lst"])
