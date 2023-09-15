@@ -75,7 +75,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       real phi
 
-      mod_str='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
+      mod_str='xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
 
       print*,'model used: ',mod_str
       
