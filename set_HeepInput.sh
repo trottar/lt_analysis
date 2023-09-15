@@ -114,6 +114,6 @@ elif [[ $a_flag = "true" ]]; then
     echo "Running simc analysis for ${InputSIMC}..."
     echo
     cd ${LTANAPATH}/src/setup
-    ./run_simc_tree "${InputSIMC}"
+    ./run_simc_tree "${InputSIMC}" "heep"
 fi
 
