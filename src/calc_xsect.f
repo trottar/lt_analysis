@@ -55,7 +55,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       character*80 r_fn, kin_fn, xunsep_fn
       character*2 pol
       character*4 pid
-      character*80 mod_str      
+      character*80 mod_str
 
       integer it,ip
       real Eb,eps
@@ -76,6 +76,8 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       real phi
 
       mod_str='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
+
+      print*,'model used: ',mod_str
       
       ipol=0
       q2=0.
