@@ -96,7 +96,8 @@ c 2       format(i5,5f10.5,2i5)
       else
          pol='pl'
       end if
-
+      print*,'polarity: ',pol
+      
       Eb=0.
       open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
