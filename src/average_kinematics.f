@@ -96,7 +96,7 @@ c     Get low, high eps. and neg., pos. polarity data.
          do lh=1,2
 
             nset=0
-            open(55, '../out_data' // file=trim(pid) // 
+            open(55, file='../out_data' // file=trim(pid) // 
      &           '/list.settings')
             do while(.true.)
 
