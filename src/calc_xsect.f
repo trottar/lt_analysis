@@ -185,8 +185,6 @@ c        Write out kinematics for Henk.
       close(61)
       print*,' '
 
-      end
-
 *=======================================================================
 
 !     Dynamically construct and include
@@ -213,3 +211,5 @@ c        Write out kinematics for Henk.
 *=======================================================================
 
       include 'eps_n_theta.f'
+      
+      end
