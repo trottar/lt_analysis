@@ -101,14 +101,6 @@ c     Get low, high eps. and neg., pos. polarity data.
             do while(.true.)
 
                read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbt
-               WRITE(*,*) 'Values read:'
-               WRITE(*,*) 'ipol = ', ipol
-               WRITE(*,*) 'q2 = ', q2
-               WRITE(*,*) 'eps = ', eps
-               WRITE(*,*) 'th_pq = ', th_pq
-               WRITE(*,*) 'tmn = ', tmn
-               WRITE(*,*) 'tmx = ', tmx
-               WRITE(*,*) 'nbt = ', nbt
                if(ipol.eq.pol_set.and.q2.eq.q2_set.and.
      &              eps.eq.eps_set(lh)) then
 
@@ -119,6 +111,14 @@ c     Get low, high eps. and neg., pos. polarity data.
                   else
                      stop '*** aver: wrong pol ***'
                   endif
+                  WRITE(*,*) 'Values read:'
+                  WRITE(*,*) 'ipol = ', ipol
+                  WRITE(*,*) 'q2 = ', q2
+                  WRITE(*,*) 'eps = ', eps
+                  WRITE(*,*) 'th_pq = ', th_pq
+                  WRITE(*,*) 'tmn = ', tmn
+                  WRITE(*,*) 'tmx = ', tmx
+                  WRITE(*,*) 'nbt = ', nbt                  
                   write(fn,'(''../out_data/'',a4,''/kindata/kindata.'',a2,''_'',i2.2,
      *                 ''_'',i2.2,''_'',SP,i5.4,S,''.dat'')') pid, pol,
      *                 nint(q2_set*10.), nint(eps_set(lh)*100.),
