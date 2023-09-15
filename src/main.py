@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 00:13:21 trottar"
+# Time-stamp: "2023-09-15 00:37:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -429,9 +429,9 @@ if EPSSET == "high":
     output_file_lst.append(xsect_file)
 
     # Save fortran scripts that contain iteration functional form of parameterization
-    fort_param = 'param_{}_{}.f'.format(ParticleType, pol_str)
+    fort_param = 'models/param_{}_{}.f'.format(ParticleType, pol_str)
     output_file_lst.append(fort_param) 
-    fort_xmodel = 'xmodel_{}_{}.f'.format(ParticleType, pol_str)
+    fort_xmodel = 'models/xmodel_{}_{}.f'.format(ParticleType, pol_str)
     output_file_lst.append(fort_xmodel) 
 
 ##############################
