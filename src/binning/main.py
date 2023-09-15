@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 21:46:16 trottar"
+# Time-stamp: "2023-09-14 22:02:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1517,8 +1517,8 @@ if EPSSET == "high":
                 if "{}".format(ParticleType) not in f_dir:
                     create_dir(new_dir+"/"+f_dir)
                     f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
+                    print("Copying {} to {}".format(f,f_new))
+                    shutil.copy(f, f_new)
         else:
             f_new = new_dir+f.split('src')[1]
             print("Copying {} to {}".format(f,f_new))
