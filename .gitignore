@@ -27,11 +27,14 @@ average_kinematics
 calc_xsect
 fort.99
 
+# Active fortran scripts
+param_active.f
+xmodel_active.f
+
 # Directories
 __pycache__
 build
 average_kinematics
-
 
 # Sym link
 worksim
