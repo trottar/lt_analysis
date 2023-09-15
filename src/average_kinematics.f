@@ -31,11 +31,14 @@ c     Average W and Q2 over theta_pq settings, then over low and high epsilon
 c     settings, then over neg. and pos. settings,
 c     and save result in averages/avek.* .
 
-      parameter (nt=6)
-
       integer pol_set
       real q2_set
 
+      real q2_bin
+      integer t_bin, phi_bin
+
+      integer nt,nphi
+      
       real aveW(nt),errW(nt),aveQ2(nt),errQ2(nt),
      &      avett(nt),errtt(nt)
       real avW(nt,2),erW(nt,2),avQ2(nt,2),erQ2(nt,2),
@@ -58,6 +61,15 @@ c     and save result in averages/avek.* .
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set
 
+      open (unit = 22, file =trim(pid) // "/t_bin_interval", 
+     *     action='read')
+      read (22,*) q2_bin, t_bin, phi_bin
+
+      nt = t_bin
+      nphi = phi_bin
+
+      close(22)
+      
       do it=1,nt
 
          aveW(it)=0.

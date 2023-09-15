@@ -59,10 +59,11 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer it,ip
       real Eb,eps
 
-      real one
+      real q2_bin
 
+      integer t_bin, phi_bin
+      
       integer nt,nphi
-      parameter (nt=6,nphi=16)
 
       real r,dr,w,dw,q2,dq2,tt,dtt,th_cm
       real tm,tmn,tmx
@@ -73,6 +74,15 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       real th_pq
 
       real phi
+
+      open (unit = 22, file =trim(pid) // "/t_bin_interval", 
+     *     action='read')
+      read (22,*) q2_bin, t_bin, phi_bin
+
+      nt = t_bin
+      nphi = phi_bin
+
+      close(22)
       
       ipol=0
       q2=0.
@@ -90,7 +100,9 @@ c 2       format(i5,5f10.5,2i5)
  3    format(' tmn, tmx: ',2f10.5)
       if(tmn.eq.0..or.tmx.eq.0.) 
      *     stop '*** setting is not found in list.settings'
-
+      if(nt.eq.nbin) 
+     *     stop '*** t-bin mismatch'
+            
       if(npol_set.lt.0) then
          pol='mn'
       else
