@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:16:09 trottar"
+# Time-stamp: "2023-09-14 23:19:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -316,7 +316,6 @@ for hist in histlist:
 
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
-
 
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc

@@ -3,13 +3,16 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:14:59 trottar"
+# Time-stamp: "2023-09-14 23:20:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
+import ROOT
+from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
+from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 
 def plot_data_vs_simc(hist,outputpdf):
     eff_plt = TCanvas()
