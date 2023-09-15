@@ -194,16 +194,12 @@ c        Write out kinematics for Henk.
       if(pid.eq.'kaon') then
          if(pol.eq.'pl') then
             include 'models/xmodel_kaon_pl.f'
-         elseif(pol.eq.'mn') then
-            include 'models/xmodel_kaon_pl.f'
          else then
      *           stop '*** Invalid polarity!'
          endif
       elseif(pid.eq.'pion') then
-         if(pol.eq.'pl') then
-            include 'models/xmodel_pion_pl.f'
-         elseif(pol.eq.'mn') then
-            include 'models/xmodel_pion_pl.f'
+         if(pol.eq.'mn') then
+            include 'models/xmodel_pion_mn.f'
          else then
      *           stop '*** Invalid polarity!'
          endif
