@@ -74,10 +74,6 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       real th_pq
 
       real phi
-
-      mod_str='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
-
-      print*,'model used: ',mod_str
       
       ipol=0
       q2=0.
@@ -141,6 +137,9 @@ c      pause
 
       open(61,file=xunsep_fn,status='replace')
 
+      mod_str='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
+      print*,'model used: ',mod_str
+      
       do it=1,nbin
 
          tm=tmn+(it-0.5)*(tmx-tmn)/nbin
