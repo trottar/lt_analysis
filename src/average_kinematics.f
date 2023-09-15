@@ -112,11 +112,10 @@ c     Get low, high eps. and neg., pos. polarity data.
                      stop '*** aver: wrong pol ***'
                   endif
                   write(fn,'(''../out_data/'',a4,''/kindata/kindata.'',
-     *                 a2,''_'',i2.2,''_'',i2.2,''_'',SP,i5.4,S,
-     *                 ''.dat'')') pid, pol,
+     *                 ''_'',i2.2,''_'',SP,i5.4,S,''.dat'')') pid, pol,
      *                 nint(q2_set*10.), nint(eps_set(lh)*100.),
      *                 nint(th_pq*1000.)
-                  print*,'fn=',fn
+c                  print*,'fn=',fn
 c                 pause
 
                   open(66,file=fn)
