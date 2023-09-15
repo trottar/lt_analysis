@@ -154,6 +154,7 @@ c      pause
          write(6,32) w,dw,q2,dq2,tt,dtt,th_cm
          WRITE(*,*) '------------'
          WRITE(*,*) 'Values read:'
+         WRITE(*,*) '------------'
  32      format('xsect: ',7f10.4)
 
          tm = tt

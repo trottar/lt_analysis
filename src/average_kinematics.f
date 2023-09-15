@@ -130,6 +130,7 @@ c     Get low, high eps. and neg., pos. polarity data.
                   endif
                   WRITE(*,*) '------------'
                   WRITE(*,*) 'Values read:'
+                  WRITE(*,*) '------------'
                   WRITE(*,*) 'ipol = ', ipol
                   WRITE(*,*) 'pol = ', pol
                   WRITE(*,*) 'q2 = ', q2
@@ -182,7 +183,7 @@ c                 pause
 
  9          continue
             close(55)
-
+            WRITE(*,*) '------------'
             print*,'nset=',nset
 
          end do                 !lh=1,2
