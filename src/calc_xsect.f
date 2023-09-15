@@ -152,6 +152,8 @@ c      pause
          tm=tmn+(it-0.5)*(tmx-tmn)/nt
          read(52,*) w,dw,q2,dq2,tt,dtt,th_cm
          write(6,32) w,dw,q2,dq2,tt,dtt,th_cm
+         WRITE(*,*) '------------'
+         WRITE(*,*) 'Values read:'
  32      format('xsect: ',7f10.4)
 
          tm = tt

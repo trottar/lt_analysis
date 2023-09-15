@@ -128,6 +128,7 @@ c     Get low, high eps. and neg., pos. polarity data.
                   else
                      stop '*** aver: wrong pol ***'
                   endif
+                  WRITE(*,*) '------------'
                   WRITE(*,*) 'Values read:'
                   WRITE(*,*) 'ipol = ', ipol
                   WRITE(*,*) 'pol = ', pol
