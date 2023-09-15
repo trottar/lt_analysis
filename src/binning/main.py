@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 21:39:30 trottar"
+# Time-stamp: "2023-09-14 21:46:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -850,6 +850,7 @@ for i,hist in enumerate(histlist):
     tex.SetTextColor(i+1)
     texlist.append(tex)
     cut_summary_lst += "\n"+"phi_bins-> {}".format(phi_bins)
+    cut_summary_lst += "\n\n"+"Diamond Cut Paramters"
     for p in [1,2,3,4]:
         tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3+p)/2))),"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
         tex.SetTextSize(0.03)
@@ -1466,7 +1467,7 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 '''
 
 if EPSSET == "high":
-    subprocess.call(['bash','{}/run_xsect.sh'.format(LTANAPATH)])
+    subprocess.call(['bash','{}/run_xsect.sh'.format(LTANAPATH), Q2, W])
 
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***
