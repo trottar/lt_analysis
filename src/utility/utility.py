@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:33:24 trottar"
+# Time-stamp: "2023-09-16 12:43:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -115,11 +115,14 @@ def hist_to_root(hist, file_name, tree_name):
         # If the tree does not exist, create a new one
         tree = ROOT.TTree(tree_name, "{} Histograms".format(tree_name.capitalize()))
 
-    # Clone the histogram to an object (since TH1D/TH2D cannot be directly stored in a TTree)
-    cloned_hist = hist.Clone()
-
-    # Create a pointer to the cloned histogram
-    hist_address = ROOT.AddressOf(cloned_hist)
+    # Create a pointer to the histogram
+    if isinstance(hist, ROOT.TH1F):
+        hist_address = ROOT.AddressOf('TH1F', hist)
+    elif isinstance(hist, ROOT.TH2F):
+        hist_address = ROOT.AddressOf('TH2F', hist)
+    else:
+        print("Unsupported histogram type.")
+        return
 
     # Add the cloned histogram as a branch to the tree
     tree.Branch(hist.GetName(), hist_address)
