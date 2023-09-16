@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 21:33:12 trottar"
+# Time-stamp: "2023-09-16 11:47:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -480,7 +480,7 @@ if EPSSET == "high":
     # Check if the file exists
     if os.path.exists(f_path):
         # If it exists, update it with the string
-        with open(f_path, 'w') as file:
+        with open(f_path, 'a') as file:
             file.write(formatted_date)
     else:
         # If not, create it and fill it with the string
