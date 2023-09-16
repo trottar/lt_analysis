@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 16:41:36 trottar"
+# Time-stamp: "2023-09-15 21:04:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -395,9 +395,9 @@ from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 '''
-*****************************************
-* NEED TO ADD ROOT FILES FOR OTHERS USE *
-*****************************************
+**************************************************
+* NEED TO ADD ROOT AND JSON FILES FOR OTHERS USE *
+**************************************************
 '''
 
 # ***Parameter file from last iteration!***
@@ -476,7 +476,7 @@ if EPSSET == "high":
     new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
     create_dir(new_dir)
 
-    f_path = new_dir+"/"+"{}_iter.dat"
+    f_path = new_dir+"/"+"{}_{}_{}_iter.dat".format(ParticleType,Q2,W)
     # Check if the file exists
     if os.path.exists(f_path):
         # If it exists, update it with the string
@@ -491,7 +491,8 @@ if EPSSET == "high":
     with open(f_path, 'r') as file:
         total_lines = len(file.readlines())
 
-    os.rename(f_path.replace("iter","iter_{}".format(total_lines)))
+    # Rename 
+    os.rename(f_path,f_path.replace("iter","iter_{}".format(total_lines)))
 
     for f in output_file_lst:
         if OUTPATH in f:
