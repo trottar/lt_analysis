@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 21:21:00 trottar"
+# Time-stamp: "2023-09-15 21:27:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -476,7 +476,7 @@ if EPSSET == "high":
     
     print("\n\n")
 
-    f_path = new_dir+"/"+"{}_{}_{}_iter.dat".format(ParticleType,Q2,W)
+    f_path = "{}/{}_{}_{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
     if os.path.exists(f_path):
         # If it exists, update it with the string
@@ -491,8 +491,8 @@ if EPSSET == "high":
     with open(f_path, 'r') as file:
         total_lines = len(file.readlines())
 
-    # Rename 
-    os.rename(f_path,f_path.replace("iter","iter_{}".format(total_lines)))
+    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines))
+    shutil(f_path,f_path_new)
 
     for f in output_file_lst:
         if OUTPATH in f:
