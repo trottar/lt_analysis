@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:53:24 trottar"
+# Time-stamp: "2023-09-16 12:59:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,26 +103,22 @@ def is_hist(obj):
 ################################################################################################################################################
 
 # Save histograms to root file
-def hist_to_root(hist, file_name, tree_name):
+def hist_to_root(hist, file_name, directory_name):
     # Check if the ROOT file already exists
     root_file = ROOT.TFile.Open(file_name, "UPDATE")
 
-    # If the file exists, check if the tree already exists
-    if root_file and tree_name in [key.GetName() for key in root_file.GetListOfKeys()]:
-        # If the tree already exists, open it
-        tree = root_file.Get(tree_name)
+    # Create or open the directory
+    if directory_name in [key.GetName() for key in root_file.GetListOfKeys()]:
+        directory = root_file.Get(directory_name)
     else:
-        # If the tree does not exist, create a new one
-        tree = ROOT.TTree(tree_name, "{} Histograms".format(tree_name.capitalize()))
+        directory = root_file.mkdir(directory_name)
+        directory.cd()
 
-    # Add the cloned histogram as a branch to the tree
-    tree.Branch(hist.GetName(), hist)
+    # Clone the histogram since we're storing it in a directory
+    cloned_hist = hist.Clone()
+    cloned_hist.Write(hist.GetName())
 
-    # Fill the tree with the cloned histogram
-    tree.Fill()
-
-    # Write the tree and close the file
-    root_file.Write()
+    # Close the file
     root_file.Close()
 
 ################################################################################################################################################    
