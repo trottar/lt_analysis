@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 11:47:00 trottar"
+# Time-stamp: "2023-09-16 12:00:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,7 +35,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir
+from utility import show_pdf_with_evince, create_dir, hist_to_root
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -481,7 +481,7 @@ if EPSSET == "high":
     if os.path.exists(f_path):
         # If it exists, update it with the string
         with open(f_path, 'a') as file:
-            file.write(formatted_date)
+            file.write('\n'+formatted_date)
     else:
         # If not, create it and fill it with the string
         with open(f_path, 'x') as file:

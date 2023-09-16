@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 21:45:26 trottar"
+# Time-stamp: "2023-09-16 11:55:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,3 +95,29 @@ def match_to_bin(data):
     return [[match, np.array(values)] for match, values in match_dict.items()]
 
 ################################################################################################################################################
+
+# Save histogram to root file
+def hist_to_root(hist, file_name, tree_name):
+    # Check if the ROOT file already exists
+    root_file = ROOT.TFile.Open(file_name, "UPDATE")
+
+    # If the file exists, check if the tree already exists
+    if root_file and tree_name in [key.GetName() for key in root_file.GetListOfKeys()]:
+        # If the tree already exists, open it
+        tree = root_file.Get(tree_name)
+    else:
+        # If the tree does not exist, create a new one
+        tree = ROOT.TTree(tree_name, "Tree containing TH1F")
+
+    # Clone the TH1F to a TH1F object (since TH1F cannot be directly stored in a TTree)
+    cloned_hist = hist.Clone()
+
+    # Add the cloned histogram as a branch to the tree
+    tree.Branch(hist.GetName(), cloned_hist)
+
+    # Fill the tree with the cloned histogram
+    tree.Fill()
+
+    # Write the tree and close the file
+    root_file.Write()
+    root_file.Close()
