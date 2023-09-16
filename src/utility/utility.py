@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 14:51:01 trottar"
+# Time-stamp: "2023-09-16 15:03:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,6 +110,8 @@ def hist_to_root(hist, file_name, directory_name):
     # Split the directory names
     directories = directory_name.split('/')
 
+    # Create or navigate through the nested directories
+    current_dir = root_file    
     for directory in directories:
         # Check if the directory exists
         dir_exists = bool(current_dir.GetDirectory(directory))
