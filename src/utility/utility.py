@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:59:52 trottar"
+# Time-stamp: "2023-09-16 13:24:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,12 +107,17 @@ def hist_to_root(hist, file_name, directory_name):
     # Check if the ROOT file already exists
     root_file = ROOT.TFile.Open(file_name, "UPDATE")
 
-    # Create or open the directory
-    if directory_name in [key.GetName() for key in root_file.GetListOfKeys()]:
-        directory = root_file.Get(directory_name)
-    else:
-        directory = root_file.mkdir(directory_name)
-        directory.cd()
+    # Split the directory names
+    directories = directory_name.split('/')
+
+    # Create or open the nested directories
+    current_directory = root_file
+    for directory in directories:
+        if directory in [key.GetName() for key in current_directory.GetListOfKeys()]:
+            current_directory = current_directory.Get(directory)
+        else:
+            current_directory = current_directory.mkdir(directory)
+            current_directory.cd()
 
     # Clone the histogram since we're storing it in a directory
     cloned_hist = hist.Clone()
