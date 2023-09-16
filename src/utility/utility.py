@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:04:28 trottar"
+# Time-stamp: "2023-09-16 12:19:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,7 +44,7 @@ def create_dir(dir_name):
 
 ################################################################################################################################################
 
-# Convert TH1F to NumPy array
+# Convert TH1D to NumPy array
 def weight_bins(histogram):
     
     # Get the number of bins in the histogram
@@ -96,9 +96,9 @@ def match_to_bin(data):
 
 ################################################################################################################################################
 
-# Function to check if an object is of type TH1F or TH2F
+# Function to check if an object is of type TH1D or TH2D
 def is_hist(obj):
-    return isinstance(obj, (ROOT.TH1F, ROOT.TH2F))
+    return isinstance(obj, (ROOT.TH1D, ROOT.TH2D))
 
 ################################################################################################################################################
 
@@ -113,9 +113,9 @@ def hist_to_root(hist, file_name, tree_name):
         tree = root_file.Get(tree_name)
     else:
         # If the tree does not exist, create a new one
-        tree = ROOT.TTree(tree_name, "Tree containing TH1F")
+        tree = ROOT.TTree(tree_name, "Tree containing TH1D")
 
-    # Clone the TH1F to a TH1F object (since TH1F cannot be directly stored in a TTree)
+    # Clone the TH1D to a TH1D object (since TH1D cannot be directly stored in a TTree)
     cloned_hist = hist.Clone()
 
     # Add the cloned histogram as a branch to the tree
