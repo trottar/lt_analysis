@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:16:22 trottar"
+# Time-stamp: "2023-09-16 12:23:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,7 +337,6 @@ for hist in histlist:
 for hist in histlist:
     # Loop through all keys,values of dictionary
     for key, val in hist.items():
-        print("----------------",key,is_hist(val))
         if is_hist(val):
             if "DATA" in val.GetName():
                 print("Saving {} to {}".format(val.GetName(),foutname))

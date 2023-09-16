@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:19:22 trottar"
+# Time-stamp: "2023-09-16 12:33:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,7 +102,7 @@ def is_hist(obj):
 
 ################################################################################################################################################
 
-# Save histogram to root file
+# Save histograms to root file
 def hist_to_root(hist, file_name, tree_name):
     # Check if the ROOT file already exists
     root_file = ROOT.TFile.Open(file_name, "UPDATE")
@@ -113,13 +113,16 @@ def hist_to_root(hist, file_name, tree_name):
         tree = root_file.Get(tree_name)
     else:
         # If the tree does not exist, create a new one
-        tree = ROOT.TTree(tree_name, "Tree containing TH1D")
+        tree = ROOT.TTree(tree_name, "{} Histograms".format(tree_name.capitalize()))
 
-    # Clone the TH1D to a TH1D object (since TH1D cannot be directly stored in a TTree)
+    # Clone the histogram to an object (since TH1D/TH2D cannot be directly stored in a TTree)
     cloned_hist = hist.Clone()
 
+    # Create a pointer to the cloned histogram
+    hist_address = ROOT.AddressOf(cloned_hist)
+
     # Add the cloned histogram as a branch to the tree
-    tree.Branch(hist.GetName(), cloned_hist)
+    tree.Branch(hist.GetName(), hist_address)
 
     # Fill the tree with the cloned histogram
     tree.Fill()
