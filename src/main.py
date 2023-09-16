@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 21:13:31 trottar"
+# Time-stamp: "2023-09-15 21:21:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -468,13 +468,13 @@ if EPSSET == "high":
 * Save all information for this iteration
 '''
 
+# Create a new directory for each iteration in cache
+new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
+create_dir(new_dir)
+
 if EPSSET == "high":
     
     print("\n\n")
-
-    # Create a new directory for each iteration in cache
-    new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
-    create_dir(new_dir)
 
     f_path = new_dir+"/"+"{}_{}_{}_iter.dat".format(ParticleType,Q2,W)
     # Check if the file exists
