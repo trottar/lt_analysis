@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:51:03 trottar"
+# Time-stamp: "2023-09-16 12:53:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,7 +116,7 @@ def hist_to_root(hist, file_name, tree_name):
         tree = ROOT.TTree(tree_name, "{} Histograms".format(tree_name.capitalize()))
 
     # Add the cloned histogram as a branch to the tree
-    tree.Branch(hist.GetName(), hist_address)
+    tree.Branch(hist.GetName(), hist)
 
     # Fill the tree with the cloned histogram
     tree.Fill()
