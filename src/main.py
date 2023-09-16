@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 21:04:03 trottar"
+# Time-stamp: "2023-09-15 21:13:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -520,5 +520,7 @@ if EPSSET == "high":
             print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
             shutil.copy(LTANAPATH+"/src/"+f, f_new)
 
-    with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
-        file.write(inpDict["cut_summary_lst"])
+# Need summary for both high and low eps.
+# All others should be saved once both are complete
+with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
+    file.write(inpDict["cut_summary_lst"])
