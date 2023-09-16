@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:23:35 trottar"
+# Time-stamp: "2023-09-16 13:14:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -340,13 +340,13 @@ for hist in histlist:
         if is_hist(val):
             if "DATA" in val.GetName():
                 print("Saving {} to {}".format(val.GetName(),foutname))
-                hist_to_root(val, foutname, "data")
+                hist_to_root(val, foutname, "{}/data".format(hist["phi_setting"]))
             if "SIMC" in val.GetName():
                 print("Saving {} to {}".format(val.GetName(),foutname))                
-                hist_to_root(val, foutname, "simc")
+                hist_to_root(val, foutname, "{}/simc".format(hist["phi_setting"]))
             if "DUMMY" in val.GetName():
                 print("Saving {} to {}".format(val.GetName(),foutname))                
-                hist_to_root(val, foutname, "dummy")
+                hist_to_root(val, foutname, "{}/dummy".format(hist["phi_setting"]))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
