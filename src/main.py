@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 21:27:32 trottar"
+# Time-stamp: "2023-09-15 21:33:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -492,7 +492,7 @@ if EPSSET == "high":
         total_lines = len(file.readlines())
 
     f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines))
-    shutil(f_path,f_path_new)
+    shutil.copy(f_path,f_path_new)
 
     for f in output_file_lst:
         if OUTPATH in f:
