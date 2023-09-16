@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:43:26 trottar"
+# Time-stamp: "2023-09-16 12:46:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,10 +116,10 @@ def hist_to_root(hist, file_name, tree_name):
         tree = ROOT.TTree(tree_name, "{} Histograms".format(tree_name.capitalize()))
 
     # Create a pointer to the histogram
-    if isinstance(hist, ROOT.TH1F):
-        hist_address = ROOT.AddressOf('TH1F', hist)
-    elif isinstance(hist, ROOT.TH2F):
-        hist_address = ROOT.AddressOf('TH2F', hist)
+    if isinstance(hist, ROOT.TH1D):
+        hist_address = ROOT.AddressOf('TH1D', hist)
+    elif isinstance(hist, ROOT.TH2D):
+        hist_address = ROOT.AddressOf('TH2D', hist)
     else:
         print("Unsupported histogram type.")
         return
