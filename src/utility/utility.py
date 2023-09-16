@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 13:24:00 trottar"
+# Time-stamp: "2023-09-16 14:51:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,18 +110,17 @@ def hist_to_root(hist, file_name, directory_name):
     # Split the directory names
     directories = directory_name.split('/')
 
-    # Create or open the nested directories
-    current_directory = root_file
     for directory in directories:
-        if directory in [key.GetName() for key in current_directory.GetListOfKeys()]:
-            current_directory = current_directory.Get(directory)
-        else:
-            current_directory = current_directory.mkdir(directory)
-            current_directory.cd()
+        # Check if the directory exists
+        dir_exists = bool(current_dir.GetDirectory(directory))
+        if not dir_exists:
+            current_dir.mkdir(directory)
+        current_dir.cd(directory)
+        current_dir = ROOT.gDirectory  # Update the current directory
 
     # Clone the histogram since we're storing it in a directory
     cloned_hist = hist.Clone()
-    cloned_hist.Write(hist.GetName())
+    cloned_hist.Write()
 
     # Close the file
     root_file.Close()
