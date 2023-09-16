@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:10:31 trottar"
+# Time-stamp: "2023-09-16 12:16:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,6 +151,7 @@ CACHEPATH=lt.CACHEPATH
 
 foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
 fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
+foutjson  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".json"
 outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 output_file_lst = []
@@ -336,6 +337,7 @@ for hist in histlist:
 for hist in histlist:
     # Loop through all keys,values of dictionary
     for key, val in hist.items():
+        print("----------------",key,is_hist(val))
         if is_hist(val):
             if "DATA" in val.GetName():
                 print("Saving {} to {}".format(val.GetName(),foutname))
