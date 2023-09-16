@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 11:55:46 trottar"
+# Time-stamp: "2023-09-16 12:04:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,6 +96,12 @@ def match_to_bin(data):
 
 ################################################################################################################################################
 
+# Function to check if an object is of type TH1F or TH2F
+def is_hist(obj):
+    return isinstance(obj, (ROOT.TH1F, ROOT.TH2F))
+
+################################################################################################################################################
+
 # Save histogram to root file
 def hist_to_root(hist, file_name, tree_name):
     # Check if the ROOT file already exists
@@ -121,3 +127,5 @@ def hist_to_root(hist, file_name, tree_name):
     # Write the tree and close the file
     root_file.Write()
     root_file.Close()
+
+################################################################################################################################################    

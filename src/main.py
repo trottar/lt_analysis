@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:00:32 trottar"
+# Time-stamp: "2023-09-16 12:10:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,7 +35,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, hist_to_root
+from utility import show_pdf_with_evince, create_dir, is_hist, hist_to_root
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -333,6 +333,20 @@ from compare_simc import compare_simc
 for hist in histlist:
     hist.update(compare_simc(hist, inpDict))
 
+for hist in histlist:
+    # Loop through all keys,values of dictionary
+    for key, val in hist.items():
+        if is_hist(val):
+            if "DATA" in val.GetName():
+                print("Saving {} to {}".format(val.GetName(),foutname))
+                hist_to_root(val, foutname, "data")
+            if "SIMC" in val.GetName():
+                print("Saving {} to {}".format(val.GetName(),foutname))                
+                hist_to_root(val, foutname, "simc")
+            if "DUMMY" in val.GetName():
+                print("Saving {} to {}".format(val.GetName(),foutname))                
+                hist_to_root(val, foutname, "dummy")
+    
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
     
