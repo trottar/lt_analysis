@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 11:57:10 trottar"
+# Time-stamp: "2023-09-17 19:24:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys, math, os, subprocess
 from array import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
@@ -86,8 +86,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     ################################################################################################################################################
     
     eff_plt = TCanvas()
-    G_eff_plt = ROOT.TMultiGraph()
-    l_eff_plt = ROOT.TLegend(0.115,0.35,0.33,0.5)
+    G_eff_plt = TMultiGraph()
+    l_eff_plt = TLegend(0.115,0.35,0.33,0.5)
 
     eff_plt.SetGrid()
 
@@ -193,7 +193,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     CW.Print(outputpdf)
 
     Ct = TCanvas()
-    l_t = ROOT.TLegend(0.115,0.45,0.33,0.95)
+    l_t = TLegend(0.115,0.45,0.33,0.95)
     l_t.SetTextSize(0.0235)
 
     binmax = []

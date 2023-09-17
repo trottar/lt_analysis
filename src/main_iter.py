@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 13:31:51 trottar"
+# Time-stamp: "2023-09-17 19:26:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys, math, os, subprocess
 from array import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import csv
@@ -35,7 +35,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_hist, hist_to_root
+from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -265,7 +265,7 @@ if not os.path.exists(foutname):
     for hist in histlist:
         # Loop through all keys,values of dictionary
         for key, val in hist.items():
-            if is_hist(val):
+            if is_root_obj(val):
                 if "DATA" in val.GetName():
                     if "yield" in val.GetName():
                         hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        

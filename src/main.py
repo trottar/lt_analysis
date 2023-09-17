@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 16:59:47 trottar"
+# Time-stamp: "2023-09-17 19:26:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys, math, os, subprocess
 from array import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import csv
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_hist, hist_to_root
+from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -396,9 +396,11 @@ if not os.path.exists(foutname):
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-            if is_hist(val):
+            if is_root_obj(val):
                 if "ratio" in val.GetName():
-                    hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                
+                    hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                if "G_" in val.GetName():
+                    hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                    
                 if "DATA" in val.GetName():
                     if "yield" in val.GetName():
                         hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
@@ -427,9 +429,9 @@ if not os.path.exists(foutname):
     if root_file.IsOpen():
         # Close the file
         root_file.Close()
-        print("The root file {} has been successfully closed.".format(foutname))
+        print("\nThe root file {} has been successfully closed.".format(foutname))
     else:
-        print("Error: Unable to close the root file {}.".format(foutname))
+        print("\nError: Unable to close the root file {}.".format(foutname))
 output_file_lst.append(foutname)
 
 # Create combined dictionary of all non-histogram information        
@@ -441,7 +443,7 @@ for hist in histlist:
     for i, (key, val) in enumerate(hist.items()):
         # Progress bar
         Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-        if not is_hist(val):
+        if not is_root_obj(val):
             tmp_lst.append({key : val})
 combineDict.update({ "histlist" : tmp_lst})
 

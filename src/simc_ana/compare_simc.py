@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 11:09:03 trottar"
+# Time-stamp: "2023-09-17 19:24:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,7 +23,7 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
 import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
@@ -110,7 +110,7 @@ def compare_simc(hist, inpDict):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
         return histDict
 
-    InFile_SIMC = ROOT.TFile.Open(rootFileSimc, "OPEN")
+    InFile_SIMC = TFile.Open(rootFileSimc, "OPEN")
 
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
 
@@ -135,38 +135,38 @@ def compare_simc(hist, inpDict):
     ################################################################################################################################################
     # Plot definitions
 
-    H_Weight_SIMC = ROOT.TH1D("H_Weight_SIMC", "Simc Weight", 500, 0, 1e-8)
-    H_hsdelta_SIMC  = ROOT.TH1D("H_hsdelta_SIMC","HMS Delta", 500, -20.0, 20.0)
-    H_hsxptar_SIMC  = ROOT.TH1D("H_hsxptar_SIMC","HMS xptar", 500, -0.1, 0.1)
-    H_hsyptar_SIMC  = ROOT.TH1D("H_hsyptar_SIMC","HMS yptar", 500, -0.1, 0.1)
-    H_ssxfp_SIMC    = ROOT.TH1D("H_ssxfp_SIMC","SHMS xfp", 500, -25.0, 25.0)
-    H_ssyfp_SIMC    = ROOT.TH1D("H_ssyfp_SIMC","SHMS yfp", 500, -25.0, 25.0)
-    H_ssxpfp_SIMC   = ROOT.TH1D("H_ssxpfp_SIMC","SHMS xpfp", 500, -0.09, 0.09)
-    H_ssypfp_SIMC   = ROOT.TH1D("H_ssypfp_SIMC","SHMS ypfp", 500, -0.05, 0.04)
-    H_hsxfp_SIMC    = ROOT.TH1D("H_hsxfp_SIMC","HMS xfp", 500, -40.0, 40.0)
-    H_hsyfp_SIMC    = ROOT.TH1D("H_hsyfp_SIMC","HMS yfp", 500, -20.0, 20.0)
-    H_hsxpfp_SIMC   = ROOT.TH1D("H_hsxpfp_SIMC","HMS xpfp", 500, -0.09, 0.05)
-    H_hsypfp_SIMC   = ROOT.TH1D("H_hsypfp_SIMC","HMS ypfp", 500, -0.05, 0.04)
-    H_ssdelta_SIMC  = ROOT.TH1D("H_ssdelta_SIMC","SHMS delta", 500, -20.0, 20.0)
-    H_ssxptar_SIMC  = ROOT.TH1D("H_ssxptar_SIMC","SHMS xptar", 500, -0.1, 0.1)
-    H_ssyptar_SIMC  = ROOT.TH1D("H_ssyptar_SIMC","SHMS yptar", 500, -0.04, 0.04)
-    H_q_SIMC        = ROOT.TH1D("H_q_SIMC","q", 500, 0.0, 10.0)
-    H_Q2_SIMC       = ROOT.TH1D("H_Q2_SIMC","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
-    H_W_SIMC  = ROOT.TH1D("H_W_SIMC","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
-    H_t_SIMC       = ROOT.TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])  
-    H_epsilon_SIMC  = ROOT.TH1D("H_epsilon_SIMC","epsilon", 500, 0., 1.0)
-    H_MM_SIMC  = ROOT.TH1D("H_MM_SIMC","MM_{K}", 500, 0.0, 1.5)
-    H_th_SIMC  = ROOT.TH1D("H_th_SIMC","X' tar", 500, -0.1, 0.1)
-    H_ph_SIMC  = ROOT.TH1D("H_ph_SIMC","Y' tar", 500, -0.1, 0.1)
-    H_ph_q_SIMC  = ROOT.TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 500, -5.0, 5.0)
-    H_th_q_SIMC  = ROOT.TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 500, -0.2, 0.2)
-    H_ph_recoil_SIMC  = ROOT.TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 500, -10.0, 10.0)
-    H_th_recoil_SIMC  = ROOT.TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 500, -10.0, 10.0)
-    H_pmiss_SIMC  = ROOT.TH1D("H_pmiss_SIMC","pmiss", 500, 0.0, 10.0)
-    H_emiss_SIMC  = ROOT.TH1D("H_emiss_SIMC","emiss", 500, 0.0, 10.0)
-    H_pmx_SIMC  = ROOT.TH1D("H_pmx_SIMC","pmx", 500, -10.0, 10.0)
-    H_pmy_SIMC  = ROOT.TH1D("H_pmy_SIMC","pmy ", 500, -10.0, 10.0)
-    H_pmz_SIMC  = ROOT.TH1D("H_pmz_SIMC","pmz", 500, -10.0, 10.0)
+    H_Weight_SIMC = TH1D("H_Weight_SIMC", "Simc Weight", 500, 0, 1e-8)
+    H_hsdelta_SIMC  = TH1D("H_hsdelta_SIMC","HMS Delta", 500, -20.0, 20.0)
+    H_hsxptar_SIMC  = TH1D("H_hsxptar_SIMC","HMS xptar", 500, -0.1, 0.1)
+    H_hsyptar_SIMC  = TH1D("H_hsyptar_SIMC","HMS yptar", 500, -0.1, 0.1)
+    H_ssxfp_SIMC    = TH1D("H_ssxfp_SIMC","SHMS xfp", 500, -25.0, 25.0)
+    H_ssyfp_SIMC    = TH1D("H_ssyfp_SIMC","SHMS yfp", 500, -25.0, 25.0)
+    H_ssxpfp_SIMC   = TH1D("H_ssxpfp_SIMC","SHMS xpfp", 500, -0.09, 0.09)
+    H_ssypfp_SIMC   = TH1D("H_ssypfp_SIMC","SHMS ypfp", 500, -0.05, 0.04)
+    H_hsxfp_SIMC    = TH1D("H_hsxfp_SIMC","HMS xfp", 500, -40.0, 40.0)
+    H_hsyfp_SIMC    = TH1D("H_hsyfp_SIMC","HMS yfp", 500, -20.0, 20.0)
+    H_hsxpfp_SIMC   = TH1D("H_hsxpfp_SIMC","HMS xpfp", 500, -0.09, 0.05)
+    H_hsypfp_SIMC   = TH1D("H_hsypfp_SIMC","HMS ypfp", 500, -0.05, 0.04)
+    H_ssdelta_SIMC  = TH1D("H_ssdelta_SIMC","SHMS delta", 500, -20.0, 20.0)
+    H_ssxptar_SIMC  = TH1D("H_ssxptar_SIMC","SHMS xptar", 500, -0.1, 0.1)
+    H_ssyptar_SIMC  = TH1D("H_ssyptar_SIMC","SHMS yptar", 500, -0.04, 0.04)
+    H_q_SIMC        = TH1D("H_q_SIMC","q", 500, 0.0, 10.0)
+    H_Q2_SIMC       = TH1D("H_Q2_SIMC","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_SIMC  = TH1D("H_W_SIMC","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])  
+    H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 500, 0., 1.0)
+    H_MM_SIMC  = TH1D("H_MM_SIMC","MM_{K}", 500, 0.0, 1.5)
+    H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 500, -0.1, 0.1)
+    H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 500, -0.1, 0.1)
+    H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 500, -5.0, 5.0)
+    H_th_q_SIMC  = TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 500, -0.2, 0.2)
+    H_ph_recoil_SIMC  = TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 500, -10.0, 10.0)
+    H_th_recoil_SIMC  = TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 500, -10.0, 10.0)
+    H_pmiss_SIMC  = TH1D("H_pmiss_SIMC","pmiss", 500, 0.0, 10.0)
+    H_emiss_SIMC  = TH1D("H_emiss_SIMC","emiss", 500, 0.0, 10.0)
+    H_pmx_SIMC  = TH1D("H_pmx_SIMC","pmx", 500, -10.0, 10.0)
+    H_pmy_SIMC  = TH1D("H_pmy_SIMC","pmy ", 500, -10.0, 10.0)
+    H_pmz_SIMC  = TH1D("H_pmz_SIMC","pmz", 500, -10.0, 10.0)
 
     ################################################################################################################################################
     # Fill data histograms for various trees called above
