@@ -16,7 +16,7 @@ import numpy as np
 import sys, math, os, subprocess
 import array
 import re # Regexp package - for string manipulation
-from ROOT import TCanvas, TExec, TColor, TGaxis, TH1D, TH2D, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TPaletteAxis, TString
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 from ROOT import kBlack, kBlue, kRed
 from array import array
 import pandas as pd
