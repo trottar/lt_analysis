@@ -17,6 +17,7 @@ import sys, math, os, subprocess
 import array
 import re # Regexp package - for string manipulation
 from ROOT import TCanvas, TExec, TColor, TGaxis, TH1D, TH2D, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TPaletteAxis, TString
+from ROOT import gROOT
 from ROOT import kBlack, kBlue, kRed
 from array import array
 import pandas as pd
@@ -186,7 +187,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         print ("Attempting to process %s" %(rootName))
 
 	###############################################################################################################################################
-        ROOT.gSetBatch(kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
+        gROOT.gSetBatch(kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 
 	###############################################################################################################################################
 
