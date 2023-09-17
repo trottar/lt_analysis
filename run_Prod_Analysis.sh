@@ -27,7 +27,7 @@ SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
 # Flag definitions (flags: h, a, b, p)
-while getopts 'habp' flag; do
+while getopts 'hcip' flag; do
     case "${flag}" in
         h) 
         echo "--------------------------------------------------------------"
@@ -37,11 +37,11 @@ while getopts 'habp' flag; do
         echo "--------------------------------------------------------------"
         echo
         echo "The following flags can be called for the heep analysis..."
+	echo "    Q2=arg1, W=arg2"
         echo "    -h, help"
-        echo "    -a, combine data for each phi setting"
+        echo "    -c, combine data for each phi setting"
+	echo "    -i, iterate SIMC to find proper weight"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
-        echo "    -b, run binning script (!!!required!!!)"
-	echo "        Q2=arg1, W=arg2"
 	echo
 	echo " Avaliable Kinematics..."	
 	echo "                      Q2=5p5, W=3p02"
@@ -52,8 +52,8 @@ while getopts 'habp' flag; do
 	echo "                      Q2=0p5, W=2p40"
         exit 0
         ;;
-	a) a_flag='true' ;;
-        b) b_flag='true' ;;
+	c) c_flag='true' ;;
+	i) i_flag='true' ;;
 	p) p_flag='true' ;;
         *) print_usage
         exit 1 ;;
@@ -73,7 +73,7 @@ declare -a EPS=("low" "high")
 for j in "${EPS[@]}"
 do
     # When any flag is used then the user input changes argument order
-    if [[ $b_flag = "true" || $a_flag = "true" ]]; then
+    if [[ $i_flag = "true" || $p_flag = "true" || $c_flag = "true" ]]; then
 
 	EPSILON=$j
 	Q2=$2
@@ -140,7 +140,7 @@ do
 
     # When analysis flag is used then the analysis script (Analysed_Prod.py)
     # will create a new root file per run number which are combined using hadd
-    if [[ $a_flag = "true" ]]; then
+    if [[ $c_flag = "true" ]]; then
 
 	##############
 	# HARD CODED #
@@ -166,7 +166,9 @@ do
 	# Function that calls python script to grab run numbers
 	grab_runs () {
 	    RunList=$1
-	    INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
+	    # Location of list of run lists
+	    #INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
+	    INPDIR="${UTILPATH}/run_list/${ANATYPE}LT/${RunList}"
 	    if [[ -e $INPDIR ]]; then
 		cd "${LTANAPATH}/src/setup"
 		RunNumArr=$(python3 getRunNumbers.py $INPDIR)
@@ -175,7 +177,7 @@ do
 		exit
 	    fi
 	}
-
+	
 	echo
 	echo "---------------------------------------------------------"
 	echo
@@ -843,15 +845,13 @@ do
     #EffData="coin_production_Prod_efficiency_data_2022_12_05.csv"
     #EffData="coin_production_Prod_efficiency_data_2022_12_30.csv"
     EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
-
-    ##############
-    ##############
-    ##############
     
     # Function that calls python script to grab run numbers
     grab_runs () {
 	RunList=$1
-	INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
+	# Location of list of run lists
+	#INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
+	INPDIR="${UTILPATH}/run_list/${ANATYPE}LT/${RunList}"
 	if [[ -e $INPDIR ]]; then
 	    cd "${LTANAPATH}/src/setup"
 	    RunNumArr=$(python3 getRunNumbers.py $INPDIR)
@@ -861,6 +861,10 @@ do
 	fi
     }
 
+    ##############
+    ##############
+    ##############
+    
     echo
     echo "---------------------------------------------------------"
     echo
@@ -1353,7 +1357,23 @@ do
 
     # Run the plotting script if t-flag enabled
     # Checks that array isn't empty
-    if [[ $b_flag = "true" ]]; then
+    if [[ $i_flag = "true" ]]; then
+	cd "${LTANAPATH}/src"
+
+	if [ $j = "low" ]; then
+	    echo
+	    echo "Finding t/phi bins for low epsilon..."
+	else
+	    echo
+	    echo "Using low epsilon t/phi bins for high epsilon..."
+	fi
+
+	if [ ${#data_right[@]} -eq 0 ]; then
+	    python3 main_iter.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date}
+	else
+	    python3 main_iter.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date}
+	fi
+    else
 	cd "${LTANAPATH}/src"
 
 	if [ $j = "low" ]; then
@@ -1368,7 +1388,7 @@ do
 	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date}
 	else
 	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date}
-	fi
+	fi	
     fi
 
     if [ $j = "low" ]; then

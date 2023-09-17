@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 15:19:50 trottar"
+# Time-stamp: "2023-09-17 13:31:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,139 +158,19 @@ output_file_lst = []
 
 ################################################################################################################################################    
 
-##############################
-# Step 1 of the lt_analysis: # DONE
-##############################
+################################
+# Step 1-4 of the lt_analysis: #
+################################
 '''
-* All analysis cuts per run (i.e. PID, acceptance, timing) are applied. 
-* This should have been completed before this script using...
-
-> lt_analysis/init/analyze_prod.py
-
-* This is script is called when using the '-a' flag in...
-
-> lt_analysis/run_Prod_Analysis.sh
-'''
-
-##############################
-# Step 2 of the lt_analysis: # DONE
-##############################
-'''
-* Diamond cuts are drawn on the CENTER setting.
-
-* Make sure to check that high and low eps overlap in...
-
-> lt_analysis/OUTPUT/Analysis/<ANATYPE>LT/<ParticleType>_<KIN>_Center_Diamond_Cut.pdf
 
 '''
 
-#Importing diamond cut script
-sys.path.append("cuts")
-from diamond import DiamondPlot
-
-Q2Val = float(Q2.replace("p","."))
-WVal = float(W.replace("p","."))
-
-inpDict["Q2min"] = Q2Val - (2/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
-inpDict["Q2max"] = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
-inpDict["Wmin"] = WVal - (2/7)*WVal # min y-range for Q2vsW plot
-inpDict["Wmax"] = WVal + (2/7)*WVal # max y-range for Q2vsW plot
-
-phisetlist = ["Center","Left","Right"]
-for phiset in phisetlist:
-    # Call diamond cut script and append paramters to dictionary
-    inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))
-
-if DEBUG:
-    # Show plot pdf for each setting
-    for phiset in phisetlist:
-        show_pdf_with_evince(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
 for phiset in phisetlist:
     output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
         
-##############################
-# Step 3 of the lt_analysis: # DONE
-##############################
-'''
-Apply random subtraction to data and dummy.
-'''
 
-sys.path.append("cuts")
-from rand_sub import rand_sub
-
-# Call histogram function above to define dictonaries for right, left, center settings
-# Put these all into an array so that if we are missing a setting it is easier to remove
-# Plus it makes the code below less repetitive
-histlist = []
-for phiset in phisetlist:
-    histlist.append(rand_sub(phiset,inpDict))
-
-print("\n\n")
-
-settingList = []
-for i,hist in enumerate(histlist):    
-    if len(hist.keys()) <= 1: # If hist is empty (length of oen for phi setting check)
-        print("No {} setting found...".format(hist["phi_setting"]))
-        phisetlist.remove(hist["phi_setting"])
-        histlist.remove(hist)
-    else:
-        settingList.append(hist["phi_setting"])
-
-if DEBUG:
-    # Show plot pdf for each setting
-    for hist in histlist:        
-        show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-
-##############################
-# Step 4 of the lt_analysis: # Done
-##############################
-'''
-* Combine all settings and choose t/phi bins for low eps.
-
-* These bins will also be used of high eps, so check high eps as well.
-'''
-
-sys.path.append("binning")
-from find_bins import find_bins
-
-if EPSSET == "low":
-    bin_vals = find_bins(histlist, inpDict)
-
-try:
-    with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
-        # Read all lines from the file into a list
-        all_lines = file.readlines()
-        # Check if the file has at least two lines
-        if len(all_lines) >= 2:
-            # Extract the second line and remove leading/trailing whitespace
-            t_bins = all_lines[1].split("\t")
-            del t_bins[0]
-            t_bins = np.array([float(element) for element in t_bins])
-except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
-except IOError:
-    print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
-
-try:
-    with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
-        # Read all lines from the file into a list
-        all_lines = file.readlines()
-        # Check if the file has at least two lines
-        if len(all_lines) >= 2:
-            # Extract the second line and remove leading/trailing whitespace
-            phi_bins = all_lines[1].split("\t")
-            del phi_bins[0]
-            phi_bins = np.array([float(element) for element in phi_bins])
-except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
-except IOError:
-    print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
-    
-for hist in histlist:
-    hist["t_bins"] = t_bins
-    hist["phi_bins"] = phi_bins
     
 ##############################
 # Step 5 of the lt_analysis: #
@@ -319,15 +199,8 @@ for hist in histlist:
 
 '''
 
-sys.path.append("normalize")
-from get_eff_charge import get_eff_charge
-
-# Upate hist dictionary with effective charge
-for hist in histlist:
-    hist.update(get_eff_charge(hist, inpDict))
-
 sys.path.append("simc_ana")    
-from compare_simc import compare_simc
+from compare_simc_iter import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
@@ -418,9 +291,6 @@ if not os.path.exists(foutname):
                 if "DUMMY" in val.GetName():
                     hist_to_root(val, foutname, "{}/dummy".format(hist["phi_setting"]))
 
-    # Close the file
-    foutname.Close()
-    
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
@@ -558,9 +428,3 @@ if EPSSET == "high":
 # All others should be saved once both are complete
 with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
     file.write(inpDict["cut_summary_lst"])
-
-'''
-for hist in histlist:
-    key_str = ', '.join(hist.keys())
-    print("{} keys: {}".format(hist["phi_setting"],key_str))
-'''

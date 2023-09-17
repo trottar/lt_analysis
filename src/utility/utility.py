@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 11:08:24 trottar"
+# Time-stamp: "2023-09-17 15:19:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -125,8 +125,5 @@ def hist_to_root(hist, file_name, directory_name):
     # Clone the histogram since we're storing it in a directory
     cloned_hist = hist.Clone()
     cloned_hist.Write()
-
-    # Close the file
-    root_file.Close()
 
 ################################################################################################################################################    

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 11:03:40 trottar"
+# Time-stamp: "2023-09-17 15:17:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -609,7 +609,6 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
     G_ratio_plt.GetXaxis().SetLabelSize(0.04)
 
     C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+')')
-
 
     # Save histograms to list of dictionaries
     for hist in histlist:
