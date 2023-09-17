@@ -866,6 +866,8 @@ do
     echo
     echo "---------------------------------------------------------"
     echo
+    echo "${formatted_date}"
+    echo
     echo "Beginning analysis for Q2=${Q2}, W=${W}, ${EPSILON} setting..."
     echo
     echo "                       Number of t bins: ${NumtBins}"
