@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 16:32:54 trottar"
+# Time-stamp: "2023-09-17 16:59:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -449,8 +449,8 @@ combineDict.update({ "histlist" : tmp_lst})
 # Check that root file doesnt already exist    
 if not os.path.exists(foutjson):
     # Open the file in write mode and use json.dump() to save the dictionary to JSON
-    with open(file_path, 'w') as foutjson:
-        json.dump(combineDict, foutjson)
+    with open(foutjson, 'w') as f_json:
+        json.dump(combineDict, f_json)
 output_file_lst.append(foutjson)
 
 if DEBUG:
