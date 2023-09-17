@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 15:53:48 trottar"
+# Time-stamp: "2023-09-17 16:32:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,6 +29,7 @@ from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import csv
+import json
 import shutil
 
 ##################################################################################################################################################
@@ -390,17 +391,17 @@ plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDic
 # Check that root file doesnt already exist    
 if not os.path.exists(foutname):
     for hist in histlist:
-        print("Saving {} histograms to {}".format(hist["phi_setting"],foutname))
+        print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutname))
         # Loop through all keys,values of dictionary
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if is_hist(val):
+                if "ratio" in val.GetName():
+                    hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                
                 if "DATA" in val.GetName():
                     if "yield" in val.GetName():
                         hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
-                    elif "ratio" in val.GetName():
-                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
                     elif "bin" in val.GetName():
                         hist_to_root(val, foutname, "{}/bins".format(hist["phi_setting"]))
                     elif "totevts" in val.GetName():
@@ -410,8 +411,6 @@ if not os.path.exists(foutname):
                 if "SIMC" in val.GetName():
                     if "yield" in val.GetName():
                         hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
-                    elif "ratio" in val.GetName():
-                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
                     elif "bin" in val.GetName():
                         hist_to_root(val, foutname, "{}/bins".format(hist["phi_setting"]))
                     elif "totevts" in val.GetName():
@@ -431,7 +430,29 @@ if not os.path.exists(foutname):
         print("The root file {} has been successfully closed.".format(foutname))
     else:
         print("Error: Unable to close the root file {}.".format(foutname))
-    
+output_file_lst.append(foutname)
+
+# Create combined dictionary of all non-histogram information        
+combineDict = {}
+combineDict.update({"inpDict" : inpDict})
+tmp_lst = []
+for hist in histlist:
+    print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
+    for i, (key, val) in enumerate(hist.items()):
+        # Progress bar
+        Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+        if not is_hist(val):
+            tmp_lst.append({key : val})
+combineDict.update({ "histlist" : tmp_lst})
+
+# Save combined dictionary to json file
+# Check that root file doesnt already exist    
+if not os.path.exists(foutjson):
+    # Open the file in write mode and use json.dump() to save the dictionary to JSON
+    with open(file_path, 'w') as foutjson:
+        json.dump(combineDict, foutjson)
+output_file_lst.append(foutjson)
+
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
@@ -462,7 +483,7 @@ except FileNotFoundError:
     
 print("\n\n")
 print("="*25)
-print("{} Cut Summary...".format(EPSSET.capitalize()),cut_summary_lst)
+print("{} Epsilon Summary...".format(EPSSET.capitalize()),cut_summary_lst)
 print("="*25)
 inpDict["cut_summary_lst"] = cut_summary_lst
 
@@ -546,9 +567,14 @@ if EPSSET == "high":
                 f_new = f.replace(OUTPATH,new_dir+"/plots")
                 print("Copying {} to {}".format(f,f_new))
                 shutil.copy(f, f_new)
+            if ".json" in f:
+                create_dir(new_dir+"/json")
+                f_new = f.replace(OUTPATH,new_dir+"/json")
+                print("Copying {} to {}".format(f,f_new))
+                shutil.copy(f, f_new)                
             if ".root" in f:
-                create_dir(new_dir+"/rootfiles")
-                f_new = f.replace(OUTPATH,new_dir+"/rootfiles")
+                create_dir(new_dir+"/root")
+                f_new = f.replace(OUTPATH,new_dir+"/root")
                 print("Copying {} to {}".format(f,f_new))
                 shutil.copy(f, f_new)
         elif "{}/".format(ParticleType) in f:
@@ -564,7 +590,7 @@ if EPSSET == "high":
             f_new = new_dir
             print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
             shutil.copy(LTANAPATH+"/src/"+f, f_new)
-
+               
 # Need summary for both high and low eps.
 # All others should be saved once both are complete
 with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
