@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-14 23:08:50 trottar"
+# Time-stamp: "2023-09-17 19:38:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,7 +23,7 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
 import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
@@ -169,7 +169,7 @@ def get_eff_charge(hist, inpDict):
     print("\n\nTotal Data Efficiency Uncertainty =",eff_errProp_data)
 
     # Define total efficiency vs run number plots
-    G_data_eff = ROOT.TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
+    G_data_eff = TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
 
     ################################################################################################################################################    
 

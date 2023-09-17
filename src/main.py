@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 19:34:10 trottar"
+# Time-stamp: "2023-09-17 19:38:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys, math, os, subprocess
 from array import array
-from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import csv
@@ -423,7 +423,7 @@ if not os.path.exists(foutname):
                     hist_to_root(val, foutname, "{}/dummy".format(hist["phi_setting"]))
 
     # Open the ROOT file
-    root_file = ROOT.TFile.Open(foutname, "UPDATE")
+    root_file = TFile.Open(foutname, "UPDATE")
 
     # Check if the file was opened successfully
     if root_file.IsOpen():
