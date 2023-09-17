@@ -167,7 +167,6 @@ do
 	grab_runs () {
 	    RunList=$1
 	    # Location of list of run lists
-	    #INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
 	    INPDIR="${UTILPATH}/run_list/${ANATYPE}LT/${RunList}"
 	    if [[ -e $INPDIR ]]; then
 		cd "${LTANAPATH}/src/setup"
@@ -846,11 +845,14 @@ do
     #EffData="coin_production_Prod_efficiency_data_2022_12_30.csv"
     EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
     
+    ##############
+    ##############
+    ##############
+
     # Function that calls python script to grab run numbers
     grab_runs () {
 	RunList=$1
 	# Location of list of run lists
-	#INPDIR="${REPLAYPATH}/UTIL_BATCH/InputRunLists/KaonLT_2018_2019/${RunList}"
 	INPDIR="${UTILPATH}/run_list/${ANATYPE}LT/${RunList}"
 	if [[ -e $INPDIR ]]; then
 	    cd "${LTANAPATH}/src/setup"
@@ -860,10 +862,6 @@ do
 	    exit
 	fi
     }
-
-    ##############
-    ##############
-    ##############
     
     echo
     echo "---------------------------------------------------------"

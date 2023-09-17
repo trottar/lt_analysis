@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 15:19:50 trottar"
+# Time-stamp: "2023-09-17 15:36:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -390,8 +390,11 @@ plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDic
 # Check that root file doesnt already exist    
 if not os.path.exists(foutname):
     for hist in histlist:
+        print("Saving {} histograms to {}".format(hist["phi_setting"],foutname))
         # Loop through all keys,values of dictionary
-        for key, val in hist.items():
+        for i, (key, val) in enumerate(hist.items()):
+            # Progress bar
+            Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if is_hist(val):
                 if "DATA" in val.GetName():
                     if "yield" in val.GetName():
@@ -418,8 +421,16 @@ if not os.path.exists(foutname):
                 if "DUMMY" in val.GetName():
                     hist_to_root(val, foutname, "{}/dummy".format(hist["phi_setting"]))
 
-    # Close the file
-    foutname.Close()
+    # Open the ROOT file
+    root_file = ROOT.TFile.Open(foutname, "UPDATE")
+
+    # Check if the file was opened successfully
+    if root_file.IsOpen():
+        # Close the file
+        root_file.Close()
+        print("The file {} has been successfully closed.".format(file_name))
+    else:
+        print("Error: Unable to open the file {}.".format(file_name))
     
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
