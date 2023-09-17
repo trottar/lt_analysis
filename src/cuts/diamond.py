@@ -17,6 +17,7 @@ import sys, math, os, subprocess
 import array
 import re # Regexp package - for string manipulation
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
+from ROOT import TExec
 from ROOT import kBlack, kBlue, kRed
 from array import array
 import pandas as pd
