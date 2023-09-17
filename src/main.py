@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 15:36:34 trottar"
+# Time-stamp: "2023-09-17 15:53:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -428,9 +428,9 @@ if not os.path.exists(foutname):
     if root_file.IsOpen():
         # Close the file
         root_file.Close()
-        print("The file {} has been successfully closed.".format(file_name))
+        print("The root file {} has been successfully closed.".format(foutname))
     else:
-        print("Error: Unable to open the file {}.".format(file_name))
+        print("Error: Unable to close the root file {}.".format(foutname))
     
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
