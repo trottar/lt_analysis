@@ -186,7 +186,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         print ("Attempting to process %s" %(rootName))
 
 	###############################################################################################################################################
-        gSetBatch(kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
+        ROOT.gSetBatch(kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 
 	###############################################################################################################################################
 

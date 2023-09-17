@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 19:41:18 trottar"
+# Time-stamp: "2023-09-17 19:43:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -26,7 +26,6 @@ from collections import defaultdict
 import sys, math, os, subprocess
 from array import array
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
-from ROOT import gSetBatch
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import csv
