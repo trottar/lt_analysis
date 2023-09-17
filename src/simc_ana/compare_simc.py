@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 12:07:59 trottar"
+# Time-stamp: "2023-09-17 11:09:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -233,6 +233,7 @@ def compare_simc(hist, inpDict):
 
     histDict["InFile_SIMC"] = InFile_SIMC
     histDict["normfac_simc"] = normfac_simc
+    histDict["H_Weight_SIMC"] =     H_Weight_SIMC
     histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
     histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC
     histDict["H_hsyptar_SIMC"] =     H_hsyptar_SIMC

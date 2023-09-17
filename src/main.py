@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 10:58:24 trottar"
+# Time-stamp: "2023-09-17 11:11:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -556,3 +556,7 @@ if EPSSET == "high":
 # All others should be saved once both are complete
 with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
     file.write(inpDict["cut_summary_lst"])
+
+for hist in histlist:
+    key_str = ', '.join(hist.keys())
+    print("{} keys: {}".format(hist["phi_setting"],key_str))
