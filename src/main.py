@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 13:14:52 trottar"
+# Time-stamp: "2023-09-17 10:58:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,27 +333,12 @@ from compare_simc import compare_simc
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     hist.update(compare_simc(hist, inpDict))
-
-for hist in histlist:
-    # Loop through all keys,values of dictionary
-    for key, val in hist.items():
-        if is_hist(val):
-            if "DATA" in val.GetName():
-                print("Saving {} to {}".format(val.GetName(),foutname))
-                hist_to_root(val, foutname, "{}/data".format(hist["phi_setting"]))
-            if "SIMC" in val.GetName():
-                print("Saving {} to {}".format(val.GetName(),foutname))                
-                hist_to_root(val, foutname, "{}/simc".format(hist["phi_setting"]))
-            if "DUMMY" in val.GetName():
-                print("Saving {} to {}".format(val.GetName(),foutname))                
-                hist_to_root(val, foutname, "{}/dummy".format(hist["phi_setting"]))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
     
 # Variable defines string of cuts applied during analysis
 cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict)
-
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
@@ -401,6 +386,38 @@ sys.path.append("plotting")
 from binned import plot_binned
 
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
+
+# Save histograms to root file
+# Check that root file doesnt already exist    
+if not os.path.exists(foutname):
+    for hist in histlist:
+        # Loop through all keys,values of dictionary
+        for key, val in hist.items():
+            if is_hist(val):
+                if "DATA" in val.GetName():
+                    if "yield" in val.GetName():
+                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
+                    elif "ratio" in val.GetName():
+                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                    elif "bin" in val.GetName():
+                        hist_to_root(val, foutname, "{}/bins".format(hist["phi_setting"]))
+                    elif "totevts" in val.GetName():
+                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                    else:
+                        hist_to_root(val, foutname, "{}/data".format(hist["phi_setting"]))
+                if "SIMC" in val.GetName():
+                    if "yield" in val.GetName():
+                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
+                    elif "ratio" in val.GetName():
+                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                    elif "bin" in val.GetName():
+                        hist_to_root(val, foutname, "{}/bins".format(hist["phi_setting"]))
+                    elif "totevts" in val.GetName():
+                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                    else:
+                        hist_to_root(val, foutname, "{}/simc".format(hist["phi_setting"]))
+                if "DUMMY" in val.GetName():
+                    hist_to_root(val, foutname, "{}/dummy".format(hist["phi_setting"]))
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))

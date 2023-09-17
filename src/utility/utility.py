@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-16 15:03:07 trottar"
+# Time-stamp: "2023-09-17 10:40:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -120,6 +120,8 @@ def hist_to_root(hist, file_name, directory_name):
         current_dir.cd(directory)
         current_dir = ROOT.gDirectory  # Update the current directory
 
+    print("Saving {} to {}".format(hist.GetName(),foutname))
+        
     # Clone the histogram since we're storing it in a directory
     cloned_hist = hist.Clone()
     cloned_hist.Write()
