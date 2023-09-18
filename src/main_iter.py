@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:17:53 trottar"
+# Time-stamp: "2023-09-17 22:20:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,6 +124,11 @@ prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
 with open(prev_iter_json, 'r') as f:
     prev_iter_combineDict = json.load(f)
 
+for val,key in prev_iter_combineDict.items():
+    if key == "histlist":
+        print(val)
+    if key == "inpDict":
+        print(val)
 key_str = ', '.join(prev_iter_combineDict.keys())
 print("keys: {}".format(key_str))
     
