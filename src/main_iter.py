@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 02:43:02 trottar"
+# Time-stamp: "2023-09-18 03:59:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,7 +192,7 @@ old_fort_param = '{}/param_{}_{}.f'.format(prev_iter_dir, ParticleType, pol_str)
 for hist in histlist:
     # SIMC file with weight from last iteration
     old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
-    iter_weight = iter_weight(old_param_file, old_fort_param, old_simc_root, inpDict)
+    iter_weight = iter_weight(old_param_file, old_fort_param, old_simc_root, inpDict, hist["phi_setting"])
     hist.update(compare_simc(iter_weight, hist, inpDict))
     
 sys.path.append("plotting")

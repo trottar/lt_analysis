@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 02:59:13 trottar"
+# Time-stamp: "2023-09-18 03:59:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,7 +44,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def iter_weight(param_file, fort_param, simc_root, inpDict):
+def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
     '''
     # Fortran script converted to python
     

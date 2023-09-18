@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 03:53:12 trottar"
+# Time-stamp: "2023-09-18 03:55:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -468,7 +468,7 @@ create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
 try:
-    cut_summary_lst += "\nUnsep Parameterization for {}...".format(formatted_date)
+    cut_summary_lst += "\n\nUnsep Parameterization for {}...".format(formatted_date)
     with open(old_param_file, 'r') as file:
         for line in file:
             cut_summary_lst += line
