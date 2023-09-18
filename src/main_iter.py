@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:21:51 trottar"
+# Time-stamp: "2023-09-17 22:27:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -120,18 +120,17 @@ prev_iter_dir = "{}/{}/{}/{}".format(CACHEPATH,USER,ParticleType.lower(),closest
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
 
-# Redefine dictionaries from old iteratio information
+# Redefine dictionaries from old iteration information, see main.py
 with open(prev_iter_json, 'r') as f:
     prev_iter_combineDict = json.load(f)
 
-for val,key in prev_iter_combineDict.items():
-    if "histlist" in key:
-        print(val)
-    if "inpDict" in key:
-        print(val)
-key_str = ', '.join(prev_iter_combineDict.keys())
-print("keys: {}".format(key_str))
-    
+inpDict = prev_iter_combineDict["inpDict"]
+histlist = prev_iter_combineDict["histlist"]
+
+phisetlist = []
+for hist in histlist:
+    phisetlist.append(hist["phi_setting"])
+
 for phiset in phisetlist:
     output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
         
