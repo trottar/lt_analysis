@@ -4,11 +4,6 @@
 	real pi,mtar_gev
 	parameter (pi=3.14159)
 	parameter (mtar_gev=0.93827231)
-
-	real*8 q2_gev, t_gev, s, s_gev
-	real*8 tav, ftav, ft
-	real*8 sigl, sigt, siglt, sigtt, sig219, sig
-	real*8 wfactor, wtn
 	
 **********************************************	
 *	Read in arguments of parameters and Q2
@@ -111,6 +106,11 @@
 
 *       ALL THIS WORKS
 **********************************************
+	real*8 q2_gev, t_gev, s, s_gev
+	real*8 tav, ftav, ft
+	real*8 sigl, sigt, siglt, sigtt, sig219, sig
+	real*8 wfactor, wtn
+
 	q2_gev=q2_set/1.d6
 *	t_gev=t_sim/1.d6 * This is probably not required
 	t_gev=t_sim
