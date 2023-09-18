@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:40:05 trottar"
+# Time-stamp: "2023-09-17 23:13:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,6 +101,69 @@ def match_to_bin(data):
 def is_root_obj(obj):
     return isinstance(obj, (ROOT.TH1D, ROOT.TH2D, ROOT.TGraphErrors, ROOT.TGraphPolar, ROOT.TFile, ROOT.TMultiGraph))
 
+################################################################################################################################################
+
+# Save histograms to root file
+def hist_to_root(hist, file_name, directory_name):
+    # Check if the ROOT file already exists
+    root_file = ROOT.TFile.Open(file_name, "UPDATE")
+
+    # Split the directory names
+    directories = directory_name.split('/')
+
+    # Create or navigate through the nested directories
+    current_dir = root_file    
+    for directory in directories:
+        # Check if the directory exists
+        dir_exists = bool(current_dir.GetDirectory(directory))
+        if not dir_exists:
+            current_dir.mkdir(directory)
+        current_dir.cd(directory)
+        current_dir = ROOT.gDirectory  # Update the current directory
+
+    # Check if the histogram already exists in the file
+    existing_hist = current_dir.Get(hist.GetName())
+    if existing_hist:
+        current_dir.Delete(hist.GetName() + ";*")  # Delete existing histogram
+        
+    #print("Saving {} to {}".format(hist.GetName(), file_name))
+        
+    # Clone the histogram since we're storing it in a directory
+    cloned_hist = hist.Clone()
+    cloned_hist.Write()
+
+################################################################################################################################################    
+
+# Used to check if object is non-serializable and converts to a list
+# so that it can be saved in json file
+def custom_encoder(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    raise TypeError("Type not serializable")
+
+################################################################################################################################################
+
+# Find closest date relative to current date, based off of the iteration list (see main.py for more info)
+def last_iter(file_name, current_date):
+
+    # Read formatted dates from the file
+    formatted_dates = []
+
+    with open(file_name, "r") as file:
+        for line in file:
+            formatted_dates.append(line.strip())
+
+    # Function to convert formatted date to datetime object for comparison
+    def convert_to_datetime(date_str):
+        # Format of dates, see run_Prod_Analysis.sh
+        date_format = "H%HM%MS%S_%Y%B%d"
+        return datetime.strptime(date_str, date_format)
+
+    # Find the closest date
+    closest_date = min(formatted_dates, key=lambda date: abs((convert_to_datetime(date) - convert_to_datetime(current_date)).total_seconds()))
+
+    return closest_date
+    
 ################################################################################################################################################
 
 # Save histograms to root file
