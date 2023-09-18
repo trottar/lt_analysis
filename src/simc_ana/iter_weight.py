@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 15:24:53 trottar"
+# Time-stamp: "2023-09-18 15:26:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,8 +101,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Clone the existing TBranch structure from the original TTree
     new_tree = TBRANCH_SIMC.CloneTree(-1, "newtree=fast")
 
-    # Using PyROOT to create a branch in a TTree
-    new_tree.Branch("Weight", ROOT.AddressOf(Weight), "Weight/F")
+    TBRANCH_SIMC.SetBranchAddress("Weight", ROOT.AddressOf(iweight))
+    new_tree.Branch("Weight", ROOT.AddressOf(iweight), "Weight/F")
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
