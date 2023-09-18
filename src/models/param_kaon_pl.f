@@ -22,7 +22,7 @@
 	argc = COMMAND_ARGUMENT_COUNT()
 
 	! Check if there are enough arguments
-	if (argc < 22) then
+	if (argc < 21) then
 	   print *, "Error: Not enough arguments provided."
 	   stop
 	end if
