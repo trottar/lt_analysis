@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 00:10:16 trottar"
+# Time-stamp: "2023-09-18 00:11:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -171,10 +171,10 @@ from compare_simc_iter import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    # Grab weight from previous iteration
-    # Open the ROOT file
+    # Open the ROOT file, must pass open root file so object exists here and in function
     root_file = ROOT.TFile.Open(prev_iter_root, "READ")
-    iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")[0]
+    # Grab weight from previous iteration
+    iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!",iter_weight.GetEntries())
     hist.update(compare_simc(iter_weight, hist, inpDict))
     
