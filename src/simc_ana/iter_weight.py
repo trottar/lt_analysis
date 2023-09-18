@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 14:06:17 trottar"
+# Time-stamp: "2023-09-18 14:07:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,7 +68,7 @@ def iter_weight(param_file, prev_iter_dir, simc_root, inpDict, phi_setting):
     # Define the path to the script module
     script_name = "param_{}_{}.py".format(ParticleType, pol_str)
 
-    spec = importlib.util.spec_from_file_location(script_name, prev_iter_dir+script_name)
+    spec = importlib.util.spec_from_file_location(script_name, prev_iter_dir+"/"+script_name)
     param_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(param_module)
 
