@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 14:13:22 trottar"
+# Time-stamp: "2023-09-18 14:14:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,12 +63,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         print("ERROR: Invalid polarity...must be +1 or -1")
         sys.exit(2)
     
-    # Define the path to the script module
-    script_name = "param_{}_{}.py".format(ParticleType, pol_str)
-
     sys.path.append("models")
 
-    from script_name import iterWeight
+    from param_active import iterWeight
     
     
     # Define diamond cut parameters

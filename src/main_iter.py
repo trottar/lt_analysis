@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 14:10:51 trottar"
+# Time-stamp: "2023-09-18 14:16:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -194,7 +194,7 @@ create_dir(new_dir+"/root")
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
-old_fort_param = '{}/param_{}_{}.f'.format(prev_iter_dir, ParticleType, pol_str)
+old_py_param = '{}/param_{}_{}.py'.format(prev_iter_dir, ParticleType, pol_str)
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
@@ -369,20 +369,20 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 if EPSSET == "high":
 
     # Save fortran scripts that contain iteration functional form of parameterization
-    fort_param = 'models/param_{}_{}.f'.format(ParticleType, pol_str)
-    output_file_lst.append(fort_param) 
+    py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
+    output_file_lst.append(py_param) 
     fort_xmodel = 'models/xmodel_{}_{}.f'.format(ParticleType, pol_str)
     output_file_lst.append(fort_xmodel)
 
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
-    fort_param_active = 'models/param_active.f'
+    py_param_active = 'models/param_active.py'
     fort_xmodel_active = 'models/xmodel_active.f'
     # Copying content of used models to actively used files
     print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
     shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
-    print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_param, LTANAPATH+"/src/"+fort_param_active))    
-    shutil.copy(LTANAPATH+"/src/"+fort_param, LTANAPATH+"/src/"+fort_param_active)
+    print("Copying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
+    shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters

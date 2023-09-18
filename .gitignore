@@ -29,6 +29,7 @@ fort.99
 
 # Active fortran scripts
 param_active.f
+param_active.py
 xmodel_active.f
 
 # Directories
