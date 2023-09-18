@@ -134,7 +134,8 @@
 	tav=(-0.178+0.315*log(q2_gev))*q2_gev
 
 	sig219=(sigt+eps_sim*sigl+eps_sim*cos(2.*phicm_sim)*sigtt
-     &         +sqrt(2.0*eps_sim*(1.+eps_sim))*cos(phicm_sim)*siglt)/1.d0
+     &         +sqrt(2.0*eps_sim*(1.+eps_sim))
+     &         *cos(phicm_sim)*siglt)/1.d0
 	
 	wfactor=1.D0/(s_gev-mtar_gev**2)**2
 	sig=sig219*wfactor

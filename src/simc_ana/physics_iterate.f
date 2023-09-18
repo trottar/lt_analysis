@@ -376,9 +376,11 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 
 	   tav=(-0.178+0.315*log(Q2_g))*Q2_g
 	   
+
+
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
-     >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))
-     >		*cos(phicm)*siglt)/1.d0
+     >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
+	  
 c now convert to different W
 c W dependence given by 1/(W^2-M^2)^2
 c factor 15.333 is value of (w**2-ami**2)**2 at W=2.19
