@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:47:02 trottar"
+# Time-stamp: "2023-09-17 22:56:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -246,15 +246,6 @@ if not os.path.exists(foutroot):
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                 if "G_" in val.GetName():
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                    
-                if "DATA" in val.GetName():
-                    if "yield" in val.GetName():
-                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
-                    elif "bin" in val.GetName():
-                        hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
-                    elif "totevts" in val.GetName():
-                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
-                    else:
-                        hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
                 if "SIMC" in val.GetName():
                     if "yield" in val.GetName():
                         hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
@@ -264,8 +255,6 @@ if not os.path.exists(foutroot):
                         hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                     else:
                         hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
-                if "DUMMY" in val.GetName():
-                    hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
 
     # Open the ROOT file
     root_file = TFile.Open(foutroot, "UPDATE")
