@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 15:27:41 trottar"
+# Time-stamp: "2023-09-18 15:31:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,7 +99,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_tree = ROOT.TTree("TBRANCH_SIMC", "Modified TTree with Weight")
 
     # Clone the existing TBranch structure from the original TTree
-    new_tree = TBRANCH_SIMC.CloneTree(-1, "newtree=fast")
+    #new_tree = TBRANCH_SIMC.CloneTree(-1, "newtree=fast")
 
     TBRANCH_SIMC.SetBranchAddress("Weight", ROOT.AddressOf(iweight))
     new_tree.Branch("Weight", ROOT.AddressOf(iweight), "Weight/F")
@@ -129,6 +129,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       #Fill SIMC events
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
+          TBRANCH_SIMC.GetEntry()
+          
           # thetacm and phicm are correct, the next line is just for testingx
           #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
           inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+ \
@@ -140,9 +142,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     
           # Assign the value of iweight to the new 'Weight' branch
           #new_weight_branch.Fill()
-
-          # Update the 'Weight' branch directly
-          evt.Weight = iweight[0]
 
           new_tree.Fill()
           
