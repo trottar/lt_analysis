@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 23:19:54 trottar"
+# Time-stamp: "2023-09-17 23:22:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,6 +182,7 @@ def get_histogram(file_name, directory_name, histogram_name):
     current_dir = root_file
     
     for directory in directories:
+        print("Checking directory:", directory)  # Debug statement
         # Check if the directory exists
         dir_exists = bool(current_dir.GetDirectory(directory))
         if not dir_exists:
@@ -190,6 +191,8 @@ def get_histogram(file_name, directory_name, histogram_name):
             return None
         current_dir.cd(directory)
         current_dir = ROOT.gDirectory
+        histograms_in_dir = current_dir.GetListOfKeys()
+        print("Histograms in directory:", [histogram.GetName() for histogram in histograms_in_dir])  # Debug statement
 
     # Get the histogram
     histogram = current_dir.Get(histogram_name)
@@ -203,6 +206,6 @@ def get_histogram(file_name, directory_name, histogram_name):
     cloned_histogram = histogram.Clone()
 
     # Close the ROOT file
-    #root_file.Close()
+    root_file.Close()
 
     return cloned_histogram
