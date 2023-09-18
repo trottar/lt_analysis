@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 00:00:16 trottar"
+# Time-stamp: "2023-09-18 00:00:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,15 +168,12 @@ def last_iter(file_name, current_date):
 
 # Save histograms to root file
 def get_histogram(file_name, directory_name, histogram_name):
-
-    cloned_histogram = []
-    
     # Open the ROOT file
     root_file = ROOT.TFile.Open(file_name, "READ")
 
     if not root_file:
         print("Error: Unable to open file {}.".format(file_name))
-        return cloned_histogram
+        return None
 
     # Split the directory names
     directories = directory_name.split('/')
@@ -191,7 +188,7 @@ def get_histogram(file_name, directory_name, histogram_name):
         if not dir_exists:
             print("Error: Unable to find directory {}.".format(directory))
             root_file.Close()
-            return cloned_histogram
+            return None
         current_dir.cd(directory)
         current_dir = ROOT.gDirectory
         histograms_in_dir = current_dir.GetListOfKeys()
@@ -203,20 +200,20 @@ def get_histogram(file_name, directory_name, histogram_name):
     if not histogram:
         print("Error: Unable to find histogram {}.".format(histogram_name))
         root_file.Close()
-        return cloned_histogram
+        return None
 
     # Check the number of entries in the histogram
     print("Number of entries in {}: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
     
     # Clone the histogram to avoid ownership issues
-    cloned_histogram.append(histogram.Clone())
+    cloned_histogram = histogram.Clone()
 
     # Close the ROOT file
     #root_file.Close()
 
     # Check the number of entries in the cloned_histogram
-    print("Number of entries in the {} cloned_histogram[0]: {}".format(cloned_histogram[0].GetName(),cloned_histogram[0].GetEntries()))  # Debug statement
+    print("Number of entries in the {} cloned_histogram: {}".format(cloned_histogram.GetName(),cloned_histogram.GetEntries()))  # Debug statement
     
-    return cloned_histogram[0]
+    return cloned_histogram
 
 ################################################################################################################################################

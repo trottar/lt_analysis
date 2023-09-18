@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 23:26:02 trottar"
+# Time-stamp: "2023-09-18 00:02:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -172,7 +172,7 @@ from compare_simc_iter import compare_simc
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     iter_weight = get_histogram(prev_iter_root, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!",iter_weight.GetEntries())
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!",get_histogram(prev_iter_root, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC").GetEntries())
     hist.update(compare_simc(iter_weight, hist, inpDict))
     
 sys.path.append("plotting")
