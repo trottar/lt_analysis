@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 21:28:11 trottar"
+# Time-stamp: "2023-09-17 21:29:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -148,7 +148,7 @@ def last_iter(file_name, current_date):
     # Read formatted dates from the file
     formatted_dates = []
 
-    with open(file_path, "r") as file:
+    with open(file_name, "r") as file:
         for line in file:
             formatted_dates.append(line.strip())
 
