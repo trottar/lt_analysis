@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:16:37 trottar"
+# Time-stamp: "2023-09-18 19:18:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -246,8 +246,13 @@ def hist_in_dir(root_file, directory_name):
             print("From {}, adding: ".format(directory, hist_key.GetName()))  # Debug statement
 
             # Get the histogram
-            histogram = current_dir.Get(hist_key.GetName())
+            histogram = root_file.Get(hist_key.GetName())
 
+            if not histogram:
+                print("Error: Unable to find histogram {}.".format(histogram_name))
+                root_file.Close()
+                return {}
+            
             # Check the number of entries in the histogram
             print("Number of entries in {}: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
 
