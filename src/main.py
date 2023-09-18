@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 20:49:48 trottar"
+# Time-stamp: "2023-09-17 20:57:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -541,7 +541,9 @@ if EPSSET == "high":
     # Grab low eps versions as well
     for f in output_file_lst:
         if OutFilename in f:
-            output_file_lst.append(f.replace("highe","lowe"))
+            f_lowe = f.replace("highe","lowe")
+            if os.path.exists(f_lowe):
+                output_file_lst.append(f_lowe)
     
     f_path = "{}/{}_{}_{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
