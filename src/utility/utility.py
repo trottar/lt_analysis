@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:18:54 trottar"
+# Time-stamp: "2023-09-18 19:19:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -249,7 +249,7 @@ def hist_in_dir(root_file, directory_name):
             histogram = root_file.Get(hist_key.GetName())
 
             if not histogram:
-                print("Error: Unable to find histogram {}.".format(histogram_name))
+                print("Error: Unable to find histogram {}.".format(histogram.GetName()))
                 root_file.Close()
                 return {}
             
