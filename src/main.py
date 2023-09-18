@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 03:19:01 trottar"
+# Time-stamp: "2023-09-18 03:27:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -551,12 +551,10 @@ if EPSSET == "high":
             f_lowe = f.replace("highe","lowe")
             if os.path.exists(f_lowe):
                 output_file_lst.append(f_lowe)
-        if ".root" in f:
-            for phiset in phisetlist:
-                if "{}".format(kinematics[0]+phiset.lower()) in f: # Simc root file
-                    f_lowe = f.replace("highe","lowe")
-                    if os.path.exists(f_lowe):
-                        output_file_lst.append(f_lowe)
+        if "Prod_Coin" in f:
+            f_lowe = f.replace("highe","lowe")
+            if os.path.exists(f_lowe):
+                output_file_lst.append(f_lowe)
                 
     f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
