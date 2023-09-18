@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:27:52 trottar"
+# Time-stamp: "2023-09-18 19:40:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -403,6 +403,7 @@ if not os.path.exists(foutroot):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if is_root_obj(val):
+                print("!!!!!!!!!!!!!!!!!",val)
                 if "ratio" in val.GetName():
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                 if "G_" in val.GetName():

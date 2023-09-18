@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:23:55 trottar"
+# Time-stamp: "2023-09-18 19:39:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -94,6 +94,12 @@ def match_to_bin(data):
 
     # Convert the dictionary to the desired format
     return [[match, np.array(values)] for match, values in match_dict.items()]
+
+################################################################################################################################################
+
+# Function to check if an object is of a ROOT type
+def is_hist(obj):
+    return isinstance(obj, (ROOT.TH1D, ROOT.TH2D))
 
 ################################################################################################################################################
 
