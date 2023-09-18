@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 12:08:19 trottar"
+# Time-stamp: "2023-09-18 12:15:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -184,6 +184,10 @@ sys.path.append("simc_ana")
 from iter_weight import iter_weight
 from compare_simc_iter import compare_simc
 
+# Create a new directory for each iteration in cache
+# ***Moved up in procedure vs main.py since required for weight iteration
+new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
+create_dir(new_dir)
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
@@ -193,12 +197,14 @@ for hist in histlist:
     # SIMC file with weight from last iteration
     old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
     new_simc_root = old_simc_root.replace(closest_date, formatted_date)
-    # Copy to new iteration so and then edit the weight
-    print("Copying {} to {}".format(old_simc_root, new_simc_root))
-    shutil.copy(old_simc_root,new_simc_root)
-    # Function to calculation new weight and apply it to simc root file 
-    iter_weight(old_param_file, old_fort_param, new_simc_root, inpDict, hist["phi_setting"])
-    hist.update(compare_simc(new_simc_root, hist, inpDict))
+    # Make sure old simc root file exists
+    if os.path.exists(old_simc_root):
+        # Copy to new iteration so and then edit the weight
+        print("Copying {} to {}".format(old_simc_root, new_simc_root))
+        shutil.copy(old_simc_root,new_simc_root)
+        # Function to calculation new weight and apply it to simc root file 
+        iter_weight(old_param_file, old_fort_param, new_simc_root, inpDict, hist["phi_setting"])
+        hist.update(compare_simc(new_simc_root, hist, inpDict))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
@@ -386,9 +392,7 @@ if EPSSET == "high":
 * Save all information for this iteration
 '''
 
-# Create a new directory for each iteration in cache
-new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
-create_dir(new_dir)
+# ***Moved creation of iteration directory up from where it is in main.py. Now is near the new weight calculation***
 
 if EPSSET == "high":
     
