@@ -1,15 +1,14 @@
 	program iterWeight
 	implicit none
+	
+	real pi,mtar_gev
+	parameter (pi=3.14159)
+	parameter (mtar_gev=0.93827231)
 
 	real*8 q2_gev, t_gev, s, s_gev
 	real*8 tav, ftav, ft
 	real*8 sigl, sigt, siglt, sigtt, sig219, sig
 	real*8 wfactor, wtn
-	
-	real pi,mtar_gev
-	real my_limit
-	parameter (pi=3.14159)
-	parameter (mtar_gev=0.93827231)
 	
 **********************************************	
 *	Read in arguments of parameters and Q2
