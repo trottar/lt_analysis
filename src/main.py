@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 03:01:50 trottar"
+# Time-stamp: "2023-09-18 03:09:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -551,10 +551,11 @@ if EPSSET == "high":
             f_lowe = f.replace("highe","lowe")
             if os.path.exists(f_lowe):
                 output_file_lst.append(f_lowe)
-        if "{}".format(kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1]) in f: # Simc root file
-            f_lowe = f.replace("highe","lowe")
-            if os.path.exists(f_lowe):
-                output_file_lst.append(f_lowe)
+        for hist in histlist:
+            if "{}".format(kinematics[0]+hist["phi_setting"].lower()) in f: # Simc root file
+                f_lowe = f.replace("highe","lowe")
+                if os.path.exists(f_lowe):
+                    output_file_lst.append(f_lowe)
 
                 
     f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
