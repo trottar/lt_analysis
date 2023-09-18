@@ -3,13 +3,15 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 00:29:56 trottar"
+# Time-stamp: "2023-09-18 00:31:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
+import sys, os
+
 ################################################################################################################################################
 '''
 ltsep package import and pathing definitions
