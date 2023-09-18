@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 03:09:58 trottar"
+# Time-stamp: "2023-09-18 03:19:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -438,24 +438,24 @@ if not os.path.exists(foutroot):
         print("\nError: Unable to close the root file {}.".format(foutroot))
 output_file_lst.append(foutroot)
 
-# Create combined dictionary of all non-histogram information        
-combineDict = {}
-combineDict.update({"inpDict" : inpDict})
-tmp_lst = []
-for hist in histlist:
-    print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
-    tmp_dict = {}
-    for i, (key, val) in enumerate(hist.items()):
-        # Progress bar
-        Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-        if not is_root_obj(val):
-            tmp_dict[key] = val
-    tmp_lst.append(tmp_dict)
-combineDict.update({ "histlist" : tmp_lst})
-
-# Save combined dictionary to json file
-# Check that root file doesnt already exist    
+# Check that root file doesnt already exist
 if not os.path.exists(foutjson):
+    # Create combined dictionary of all non-histogram information        
+    combineDict = {}
+    combineDict.update({"inpDict" : inpDict})
+    tmp_lst = []
+    for hist in histlist:
+        print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
+        tmp_dict = {}
+        for i, (key, val) in enumerate(hist.items()):
+            # Progress bar
+            Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+            if not is_root_obj(val):
+                tmp_dict[key] = val
+        tmp_lst.append(tmp_dict)
+    combineDict.update({ "histlist" : tmp_lst})
+
+    # Save combined dictionary to json file
     # Open the file in write mode and use json.dump() to save the dictionary to JSON
     with open(foutjson, 'w') as f_json:
         json.dump(combineDict, f_json, default=custom_encoder)
@@ -551,12 +551,12 @@ if EPSSET == "high":
             f_lowe = f.replace("highe","lowe")
             if os.path.exists(f_lowe):
                 output_file_lst.append(f_lowe)
-        for hist in histlist:
-            if "{}".format(kinematics[0]+hist["phi_setting"].lower()) in f: # Simc root file
-                f_lowe = f.replace("highe","lowe")
-                if os.path.exists(f_lowe):
-                    output_file_lst.append(f_lowe)
-
+        if ".root" in f:
+            for phiset in phisetlist:
+                if "{}".format(kinematics[0]+phiset.lower()) in f: # Simc root file
+                    f_lowe = f.replace("highe","lowe")
+                    if os.path.exists(f_lowe):
+                        output_file_lst.append(f_lowe)
                 
     f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
@@ -574,6 +574,7 @@ if EPSSET == "high":
         total_lines = len(file.readlines())
 
     f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines))
+    print("Copying {} to {}".format(f_path,f_path_new))
     shutil.copy(f_path,f_path_new)
 
     for f in output_file_lst:
