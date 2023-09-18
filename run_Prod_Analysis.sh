@@ -1685,10 +1685,10 @@ else
 
 	if [ $j = "low" ]; then
 	    echo
-	    echo "Finding t/phi bins for low epsilon..."
+	    echo "Finding new simc weight for low epsilon..."
 	else
 	    echo
-	    echo "Using low epsilon t/phi bins for high epsilon..."
+	    echo "Finding new simc weight for for high epsilon..."
 	fi
 
 	python3 main_iter.py ${KIN} ${W} ${Q2} ${EPSVAL} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date}
