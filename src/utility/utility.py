@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:02:50 trottar"
+# Time-stamp: "2023-09-17 22:06:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,7 +13,7 @@
 import ROOT
 from array import array
 import numpy as np
-import datetime
+from datetime import datetime
 import os, subprocess
 
 ################################################################################################################################################
@@ -153,26 +153,11 @@ def last_iter(file_name, current_date):
         for line in file:
             formatted_dates.append(line.strip())
 
-    # Define a custom date parser function
-    def custom_date_parser(date_str):
-        parts = date_str.split('_')
-        time_part = parts[0]
-        date_part = parts[1]
-
-        # Extract hours, minutes, and seconds
-        hours = int(time_part[1:3])
-        minutes = int(time_part[4:6])
-        seconds = int(time_part[7:9])
-
-        # Extract year, month, and day
-        year = int(date_part[:4])
-        month = date_part[4:-2]
-        day = int(date_part[-2:])
-
-        return datetime(year, datetime.strptime(month, "%B").month, day, hours, minutes, seconds)
-
-    # Convert current date to datetime object
-    current_datetime = custom_date_parser(current_date)
+    # Function to convert formatted date to datetime object for comparison
+    def convert_to_datetime(date_str):
+        # Format of dates, see run_Prod_Analysis.sh
+        date_format = "H%HM%MS%S_%Y%B%d"
+        return datetime.strptime(date_str, date_format)
 
     # Find the closest date
     closest_date = min(formatted_dates, key=lambda date: abs((convert_to_datetime(date) - convert_to_datetime(current_date)).total_seconds()))
