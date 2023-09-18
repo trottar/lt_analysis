@@ -820,7 +820,7 @@ do
     fi
 done
 
-if [[ $p_flag != "true" ]]; then
+if [[ $i_flag != "true" ]]; then
     # Need to rerun loop separately so that the combined files for high and low epsilon exists for diamond cut script
     declare -a EPS=("low" "high")
     for j in "${EPS[@]}"
