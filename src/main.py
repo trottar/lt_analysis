@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 13:05:56 trottar"
+# Time-stamp: "2023-09-18 13:13:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -496,6 +496,9 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 
 if EPSSET == "high":
 
+    py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
+    output_file_lst.append(py_param)
+    
     # Save fortran scripts that contain iteration functional form of parameterization
     fort_param = 'models/param_{}_{}.f'.format(ParticleType, pol_str)
     output_file_lst.append(fort_param) 
