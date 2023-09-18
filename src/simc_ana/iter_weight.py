@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 14:14:11 trottar"
+# Time-stamp: "2023-09-18 14:17:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,6 +23,12 @@ import importlib.util
 
 sys.path.append("utility")
 from utility import run_fortran
+
+##################################################################################################################################################
+# Importing param model for weight iteration
+
+sys.path.append("models")
+from param_active import iterWeight    
 
 ################################################################################################################################################
 '''
@@ -62,11 +68,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     else:
         print("ERROR: Invalid polarity...must be +1 or -1")
         sys.exit(2)
-    
-    sys.path.append("models")
-
-    from param_active import iterWeight
-    
     
     # Define diamond cut parameters
     a1 = inpDict["a1"]
