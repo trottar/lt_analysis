@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 16:16:42 trottar"
+# Time-stamp: "2023-09-18 16:20:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,7 +103,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     
     # Create a new branch with the updated values
     iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-    new_branch = new_TBRANCH_SIMC.Branch("Weight", iweight, "Weight/D")  # 'D' for double, change if needed
+    new_branch = new_TBRANCH_SIMC.Branch("new_Weight", iweight, "new_Weight/D")  # 'D' for double, change if needed
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
@@ -138,7 +138,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                            ' '.join(param_arr)
           #print("-"*25,"\n",i,"\n",inp_param)
 
-          iweight[0] = iterWeight(inp_param)
+          #iweight[0] = iterWeight(inp_param)
+          iweight[0] = 10
           
           # Set the value of iweight
           new_Weight_SIMC.SetAddress(iweight)
@@ -146,7 +147,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           # Fill the new branch with the new value for this entry
           new_branch.Fill()
           
-    new_TBRANCH_SIMC.Write("h10", ROOT.TObject.kOverwrite)
+    new_TBRANCH_SIMC.Write()
     
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
