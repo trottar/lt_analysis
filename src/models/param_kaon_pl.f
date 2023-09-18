@@ -64,7 +64,7 @@
 	read(arg, *) wt_sim
 	
 	! Get params from the rest of the arguments
-	do i = 10,22
+	do i = 10,21
 	   call GET_COMMAND_ARGUMENT(i, arg)
 	   read(arg, *) params(i-9)
 	end do
