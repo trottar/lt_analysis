@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 01:23:37 trottar"
+# Time-stamp: "2023-09-18 01:29:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,7 +44,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def iter_weight(param_file, fort_param, formatted_date):
+def iter_weight(param_file, fort_param, inpDict):
     '''
     # Fortran script converted to python
     
@@ -103,13 +103,17 @@ def iter_weight(param_file, fort_param, formatted_date):
 
     return
     '''
+
+    formatted_date  = inpDict["formatted_date"]
+    Q2 = inpDict["Q2"].replace("p",".")
+    
     param_arr = []
     with open(param_file, 'r') as f:
         for i, line in enumerate(f):
             columns = line.split()
             param_arr.append(str(columns[0]))
 
-    inp_fort_param = ' '.join(param_arr)
+    inp_fort_param = ' '.join(param_arr)+' {}'.format(Q2)
     print(inp_fort_param)
 
     # Get the standard output and standard error

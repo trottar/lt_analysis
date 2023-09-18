@@ -1,8 +1,34 @@
 	program iterWeight
 	implicit none
+
+**********************************************	
+*	Read in arguments of parameters and Q2
+	real :: q2_set, params(12)
+	integer :: i, argc
+	character(len=20) :: arg
+
+	! Get the number of command line arguments
+	argc = COMMAND_ARGUMENT_COUNT()
+
+	! Check if there are enough arguments
+	if (argc < 13) then
+	   print *, "Error: Not enough arguments provided."
+	   stop
+	end if
+
+	! Get q2_set from the first argument
+	call GET_COMMAND_ARGUMENT(1, arg)
+	read(arg, *) q2_set
+
+	! Get params from the rest of the arguments
+	do i = 2, 13
+	   call GET_COMMAND_ARGUMENT(i, arg)
+	   read(arg, *) params(i-1)
+	end do
+**********************************************
+
 	
-	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12
-	real, dimension(12), intent(in) :: params
+	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12	
 	real nsigl,nsigt,nsiglt,nsigtt,tmp
 	real nsig219,nsig,wtn
 	real ft,tav,ftav
