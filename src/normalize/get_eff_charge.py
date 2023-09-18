@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 19:38:49 trottar"
+# Time-stamp: "2023-09-18 19:30:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -170,7 +170,7 @@ def get_eff_charge(hist, inpDict):
 
     # Define total efficiency vs run number plots
     G_data_eff = TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
-
+    
     ################################################################################################################################################    
 
     ################################################################################################################################################
