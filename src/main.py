@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 20:37:30 trottar"
+# Time-stamp: "2023-09-17 20:49:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -387,6 +387,10 @@ from binned import plot_binned
 
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
 
+if DEBUG:
+    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
+
 # Save histograms to root file
 # Check that root file doesnt already exist    
 if not os.path.exists(foutname):
@@ -455,18 +459,8 @@ if not os.path.exists(foutjson):
         json.dump(combineDict, f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
 
-if DEBUG:
-    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
-output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
-
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
-
-'''
-**************************************************
-* NEED TO ADD ROOT AND JSON FILES FOR OTHERS USE *
-**************************************************
-'''
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
@@ -544,6 +538,11 @@ if EPSSET == "high":
     
     print("\n\n")
 
+    # Grab low eps versions as well
+    for f in output_file_lst:
+        if OutFilename in f:
+            output_file_lst.append(f.replace("highe","lowe"))
+    
     f_path = "{}/{}_{}_{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
     if os.path.exists(f_path):
