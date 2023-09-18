@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:19:55 trottar"
+# Time-stamp: "2023-09-18 19:22:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -221,7 +221,7 @@ def hist_in_dir(root_file, directory_name):
 
     histDict = {}
     
-    if not root_file:
+    if not root_file or root_file.IsZombie():
         print("Error: Unable to open file {}.".format(root_file))
         return None
 
@@ -232,7 +232,7 @@ def hist_in_dir(root_file, directory_name):
     current_dir = root_file
     
     for directory in directories:
-        print("Checking directory:", directory)  # Debug statement
+        print("Checking directory: {}".format(directory))  # Debug statement
         # Check if the directory exists
         dir_exists = bool(current_dir.GetDirectory(directory))
         if not dir_exists:
@@ -243,25 +243,26 @@ def hist_in_dir(root_file, directory_name):
         current_dir = ROOT.gDirectory
         histograms_in_dir = current_dir.GetListOfKeys()
         for hist_key in histograms_in_dir:
-            print("From {}, adding: ".format(directory, hist_key.GetName()))  # Debug statement
+            print("From {}, adding: {}".format(directory, hist_key.GetName()))  # Debug statement
 
             # Get the histogram
-            histogram = root_file.Get(hist_key.GetName())
+            histogram = current_dir.Get(hist_key.GetName())
 
             if not histogram:
-                print("Error: Unable to find histogram {}.".format(histogram.GetName()))
+                print("Error: Unable to find histogram {}.".format(hist_key.GetName()))
                 root_file.Close()
                 return {}
             
             # Check the number of entries in the histogram
-            print("Number of entries in {}: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
+            print("Number of entries in {}: {}".format(histogram.GetName(), histogram.GetEntries()))  # Debug statement
 
             # Clone the histogram to avoid ownership issues
             cloned_histogram = histogram.Clone()
 
-            histDict["".format(histogram.GetName())] = cloned_histogram
+            histDict["{}".format(histogram.GetName())] = cloned_histogram
 
     return histDict
+
 
 ################################################################################################################################################
 
