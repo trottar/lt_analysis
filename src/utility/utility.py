@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 00:08:34 trottar"
+# Time-stamp: "2023-09-18 00:09:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -215,7 +215,6 @@ def get_histogram(file_name, directory_name, histogram_name):
     print("Number of entries in the {} cloned_histogram: {}".format(cloned_histogram.GetName(),cloned_histogram.GetEntries()))  # Debug statement
 
     # Must pass root file with this since object does not exist outside function
-    #return [cloned_histogram,root_file]
-    return [cloned_histogram,None]
+    return [cloned_histogram,root_file]
 
 ################################################################################################################################################
