@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 16:06:41 trottar"
+# Time-stamp: "2023-09-18 16:12:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,10 +180,6 @@ iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H
 
 print("\n\n")
 
-sys.path.append("simc_ana")
-from iter_weight import iter_weight
-from compare_simc_iter import compare_simc
-
 # Create a new directory for each iteration in cache
 # ***Moved up in procedure vs main.py since required for weight iteration
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
@@ -206,6 +202,10 @@ py_param_active = 'models/param_active.py'
 # Copying content of used models to actively used files
 print("Copying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
 shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
+
+sys.path.append("simc_ana")
+from iter_weight import iter_weight
+from compare_simc_iter import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
