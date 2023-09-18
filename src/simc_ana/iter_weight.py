@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 12:37:28 trottar"
+# Time-stamp: "2023-09-18 12:43:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,6 +15,7 @@ from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphError
 from array import array
 import sys, math, os, subprocess
 
+import time
 ##################################################################################################################################################
 # Importing utility functions
 
@@ -79,8 +80,13 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
 
+    start_time = time.time()
     print("\nGrabbing %s simc..." % phi_setting)
+    #for i,evt in enumerate(TBRANCH_SIMC):
     for i,evt in enumerate(TBRANCH_SIMC):
+
+      if i >=2:
+          break
 
       # Progress bar
       Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
@@ -105,7 +111,7 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
           #inp_fort_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
           inp_fort_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+ \
                            ' '.join(param_arr)
-          print("-"*25,"\n",i,"\n",inp_fort_param)
+          #print("-"*25,"\n",i,"\n",inp_fort_param)
               
           # Get the standard output and standard error
           stdout, stderr = run_fortran(fort_param, inp_fort_param)
@@ -118,6 +124,11 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
     
           # Fill the branch
           Weight_SIMC.Fill()
+
+    end_time = time.time()
+
+    execution_time = end_time - start_time
+    print("Time:", execution_time)
 
     TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
     InFile_SIMC.Close()
