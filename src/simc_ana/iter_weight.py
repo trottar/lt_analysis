@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 01:13:59 trottar"
+# Time-stamp: "2023-09-18 01:15:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,7 +110,7 @@ def iter_weight(param_file, fort_param, formatted_date):
     command = 'gfortran {} -o output && ./output {}'.format(fort_param, inp_fort_param)
 
     # Execute the command and capture the output
-    result = subprocess.call(command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = subprocess.call(command, shell=True, text=True, capture_output=True)
 
     print(result.stdout)
     print(result.stderr)
