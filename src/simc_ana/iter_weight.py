@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 15:42:35 trottar"
+# Time-stamp: "2023-09-18 15:45:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -94,15 +94,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     # Associate a variable with the branch
     iweight = ROOT.Double(0)
-
-    # Create a new TBranch with the same name 'Weight' in a new TTree
-    #new_tree = ROOT.TTree("TBRANCH_SIMC", "Modified TTree with Weight")
-
-    # Clone the existing TBranch structure from the original TTree
-    new_tree = TBRANCH_SIMC.CloneTree(-1, "newtree=fast")
-
-    #TBRANCH_SIMC.SetBranchAddress("Weight", iweight)
-    new_tree.Branch("Weight", iweight, "Weight/D")
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
@@ -129,7 +120,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       #Fill SIMC events
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
-          TBRANCH_SIMC.GetEntry()
+          TBRANCH_SIMC.GetEntry(i)
           
           # thetacm and phicm are correct, the next line is just for testingx
           #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
@@ -138,12 +129,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #print("-"*25,"\n",i,"\n",inp_param)
           
           # Set the value of iweight
-          iweight = iterWeight(inp_param)*1e6
+          Weight_SIMC.SetAddress(iterWeight(inp_param)*1e6)
     
-          new_tree.Fill()
+          TBRANCH_SIMC.Fill()
           
-    # Write the new TTree to the output file
-    new_tree.Write("h10", ROOT.TObject.kOverwrite)
+    TBRANCH_SIMC.Write()
     
     #TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
     InFile_SIMC.Close()
