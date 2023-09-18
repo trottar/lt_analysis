@@ -1,12 +1,23 @@
 	program iterWeight
 	implicit none
 
+	real nsigl,nsigt,nsiglt,nsigtt,tmp
+	real nsig219,nsig,wtn
+	real ft,tav,ftav
+	
+	real pi,mtar_gev,q2_gev
+	real my_limit
+	integer q2_set
+	parameter (pi=3.14159)
+	parameter (mtar_gev=0.93827231)
+
+	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12
+	
 **********************************************	
 *	Read in arguments of parameters and Q2
 	real :: q2_set, params(12)
 	integer :: i, argc
 	character(len=20) :: arg
-	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12
 
 	! Get the number of command line arguments
 	argc = COMMAND_ARGUMENT_COUNT()
@@ -28,16 +39,6 @@
 	end do
 **********************************************
 	
-	real nsigl,nsigt,nsiglt,nsigtt,tmp
-	real nsig219,nsig,wtn
-	real ft,tav,ftav
-	
-	real pi,mtar_gev,q2_gev
-	real my_limit
-	integer q2_set
-	parameter (pi=3.14159)
-	parameter (mtar_gev=0.93827231)
-
 	p1 = params(1)
 	p2 = params(2)
 	p3 = params(3)
