@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 15:31:14 trottar"
+# Time-stamp: "2023-09-18 15:33:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,7 +93,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
 
     # Associate a variable with the branch
-    iweight = array('f', [0.0])  # Assuming iweight is a float
+    iweight = ROOT.Float(0)
 
     # Create a new TBranch with the same name 'Weight' in a new TTree
     new_tree = ROOT.TTree("TBRANCH_SIMC", "Modified TTree with Weight")
@@ -138,11 +138,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #print("-"*25,"\n",i,"\n",inp_param)
           
           # Set the value of iweight
-          iweight[0] = iterWeight(inp_param)*1e6
+          iweight = iterWeight(inp_param)*1e6
     
-          # Assign the value of iweight to the new 'Weight' branch
-          #new_weight_branch.Fill()
-
           new_tree.Fill()
           
     # Write the new TTree to the output file
