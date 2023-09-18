@@ -51,6 +51,22 @@
 	p10 = params(10)
 	p11 = params(11)
 	p12 = params(12)
+
+	! Print q2_set, p1 to p12 for verification
+	print *, "q2_set =", q2_set
+	print *, "p1 =", p1
+	print *, "p2 =", p2
+	print *, "p3 =", p3
+	print *, "p4 =", p4
+	print *, "p5 =", p5
+	print *, "p6 =", p6
+	print *, "p7 =", p7
+	print *, "p8 =", p8
+	print *, "p9 =", p9
+	print *, "p10 =", p10
+	print *, "p11 =", p11
+	print *, "p12 =", p12	
+	
 ***     
 *       Parameterization based upon Fpi-1 pi+ IT25, 12.04.18
 *       Revised for IT21, 12.11.06
