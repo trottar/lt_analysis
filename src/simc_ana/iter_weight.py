@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 02:50:34 trottar"
+# Time-stamp: "2023-09-18 02:58:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,7 +124,7 @@ def iter_weight(param_file, fort_param, simc_root, inpDict):
             param_arr.append(str(columns[0]))    
 
     if not os.path.isfile(simc_root):
-        print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
+        print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))
         return histDict
 
     InFile_SIMC = TFile.Open(simc_root, "OPEN")
