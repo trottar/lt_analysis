@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 23:19:17 trottar"
+# Time-stamp: "2023-09-17 23:26:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,7 +112,7 @@ output_file_lst = []
 # Find last iteration, based of closest date
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
-print("closest_date",closest_date)
+print("The last iteration was ",closest_date)
 
 # Save this as the directory to grab further information
 prev_iter_dir = "{}/{}/{}/{}".format(CACHEPATH,USER,ParticleType.lower(),closest_date)
@@ -163,6 +163,8 @@ for hist in histlist:
 ** Once unseparated cross sections are achieved with good parameterization, cross section separation can be performed.
 
 '''
+
+print("\n\n")
 
 sys.path.append("simc_ana")    
 from compare_simc_iter import compare_simc
