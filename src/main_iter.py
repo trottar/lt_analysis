@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 23:18:12 trottar"
+# Time-stamp: "2023-09-17 23:19:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -126,9 +126,6 @@ with open(prev_iter_json, 'r') as f:
 
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
-
-print(inpDict)
-print(histlist)
 
 phisetlist = []
 for hist in histlist:

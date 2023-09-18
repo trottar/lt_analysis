@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 23:13:45 trottar"
+# Time-stamp: "2023-09-17 23:19:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -203,6 +203,6 @@ def get_histogram(file_name, directory_name, histogram_name):
     cloned_histogram = histogram.Clone()
 
     # Close the ROOT file
-    root_file.Close()
+    #root_file.Close()
 
     return cloned_histogram
