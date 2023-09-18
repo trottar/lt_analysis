@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 11:51:28 trottar"
+# Time-stamp: "2023-09-18 11:54:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,15 +158,19 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
           #inp_fort_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
           inp_fort_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+ \
                            ' '.join(param_arr)
-          print(inp_fort_param)
+          #print(inp_fort_param)
               
           # Get the standard output and standard error
           stdout, stderr = run_fortran(fort_param, inp_fort_param)
-
+          
           # Print the output
-          print(stdout)
+          #print(stdout)
           #print(stderr)
-    
+
+          iweight = float(stdout)
+
+          
+          
     H_Weight_SIMC  = TH1D("H_Weight_SIMC","{} Weight".format(formatted_date), 500, 0, 1e-8)    
     
         
