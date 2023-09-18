@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 13:29:52 trottar"
+# Time-stamp: "2023-09-18 13:46:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,14 +45,27 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def iter_weight(param_file, py_param_file, simc_root, inpDict, phi_setting):
+def iter_weight(param_file, prev_iter_dir, simc_root, inpDict, phi_setting):
 
-    # Use importlib to import the module and get the function
-    module = importlib.import_module(py_param_file)
-    function = getattr(module, "iterWeight")
     
     formatted_date  = inpDict["formatted_date"]
     Q2 = inpDict["Q2"].replace("p","")
+    POL = inpDict["POL"]
+    
+    if int(POL) == 1:
+        pol_str = "pl"
+    elif int(POL) == -1:
+        pol_str = "mn"
+    else:
+        print("ERROR: Invalid polarity...must be +1 or -1")
+        sys.exit(2)
+    
+    sys.path.insert(0, prev_iter_dir)
+
+    # Use importlib to import the module and get the function
+    module = importlib.import_module("param_{}_{}.py".format(ParticleType, pol_str))
+    function = getattr(module, "iterWeight")
+
     
     # Define diamond cut parameters
     a1 = inpDict["a1"]
