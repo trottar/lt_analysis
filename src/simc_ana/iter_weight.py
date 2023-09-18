@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 14:58:41 trottar"
+# Time-stamp: "2023-09-18 15:03:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,7 +96,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     iweight = array('f', [0.0])  # Assuming iweight is a float
 
     # Create a new ROOT file for writing
-    output_file = ROOT.TFile("simc_root".replace(".root","_new.root"), "RECREATE")
+    output_file = ROOT.TFile(simc_root.replace(".root","_new.root"), "RECREATE")
 
     # Create a new TBranch with the same name 'Weight' in a new TTree
     new_tree = ROOT.TTree("TBRANCH_SIMC", "Modified TTree with Weight")
@@ -111,7 +111,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Run over simc root branch to determine new weight
 
     print("\nRecalculating weight for %s simc..." % phi_setting)
-    #for i,evt in enumerate(TBRANCH_SIMC):
     for i,evt in enumerate(TBRANCH_SIMC):
 
       # Progress bar
