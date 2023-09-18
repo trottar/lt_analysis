@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 01:11:15 trottar"
+# Time-stamp: "2023-09-18 01:13:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,7 +112,8 @@ def iter_weight(param_file, fort_param, formatted_date):
     # Execute the command and capture the output
     result = subprocess.call(command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    print(result)
+    print(result.stdout)
+    print(result.stderr)
     
     H_Weight_SIMC  = TH1D("H_Weight_SIMC","{} Weight".format(formatted_date), 500, 0, 1e-8)    
     
