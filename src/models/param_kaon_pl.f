@@ -143,7 +143,8 @@ c	print *, "p12 =", p12
 	sig=sig/2./pi/1.d+06	!dsig/dtdphicm in microbarns/MeV**2/rad
 
 	wtn = wt_sim*sig/sigcm_sim
-	
-	print wtn
+
+
+	print *, "", wt
 	
 	end program iterWeight
