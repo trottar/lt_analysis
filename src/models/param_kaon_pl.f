@@ -11,7 +11,7 @@
 	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12	
 	integer :: q2_set
 	real :: params(12)
-	real :: q2_sim, w_sim, t_sim
+	real :: q2_sim, w_sim, t_sim, eps_sim
 	real :: thetacm_sim, phicm_sim
 	real :: sigcm_sim
 	real :: wt_sim
@@ -107,4 +107,34 @@
 
 *       ALL THIS WORKS
 **********************************************
+	q2_gev=q2_set/1.d6
+	t_gev=t_sim/1.d6
+* 	W~sqrt(s), if Mp >> E_interaction
+	s = w_sim**2
+	s_gev=s/1.d6
+	
+	tav=(0.0735+0.028*log(q2_gev))*q2_gev
+	ftav=(abs(t_gev)-tav)/tav
+	ft=t_gev/(abs(t_gev)+0.139570**2)**2
+
+	sigl=(p1+p2*log(q2_gev))
+     1           *exp((p3+p4*log(q2_gev))*(abs(t_gev)-0.2))
+	sigt=p5+p6*log(q2_gev)
+     1           +(p7+p8*log(q2_gev))*ftav
+
+	siglt=(p9*exp(p1)*abs(t_gev))
+     1           +p1)/abs(t_gev))*sin(thetacm_sim)
+	sigtt=(p1)*q2_gev*exp(-q2_gev))*ft*sin(thetacm_sim)**2
+
+	tav=(-0.178+0.315*log(q2_gev))*q2_gev
+
+	sig219=(sigt+eps_sim*sigl+eps_sim*cos(2.*phicm_sim)*sigtt
+     >		+sqrt(2.0*eps_sim*(1.+eps_sim))*cos(phicm_sim)*siglt)/1.d0
+	
+	wfactor=1.D0/(s_gev-mtar_gev**2)**2
+	sig=sig219*wfactor
+	sig=sig/2./pi/1.d+06	!dsig/dtdphicm in microbarns/MeV**2/rad
+
+	wtn = wtn_sim*sig/sigcm_sim
+	
 	end program iterWeight
