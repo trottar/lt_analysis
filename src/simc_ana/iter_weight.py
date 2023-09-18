@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 15:13:52 trottar"
+# Time-stamp: "2023-09-18 15:16:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,9 +95,19 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Associate a variable with the branch
     iweight = array('f', [0.0])  # Assuming iweight is a float
 
-    # Set the branch address to iweight
-    Weight_SIMC.SetAddress(iweight)
-       
+    # Create a new ROOT file for writing
+    output_file = ROOT.TFile(simc_root.replace(".root","_new.root"), "RECREATE")
+
+    # Create a new TBranch with the same name 'Weight' in a new TTree
+    new_tree = ROOT.TTree("TBRANCH_SIMC", "Modified TTree with Weight")
+
+    # Clone the existing TBranch structure from the original TTree
+    new_tree = TBRANCH_SIMC.CloneTree(-1, "newtree=fast")
+
+    # Define a new TBranch for 'Weight' with the values of iweight
+    new_weight_branch = new_tree.GetBranch("Weight")
+    new_weight_branch.SetAddress(iweight)
+    
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
 
@@ -132,13 +142,19 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           # Set the value of iweight
           iweight[0] = iterWeight(inp_param)*1e6
     
-          # Update the 'Weight' branch directly
-          Weight_SIMC.GetEntry(i)
-          Weight_SIMC.Fill()          
-          
-    # Write the TTree to the output file
-    InFile_SIMC.cd()
-    TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
+          # Assign the value of iweight to the new 'Weight' branch
+          #new_weight_branch.Fill()
 
-    # Close the input file
+          # Update the 'Weight' branch directly
+          new_weight_branch.GetEntry(i)
+          new_weight_branch.Fill()
+          
+    # Write the new TTree to the output file
+    output_file.cd()
+    new_tree.Write()
+    
+    # Close the output file
+    output_file.Close()
+
+    #TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
     InFile_SIMC.Close()
