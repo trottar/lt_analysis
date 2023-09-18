@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 00:50:10 trottar"
+# Time-stamp: "2023-09-18 00:53:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,10 +106,8 @@ def iter_weight(param_file, fort_param, formatted_date):
     inp_fort_param = ' '.join(param_arr)
     print(inp_fort_param)
         
-    H_Weight_SIMC  = TH1D("H_Weight_SIMC","{} Weight".format(formatted_date), 500, 0, 1e-8)    
-    
     # Define the command to compile and run the Fortran script with input
-    command = 'gfortran {} -o output && ./output {}'.format(fort_param, input_str)
+    command = 'gfortran {} -o output && ./output {}'.format(fort_param, inp_fort_param)
 
     # Execute the command and capture the output
     result = subprocess.run(command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -123,3 +121,7 @@ def iter_weight(param_file, fort_param, formatted_date):
         print('The Fortran script returned the following array: {}'.format(output_array))
     else:
         print('Error occurred while running the Fortran script.')
+
+    H_Weight_SIMC  = TH1D("H_Weight_SIMC","{} Weight".format(formatted_date), 500, 0, 1e-8)    
+    
+        
