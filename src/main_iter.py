@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 01:32:23 trottar"
+# Time-stamp: "2023-09-18 02:43:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,10 +187,12 @@ from compare_simc_iter import compare_simc
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
-old_fort_param = '{}/param_{}_{}.f'.format(prev_iter_dir, ParticleType, pol_str)
+old_fort_param = '{}/param_{}_{}.f'.format(prev_iter_dir, ParticleType, pol_str)    
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    iter_weight = iter_weight(old_param_file, old_fort_param, inpDict)
+    # SIMC file with weight from last iteration
+    old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
+    iter_weight = iter_weight(old_param_file, old_fort_param, old_simc_root, inpDict)
     hist.update(compare_simc(iter_weight, hist, inpDict))
     
 sys.path.append("plotting")

@@ -1,6 +1,5 @@
 	program iterWeight
 	implicit none
-
 	
 	real pi,mtar_gev,q2_gev
 	real my_limit
@@ -12,6 +11,10 @@
 	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12	
 	integer :: q2_set
 	real :: params(12)
+	real :: q2_sim, w_sim, t_sim
+	real :: thetacm_sim, phicm_sim
+	real :: sigcm_sim
+	real :: wt_sim
 	integer :: i, argc
 	character(len=20) :: arg
 
@@ -19,15 +22,47 @@
 	argc = COMMAND_ARGUMENT_COUNT()
 
 	! Check if there are enough arguments
-	if (argc < 13) then
+	if (argc < 22) then
 	   print *, "Error: Not enough arguments provided."
 	   stop
 	end if
 
-	! Get q2_set from the first argument
+	! Get q2_set from the argument
 	call GET_COMMAND_ARGUMENT(1, arg)
 	read(arg, *) q2_set
 
+	! Get q2_sim from the argument
+	call GET_COMMAND_ARGUMENT(2, arg)
+	read(arg, *) q2_sim
+
+	! Get w_sim from the argument
+	call GET_COMMAND_ARGUMENT(3, arg)
+	read(arg, *) w_sim
+
+	! Get t_sim from the argument
+	call GET_COMMAND_ARGUMENT(4, arg)
+	read(arg, *) t_sim
+
+	! Get eps_sim from the argument
+	call GET_COMMAND_ARGUMENT(5, arg)
+	read(arg, *) eps_sim
+
+	! Get thetacm_sim from the argument
+	call GET_COMMAND_ARGUMENT(6, arg)
+	read(arg, *) thetacm_sim
+
+	! Get phicm_sim from the argument
+	call GET_COMMAND_ARGUMENT(7, arg)
+	read(arg, *) phicm_sim
+
+	! Get sigcm_sim from the argument
+	call GET_COMMAND_ARGUMENT(8, arg)
+	read(arg, *) sigcm_sim
+
+	! Get wt_sim from the argument
+	call GET_COMMAND_ARGUMENT(9, arg)
+	read(arg, *) wt_sim
+	
 	! Get params from the rest of the arguments
 	do i = 2, 13
 	   call GET_COMMAND_ARGUMENT(i, arg)
@@ -49,6 +84,14 @@
 
 	! Print q2_set, p1 to p12 for verification
 	print *, "q2_set =", q2_set
+	print *, "q2_sim =", q2_sim
+	print *, "w_sim =", w_sim
+	print *, "t_sim =", t_sim
+	print *, "eps_sim =", eps_sim
+	print *, "thetacm_sim =", thetacm_sim
+	print *, "phicm_sim =", phicm_sim
+	print *, "sigcm_sim =", sigcm_sim
+	print *, "wt_sim =", wt_sim
 	print *, "p1 =", p1
 	print *, "p2 =", p2
 	print *, "p3 =", p3
