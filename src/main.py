@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 03:27:29 trottar"
+# Time-stamp: "2023-09-18 03:34:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -552,6 +552,7 @@ if EPSSET == "high":
             if os.path.exists(f_lowe):
                 output_file_lst.append(f_lowe)
         if "Prod_Coin" in f:
+            print(f)
             f_lowe = f.replace("highe","lowe")
             if os.path.exists(f_lowe):
                 output_file_lst.append(f_lowe)
