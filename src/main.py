@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 03:47:30 trottar"
+# Time-stamp: "2023-09-18 03:53:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -544,8 +544,8 @@ if EPSSET == "high":
     for hist in histlist:
         for eps in ["highe","lowe"]:
             f_simc = OUTPATH+"/Prod_Coin_{}.root".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
-            print(f_simc)
-            output_file_lst.append(f_simc)
+            if os.path.exists(f_simc):
+                output_file_lst.append(f_simc)
         
     # Grab low eps versions as well
     for f in output_file_lst:
