@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 00:43:34 trottar"
+# Time-stamp: "2023-09-18 00:50:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,7 +38,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def iter_weight(param_file, formatted_date):
+def iter_weight(param_file, fort_param, formatted_date):
     '''
     # Fortran script converted to python
     
@@ -106,7 +106,20 @@ def iter_weight(param_file, formatted_date):
     inp_fort_param = ' '.join(param_arr)
     print(inp_fort_param)
         
-    H_Weight_SIMC  = TH1D("H_Weight_SIMC","{} Weight".format(formatted_date), 500, 0, 1e-8)
+    H_Weight_SIMC  = TH1D("H_Weight_SIMC","{} Weight".format(formatted_date), 500, 0, 1e-8)    
+    
+    # Define the command to compile and run the Fortran script with input
+    command = 'gfortran {} -o output && ./output {}'.format(fort_param, input_str)
 
-    
-    
+    # Execute the command and capture the output
+    result = subprocess.run(command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Check if the execution was successful
+    if result.returncode == 0:
+        # Extract the output values as a space-separated string
+        output_str = result.stdout.strip()
+        # Convert the output string back to an array
+        output_array = np.array(list(map(float, output_str.split())))
+        print('The Fortran script returned the following array: {}'.format(output_array))
+    else:
+        print('Error occurred while running the Fortran script.')

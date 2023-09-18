@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 00:38:58 trottar"
+# Time-stamp: "2023-09-18 00:52:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,9 +187,10 @@ from compare_simc_iter import compare_simc
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
+old_fort_param = '{}/models/param_active.f'.format(prev_iter_dir)
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    iter_weight = iter_weight(old_param_file, formatted_date)
+    iter_weight = iter_weight(old_param_file, old_fort_param, formatted_date)
     hist.update(compare_simc(iter_weight, hist, inpDict))
     
 sys.path.append("plotting")
