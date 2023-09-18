@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 23:40:10 trottar"
+# Time-stamp: "2023-09-17 23:58:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,6 +168,9 @@ def last_iter(file_name, current_date):
 
 # Save histograms to root file
 def get_histogram(file_name, directory_name, histogram_name):
+
+    cloned_histogram = []
+    
     # Open the ROOT file
     root_file = ROOT.TFile.Open(file_name, "READ")
 
@@ -203,17 +206,17 @@ def get_histogram(file_name, directory_name, histogram_name):
         return None
 
     # Check the number of entries in the histogram
-    print("Number of entries in the {} histogram: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
+    print("Number of entries in {}: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
     
     # Clone the histogram to avoid ownership issues
-    cloned_histogram = histogram.Clone()
+    cloned_histogram.append(histogram.Clone())
 
     # Close the ROOT file
     #root_file.Close()
 
     # Check the number of entries in the cloned_histogram
-    print("Number of entries in the {} cloned_histogram: {}".format(cloned_histogram.GetName(),cloned_histogram.GetEntries()))  # Debug statement
+    print("Number of entries in the {} cloned_histogram[0]: {}".format(cloned_histogram[0].GetName(),cloned_histogram[0].GetEntries()))  # Debug statement
     
-    return cloned_histogram
+    return cloned_histogram[0]
 
 ################################################################################################################################################
