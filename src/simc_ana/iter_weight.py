@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 12:47:36 trottar"
+# Time-stamp: "2023-09-18 12:56:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,13 +47,12 @@ OUTPATH=lt.OUTPATH
 
 import math
 
-def iterWeight(*args):
+import math
+
+def iterWeight(q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params):
     # Define constants
     pi = 3.14159
     mtar_gev = 0.93827231
-
-    # Read in arguments of parameters and Q2
-    q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params = args
 
     # Convert units
     q2_gev = q2_set / 1e6
@@ -90,7 +89,6 @@ def iterWeight(*args):
         wtn = 0.0
 
     return wtn
-
 
 def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
 
