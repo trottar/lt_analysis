@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 14:11:59 trottar"
+# Time-stamp: "2023-09-18 14:13:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,7 +68,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     sys.path.append("models")
 
-    from exec(script_name) import iterWeight
+    from script_name import iterWeight
     
     
     # Define diamond cut parameters
