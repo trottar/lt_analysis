@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:22:43 trottar"
+# Time-stamp: "2023-09-18 19:23:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -254,7 +254,7 @@ def hist_in_dir(root_file, directory_name):
                 return {}
             
             # Check the number of entries in the histogram
-            print("Number of entries in {}: {}".format(histogram.GetName(), histogram.GetEntries()))  # Debug statement
+            #print("Number of entries in {}: {}".format(histogram.GetName(), histogram.GetEntries()))  # Debug statement
 
             # Clone the histogram to avoid ownership issues
             cloned_histogram = histogram.Clone()
