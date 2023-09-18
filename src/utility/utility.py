@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:15:26 trottar"
+# Time-stamp: "2023-09-18 19:16:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,11 +242,11 @@ def hist_in_dir(root_file, directory_name):
         current_dir.cd(directory)
         current_dir = ROOT.gDirectory
         histograms_in_dir = current_dir.GetListOfKeys()
-        for histogram in histograms_in_dir:
-            print("From {}, adding: ".format(directory, histogram.GetName()))  # Debug statement
+        for hist_key in histograms_in_dir:
+            print("From {}, adding: ".format(directory, hist_key.GetName()))  # Debug statement
 
             # Get the histogram
-            #histogram = current_dir.Get(histogram_name)
+            histogram = current_dir.Get(hist_key.GetName())
 
             # Check the number of entries in the histogram
             print("Number of entries in {}: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
