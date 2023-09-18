@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 12:56:38 trottar"
+# Time-stamp: "2023-09-18 12:58:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,6 +90,7 @@ def iterWeight(q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, si
 
     return wtn
 
+
 def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
 
     formatted_date  = inpDict["formatted_date"]
@@ -164,7 +165,7 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
           # Print the output
           #print(stdout,"\n",stderr)
 
-          stdout = iterWeight(inp_fort_param)
+          stdout = iterWeight(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight,' '.join(param_arr))
           
           # Set the value of iweight
           iweight[0] = float(stdout)
