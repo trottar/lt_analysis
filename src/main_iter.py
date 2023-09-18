@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:27:56 trottar"
+# Time-stamp: "2023-09-17 22:47:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root, last_iter
+from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root, last_iter, get_histogram
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -172,7 +172,8 @@ from compare_simc_iter import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    hist.update(compare_simc(weight, hist, inpDict))
+    iter_weight = get_histogram(prev_iter_root, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
+    hist.update(compare_simc(iter_weight, hist, inpDict))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
