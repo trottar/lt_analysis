@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 13:16:17 trottar"
+# Time-stamp: "2023-09-18 16:05:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,6 +13,8 @@
 import math
 
 def iterWeight(arg_str):
+
+    print("!!!!!!!!!!!!")
     # Define constants
     pi = 3.14159
     mtar_gev = 0.93827231
