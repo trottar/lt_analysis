@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 00:31:58 trottar"
+# Time-stamp: "2023-09-18 00:34:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,7 +99,8 @@ def iter_weight(param_file):
     with open(param_file, 'r') as f:
         for i, line in enumerate(f):
             columns = line.split()
-            paramDict["p{}".format(i)] = str(columns)
+            paramDict["p{}".format(i+1)] = str(columns[0])
+            paramDict["p{}_err".format(i+1)] = str(columns[0])
 
-    for key,val in enumerate(paramDict.items()):
+    for key,val in paramDict.items():
         print("{} = {}".format(key,val))
