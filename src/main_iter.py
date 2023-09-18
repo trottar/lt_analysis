@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 16:05:07 trottar"
+# Time-stamp: "2023-09-18 16:06:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,7 +206,6 @@ py_param_active = 'models/param_active.py'
 # Copying content of used models to actively used files
 print("Copying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
 shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
-
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
