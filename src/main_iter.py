@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 00:23:02 trottar"
+# Time-stamp: "2023-09-18 00:38:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,7 +112,7 @@ output_file_lst = []
 # Find last iteration, based of closest date
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
-print("The last iteration was ",closest_date)
+print("\n\nThe last iteration was ",closest_date)
 
 # Save this as the directory to grab further information
 prev_iter_dir = "{}/{}/{}/{}".format(CACHEPATH,USER,ParticleType.lower(),closest_date)
@@ -189,7 +189,7 @@ from compare_simc_iter import compare_simc
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    iter_weight = iter_weight(old_param_file)
+    iter_weight = iter_weight(old_param_file, formatted_date)
     hist.update(compare_simc(iter_weight, hist, inpDict))
     
 sys.path.append("plotting")

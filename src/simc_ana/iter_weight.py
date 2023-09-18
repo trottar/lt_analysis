@@ -3,14 +3,17 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 00:34:34 trottar"
+# Time-stamp: "2023-09-18 00:43:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
-import sys, os
+import ROOT
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
+import array
+import sys, math, os, subprocess
 
 ################################################################################################################################################
 '''
@@ -35,7 +38,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def iter_weight(param_file):
+def iter_weight(param_file, formatted_date):
     '''
     # Fortran script converted to python
     
@@ -94,13 +97,16 @@ def iter_weight(param_file):
 
     return
     '''
-
-    paramDict = {}
+    param_arr = []
     with open(param_file, 'r') as f:
         for i, line in enumerate(f):
             columns = line.split()
-            paramDict["p{}".format(i+1)] = str(columns[0])
-            paramDict["p{}_err".format(i+1)] = str(columns[0])
+            param_arr.append(str(columns[0]))
 
-    for key,val in paramDict.items():
-        print("{} = {}".format(key,val))
+    inp_fort_param = ' '.join(param_arr)
+    print(inp_fort_param)
+        
+    H_Weight_SIMC  = TH1D("H_Weight_SIMC","{} Weight".format(formatted_date), 500, 0, 1e-8)
+
+    
+    
