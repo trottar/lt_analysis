@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 19:39:01 trottar"
+# Time-stamp: "2023-09-17 21:27:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,7 +35,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root
+from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root, last_iter
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -162,13 +162,22 @@ output_file_lst = []
 # Step 1-4 of the lt_analysis: #
 ################################
 '''
+* Analysis already done for data, see main.py
+
+* Here is just appending files to list so it can be copied to iteration in cache
+
+* Need to read in previous iteration histograms, information, etc.
 
 '''
+
+# Find last iteration, based of closest date
+f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+closest_date = last_iter(f_iter, formatted_date)
+print("closest_date",closest_date)
 
 for phiset in phisetlist:
     output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
         
-
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
     
@@ -204,7 +213,7 @@ from compare_simc_iter import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    hist.update(compare_simc(hist, inpDict))
+    hist.update(compare_simc(weight, hist, inpDict))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
@@ -259,18 +268,27 @@ from binned import plot_binned
 
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
 
+if DEBUG:
+    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
+
 # Save histograms to root file
 # Check that root file doesnt already exist    
 if not os.path.exists(foutname):
     for hist in histlist:
+        print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutname))
         # Loop through all keys,values of dictionary
-        for key, val in hist.items():
+        for i, (key, val) in enumerate(hist.items()):
+            # Progress bar
+            Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if is_root_obj(val):
+                if "ratio" in val.GetName():
+                    hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                if "G_" in val.GetName():
+                    hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                    
                 if "DATA" in val.GetName():
                     if "yield" in val.GetName():
                         hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
-                    elif "ratio" in val.GetName():
-                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
                     elif "bin" in val.GetName():
                         hist_to_root(val, foutname, "{}/bins".format(hist["phi_setting"]))
                     elif "totevts" in val.GetName():
@@ -280,8 +298,6 @@ if not os.path.exists(foutname):
                 if "SIMC" in val.GetName():
                     if "yield" in val.GetName():
                         hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
-                    elif "ratio" in val.GetName():
-                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
                     elif "bin" in val.GetName():
                         hist_to_root(val, foutname, "{}/bins".format(hist["phi_setting"]))
                     elif "totevts" in val.GetName():
@@ -291,18 +307,41 @@ if not os.path.exists(foutname):
                 if "DUMMY" in val.GetName():
                     hist_to_root(val, foutname, "{}/dummy".format(hist["phi_setting"]))
 
-if DEBUG:
-    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
-output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
+    # Open the ROOT file
+    root_file = TFile.Open(foutname, "UPDATE")
+
+    # Check if the file was opened successfully
+    if root_file.IsOpen():
+        # Close the file
+        root_file.Close()
+        print("\nThe root file {} has been successfully closed.".format(foutname))
+    else:
+        print("\nError: Unable to close the root file {}.".format(foutname))
+output_file_lst.append(foutname)
+
+# Create combined dictionary of all non-histogram information        
+combineDict = {}
+combineDict.update({"inpDict" : inpDict})
+tmp_lst = []
+for hist in histlist:
+    print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
+    for i, (key, val) in enumerate(hist.items()):
+        # Progress bar
+        Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+        if not is_root_obj(val):
+            tmp_lst.append({key : val})
+combineDict.update({ "histlist" : tmp_lst})
+
+# Save combined dictionary to json file
+# Check that root file doesnt already exist    
+if not os.path.exists(foutjson):
+    # Open the file in write mode and use json.dump() to save the dictionary to JSON
+    with open(foutjson, 'w') as f_json:
+        json.dump(combineDict, f_json, default=custom_encoder)
+output_file_lst.append(foutjson)
 
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
-
-'''
-**************************************************
-* NEED TO ADD ROOT AND JSON FILES FOR OTHERS USE *
-**************************************************
-'''
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
@@ -321,7 +360,7 @@ except FileNotFoundError:
     
 print("\n\n")
 print("="*25)
-print("{} Cut Summary...".format(EPSSET.capitalize()),cut_summary_lst)
+print("{} Epsilon Summary...".format(EPSSET.capitalize()),cut_summary_lst)
 print("="*25)
 inpDict["cut_summary_lst"] = cut_summary_lst
 
@@ -380,7 +419,14 @@ if EPSSET == "high":
     
     print("\n\n")
 
-    f_path = "{}/{}_{}_{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    # Grab low eps versions as well
+    for f in output_file_lst:
+        if OutFilename in f:
+            f_lowe = f.replace("highe","lowe")
+            if os.path.exists(f_lowe):
+                output_file_lst.append(f_lowe)
+    
+    f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
     if os.path.exists(f_path):
         # If it exists, update it with the string
@@ -405,9 +451,14 @@ if EPSSET == "high":
                 f_new = f.replace(OUTPATH,new_dir+"/plots")
                 print("Copying {} to {}".format(f,f_new))
                 shutil.copy(f, f_new)
+            if ".json" in f:
+                create_dir(new_dir+"/json")
+                f_new = f.replace(OUTPATH,new_dir+"/json")
+                print("Copying {} to {}".format(f,f_new))
+                shutil.copy(f, f_new)                
             if ".root" in f:
-                create_dir(new_dir+"/rootfiles")
-                f_new = f.replace(OUTPATH,new_dir+"/rootfiles")
+                create_dir(new_dir+"/root")
+                f_new = f.replace(OUTPATH,new_dir+"/root")
                 print("Copying {} to {}".format(f,f_new))
                 shutil.copy(f, f_new)
         elif "{}/".format(ParticleType) in f:
@@ -423,8 +474,14 @@ if EPSSET == "high":
             f_new = new_dir
             print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
             shutil.copy(LTANAPATH+"/src/"+f, f_new)
-
+               
 # Need summary for both high and low eps.
 # All others should be saved once both are complete
 with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
     file.write(inpDict["cut_summary_lst"])
+
+'''
+for hist in histlist:
+    key_str = ', '.join(hist.keys())
+    print("{} keys: {}".format(hist["phi_setting"],key_str))
+'''

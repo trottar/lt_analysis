@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 20:34:49 trottar"
+# Time-stamp: "2023-09-17 21:28:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -120,6 +120,11 @@ def hist_to_root(hist, file_name, directory_name):
         current_dir.cd(directory)
         current_dir = ROOT.gDirectory  # Update the current directory
 
+    # Check if the histogram already exists in the file
+    existing_hist = current_dir.Get(hist.GetName())
+    if existing_hist:
+        current_dir.Delete(hist.GetName() + ";*")  # Delete existing histogram
+        
     #print("Saving {} to {}".format(hist.GetName(), file_name))
         
     # Clone the histogram since we're storing it in a directory
@@ -134,3 +139,33 @@ def custom_encoder(obj):
     if isinstance(obj, np.ndarray):
         return obj.tolist()
     raise TypeError("Type not serializable")
+
+################################################################################################################################################
+
+# Find closest date relative to current date, based off of the iteration list (see main.py for more info)
+def last_iter(file_name, current_date):
+
+    # Read formatted dates from the file
+    formatted_dates = []
+
+    with open(file_path, "r") as file:
+        for line in file:
+            formatted_dates.append(line.strip())
+
+    # Current date in the same format
+    current_date = formatted_date
+
+    # Function to convert formatted date to datetime object for comparison
+    def convert_to_datetime(date_str):
+        # Format of dates, see run_Prod_Analysis.sh
+        date_format = "H%MM%SS_%Y%B%d"
+        return datetime.strptime(date_str, date_format)
+
+    # Find the closest date
+    closest_date = min(formatted_dates, key=lambda date: abs((convert_to_datetime(date) - convert_to_datetime(current_date)).total_seconds()))
+
+    return closest_date
+    
+
+
+################################################################################################################################################

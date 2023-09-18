@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 20:57:01 trottar"
+# Time-stamp: "2023-09-17 21:12:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -545,7 +545,7 @@ if EPSSET == "high":
             if os.path.exists(f_lowe):
                 output_file_lst.append(f_lowe)
     
-    f_path = "{}/{}_{}_{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
     if os.path.exists(f_path):
         # If it exists, update it with the string
