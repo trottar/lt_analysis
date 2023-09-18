@@ -7,7 +7,6 @@
 	
 	real pi,mtar_gev,q2_gev
 	real my_limit
-	integer q2_set
 	parameter (pi=3.14159)
 	parameter (mtar_gev=0.93827231)
 
@@ -15,7 +14,8 @@
 	
 **********************************************	
 *	Read in arguments of parameters and Q2
-	real :: q2_set, params(12)
+	integer :: q2_set
+	real :: params(12)
 	integer :: i, argc
 	character(len=20) :: arg
 

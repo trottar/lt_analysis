@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 01:29:22 trottar"
+# Time-stamp: "2023-09-18 01:37:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,7 +105,7 @@ def iter_weight(param_file, fort_param, inpDict):
     '''
 
     formatted_date  = inpDict["formatted_date"]
-    Q2 = inpDict["Q2"].replace("p",".")
+    Q2 = inpDict["Q2"].replace("p","")
     
     param_arr = []
     with open(param_file, 'r') as f:
