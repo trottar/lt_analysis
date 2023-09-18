@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 13:00:17 trottar"
+# Time-stamp: "2023-09-18 13:02:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,10 +49,16 @@ import math
 
 import math
 
-def iterWeight(q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params):
+def iterWeight(arg_str):
     # Define constants
     pi = 3.14159
     mtar_gev = 0.93827231
+
+    # Split and convert the input string into a list of floats
+    args = list(map(float, arg_str.split()))
+
+    # Extract individual values from the list
+    q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params = args
 
     # Convert units
     q2_gev = q2_set / 1e6
@@ -165,7 +171,7 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
           # Print the output
           #print(stdout,"\n",stderr)
 
-          stdout = iterWeight(float(Q2), float(evt.Q2), float(evt.W), float(evt.t), float(evt.epsilon), float(evt.thetapq), float(evt.phipq), float(evt.sigcm), float(evt.Weight),' '.join(param_arr))
+          stdout = iterWeight(inp_fort_param)
           
           # Set the value of iweight
           iweight[0] = float(stdout)
