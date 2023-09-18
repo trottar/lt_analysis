@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 12:29:54 trottar"
+# Time-stamp: "2023-09-18 12:32:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,6 +130,10 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
     Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
 
+    # Associate a variable with the branch
+    iweight = array('f', [0.0])  # Assuming iweight is a float
+    Weight_SIMC.SetAddress(iweight)
+
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
 
@@ -167,9 +171,10 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
           # Print the output
           #print(stdout,"\n",stderr)
 
-          iweight = float(stdout)
-          
-          Weight_SIMC.SetAddress(iweight)
+          # Set the value of iweight
+          iweight[0] = float(stdout)
+    
+          # Fill the branch
           Weight_SIMC.Fill()
 
     TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
