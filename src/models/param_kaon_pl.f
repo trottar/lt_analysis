@@ -144,6 +144,11 @@ c	print *, "p12 =", p12
 
 	wtn = wt_sim*sig/sigcm_sim
 
+        if (wtn.gt.0.0) then
+          continue
+        else
+          wtn=0.
+        endif	
 
 	print *, "", wtn
 	
