@@ -123,18 +123,18 @@
 	ft=t_gev/(abs(t_gev)+0.139570**2)**2
 
 	sigl=(p1+p2*log(q2_gev))
-     *       *exp((p3+p4*log(q2_gev))*(abs(t_gev)-0.2))
+     &       *exp((p3+p4*log(q2_gev))*(abs(t_gev)-0.2))
 	sigt=p5+p6*log(q2_gev)
-     *       +(p7+p8*log(q2_gev))*ftav
+     &       +(p7+p8*log(q2_gev))*ftav
 
-	siglt=(p9*exp(p1)*abs(t_gev))
-     *       +p1)/abs(t_gev))*sin(thetacm_sim)
-	sigtt=(p1)*q2_gev*exp(-q2_gev))*ft*sin(thetacm_sim)**2
+	siglt=(p9*exp(p10*abs(t_gev))
+     &       +p11/abs(t_gev))*sin(thetacm_sim)
+	sigtt=(p12*q2_gev*exp(-q2_gev))*ft*sin(thetacm_sim)**2
 
 	tav=(-0.178+0.315*log(q2_gev))*q2_gev
 
 	sig219=(sigt+eps_sim*sigl+eps_sim*cos(2.*phicm_sim)*sigtt
-     *         +sqrt(2.0*eps_sim*(1.+eps_sim))*cos(phicm_sim)*siglt)/1.d0
+     &         +sqrt(2.0*eps_sim*(1.+eps_sim))*cos(phicm_sim)*siglt)/1.d0
 	
 	wfactor=1.D0/(s_gev-mtar_gev**2)**2
 	sig=sig219*wfactor
