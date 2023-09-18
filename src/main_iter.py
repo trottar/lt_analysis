@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 12:18:10 trottar"
+# Time-stamp: "2023-09-18 12:20:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -188,6 +188,8 @@ from compare_simc_iter import compare_simc
 # ***Moved up in procedure vs main.py since required for weight iteration
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
 create_dir(new_dir)
+# ***Also must create new root directory in iter directory***
+create_dir(new_dir+"/root")
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
