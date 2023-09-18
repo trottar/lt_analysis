@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 23:34:14 trottar"
+# Time-stamp: "2023-09-17 23:40:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -203,8 +203,7 @@ def get_histogram(file_name, directory_name, histogram_name):
         return None
 
     # Check the number of entries in the histogram
-    num_entries = histogram.GetEntries()
-    print("Number of entries in the histogram:", num_entries)  # Debug statement
+    print("Number of entries in the {} histogram: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
     
     # Clone the histogram to avoid ownership issues
     cloned_histogram = histogram.Clone()
@@ -213,7 +212,8 @@ def get_histogram(file_name, directory_name, histogram_name):
     #root_file.Close()
 
     # Check the number of entries in the cloned_histogram
-    num_entries = cloned_histogram.GetEntries()
-    print("Number of entries in the cloned_histogram:", num_entries)  # Debug statement
+    print("Number of entries in the {} cloned_histogram: {}".format(cloned_histogram.GetName(),cloned_histogram.GetEntries()))  # Debug statement
     
     return cloned_histogram
+
+################################################################################################################################################
