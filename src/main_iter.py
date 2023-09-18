@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 13:25:12 trottar"
+# Time-stamp: "2023-09-18 13:42:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -213,7 +213,7 @@ for hist in histlist:
         # Make sure new simc root file exists
         if os.path.exists(new_simc_root):
             # Function to calculation new weight and apply it to simc root file 
-            iter_weight(old_param_file, prev_iter_dir, new_simc_root, inpDict, hist["phi_setting"])
+            iter_weight(old_param_file, old_py_param, new_simc_root, inpDict, hist["phi_setting"])
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
             print("ERROR: {} not properly copied to {}".format(old_simc_root, new_simc_root))
