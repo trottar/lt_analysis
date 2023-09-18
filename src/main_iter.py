@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 21:47:42 trottar"
+# Time-stamp: "2023-09-17 21:50:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,18 +66,6 @@ elif int(POL) == -1:
 else:
     print("ERROR: Invalid polarity...must be +1 or -1")
     sys.exit(2)
-
-inpDict = {
-    "kinematics" : kinematics,
-    "W" : W,
-    "Q2" : Q2,
-    "EPSVAL" : EPSVAL,
-    "ParticleType" : ParticleType,
-    "EPSSET" : EPSSET,
-    "POL" : POL,
-    "OutFilename" : OutFilename,
-    "formatted_date" : formatted_date,
-}
 
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
