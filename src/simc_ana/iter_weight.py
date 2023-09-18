@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 13:47:22 trottar"
+# Time-stamp: "2023-09-18 13:50:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,10 +63,11 @@ def iter_weight(param_file, prev_iter_dir, simc_root, inpDict, phi_setting):
     
     sys.path.insert(0, prev_iter_dir)
 
-    # Use importlib to import the module and get the function
-    module = importlib.import_module("param_{}_{}.py".format(ParticleType, pol_str))
-    function = getattr(module, "iterWeight")
-
+     try:
+         import_module = __import__(os.path.splitext("param_{}_{}.py".format(ParticleType, pol_str))[0])
+         iterWeight = import_module.iterWeight
+     except ImportError as e:
+         print(f"Error importing {script_name}: {e}")
     
     # Define diamond cut parameters
     a1 = inpDict["a1"]
