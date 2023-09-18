@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:30:31 trottar"
+# Time-stamp: "2023-09-18 02:35:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -540,6 +540,11 @@ if EPSSET == "high":
     
     print("\n\n")
 
+    # Grab simc root file
+    for hist in histlist:
+        f_simc = OUTPATH+"/Prod_Coin_{}.root".format(kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
+        output_file_lst.append(f_simc)
+        
     # Grab low eps versions as well
     for f in output_file_lst:
         if OutFilename in f:
