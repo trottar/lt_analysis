@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:39:40 trottar"
+# Time-stamp: "2023-09-18 19:55:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,6 +106,37 @@ def is_hist(obj):
 # Function to check if an object is of a ROOT type
 def is_root_obj(obj):
     return isinstance(obj, (ROOT.TH1D, ROOT.TH2D, ROOT.TGraphErrors, ROOT.TGraphPolar, ROOT.TFile, ROOT.TMultiGraph))
+
+################################################################################################################################################
+
+# Save histograms to root file
+def hist_to_root(hist, file_name, directory_name):
+    # Check if the ROOT file already exists
+    root_file = ROOT.TFile.Open(file_name, "UPDATE")
+
+    # Split the directory names
+    directories = directory_name.split('/')
+
+    # Create or navigate through the nested directories
+    current_dir = root_file    
+    for directory in directories:
+        # Check if the directory exists
+        dir_exists = bool(current_dir.GetDirectory(directory))
+        if not dir_exists:
+            current_dir.mkdir(directory)
+        current_dir.cd(directory)
+        current_dir = ROOT.gDirectory  # Update the current directory
+
+    # Check if the histogram already exists in the file
+    existing_hist = current_dir.Get(hist.GetName())
+    if existing_hist:
+        current_dir.Delete(hist.GetName() + ";*")  # Delete existing histogram
+        
+    #print("Saving {} to {}".format(hist.GetName(), file_name))
+        
+    # Clone the histogram since we're storing it in a directory
+    cloned_hist = hist.Clone()
+    cloned_hist.Write()
 
 ################################################################################################################################################
 
