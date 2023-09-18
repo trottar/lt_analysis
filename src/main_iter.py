@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 12:20:30 trottar"
+# Time-stamp: "2023-09-18 12:23:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -203,11 +203,11 @@ for hist in histlist:
     new_simc_root = old_simc_root.replace(closest_date, formatted_date)
     # Make sure old simc root file exists
     if os.path.exists(old_simc_root):
+        # Copy to new iteration so and then edit the weight
+        print("Copying {} to {}".format(old_simc_root, new_simc_root))
+        shutil.copy(old_simc_root,new_simc_root)
         # Make sure new simc root file exists
         if os.path.exists(new_simc_root):
-            # Copy to new iteration so and then edit the weight
-            print("Copying {} to {}".format(old_simc_root, new_simc_root))
-            shutil.copy(old_simc_root,new_simc_root)
             # Function to calculation new weight and apply it to simc root file 
             iter_weight(old_param_file, old_fort_param, new_simc_root, inpDict, hist["phi_setting"])
             hist.update(compare_simc(new_simc_root, hist, inpDict))
