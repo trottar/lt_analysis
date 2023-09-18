@@ -6,6 +6,7 @@
 	real :: q2_set, params(12)
 	integer :: i, argc
 	character(len=20) :: arg
+	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12
 
 	! Get the number of command line arguments
 	argc = COMMAND_ARGUMENT_COUNT()
@@ -26,9 +27,7 @@
 	   read(arg, *) params(i-1)
 	end do
 **********************************************
-
 	
-	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12	
 	real nsigl,nsigt,nsiglt,nsigtt,tmp
 	real nsig219,nsig,wtn
 	real ft,tav,ftav
