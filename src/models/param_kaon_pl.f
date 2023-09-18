@@ -1,4 +1,4 @@
-program iterWeight
+	program iterWeight
 	implicit none
 	
 	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12
@@ -62,4 +62,4 @@ program iterWeight
 !       Print the value of wtn
 	print *, "wtn =", wtn
 
-end program iterWeight
+	end program iterWeight
