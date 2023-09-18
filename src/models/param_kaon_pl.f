@@ -86,28 +86,29 @@
 	p11 = params(11)
 	p12 = params(12)
 
+c	DEBUGGING
 	! Print q2_set, p1 to p12 for verification
-	print *, "q2_set =", q2_set
-	print *, "q2_sim =", q2_sim
-	print *, "w_sim =", w_sim
-	print *, "t_sim =", t_sim
-	print *, "eps_sim =", eps_sim
-	print *, "thetacm_sim =", thetacm_sim
-	print *, "phicm_sim =", phicm_sim
-	print *, "sigcm_sim =", sigcm_sim
-	print *, "wt_sim =", wt_sim
-	print *, "p1 =", p1
-	print *, "p2 =", p2
-	print *, "p3 =", p3
-	print *, "p4 =", p4
-	print *, "p5 =", p5
-	print *, "p6 =", p6
-	print *, "p7 =", p7
-	print *, "p8 =", p8
-	print *, "p9 =", p9
-	print *, "p10 =", p10
-	print *, "p11 =", p11
-	print *, "p12 =", p12	
+c	print *, "q2_set =", q2_set
+c	print *, "q2_sim =", q2_sim
+c	print *, "w_sim =", w_sim
+c	print *, "t_sim =", t_sim
+c	print *, "eps_sim =", eps_sim
+c	print *, "thetacm_sim =", thetacm_sim
+c	print *, "phicm_sim =", phicm_sim
+c	print *, "sigcm_sim =", sigcm_sim
+c	print *, "wt_sim =", wt_sim
+c	print *, "p1 =", p1
+c	print *, "p2 =", p2
+c	print *, "p3 =", p3
+c	print *, "p4 =", p4
+c	print *, "p5 =", p5
+c	print *, "p6 =", p6
+c	print *, "p7 =", p7
+c	print *, "p8 =", p8
+c	print *, "p9 =", p9
+c	print *, "p10 =", p10
+c	print *, "p11 =", p11
+c	print *, "p12 =", p12	
 
 *       ALL THIS WORKS
 **********************************************
@@ -142,5 +143,7 @@
 	sig=sig/2./pi/1.d+06	!dsig/dtdphicm in microbarns/MeV**2/rad
 
 	wtn = wt_sim*sig/sigcm_sim
+	
+	print wtn
 	
 	end program iterWeight

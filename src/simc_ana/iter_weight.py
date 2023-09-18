@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 04:05:28 trottar"
+# Time-stamp: "2023-09-18 11:51:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,7 +165,7 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
 
           # Print the output
           print(stdout)
-          print(stderr)
+          #print(stderr)
     
     H_Weight_SIMC  = TH1D("H_Weight_SIMC","{} Weight".format(formatted_date), 500, 0, 1e-8)    
     
