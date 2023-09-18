@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 12:23:50 trottar"
+# Time-stamp: "2023-09-18 13:07:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,12 +200,15 @@ old_fort_param = '{}/param_{}_{}.f'.format(prev_iter_dir, ParticleType, pol_str)
 for hist in histlist:
     # SIMC file with weight from last iteration
     old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
+    old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
     new_simc_root = old_simc_root.replace(closest_date, formatted_date)
+    new_simc_hist = old_simc_hist.replace(closest_date, formatted_date)
     # Make sure old simc root file exists
     if os.path.exists(old_simc_root):
         # Copy to new iteration so and then edit the weight
         print("Copying {} to {}".format(old_simc_root, new_simc_root))
         shutil.copy(old_simc_root,new_simc_root)
+        shutil.copy(old_simc_hist,new_simc_hist)        
         # Make sure new simc root file exists
         if os.path.exists(new_simc_root):
             # Function to calculation new weight and apply it to simc root file 

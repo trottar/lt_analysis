@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 03:55:45 trottar"
+# Time-stamp: "2023-09-18 13:05:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -543,9 +543,12 @@ if EPSSET == "high":
     # Grab simc root file
     for hist in histlist:
         for eps in ["highe","lowe"]:
-            f_simc = OUTPATH+"/Prod_Coin_{}.root".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
-            if os.path.exists(f_simc):
-                output_file_lst.append(f_simc)
+            f_simc_root = OUTPATH+"/Prod_Coin_{}.root".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
+            f_simc_hist = OUTPATH+"/Prod_Coin_{}.hist".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
+            if os.path.exists(f_simc_root):
+                output_file_lst.append(f_simc_root)
+            if os.path.exists(f_simc_hist):
+                output_file_lst.append(f_simc_hist)                
         
     # Grab low eps versions as well
     for f in output_file_lst:
@@ -590,6 +593,11 @@ if EPSSET == "high":
                 f_new = f.replace(OUTPATH,new_dir+"/root")
                 print("Copying {} to {}".format(f,f_new))
                 shutil.copy(f, f_new)
+            if ".hist" in f:
+                create_dir(new_dir+"/root")
+                f_new = f.replace(OUTPATH,new_dir+"/root")
+                print("Copying {} to {}".format(f,f_new))
+                shutil.copy(f, f_new)                
         elif "{}/".format(ParticleType) in f:
             f_arr = f.split("/")
             f_tmp = f_arr.pop()
