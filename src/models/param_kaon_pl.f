@@ -67,5 +67,4 @@
 	print *, "p11 =", p11
 	print *, "p12 =", p12	
 	
-
 	end program iterWeight

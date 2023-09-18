@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 01:37:00 trottar"
+# Time-stamp: "2023-09-18 01:48:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,7 +113,7 @@ def iter_weight(param_file, fort_param, inpDict):
             columns = line.split()
             param_arr.append(str(columns[0]))
 
-    inp_fort_param = ' '.join(param_arr)+' {}'.format(Q2)
+    inp_fort_param = '{} '.format(Q2)+' '.join(param_arr)
     print(inp_fort_param)
 
     # Get the standard output and standard error
