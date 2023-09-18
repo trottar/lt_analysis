@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:14:36 trottar"
+# Time-stamp: "2023-09-17 22:30:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -444,11 +444,13 @@ combineDict.update({"inpDict" : inpDict})
 tmp_lst = []
 for hist in histlist:
     print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
+    tmp_dict = {}
     for i, (key, val) in enumerate(hist.items()):
         # Progress bar
         Misc.progressBar(i, len(hist.items())-1,bar_length=25)
         if not is_root_obj(val):
-            tmp_lst.append({key : val})
+            tmp_dict[key] = val
+    tmp_lst.append(tmp_dict)
 combineDict.update({ "histlist" : tmp_lst})
 
 # Save combined dictionary to json file
