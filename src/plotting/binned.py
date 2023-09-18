@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 19:39:15 trottar"
+# Time-stamp: "2023-09-17 20:15:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -402,7 +402,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             multiDict["G_yieldvsphi_plt_{}".format(i)].GetYaxis().SetTitleOffset(1.5)
             multiDict["G_yieldvsphi_plt_{}".format(i)].GetXaxis().SetTitleOffset(1.5)
             multiDict["G_yieldvsphi_plt_{}".format(i)].GetXaxis().SetLabelSize(0.04)
-
+    
         l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_data,"Data")
         l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
         l_yieldvsphi_data_plt.Draw()
@@ -655,10 +655,6 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             i = simc_key_tuple[0] # t bin
             j = simc_key_tuple[1] # phi bin
             hist["H_totevts_SIMC_{}_{}".format(str(i+1), str(j+1))] = histbinDict["H_totevts_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))]
-
-        for i, val in enumerate(t_bins):            
-            hist["G_yieldvsphi_plt_{}".format(i)] = multiDict["G_yieldvsphi_plt_{}".format(i)]
-            hist["G_ratiovsphi_plt_{}".format(i)] = multiDict["G_ratiovsphi_plt_{}".format(i)]
 
         hist["G_yield_data_plt"] = G_yield_data_plt        
         hist["G_ratio"] = G_ratio

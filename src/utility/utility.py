@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 19:25:05 trottar"
+# Time-stamp: "2023-09-17 20:17:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,7 +98,7 @@ def match_to_bin(data):
 
 # Function to check if an object is of type TH1D or TH2D
 def is_root_obj(obj):
-    return isinstance(obj, (TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph))
+    return isinstance(obj, (TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine))
 
 ################################################################################################################################################
 
