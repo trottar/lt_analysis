@@ -12,13 +12,13 @@
 	
 **********************************************	
 *	Read in arguments of parameters and Q2
-	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12	
+	real*8 p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12	
 	integer :: q2_set
-	real :: params(12)
-	real :: q2_sim, w_sim, t_sim, eps_sim
-	real :: thetacm_sim, phicm_sim
-	real :: sigcm_sim
-	real :: wt_sim
+	real*8 :: params(12)
+	real*8 :: q2_sim, w_sim, t_sim, eps_sim
+	real*8 :: thetacm_sim, phicm_sim
+	real*8 :: sigcm_sim
+	real*8 :: wt_sim
 	integer :: i, argc
 	character(len=30) :: arg
 
@@ -112,7 +112,8 @@
 *       ALL THIS WORKS
 **********************************************
 	q2_gev=q2_set/1.d6
-	t_gev=t_sim/1.d6
+*	t_gev=t_sim/1.d6 * This is probably not required
+	t_gev=t_sim
 * 	W~sqrt(s), if Mp >> E_interaction
 	s = w_sim**2
 	s_gev=s/1.d6
