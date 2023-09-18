@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 14:26:02 trottar"
+# Time-stamp: "2023-09-18 14:29:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -94,12 +94,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     # Associate a variable with the branch
     iweight = array('f', [0.0])  # Assuming iweight is a float
-    Weight_SIMC.SetAddress(iweight)
 
+    # Create a new TBranch with the same name 'Weight'
+    NewWeightBranch = TBRANCH_SIMC.Branch("Weight", iweight, "Weight/F")
+    
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
 
-    print("\nGrabbing %s simc..." % phi_setting)
+    print("\nRecalculating weight for %s simc..." % phi_setting)
     #for i,evt in enumerate(TBRANCH_SIMC):
     for i,evt in enumerate(TBRANCH_SIMC):
 
@@ -131,7 +133,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           # Set the value of iweight
           iweight[0] = iterWeight(inp_param)
     
-          evt.Weight = iweight[0]
+          # Assign the value of iweight to the new 'Weight' branch
+          NewWeightBranch.Fill()
+          
+    # Remove the old 'Weight' branch
+    TBRANCH_SIMC.GetBranch("Weight").Reset()
 
     TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
     InFile_SIMC.Close()
