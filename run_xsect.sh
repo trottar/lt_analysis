@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-07 17:59:16 trottar"
+# Time-stamp: "2023-09-17 21:58:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -181,8 +181,3 @@ OutUnsepxsectsFilename="unsep_xsects_${KIN}"
 
 cd "${LTANAPATH}"
 #evince "OUTPUT/Analysis/${ANATYPE}LT/${OutUnsepxsectsFilename}.pdf"
-
-echo
-echo
-echo
-echo "Script Complete!"

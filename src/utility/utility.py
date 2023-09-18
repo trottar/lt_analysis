@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 21:29:58 trottar"
+# Time-stamp: "2023-09-17 21:59:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,9 +151,6 @@ def last_iter(file_name, current_date):
     with open(file_name, "r") as file:
         for line in file:
             formatted_dates.append(line.strip())
-
-    # Current date in the same format
-    current_date = formatted_date
 
     # Function to convert formatted date to datetime object for comparison
     def convert_to_datetime(date_str):
