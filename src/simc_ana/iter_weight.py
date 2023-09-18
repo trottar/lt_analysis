@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 15:56:34 trottar"
+# Time-stamp: "2023-09-18 15:57:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,7 +99,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
 
     # Get the Weight branch from the new tree
-    new_Weight_SIMC = New_TBRANCH_SIMC.GetBranch("Weight")
+    new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
     
     # Create a new branch with the updated values
     iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
