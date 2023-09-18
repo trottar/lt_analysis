@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 21:50:41 trottar"
+# Time-stamp: "2023-09-17 22:17:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,6 +29,7 @@ from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphError
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import csv
+import json
 import shutil
 
 ##################################################################################################################################################
@@ -87,7 +88,7 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
 
-foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
+foutroot = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
 fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
 foutjson  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".json"
 outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
@@ -113,6 +114,19 @@ f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
 print("closest_date",closest_date)
 
+# Save this as the directory to grab further information
+prev_iter_dir = "{}/{}/{}/{}".format(CACHEPATH,USER,ParticleType.lower(),closest_date)
+
+prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
+prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
+
+# Redefine dictionaries from old iteratio information
+with open(prev_iter_json, 'r') as f:
+    prev_iter_combineDict = json.load(f)
+
+key_str = ', '.join(prev_iter_combineDict.keys())
+print("keys: {}".format(key_str))
+    
 for phiset in phisetlist:
     output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
         
@@ -212,50 +226,50 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
-if not os.path.exists(foutname):
+if not os.path.exists(foutroot):
     for hist in histlist:
-        print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutname))
+        print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
         # Loop through all keys,values of dictionary
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if is_root_obj(val):
                 if "ratio" in val.GetName():
-                    hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                    hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                 if "G_" in val.GetName():
-                    hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                    
+                    hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                    
                 if "DATA" in val.GetName():
                     if "yield" in val.GetName():
-                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
+                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
                     elif "bin" in val.GetName():
-                        hist_to_root(val, foutname, "{}/bins".format(hist["phi_setting"]))
+                        hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
                     elif "totevts" in val.GetName():
-                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                     else:
-                        hist_to_root(val, foutname, "{}/data".format(hist["phi_setting"]))
+                        hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
                 if "SIMC" in val.GetName():
                     if "yield" in val.GetName():
-                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))                        
+                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
                     elif "bin" in val.GetName():
-                        hist_to_root(val, foutname, "{}/bins".format(hist["phi_setting"]))
+                        hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
                     elif "totevts" in val.GetName():
-                        hist_to_root(val, foutname, "{}/yield".format(hist["phi_setting"]))
+                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                     else:
-                        hist_to_root(val, foutname, "{}/simc".format(hist["phi_setting"]))
+                        hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
                 if "DUMMY" in val.GetName():
-                    hist_to_root(val, foutname, "{}/dummy".format(hist["phi_setting"]))
+                    hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
 
     # Open the ROOT file
-    root_file = TFile.Open(foutname, "UPDATE")
+    root_file = TFile.Open(foutroot, "UPDATE")
 
     # Check if the file was opened successfully
     if root_file.IsOpen():
         # Close the file
         root_file.Close()
-        print("\nThe root file {} has been successfully closed.".format(foutname))
+        print("\nThe root file {} has been successfully closed.".format(foutroot))
     else:
-        print("\nError: Unable to close the root file {}.".format(foutname))
-output_file_lst.append(foutname)
+        print("\nError: Unable to close the root file {}.".format(foutroot))
+output_file_lst.append(foutroot)
 
 # Create combined dictionary of all non-histogram information        
 combineDict = {}

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:06:23 trottar"
+# Time-stamp: "2023-09-17 22:07:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -162,8 +162,6 @@ def last_iter(file_name, current_date):
     # Find the closest date
     closest_date = min(formatted_dates, key=lambda date: abs((convert_to_datetime(date) - convert_to_datetime(current_date)).total_seconds()))
 
-    return closest_date
-    
-
+    return closest_date    
 
 ################################################################################################################################################
