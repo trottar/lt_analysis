@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 01:17:41 trottar"
+# Time-stamp: "2023-09-18 01:23:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,6 +14,12 @@ import ROOT
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 import array
 import sys, math, os, subprocess
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import run_fortran
 
 ################################################################################################################################################
 '''
@@ -105,15 +111,9 @@ def iter_weight(param_file, fort_param, formatted_date):
 
     inp_fort_param = ' '.join(param_arr)
     print(inp_fort_param)
-        
-    # Define the command to compile and run the Fortran script with input
-    command = 'gfortran {} -o output && ./output {}'.format(fort_param, inp_fort_param)
-
-    # Execute the command and capture the output
-    completed_process = subprocess.Popen(command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Get the standard output and standard error
-    stdout, stderr = completed_process.communicate()
+    stdout, stderr = run_fortran(fort_param, inp_fort_param)
 
     # Print the output
     print(stdout)

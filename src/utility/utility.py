@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 00:10:35 trottar"
+# Time-stamp: "2023-09-18 01:22:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -213,5 +213,19 @@ def get_histogram(root_file, directory_name, histogram_name):
     print("Number of entries in the {} cloned_histogram: {}".format(cloned_histogram.GetName(),cloned_histogram.GetEntries()))  # Debug statement
 
     return cloned_histogram
+
+################################################################################################################################################
+
+# Run fortran script from python with variable argument
+def run_fortran(fort_script, inp_val=""):
+
+    # Define the command to compile and run the Fortran script with input
+    command = 'gfortran {} -o output && ./output {}'.format(fort_script, inp_val)
+
+    # Execute the command and capture the output
+    completed_process = subprocess.Popen(command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Return the standard output and standard error
+    return completed_process.communicate()
 
 ################################################################################################################################################
