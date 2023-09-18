@@ -1,37 +1,33 @@
-	function wtn(q2_set)
-	include ?
-
+program iterWeight
+	implicit none
+	
 	real p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12
+	real, dimension(12), intent(in) :: params
 	real nsigl,nsigt,nsiglt,nsigtt,tmp
 	real nsig219,nsig,wtn
 	real ft,tav,ftav
-
+	
 	real pi,mtar_gev,q2_gev
 	real my_limit
 	integer q2_set
 	parameter (pi=3.14159)
 	parameter (mtar_gev=0.93827231)
 
-	if (abs(q2_set-245).lt.1) then
-	   p1=  0.25961E+02 
-	   p2= -0.10000E+02 
-	   p3= -0.15838E+02 
-	   p4=  0.00000E+00 
-	   p5=  0.46859E+02 
-	   p6= -0.30000E+02 
-	   p7= -0.33572E+01 
-	   p8=  0.00000E+00 
-	   p9=  0.10000E+04 
-	   p10=-0.28000E+02 
-	   p11= 0.35000E+01 
-	   p12=-0.67276E+02 
-	else
-	   write(*,*)'wtn: q2 error ',q2_set
-	endif
-
-***
-* Parameterization based upon Fpi-1 pi+ IT25, 12.04.18
-* Revised for IT21, 12.11.06
+	p1 = params(1)
+	p2 = params(2)
+	p3 = params(3)
+	p4 = params(4)
+	p5 = params(5)
+	p6 = params(6)
+	p7 = params(7)
+	p8 = params(8)
+	p9 = params(9)
+	p10 = params(10)
+	p11 = params(11)
+	p12 = params(12)
+***     
+*       Parameterization based upon Fpi-1 pi+ IT25, 12.04.18
+*       Revised for IT21, 12.11.06
 *        tav=(0.0735+0.028*log(Q2i))*Q2i
 	q2_gev=float(q2_set)/100.
         tav=(0.0735+0.028*log(q2_gev))*q2_gev
@@ -63,5 +59,7 @@
           wtn=0.
         endif
 
-        return
-	end
+!       Print the value of wtn
+	print *, "wtn =", wtn
+
+end program iterWeight
