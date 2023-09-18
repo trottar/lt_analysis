@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 16:28:34 trottar"
+# Time-stamp: "2023-09-18 19:14:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root, last_iter, get_histogram
+from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root, last_iter, get_histogram, hist_in_dir
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -126,6 +126,11 @@ with open(prev_iter_json, 'r') as f:
 
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
+
+root_file = ROOT.TFile.Open(prev_iter_root, "READ")
+# Grab weight from previous iteration
+for hist in histlist:
+    hist.update(hist_in_dir(root_file, "{}/data".format(hist["phi_setting"])))
 
 # t/phi bins are the same for all settings
 # so arbitrarily grabbing from first setting of list
@@ -233,7 +238,7 @@ for hist in histlist:
             
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
-    
+
 # Variable defines string of cuts applied during analysis
 cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict)
 

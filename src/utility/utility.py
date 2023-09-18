@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 01:22:44 trottar"
+# Time-stamp: "2023-09-18 19:14:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -213,6 +213,56 @@ def get_histogram(root_file, directory_name, histogram_name):
     print("Number of entries in the {} cloned_histogram: {}".format(cloned_histogram.GetName(),cloned_histogram.GetEntries()))  # Debug statement
 
     return cloned_histogram
+
+################################################################################################################################################
+
+# Save histograms to root file
+def hist_in_dir(root_file, directory_name):
+
+    histDict = {}
+    
+    if not root_file:
+        print("Error: Unable to open file {}.".format(root_file))
+        return None
+
+    # Split the directory names
+    directories = directory_name.split('/')
+
+    # Initialize current_dir to the root of the file
+    current_dir = root_file
+    
+    for directory in directories:
+        print("Checking directory:", directory)  # Debug statement
+        # Check if the directory exists
+        dir_exists = bool(current_dir.GetDirectory(directory))
+        if not dir_exists:
+            print("Error: Unable to find directory {}.".format(directory))
+            root_file.Close()
+            return None
+        current_dir.cd(directory)
+        current_dir = ROOT.gDirectory
+        histograms_in_dir = current_dir.GetListOfKeys()
+        for histogram in histograms_in_dir:
+            print("From {}, adding: ".format(directory, histogram.GetName()))  # Debug statement
+
+            # Get the histogram
+            #histogram = current_dir.Get(histogram_name)
+
+            # Check the number of entries in the histogram
+            print("Number of entries in {}: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
+
+            # Clone the histogram to avoid ownership issues
+            cloned_histogram = histogram.Clone()
+
+            histDict["".format(histogram.GetName())] = cloned_histogram
+
+    # Close the ROOT file
+    #root_file.Close()
+
+    # Check the number of entries in the cloned_histogram
+    print("Number of entries in the {} cloned_histogram: {}".format(cloned_histogram.GetName(),cloned_histogram.GetEntries()))  # Debug statement
+
+    return histDict
 
 ################################################################################################################################################
 
