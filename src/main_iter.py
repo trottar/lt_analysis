@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 03:59:33 trottar"
+# Time-stamp: "2023-09-18 12:08:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,8 +192,13 @@ old_fort_param = '{}/param_{}_{}.f'.format(prev_iter_dir, ParticleType, pol_str)
 for hist in histlist:
     # SIMC file with weight from last iteration
     old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
-    iter_weight = iter_weight(old_param_file, old_fort_param, old_simc_root, inpDict, hist["phi_setting"])
-    hist.update(compare_simc(iter_weight, hist, inpDict))
+    new_simc_root = old_simc_root.replace(closest_date, formatted_date)
+    # Copy to new iteration so and then edit the weight
+    print("Copying {} to {}".format(old_simc_root, new_simc_root))
+    shutil.copy(old_simc_root,new_simc_root)
+    # Function to calculation new weight and apply it to simc root file 
+    iter_weight(old_param_file, old_fort_param, new_simc_root, inpDict, hist["phi_setting"])
+    hist.update(compare_simc(new_simc_root, hist, inpDict))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
@@ -359,7 +364,7 @@ if EPSSET == "high":
     print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
     shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
     print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_param, LTANAPATH+"/src/"+fort_param_active))    
-    shutil.copy(LTANAPATH+"/src/"+fort_param, LTANAPATH+"/src/"+fort_param_active)    
+    shutil.copy(LTANAPATH+"/src/"+fort_param, LTANAPATH+"/src/"+fort_param_active)
 
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters

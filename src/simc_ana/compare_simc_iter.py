@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 02:44:44 trottar"
+# Time-stamp: "2023-09-18 12:10:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def compare_simc(inp_weight, hist, inpDict):
+def compare_simc(rootFileSimc, hist, inpDict):
 
     phi_setting = hist["phi_setting"]
     
@@ -104,12 +104,11 @@ def compare_simc(inp_weight, hist, inpDict):
     # Define simc root file trees of interest
 
     # Names don't match so need to do some string rearrangement
-    InSIMCFilename = "Prod_Coin_{}.root".format(kinematics[0]+phi_setting.lower()+"_"+kinematics[1])
-    rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
         return histDict
 
+    # Opening new simc root file with new iteration of weight
     InFile_SIMC = TFile.Open(rootFileSimc, "OPEN")
 
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
@@ -135,7 +134,7 @@ def compare_simc(inp_weight, hist, inpDict):
     ################################################################################################################################################
     # Plot definitions
 
-    H_Weight_SIMC = inp_weight
+    H_Weight_SIMC = TH1D("H_Weight_SIMC", "Simc Weight", 500, 0, 1e-8)
     H_hsdelta_SIMC  = TH1D("H_hsdelta_SIMC","HMS Delta", 500, -20.0, 20.0)
     H_hsxptar_SIMC  = TH1D("H_hsxptar_SIMC","HMS xptar", 500, -0.1, 0.1)
     H_hsyptar_SIMC  = TH1D("H_hsyptar_SIMC","HMS yptar", 500, -0.1, 0.1)
@@ -193,37 +192,36 @@ def compare_simc(inp_weight, hist, inpDict):
       #Fill SIMC events
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
-          # Apply new iterated weight to SIMC
-          weight = H_Weight_SIMC.GetBinContent(i+1)  # i+1 because histogram bin numbering starts from 1
-          
-          H_ssxfp_SIMC.Fill(evt.ssxfp, weight)
-          H_ssyfp_SIMC.Fill(evt.ssyfp, weight)
-          H_ssxpfp_SIMC.Fill(evt.ssxpfp, weight)
-          H_ssypfp_SIMC.Fill(evt.ssypfp, weight)
-          H_hsxfp_SIMC.Fill(evt.hsxfp, weight)
-          H_hsyfp_SIMC.Fill(evt.hsyfp, weight)
-          H_hsxpfp_SIMC.Fill(evt.hsxpfp, weight)
-          H_hsypfp_SIMC.Fill(evt.hsypfp, weight)
-          H_ssdelta_SIMC.Fill(evt.ssdelta, weight) 
-          H_hsdelta_SIMC.Fill(evt.hsdelta, weight)	
-          H_ssxptar_SIMC.Fill(evt.ssxptar, weight)
-          H_ssyptar_SIMC.Fill(evt.ssyptar, weight)
-          H_hsxptar_SIMC.Fill(evt.hsxptar, weight)	
-          H_hsyptar_SIMC.Fill(evt.hsyptar, weight)
+          H_Weight_SIMC.Fill(evt.Weight)
 
-          H_ph_q_SIMC.Fill(evt.phipq, weight)
-          H_th_q_SIMC.Fill(evt.thetapq, weight)
+          H_ssxfp_SIMC.Fill(evt.ssxfp, evt.Weight)
+          H_ssyfp_SIMC.Fill(evt.ssyfp, evt.Weight)
+          H_ssxpfp_SIMC.Fill(evt.ssxpfp, evt.Weight)
+          H_ssypfp_SIMC.Fill(evt.ssypfp, evt.Weight)
+          H_hsxfp_SIMC.Fill(evt.hsxfp, evt.Weight)
+          H_hsyfp_SIMC.Fill(evt.hsyfp, evt.Weight)
+          H_hsxpfp_SIMC.Fill(evt.hsxpfp, evt.Weight)
+          H_hsypfp_SIMC.Fill(evt.hsypfp, evt.Weight)
+          H_ssdelta_SIMC.Fill(evt.ssdelta, evt.Weight) 
+          H_hsdelta_SIMC.Fill(evt.hsdelta, evt.Weight)	
+          H_ssxptar_SIMC.Fill(evt.ssxptar, evt.Weight)
+          H_ssyptar_SIMC.Fill(evt.ssyptar, evt.Weight)
+          H_hsxptar_SIMC.Fill(evt.hsxptar, evt.Weight)	
+          H_hsyptar_SIMC.Fill(evt.hsyptar, evt.Weight)
 
-          H_pmiss_SIMC.Fill(evt.Pm, weight)	
-          H_emiss_SIMC.Fill(evt.Em, weight)	
-          #H_pmx_SIMC.Fill(evt.Pmx, weight)
-          #H_pmy_SIMC.Fill(evt.Pmy, weight)
-          #H_pmz_SIMC.Fill(evt.Pmz, weight)
-          H_Q2_SIMC.Fill(evt.Q2, weight)
-          H_W_SIMC.Fill(evt.W, weight)
-          H_t_SIMC.Fill(evt.t, weight)
-          H_epsilon_SIMC.Fill(evt.epsilon, weight)
-          H_MM_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), weight)
+          H_ph_q_SIMC.Fill(evt.phipq, evt.Weight)
+          H_th_q_SIMC.Fill(evt.thetapq, evt.Weight)
+
+          H_pmiss_SIMC.Fill(evt.Pm, evt.Weight)	
+          H_emiss_SIMC.Fill(evt.Em, evt.Weight)	
+          #H_pmx_SIMC.Fill(evt.Pmx, evt.Weight)
+          #H_pmy_SIMC.Fill(evt.Pmy, evt.Weight)
+          #H_pmz_SIMC.Fill(evt.Pmz, evt.Weight)
+          H_Q2_SIMC.Fill(evt.Q2, evt.Weight)
+          H_W_SIMC.Fill(evt.W, evt.Weight)
+          H_t_SIMC.Fill(evt.t, evt.Weight)
+          H_epsilon_SIMC.Fill(evt.epsilon, evt.Weight)
+          H_MM_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)          
 
     ################################################################################################################################################
     # Normalize simc by normfactor/nevents
