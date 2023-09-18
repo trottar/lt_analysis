@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 00:11:31 trottar"
+# Time-stamp: "2023-09-18 00:23:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,6 +127,11 @@ with open(prev_iter_json, 'r') as f:
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
 
+# t/phi bins are the same for all settings
+# so arbitrarily grabbing from first setting of list
+t_bins = histlist[0]["t_bins"]
+phi_bins = histlist[0]["phi_bins"]
+
 phisetlist = []
 for hist in histlist:
     phisetlist.append(hist["phi_setting"])
@@ -136,6 +141,15 @@ for phiset in phisetlist:
         
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+
+'''
+EXAMPLE: How to get histograms from previous iteration
+
+# Open the ROOT file, must pass open root file so object exists here and in function
+root_file = ROOT.TFile.Open(prev_iter_root, "READ")
+# Grab weight from previous iteration
+iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
+'''
     
 ##############################
 # Step 5 of the lt_analysis: #
@@ -166,16 +180,16 @@ for hist in histlist:
 
 print("\n\n")
 
-sys.path.append("simc_ana")    
+sys.path.append("simc_ana")
+from iter_weight import iter_weight
 from compare_simc_iter import compare_simc
 
+# ***Parameter file from last iteration!***
+# ***These old parameters are needed for this iteration. See README for more info on procedure!***
+old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    # Open the ROOT file, must pass open root file so object exists here and in function
-    root_file = ROOT.TFile.Open(prev_iter_root, "READ")
-    # Grab weight from previous iteration
-    iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!",iter_weight.GetEntries())
+    iter_weight = iter_weight(old_param_file)
     hist.update(compare_simc(iter_weight, hist, inpDict))
     
 sys.path.append("plotting")
@@ -295,6 +309,7 @@ output_file_lst.append(foutjson)
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
+# Redefinition from above, but should be the same! This is just to stay consistent with main.py
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))

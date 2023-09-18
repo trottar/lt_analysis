@@ -3,17 +3,40 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-14 21:05:08 trottar"
+# Time-stamp: "2023-09-18 00:29:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
+################################################################################################################################################
+'''
+ltsep package import and pathing definitions
+'''
 
-import math
+# Import package for cuts
+from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
 
-def wtn(q2_set):
+lt=Root(os.path.realpath(__file__),"Plot_Prod")
+
+# Add this to all files for more dynamic pathing
+USER=lt.USER # Grab user info for file finding
+HOST=lt.HOST
+REPLAYPATH=lt.REPLAYPATH
+UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH
+ANATYPE=lt.ANATYPE
+OUTPATH=lt.OUTPATH
+
+################################################################################################################################################
+
+def iter_weight(param_file):
+    '''
+    # Fortran script converted to python
+    
     # Define constants
     pi = 3.14159
     mtar_gev = 0.93827231
@@ -68,3 +91,13 @@ def wtn(q2_set):
         wtn = 0.0
 
     return
+    '''
+
+    paramDict = {}
+    with open(param_file, 'r') as f:
+        for i, line in enumerate(f):
+            columns = line.split()
+            paramDict["p{}".format(i)] = str(columns)
+
+    for key,val in enumerate(paramDict.items()):
+        print("{} = {}".format(key,val))
