@@ -141,6 +141,6 @@
 	sig=sig219*wfactor
 	sig=sig/2./pi/1.d+06	!dsig/dtdphicm in microbarns/MeV**2/rad
 
-	wtn = wtn_sim*sig/sigcm_sim
+	wtn = wt_sim*sig/sigcm_sim
 	
 	end program iterWeight
