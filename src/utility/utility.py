@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 20:24:23 trottar"
+# Time-stamp: "2023-09-17 20:27:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,11 +98,7 @@ def match_to_bin(data):
 
 # Function to check if an object is of a ROOT type
 def is_root_obj(obj):
-    root_types = (ROOT.TCanvas, ROOT.TH1D, ROOT.TH2D, ROOT.gStyle, ROOT.gPad, ROOT.TPaveText,
-                  ROOT.TArc, ROOT.TGraphErrors, ROOT.TGraphPolar, ROOT.TFile, ROOT.TLegend,
-                  ROOT.TMultiGraph, ROOT.TLine)
-
-    return any(isinstance(obj, t) for t in root_types)
+    return isinstance(obj, (ROOT.TH1D, ROOT.TH2D, ROOT.TGraphErrors, ROOT.TGraphPolar, ROOT.TFile, ROOT.TMultiGraph))
 
 ################################################################################################################################################
 
