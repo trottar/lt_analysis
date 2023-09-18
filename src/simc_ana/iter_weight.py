@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 15:46:26 trottar"
+# Time-stamp: "2023-09-18 15:47:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,9 +127,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+ \
                            ' '.join(param_arr)
           #print("-"*25,"\n",i,"\n",inp_param)
+
+          iweight = iterWeight(inp_param)*1e6
           
           # Set the value of iweight
-          Weight_SIMC.SetAddress(ROOT.AddressOf(iterWeight(inp_param)*1e6))
+          Weight_SIMC.SetAddress(ROOT.AddressOf(iweight))
     
           TBRANCH_SIMC.Fill()
           
