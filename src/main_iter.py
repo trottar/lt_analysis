@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 21:27:25 trottar"
+# Time-stamp: "2023-09-17 21:47:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,8 +40,8 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root,
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=34:
-    print("!!!!! ERROR !!!!!\n Expected 34 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=9:
+    print("!!!!! ERROR !!!!!\n Expected 9 arguments\n Usage is with - KIN W Q2 EPSVAL ParticleType EPSSET POL OutFilename formatted_date\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -53,36 +53,11 @@ kinematics = sys.argv[1].split("_")
 W = sys.argv[2]
 Q2 = sys.argv[3]
 EPSVAL = sys.argv[4]
-InDATAFilename = sys.argv[5]
-InDUMMYFilename = sys.argv[6]
-OutFilename = sys.argv[7]
-tmin = float(sys.argv[8])
-tmax = float(sys.argv[9])
-NumtBins = int(sys.argv[10])
-NumPhiBins = int(sys.argv[11])
-runNumRight = sys.argv[12]
-runNumLeft = sys.argv[13]
-runNumCenter = sys.argv[14]
-data_charge_right = int(sys.argv[15])/1000 # Convert from uC to C
-data_charge_left = int(sys.argv[16])/1000 # Convert from uC to C
-data_charge_center = int(sys.argv[17])/1000 # Convert from uC to C
-dummy_charge_right = int(sys.argv[18])/1000 # Convert from uC to C
-dummy_charge_left = int(sys.argv[19])/1000 # Convert from uC to C
-dummy_charge_center = int(sys.argv[20])/1000 # Convert from uC to C
-InData_efficiency_right = sys.argv[21]
-InData_efficiency_left = sys.argv[22]
-InData_efficiency_center = sys.argv[23]
-efficiency_table = sys.argv[24]
-ParticleType = sys.argv[25]
-EPSSET = sys.argv[26]
-pThetaValRight = list(sys.argv[27].split(" "))
-pThetaValLeft = list(sys.argv[28].split(" "))
-pThetaValCenter = list(sys.argv[29].split(" "))
-EbeamValRight = list(sys.argv[30].split(" "))
-EbeamValLeft = list(sys.argv[31].split(" "))
-EbeamValCenter = list(sys.argv[32].split(" "))
-POL = sys.argv[33]
-formatted_date = sys.argv[34]
+ParticleType = sys.argv[5]
+EPSSET = sys.argv[6]
+POL = sys.argv[7]
+OutFilename = sys.argv[8]
+formatted_date = sys.argv[9]
 
 if int(POL) == 1:
     pol_str = "pl"
@@ -97,35 +72,10 @@ inpDict = {
     "W" : W,
     "Q2" : Q2,
     "EPSVAL" : EPSVAL,
-    "InDATAFilename" : InDATAFilename,
-    "InDUMMYFilename" : InDUMMYFilename,
-    "OutFilename" : OutFilename,
-    "tmin" : tmin,
-    "tmax" : tmax,
-    "NumtBins" : NumtBins,
-    "NumPhiBins" : NumPhiBins,
-    "runNumRight" : runNumRight,
-    "runNumLeft" : runNumLeft,
-    "runNumCenter" : runNumCenter,
-    "data_charge_right" : data_charge_right,
-    "data_charge_left" : data_charge_left,
-    "data_charge_center" : data_charge_center,
-    "dummy_charge_right" : dummy_charge_right,
-    "dummy_charge_left" : dummy_charge_left,
-    "dummy_charge_center" : dummy_charge_center,
-    "InData_efficiency_right" : InData_efficiency_right,
-    "InData_efficiency_left" : InData_efficiency_left,
-    "InData_efficiency_center" : InData_efficiency_center,
-    "efficiency_table" : efficiency_table,
     "ParticleType" : ParticleType,
     "EPSSET" : EPSSET,
-    "pThetaValRight" : pThetaValRight,
-    "pThetaValLeft" : pThetaValLeft,
-    "pThetaValCenter" : pThetaValCenter,
-    "EbeamValRight" : EbeamValRight,
-    "EbeamValLeft" : EbeamValLeft,
-    "EbeamValCenter" : EbeamValCenter,
     "POL" : POL,
+    "OutFilename" : OutFilename,
     "formatted_date" : formatted_date,
 }
 
