@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 22:53:07 trottar"
+# Time-stamp: "2023-09-17 23:15:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -194,10 +194,8 @@ def compare_simc(inp_weight, hist, inpDict):
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
           # Apply new iterated weight to SIMC
-          weight = existing_histogram.GetBinContent(i+1)  # i+1 because histogram bin numbering starts from 1
+          weight = H_Weight_SIMC.GetBinContent(i+1)  # i+1 because histogram bin numbering starts from 1
           
-          H_Weight_SIMC.Fill(weight)
-
           H_ssxfp_SIMC.Fill(evt.ssxfp, weight)
           H_ssyfp_SIMC.Fill(evt.ssyfp, weight)
           H_ssxpfp_SIMC.Fill(evt.ssxpfp, weight)
