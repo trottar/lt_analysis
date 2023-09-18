@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 14:29:39 trottar"
+# Time-stamp: "2023-09-18 14:53:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,9 +95,18 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Associate a variable with the branch
     iweight = array('f', [0.0])  # Assuming iweight is a float
 
-    # Create a new TBranch with the same name 'Weight'
-    NewWeightBranch = TBRANCH_SIMC.Branch("Weight", iweight, "Weight/F")
-    
+    # Create a new ROOT file for writing
+    output_file = ROOT.TFile("simc_root".replace(".root","_new.root"), "RECREATE")
+
+    # Create a new TBranch with the same name 'Weight' in a new TTree
+    new_tree = ROOT.TTree("TBRANCH_SIMC", "Modified TTree with Weight")
+
+    # Clone the existing TBranch structure from the original TTree
+    new_tree = TBRANCH_SIMC.CloneTree(-1, "newtree=fast")
+
+    # Define a new TBranch for 'Weight' with the values of iweight
+    new_weight_branch = new_tree.Branch("Weight", iweight, "Weight/F")
+       
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
 
@@ -134,10 +143,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           iweight[0] = iterWeight(inp_param)
     
           # Assign the value of iweight to the new 'Weight' branch
-          NewWeightBranch.Fill()
+          new_weight_branch.Fill()
           
-    # Remove the old 'Weight' branch
-    TBRANCH_SIMC.GetBranch("Weight").Reset()
+    # Write the new TTree to the output file
+    output_file.cd()
+    new_tree.Write()
+    
+    # Close the output file
+    output_file.Close()
 
-    TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
+    #TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
     InFile_SIMC.Close()
