@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 14:00:01 trottar"
+# Time-stamp: "2023-09-18 14:06:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,8 +13,10 @@
 import ROOT
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 from array import array
-import importlib
 import sys, math, os, subprocess
+
+# Import the dynamic script
+import importlib.util
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -65,15 +67,11 @@ def iter_weight(param_file, prev_iter_dir, simc_root, inpDict, phi_setting):
 
     # Define the path to the script module
     script_name = "param_{}_{}.py".format(ParticleType, pol_str)
-    script_module_path = os.path.splitext(script_name)[0]
 
-    try:
-        # Import the module using the correct path
-        param_module = __import__(script_module_path)
-    except ImportError as e:
-        print("Error importing {}: {}".format(script_name, e))
-        sys.exit(1)
-    
+    spec = importlib.util.spec_from_file_location(script_name, prev_iter_dir+script_name)
+    param_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(param_module)
+
     # Define diamond cut parameters
     a1 = inpDict["a1"]
     b1 = inpDict["b1"]
