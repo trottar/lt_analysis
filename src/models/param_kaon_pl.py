@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 16:07:35 trottar"
+# Time-stamp: "2023-09-18 16:08:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,3 +58,4 @@ def iterWeight(arg_str):
     else:
         wtn = 0.0
 
+    return float(wtn)
