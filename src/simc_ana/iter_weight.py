@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 15:26:53 trottar"
+# Time-stamp: "2023-09-18 15:27:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,7 +142,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #new_weight_branch.Fill()
 
           # Update the 'Weight' branch directly
-          evt.Weight = iterWeight(inp_param)*1e6
+          evt.Weight = iweight[0]
 
           new_tree.Fill()
           
