@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 12:43:46 trottar"
+# Time-stamp: "2023-09-18 12:45:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,13 +114,14 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
           #print("-"*25,"\n",i,"\n",inp_fort_param)
               
           # Get the standard output and standard error
-          stdout, stderr = run_fortran(fort_param, inp_fort_param)
+          #stdout, stderr = run_fortran(fort_param, inp_fort_param)
           
           # Print the output
           #print(stdout,"\n",stderr)
 
           # Set the value of iweight
-          iweight[0] = float(stdout)
+          #iweight[0] = float(stdout)
+          iweight[0] = 0.0
     
           # Fill the branch
           Weight_SIMC.Fill()
