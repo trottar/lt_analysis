@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 03:59:44 trottar"
+# Time-stamp: "2023-09-18 04:05:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,10 +154,12 @@ def iter_weight(param_file, fort_param, simc_root, inpDict, phi_setting):
       #Fill SIMC events
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
-          inp_fort_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          # thetacm and phicm are correct, the next line is just for testingx
+          #inp_fort_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          inp_fort_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+ \
+                           ' '.join(param_arr)
           print(inp_fort_param)
-    
-          
+              
           # Get the standard output and standard error
           stdout, stderr = run_fortran(fort_param, inp_fort_param)
 
