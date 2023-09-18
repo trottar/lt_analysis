@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 23:58:58 trottar"
+# Time-stamp: "2023-09-18 00:00:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -176,7 +176,7 @@ def get_histogram(file_name, directory_name, histogram_name):
 
     if not root_file:
         print("Error: Unable to open file {}.".format(file_name))
-        return None
+        return cloned_histogram
 
     # Split the directory names
     directories = directory_name.split('/')
@@ -191,7 +191,7 @@ def get_histogram(file_name, directory_name, histogram_name):
         if not dir_exists:
             print("Error: Unable to find directory {}.".format(directory))
             root_file.Close()
-            return None
+            return cloned_histogram
         current_dir.cd(directory)
         current_dir = ROOT.gDirectory
         histograms_in_dir = current_dir.GetListOfKeys()
@@ -203,7 +203,7 @@ def get_histogram(file_name, directory_name, histogram_name):
     if not histogram:
         print("Error: Unable to find histogram {}.".format(histogram_name))
         root_file.Close()
-        return None
+        return cloned_histogram
 
     # Check the number of entries in the histogram
     print("Number of entries in {}: {}".format(histogram.GetName(),histogram.GetEntries()))  # Debug statement
