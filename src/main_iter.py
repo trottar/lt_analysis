@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 01:09:22 trottar"
+# Time-stamp: "2023-09-18 01:32:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -190,7 +190,7 @@ old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, Particle
 old_fort_param = '{}/param_{}_{}.f'.format(prev_iter_dir, ParticleType, pol_str)
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    iter_weight = iter_weight(old_param_file, old_fort_param, formatted_date)
+    iter_weight = iter_weight(old_param_file, old_fort_param, inpDict)
     hist.update(compare_simc(iter_weight, hist, inpDict))
     
 sys.path.append("plotting")
