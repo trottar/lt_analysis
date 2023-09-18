@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 20:27:47 trottar"
+# Time-stamp: "2023-09-17 20:34:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,3 +127,10 @@ def hist_to_root(hist, file_name, directory_name):
     cloned_hist.Write()
 
 ################################################################################################################################################    
+
+# Used to check if object is non-serializable and converts to a list
+# so that it can be saved in json file
+def custom_encoder(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    raise TypeError("Type not serializable")

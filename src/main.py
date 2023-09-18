@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 19:57:46 trottar"
+# Time-stamp: "2023-09-17 20:37:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root
+from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root, custom_encoder
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -452,7 +452,7 @@ combineDict.update({ "histlist" : tmp_lst})
 if not os.path.exists(foutjson):
     # Open the file in write mode and use json.dump() to save the dictionary to JSON
     with open(foutjson, 'w') as f_json:
-        json.dump(combineDict, f_json)
+        json.dump(combineDict, f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
 
 if DEBUG:
