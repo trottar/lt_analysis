@@ -145,6 +145,6 @@ c	print *, "p12 =", p12
 	wtn = wt_sim*sig/sigcm_sim
 
 
-	print *, "", wt
+	print *, "", wtn
 	
 	end program iterWeight
