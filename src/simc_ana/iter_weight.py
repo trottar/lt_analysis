@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 13:52:45 trottar"
+# Time-stamp: "2023-09-18 13:57:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,8 +65,7 @@ def iter_weight(param_file, prev_iter_dir, simc_root, inpDict, phi_setting):
 
     script_name = "param_{}_{}.py".format(ParticleType, pol_str)
     try:
-        import_module = __import__(os.path.splitext(script_name)[0])
-        iterWeight = import_module.iterWeight
+        param_module = __import__(os.path.splitext(script_name)[0])
     except ImportError as e:
         print("Error importing {}: {}".format(script_name,e))
     
@@ -130,7 +129,7 @@ def iter_weight(param_file, prev_iter_dir, simc_root, inpDict, phi_setting):
           #print("-"*25,"\n",i,"\n",inp_param)
           
           # Set the value of iweight
-          iweight[0] = iterWeight(inp_param)
+          iweight[0] = param_module.iterWeight(inp_param)
     
           # Fill the branch
           Weight_SIMC.Fill()
