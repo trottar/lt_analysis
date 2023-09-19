@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 20:17:35 trottar"
+# Time-stamp: "2023-09-18 22:40:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,6 +133,8 @@ root_file = ROOT.TFile.Open(prev_iter_root, "READ")
 # Grab weight from previous iteration
 for hist in histlist:
     hist.update(hist_in_dir(root_file, "{}/data".format(hist["phi_setting"])))
+    hist.update(hist_in_dir(root_file, "{}/simc".format(hist["phi_setting"])))
+    hist.update(hist_in_dir(root_file, "{}/dummy".format(hist["phi_setting"])))
 
 # t/phi bins are the same for all settings
 # so arbitrarily grabbing from first setting of list
