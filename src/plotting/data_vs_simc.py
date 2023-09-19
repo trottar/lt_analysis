@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 00:42:03 trottar"
+# Time-stamp: "2023-09-19 00:45:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -227,7 +227,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         if i == 0:
             tBin_line.SetLineColor(3)
         else:
-        tBin_line.SetLineColor(3)
+            tBin_line.SetLineColor(3)
         tBin_line.SetLineWidth(4)
         tBin_line.DrawLine(b,0,b,binmax)
         l_t.AddEntry(tBin_line,"Num Evts in bin {}: {}".format(i+1, events_between))
