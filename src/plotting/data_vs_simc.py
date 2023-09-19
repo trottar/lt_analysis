@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 11:41:00 trottar"
+# Time-stamp: "2023-09-19 11:41:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -193,11 +193,12 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     CW.Print(outputpdf)
 
     Ct = TCanvas()
-    l_t = TLegend(0.115,0.45,0.33,0.95)
-    l_t.SetTextSize(0.0235)
+
 
     binmax = []
     for i,hist in enumerate(histlist):
+        l_t = TLegend(0.115,0.45+i,0.33,0.95)
+        l_t.SetTextSize(0.0235)
         hist["H_t_DATA"].SetLineColor(i+1)
         l_t.AddEntry(hist["H_t_DATA"],hist["phi_setting"])
         hist["H_t_DATA"].Draw("same, E1")
