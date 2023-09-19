@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 17:48:20 trottar"
+# Time-stamp: "2023-09-19 17:48:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,7 +47,7 @@ with open(file_path, 'r') as file:
 # Find and replace the specific variable definition
 for i, line in enumerate(lines):
     if 'q2_set=' in line:
-        print("Changing {} to q2_set={}".format(line))
+        print("Changing {} to q2_set={}".format(line,Q2))
         lines[i] = 'q2_set={}\n'.format(Q2)
 
 # Write the modified content back to the file
