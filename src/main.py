@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 21:23:49 trottar"
+# Time-stamp: "2023-09-18 21:36:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -405,6 +405,8 @@ if not os.path.exists(foutroot):
             if "polar_phiq_vs_t_DATA" in key:
                 print(key,type(val))
             if is_hist(val):
+                if "polar_phiq_vs_t_DATA" in key:
+                    print(key,type(val))                
                 if "ratio" in val.GetName():
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                 if "DATA" in val.GetName():
