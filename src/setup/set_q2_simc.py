@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 17:50:11 trottar"
+# Time-stamp: "2023-09-19 17:52:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,7 +48,9 @@ with open(file_path, 'r') as file:
 for i, line in enumerate(lines):
     if 'q2_set=' in line:
         print("Changing {} to q2_set={}".format(line.strip(),Q2))
-        lines[i] = 'q2_set={}\n'.format(Q2)
+        # Preserve the spaces before 'q2_set'
+        prefix_spaces = line[:line.find('q2_set=')]
+        lines[i] = '{}q2_set={}\n'.format(prefix_spaces,Q2)
 
 # Write the modified content back to the file
 with open(file_path, 'w') as file:
