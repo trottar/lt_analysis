@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:55:38 trottar"
+# Time-stamp: "2023-09-18 20:38:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,7 +99,7 @@ def match_to_bin(data):
 
 # Function to check if an object is of a ROOT type
 def is_hist(obj):
-    return isinstance(obj, (ROOT.TH1D, ROOT.TH2D))
+    return isinstance(obj, (ROOT.TH1D, ROOT.TH2D, ROOT.TGraphPolar))
 
 ################################################################################################################################################
 
