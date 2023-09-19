@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 00:18:31 trottar"
+# Time-stamp: "2023-09-19 00:29:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -219,12 +219,19 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         # Get the content of the bins and calculate the number of events between them
         events_between = sum(hist["H_t_SIMC"].GetBinContent(j) for j in range(bin1, bin2+1))
         
-        tBin_line.SetLineColor(4)
+        tBin_line.SetLineColor(4) 
         tBin_line.SetLineWidth(4)
         tBin_line.DrawLine(b,0,b,binmax)
         l_t.AddEntry(tBin_line,"Num Evts in bin {}: {}".format(i+1, events_between))
         l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
-
+        
+    b = t_bins[i+1]
+    tBin_line.SetLineColor(4) 
+    tBin_line.SetLineWidth(4)
+    tBin_line.DrawLine(b,0,b,binmax)
+    l_t.AddEntry(tBin_line,"Num Evts in bin {}: {}".format(i+1, events_between))
+    l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
+        
     l_t.Draw()    
 
     Ct.Print(outputpdf)
