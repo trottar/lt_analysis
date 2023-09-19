@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 22:40:31 trottar"
+# Time-stamp: "2023-09-18 22:41:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -129,7 +129,7 @@ with open(prev_iter_json, 'r') as f:
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
 
-root_file = ROOT.TFile.Open(prev_iter_root, "READ")
+root_file = TFile.Open(prev_iter_root, "READ")
 # Grab weight from previous iteration
 for hist in histlist:
     hist.update(hist_in_dir(root_file, "{}/data".format(hist["phi_setting"])))
@@ -155,7 +155,7 @@ for hist in histlist:
 EXAMPLE: How to get histograms from previous iteration
 
 # Open the ROOT file, must pass open root file so object exists here and in function
-root_file = ROOT.TFile.Open(prev_iter_root, "READ")
+root_file = TFile.Open(prev_iter_root, "READ")
 # Grab weight from previous iteration
 iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
 '''

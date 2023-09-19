@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 20:38:03 trottar"
+# Time-stamp: "2023-09-18 22:42:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -280,7 +280,6 @@ def hist_in_dir(root_file, directory_name):
         current_dir = ROOT.gDirectory
         histograms_in_dir = current_dir.GetListOfKeys()
         for hist_key in histograms_in_dir:
-            print("From {}, adding: {}".format(directory, hist_key.GetName()))  # Debug statement
 
             # Get the histogram
             histogram = current_dir.Get(hist_key.GetName())
@@ -289,9 +288,6 @@ def hist_in_dir(root_file, directory_name):
                 print("Error: Unable to find histogram {}.".format(hist_key.GetName()))
                 root_file.Close()
                 return {}
-            
-            # Check the number of entries in the histogram
-            #print("Number of entries in {}: {}".format(histogram.GetName(), histogram.GetEntries()))  # Debug statement
 
             # Clone the histogram to avoid ownership issues
             cloned_histogram = histogram.Clone()
