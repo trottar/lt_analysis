@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 14:55:58 trottar"
+# Time-stamp: "2023-09-19 17:56:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -315,8 +315,8 @@ for hist in histlist:
 ** Once physics_iterate.f is in simc_gfortran, change object in Makefile from physics_<PID>.o to physics_iterate.o
    Note: This also needs initial parameterization. 
          par_pl (rename to par.pl in SIMC )is currently in there, Q2=2.45 of FPI2 analysis
-** Run SIMC with this new cross section. There is no need to rerun SIMC from this point on unless model functional
-   form changes.
+** Run SIMC with this new cross section (the hard coded q2_set value in physics_iterate.f is dynamically updated using the set_ProdInput script). 
+   There is no need to rerun SIMC from this point on unless model functional form changes.
 ** Run this script (i.e. src/main.py) for first iteration. This will generate json and root file with data info
    and current simc info. It will generate new parameters (located src/<PID>/parameters/par.<pol>_<Q2>.dat) from
    calc_xsect.f script.

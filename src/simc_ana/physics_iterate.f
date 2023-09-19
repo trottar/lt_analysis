@@ -1,12 +1,13 @@
- 	real*8 function peepi(vertex,main)
+ 	real*8 function peek(vertex,main)
 
 * Purpose:
 * This function determines the kinematics in the PHOTON-NUCLEON center of mass
 * frame, calculates some of the kinematical variables (s,t, and CM quantities
-* in the 'main' structure), and returns the pion cross section.
+* in the 'main' structure), and returns the kaon cross section.
 *
+* RLT: (9/15/2023) Updated for kaon cross section
 *   output:
-*	peepi		!d5sigma/dEe'dOmegae'Omegapi	(microbarn/MeV/sr^2)
+*	peek		!d5sigma/dEe'dOmegae'Omegak	(microbarn/MeV/sr^2)
 
 	implicit none
 	include 'simulate.inc'
@@ -18,7 +19,7 @@
 * photon-NUCLEON center of mass, not the photon-NUCLEUS!  The model gives
 * the cross section in the photon-nucleon center of mass frame.
 
-	real*8 sigma_eepi		!final cross section (returned as peepi)
+	real*8 sigma_eek		!final cross section (returned as peek)
 	real*8 k_eq			!equivalent photon energy.
 	real*8 sig219,sig,fac
 	real*8 wfactor
@@ -26,9 +27,9 @@
 c	real*8 efer			!energy of target particle
 	real*8 epsi			!epsilon of virtual photon
 	real*8 gtpr			!gamma_t prime.
-	real*8 tcos,tsin		!cos/sin of theta between ppi and q
+	real*8 tcos,tsin		!cos/sin of theta between pk and q
 	real*8 tfcos,tfsin		!cos/sin of theta between pfermi and q
-	real*8 ppix,ppiy,ppiz		!pion momentum in lab.
+	real*8 pkx,pky,pkz		!kaon momentum in lab.
 	real*8 zero
 
 	real*8 s,s_gev,t,t_gev,Q2_g			!t,s, Q2 in (GeV/c)**2
@@ -49,7 +50,7 @@ c	real*8 efer			!energy of target particle
 
 	real*8 pbeam,beam_newx,beam_newy,beam_newz
 c	real*8 pbeamcmx,pbeamcmy,pbeamcmz,ebeamcm,pbeamcm
-	real*8 ppicm_newx,ppicm_newy,ppicm_newz
+	real*8 pkcm_newx,pkcm_newy,pkcm_newz
 
 	real*8 dEcmdcos,dEcmdphi,dcoscmdcos,dcoscmdphi
 c	real*8 tmp
@@ -60,7 +61,7 @@ c	real*8 tmp
 c Variables calculated in transformation to gamma-NUCLEON center of mass.
         real*8 gstar,bstar,bstarx,bstary,bstarz		!beta of boost to C.M.
         real*8 nustar,qstar,qstarx,qstary,qstarz	!q in C.M.
-        real*8 epicm,ppicm,ppicmx,ppicmy,ppicmz		!p_hadron in C.M.
+        real*8 ekcm,pkcm,pkcmx,pkcmy,pkcmz		!p_hadron in C.M.
         real*8 ebeamcm,pbeamcm,pbeamcmx,pbeamcmy,pbeamcmz !p_beam in C.M.
         real*8 etarcm,ptarcm,ptarcmx,ptarcmy,ptarcmz	!p_fermi in C.M.
         real*8 thetacm,phicm,phiqn,jacobian,jac_old
@@ -70,7 +71,7 @@ c Variables calculated in transformation to gamma-NUCLEON center of mass.
 *=====================================================================
 c       Fit parameters.
 	integer npar,ipar
-	parameter (npar=12)	!number of fit parameters for H, pi+ and D, pi-
+	parameter (npar=12)	!number of fit parameters for H, k+ and D, k-
 	real*8 fitpar(npar),par,par_er
 	save fitpar
 	logical first_call
@@ -78,7 +79,7 @@ c       Fit parameters.
 
 	data first_call/.true./
 *=====================================================================
-
+        
 * Initialize some stuff.
 	Q2_g = vertex%Q2/1.d6
 c NOTE: phipq calculation in event.f reverted to original version.
@@ -86,14 +87,14 @@ c NOTE: phipq calculation in event.f reverted to original version.
 	mtar_gev = targ%Mtar_struck/1000.
 
 * calculate energy of initial (struck) nucleon, using the same assumptions that
-* go into calculating the pion angle/momentum (in event.f).  For A>1, the struck
+* go into calculating the kaon angle/momentum (in event.f).  For A>1, the struck
 * nucleon is off shell, the 2nd nucleon (always a neutron) is on shell, and has
 * p = -p_fermi, and any additional nucleons are at rest.
 * NOTE pfer, efer appear to be in MeV at this point.
 	efer = sqrt(pfer**2+targ%Mtar_struck**2)
-	if(doing_deutpi.or.doing_hepi) then
+	if(doing_deutkaon.or.doing_hekaon) then
 	  efer = targ%M-sqrt(mn**2+pfer**2)
-	  if(doing_hepi)efer=efer-mp
+	  if(doing_hekaon)efer=efer-mp
 c	  mtar_offshell = sqrt(efer**2-pfer**2)
 	endif
 
@@ -112,7 +113,8 @@ c	  mtar_offshell = sqrt(efer**2-pfer**2)
 	epsi = 1./(1.+2*(1.+vertex%nu**2/vertex%Q2)*tan(vertex%e%theta/2.)**2)
 
 	s_fer = (vertex%nu+efer)**2-(vertex%q+pfer*tfcos)**2-(pfer*tfsin)**2
-	ntup%W_fer=sqrt(s_fer)/1.d3
+c     RLT (9/15/2023): Removed fermi motion variable W??
+c	ntup%W_fer=sqrt(s_fer)/1.d3 
 
 c GH:
 c calculate with target nucleon at rest (as in experimental replay)
@@ -121,7 +123,8 @@ c calculate with target nucleon at rest (as in experimental replay)
 	s_gev = s/1.d6
 
 	t_old = vertex%Q2-Mh2+2.*vertex%nu*vertex%p%E-2.*vertex%p%P*vertex%q*tcos
-	ntup%t_old=t_old/1.d6
+c     RLT (9/15/2023): Removed t_old since not defined (or used) elsewhere        
+c	ntup%t_old=t_old/1.d6
 
 c GH:
 c calculate t the same way as in experimental replay
@@ -139,7 +142,7 @@ c OLD VERSION WHERE TARGET NUCLEON HAS FERMI MOMENTUM
 * Calculate velocity of PHOTON-NUCLEON C.M. system in the lab frame. Use beta
 * and gamma of the cm system (bstar and gstar) to transform particles into
 * c.m. frame.  Define z along the direction of q, and x to be along the
-* direction of the pion momentum perpendicular to q.
+* direction of the kaon momentum perpendicular to q.
 
 * DJG: Get pfer components in the lab "q" system
 	dummy=sqrt((vertex%uq%x**2+vertex%uq%y**2)*
@@ -183,22 +186,22 @@ c OLD VERSION WHERE TARGET NUCLEON HAS FERMI MOMENTUM
 	call loren(gstar,bstarx,bstary,bstarz,vertex%nu,
      >		zero,zero,vertex%q,nustar,qstarx,qstary,qstarz,qstar)
 
-* DJG: Boost pion to CM.
+* DJG: Boost kaon to CM.
 	
-	ppiz = vertex%p%P*tcos
-	ppix = vertex%p%P*tsin*cos(phipq)
-	ppiy = vertex%p%P*tsin*sin(phipq)
+	pkz = vertex%p%P*tcos
+	pkx = vertex%p%P*tsin*cos(phipq)
+	pky = vertex%p%P*tsin*sin(phipq)
 	call loren(gstar,bstarx,bstary,bstarz,vertex%p%E,
-     >		ppix,ppiy,ppiz,epicm,ppicmx,ppicmy,ppicmz,ppicm)
-	thetacm = acos((ppicmx*qstarx+ppicmy*qstary+ppicmz*qstarz)/ppicm/qstar)
-	main%pcm = ppicm
+     >		pkx,pky,pkz,ekcm,pkcmx,pkcmy,pkcmz,pkcm)
+	thetacm = acos((pkcmx*qstarx+pkcmy*qstary+pkcmz*qstarz)/pkcm/qstar)
+	main%pcm = pkcm
 
 * DJG Boost the beam to CM.
 
 	call loren(gstar,bstarx,bstary,bstarz,vertex%Ein,beam_newx,
      >		beam_newy,beam_newz,ebeamcm,pbeamcmx,pbeamcmy,pbeamcmz,pbeamcm)
 
-* Thetacm is defined as angle between ppicm and qstar.
+* Thetacm is defined as angle between pkcm and qstar.
 * To get phicm, we need out of plane angle relative to scattering plane
 * (plane defined by pbeamcm and qcm).  For stationary target, this plane
 * does not change.  In general, the new coordinate system is defined such
@@ -223,24 +226,26 @@ c OLD VERSION WHERE TARGET NUCLEON HAS FERMI MOMENTUM
 	new_z_y = qstary/qstar
 	new_z_z = qstarz/qstar
 
-	ppicm_newx = ppicmx*new_x_x + ppicmy*new_x_y + ppicmz*new_x_z
-	ppicm_newy = ppicmx*new_y_x + ppicmy*new_y_y + ppicmz*new_y_z
-	ppicm_newz = ppicmx*new_z_x + ppicmy*new_z_y + ppicmz*new_z_z
+	pkcm_newx = pkcmx*new_x_x + pkcmy*new_x_y + pkcmz*new_x_z
+	pkcm_newy = pkcmx*new_y_x + pkcmy*new_y_y + pkcmz*new_y_z
+	pkcm_newz = pkcmx*new_z_x + pkcmy*new_z_y + pkcmz*new_z_z
 
-	phicm = atan2(ppicm_newy,ppicm_newx)
+	phicm = atan2(pkcm_newy,pkcm_newx)
 	if(phicm.lt.0.) phicm = 2.*3.141592654+phicm
 
 	thetacm_fer = thetacm
-	ntup%thetacm_fer=thetacm_fer
+c     RLT (9/15/2023): Removed fermi motion variable thetacm??        
+c	ntup%thetacm_fer=thetacm_fer
 	phicm_fer = phicm
-	ntup%phicm_fer=phicm_fer
+c     RLT (9/15/2023): Removed fermi motion variable phicm??
+c	ntup%phicm_fer=phicm_fer
 
 *******************************************************************************
 c NEW VERSION WHERE TARGET NUCLEON IS AT REST (AS IN EXPERIMENTAL REPLAY)
 * Calculate velocity of PHOTON-NUCLEON C.M. system in the lab frame. Use beta
 * and gamma of the cm system (bstar and gstar) to transform particles into
 * c.m. frame.  Define z along the direction of q, and x to be along the
-* direction of the pion momentum perpendicular to q.
+* direction of the kaon momentum perpendicular to q.
 
 	dummy=sqrt((vertex%uq%x**2+vertex%uq%y**2) * 
      1             (vertex%uq%x**2+vertex%uq%y**2+vertex%uq%z**2))
@@ -273,22 +278,22 @@ c NEW VERSION WHERE TARGET NUCLEON IS AT REST (AS IN EXPERIMENTAL REPLAY)
 	call loren(gstar,bstarx,bstary,bstarz,vertex%nu,
      >		zero,zero,vertex%q,nustar,qstarx,qstary,qstarz,qstar)
 
-* DJG: Boost pion to q+nucleon CM.
+* DJG: Boost kaon to q+nucleon CM.
 	
-	ppiz = vertex%p%P*tcos
-	ppix = vertex%p%P*tsin*cos(phipq)
-	ppiy = vertex%p%P*tsin*sin(phipq)
+	pkz = vertex%p%P*tcos
+	pkx = vertex%p%P*tsin*cos(phipq)
+	pky = vertex%p%P*tsin*sin(phipq)
 	call loren(gstar,bstarx,bstary,bstarz,vertex%p%E,
-     >		ppix,ppiy,ppiz,epicm,ppicmx,ppicmy,ppicmz,ppicm)
-	thetacm = acos((ppicmx*qstarx+ppicmy*qstary+ppicmz*qstarz)/ppicm/qstar)
-	main%pcm = ppicm
+     >		pkx,pky,pkz,ekcm,pkcmx,pkcmy,pkcmz,pkcm)
+	thetacm = acos((pkcmx*qstarx+pkcmy*qstary+pkcmz*qstarz)/pkcm/qstar)
+	main%pcm = pkcm
 
 * DJG Boost the beam to q+nucleon CM.
 
 	call loren(gstar,bstarx,bstary,bstarz,vertex%Ein,beam_newx,
      >		beam_newy,beam_newz,ebeamcm,pbeamcmx,pbeamcmy,pbeamcmz,pbeamcm)
 
-* Thetacm is defined as angle between ppicm and qstar.
+* Thetacm is defined as angle between pkcm and qstar.
 * To get phicm, we need out of plane angle relative to scattering plane
 * (plane defined by pbeamcm and qcm).  For stationary target, this plane
 * does not change.  In general, the new coordinate system is defined such
@@ -313,11 +318,11 @@ c NEW VERSION WHERE TARGET NUCLEON IS AT REST (AS IN EXPERIMENTAL REPLAY)
 	new_z_y = qstary/qstar
 	new_z_z = qstarz/qstar
 
-	ppicm_newx = ppicmx*new_x_x + ppicmy*new_x_y + ppicmz*new_x_z
-	ppicm_newy = ppicmx*new_y_x + ppicmy*new_y_y + ppicmz*new_y_z
-	ppicm_newz = ppicmx*new_z_x + ppicmy*new_z_y + ppicmz*new_z_z
+	pkcm_newx = pkcmx*new_x_x + pkcmy*new_x_y + pkcmz*new_x_z
+	pkcm_newy = pkcmx*new_y_x + pkcmy*new_y_y + pkcmz*new_y_z
+	pkcm_newz = pkcmx*new_z_x + pkcmy*new_z_y + pkcmz*new_z_z
 
-	phicm = atan2(ppicm_newy,ppicm_newx)
+	phicm = atan2(pkcm_newy,pkcm_newx)
 	if(phicm.lt.0.) phicm = 2.*3.141592654+phicm
 
 	main%thetacm = thetacm
@@ -329,15 +334,14 @@ c	write(6,*)' t ',t,t_old
 c	write(6,*)' s ',s,s_fer
 c	write(6,*)' thetacm ',thetacm*180./3.14159,thetacm_fer*180./3.14159
 c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.14159
-
+        
 *******************************************************************************
 * Read fit parameters when first called.
 
 	   if(first_call) then
 
 	      first_call=.false.
-
-	      if(doing_piplus) then
+	      if(doing_kaon) then
 		 open(88,file='par.pl',status='old')
 	      else
 		 open(88,file='par.mn',status='old')
@@ -349,17 +353,19 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 	      end do
  99	      close(88)
 
-	      print*,doing_piplus
+	      print*,doing_kaon
 	      do ipar=1,npar
+                 print*,'Initial parameterization...'
 		 print*,fitpar(ipar),ipar
 	      end do
 
 	   end if		!first_call.
-
+           
 * Models for sigL, sigT, sigLT, sigTT  for Deuterium.
 
 ***
-* Parameterization revised for IT26, 12.11.09
+*       Parameterization revised for IT26, 12.11.09
+*       q2_set is dynamically changed with the set_ProdInput.sh script
 	   q2_set=2.45
 	   tav=(0.0735+0.028*log(q2_set))*q2_set
 	   ftav=(abs(t_gev)-tav)/tav
@@ -374,9 +380,7 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
      1           +fitpar(11)/abs(t_gev))*sin(thetacm)
 	   sigtt=(fitpar(12)*Q2_g*exp(-Q2_g))*ft*sin(thetacm)**2
 
-	   tav=(-0.178+0.315*log(Q2_g))*Q2_g
-	   
-
+	   tav=(-0.178+0.315*log(Q2_g))*Q2_g	   
 
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
      >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
@@ -385,10 +389,6 @@ c now convert to different W
 c W dependence given by 1/(W^2-M^2)^2
 c factor 15.333 is value of (w**2-ami**2)**2 at W=2.19
 
-c	  wfactor=15.333/(s-(targ.Mtar_pion/1000.)**2)**2
-*	  wfactor=8.539/(s-(targ.Mtar_pion/1000.)**2)**2
-
-c	  wfactor=1.D0/(s-(targ.Mtar_pion/1000.)**2)**2
 	  wfactor=1.D0/(s_gev-mtar_gev**2)**2
 	  sig=sig219*wfactor
 	  sigl=sigl*wfactor
@@ -409,7 +409,9 @@ C--->Debug
 
 	  sig=sig/2./pi/1.d+06   !dsig/dtdphicm in microbarns/MeV**2/rad
 
-	  ntup%dsigdt = sig
+c     RLT (9/15/2023): Removed dsigdt because it is not defined in SIMC
+c                      and not used anywhere else in this script          
+c	  ntup%dsigdt = sig
 
 C--->Debug
 c	  write(*,*) 'sig =',sig
@@ -417,101 +419,13 @@ c	  write(*,*) '====================================================='
 C--->Debug
 
 *******************************************************************************
-* sigma_eepi is two-fold C.M. cross section: d2sigma/dt/dphi_cm [ub/MeV**2/rad]
+* sigma_eek is two-fold C.M. cross section: d2sigma/dt/dphi_cm [ub/MeV**2/rad]
 * Convert from dt dphi_cm --> dOmega_lab using 'jacobian' [ub/sr]
 * Convert to 5-fold by multiplying by flux factor, gtpr [1/MeV]
-* to give d5sigma/dOmega_pi/dOmega_e/dE_e [ub/Mev/sr].
+* to give d5sigma/dOmega_k/dOmega_e/dE_e [ub/Mev/sr].
 *******************************************************************************
-c OLD VERSION WHERE TARGET NUCLEON HAS FERMI MOMENTUM
-* DJG We need a full blown Jacobian with target not at rest:
-* DJG | dt/dcos(theta) dphicm/dphi - dt/dphi dphicm/dcos(theta) |
-* DJG: Calculate dt/d(cos(theta)) and dt/dphi for the general case.
-c
-c	psign = cos(phiqn)*cos(phipq)+sin(phiqn)*sin(phipq)
-c
-c	square_root = vertex%q + pfer*tfcos - vertex%p%P*tcos
-c	dp_dcos_num = vertex%p%P + (vertex%p%P**2*tcos -
-c     >		psign*pfer*vertex%p%P*tfsin*tcos/tsin)/square_root
-c	dp_dcos_den = ( (vertex%nu+efer-vertex%p%E)*vertex%p%P/vertex%p%E +
-c     >		vertex%p%P*tsin**2-psign*pfer*tfsin*tsin )/square_root - tcos
-c	dp_dcos = dp_dcos_num/dp_dcos_den
-c
-c	dp_dphi_num = pfer*vertex%p%P*tsin*tfsin*(cos(phiqn)*sin(phipq)-
-c     >		sin(phiqn)*cos(phipq))/square_root
-c	dp_dphi_den = tcos + (pfer*tsin*tfsin*psign - vertex%p%P*tsin**2
-c     >		- (vertex%nu+efer-vertex%p%E)*vertex%p%P/vertex%p%E)/square_root
-c	dp_dphi = dp_dphi_num/dp_dphi_den
-c
-c	dt_dcos_lab = 2.*(vertex%q*vertex%p%P +
-c     >		(vertex%q*tcos-vertex%nu*vertex%p%P/vertex%p%E)*dp_dcos)
-c
-c	dt_dphi_lab = 2.*(vertex%q*tcos-vertex%nu*vertex%p%P/vertex%p%E)*dp_dphi
-c
-c* DJG: Now calculate dphicm/dphi and dphicm/d(cos(theta)) in the most
-c* DJG: excruciating way possible.
-c
-c        dpxdphi = vertex%p%P*tsin*(-sin(phipq)+(gstar-1.)*bstarx/bstar**2*
-c     >		(bstary*cos(phipq)-bstarx*sin(phipq)) ) +
-c     >		( (ppicmx+gstar*bstarx*vertex%p%E)/vertex%p%P -
-c     >		gstar*bstarx*vertex%p%P/vertex%p%E)*dp_dphi
-c        dpydphi = vertex%p%P*tsin*(cos(phipq)+(gstar-1.)*bstary/bstar**2*
-c     >		(bstary*cos(phipq)-bstarx*sin(phipq)) ) +
-c     >		( (ppicmy+gstar*bstary*vertex%p%E)/vertex%p%P -
-c     >		gstar*bstary*vertex%p%P/vertex%p%E)*dp_dphi
-c	dpzdphi =  vertex%p%P*(gstar-1.)/bstar**2*bstarz*tsin*
-c     >		(bstary*cos(phipq)-bstarx*sin(phipq)) +
-c     > 		((ppicmz+gstar*bstarz*vertex%p%E)/vertex%p%P-
-c     >		gstar*bstarz*vertex%p%P/vertex%p%E)*dp_dphi
-c
-c	dpxdcos = -vertex%p%P*tcos/tsin*(cos(phipq)+(gstar-1.)*bstarx/bstar**2*
-c     >		(bstarx*cos(phipq)+bstary*sin(phipq)-bstarz*tsin/tcos)) +
-c     >		( (ppicmx+gstar*bstarx*vertex%p%E)/vertex%p%P -
-c     >		gstar*bstarx*vertex%p%P/vertex%p%E)*dp_dcos
-c	dpydcos = -vertex%p%P*tcos/tsin*(sin(phipq)+(gstar-1.)*bstary/bstar**2*
-c     >		(bstarx*cos(phipq)+bstary*sin(phipq)-bstarz*tsin/tcos)) +
-c     >		( (ppicmy+gstar*bstary*vertex%p%E)/vertex%p%P -
-c     >		gstar*bstary*vertex%p%P/vertex%p%E)*dp_dcos
-c	dpzdcos = vertex%p%P*(1.-(gstar-1.)/bstar**2*bstarz*tcos/tsin*
-c     >		(bstarx*cos(phipq)+bstary*sin(phipq)-tsin/tcos*bstarz))
-c     >		+((ppicmz+gstar*bstarz*vertex%p%E)/vertex%p%P-gstar*bstarz*
-c     >		vertex%p%P/vertex%p%E)*dp_dcos
-c
-c	dpxnewdphi = dpxdphi*new_x_x+dpydphi*new_x_y+dpzdphi*new_x_z
-c	dpynewdphi = dpxdphi*new_y_x+dpydphi*new_y_y+dpzdphi*new_y_z
-c	dpznewdphi = dpxdphi*new_z_x+dpydphi*new_z_y+dpzdphi*new_z_z
-c
-c	dphicmdphi = (dpynewdphi*ppicm_newx - ppicm_newy*dpxnewdphi)/
-c     >			(ppicm_newx**2+ppicm_newy**2)
-c
-c	dpxnewdcos = dpxdcos*new_x_x+dpydcos*new_x_y+dpzdcos*new_x_z
-c	dpynewdcos = dpxdcos*new_y_x+dpydcos*new_y_y+dpzdcos*new_y_z
-c	dpznewdcos = dpxdcos*new_z_x+dpydcos*new_z_y+dpzdcos*new_z_z
-c
-c	dphicmdcos = (dpynewdcos*ppicm_newx - ppicm_newy*dpxnewdcos)
-c     >			/(ppicm_newx**2+ppicm_newy**2)
-c
-c	dcoscmdcos = dpznewdcos/ppicm-ppicm_newz*epicm*dEcmdcos/ppicm**1.5
-c	dcoscmdphi = dpznewdphi/ppicm-ppicm_newz*epicm*dEcmdphi/ppicm**1.5
-c
-c	jacobian = abs(dt_dcos_lab*dphicmdphi-dt_dphi_lab*dphicmdcos)
-c	davejac_fer = jacobian
-c
-c	main%johnjac = 2*(efer-2*pferz*pfer*vertex%p%E/vertex%p%P*tcos)*
-c     >		(vertex%q+pferz*pfer)*vertex%p%P /
-c     >		( efer+vertex%nu-(vertex%q+pferz*pfer)
-c     1           *vertex%p%E/vertex%p%P*tcos )- 2*vertex%p%P*pfer
-c
 *******************************************************************************
 c NEW VERSION WHERE TARGET NUCLEON IS AT REST (AS IN EXPERIMENTAL REPLAY)
-
-c	square_root = vertex%q - vertex%p%P*tcos
-c	dp_dcos_num = vertex%p%P + vertex%p%P**2*tcos/square_root
-c	dp_dcos_den = ( (vertex%nu+targ%Mtar_struck-vertex%p%E)*vertex%p%P/vertex%p%E +
-c     >		vertex%p%P*tsin**2)/square_root - tcos
-c	dp_dcos = dp_dcos_num/dp_dcos_den
-c
-c	dt_dcos_lab = 2.*(vertex%q*vertex%p%P +
-c     >		(vertex%q*tcos-vertex%nu*vertex%p%P/vertex%p%E)*dp_dcos)
 
 	dt_dcos_lab = 2.*(vertex%q*vertex%p%P*targ%Mtar_struck) / 
      1            ( targ%Mtar_struck+vertex%nu
@@ -552,11 +466,8 @@ c	write(6,*)' jac ',davejac_fer,jacobian
 *	davesig = gtpr*fac*sig*jacobian
 *
 *******************************************************************************
-* DJG: Replace targ.Mtar_pion in denominator of gammaflux with more general
+* DJG: Replace targ.Mtar_kaon in denominator of gammaflux with more general
 * DJG: efer-pfer*tfcos, for pfer =0 this reverts to old form
-
-c	gtpr = alpha/2./(pi**2)*vertex%e%E/vertex%Ein*(s_gev-mtar_gev**2)/2./
-c     >		(efer-pfer*tfcos)/Q2_g/(1.-epsi)
 
 	gtpr = alpha/2./(pi**2)*vertex%e%E/vertex%Ein*(s_gev-mtar_gev**2)/2./
      >		(targ%Mtar_struck)/Q2_g/(1.-epsi)
@@ -564,19 +475,19 @@ c     >		(efer-pfer*tfcos)/Q2_g/(1.-epsi)
 	davesig = gtpr*sig*jacobian
 *******************************************************************************
 
-	sigma_eepi = davesig
-	peepi = sigma_eepi
+	sigma_eek = davesig
+	peek = sigma_eek
 
-	ntup%sigcm = sigma_eepi		!sig_cm
+	ntup%sigcm = sigma_eek		!sig_cm
 
-c	write(6,*)' 1 ',jacobian,thetacm,phicm,ppicm
+c	write(6,*)' 1 ',jacobian,thetacm,phicm,pkcm
 c	write(6,*)'   ',efer,pfer
-c       write(6,*)'   ',gtpr,sig,sigma_eepi
+c       write(6,*)'   ',gtpr,sig,sigma_eek
 c	write(6,*)'   ',sigl,sigt,siglt,sigtt,wfactor
 
 202	format(/11X,f5.1/)
 203	format(11X,f5.0)
 204	format(6(/9X,7f8.3))
-
+        
 	return
 	end
