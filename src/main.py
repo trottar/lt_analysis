@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 21:46:33 trottar"
+# Time-stamp: "2023-09-18 21:55:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -402,14 +402,10 @@ if not os.path.exists(foutroot):
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-            if "polar_phiq_vs_t_DATA" in key:
-                print(key,type(val))
             if is_hist(val):            
                 if "ratio" in key:
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                 if "DATA" in key:
-                    if "polar_phiq_vs_t_DATA" in key:
-                        print(key,type(val))
                     if "yield" in key:
                         hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
                     elif "bin" in key:
