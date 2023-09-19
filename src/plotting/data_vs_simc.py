@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 00:45:23 trottar"
+# Time-stamp: "2023-09-19 00:53:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,20 +217,15 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         bin1 = hist["H_t_SIMC"].FindBin(t_bins[i])
         bin2 = hist["H_t_SIMC"].FindBin(t_bins[i+1])
         # Get the content of the bins and calculate the number of events between them
-        #events_between = sum(hist["H_t_SIMC"].GetBinContent(j) for j in range(bin1, bin2+1))
-        events_between = 0
-        for j in range(bin1, bin2+1):
-            print("~~~~~~~~~~",t_bins[i], t_bins[i+1])
-            print(hist["H_t_SIMC"].GetBinContent(j))
-            events_between += hist["H_t_SIMC"].GetBinContent(j)
+        events_between = sum(hist["H_t_SIMC"].GetBinContent(j) for j in range(bin1, bin2+1))
 
         if i == 0:
             tBin_line.SetLineColor(3)
         else:
-            tBin_line.SetLineColor(3)
+            tBin_line.SetLineColor(4)
         tBin_line.SetLineWidth(4)
         tBin_line.DrawLine(b,0,b,binmax)
-        l_t.AddEntry(tBin_line,"Num Evts in bin {}: {}".format(i+1, events_between))
+        l_t.AddEntry(tBin_line,"Num Evts in bin {:.3f}: {:.3f}".format(i+1, events_between))
         l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
         
     b = t_bins[i+1]
