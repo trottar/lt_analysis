@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 01:53:42 trottar"
+# Time-stamp: "2023-09-18 23:53:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -139,11 +139,11 @@ def find_bins(histlist, inpDict):
             # discrete data points (xp, fp), evaluated at x.
             #
             # np.interp(x, xp, fp)
-            # x -> np.linspace(0, npt, nbin + 1) : The x-coordinates at which to evaluate the interpolated values
+            # x -> np.linspace(0, npt, nbin) : The x-coordinates at which to evaluate the interpolated values
             # In this case, this is an array of evenly spaced t-bins
             # xp -> np.arange(npt) : The x-coordinates of the data points
             # In this case, this returns evenly spaced values within a given interval
-            # yp -> np.sort(x) : he y-coordinates of the data points
+            # yp -> np.sort(x) : the y-coordinates of the data points
             # In this case, this returns a sorted copy of the array
             return np.interp(np.linspace(0, npt, nbin),np.arange(npt),np.sort(x))
 
