@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 00:14:01 trottar"
+# Time-stamp: "2023-09-19 00:16:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -209,7 +209,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     t_bins = np.append(t_bins, tmax)
     tBin_line = TLine()
-    for i in range(0, len(t_bins)+1):
+    for i in range(0, len(t_bins)-1):
         b = t_bins[i]
         # Find the bins corresponding to the given bin centers
         bin1 = hist["H_t_SIMC"].FindBin(t_bins[i])
