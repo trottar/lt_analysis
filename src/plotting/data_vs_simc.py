@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 00:54:44 trottar"
+# Time-stamp: "2023-09-19 01:00:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -220,19 +220,19 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         events_between = sum(hist["H_t_DATA"].GetBinContent(j) for j in range(bin1, bin2+1))
 
         if i == 0:
-            tBin_line.SetLineColor(3)
+            tBin_line.SetLineColor(5)
         else:
             tBin_line.SetLineColor(4)
-        tBin_line.SetLineWidth(4)
+        tBin_line.SetLineWidth(5)
         tBin_line.DrawLine(b,0,b,binmax)
-        l_t.AddEntry(tBin_line,"Num Evts in bin {:.3f}: {:.3f}".format(i+1, events_between))
+        l_t.AddEntry(tBin_line,"Num Evts in bin {:.3f}: {:.0f}".format(i+1, events_between))
         l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
         
     b = t_bins[i+1]
-    tBin_line.SetLineColor(3) 
+    tBin_line.SetLineColor(5)
     tBin_line.SetLineWidth(4)
     tBin_line.DrawLine(b,0,b,binmax)
-    l_t.AddEntry(tBin_line,"Num Evts in bin {}: {}".format(i+1, events_between))
+    l_t.AddEntry(tBin_line,"Num Evts in bin {:.3f}: {:.0f}".format(i+1, events_between))
     l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
         
     l_t.Draw()    
