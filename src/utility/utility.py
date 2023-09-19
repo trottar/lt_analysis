@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 12:12:33 trottar"
+# Time-stamp: "2023-09-19 12:14:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -79,12 +79,12 @@ def weight_bins(histogram):
     '''
 
     # Create a new TH1F to hold the flattened histogram
-    flattened_hist = ROOT.TH1F("flattened_hist", "Flattened Histogram", original_hist.GetNbinsX(), original_hist.GetXaxis().GetXmin(), original_hist.GetXaxis().GetXmax())
+    flattened_hist = ROOT.TH1F("flattened_hist", "Flattened Histogram", histogram.GetNbinsX(), histogram.GetXaxis().GetXmin(), histogram.GetXaxis().GetXmax())
 
     # Loop over the bins in the original histogram
-    for i in range(1, original_hist.GetNbinsX() + 1):
-        bin_center = original_hist.GetBinCenter(i)
-        bin_content = original_hist.GetBinContent(i)
+    for i in range(1, histogram.GetNbinsX() + 1):
+        bin_center = histogram.GetBinCenter(i)
+        bin_content = histogram.GetBinContent(i)
 
         # Fill the new histogram with the bin center 'bin_content' times
         for j in range(bin_content):
