@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 20:13:08 trottar"
+# Time-stamp: "2023-09-18 20:17:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,10 +110,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 * Need to read in previous iteration histograms, information, etc.
 
 '''
-
-sys.path.append("normalize")
-from get_eff_charge import get_eff_charge
-
+    
 # Find last iteration, based of closest date
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
@@ -189,6 +186,12 @@ iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H
 '''
 
 print("\n\n")
+
+sys.path.append("normalize")
+from get_eff_charge import get_eff_charge
+# Upate hist dictionary with effective charge
+for hist in histlist:
+    hist.update(get_eff_charge(hist, inpDict))
 
 # Create a new directory for each iteration in cache
 # ***Moved up in procedure vs main.py since required for weight iteration
