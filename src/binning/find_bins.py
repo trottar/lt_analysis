@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 14:28:50 trottar"
+# Time-stamp: "2023-09-19 14:30:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,9 +167,9 @@ def find_bins(histlist, inpDict):
         # such containers if there are multiple input datasets.
         n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]))
 
-        bins = bins[1:-1]
+        bin_centers = bins[1:-1]
         
-        bin_centers = (bins[:-1] + bins[1:]) / 2
+        #bin_centers = (bins[:-1] + bins[1:]) / 2
         
         print("t_bins = ", bin_centers)
         
