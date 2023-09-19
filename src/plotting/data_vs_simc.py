@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 01:06:31 trottar"
+# Time-stamp: "2023-09-19 11:41:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -205,35 +205,33 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_t_SIMC"].SetLineStyle(10-i)
         hist["H_t_SIMC"].Draw("same, E1")
         binmax.append(hist["H_t_DATA"].GetMaximum())
-    binmax = max(binmax)
+        binmax = max(binmax)
 
-    t_bins = np.append(t_bins, tmin)
-    t_bins = np.append(t_bins, tmax)
-    t_bins = np.sort(t_bins)
-    tBin_line = TLine()
-    for i in range(0, len(t_bins)-1):
-        b = t_bins[i]
-        # Find the bins corresponding to the given bin centers
-        bin1 = hist["H_t_DATA"].FindBin(t_bins[i])
-        bin2 = hist["H_t_DATA"].FindBin(t_bins[i+1])
-        # Get the content of the bins and calculate the number of events between them
-        events_between = sum(hist["H_t_DATA"].GetBinContent(j) for j in range(bin1, bin2+1))
+        t_bins = np.append(t_bins, tmin)
+        t_bins = np.append(t_bins, tmax)
+        t_bins = np.sort(t_bins)
+        tBin_line = TLine()
+        for i in range(0, len(t_bins)-1):
+            b = t_bins[i]
+            # Find the bins corresponding to the given bin centers
+            bin1 = hist["H_t_DATA"].FindBin(t_bins[i])
+            bin2 = hist["H_t_DATA"].FindBin(t_bins[i+1])
+            # Get the content of the bins and calculate the number of events between them
+            events_between = sum(hist["H_t_DATA"].GetBinContent(j) for j in range(bin1, bin2+1))
 
-        if i == 0:
-            tBin_line.SetLineColor(5)
-        else:
-            tBin_line.SetLineColor(4)
-        tBin_line.SetLineWidth(5)
+            if i == 0:
+                tBin_line.SetLineColor(5)
+            else:
+                tBin_line.SetLineColor(4)
+                l_t.AddEntry(tBin_line,"Num Evts in bin {}: {:.0f}".format(i+1, events_between))
+                l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)        
+            tBin_line.SetLineWidth(5)
+            tBin_line.DrawLine(b,0,b,binmax)
+
+        b = t_bins[i+1]
+        tBin_line.SetLineColor(5)
+        tBin_line.SetLineWidth(4)
         tBin_line.DrawLine(b,0,b,binmax)
-        l_t.AddEntry(tBin_line,"Num Evts in bin {}: {:.0f}".format(i+1, events_between))
-        l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
-        
-    b = t_bins[i+1]
-    tBin_line.SetLineColor(5)
-    tBin_line.SetLineWidth(4)
-    tBin_line.DrawLine(b,0,b,binmax)
-    l_t.AddEntry(tBin_line,"Num Evts in bin {}: {:.0f}".format(i+1, events_between))
-    l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
         
     l_t.Draw()    
 
