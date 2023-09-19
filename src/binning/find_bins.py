@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 23:53:16 trottar"
+# Time-stamp: "2023-09-19 14:26:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,6 +101,8 @@ def find_bins(histlist, inpDict):
 
     # Concatenate the H_t arrays for Right, Left, and Center
     H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
+    H_t_BinTest = np.append(H_t_BinTest, tmin)
+    H_t_BinTest = np.append(H_t_BinTest, tmax)
 
     # Concatenate the H_phi arrays for Right, Left, and Center
     H_phi_BinTest = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
@@ -145,7 +147,11 @@ def find_bins(histlist, inpDict):
             # In this case, this returns evenly spaced values within a given interval
             # yp -> np.sort(x) : the y-coordinates of the data points
             # In this case, this returns a sorted copy of the array
-            return np.interp(np.linspace(0, npt, nbin),np.arange(npt),np.sort(x))
+            npt = len(x) 
+            indices = np.linspace(0, npt-1, nbin+1).astype(int)  # Corrected line
+            sorted_x = np.sort(x)
+            equalN_values = sorted_x[indices]
+            return np.interp(np.linspace(0, npt, nbin+2), indices, equalN_values)
 
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
@@ -156,8 +162,10 @@ def find_bins(histlist, inpDict):
         # bins -> The edges of the bins
         # patches -> Container of individual artists used to create the histogram or list of
         # such containers if there are multiple input datasets.
-        n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]+1))
+        n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]))
 
+        bins = bins[1:-1]
+        
         bin_centers = (bins[:-1] + bins[1:]) / 2
         
         print("t_bins = ", bin_centers)
