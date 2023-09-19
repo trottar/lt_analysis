@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 14:33:48 trottar"
+# Time-stamp: "2023-09-19 14:47:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import weight_bins
+from utility import flatten_hist
 
 ################################################################################################################################################
 
@@ -85,8 +85,8 @@ def find_bins(histlist, inpDict):
     
     for i,hist in enumerate(histlist):
         
-        t = weight_bins(hist["H_t_DATA"])
-        phi_deg = [(phi + math.pi)*(180 / math.pi) for phi in weight_bins(hist["H_ph_q_DATA"])]
+        t = flatten_hist(hist["H_t_DATA"])
+        phi_deg = [(phi + math.pi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
         
         if hist["phi_setting"] == 'Right':
             H_t_Right = np.append(H_t_Right, t)
@@ -104,6 +104,8 @@ def find_bins(histlist, inpDict):
 
     # Concatenate the H_t arrays for Right, Left, and Center
     H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
+
+    # Apply proper boundaries
     H_t_BinTest = np.append(H_t_BinTest, tmin)
     H_t_BinTest = np.append(H_t_BinTest, tmax)
 
@@ -151,10 +153,10 @@ def find_bins(histlist, inpDict):
             # yp -> np.sort(x) : the y-coordinates of the data points
             # In this case, this returns a sorted copy of the array
             npt = len(x) 
-            indices = np.linspace(0, npt-1, nbin+1).astype(int)  # Corrected line
+            indices = np.linspace(0, npt-1, nbin+1).astype(int)
             sorted_x = np.sort(x)
             equalN_values = sorted_x[indices]
-            return np.interp(np.linspace(0, npt, nbin+2), indices, equalN_values)
+            return np.interp(np.linspace(0, npt, nbin+2), indices, equalN_values) # +2 to account for tmin and tmax
 
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
@@ -167,9 +169,8 @@ def find_bins(histlist, inpDict):
         # such containers if there are multiple input datasets.
         n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]))
 
+        # Stripping tmin and tmax
         bin_centers = bins[1:-1]
-        
-        #bin_centers = (bins[:-1] + bins[1:]) / 2
         
         print("t_bins = ", bin_centers)
         

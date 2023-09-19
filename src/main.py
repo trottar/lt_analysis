@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 21:55:16 trottar"
+# Time-stamp: "2023-09-19 14:55:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -160,6 +160,12 @@ output_file_lst = []
 ###############################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
+
+# Removes this file to reset iteration count (see below for more details)
+f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+# Check if the file exists
+if os.path.exists(f_path):
+    os.remove(f_path)
 
 ##############################
 # Step 1 of the lt_analysis: # DONE

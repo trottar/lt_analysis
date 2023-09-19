@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 22:41:56 trottar"
+# Time-stamp: "2023-09-19 14:51:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, hist_to_root, last_iter, get_histogram, hist_in_dir
+from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -305,24 +305,22 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
-if not os.path.exists(foutroot):
+if os.path.exists(foutroot):
     for hist in histlist:
         print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
         # Loop through all keys,values of dictionary
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-            if is_root_obj(val):
-                if "ratio" in val.GetName():
+            if is_hist(val):
+                if "ratio" in key:
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
-                if "G_" in val.GetName():
-                    hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                    
-                if "SIMC" in val.GetName():
-                    if "yield" in val.GetName():
+                if "SIMC" in key:
+                    if "yield" in key:
                         hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
-                    elif "bin" in val.GetName():
+                    elif "bin" in key:
                         hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
-                    elif "totevts" in val.GetName():
+                    elif "totevts" in key:
                         hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                     else:
                         hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
