@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 14:47:01 trottar"
+# Time-stamp: "2023-09-19 15:39:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,7 +251,6 @@ def hist_in_dir(root_file, directory_name):
     current_dir = root_file
     
     for directory in directories:
-        print("Checking directory: {}".format(directory))  # Debug statement
         # Check if the directory exists
         dir_exists = bool(current_dir.GetDirectory(directory))
         if not dir_exists:

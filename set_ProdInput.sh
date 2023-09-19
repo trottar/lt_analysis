@@ -102,6 +102,9 @@ InputSIMC_left="Prod_Coin_Q${Q2}W${W}left_${EPSILON}e"
 InputSIMC_center="Prod_Coin_Q${Q2}W${W}center_${EPSILON}e"
 
 cd ${LTANAPATH}/src/setup
+
+python3 set_q2_simc.py ${Q2}
+
 if [[ -f "${LTANAPATH}/input/${InputSIMC_right}.inp" ]]; then
     echo
     echo 
