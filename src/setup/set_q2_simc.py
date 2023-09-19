@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 17:49:24 trottar"
+# Time-stamp: "2023-09-19 17:50:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -39,7 +39,7 @@ CACHEPATH=lt.CACHEPATH
 
 file_path = "{}/physics_iterate.f".format(SIMCPATH)
 
-print("Updating {} with proper Q2...")
+print("Updating {} with proper Q2...".format(file_path))
 # Read the file and store its contents
 with open(file_path, 'r') as file:
     lines = file.readlines()
@@ -47,7 +47,7 @@ with open(file_path, 'r') as file:
 # Find and replace the specific variable definition
 for i, line in enumerate(lines):
     if 'q2_set=' in line:
-        print("Changing {} to q2_set={}".format(line,Q2))
+        print("Changing {} to q2_set={}".format(line.strip(),Q2))
         lines[i] = 'q2_set={}\n'.format(Q2)
 
 # Write the modified content back to the file
