@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:28:07 trottar"
+# Time-stamp: "2023-09-18 20:13:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,6 +110,9 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 * Need to read in previous iteration histograms, information, etc.
 
 '''
+
+sys.path.append("normalize")
+from get_eff_charge import get_eff_charge
 
 # Find last iteration, based of closest date
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 19:59:22 trottar"
+# Time-stamp: "2023-09-18 20:12:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -402,35 +402,29 @@ if not os.path.exists(foutroot):
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-            print("!!!!!!!!!!!!!!!!!",val)
-            if is_root_obj(val):
-                if is_hist(val):
-                    if "ratio" in val.GetName():
+            if is_hist(val):
+                if "ratio" in val.GetName():
+                    hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
+                if "DATA" in val.GetName():
+                    if "yield" in val.GetName():
+                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
+                    elif "bin" in val.GetName():
+                        hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
+                    elif "totevts" in val.GetName():
                         hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
-                    if "DATA" in val.GetName():
-                        if "yield" in val.GetName():
-                            hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
-                        elif "bin" in val.GetName():
-                            hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
-                        elif "totevts" in val.GetName():
-                            hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
-                        else:
-                            hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
-                    if "SIMC" in val.GetName():
-                        if "yield" in val.GetName():
-                            hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
-                        elif "bin" in val.GetName():
-                            hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
-                        elif "totevts" in val.GetName():
-                            hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
-                        else:
-                            hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
-                    if "DUMMY" in val.GetName():
-                        hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
-                else:
-                    #if "G_" in val.GetName():
-                    print("HERE!!!")
-                    #hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                    
+                    else:
+                        hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
+                if "SIMC" in val.GetName():
+                    if "yield" in val.GetName():
+                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
+                    elif "bin" in val.GetName():
+                        hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
+                    elif "totevts" in val.GetName():
+                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
+                    else:
+                        hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
+                if "DUMMY" in val.GetName():
+                    hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
 
     # Open the ROOT file
     root_file = TFile.Open(foutroot, "UPDATE")

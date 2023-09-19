@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 20:15:53 trottar"
+# Time-stamp: "2023-09-18 20:08:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -655,6 +655,3 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             i = simc_key_tuple[0] # t bin
             j = simc_key_tuple[1] # phi bin
             hist["H_totevts_SIMC_{}_{}".format(str(i+1), str(j+1))] = histbinDict["H_totevts_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))]
-
-        hist["G_yield_data_plt"] = G_yield_data_plt        
-        hist["G_ratio"] = G_ratio
