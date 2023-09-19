@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 22:42:47 trottar"
+# Time-stamp: "2023-09-19 12:12:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,6 +47,8 @@ def create_dir(dir_name):
 
 # Convert TH1D to NumPy array
 def weight_bins(histogram):
+
+    '''
     
     # Get the number of bins in the histogram
     n_bins = histogram.GetNbinsX()
@@ -74,6 +76,21 @@ def weight_bins(histogram):
     weighted_bin_edges = [edge * weight for edge, weight in zip(bin_edges, bin_weights)]
     
     return weighted_bin_edges
+    '''
+
+    # Create a new TH1F to hold the flattened histogram
+    flattened_hist = ROOT.TH1F("flattened_hist", "Flattened Histogram", original_hist.GetNbinsX(), original_hist.GetXaxis().GetXmin(), original_hist.GetXaxis().GetXmax())
+
+    # Loop over the bins in the original histogram
+    for i in range(1, original_hist.GetNbinsX() + 1):
+        bin_center = original_hist.GetBinCenter(i)
+        bin_content = original_hist.GetBinContent(i)
+
+        # Fill the new histogram with the bin center 'bin_content' times
+        for j in range(bin_content):
+            flattened_hist.Fill(bin_center)
+
+    return flattened_hist
 
 ################################################################################################################################################
 
