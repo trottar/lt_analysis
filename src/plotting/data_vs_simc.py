@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 20:09:12 trottar"
+# Time-stamp: "2023-09-19 00:10:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,13 +207,20 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         binmax.append(hist["H_t_DATA"].GetMaximum())
     binmax = max(binmax)
 
+    t_bins.append(tmax)
     tBin_line = TLine()
-    for i,b in enumerate(t_bins):
-        b = float(b)
+    for i in range(0, len(t_bins)+1):
+        b = t_bins[i]
+        # Find the bins corresponding to the given bin centers
+        bin1 = hist["H_t_SIMC"].FindBin(t_bins[i])
+        bin2 = hist["H_t_SIMC"].FindBin(t_bins[i+1])
+        # Get the content of the bins and calculate the number of events between them
+        events_between = sum(hist["H_t_SIMC"].GetBinContent(j) for j in range(bin1, bin2+1))
+        
         tBin_line.SetLineColor(4)
         tBin_line.SetLineWidth(4)
         tBin_line.DrawLine(b,0,b,binmax)
-        l_t.AddEntry(tBin_line,"Bin Edge %s" % i )
+        l_t.AddEntry(tBin_line,"Num Evts in bin {}: {}".format(i+1, events_between))
         l_t.AddEntry(tBin_line,"BinCenter = %.2f" % b)
 
     l_t.Draw()    
