@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-20 16:18:17 trottar"
+# Time-stamp: "2023-09-20 16:20:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -197,9 +197,9 @@ def unsep_xsect(inpDict):
     phi_setting = ['left', 'center']
 
     for ps in phi_setting:
-        for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
-            G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
-            G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
+        for i in range(len(file_df_dict['aver_eps_{}'.format(ps)]['ratio'].tolist())):
+            G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_eps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_eps_{}'.format(ps)]['ratio'].tolist())[i])
+            G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_eps_{}'.format(ps)]['dratio'].tolist())[i])
             G_ratio_phi.SetMarkerColor(i+1)
 
     G_ratio_phi.SetMarkerStyle(21)
@@ -219,9 +219,9 @@ def unsep_xsect(inpDict):
     phi_setting = ['left', 'center']
 
     for ps in phi_setting:
-        for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
-            G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['tbin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
-            G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
+        for i in range(len(file_df_dict['aver_eps_{}'.format(ps)]['ratio'].tolist())):
+            G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_eps_{}'.format(ps)]['tbin'].tolist())[i], np.array(file_df_dict['aver_eps_{}'.format(ps)]['ratio'].tolist())[i])
+            G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_eps_{}'.format(ps)]['dratio'].tolist())[i])
             G_ratio_t.SetMarkerColor(i+1)
 
     G_ratio_t.SetMarkerStyle(21)
@@ -240,9 +240,9 @@ def unsep_xsect(inpDict):
 
     G_Q2_tbin.SetTitle("eps = %s ; #theta_{cm}; Q^{2} Average" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
-        G_Q2_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
-        l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['Q2'].tolist())):
+        G_Q2_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['Q2'].tolist())[i])
+        l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_Q2_tbin.SetMarkerColor(i+1)
 
     G_Q2_tbin.SetMarkerStyle(21)
@@ -262,9 +262,9 @@ def unsep_xsect(inpDict):
 
     G_W_tbin.SetTitle("eps = %s ; #theta_{cm}; W Average" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
-        G_W_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
-        l_W_tbin.AddEntry(G_W_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['W'].tolist())):
+        G_W_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['W'].tolist())[i])
+        l_W_tbin.AddEntry(G_W_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_W_tbin.SetMarkerColor(i+1)
 
     G_W_tbin.SetMarkerStyle(21)
@@ -284,9 +284,9 @@ def unsep_xsect(inpDict):
 
     G_t_tbin.SetTitle("eps = %s ; #theta_{cm}; t Average" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
-        G_t_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
-        l_t_tbin.AddEntry(G_t_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['tm'].tolist())):
+        G_t_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i])
+        l_t_tbin.AddEntry(G_t_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_t_tbin.SetMarkerColor(i+1)
 
     G_t_tbin.SetMarkerStyle(21)
@@ -306,9 +306,9 @@ def unsep_xsect(inpDict):
 
     G_Q2_phitbin.SetTitle("eps = %s ; #phi; Q^{2} Average" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
-        G_Q2_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
-        l_Q2_phitbin.AddEntry(G_Q2_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['Q2'].tolist())):
+        G_Q2_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['Q2'].tolist())[i])
+        l_Q2_phitbin.AddEntry(G_Q2_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_Q2_phitbin.SetMarkerColor(i+1)
 
     G_Q2_phitbin.SetMarkerStyle(21)
@@ -328,9 +328,9 @@ def unsep_xsect(inpDict):
 
     G_W_phitbin.SetTitle("eps = %s ; #phi; W Average" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
-        G_W_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
-        l_W_phitbin.AddEntry(G_W_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['W'].tolist())):
+        G_W_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['W'].tolist())[i])
+        l_W_phitbin.AddEntry(G_W_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_W_phitbin.SetMarkerColor(i+1)
 
     G_W_phitbin.SetMarkerStyle(21)
@@ -350,9 +350,9 @@ def unsep_xsect(inpDict):
 
     G_t_phitbin.SetTitle("eps = %s ; #phi; t Average" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
-        G_t_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
-        l_t_phitbin.AddEntry(G_t_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['tm'].tolist())):
+        G_t_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i])
+        l_t_phitbin.AddEntry(G_t_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_t_phitbin.SetMarkerColor(i+1)
 
     G_t_phitbin.SetMarkerStyle(21)
@@ -372,10 +372,10 @@ def unsep_xsect(inpDict):
 
     G_xreal_th.SetTitle("eps = %s ; #theta_{cm}; x_real" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-        G_xreal_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-        G_xreal_th.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-        l_xreal_th.AddEntry(G_xreal_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['x_real'].tolist())):
+        G_xreal_th.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['x_real'].tolist())[i])
+        G_xreal_th.SetPointError(i, 0, np.array(file_df_dict['xsects_file_eps']['dx_real'].tolist())[i])
+        l_xreal_th.AddEntry(G_xreal_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_xreal_th.SetMarkerColor(i+1)
 
     G_xreal_th.SetMarkerStyle(21)
@@ -395,9 +395,9 @@ def unsep_xsect(inpDict):
 
     G_xmod_th.SetTitle("eps = %s ; #theta_{cm}; x_mod" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-        G_xmod_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
-        l_xmod_th.AddEntry(G_xmod_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['x_mod'].tolist())):
+        G_xmod_th.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['x_mod'].tolist())[i])
+        l_xmod_th.AddEntry(G_xmod_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_xmod_th.SetMarkerColor(i+1)
 
     G_xmod_th.SetMarkerStyle(21)
@@ -417,10 +417,10 @@ def unsep_xsect(inpDict):
 
     G_xreal_phi.SetTitle("eps = %s ; #phi; x_real" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-        G_xreal_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-        G_xreal_phi.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-        l_xreal_phi.AddEntry(G_xreal_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['x_real'].tolist())):
+        G_xreal_phi.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['x_real'].tolist())[i])
+        G_xreal_phi.SetPointError(i, 0, np.array(file_df_dict['xsects_file_eps']['dx_real'].tolist())[i])
+        l_xreal_phi.AddEntry(G_xreal_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_xreal_phi.SetMarkerColor(i+1)
 
     G_xreal_phi.SetMarkerStyle(21)
@@ -440,9 +440,9 @@ def unsep_xsect(inpDict):
 
     G_xmod_phi.SetTitle("eps = %s ; #phi; x_mod" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-        G_xmod_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
-        l_xmod_phi.AddEntry(G_xmod_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['x_mod'].tolist())):
+        G_xmod_phi.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['x_mod'].tolist())[i])
+        l_xmod_phi.AddEntry(G_xmod_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_xmod_phi.SetMarkerColor(i+1)
 
     G_xmod_phi.SetMarkerStyle(21)
@@ -462,10 +462,10 @@ def unsep_xsect(inpDict):
 
     G_xreal_t.SetTitle("eps = %s ; t; x_real" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-        G_xreal_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-        G_xreal_t.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-        l_xreal_t.AddEntry(G_xreal_t, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+    for i in range(len(file_df_dict['xsects_file_eps']['x_real'].tolist())):
+        G_xreal_t.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['x_real'].tolist())[i])
+        G_xreal_t.SetPointError(i, 0, np.array(file_df_dict['xsects_file_eps']['dx_real'].tolist())[i])
+        l_xreal_t.AddEntry(G_xreal_t, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i]))
         G_xreal_t.SetMarkerColor(i+1)
 
     G_xreal_t.SetMarkerStyle(21)
@@ -483,8 +483,8 @@ def unsep_xsect(inpDict):
 
     G_xmod_t.SetTitle("eps = %s ; t; x_mod" % EPSVAL)
 
-    for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-        G_xmod_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
+    for i in range(len(file_df_dict['xsects_file_eps']['x_mod'].tolist())):
+        G_xmod_t.SetPoint(i, np.array(file_df_dict['xsects_file_eps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_eps']['x_mod'].tolist())[i])
         G_xmod_t.SetMarkerColor(i+1)
 
     G_xmod_t.SetMarkerStyle(21)
