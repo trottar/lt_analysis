@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-03-02 12:42:42 trottar"
+# Time-stamp: "2023-09-20 15:54:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -19,30 +19,6 @@ from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import re
 import sys, math, os, subprocess
-
-##################################################################################################################################################
-# Check the number of arguments provided to the script
-
-if len(sys.argv)-1!=6:
-    print("!!!!! ERROR !!!!!\n Expected 6 arguments\n Usage is with - Q2 W LOEPS HIEPS KIN OutUnsepxsectsFilename\n!!!!! ERROR !!!!!")
-    sys.exit(1)
-
-###############################################################################################################################################
-    
-Q2 = sys.argv[1]
-W = sys.argv[2]
-LOEPS = sys.argv[3]
-HIEPS = sys.argv[4]
-
-kinematics = sys.argv[5]
-OutFilename = sys.argv[6]
-
-particle = "kaon"
-
-if particle == "kaon":
-    PID = "k"
-elif particle == "pion":
-    PID = "pi"
     
 ###############################################################################################################################################
 
@@ -65,10 +41,6 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
-
-foutname = OUTPATH+"/" + OutFilename + ".root"
-fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
-outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 
 ################################################################################################################################################
 
@@ -93,11 +65,11 @@ def file_to_df(f_name, columns):
     return df
 
 ################################################################################################################################################
-
+'''
 def fix_spacing(f_name):
-    '''
+    ''
     Fortran created files are bad with spacing. This fixes it.
-    '''
+    ''
 
     # Open the file for reading
     with open(f_name, 'r') as file:
@@ -117,392 +89,407 @@ def fix_spacing(f_name):
 fix_spacing(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")))
 fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(LOEPS)*100))
 fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(HIEPS)*100))
+
+'''
 ################################################################################################################################################
 # Read in files and convert to dataframes
 
-file_df_dict = {}
+def unsep_xsect(inpDict):
 
-setting_file = LTANAPATH+"/src/list.settings"
-file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins', 'Kset'])
-
-for i,row in file_df_dict['setting_df'].iterrows():
-    if row['Q2'] == float(Q2.replace("p",".")):
-        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
-        file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")) \
-                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])
-        if row['EPSVAL'] == float(LOEPS):
-            if row['thpq'] < 0.0:
-                file_df_dict['aver_loeps_{}'.format('right')] = file_to_df( \
-                                                                            LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                            .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                            , ['ratio', 'dratio', 'phibin', 'tbin'])
-                file_df_dict['kindata_loeps_{}'.format('right')] = file_to_df( \
-                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
-                                                                               .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
-                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            if row['thpq'] > 0.0:
-                file_df_dict['aver_loeps_{}'.format('left')] = file_to_df( \
-                                                                           LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                           .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                           , ['ratio', 'dratio', 'phibin', 'tbin'])
-                file_df_dict['kindata_loeps_{}'.format('left')] = file_to_df( \
-                                                                              LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
-                                                                              .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
-                                                                              , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            if row['thpq'] == 0.0:
-                file_df_dict['aver_loeps_{}'.format('center')] = file_to_df( \
-                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                             .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                             , ['ratio', 'dratio', 'phibin', 'tbin'])
-                file_df_dict['kindata_loeps_{}'.format('center')] = file_to_df( \
-                                                                                LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
-                                                                                .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            file_df_dict['xsects_file_loeps'] = file_to_df( \
-                                                            LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}" \
-                                                            .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
-
-        if row['EPSVAL'] == float(HIEPS):
-            if row['thpq'] < 0.0:
-                file_df_dict['aver_hieps_{}'.format('right')] = file_to_df( \
-                                                                            LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                            .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                            , ['ratio', 'dratio', 'phibin', 'tbin'])
-                file_df_dict['kindata_hieps_{}'.format('right')] = file_to_df( \
-                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
-                                                                               .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
-                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            if row['thpq'] > 0.0:
-                file_df_dict['aver_hieps_{}'.format('left')] = file_to_df( \
-                                                                           LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                           .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                           , ['ratio', 'dratio', 'phibin', 'tbin'])
-                file_df_dict['kindata_hieps_{}'.format('left')] = file_to_df( \
-                                                                              LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
-                                                                              .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
-                                                                              , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            if row['thpq'] == 0.0:
-                file_df_dict['aver_hieps_{}'.format('center')] = file_to_df( \
-                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                             .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                             , ['ratio', 'dratio', 'phibin', 'tbin'])
-                file_df_dict['kindata_hieps_{}'.format('center')] = file_to_df( \
-                                                                                LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
-                                                                                .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            file_df_dict['xsects_file_hieps'] = file_to_df( \
-                                                            LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}" \
-                                                            .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
-
-################################################################################################################################################
-ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
-################################################################################################################################################
-
-C_ratio_phi = TCanvas()
-C_ratio_phi.SetGrid()
-
-G_ratio_phi = ROOT.TGraphErrors()
-
-G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
-
-phi_setting = ['left', 'center']
-
-for ps in phi_setting:
-    for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
-        G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
-        G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
-        G_ratio_phi.SetMarkerColor(i+1)
-
-G_ratio_phi.SetMarkerStyle(21)
-G_ratio_phi.SetMarkerSize(1)
+    kinematics = inpDict["kinematics"] 
+    W = inpDict["W"] 
+    Q2 = inpDict["Q2"] 
+    EPSVAL = inpDict["EPSVAL"] 
+    InDATAFilename = inpDict["InDATAFilename"] 
+    InDUMMYFilename = inpDict["InDUMMYFilename"] 
+    OutFilename = inpDict["OutFilename"] 
+    tmin = inpDict["tmin"] 
+    tmax = inpDict["tmax"] 
+    NumtBins = inpDict["NumtBins"] 
+    NumPhiBins = inpDict["NumPhiBins"] 
+    runNumRight = inpDict["runNumRight"] 
+    runNumLeft = inpDict["runNumLeft"] 
+    runNumCenter = inpDict["runNumCenter"]
+    data_charge_right = inpDict["data_charge_right"] 
+    data_charge_left = inpDict["data_charge_left"] 
+    data_charge_center = inpDict["data_charge_center"] 
+    dummy_charge_right = inpDict["dummy_charge_right"] 
+    dummy_charge_left = inpDict["dummy_charge_left"] 
+    dummy_charge_center = inpDict["dummy_charge_center"] 
+    InData_efficiency_right = inpDict["InData_efficiency_right"] 
+    InData_efficiency_left = inpDict["InData_efficiency_left"] 
+    InData_efficiency_center = inpDict["InData_efficiency_center"] 
+    efficiency_table = inpDict["efficiency_table"] 
+    ParticleType = inpDict["ParticleType"]
+    POL = inpDict["POL"]
     
-G_ratio_phi.Draw('AP')
+    if int(POL) == 1:
+        pol_str = "pl"
+    elif int(POL) == -1:
+        pol_str = "mn"
+    else:
+        print("ERROR: Invalid polarity...must be +1 or -1")
+        sys.exit(2)
 
-C_ratio_phi.Print(outputpdf + '(')
+    ################################################################################################################################################
 
-C_ratio_t = TCanvas()
-C_ratio_t.SetGrid()
+    foutname = OUTPATH + "/" + ParticleType + "_unsep_" + OutFilename + ".root"
+    fouttxt  = OUTPATH + "/" + ParticleType + "_unsep_" + OutFilename + ".txt"
+    outputpdf  = OUTPATH + "/" + ParticleType + "_unsep_" + OutFilename + ".pdf"
 
-G_ratio_t = ROOT.TGraphErrors()
-
-G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % LOEPS)
-
-phi_setting = ['left', 'center']
-
-for ps in phi_setting:
-    for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
-        G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['tbin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
-        G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
-        G_ratio_t.SetMarkerColor(i+1)
-
-G_ratio_t.SetMarkerStyle(21)
-G_ratio_t.SetMarkerSize(1)
+    ################################################################################################################################################
     
-G_ratio_t.Draw('AP')
+    file_df_dict = {}
+
+    setting_file = LTANAPATH+"/src/{}/list.settings"
+    file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins', 'Kset'])
+
+    for i,row in file_df_dict['setting_df'].iterrows():
+        if row['Q2'] == float(Q2.replace("p",".")):
+            file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
+            file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/{}/averages/avek.{}.dat".format(Q2.replace("p","")) \
+                                                   , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])
+
+            if row['EPSVAL'] == float(EPSVAL):
+                if row['thpq'] < 0.0:
+                    file_df_dict['aver_eps_{}'.format('right')] = file_to_df( \
+                                                                                LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                                .format(pol_str, Q2.replace("p",""), float(EPSVAL)*100) \
+                                                                                , ['ratio', 'dratio', 'phibin', 'tbin'])
+                    file_df_dict['kindata_eps_{}'.format('right')] = file_to_df( \
+                                                                                   LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
+                                                                                   .format(pol_str, Q2.replace("p",""), float(EPSVAL)*100, int(row['thpq']*1000)) \
+                                                                                   , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
+                if row['thpq'] > 0.0:
+                    file_df_dict['aver_eps_{}'.format('left')] = file_to_df( \
+                                                                               LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                               .format(pol_str, Q2.replace("p",""), float(EPSVAL)*100) \
+                                                                               , ['ratio', 'dratio', 'phibin', 'tbin'])
+                    file_df_dict['kindata_eps_{}'.format('left')] = file_to_df( \
+                                                                                  LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
+                                                                                  .format(pol_str, Q2.replace("p",""), float(EPSVAL)*100, int(row['thpq']*1000)) \
+                                                                                  , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
+                if row['thpq'] == 0.0:
+                    file_df_dict['aver_eps_{}'.format('center')] = file_to_df( \
+                                                                                 LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                                 .format(pol_str, Q2.replace("p",""), float(EPSVAL)*100) \
+                                                                                 , ['ratio', 'dratio', 'phibin', 'tbin'])
+                    file_df_dict['kindata_eps_{}'.format('center')] = file_to_df( \
+                                                                                    LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
+                                                                                    .format(pol_str, Q2.replace("p",""), float(EPSVAL)*100) \
+                                                                                    , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
+                file_df_dict['xsects_file_eps'] = file_to_df( \
+                                                                LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}" \
+                                                                .format(pol_str, Q2.replace("p",""), float(EPSVAL)*100) \
+                                                                , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
-C_ratio_t.Print(outputpdf)
+    ################################################################################################################################################
+    ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
+    ################################################################################################################################################
 
-C_Q2_tbin = TCanvas()
-C_Q2_tbin.SetGrid()
+    C_ratio_phi = TCanvas()
+    C_ratio_phi.SetGrid()
 
-G_Q2_tbin = ROOT.TGraph()
+    G_ratio_phi = ROOT.TGraphErrors()
 
-l_Q2_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
 
-G_Q2_tbin.SetTitle("eps = %s ; #theta_{cm}; Q^{2} Average" % LOEPS)
+    phi_setting = ['left', 'center']
 
-for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
-    G_Q2_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
-    l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_Q2_tbin.SetMarkerColor(i+1)
+    for ps in phi_setting:
+        for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
+            G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
+            G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
+            G_ratio_phi.SetMarkerColor(i+1)
 
-G_Q2_tbin.SetMarkerStyle(21)
-G_Q2_tbin.SetMarkerSize(1)
-    
-G_Q2_tbin.Draw('AP')
-l_Q2_tbin.Draw()
+    G_ratio_phi.SetMarkerStyle(21)
+    G_ratio_phi.SetMarkerSize(1)
 
-C_Q2_tbin.Print(outputpdf)
+    G_ratio_phi.Draw('AP')
 
-C_W_tbin = TCanvas()
-C_W_tbin.SetGrid()
+    C_ratio_phi.Print(outputpdf + '(')
 
-G_W_tbin = ROOT.TGraph()
+    C_ratio_t = TCanvas()
+    C_ratio_t.SetGrid()
 
-l_W_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    G_ratio_t = ROOT.TGraphErrors()
 
-G_W_tbin.SetTitle("eps = %s ; #theta_{cm}; W Average" % LOEPS)
+    G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
-    G_W_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
-    l_W_tbin.AddEntry(G_W_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_W_tbin.SetMarkerColor(i+1)
+    phi_setting = ['left', 'center']
 
-G_W_tbin.SetMarkerStyle(21)
-G_W_tbin.SetMarkerSize(1)
-    
-G_W_tbin.Draw('AP')
-l_W_tbin.Draw()
+    for ps in phi_setting:
+        for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
+            G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['tbin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
+            G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
+            G_ratio_t.SetMarkerColor(i+1)
 
-C_W_tbin.Print(outputpdf)
+    G_ratio_t.SetMarkerStyle(21)
+    G_ratio_t.SetMarkerSize(1)
 
-C_t_tbin = TCanvas()
-C_t_tbin.SetGrid()
+    G_ratio_t.Draw('AP')
 
-G_t_tbin = ROOT.TGraph()
+    C_ratio_t.Print(outputpdf)
 
-l_t_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    C_Q2_tbin = TCanvas()
+    C_Q2_tbin.SetGrid()
 
-G_t_tbin.SetTitle("eps = %s ; #theta_{cm}; t Average" % LOEPS)
+    G_Q2_tbin = ROOT.TGraph()
 
-for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
-    G_t_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
-    l_t_tbin.AddEntry(G_t_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_t_tbin.SetMarkerColor(i+1)
+    l_Q2_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-G_t_tbin.SetMarkerStyle(21)
-G_t_tbin.SetMarkerSize(1)
-    
-G_t_tbin.Draw('AP')
-l_t_tbin.Draw()
+    G_Q2_tbin.SetTitle("eps = %s ; #theta_{cm}; Q^{2} Average" % LOEPS)
 
-C_t_tbin.Print(outputpdf)
+    for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
+        G_Q2_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
+        l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_Q2_tbin.SetMarkerColor(i+1)
 
-C_Q2_phitbin = TCanvas()
-C_Q2_phitbin.SetGrid()
+    G_Q2_tbin.SetMarkerStyle(21)
+    G_Q2_tbin.SetMarkerSize(1)
 
-G_Q2_phitbin = ROOT.TGraph()
+    G_Q2_tbin.Draw('AP')
+    l_Q2_tbin.Draw()
 
-l_Q2_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    C_Q2_tbin.Print(outputpdf)
 
-G_Q2_phitbin.SetTitle("eps = %s ; #phi; Q^{2} Average" % LOEPS)
+    C_W_tbin = TCanvas()
+    C_W_tbin.SetGrid()
 
-for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
-    G_Q2_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
-    l_Q2_phitbin.AddEntry(G_Q2_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_Q2_phitbin.SetMarkerColor(i+1)
+    G_W_tbin = ROOT.TGraph()
 
-G_Q2_phitbin.SetMarkerStyle(21)
-G_Q2_phitbin.SetMarkerSize(1)
-    
-G_Q2_phitbin.Draw('AP')
-l_Q2_phitbin.Draw()
+    l_W_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-C_Q2_phitbin.Print(outputpdf)
+    G_W_tbin.SetTitle("eps = %s ; #theta_{cm}; W Average" % LOEPS)
 
-C_W_phitbin = TCanvas()
-C_W_phitbin.SetGrid()
+    for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
+        G_W_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
+        l_W_tbin.AddEntry(G_W_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_W_tbin.SetMarkerColor(i+1)
 
-G_W_phitbin = ROOT.TGraph()
+    G_W_tbin.SetMarkerStyle(21)
+    G_W_tbin.SetMarkerSize(1)
 
-l_W_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    G_W_tbin.Draw('AP')
+    l_W_tbin.Draw()
 
-G_W_phitbin.SetTitle("eps = %s ; #phi; W Average" % LOEPS)
+    C_W_tbin.Print(outputpdf)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
-    G_W_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
-    l_W_phitbin.AddEntry(G_W_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_W_phitbin.SetMarkerColor(i+1)
+    C_t_tbin = TCanvas()
+    C_t_tbin.SetGrid()
 
-G_W_phitbin.SetMarkerStyle(21)
-G_W_phitbin.SetMarkerSize(1)
-    
-G_W_phitbin.Draw('AP')
-l_W_phitbin.Draw()
+    G_t_tbin = ROOT.TGraph()
 
-C_W_phitbin.Print(outputpdf)
+    l_t_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-C_t_phitbin = TCanvas()
-C_t_phitbin.SetGrid()
+    G_t_tbin.SetTitle("eps = %s ; #theta_{cm}; t Average" % LOEPS)
 
-G_t_phitbin = ROOT.TGraph()
+    for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
+        G_t_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
+        l_t_tbin.AddEntry(G_t_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_t_tbin.SetMarkerColor(i+1)
 
-l_t_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    G_t_tbin.SetMarkerStyle(21)
+    G_t_tbin.SetMarkerSize(1)
 
-G_t_phitbin.SetTitle("eps = %s ; #phi; t Average" % LOEPS)
+    G_t_tbin.Draw('AP')
+    l_t_tbin.Draw()
 
-for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
-    G_t_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
-    l_t_phitbin.AddEntry(G_t_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_t_phitbin.SetMarkerColor(i+1)
+    C_t_tbin.Print(outputpdf)
 
-G_t_phitbin.SetMarkerStyle(21)
-G_t_phitbin.SetMarkerSize(1)
-    
-G_t_phitbin.Draw('AP')
-l_t_phitbin.Draw()
+    C_Q2_phitbin = TCanvas()
+    C_Q2_phitbin.SetGrid()
 
-C_t_phitbin.Print(outputpdf)
+    G_Q2_phitbin = ROOT.TGraph()
 
-C_xreal_th = TCanvas()
-C_xreal_th.SetGrid()
+    l_Q2_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-G_xreal_th = ROOT.TGraphErrors()
+    G_Q2_phitbin.SetTitle("eps = %s ; #phi; Q^{2} Average" % LOEPS)
 
-l_xreal_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
+        G_Q2_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
+        l_Q2_phitbin.AddEntry(G_Q2_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_Q2_phitbin.SetMarkerColor(i+1)
 
-G_xreal_th.SetTitle("eps = %s ; #theta_{cm}; x_real" % LOEPS)
+    G_Q2_phitbin.SetMarkerStyle(21)
+    G_Q2_phitbin.SetMarkerSize(1)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-    G_xreal_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-    G_xreal_th.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_th.AddEntry(G_xreal_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_xreal_th.SetMarkerColor(i+1)
+    G_Q2_phitbin.Draw('AP')
+    l_Q2_phitbin.Draw()
 
-G_xreal_th.SetMarkerStyle(21)
-G_xreal_th.SetMarkerSize(1)
-    
-G_xreal_th.Draw('AP')
-l_xreal_th.Draw()
+    C_Q2_phitbin.Print(outputpdf)
 
-C_xreal_th.Print(outputpdf)
+    C_W_phitbin = TCanvas()
+    C_W_phitbin.SetGrid()
 
-C_xmod_th = TCanvas()
-C_xmod_th.SetGrid()
+    G_W_phitbin = ROOT.TGraph()
 
-G_xmod_th = ROOT.TGraph()
+    l_W_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-l_xmod_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    G_W_phitbin.SetTitle("eps = %s ; #phi; W Average" % LOEPS)
 
-G_xmod_th.SetTitle("eps = %s ; #theta_{cm}; x_mod" % LOEPS)
+    for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
+        G_W_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
+        l_W_phitbin.AddEntry(G_W_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_W_phitbin.SetMarkerColor(i+1)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-    G_xmod_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
-    l_xmod_th.AddEntry(G_xmod_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_xmod_th.SetMarkerColor(i+1)
+    G_W_phitbin.SetMarkerStyle(21)
+    G_W_phitbin.SetMarkerSize(1)
 
-G_xmod_th.SetMarkerStyle(21)
-G_xmod_th.SetMarkerSize(1)
-    
-G_xmod_th.Draw('AP')
-l_xmod_th.Draw()
+    G_W_phitbin.Draw('AP')
+    l_W_phitbin.Draw()
 
-C_xmod_th.Print(outputpdf)
+    C_W_phitbin.Print(outputpdf)
 
-C_xreal_phi = TCanvas()
-C_xreal_phi.SetGrid()
+    C_t_phitbin = TCanvas()
+    C_t_phitbin.SetGrid()
 
-G_xreal_phi = ROOT.TGraphErrors()
+    G_t_phitbin = ROOT.TGraph()
 
-l_xreal_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    l_t_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-G_xreal_phi.SetTitle("eps = %s ; #phi; x_real" % LOEPS)
+    G_t_phitbin.SetTitle("eps = %s ; #phi; t Average" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-    G_xreal_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-    G_xreal_phi.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_phi.AddEntry(G_xreal_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_xreal_phi.SetMarkerColor(i+1)
+    for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
+        G_t_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
+        l_t_phitbin.AddEntry(G_t_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_t_phitbin.SetMarkerColor(i+1)
 
-G_xreal_phi.SetMarkerStyle(21)
-G_xreal_phi.SetMarkerSize(1)
-    
-G_xreal_phi.Draw('AP')
-l_xreal_phi.Draw()
+    G_t_phitbin.SetMarkerStyle(21)
+    G_t_phitbin.SetMarkerSize(1)
 
-C_xreal_phi.Print(outputpdf)
+    G_t_phitbin.Draw('AP')
+    l_t_phitbin.Draw()
 
-C_xmod_phi = TCanvas()
-C_xmod_phi.SetGrid()
+    C_t_phitbin.Print(outputpdf)
 
-G_xmod_phi = ROOT.TGraph()
+    C_xreal_th = TCanvas()
+    C_xreal_th.SetGrid()
 
-l_xmod_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    G_xreal_th = ROOT.TGraphErrors()
 
-G_xmod_phi.SetTitle("eps = %s ; #phi; x_mod" % LOEPS)
+    l_xreal_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-    G_xmod_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
-    l_xmod_phi.AddEntry(G_xmod_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_xmod_phi.SetMarkerColor(i+1)
+    G_xreal_th.SetTitle("eps = %s ; #theta_{cm}; x_real" % LOEPS)
 
-G_xmod_phi.SetMarkerStyle(21)
-G_xmod_phi.SetMarkerSize(1)
-    
-G_xmod_phi.Draw('AP')
-l_xmod_phi.Draw()
+    for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
+        G_xreal_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
+        G_xreal_th.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
+        l_xreal_th.AddEntry(G_xreal_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_xreal_th.SetMarkerColor(i+1)
 
-C_xmod_phi.Print(outputpdf)
+    G_xreal_th.SetMarkerStyle(21)
+    G_xreal_th.SetMarkerSize(1)
 
-C_xreal_t = TCanvas()
-C_xreal_t.SetGrid()
+    G_xreal_th.Draw('AP')
+    l_xreal_th.Draw()
 
-G_xreal_t = ROOT.TGraphErrors()
+    C_xreal_th.Print(outputpdf)
 
-l_xreal_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+    C_xmod_th = TCanvas()
+    C_xmod_th.SetGrid()
 
-G_xreal_t.SetTitle("eps = %s ; t; x_real" % LOEPS)
+    G_xmod_th = ROOT.TGraph()
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-    G_xreal_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-    G_xreal_t.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_t.AddEntry(G_xreal_t, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
-    G_xreal_t.SetMarkerColor(i+1)
+    l_xmod_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-G_xreal_t.SetMarkerStyle(21)
-G_xreal_t.SetMarkerSize(1)
-    
-G_xreal_t.Draw('AP')
-l_xreal_t.Draw()
+    G_xmod_th.SetTitle("eps = %s ; #theta_{cm}; x_mod" % LOEPS)
 
-C_xreal_t.Print(outputpdf)
+    for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
+        G_xmod_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
+        l_xmod_th.AddEntry(G_xmod_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_xmod_th.SetMarkerColor(i+1)
 
-C_xmod_t = TCanvas()
-C_xmod_t.SetGrid()
+    G_xmod_th.SetMarkerStyle(21)
+    G_xmod_th.SetMarkerSize(1)
 
-G_xmod_t = ROOT.TGraph()
+    G_xmod_th.Draw('AP')
+    l_xmod_th.Draw()
 
-G_xmod_t.SetTitle("eps = %s ; t; x_mod" % LOEPS)
+    C_xmod_th.Print(outputpdf)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-    G_xmod_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
-    G_xmod_t.SetMarkerColor(i+1)
+    C_xreal_phi = TCanvas()
+    C_xreal_phi.SetGrid()
 
-G_xmod_t.SetMarkerStyle(21)
-G_xmod_t.SetMarkerSize(1)
-    
-G_xmod_t.Draw('AP')
+    G_xreal_phi = ROOT.TGraphErrors()
 
-C_xmod_t.Print(outputpdf + ')')
+    l_xreal_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
+
+    G_xreal_phi.SetTitle("eps = %s ; #phi; x_real" % LOEPS)
+
+    for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
+        G_xreal_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
+        G_xreal_phi.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
+        l_xreal_phi.AddEntry(G_xreal_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_xreal_phi.SetMarkerColor(i+1)
+
+    G_xreal_phi.SetMarkerStyle(21)
+    G_xreal_phi.SetMarkerSize(1)
+
+    G_xreal_phi.Draw('AP')
+    l_xreal_phi.Draw()
+
+    C_xreal_phi.Print(outputpdf)
+
+    C_xmod_phi = TCanvas()
+    C_xmod_phi.SetGrid()
+
+    G_xmod_phi = ROOT.TGraph()
+
+    l_xmod_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
+
+    G_xmod_phi.SetTitle("eps = %s ; #phi; x_mod" % LOEPS)
+
+    for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
+        G_xmod_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
+        l_xmod_phi.AddEntry(G_xmod_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_xmod_phi.SetMarkerColor(i+1)
+
+    G_xmod_phi.SetMarkerStyle(21)
+    G_xmod_phi.SetMarkerSize(1)
+
+    G_xmod_phi.Draw('AP')
+    l_xmod_phi.Draw()
+
+    C_xmod_phi.Print(outputpdf)
+
+    C_xreal_t = TCanvas()
+    C_xreal_t.SetGrid()
+
+    G_xreal_t = ROOT.TGraphErrors()
+
+    l_xreal_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+
+    G_xreal_t.SetTitle("eps = %s ; t; x_real" % LOEPS)
+
+    for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
+        G_xreal_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
+        G_xreal_t.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
+        l_xreal_t.AddEntry(G_xreal_t, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+        G_xreal_t.SetMarkerColor(i+1)
+
+    G_xreal_t.SetMarkerStyle(21)
+    G_xreal_t.SetMarkerSize(1)
+
+    G_xreal_t.Draw('AP')
+    l_xreal_t.Draw()
+
+    C_xreal_t.Print(outputpdf)
+
+    C_xmod_t = TCanvas()
+    C_xmod_t.SetGrid()
+
+    G_xmod_t = ROOT.TGraph()
+
+    G_xmod_t.SetTitle("eps = %s ; t; x_mod" % LOEPS)
+
+    for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
+        G_xmod_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
+        G_xmod_t.SetMarkerColor(i+1)
+
+    G_xmod_t.SetMarkerStyle(21)
+    G_xmod_t.SetMarkerSize(1)
+
+    G_xmod_t.Draw('AP')
+
+    C_xmod_t.Print(outputpdf + ')')

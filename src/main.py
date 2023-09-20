@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 17:56:42 trottar"
+# Time-stamp: "2023-09-20 15:53:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -628,3 +628,8 @@ for hist in histlist:
     key_str = ', '.join(hist.keys())
     print("{} keys: {}".format(hist["phi_setting"],key_str))
 '''
+
+sys.path.append("plotting")
+from plot_unsep import unsep_xsect
+
+unsep_xsect(inpDict)
