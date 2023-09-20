@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-20 16:15:48 trottar"
+# Time-stamp: "2023-09-20 16:18:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -87,8 +87,8 @@ def fix_spacing(f_name):
 
 # Fix file spacing to work in pandas
 fix_spacing(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")))
-fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(LOEPS)*100))
-fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(HIEPS)*100))
+fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(EPSVAL)*100))
+fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(EPSVAL)*100))
 
 '''
 ################################################################################################################################################
@@ -192,7 +192,7 @@ def unsep_xsect(inpDict):
 
     G_ratio_phi = ROOT.TGraphErrors()
 
-    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
+    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % EPSVAL)
 
     phi_setting = ['left', 'center']
 
@@ -214,7 +214,7 @@ def unsep_xsect(inpDict):
 
     G_ratio_t = ROOT.TGraphErrors()
 
-    G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % LOEPS)
+    G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % EPSVAL)
 
     phi_setting = ['left', 'center']
 
@@ -238,7 +238,7 @@ def unsep_xsect(inpDict):
 
     l_Q2_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_Q2_tbin.SetTitle("eps = %s ; #theta_{cm}; Q^{2} Average" % LOEPS)
+    G_Q2_tbin.SetTitle("eps = %s ; #theta_{cm}; Q^{2} Average" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
         G_Q2_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
@@ -260,7 +260,7 @@ def unsep_xsect(inpDict):
 
     l_W_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_W_tbin.SetTitle("eps = %s ; #theta_{cm}; W Average" % LOEPS)
+    G_W_tbin.SetTitle("eps = %s ; #theta_{cm}; W Average" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
         G_W_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
@@ -282,7 +282,7 @@ def unsep_xsect(inpDict):
 
     l_t_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_t_tbin.SetTitle("eps = %s ; #theta_{cm}; t Average" % LOEPS)
+    G_t_tbin.SetTitle("eps = %s ; #theta_{cm}; t Average" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
         G_t_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
@@ -304,7 +304,7 @@ def unsep_xsect(inpDict):
 
     l_Q2_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_Q2_phitbin.SetTitle("eps = %s ; #phi; Q^{2} Average" % LOEPS)
+    G_Q2_phitbin.SetTitle("eps = %s ; #phi; Q^{2} Average" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
         G_Q2_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
@@ -326,7 +326,7 @@ def unsep_xsect(inpDict):
 
     l_W_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_W_phitbin.SetTitle("eps = %s ; #phi; W Average" % LOEPS)
+    G_W_phitbin.SetTitle("eps = %s ; #phi; W Average" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
         G_W_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
@@ -348,7 +348,7 @@ def unsep_xsect(inpDict):
 
     l_t_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_t_phitbin.SetTitle("eps = %s ; #phi; t Average" % LOEPS)
+    G_t_phitbin.SetTitle("eps = %s ; #phi; t Average" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
         G_t_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
@@ -370,7 +370,7 @@ def unsep_xsect(inpDict):
 
     l_xreal_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_xreal_th.SetTitle("eps = %s ; #theta_{cm}; x_real" % LOEPS)
+    G_xreal_th.SetTitle("eps = %s ; #theta_{cm}; x_real" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
         G_xreal_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
@@ -393,7 +393,7 @@ def unsep_xsect(inpDict):
 
     l_xmod_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_xmod_th.SetTitle("eps = %s ; #theta_{cm}; x_mod" % LOEPS)
+    G_xmod_th.SetTitle("eps = %s ; #theta_{cm}; x_mod" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
         G_xmod_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
@@ -415,7 +415,7 @@ def unsep_xsect(inpDict):
 
     l_xreal_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_xreal_phi.SetTitle("eps = %s ; #phi; x_real" % LOEPS)
+    G_xreal_phi.SetTitle("eps = %s ; #phi; x_real" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
         G_xreal_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
@@ -438,7 +438,7 @@ def unsep_xsect(inpDict):
 
     l_xmod_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_xmod_phi.SetTitle("eps = %s ; #phi; x_mod" % LOEPS)
+    G_xmod_phi.SetTitle("eps = %s ; #phi; x_mod" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
         G_xmod_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
@@ -460,7 +460,7 @@ def unsep_xsect(inpDict):
 
     l_xreal_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
-    G_xreal_t.SetTitle("eps = %s ; t; x_real" % LOEPS)
+    G_xreal_t.SetTitle("eps = %s ; t; x_real" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
         G_xreal_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
@@ -481,7 +481,7 @@ def unsep_xsect(inpDict):
 
     G_xmod_t = ROOT.TGraph()
 
-    G_xmod_t.SetTitle("eps = %s ; t; x_mod" % LOEPS)
+    G_xmod_t.SetTitle("eps = %s ; t; x_mod" % EPSVAL)
 
     for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
         G_xmod_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
