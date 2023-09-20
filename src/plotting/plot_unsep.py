@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-20 16:20:34 trottar"
+# Time-stamp: "2023-09-20 16:24:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,25 +151,25 @@ def unsep_xsect(inpDict):
                                                    , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])
 
             if row['EPSVAL'] == float(EPSVAL):
-                if row['thpq'] < 0.0:
+                if float(row['thpq']) < 0.0:
                     file_df_dict['aver_eps_{}'.format('right')] = file_to_df( \
                                                                                 LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
                                                                                 .format(ParticleType, pol_str, Q2, float(EPSVAL)*100) \
                                                                                 , ['ratio', 'dratio', 'phibin', 'tbin'])
                     file_df_dict['kindata_eps_{}'.format('right')] = file_to_df( \
                                                                                    LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
-                                                                                   .format(ParticleType, pol_str, Q2, float(EPSVAL)*100, int(row['thpq']*1000)) \
+                                                                                   .format(ParticleType, pol_str, Q2, float(EPSVAL)*100, int(float(row['thpq'])*1000)) \
                                                                                    , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-                if row['thpq'] > 0.0:
+                if float(row['thpq']) > 0.0:
                     file_df_dict['aver_eps_{}'.format('left')] = file_to_df( \
                                                                                LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
                                                                                .format(ParticleType, pol_str, Q2, float(EPSVAL)*100) \
                                                                                , ['ratio', 'dratio', 'phibin', 'tbin'])
                     file_df_dict['kindata_eps_{}'.format('left')] = file_to_df( \
                                                                                   LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
-                                                                                  .format(ParticleType, pol_str, Q2, float(EPSVAL)*100, int(row['thpq']*1000)) \
+                                                                                  .format(ParticleType, pol_str, Q2, float(EPSVAL)*100, int(float(row['thpq'])*1000)) \
                                                                                   , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-                if row['thpq'] == 0.0:
+                if float(row['thpq']) == 0.0:
                     file_df_dict['aver_eps_{}'.format('center')] = file_to_df( \
                                                                                  LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
                                                                                  .format(ParticleType, pol_str, Q2, float(EPSVAL)*100) \
