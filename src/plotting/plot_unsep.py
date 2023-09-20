@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-20 19:39:25 trottar"
+# Time-stamp: "2023-09-20 19:56:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,7 +67,6 @@ def file_to_df(f_name, columns):
     return df
 
 ################################################################################################################################################
-'''
 def fix_spacing(f_name):
     ''
     Fortran created files are bad with spacing. This fixes it.
@@ -88,11 +87,10 @@ def fix_spacing(f_name):
             output.write('\n'.join(lines))
 
 # Fix file spacing to work in pandas
-fix_spacing(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")))
-fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(EPSVAL)*100))
-fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(EPSVAL)*100))
+fix_spacing(LTANAPATH+"/src/{}/averages/avek.{}.dat".format(ParticleType, Q2.replace("p","")))
+fix_spacing(LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}".format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100))
+fix_spacing(LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}".format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100))
 
-'''
 ################################################################################################################################################
 # Read in files and convert to dataframes
 
