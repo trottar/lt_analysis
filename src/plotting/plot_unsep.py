@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-20 19:56:32 trottar"
+# Time-stamp: "2023-09-20 19:59:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,9 +68,9 @@ def file_to_df(f_name, columns):
 
 ################################################################################################################################################
 def fix_spacing(f_name):
-    ''
+    '''
     Fortran created files are bad with spacing. This fixes it.
-    ''
+    '''
 
     # Open the file for reading
     with open(f_name, 'r') as file:
