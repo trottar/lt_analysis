@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 17:20:55 trottar"
+# Time-stamp: "2023-09-21 18:30:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -559,6 +559,8 @@ if EPSSET == "high":
         subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL])
     except Exception as e:
         sys.exit(2)
+
+    output_file_lst.append(OUTPATH+"/${ParticleType}_unsep_xsects_${KIN}.pdf")
 
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 17:00:55 trottar"
+# Time-stamp: "2023-09-21 18:28:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,7 +189,7 @@ Q2=${Q2//./p}
 KIN="Q${Q2}W${W}"
 
 # Define input and output file names
-OutUnsepxsectsFilename="unsep_xsects_${KIN}"
+OutUnsepxsectsFilename="${ParticleType}_unsep_xsects_${KIN}"
 
 cd "${LTANAPATH}/src/plotting/"
 python3 plot_unsep.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
