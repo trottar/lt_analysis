@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 12:54:57 trottar"
+# Time-stamp: "2023-09-21 12:57:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -227,115 +227,13 @@ def ave_per_bin_data(histlist, inpDict):
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
 
-        # Assign histograms for Q2
-        if hist["phi_setting"] == "Center":
-            Q2_Center_DATA = hist["H_Q2_DATA"]
-        if hist["phi_setting"] == "Left":
-            Q2_Left_DATA = hist["H_Q2_DATA"]
-        if hist["phi_setting"] == "Right":
-            Q2_Right_DATA = hist["H_Q2_DATA"]
-
-        # Assign histograms for W
-        if hist["phi_setting"] == "Center":
-            W_Center_DATA = hist["H_W_DATA"]
-        if hist["phi_setting"] == "Left":
-            W_Left_DATA = hist["H_W_DATA"]
-        if hist["phi_setting"] == "Right":
-            W_Right_DATA = hist["H_W_DATA"]
-
-        # Assign histograms for t
-        if hist["phi_setting"] == "Center":
-            t_Center_DATA = hist["H_t_DATA"]
-        if hist["phi_setting"] == "Left":
-            t_Left_DATA = hist["H_t_DATA"]
-        if hist["phi_setting"] == "Right":
-            t_Right_DATA = hist["H_t_DATA"]
-
-        # Assign histograms for Q2
-        if hist["phi_setting"] == "Center":
-            Q2_Center_DUMMY = hist["H_Q2_DUMMY"]
-        if hist["phi_setting"] == "Left":
-            Q2_Left_DUMMY = hist["H_Q2_DUMMY"]
-        if hist["phi_setting"] == "Right":
-            Q2_Right_DUMMY = hist["H_Q2_DUMMY"]
-
-        # Assign histograms for W
-        if hist["phi_setting"] == "Center":
-            W_Center_DUMMY = hist["H_W_DUMMY"]
-        if hist["phi_setting"] == "Left":
-            W_Left_DUMMY = hist["H_W_DUMMY"]
-        if hist["phi_setting"] == "Right":
-            W_Right_DUMMY = hist["H_W_DUMMY"]
-
-        # Assign histograms for t
-        if hist["phi_setting"] == "Center":
-            t_Center_DUMMY = hist["H_t_DUMMY"]
-        if hist["phi_setting"] == "Left":
-            t_Left_DUMMY = hist["H_t_DUMMY"]
-        if hist["phi_setting"] == "Right":
-            t_Right_DUMMY = hist["H_t_DUMMY"]
-            
-    # Combine histograms for Q2_data
-    Q2_data = TH1D("Q2_data", "Combined Q2_data Histogram", Q2_Center_DATA.GetNbinsX(), Q2_Center_DATA.GetXaxis().GetXmin(), Q2_Center_DATA.GetXaxis().GetXmax())
-    for bin in range(1, Q2_Center_DATA.GetNbinsX() + 1):
-        try:
-            combined_content = Q2_Center_DATA.GetBinContent(bin) + Q2_Left_DATA.GetBinContent(bin) + Q2_Right_DATA.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = Q2_Center_DATA.GetBinContent(bin) + Q2_Left_DATA.GetBinContent(bin)
-        Q2_data.SetBinContent(bin, combined_content)
-
-    # Combine histograms for W_data
-    W_data = TH1D("W_data", "Combined W_data Histogram", W_Center_DATA.GetNbinsX(), W_Center_DATA.GetXaxis().GetXmin(), W_Center_DATA.GetXaxis().GetXmax())
-    for bin in range(1, W_Center_DATA.GetNbinsX() + 1):
-        try:
-            combined_content = W_Center_DATA.GetBinContent(bin) + W_Left_DATA.GetBinContent(bin) + W_Right_DATA.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = W_Center_DATA.GetBinContent(bin) + W_Left_DATA.GetBinContent(bin)
-        W_data.SetBinContent(bin, combined_content)
-
-    # Combine histograms for t_data
-    t_data = TH1D("t_data", "Combined t_data Histogram", t_Center_DATA.GetNbinsX(), t_Center_DATA.GetXaxis().GetXmin(), t_Center_DATA.GetXaxis().GetXmax())
-    for bin in range(1, t_Center_DATA.GetNbinsX() + 1):
-        try:
-            combined_content = t_Center_DATA.GetBinContent(bin) + t_Left_DATA.GetBinContent(bin) + t_Right_DATA.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = t_Center_DATA.GetBinContent(bin) + t_Left_DATA.GetBinContent(bin)
-        t_data.SetBinContent(bin, combined_content)
-
-    # Combine histograms for Q2_dummy
-    Q2_dummy = TH1D("Q2_dummy", "Combined Q2_dummy Histogram", Q2_Center_DUMMY.GetNbinsX(), Q2_Center_DUMMY.GetXaxis().GetXmin(), Q2_Center_DUMMY.GetXaxis().GetXmax())
-    for bin in range(1, Q2_Center_DUMMY.GetNbinsX() + 1):
-        try:
-            combined_content = Q2_Center_DUMMY.GetBinContent(bin) + Q2_Left_DUMMY.GetBinContent(bin) + Q2_Right_DUMMY.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = Q2_Center_DUMMY.GetBinContent(bin) + Q2_Left_DUMMY.GetBinContent(bin)
-        Q2_dummy.SetBinContent(bin, combined_content)
-
-    # Combine histograms for W_dummy
-    W_dummy = TH1D("W_dummy", "Combined W_dummy Histogram", W_Center_DUMMY.GetNbinsX(), W_Center_DUMMY.GetXaxis().GetXmin(), W_Center_DUMMY.GetXaxis().GetXmax())
-    for bin in range(1, W_Center_DUMMY.GetNbinsX() + 1):
-        try:
-            combined_content = W_Center_DUMMY.GetBinContent(bin) + W_Left_DUMMY.GetBinContent(bin) + W_Right_DUMMY.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = W_Center_DUMMY.GetBinContent(bin) + W_Left_DUMMY.GetBinContent(bin)
-        W_dummy.SetBinContent(bin, combined_content)
-
-    # Combine histograms for t_dummy
-    t_dummy = TH1D("t_dummy", "Combined t_dummy Histogram", t_Center_DUMMY.GetNbinsX(), t_Center_DUMMY.GetXaxis().GetXmin(), t_Center_DUMMY.GetXaxis().GetXmax())
-    for bin in range(1, t_Center_DUMMY.GetNbinsX() + 1):
-        try:
-            combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin) + t_Right_DUMMY.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = t_Center_DUMMY.GetBinContent(bin) + t_Left_DUMMY.GetBinContent(bin)
-        t_dummy.SetBinContent(bin, combined_content)
-
     aveDict = {
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
     }
         
     # List of kinematic types
-    kinematic_types = ["Q2", "W", "t"]
+    kinematic_types = ["Q2", "W", "t", "epsilon"]
 
     # Loop through histlist and update aveDict
     for hist in histlist:
@@ -357,64 +255,13 @@ def ave_per_bin_simc(histlist, inpDict):
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
 
-        # Assign histograms for Q2
-        if hist["phi_setting"] == "Center":
-            Q2_Center_SIMC = hist["H_Q2_SIMC"]
-        if hist["phi_setting"] == "Left":
-            Q2_Left_SIMC = hist["H_Q2_SIMC"]
-        if hist["phi_setting"] == "Right":
-            Q2_Right_SIMC = hist["H_Q2_SIMC"]
-
-        # Assign histograms for W
-        if hist["phi_setting"] == "Center":
-            W_Center_SIMC = hist["H_W_SIMC"]
-        if hist["phi_setting"] == "Left":
-            W_Left_SIMC = hist["H_W_SIMC"]
-        if hist["phi_setting"] == "Right":
-            W_Right_SIMC = hist["H_W_SIMC"]
-
-        # Assign histograms for t
-        if hist["phi_setting"] == "Center":
-            t_Center_SIMC = hist["H_t_SIMC"]
-        if hist["phi_setting"] == "Left":
-            t_Left_SIMC = hist["H_t_SIMC"]
-        if hist["phi_setting"] == "Right":
-            t_Right_SIMC = hist["H_t_SIMC"]        
-    
-    # Combine histograms for Q2_simc
-    Q2_simc = TH1D("Q2_simc", "Combined Q2_simc Histogram", Q2_Center_SIMC.GetNbinsX(), Q2_Center_SIMC.GetXaxis().GetXmin(), Q2_Center_SIMC.GetXaxis().GetXmax())
-    for bin in range(1, Q2_Center_SIMC.GetNbinsX() + 1):
-        try:
-            combined_content = Q2_Center_SIMC.GetBinContent(bin) + Q2_Left_SIMC.GetBinContent(bin) + Q2_Right_SIMC.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = Q2_Center_SIMC.GetBinContent(bin) + Q2_Left_SIMC.GetBinContent(bin)
-        Q2_simc.SetBinContent(bin, combined_content)
-
-    # Combine histograms for W_simc
-    W_simc = TH1D("W_simc", "Combined W_simc Histogram", W_Center_SIMC.GetNbinsX(), W_Center_SIMC.GetXaxis().GetXmin(), W_Center_SIMC.GetXaxis().GetXmax())
-    for bin in range(1, W_Center_SIMC.GetNbinsX() + 1):
-        try:
-            combined_content = W_Center_SIMC.GetBinContent(bin) + W_Left_SIMC.GetBinContent(bin) + W_Right_SIMC.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = W_Center_SIMC.GetBinContent(bin) + W_Left_SIMC.GetBinContent(bin)
-        W_simc.SetBinContent(bin, combined_content)
-
-    # Combine histograms for t_simc
-    t_simc = TH1D("t_simc", "Combined t_simc Histogram", t_Center_SIMC.GetNbinsX(), t_Center_SIMC.GetXaxis().GetXmin(), t_Center_SIMC.GetXaxis().GetXmax())
-    for bin in range(1, t_Center_SIMC.GetNbinsX() + 1):
-        try:
-            combined_content = t_Center_SIMC.GetBinContent(bin) + t_Left_SIMC.GetBinContent(bin) + t_Right_SIMC.GetBinContent(bin)
-        except UnboundLocalError:
-            combined_content = t_Center_SIMC.GetBinContent(bin) + t_Left_SIMC.GetBinContent(bin)
-        t_simc.SetBinContent(bin, combined_content)
-
     aveDict = {
         "t_bins" : t_bins,
         "phi_bins" : phi_bins
     }
         
     # List of kinematic types
-    kinematic_types = ["Q2", "W", "t"]
+    kinematic_types = ["Q2", "W", "t", "epsilon"]
 
     # Loop through histlist and update aveDict
     for hist in histlist:
