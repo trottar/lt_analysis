@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 14:00:22 trottar"
+# Time-stamp: "2023-09-21 14:01:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -218,7 +218,7 @@ for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
     inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))
  
-print("Diamond cut parameters: ")
+print("\n\nDiamond cut parameters: ")
 for p in [1,2,3,4]:
     if inpDict["a%i" % p] == 0.0 or inpDict["b%i" % p] == 0.0:
         print("ERROR: Invalid diamond cut paramters")
@@ -240,7 +240,6 @@ for phiset in phisetlist:
 '''
 Apply random subtraction to data and dummy.
 '''
-
 
 ##############
 # HARD CODED #

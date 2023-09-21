@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-15 10:32:34 trottar"
+# Time-stamp: "2023-09-21 14:22:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,26 +256,97 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
             check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins)
-            # Check if the line already exists
-            if check_line not in lines:
-                write_to_file(f_list_settings,check_line)
 
-    if float(runNumLeft[0]) != 0:
+            # Extract the first 4 entries from the line in the file
+            existing_entries = check_line.split()[:4]
+
+            # Convert existing entries to a string for comparison
+            existing_entries_str = ' '.join(existing_entries)
+
+            # Check if the first 4 entries match
+            if existing_entries_str in lines:
+                # Find the index of the matching line
+                index = lines.index(existing_entries_str)
+
+                # Extract tmin, tmax, and NumtBins from the line in the file
+                file_entries = lines[index].split()[4:]
+
+                # Convert them to a string for comparison
+                file_entries_str = ' '.join(file_entries)
+
+                # Check if tmin, tmax, and NumtBins match
+                if file_entries_str != "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
+                    # If not, overwrite the line with the new values
+                    lines[index] = check_line
+
+        # Write the modified lines back to the file
+        with open(f_list_settings, 'w') as f:
+            f.writelines(lines)
+
+    if float(runNumLeft[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
-            lines = f.readlines()        
+            lines = f.readlines()
             check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
-            if check_line not in lines:
-                write_to_file(f_list_settings,check_line)
 
-    if float(runNumCenter[0]) != 0:
+            # Extract the first 4 entries from the line in the file
+            existing_entries = check_line.split()[:4]
+
+            # Convert existing entries to a string for comparison
+            existing_entries_str = ' '.join(existing_entries)
+
+            # Check if the first 4 entries match
+            if existing_entries_str in lines:
+                # Find the index of the matching line
+                index = lines.index(existing_entries_str)
+
+                # Extract tmin, tmax, and NumtBins from the line in the file
+                file_entries = lines[index].split()[4:]
+
+                # Convert them to a string for comparison
+                file_entries_str = ' '.join(file_entries)
+
+                # Check if tmin, tmax, and NumtBins match
+                if file_entries_str != "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
+                    # If not, overwrite the line with the new values
+                    lines[index] = check_line
+
+        # Write the modified lines back to the file
+        with open(f_list_settings, 'w') as f:
+            f.writelines(lines)
+
+    if float(runNumCenter[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
-            lines = f.readlines()        
+            lines = f.readlines()
             check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
-            if check_line not in lines:
-                write_to_file(f_list_settings,check_line)            
 
+            # Extract the first 4 entries from the line in the file
+            existing_entries = check_line.split()[:4]
+
+            # Convert existing entries to a string for comparison
+            existing_entries_str = ' '.join(existing_entries)
+
+            # Check if the first 4 entries match
+            if existing_entries_str in lines:
+                # Find the index of the matching line
+                index = lines.index(existing_entries_str)
+
+                # Extract tmin, tmax, and NumtBins from the line in the file
+                file_entries = lines[index].split()[4:]
+
+                # Convert them to a string for comparison
+                file_entries_str = ' '.join(file_entries)
+
+                # Check if tmin, tmax, and NumtBins match
+                if file_entries_str != "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
+                    # If not, overwrite the line with the new values
+                    lines[index] = check_line
+
+        # Write the modified lines back to the file
+        with open(f_list_settings, 'w') as f:
+            f.writelines(lines)
+            
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
