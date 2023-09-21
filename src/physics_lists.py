@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 14:30:24 trottar"
+# Time-stamp: "2023-09-21 14:35:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -263,31 +263,32 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             # Convert existing entries to a string for comparison
             existing_entries_str = ' '.join(existing_entries)
 
-            # Check if the first 4 entries match
-            if existing_entries_str in lines:
-                # Find the index of the matching line
-                index = lines.index(existing_entries_str)
+            # Initialize a flag to check if the first 4 entries match
+            match_found = False
 
-                # Extract tmin, tmax, and NumtBins from the line in the file
-                file_entries = lines[index].split()[4:]
+            for i, line in enumerate(lines):
+                if existing_entries_str in line:
+                    # Extract tmin, tmax, and NumtBins from the line in the file
+                    file_entries = line.split()[4:]
 
-                # Convert them to a string for comparison
-                file_entries_str = ' '.join(file_entries)
+                    # Convert them to a string for comparison
+                    file_entries_str = ' '.join(file_entries)
 
-                # Check if tmin, tmax, and NumtBins match
-                if file_entries_str != "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
-                    # If not, overwrite the line with the new values
-                    lines[index] = check_line
+                    # Check if tmin, tmax, and NumtBins match
+                    if file_entries_str == "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
+                        # If they match, set the flag and break out of the loop
+                        match_found = True
+                        break
 
-        # Write the modified lines back to the file
-        with open(f_list_settings, 'w') as f:
-            f.writelines(lines)
+            if not match_found:
+                # If no match was found, append the new line to the file
+                write_to_file(f_list_settings,check_line)
 
     if float(runNumLeft[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-            check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+            check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
 
             # Extract the first 4 entries from the line in the file
             existing_entries = check_line.split()[:4]
@@ -295,31 +296,32 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             # Convert existing entries to a string for comparison
             existing_entries_str = ' '.join(existing_entries)
 
-            # Check if the first 4 entries match
-            if existing_entries_str in lines:
-                # Find the index of the matching line
-                index = lines.index(existing_entries_str)
+            # Initialize a flag to check if the first 4 entries match
+            match_found = False
 
-                # Extract tmin, tmax, and NumtBins from the line in the file
-                file_entries = lines[index].split()[4:]
+            for i, line in enumerate(lines):
+                if existing_entries_str in line:
+                    # Extract tmin, tmax, and NumtBins from the line in the file
+                    file_entries = line.split()[4:]
 
-                # Convert them to a string for comparison
-                file_entries_str = ' '.join(file_entries)
+                    # Convert them to a string for comparison
+                    file_entries_str = ' '.join(file_entries)
 
-                # Check if tmin, tmax, and NumtBins match
-                if file_entries_str != "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
-                    # If not, overwrite the line with the new values
-                    lines[index] = check_line
+                    # Check if tmin, tmax, and NumtBins match
+                    if file_entries_str == "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
+                        # If they match, set the flag and break out of the loop
+                        match_found = True
+                        break
 
-        # Write the modified lines back to the file
-        with open(f_list_settings, 'w') as f:
-            f.writelines(lines)
+            if not match_found:
+                # If no match was found, append the new line to the file
+                write_to_file(f_list_settings,check_line)
 
     if float(runNumCenter[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-            check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
+            check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
 
             # Extract the first 4 entries from the line in the file
             existing_entries = check_line.split()[:4]
@@ -327,27 +329,26 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             # Convert existing entries to a string for comparison
             existing_entries_str = ' '.join(existing_entries)
 
-            print("---------------",lines)
-            # Check if the first 4 entries match
-            if existing_entries_str in lines:
-                print("!!!!!!!!!!!!!!!",existing_entries_str)
-                # Find the index of the matching line
-                index = lines.index(existing_entries_str)
+            # Initialize a flag to check if the first 4 entries match
+            match_found = False
 
-                # Extract tmin, tmax, and NumtBins from the line in the file
-                file_entries = lines[index].split()[4:]
+            for i, line in enumerate(lines):
+                if existing_entries_str in line:
+                    # Extract tmin, tmax, and NumtBins from the line in the file
+                    file_entries = line.split()[4:]
 
-                # Convert them to a string for comparison
-                file_entries_str = ' '.join(file_entries)
+                    # Convert them to a string for comparison
+                    file_entries_str = ' '.join(file_entries)
 
-                # Check if tmin, tmax, and NumtBins match
-                if file_entries_str != "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
-                    # If not, overwrite the line with the new values
-                    lines[index] = check_line
+                    # Check if tmin, tmax, and NumtBins match
+                    if file_entries_str == "{} {:.3f} {:.3f} {}".format(tmin, tmax, NumtBins):
+                        # If they match, set the flag and break out of the loop
+                        match_found = True
+                        break
 
-        # Write the modified lines back to the file
-        with open(f_list_settings, 'w') as f:
-            f.writelines(lines)
+            if not match_found:
+                # If no match was found, append the new line to the file
+                write_to_file(f_list_settings,check_line)
             
     ################################################################################################################################################
 
