@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 09:43:07 trottar"
+# Time-stamp: "2023-09-21 09:45:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -162,7 +162,7 @@ def find_bins(histlist, inpDict):
         def histedges_equalN(x, nbin):
             npt = len(x)
             # Calculate the indices for equal number of events
-            indices = np.arange(0, npt-1, npt // nbin-1)
+            indices = np.arange(0, npt-1, npt // nbin)
             indices = np.append(indices, npt-1)  # Add the last index
             sorted_x = np.sort(x)
             equalN_values = sorted_x[indices]
