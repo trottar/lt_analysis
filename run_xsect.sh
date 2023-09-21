@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 11:52:14 trottar"
+# Time-stamp: "2023-09-21 13:54:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,10 +158,7 @@ cd "${LTANAPATH}/src/"
 echo
 echo "Compiling average_kinematics.f..."
 eval "gfortran -o average_kinematics average_kinematics.f"
-echo
-echo "Running average_kinematics..."
-./average_kinematics.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
-# Check the exit status of the Python script
+# Check the exit status of the Fortran script
 if [ $? -ne 0 ]; then
     echo
     echo
@@ -169,14 +166,14 @@ if [ $? -ne 0 ]; then
     echo "       See error above..."
     exit 1
 fi
+echo
+echo "Running average_kinematics..."
+./average_kinematics.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
 eval "gfortran -o calc_xsect calc_xsect.f"
-echo
-echo "Running calc_xsect..."
-./calc_xsect.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
-# Check the exit status of the Python script
+# Check the exit status of the Fortran script
 if [ $? -ne 0 ]; then
     echo
     echo
@@ -184,6 +181,9 @@ if [ $? -ne 0 ]; then
     echo "       See error above..."
     exit 1
 fi
+echo
+echo "Running calc_xsect..."
+./calc_xsect.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
 
 # Replace p with '.'
 Q2=${Q2//./p}
