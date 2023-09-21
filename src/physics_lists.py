@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 15:26:15 trottar"
+# Time-stamp: "2023-09-21 15:29:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -257,7 +257,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         check_kin = check_line.split()[:4]
         inLine = False
         with open(f_list_settings, 'w') as f:
-            for line in lines:
+            for line in f:
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
@@ -271,7 +271,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         check_kin = check_line.split()[:4]
         inLine = False
         with open(f_list_settings, 'w') as f:
-            for line in lines:
+            for line in f:
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
@@ -285,7 +285,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         check_kin = check_line.split()[:4]
         inLine = False
         with open(f_list_settings, 'w') as f:
-            for line in lines:
+            for line in f:
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
