@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 14:47:18 trottar"
+# Time-stamp: "2023-09-21 09:11:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,6 +168,10 @@ def find_bins(histlist, inpDict):
         # patches -> Container of individual artists used to create the histogram or list of
         # such containers if there are multiple input datasets.
         n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]))
+
+        for i,val in bins:
+            print("!!!!!!!!!!!!!!!!!",bins[i])
+            print("-----------------",n[i])
 
         # Stripping tmin and tmax
         bin_centers = bins[1:-1]
