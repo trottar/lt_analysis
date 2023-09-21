@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 11:42:59 trottar"
+# Time-stamp: "2023-09-21 13:35:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -204,6 +204,8 @@ inpDict["Q2min"] = Q2Val - (2/7)*Q2Val # Minimum value of Q2 on the Q2 vs W plot
 inpDict["Q2max"] = Q2Val + (2/7)*Q2Val # Maximum value of Q2 on the Q2 vs W plot
 inpDict["Wmin"] = WVal - (2/7)*WVal # min y-range for Q2vsW plot
 inpDict["Wmax"] = WVal + (2/7)*WVal # max y-range for Q2vsW plot
+inpDict["Epsmin"] = EPSVAL - (2/7)*EPSVAL
+inpDict["Epsmax"] = EPSVAL + (2/7)*EPSVAL
 
 phisetlist = ["Center","Left","Right"]
 for phiset in phisetlist:
