@@ -99,7 +99,7 @@ c      sigTT=(par(11)*q2*exp(-q2)+par(12)/q2**2)*f_tm*sin(thetacm)**2
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
       sigTT=(par(12)*q2*exp(-q2))*f_tm*sin(thetacm)**2
 
-      tav=(-0.178+0.3.15*log(q2_set))*q2_set      
+      tav=(-0.178+0.315*log(q2))*q2      
       
 ** !! MODEL DEP STUDY !!
 c      sigL=sigL*0.90-0.1
