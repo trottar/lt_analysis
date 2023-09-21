@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-09-18 16:29:00 trottar"
+# Time-stamp: "2023-09-21 19:47:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,37 +114,21 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       # Progress bar
       Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
-      # Define the acceptance cuts  
-      SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-      HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-      if ( a1 == 0.0 and  b1 == 0.0 and  a2 == 0.0 and  b2 == 0.0 and  a3 == 0.0 and  b3 == 0.0 and  a4 == 0.0 and  b4 == 0.0):
-          Diamond = True
-      else:
-          try:
-              Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-          except ZeroDivisionError:
-              Diamond = False
+      TBRANCH_SIMC.GetEntry(i)
 
-      #........................................
+      # thetacm and phicm are correct, the next line is just for testingx
+      #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
+      inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+ \
+                       ' '.join(param_arr)
+      #print("-"*25,"\n",i,"\n",inp_param)
 
-      #Fill SIMC events
-      if(HMS_Acceptance & SHMS_Acceptance & Diamond):
+      iweight[0] = iterWeight(inp_param)
 
-          TBRANCH_SIMC.GetEntry(i)
-          
-          # thetacm and phicm are correct, the next line is just for testingx
-          #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
-          inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+ \
-                           ' '.join(param_arr)
-          #print("-"*25,"\n",i,"\n",inp_param)
+      # Set the value of iweight
+      new_Weight_SIMC.SetAddress(iweight)
 
-          iweight[0] = iterWeight(inp_param)
-          
-          # Set the value of iweight
-          new_Weight_SIMC.SetAddress(iweight)
-    
-          # Fill the new branch with the new value for this entry
-          new_branch.Fill()
+      # Fill the new branch with the new value for this entry
+      new_branch.Fill()
           
     new_TBRANCH_SIMC.Write()
     
