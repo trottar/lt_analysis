@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 11:21:45 trottar"
+# Time-stamp: "2023-09-21 19:55:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,7 +44,7 @@ def iterWeight(arg_str):
     tav = (-0.178 + 0.315 * math.log(q2_sim)) * q2_sim
 
     sig219 = (sigt + eps_sim * sigl + eps_sim * math.cos(2. * phicm_sim) * sigtt +
-             math.sqrt(2.0 * eps_sim * (1. + eps_sim)) * math.cos(phicm_sim) * siglt) / 1.0
+             math.sqrt(2.0 * eps_sim * (1. + eps_sim)) * math.cos(phicm_sim) * siglt) / 1e6
 
     wfactor = 1.0 / (s_gev - mtar_gev**2)**2
     sig = sig219 * wfactor
