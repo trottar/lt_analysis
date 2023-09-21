@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:52:26 trottar"
+# Time-stamp: "2023-09-21 13:53:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -205,8 +205,8 @@ WVal = float(W.replace("p","."))
 ##############
 # May need to adjust these for both diamond plots and binning
 # Too many zero bins can result in empty bins when t/phi binning
-inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
-inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+inpDict["Q2min"] = Q2Val - (2/7)*Q2Val
+inpDict["Q2max"] = Q2Val + (2/7)*Q2Val
 inpDict["Wmin"] = WVal - (0.06)*WVal
 inpDict["Wmax"] = WVal + (0.06)*WVal
 inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
@@ -223,7 +223,7 @@ for phiset in phisetlist:
 print("Diamond cut parameters: ")
 for p in [1,2,3,4]:
     if inpDict["a%i" % p] == 0.0 or inpDict["b%i" % p] == 0.0:
-        print("ERROR: Invalid diamon cut paramters")
+        print("ERROR: Invalid diamond cut paramters")
         sys.exit(2)
     else:
         print("a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
