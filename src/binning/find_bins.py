@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 09:22:05 trottar"
+# Time-stamp: "2023-09-21 09:23:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,15 +158,16 @@ def find_bins(histlist, inpDict):
             equalN_values = sorted_x[indices]
             return np.interp(np.linspace(0, npt, nbin+2), indices, equalN_values) # +2 to account for tmin and tmax
         '''
-    def histedges_equalN(x, nbin):
-        npt = len(x)
-        # Calculate the indices for equal number of events
-        indices = np.arange(0, npt-1, (npt-1) // nbin)
-        indices = np.append(indices, npt-1)  # Add the last index
-        sorted_x = np.sort(x)
-        equalN_values = sorted_x[indices]
-        return equalN_values        
-
+        
+        def histedges_equalN(x, nbin):
+            npt = len(x)
+            # Calculate the indices for equal number of events
+            indices = np.arange(0, npt-1, (npt-1) // nbin)
+            indices = np.append(indices, npt-1)  # Add the last index
+            sorted_x = np.sort(x)
+            equalN_values = sorted_x[indices]
+            return equalN_values
+        
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
         # The bins are determined by a linear interpolation (see function above)
