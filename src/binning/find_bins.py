@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 09:47:59 trottar"
+# Time-stamp: "2023-09-21 09:54:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -119,8 +119,7 @@ def find_bins(histlist, inpDict):
         n, bins = np.histogram(H_phi_BinTest, bin_edges)
 
         for i,val in enumerate(n):
-            print("!!!!!!!!!!!!!!!!!",bins[i]," - ",bins[i+1])
-            print("-----------------",n[i])
+            print("Bin {} from {} to {} has {} events".format(i, bins[i], bins[i+1], n[i]))
         
         bin_centers = (bins[:-1] + bins[1:]) / 2
 
@@ -134,7 +133,7 @@ def find_bins(histlist, inpDict):
                 lines.append("\t{}".format(float(phi)))
             file.writelines(lines)
 
-        return [n,bin_centers]
+        return [n,bins]
 
     def find_tbins(H_t_BinTest):
 
@@ -186,15 +185,13 @@ def find_bins(histlist, inpDict):
         n, bins = np.histogram(H_t_BinTest, bin_edges)
         
         for i,val in enumerate(n):
-            print("!!!!!!!!!!!!!!!!!",bins[i]," - ",bins[i+1])
-            print("-----------------",n[i])
+            print("Bin {} from {} to {} has {} events".format(i, bins[i], bins[i+1], n[i]))
 
         # Stripping tmin and tmax
         #bin_centers = bins[1:-1]
         
-        bin_centers = (bins[:-1] + bins[1:]) / 2
-        
-        print("t_bins = ", bin_centers)
+        bin_centers = (bins[:-1] + bins[1:]) / 2        
+        print("t_bins = ", bin_centers)        
         
         # Write t_bin_interval for lt_analysis scripts
         lines = []
@@ -204,6 +201,6 @@ def find_bins(histlist, inpDict):
                 lines.append("\t{:.2f}".format(float(t)))
             file.writelines(lines)
 
-        return [n,bin_centers]
+        return [n,bins]
     
     return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
