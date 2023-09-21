@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-20 20:10:03 trottar"
+# Time-stamp: "2023-09-20 20:24:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,6 +58,10 @@ def file_to_df(f_name, columns):
         print(lines)
         if '1.000000\n' in lines:
             lineskip=True
+        if 'Infinity' in lines:
+            lineskip=True
+        if 'NaN' in lines:
+            lineskip=True            
 
     if lineskip:
         df = pd.read_csv(f_name, header=None, sep=' ', skiprows=1, skipfooter=1, engine='python')
