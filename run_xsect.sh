@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 11:42:43 trottar"
+# Time-stamp: "2023-09-21 11:52:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -195,6 +195,14 @@ OutUnsepxsectsFilename="unsep_xsects_${KIN}"
 
 cd "${LTANAPATH}/src/plotting/"
 python3 plot_unsep.py ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
+# Check the exit status of the Python script
+if [ $? -ne 0 ]; then
+    echo
+    echo
+    echo "ERROR: Python script failed!"
+    echo "       See error above..."
+    exit 1
+fi
 
 #cd "${LTANAPATH}"
 #evince "OUTPUT/Analysis/${ANATYPE}LT/${OutUnsepxsectsFilename}.pdf"

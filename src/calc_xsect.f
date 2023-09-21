@@ -89,7 +89,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       open(55,file=trim(pid) // '/list.settings')
       do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.eps.ne.eps_set)
          read(55,*) ipol,q2,eps,th_pq,tmn,tmx
-c         write(6,2)ipol,q2,eps,th_pq,tmn,tmx
+         write(6,2)ipol,q2,eps,th_pq,tmn,tmx
 c 2       format(i5,5f10.5,2i5)
       end do
       close(55)
