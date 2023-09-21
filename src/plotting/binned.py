@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-18 20:08:25 trottar"
+# Time-stamp: "2023-09-21 10:51:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,7 +90,11 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
     outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
     ################################################################################################################################################
-    
+
+
+    # Find bin centers
+    t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
+    phi_bin_centers = (phi_bins[:-1] + phi_bins[1:]) / 2    
 
     histbinDict = {}
 
@@ -377,7 +381,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         phibins_simc = match_to_bin(phibins_simc)
 
         multiDict = {}
-        for i, val in enumerate(t_bins):
+        for i, val in enumerate(t_bin_centers):
 
             multiDict["G_yieldvsphi_plt_{}".format(i)] = TMultiGraph()
 
@@ -437,7 +441,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         phibins = match_to_bin(phibins)
 
         multiDict = {}
-        for i, val in enumerate(t_bins):
+        for i, val in enumerate(t_bin_centers):
 
             multiDict["G_ratiovsphi_plt_{}".format(i)] = TMultiGraph()
 

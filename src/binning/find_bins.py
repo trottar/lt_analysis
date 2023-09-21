@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 10:20:05 trottar"
+# Time-stamp: "2023-09-21 10:35:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,7 +105,7 @@ def find_bins(histlist, inpDict):
     # Concatenate the H_t arrays for Right, Left, and Center
     H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
 
-    # Apply proper boundaries
+    # Apply proper boundaries for t
     H_t_BinTest = np.append(H_t_BinTest, tmin)
     H_t_BinTest = np.append(H_t_BinTest, tmax)
 
@@ -139,32 +139,11 @@ def find_bins(histlist, inpDict):
 
 
         ################################################################################################################################################
-        '''
-        def histedges_equalN(x, nbin):
-            # Grab number of events in array
-            npt = len(x)
-            # One-dimensional linear interpolation for monotonically increasing sample points.
-            # Returns the one-dimensional piecewise linear interpolant to a function with given
-            # discrete data points (xp, fp), evaluated at x.
-            #
-            # np.interp(x, xp, fp)
-            # x -> np.linspace(0, npt, nbin) : The x-coordinates at which to evaluate the interpolated values
-            # In this case, this is an array of evenly spaced t-bins
-            # xp -> np.arange(npt) : The x-coordinates of the data points
-            # In this case, this returns evenly spaced values within a given interval
-            # yp -> np.sort(x) : the y-coordinates of the data points
-            # In this case, this returns a sorted copy of the array
-            npt = len(x) 
-            indices = np.linspace(0, npt-1, nbin+1).astype(int) # npt-1 since starting at 0
-            sorted_x = np.sort(x)
-            equalN_values = sorted_x[indices]
-            return np.interp(np.linspace(0, npt, nbin+2), indices, equalN_values) # +2 to account for tmin and tmax
-        '''
-        
+ 
         def histedges_equalN(x, nbin):
             npt = len(x)
             # Calculate the indices for equal number of events
-            indices = np.arange(0, npt-1, npt // nbin)
+            indices = np.arange(0, npt-1, npt // nbin) # npt-1 because starting at 0
             indices = np.append(indices, npt-1)  # Add the last index
             sorted_x = np.sort(x)
             equalN_values = sorted_x[indices]
@@ -174,13 +153,6 @@ def find_bins(histlist, inpDict):
         # Histogram takes the array data set and the bins as input
         # The bins are determined by a linear interpolation (see function above)
         # This returns the binned data with equal number of events per bin
-        # Returns...
-        # n -> The values of the histogram bins
-        # bins -> The edges of the bins
-        # patches -> Container of individual artists used to create the histogram or list of
-        # such containers if there are multiple input datasets.
-        #n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]))
-        # Generate the histogram
         bin_edges = histedges_equalN(H_t_BinTest, inpDict["NumtBins"])
         n, bins = np.histogram(H_t_BinTest, bin_edges)
         
