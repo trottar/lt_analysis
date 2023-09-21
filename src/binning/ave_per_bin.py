@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:19:16 trottar"
+# Time-stamp: "2023-09-21 13:23:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,12 +57,15 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
     binned_hist_data = []
     binned_hist_dummy = []
 
+    
     for j in range(len(t_bins)-1):
+        test_arr = []
         for bin_index in range(1, t_data.GetNbinsX() + 1):
             if "W" in kin_type:
                 bin_center = t_data.GetBinCenter(bin_index)
                 if t_bins[j] <= bin_center <= t_bins[j+1]:
-                    print("!!!!!!!!!!!!!!W,t",hist_data.GetBinCenter(bin_index),t_data.GetBinCenter(bin_index))
+                    test_arr.append(hist_data.GetBinCenter(bin_index))
+                    #print("!!!!!!!!!!!!!!W,t",hist_data.GetBinCenter(bin_index),t_data.GetBinCenter(bin_index))
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -72,7 +75,9 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
         for bin_index in range(1, t_data.GetNbinsX() + 1):
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
-                if hist_data.GetBinContent(bin_index) > 0:
+                if hist_data.GetBinCenter(bin_index) == test_arr[bin_index]:
+                    print("!!!!!!!!!!!!!!W,t",hist_data.GetBinCenter(bin_index),t_data.GetBinCenter(bin_index))
+                if hist_data.GetBinContent(bin_index) > 0:                    
                     #print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
                     #print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
