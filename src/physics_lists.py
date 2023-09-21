@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 15:04:08 trottar"
+# Time-stamp: "2023-09-21 15:06:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,7 +251,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
 
-   if float(runNumRight[0]) != 0:    
+    if float(runNumRight[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -266,7 +266,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         else:
             write_to_file(f_list_settings,check_line)
 
-   if float(runNumLeft[0]) != 0:    
+    if float(runNumLeft[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -281,7 +281,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         else:
             write_to_file(f_list_settings,check_line)
 
-   if float(runNumCenter[0]) != 0:    
+    if float(runNumCenter[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
