@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 15:33:32 trottar"
+# Time-stamp: "2023-09-21 15:38:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -254,7 +254,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if float(runNumRight[0]) != 0:    
         # First check if line exists
         check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins)
-        check_kin = check_line.split()[:4]
+        check_kin = ' '.join(check_line.split()[:4])
         inLine = False
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -263,6 +263,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
+                else:
+                    f.write(line)                    
         # Check if the line already exists
         if not inLine:
             write_to_file(f_list_settings,check_line)
@@ -270,7 +272,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if float(runNumLeft[0]) != 0:    
         # First check if line exists
         check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
-        check_kin = check_line.split()[:4]
+        check_kin = ' '.join(check_line.split()[:4])
         inLine = False
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -279,6 +281,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
+                else:
+                    f.write(line)                    
         # Check if the line already exists
         if not inLine:
             write_to_file(f_list_settings,check_line)
@@ -286,7 +290,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if float(runNumCenter[0]) != 0:    
         # First check if line exists
         check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
-        check_kin = check_line.split()[:4]
+        check_kin = ' '.join(check_line.split()[:4])
         inLine = False
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()        
@@ -295,6 +299,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
+                else:
+                    f.write(line)
         # Check if the line already exists
         if not inLine:
             write_to_file(f_list_settings,check_line)            
