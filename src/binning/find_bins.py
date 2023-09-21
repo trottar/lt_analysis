@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 09:45:44 trottar"
+# Time-stamp: "2023-09-21 09:47:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -115,10 +115,13 @@ def find_bins(histlist, inpDict):
     def find_phibins(H_phi_BinTest):
 
         print("\nFinding phi bins...")
-        phi_arr = np.linspace(0.0, 360.0, inpDict["NumPhiBins"]+1)
+        bin_edges = np.linspace(0.0, 360.0, inpDict["NumPhiBins"]+1)
+        n, bins = np.histogram(H_phi_BinTest, bin_edges)
 
-        n, bins, patches = plt.hist(H_phi_BinTest, phi_arr)
-
+        for i,val in enumerate(n):
+            print("!!!!!!!!!!!!!!!!!",bins[i]," - ",bins[i+1])
+            print("-----------------",n[i])
+        
         bin_centers = (bins[:-1] + bins[1:]) / 2
 
         print("phi_bins = ", bin_centers)
