@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 09:59:18 trottar"
+# Time-stamp: "2023-09-21 10:05:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,8 +68,8 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:
-                    print("Checking if {} <= {} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
-                    print("Bin {}, Hist bin {} Passed with content {}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                    print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+                    print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
                     tmp_t_data[1].append(t_data.GetBinContent(bin_index))
                     tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
