@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 09:36:43 trottar"
+# Time-stamp: "2023-09-21 09:39:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,7 +183,7 @@ def find_bins(histlist, inpDict):
         n, bins = np.histogram(H_t_BinTest, bin_edges)
         
         for i,val in enumerate(n):
-            print("!!!!!!!!!!!!!!!!!",bins[i])
+            print("!!!!!!!!!!!!!!!!!",bins[i]," - ",bins[i+1])
             print("-----------------",n[i])
 
         # Stripping tmin and tmax
