@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 09:23:53 trottar"
+# Time-stamp: "2023-09-21 09:28:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -177,9 +177,12 @@ def find_bins(histlist, inpDict):
         # bins -> The edges of the bins
         # patches -> Container of individual artists used to create the histogram or list of
         # such containers if there are multiple input datasets.
-        n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]))
-
-        for i,val in enumerate(bins):
+        #n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]))
+        # Generate the histogram
+        bin_edges = histedges_equalN(H_t_BinTest, inpDict["NumtBins"])
+        n, bins = np.histogram(H_t_BinTest, bin_edges)
+        
+        for i,val in enumerate(n):
             print("!!!!!!!!!!!!!!!!!",bins[i])
             print("-----------------",n[i])
 
