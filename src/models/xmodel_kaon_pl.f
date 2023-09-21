@@ -45,23 +45,39 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       call eps_n_theta(pid,npol_set,Eb,w,q2,tm,thetacm,eps_mod)
 
 *     Model fit parameters.
-      
+
+*     RLT (9/21/2023: Removing if statement phi<0.3,
+*                     not sure why this is there
+*      write(fn,10) pid,pol,nint(q2_set*10)
+* 10   format(a4,'/parameters/par.',a2,'_',i2.2,'.dat')
+*      if (phi.lt.0.3) then
+*         print*, 'param: fn=',fn
+*      endif
+
+*      open(56,file=fn)
+*      do while(.true.)
+*         read(56,*,end=9) p,e,i
+*         par(i)=p
+*         if (phi.lt.0.3) then
+*            write(6,101)par(i),e,i
+* 101        format(' xmodel: '2f11.4,i4)
+*         endif
+c         pause
+*     end do
+
       write(fn,10) pid,pol,nint(q2_set*10)
  10   format(a4,'/parameters/par.',a2,'_',i2.2,'.dat')
-      if (phi.lt.0.3) then
-         print*, 'param: fn=',fn
-      endif
+      print*, 'param: fn=',fn
 
       open(56,file=fn)
       do while(.true.)
          read(56,*,end=9) p,e,i
          par(i)=p
-         if (phi.lt.0.3) then
-            write(6,101)par(i),e,i
- 101        format(' xmodel: '2f11.4,i4)
-         endif
+         write(6,101)par(i),e,i
+ 101     format(' xmodel: '2f11.4,i4)
 c         pause
       end do
+      
 
  9    close(56)
 
@@ -79,7 +95,7 @@ c         pause
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
       sigTT=(par(12)*q2*exp(-q2))*f_tm*sin(thetacm)**2
 
-      tav=(-0.178+0.315*log(q2))*q2      
+      tav=(-0.178+0.315*log(q2))*q2
       
 ** !! MODEL DEP STUDY !!
 c      sigL=sigL*0.90-0.1
@@ -100,12 +116,19 @@ c     Correct for W.
 
       th_mod=thetacm
 
-      if (phi.lt.0.3) then
-         write(6,102) eps_mod,tm,sigL,sigT,sigTT,sigLT,x_mod
- 102     format('xmodel: eps=',f5.3,' t=',f5.3,' sigL=',f6.2,' sigT=',
-     1        f6.2,' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f5.2)
-      endif
+*     RLT (9/21/2023: Removing if statement phi<0.3,
+*                     not sure why this is there      
+*      if (phi.lt.0.3) then
+*         write(6,102) eps_mod,tm,sigL,sigT,sigTT,sigLT,x_mod
+* 102     format('xmodel: eps=',f5.3,' t=',f5.3,' sigL=',f6.2,' sigT=',
+*     1        f6.2,' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f5.2)
+*      endif
 
+ 
+      write(6,102) eps_mod,tm,sigL,sigT,sigTT,sigLT,x_mod
+ 102  format('xmodel: eps=',f5.3,' t=',f5.3,' sigL=',f6.2,' sigT=',
+     1     f6.2,' sigTT=',f5.2,' sigLT=',f5.2,' x_mod=',f5.2)
+     
       end
 
 *=======================================================================
