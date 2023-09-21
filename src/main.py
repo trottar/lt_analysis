@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:45:23 trottar"
+# Time-stamp: "2023-09-21 13:46:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,6 +200,9 @@ from diamond import DiamondPlot
 Q2Val = float(Q2.replace("p","."))
 WVal = float(W.replace("p","."))
 
+##############
+# HARD CODED #
+##############
 # May need to adjust these for both diamond plots and binning
 # Too many zero bins can result in empty bins when t/phi binning
 inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
@@ -208,6 +211,9 @@ inpDict["Wmin"] = WVal - (0.06)*WVal
 inpDict["Wmax"] = WVal + (0.06)*WVal
 inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
 inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
+##############
+##############
+##############
 
 phisetlist = ["Center","Left","Right"]
 for phiset in phisetlist:
