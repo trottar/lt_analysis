@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 18:31:46 trottar"
+# Time-stamp: "2023-09-21 18:59:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -415,7 +415,7 @@ if EPSSET == "high":
     except Exception as e:
         sys.exit(2)
 
-    output_file_lst.append(OUTPATH+"/${ParticleType}_unsep_xsects_${KIN}.pdf")
+    output_file_lst.append(OUTPATH+"/{}_unsep_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
 
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***
