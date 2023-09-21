@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-20 20:24:40 trottar"
+# Time-stamp: "2023-09-21 09:57:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,8 +54,8 @@ def file_to_df(f_name, columns):
     # Open the file for reading
     with open(f_name, 'r') as file:
         lines = file.readlines()
-        print("Reading in {}".format(f_name))
-        print(lines)
+        #print("Reading in {}".format(f_name))
+        #print(lines)
         if '1.000000\n' in lines:
             lineskip=True
         if 'Infinity' in lines:
