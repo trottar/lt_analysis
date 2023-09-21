@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 14:44:26 trottar"
+# Time-stamp: "2023-09-21 15:04:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,105 +251,51 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
 
-    if float(runNumRight[0]) != 0:
+   if float(runNumRight[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-            check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins)
+        check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins)
+        check_kin = check_line.split()[:4]
+        if check_kin in lines:
+            with open(f_list_settings, 'w') as f:
+                for line in lines:
+                    if check_kin in line:
+                        f.write(check_line)
+        # Check if the line already exists
+        else:
+            write_to_file(f_list_settings,check_line)
 
-            # Extract the first 4 entries for comparison
-            check_entries = check_line.split()[:4]
-
-            # Initialize a flag to track if the line is found
-            line_found = False
-
-            # Initialize a list to keep track of unique lines
-            unique_lines = []
-
-            for line in lines:
-                # Extract the first 4 entries of the line from the file
-                line_entries = line.split()[:4]
-
-                # Check if the first 4 entries match
-                if check_entries == line_entries:
-                    # Check if tmin, tmax, and NumtBins also match
-                    if check_line != line:
-                        # If not, overwrite the line
-                        unique_lines.append(check_line)
-                        line_found = True
-                else:
-                    # If first 4 entries don't match, keep the line
-                    unique_lines.append(line)
-
-            # Write back the unique lines to the file using the function
-            write_to_file(f_list_settings, ''.join(unique_lines), 'w')
-
-    if float(runNumLeft[0]) != 0:
+   if float(runNumLeft[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-            check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+        check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+        check_kin = check_line.split()[:4]
+        if check_kin in lines:
+            with open(f_list_settings, 'w') as f:
+                for line in lines:
+                    if check_kin in line:
+                        f.write(check_line)
+        # Check if the line already exists
+        else:
+            write_to_file(f_list_settings,check_line)
 
-            # Extract the first 4 entries for comparison
-            check_entries = check_line.split()[:4]
-
-            # Initialize a flag to track if the line is found
-            line_found = False
-
-            # Initialize a list to keep track of unique lines
-            unique_lines = []
-
-            for line in lines:
-                # Extract the first 4 entries of the line from the file
-                line_entries = line.split()[:4]
-
-                # Check if the first 4 entries match
-                if check_entries == line_entries:
-                    # Check if tmin, tmax, and NumtBins also match
-                    if check_line != line:
-                        # If not, overwrite the line
-                        unique_lines.append(check_line)
-                        line_found = True
-                else:
-                    # If first 4 entries don't match, keep the line
-                    unique_lines.append(line)
-
-            # Write back the unique lines to the file using the function
-            write_to_file(f_list_settings, ''.join(unique_lines), 'w')
-
-    if float(runNumCenter[0]) != 0:
+   if float(runNumCenter[0]) != 0:    
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-            check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
-
-            # Extract the first 4 entries for comparison
-            check_entries = check_line.split()[:4]
-
-            # Initialize a flag to track if the line is found
-            line_found = False
-
-            # Initialize a list to keep track of unique lines
-            unique_lines = []
-
-            for line in lines:
-                # Extract the first 4 entries of the line from the file
-                line_entries = line.split()[:4]
-
-                # Check if the first 4 entries match
-                if check_entries == line_entries:
-                    # Check if tmin, tmax, and NumtBins also match
-                    if check_line != line:
-                        # If not, overwrite the line
-                        unique_lines.append(check_line)
-                        line_found = True
-                else:
-                    # If first 4 entries don't match, keep the line
-                    unique_lines.append(line)
-
-            # Write back the unique lines to the file using the function
-            write_to_file(f_list_settings, ''.join(unique_lines), 'w')
-        
+        check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
+        check_kin = check_line.split()[:4]
+        if check_kin in lines:
+            with open(f_list_settings, 'w') as f:
+                for line in lines:
+                    if check_kin in line:
+                        f.write(check_line)
+        # Check if the line already exists
+        else:
+            write_to_file(f_list_settings,check_line)            
+                
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
