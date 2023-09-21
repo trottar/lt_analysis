@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 14:22:27 trottar"
+# Time-stamp: "2023-09-21 14:30:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -327,8 +327,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             # Convert existing entries to a string for comparison
             existing_entries_str = ' '.join(existing_entries)
 
+            print("---------------",lines)
             # Check if the first 4 entries match
             if existing_entries_str in lines:
+                print("!!!!!!!!!!!!!!!",existing_entries_str)
                 # Find the index of the matching line
                 index = lines.index(existing_entries_str)
 
