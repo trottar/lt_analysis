@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 16:00:24 trottar"
+# Time-stamp: "2023-09-21 16:01:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,9 +141,9 @@ def find_bins(histlist, inpDict):
         ################################################################################################################################################
  
         def histedges_equalN(x, nbin):
-            npt = len(x)-1
+            npt = len(x)-1 # npt-1 because starting at 0
             # Calculate the indices for equal number of events
-            indices = np.arange(0, npt, npt // nbin) # npt-1 because starting at 0
+            indices = np.arange(0, npt, npt // nbin) 
             indices = np.append(indices, npt)  # Add the last index
             sorted_x = np.sort(x)
             equalN_values = sorted_x[indices]
@@ -153,7 +153,7 @@ def find_bins(histlist, inpDict):
         # Histogram takes the array data set and the bins as input
         # The bins are determined by a linear interpolation (see function above)
         # This returns the binned data with equal number of events per bin
-        bin_edges = histedges_equalN(H_t_BinTest, inpDict["NumtBins"])
+        bin_edges = histedges_equalN(H_t_BinTest, inpDict["NumtBins"]+1)
         n, bins = np.histogram(H_t_BinTest, bin_edges)
         
         for i,val in enumerate(n):
