@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:31:17 trottar"
+# Time-stamp: "2023-09-21 13:38:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,7 +154,7 @@ def compare_simc(hist, inpDict):
     H_Q2_SIMC       = TH1D("H_Q2_SIMC","Q2", 200, inpDict["Q2min"], inpDict["Q2max"])
     H_W_SIMC  = TH1D("H_W_SIMC","W ", 200, inpDict["Wmin"], inpDict["Wmax"])
     H_t_SIMC       = TH1D("H_t_SIMC","-t", 200, inpDict["tmin"], inpDict["tmax"])  
-    H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 200, 0., 1.0)
+    H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_SIMC  = TH1D("H_MM_SIMC","MM_{K}", 200, 0.0, 1.5)
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 200, -0.1, 0.1)
     H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 200, -0.1, 0.1)
