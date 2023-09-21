@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 16:57:31 trottar"
+# Time-stamp: "2023-09-21 17:07:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -555,7 +555,7 @@ if EPSSET == "high":
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
     # if still iterating weights
-    subprocess.call(['bash','{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, ])
+    subprocess.call(['bash','{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL])
 
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***
