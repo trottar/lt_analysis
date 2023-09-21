@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 17:01:59 trottar"
+# Time-stamp: "2023-09-21 17:14:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -125,12 +125,12 @@ fix_spacing(LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(ParticleT
 
 file_df_dict = {}
 
-setting_file = LTANAPATH+"/src/{}/list.settings"
+setting_file = LTANAPATH+"/src/{}/list.settings".format(ParticleType)
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins', 'Kset'])
 
 for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
-        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
+        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat".format(ParticleType), ['ebeam', 'Q2', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/{}/averages/avek.{}.dat".format(ParticleType, Q2.replace("p","")) \
                                                , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])
         if row['EPSVAL'] == float(LOEPS):
