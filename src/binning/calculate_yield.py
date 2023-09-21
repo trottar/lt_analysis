@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 19:35:56 trottar"
+# Time-stamp: "2023-09-21 10:33:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,8 +57,6 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
     binned_hist_data = []
     binned_hist_dummy = []
     
-    t_bins = np.append(t_bins, 0.0) # Needed to fully finish loop over bins
-    phi_bins = np.append(phi_bins, 0.0) # Needed to fully finish loop over bins
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -74,10 +72,10 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
                             phibin_center = (phi_data.GetBinCenter(phibin_index)+math.pi)*(180 / math.pi)
                             if phi_bins[k] <= phibin_center <= phi_bins[k+1]:
                                 if hist_data.GetBinContent(phibin_index) > 0:
-                                    #print("Checking if t: {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
-                                    #print("t-bin {}, Hist bin {} Passed with content {}".format(j, hist_data.GetBinCenter(tbin_index), hist_data.GetBinContent(tbin_index)))
-                                    #print("Checking if phi: {} <= {} <= {}".format(phi_bins[k], phibin_center, phi_bins[k+1]))
-                                    #print("phi-bin {}, Hist bin {} Passed with content {}".format(k, hist_data.GetBinCenter(phibin_index), hist_data.GetBinContent(phibin_index)))
+                                    print("Checking if t: {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
+                                    print("t-bin {}, Hist bin {} Passed with content {}".format(j+1, hist_data.GetBinCenter(tbin_index), hist_data.GetBinContent(tbin_index)))
+                                    print("Checking if phi: {} <= {} <= {}".format(phi_bins[k], phibin_center, phi_bins[k+1]))
+                                    print("phi-bin {}, Hist bin {} Passed with content {}".format(k+1, hist_data.GetBinCenter(phibin_index), hist_data.GetBinContent(phibin_index)))
                                     tmp_t_data[0].append(t_data.GetBinCenter(tbin_index))
                                     tmp_t_data[1].append(t_data.GetBinContent(tbin_index))
                                     tmp_phi_data[0].append(phi_data.GetBinCenter(phibin_index))
@@ -125,7 +123,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             phibin_index = k
             hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
             yield_val = yield_hist[i]
-            print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j, k, yield_val))
+            print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
             i+=1
 
@@ -146,8 +144,6 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
     binned_phi_simc = []
     binned_hist_simc = []
     
-    t_bins = np.append(t_bins, 0.0) # Needed to fully finish loop over bins
-    phi_bins = np.append(phi_bins, 0.0) # Needed to fully finish loop over bins
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -163,9 +159,9 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
                             if phi_bins[k] <= phibin_center <= phi_bins[k+1]:
                                 if hist_simc.GetBinContent(phibin_index) > 0:
                                     #print("Checking if t: {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
-                                    #print("t-bin {}, Hist bin {} Passed with content {}".format(j, hist_simc.GetBinCenter(tbin_index), hist_simc.GetBinContent(tbin_index)))
+                                    #print("t-bin {}, Hist bin {} Passed with content {}".format(j+1, hist_simc.GetBinCenter(tbin_index), hist_simc.GetBinContent(tbin_index)))
                                     #print("Checking if phi: {} <= {} <= {}".format(phi_bins[k], phibin_center, phi_bins[k+1]))
-                                    #print("phi-bin {}, Hist bin {} Passed with content {}".format(k, hist_simc.GetBinCenter(phibin_index), hist_simc.GetBinContent(phibin_index)))
+                                    #print("phi-bin {}, Hist bin {} Passed with content {}".format(k+1, hist_simc.GetBinCenter(phibin_index), hist_simc.GetBinContent(phibin_index)))
                                     tmp_t_simc[0].append(t_simc.GetBinCenter(tbin_index))
                                     tmp_t_simc[1].append(t_simc.GetBinContent(tbin_index))
                                     tmp_phi_simc[0].append(phi_simc.GetBinCenter(phibin_index))
@@ -207,7 +203,7 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
             phibin_index = k
             hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
             yield_val = yield_hist[i]
-            print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j, k, yield_val))
+            print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
             i+=1
             
