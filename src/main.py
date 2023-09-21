@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:46:21 trottar"
+# Time-stamp: "2023-09-21 13:51:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -220,6 +220,10 @@ for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
     inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))
 
+print("Diamond fit parameters: ")
+for p in [1,2,3,4]:
+    print("a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
+    
 if DEBUG:
     # Show plot pdf for each setting
     for phiset in phisetlist:
