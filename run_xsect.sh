@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:54:50 trottar"
+# Time-stamp: "2023-09-21 17:00:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,14 +97,12 @@ if [[ -z "$2" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3r
     done
 fi
 
+ParticleType=$3
+POL=$4
+
 ##############
 # HARD CODED #
 ##############
-
-PID="kaon"
-
-# Define global variables for lt_analysis scripts
-POL="+1" # All KaonLT is positive polarity
 
 if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     LOEPS=0.1838
@@ -168,7 +166,7 @@ if [ $? -ne 0 ]; then
 fi
 echo
 echo "Running average_kinematics..."
-./average_kinematics.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
+./average_kinematics.expect ${ParticleType} ${POL} ${Q2} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
@@ -183,7 +181,7 @@ if [ $? -ne 0 ]; then
 fi
 echo
 echo "Running calc_xsect..."
-./calc_xsect.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
+./calc_xsect.expect ${ParticleType} ${POL} ${Q2} ${LOEPS} ${HIEPS}
 
 # Replace p with '.'
 Q2=${Q2//./p}
@@ -194,7 +192,7 @@ KIN="Q${Q2}W${W}"
 OutUnsepxsectsFilename="unsep_xsects_${KIN}"
 
 cd "${LTANAPATH}/src/plotting/"
-python3 plot_unsep.py ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
+python3 plot_unsep.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
 # Check the exit status of the Python script
 if [ $? -ne 0 ]; then
     echo

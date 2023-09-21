@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 11:43:52 trottar"
+# Time-stamp: "2023-09-21 17:01:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,26 +23,29 @@ import sys, math, os, subprocess
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=6:
-    print("!!!!! ERROR !!!!!\n Expected 6 arguments\n Usage is with - Q2 W LOEPS HIEPS KIN OutUnsepxsectsFilename\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=8:
+    print("!!!!! ERROR !!!!!\n Expected 8 arguments\n Usage is with - ParticleType POL Q2 W LOEPS HIEPS KIN OutUnsepxsectsFilename\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ###############################################################################################################################################
-    
-Q2 = sys.argv[1]
-W = sys.argv[2]
-LOEPS = sys.argv[3]
-HIEPS = sys.argv[4]
 
-kinematics = sys.argv[5]
-OutFilename = sys.argv[6]
+ParticleType = sys.argv[1]
+POL = sys.argv[2]
+Q2 = sys.argv[3]
+W = sys.argv[4]
+LOEPS = sys.argv[5]
+HIEPS = sys.argv[6]
 
-particle = "kaon"
+kinematics = sys.argv[7]
+OutFilename = sys.argv[8]
 
-if particle == "kaon":
-    PID = "k"
-elif particle == "pion":
-    PID = "pi"
+if int(POL) == 1:
+    pol_str = "pl"
+elif int(POL) == -1:
+    pol_str = "mn"
+else:
+    print("ERROR: Invalid polarity...must be +1 or -1")
+    sys.exit(2)
     
 ###############################################################################################################################################
 
@@ -114,86 +117,86 @@ def fix_spacing(f_name):
             output.write('\n'.join(lines))
 
 # Fix file spacing to work in pandas
-fix_spacing(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")))
-fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(LOEPS)*100))
-fix_spacing(LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}".format(PID, Q2.replace("p",""), float(HIEPS)*100))
+fix_spacing(LTANAPATH+"/src/{}/averages/avek.{}.dat".format(ParticleType, Q2.replace("p","")))
+fix_spacing(LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100))
+fix_spacing(LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100))
 ################################################################################################################################################
 # Read in files and convert to dataframes
 
 file_df_dict = {}
 
-setting_file = LTANAPATH+"/src/list.settings"
+setting_file = LTANAPATH+"/src/{}/list.settings"
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins', 'Kset'])
 
 for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
-        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
-        file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/averages/avek.{}.dat".format(Q2.replace("p","")) \
+        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat", ['ebeam', 'Q2', 'EPSVAL'])
+        file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/{}/averages/avek.{}.dat".format(ParticleType, Q2.replace("p","")) \
                                                , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])
         if row['EPSVAL'] == float(LOEPS):
             if row['thpq'] < 0.0:
                 file_df_dict['aver_loeps_{}'.format('right')] = file_to_df( \
-                                                                            LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                            .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
+                                                                            LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                            .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
                                                                             , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('right')] = file_to_df( \
-                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
-                                                                               .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
+                                                                               LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
+                                                                               .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
                 file_df_dict['aver_loeps_{}'.format('left')] = file_to_df( \
-                                                                           LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                           .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
+                                                                           LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                           .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
                                                                            , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('left')] = file_to_df( \
-                                                                              LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
-                                                                              .format(PID, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
+                                                                              LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
+                                                                              .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] == 0.0:
                 file_df_dict['aver_loeps_{}'.format('center')] = file_to_df( \
-                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                             .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
+                                                                             LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
                                                                              , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('center')] = file_to_df( \
-                                                                                LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
-                                                                                .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
+                                                                                LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
+                                                                                .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
                                                                                 , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             file_df_dict['xsects_file_loeps'] = file_to_df( \
-                                                            LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}" \
-                                                            .format(PID, Q2.replace("p",""), float(LOEPS)*100) \
+                                                            LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat" \
+                                                            .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
                                                             , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
         if row['EPSVAL'] == float(HIEPS):
             if row['thpq'] < 0.0:
                 file_df_dict['aver_hieps_{}'.format('right')] = file_to_df( \
-                                                                            LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                            .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
+                                                                            LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                            .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
                                                                             , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('right')] = file_to_df( \
-                                                                               LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
-                                                                               .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
+                                                                               LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
+                                                                               .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
                 file_df_dict['aver_hieps_{}'.format('left')] = file_to_df( \
-                                                                           LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                           .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
+                                                                           LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                           .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
                                                                            , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('left')] = file_to_df( \
-                                                                              LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
-                                                                              .format(PID, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
+                                                                              LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
+                                                                              .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] == 0.0:
                 file_df_dict['aver_hieps_{}'.format('center')] = file_to_df( \
-                                                                             LTANAPATH+"/src/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                             .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
+                                                                             LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
                                                                              , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('center')] = file_to_df( \
-                                                                                LTANAPATH+"/src/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
-                                                                                .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
+                                                                                LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
+                                                                                .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
                                                                                 , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             file_df_dict['xsects_file_hieps'] = file_to_df( \
-                                                            LTANAPATH+"/src/xsects/x_unsep.{}_{}_{:.0f}" \
-                                                            .format(PID, Q2.replace("p",""), float(HIEPS)*100) \
+                                                            LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat" \
+                                                            .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
                                                             , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'um', 'um_min', 'W', 'Q2'])
 
 ################################################################################################################################################
