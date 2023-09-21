@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 19:34:22 trottar"
+# Time-stamp: "2023-09-21 19:39:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,8 +138,8 @@ for hist in histlist:
 
 # t/phi bins are the same for all settings
 # so arbitrarily grabbing from first setting of list
-t_bins = histlist[0]["t_bins"]
-phi_bins = histlist[0]["phi_bins"]
+t_bins = np.array(histlist[0]["t_bins"])
+phi_bins = np.array(histlist[0]["phi_bins"])
 
 print("\n\nt_bins = ", t_bins)
 print("phi_bins = ", phi_bins)
