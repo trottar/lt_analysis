@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 15:29:19 trottar"
+# Time-stamp: "2023-09-21 15:33:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,8 +256,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins)
         check_kin = check_line.split()[:4]
         inLine = False
+        with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
         with open(f_list_settings, 'w') as f:
-            for line in f:
+            for line in lines:
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
@@ -270,8 +272,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
         check_kin = check_line.split()[:4]
         inLine = False
+        with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
         with open(f_list_settings, 'w') as f:
-            for line in f:
+            for line in lines:
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
@@ -284,8 +288,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
         check_kin = check_line.split()[:4]
         inLine = False
+        with open(f_list_settings, 'r') as f:
+            lines = f.readlines()        
         with open(f_list_settings, 'w') as f:
-            for line in f:
+            for line in lines:
                 if check_kin in line:
                     inLine = True
                     f.write(check_line)
