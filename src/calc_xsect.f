@@ -172,6 +172,19 @@ c      pause
             print*,'ratio',r
             print*,'dratio',dr
 
+            print*,"xmodel inputs:"
+            print*,"pid: ", pid
+            print*,"npol_set: ", npol_set
+            print*,"Eb: ", Eb
+            print*,"q2_set: ", q2_set
+            print*,"w: ", w
+            print*,"q2: ", q2
+            print*,"tm: ", tm
+            print*,"phi: ", phi
+            print*,"eps_mod: ", eps_mod
+            print*,"th_mod: ", th_mod
+            print*,"x_mod: ", x_mod            
+            
             call xmodel(pid,npol_set,Eb,q2_set,w,q2,tm,phi,
      *           eps_mod,th_mod,x_mod)
 
