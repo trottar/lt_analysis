@@ -87,12 +87,12 @@ else
     done
 fi
 
-NumtBins=4
+NumtBins=3
 NumPhiBins=8
 
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity
-TMIN=0.0
+TMIN=0.001
 TMAX=0.6
 
 # Efficiency csv file
