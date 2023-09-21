@@ -92,8 +92,9 @@ NumPhiBins=8
 
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity
+# Make sure 3 sig figs (no more, less allowed)
 TMIN=0.001
-TMAX=0.6
+TMAX=0.600
 
 # Efficiency csv file
 #EffData="coin_production_Prod_efficiency_data_2022_12_05.csv"
