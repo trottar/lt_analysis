@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:08:02 trottar"
+# Time-stamp: "2023-09-21 13:11:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -501,9 +501,6 @@ def rand_sub(phi_setting, inpDict):
           H_MM_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
           #H_MM_DATA.Fill(pow(evt.MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
-
-          if -evt.MandelT > 0:
-              print("!!!!!!!!!!!!!!Q2,W,t",evt.Q2,evt.W,-evt.MandelT)
           
           H_cal_etottracknorm_DATA.Fill(evt.H_cal_etottracknorm)
           H_cer_npeSum_DATA.Fill(evt.H_cer_npeSum)
