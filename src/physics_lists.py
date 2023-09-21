@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 15:38:13 trottar"
+# Time-stamp: "2023-09-21 15:40:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -271,7 +271,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
 
     if float(runNumLeft[0]) != 0:    
         # First check if line exists
-        check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+        check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
         check_kin = ' '.join(check_line.split()[:4])
         inLine = False
         with open(f_list_settings, 'r') as f:
@@ -289,7 +289,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
 
     if float(runNumCenter[0]) != 0:    
         # First check if line exists
-        check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
+        check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
         check_kin = ' '.join(check_line.split()[:4])
         inLine = False
         with open(f_list_settings, 'r') as f:
