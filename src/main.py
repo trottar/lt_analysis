@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:53:43 trottar"
+# Time-stamp: "2023-09-21 14:00:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -203,14 +203,12 @@ WVal = float(W.replace("p","."))
 ##############
 # HARD CODED #
 ##############
-# May need to adjust these for both diamond plots and binning
-# Too many zero bins can result in empty bins when t/phi binning
+# May need to adjust these for diamond plots to work
+# 2/7 seems to work for all Q2 of KaonLT 2018-19
 inpDict["Q2min"] = Q2Val - (2/7)*Q2Val
 inpDict["Q2max"] = Q2Val + (2/7)*Q2Val
-inpDict["Wmin"] = WVal - (0.06)*WVal
-inpDict["Wmax"] = WVal + (0.06)*WVal
-inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
-inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
+inpDict["Wmin"] = WVal - (2/7)*WVal
+inpDict["Wmax"] = WVal + (2/7)*WVal
 ##############
 ##############
 ##############
@@ -242,6 +240,24 @@ for phiset in phisetlist:
 '''
 Apply random subtraction to data and dummy.
 '''
+
+
+##############
+# HARD CODED #
+##############
+# Redefine boundaries of Q2, W and eps
+# May need to adjust these for binning
+# Too many zero bins can result in empty bins when t/phi binning
+# Good method is to use std dev around central set value
+inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+inpDict["Wmin"] = WVal - (0.06)*WVal
+inpDict["Wmax"] = WVal + (0.06)*WVal
+inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
+inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
+##############
+##############
+##############
 
 sys.path.append("cuts")
 from rand_sub import rand_sub
