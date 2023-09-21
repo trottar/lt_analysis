@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-17 21:58:45 trottar"
+# Time-stamp: "2023-09-21 11:42:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,6 +161,14 @@ eval "gfortran -o average_kinematics average_kinematics.f"
 echo
 echo "Running average_kinematics..."
 ./average_kinematics.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
+# Check the exit status of the Python script
+if [ $? -ne 0 ]; then
+    echo
+    echo
+    echo "ERROR: Fortran script failed!"
+    echo "       See error above..."
+    exit 1
+fi
 
 echo
 echo "Compiling calc_xsect.f..."
@@ -168,6 +176,14 @@ eval "gfortran -o calc_xsect calc_xsect.f"
 echo
 echo "Running calc_xsect..."
 ./calc_xsect.expect ${PID} ${POL} ${Q2} ${LOEPS} ${HIEPS}
+# Check the exit status of the Python script
+if [ $? -ne 0 ]; then
+    echo
+    echo
+    echo "ERROR: Fortran script failed!"
+    echo "       See error above..."
+    exit 1
+fi
 
 # Replace p with '.'
 Q2=${Q2//./p}
@@ -177,7 +193,8 @@ KIN="Q${Q2}W${W}"
 # Define input and output file names
 OutUnsepxsectsFilename="unsep_xsects_${KIN}"
 
-#python3 plot_unsep.py ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
+cd "${LTANAPATH}/src/plotting/"
+python3 plot_unsep.py ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
 
-cd "${LTANAPATH}"
+#cd "${LTANAPATH}"
 #evince "OUTPUT/Analysis/${ANATYPE}LT/${OutUnsepxsectsFilename}.pdf"
