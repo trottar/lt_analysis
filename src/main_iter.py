@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 18:59:10 trottar"
+# Time-stamp: "2023-09-21 19:34:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,6 +140,9 @@ for hist in histlist:
 # so arbitrarily grabbing from first setting of list
 t_bins = histlist[0]["t_bins"]
 phi_bins = histlist[0]["phi_bins"]
+
+print("\n\nt_bins = ", t_bins)
+print("phi_bins = ", phi_bins)
 
 phisetlist = []
 for hist in histlist:
