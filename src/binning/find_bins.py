@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 09:11:09 trottar"
+# Time-stamp: "2023-09-21 09:14:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,7 +153,7 @@ def find_bins(histlist, inpDict):
             # yp -> np.sort(x) : the y-coordinates of the data points
             # In this case, this returns a sorted copy of the array
             npt = len(x) 
-            indices = np.linspace(0, npt-1, nbin+1).astype(int)
+            indices = np.linspace(0, npt-1, nbin+1).astype(int) # npt-1 since starting at 0
             sorted_x = np.sort(x)
             equalN_values = sorted_x[indices]
             return np.interp(np.linspace(0, npt, nbin+2), indices, equalN_values) # +2 to account for tmin and tmax
@@ -169,7 +169,7 @@ def find_bins(histlist, inpDict):
         # such containers if there are multiple input datasets.
         n, bins, patches = plt.hist(H_t_BinTest, histedges_equalN(H_t_BinTest, inpDict["NumtBins"]))
 
-        for i,val in bins:
+        for i,val in enumerate(bins):
             print("!!!!!!!!!!!!!!!!!",bins[i])
             print("-----------------",n[i])
 
