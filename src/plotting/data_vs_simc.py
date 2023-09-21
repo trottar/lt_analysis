@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 12:37:04 trottar"
+# Time-stamp: "2023-09-21 11:03:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,8 +207,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         binmax.append(hist["H_t_DATA"].GetMaximum())
     binmax = max(binmax)
 
-    t_bins = np.append(t_bins, tmin)
-    t_bins = np.append(t_bins, tmax)
     t_bins = np.sort(t_bins)
     tBin_line = TLine()
     events_between = []

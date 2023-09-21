@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 10:33:09 trottar"
+# Time-stamp: "2023-09-21 10:57:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,10 +72,10 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
                             phibin_center = (phi_data.GetBinCenter(phibin_index)+math.pi)*(180 / math.pi)
                             if phi_bins[k] <= phibin_center <= phi_bins[k+1]:
                                 if hist_data.GetBinContent(phibin_index) > 0:
-                                    print("Checking if t: {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
-                                    print("t-bin {}, Hist bin {} Passed with content {}".format(j+1, hist_data.GetBinCenter(tbin_index), hist_data.GetBinContent(tbin_index)))
-                                    print("Checking if phi: {} <= {} <= {}".format(phi_bins[k], phibin_center, phi_bins[k+1]))
-                                    print("phi-bin {}, Hist bin {} Passed with content {}".format(k+1, hist_data.GetBinCenter(phibin_index), hist_data.GetBinContent(phibin_index)))
+                                    #print("Checking if t: {} <= {} <= {:.3f}".format(t_bins[j], tbin_center, t_bins[j+1]))
+                                    #print("t-bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(tbin_index), hist_data.GetBinContent(tbin_index)))
+                                    #print("Checking if phi: {} <= {:.0f} <= {}".format(phi_bins[k], phibin_center, phi_bins[k+1]))
+                                    #print("phi-bin {}, Hist bin {:.0f} Passed with content {:.0f}".format(k+1, hist_data.GetBinCenter(phibin_index), hist_data.GetBinContent(phibin_index)))
                                     tmp_t_data[0].append(t_data.GetBinCenter(tbin_index))
                                     tmp_t_data[1].append(t_data.GetBinContent(tbin_index))
                                     tmp_phi_data[0].append(phi_data.GetBinCenter(phibin_index))
