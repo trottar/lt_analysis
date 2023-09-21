@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-20 20:07:09 trottar"
+# Time-stamp: "2023-09-20 20:10:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -178,7 +178,7 @@ def unsep_xsect(inpDict):
                                                                                     .format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100) \
                                                                                     , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
                 file_df_dict['xsects_file_eps'] = file_to_df( \
-                                                                LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}" \
+                                                                LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat" \
                                                                 .format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100) \
                                                                 , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'W', 'Q2'])
 
