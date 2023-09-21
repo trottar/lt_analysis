@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-19 17:25:24 trottar"
+# Time-stamp: "2023-09-21 11:21:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,7 +32,7 @@ def iterWeight(arg_str):
     # Calculate tav, ftav, ft
     tav = (0.0735 + 0.028 * math.log(q2_gev)) * q2_gev
     ftav = (abs(t_gev) - tav) / tav
-    ft = t_gev / (abs(t_gev) + 0.139570**2)**2
+    ft = abs(t_gev) / (abs(t_gev) + 0.139570**2)**2
 
     # Calculate sigl, sigt, siglt, sigtt, sig219, sig
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12 = params

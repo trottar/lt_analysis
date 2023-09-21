@@ -67,10 +67,6 @@ c         pause
 
 *     Model sigL, sigT, sigTT, sigLT.
 
-      f_tm=abs(tm)/(abs(tm)+0.139570**2)**2 ! pole factor
-
-      g_W=1./(W**2-targ**2)**2       ! W factor
-
 * Parameterization based upon Fpi-1 pi+ IT25, 12.04.18
 c      tav=(0.0735+0.028*log(q2))*q2
 c      f_tav=(tm-tav)/tav
@@ -94,7 +90,8 @@ c      sigTT=(par(11)*q2*exp(-q2)+par(12)/q2**2)*f_tm*sin(thetacm)**2
 * Revised for IT26, 12.11.09
       tav=(0.0735+0.028*log(q2_set))*q2_set
       f_tav=(tm-tav)/tav
-
+      f_tm=abs(tm)/(abs(tm)+0.139570**2)**2 ! pole factor
+      
       sigL=(par(1)+par(2)*log(q2))*exp((par(3)
      >     +par(4)*log(q2))*(abs(tm)-0.2))
       sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
@@ -102,6 +99,8 @@ c      sigTT=(par(11)*q2*exp(-q2)+par(12)/q2**2)*f_tm*sin(thetacm)**2
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
       sigTT=(par(12)*q2*exp(-q2))*f_tm*sin(thetacm)**2
 
+      tav=(-0.178+0.3.15*log(q2_set))*q2_set      
+      
 ** !! MODEL DEP STUDY !!
 c      sigL=sigL*0.90-0.1
 
@@ -110,6 +109,8 @@ c      sigL=sigL*0.90-0.1
 
 c     Correct for W.
 
+      g_W=1./(W**2-targ**2)**2       ! W factor
+      
       wfactor=g_W
       sigL=sigL*wfactor
       sigT=sigT*wfactor
