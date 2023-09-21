@@ -1355,8 +1355,7 @@ if [[ $i_flag != "true" ]]; then
 		echo
 		echo
 		echo "ERROR: Python script failed!"
-		echo "       See error above."
-		echo "       Killing Bash script..."
+		echo "       See error above..."
 		exit 1
 	    fi
 	else
@@ -1366,8 +1365,7 @@ if [[ $i_flag != "true" ]]; then
 		echo
 		echo
 		echo "ERROR: Python script failed!"
-		echo "       See error above."
-		echo "       Killing Bash script..."
+		echo "       See error above..."
 		exit 1
 	    fi
 	fi	
@@ -1716,8 +1714,7 @@ else
 	    echo
 	    echo
 	    echo "ERROR: Python script failed!"
-	    echo "       See error above."
-	    echo "       Killing Bash script..."
+	    echo "       See error above..."
 	    exit 1
 	fi	
 	
