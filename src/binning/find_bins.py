@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 10:07:10 trottar"
+# Time-stamp: "2023-09-21 10:15:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -123,7 +123,7 @@ def find_bins(histlist, inpDict):
         
         bin_centers = (bins[:-1] + bins[1:]) / 2
 
-        print("phi_bins = ", bin_centers)
+        print("phi_bins = ", bins)
         
         # Write phibin_interval for lt_analysis scripts
         lines = []
@@ -190,8 +190,9 @@ def find_bins(histlist, inpDict):
         # Stripping tmin and tmax
         #bin_centers = bins[1:-1]
         
-        bin_centers = (bins[:-1] + bins[1:]) / 2        
-        print("t_bins = ", bin_centers)        
+        bin_centers = (bins[:-1] + bins[1:]) / 2
+        
+        print("t_bins = ", bins)
         
         # Write t_bin_interval for lt_analysis scripts
         lines = []
