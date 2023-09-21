@@ -1,5 +1,5 @@
 *=======================================================================
-* xmodel for pi- of FPI2
+* xmodel for K^+ for KaonLT 2018-19
 *=======================================================================      
       subroutine xmodel(pid,npol_set,Eb,q2_set,w,q2,tm,phi,
      *     eps_mod,th_mod,x_mod)
@@ -45,11 +45,11 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       call eps_n_theta(pid,npol_set,Eb,w,q2,tm,thetacm,eps_mod)
 
 *     Model fit parameters.
-
+      
       write(fn,10) pid,pol,nint(q2_set*10)
  10   format(a4,'/parameters/par.',a2,'_',i2.2,'.dat')
       if (phi.lt.0.3) then
-         print*, 'xmodel: fn=',fn
+         print*, 'param: fn=',fn
       endif
 
       open(56,file=fn)
@@ -66,26 +66,6 @@ c         pause
  9    close(56)
 
 *     Model sigL, sigT, sigTT, sigLT.
-
-* Parameterization based upon Fpi-1 pi+ IT25, 12.04.18
-c      tav=(0.0735+0.028*log(q2))*q2
-c      f_tav=(tm-tav)/tav
-c
-c      sigL=(par(1)+par(2)*log(q2))*exp((par(3)+par(4)*log(q2))*abs(tm))
-c      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
-c
-c      sigLT=par(9)*exp(par(10)*abs(tm))*sin(thetacm)
-c      sigTT=(par(11)*q2*exp(-q2)+par(12)/q2**2)*f_tm*sin(thetacm)**2
-
-* Revised for IT22, 12.11.06
-c      tav=(0.0735+0.028*log(q2_set))*q2_set
-c      f_tav=(tm-tav)/tav
-c
-c      sigL=(par(1)+par(2)*log(q2))*exp((par(3)+par(4)*log(q2))*(abs(tm)-0.2))
-c      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
-c
-c      sigLT=par(9)*exp(par(10)*abs(tm)+1.5/abs(tm))*sin(thetacm)
-c      sigTT=(par(11)*q2*exp(-q2)+par(12)/q2**2)*f_tm*sin(thetacm)**2
 
 * Revised for IT26, 12.11.09
       tav=(0.0735+0.028*log(q2_set))*q2_set
