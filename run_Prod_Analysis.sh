@@ -1350,8 +1350,18 @@ if [[ $i_flag != "true" ]]; then
 	
 	if [ ${#data_right[@]} -eq 0 ]; then
 	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date}
+	    # Check the exit status of the Python script
+	    if [ $? -ne 0 ]; then
+		echo "Python script failed. Killing Bash script."
+		exit 1
+	    fi
 	else
 	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date}
+	    # Check the exit status of the Python script
+	    if [ $? -ne 0 ]; then
+		echo "Python script failed. Killing Bash script."
+		exit 1
+	    fi
 	fi	
 
 	if [ $j = "low" ]; then
@@ -1692,6 +1702,12 @@ else
 	fi
 
 	python3 main_iter.py ${KIN} ${W} ${Q2} ${EPSVAL} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date}
+
+	# Check the exit status of the Python script
+	if [ $? -ne 0 ]; then
+	    echo "Python script failed. Killing Bash script."
+	    exit 1
+	fi	
 	
 	if [ $j = "low" ]; then
 	    echo
