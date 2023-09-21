@@ -89,7 +89,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       open(55,file=trim(pid) // '/list.settings')
       do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.eps.ne.eps_set)
          read(55,*) ipol,q2,eps,th_pq,tmn,tmx
-         write(6,2)ipol,q2,eps,th_pq,tmn,tmx
+*         write(6,2)ipol,q2,eps,th_pq,tmn,tmx
 c 2       format(i5,5f10.5,2i5)
       end do
       close(55)
@@ -165,13 +165,14 @@ c      pause
 
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
+            print*,"=============="
             print*,'it',it
             print*,'nt',nt            
             print*,'ip',ip
             print*,'nphi',nphi
             print*,'ratio',r
             print*,'dratio',dr
-
+            print*,""
             print*,"xmodel inputs:"
             print*,"pid: ", pid
             print*,"npol_set: ", npol_set
@@ -183,7 +184,8 @@ c      pause
             print*,"phi: ", phi
             print*,"eps_mod: ", eps_mod
             print*,"th_mod: ", th_mod
-            print*,"x_mod: ", x_mod            
+            print*,"x_mod: ", x_mod
+            print*,"=============="
             
             call xmodel(pid,npol_set,Eb,q2_set,w,q2,tm,phi,
      *           eps_mod,th_mod,x_mod)
