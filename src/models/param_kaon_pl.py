@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 22:56:08 trottar"
+# Time-stamp: "2023-09-21 23:03:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -24,14 +24,14 @@ def iterWeight(arg_str):
     # Extract individual values from the list
     q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params = args
 
-    q2_gev = q2_set / 1e6
+    q2_gev = q2_set # Already GeV
     t_gev = t_sim
     s = w_sim**2
-    s_gev = s / 1e6
+    s_gev = s # Already GeV
 
     # Calculate tav, ftav, ft
     tav = (0.0735 + 0.028 * math.log(q2_gev)) * q2_gev
-    ftav = (t_gev - tav) / tav
+    ftav = (abs(t_gev - tav) / tav
     ft = abs(t_gev) / (abs(t_gev) + 0.139570**2)**2
 
     # Calculate sigl, sigt, siglt, sigtt, sig219, sig
