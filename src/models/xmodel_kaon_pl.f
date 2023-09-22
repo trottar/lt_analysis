@@ -85,7 +85,7 @@ c         pause
 
 * Revised for IT26, 12.11.09
       tav=(0.0735+0.028*log(q2_set))*q2_set
-      f_tav=(tm-tav)/tav
+      f_tav=(abs(tm)-tav)/tav
       f_tm=abs(tm)/(abs(tm)+0.139570**2)**2 ! pole factor
       
       sigL=(par(1)+par(2)*log(q2))*exp((par(3)

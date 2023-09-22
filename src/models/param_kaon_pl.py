@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 22:29:53 trottar"
+# Time-stamp: "2023-09-21 22:56:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,7 +31,7 @@ def iterWeight(arg_str):
 
     # Calculate tav, ftav, ft
     tav = (0.0735 + 0.028 * math.log(q2_gev)) * q2_gev
-    ftav = (abs(t_gev) - tav) / tav
+    ftav = (t_gev - tav) / tav
     ft = abs(t_gev) / (abs(t_gev) + 0.139570**2)**2
 
     # Calculate sigl, sigt, siglt, sigtt, sig219, sig
@@ -48,8 +48,7 @@ def iterWeight(arg_str):
 
     wfactor = 1.0 / (s_gev - mtar_gev**2)**2
     sig = sig219 * wfactor
-    #sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
-    sig = sig / 2.0 / pi / 1e12  # dsig/dtdphicm in microbarns/MeV**2/rad
+    sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     
     wtn = wt_sim * sig / sigcm_sim
 
