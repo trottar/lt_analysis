@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 23:09:14 trottar"
+# Time-stamp: "2023-09-25 14:11:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,13 +41,19 @@ def iterWeight(arg_str):
     siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     sigtt = (p12 * q2_sim * math.exp(-q2_sim)) * ft * math.sin(thetacm_sim)**2
 
-    tav = (-0.178 + 0.315 * math.log(q2_sim)) * q2_sim
+    # RLT (9/25/2023): There are two tav parameterizations in here.
+    #                  I am only using the one above, for now.    
+    # tav = (-0.178 + 0.315 * math.log(q2_sim)) * q2_sim
 
     sig219 = (sigt + eps_sim * sigl + eps_sim * math.cos(2. * phicm_sim) * sigtt +
              math.sqrt(2.0 * eps_sim * (1. + eps_sim)) * math.cos(phicm_sim) * siglt) / 1.0
 
     wfactor = 1.0 / (s_gev - mtar_gev**2)**2
     sig = sig219 * wfactor
+    sigl = sigl*wfactor
+    sigt = sigt*wfactor
+    sigtt = sigtt*wfactor
+    siglt = siglt*wfactor    
     sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     
     wtn = wt_sim * sig / sigcm_sim

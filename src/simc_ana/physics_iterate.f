@@ -367,8 +367,22 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *       Parameterization revised for IT26, 12.11.09
 *       q2_set is dynamically changed with the set_ProdInput.sh script
 	   q2_set=2.45
+***
+*       RLT (9/25/2023):
+*       tav is meant to be a simple equation to give roughly
+*       the average t-value for each Q2 set.  i.e. in the parameterization,
+*       the relevant term has the form (t-tav), so that this term vanishes at tav.
+*       You simply need to find an equation of any form that quickly gives you
+*       t-average for each set.
+*       These equations were for Fpi-2, which were at nearly constant W.
+*       If you have more than one W setting for fixed Q2, you will have to find a
+*       simple way to let the parmeterization know which equation to use.
+*       Please don't try anything complicated, it's only meant to be simple. 
+***	   
 	   tav=(0.0735+0.028*log(q2_set))*q2_set
 	   ftav=(abs(t_gev)-tav)/tav
+*       ft=t_gev/(abs(t_gev)+0.139570**2)**2
+*       RLT (9/21/2023): t_gev should be abs(t_gev)
 	   ft=abs(t_gev)/(abs(t_gev)+0.139570**2)**2
 
 	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
@@ -380,7 +394,9 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
      1           +fitpar(11)/abs(t_gev))*sin(thetacm)
 	   sigtt=(fitpar(12)*Q2_g*exp(-Q2_g))*ft*sin(thetacm)**2
 
-	   tav=(-0.178+0.315*log(Q2_g))*Q2_g	   
+*       RLT (9/25/2023): There are two tav parameterizations in here.
+*                        I am only using the one above, for now.	   
+*	   tav=(-0.178+0.315*log(Q2_g))*Q2_g	   
 
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
      >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0

@@ -95,6 +95,8 @@ c         pause
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
       sigTT=(par(12)*q2*exp(-q2))*f_tm*sin(thetacm)**2
 
+*     RLT (9/25/2023): There are two tav parameterizations in here.
+*                      I am only using the one above, for now.
       tav=(-0.178+0.315*log(q2))*q2
       
 ** !! MODEL DEP STUDY !!
