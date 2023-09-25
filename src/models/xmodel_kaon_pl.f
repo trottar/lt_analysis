@@ -97,7 +97,7 @@ c         pause
 
 *     RLT (9/25/2023): There are two tav parameterizations in here.
 *                      I am only using the one above, for now.
-      tav=(-0.178+0.315*log(q2))*q2
+*      tav=(-0.178+0.315*log(q2))*q2
       
 ** !! MODEL DEP STUDY !!
 c      sigL=sigL*0.90-0.1
