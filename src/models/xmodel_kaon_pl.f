@@ -12,9 +12,12 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       common prv_it
 
       integer npol_set
-      real Eb,q2_set,w,q2,tm,phi,eps_mod,th_mod,x_mod
+      real Eb,q2_set,eps_set
+      real w,q2,tm,phi
+      real eps_mod,th_mod,x_mod
 
       real targ,mp,mn
+      parameter (pi=3.14159)      
       parameter (mp=.93827231)   !mp
       parameter (mn=.93956563)   !mn
 

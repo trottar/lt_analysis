@@ -187,7 +187,7 @@ c      pause
             print*,"x_mod: ", x_mod
             print*,"=============="
             
-            call xmodel(pid,npol_set,Eb,q2_set,w,q2,tm,phi,
+            call xmodel(pid,npol_set,Eb,q2_set,eps_set,w,q2,tm,phi,
      *           eps_mod,th_mod,x_mod)
 
 c angle check
