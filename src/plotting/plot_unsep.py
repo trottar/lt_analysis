@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 17:29:29 trottar"
+# Time-stamp: "2023-09-26 17:39:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,15 +224,13 @@ C_ratio_phi = TCanvas()
 C_ratio_phi.SetGrid()
 C_ratio_phi.Divide(1,NumtBins)
 
-G_ratio_phi = ROOT.TGraphErrors()
-
-G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
-
 for k in range(0,NumtBins-1):
+    
+    G_ratio_phi = ROOT.TGraphErrors()
+    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)    
+    C_ratio_phi.cd(k)
 
     phi_setting = ['left', 'center']
-
-    C_ratio_phi.cd(k)
     
     for j, ps in enumerate(phi_setting):
         for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
@@ -241,11 +239,9 @@ for k in range(0,NumtBins-1):
                 G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
                 G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
                 G_ratio_phi.SetMarkerColor(j)
-
-    G_ratio_phi.SetMarkerStyle(21)
-    G_ratio_phi.SetMarkerSize(1)
-    
-    G_ratio_phi.Draw('AP')
+                G_ratio_phi.SetMarkerStyle(21)
+                G_ratio_phi.SetMarkerSize(1)    
+        G_ratio_phi.Draw('AP')
 
 C_ratio_phi.Print(outputpdf + '(')
 
