@@ -1356,7 +1356,7 @@ if [[ $i_flag != "true" ]]; then
 	    if [ $? -ne 0 ]; then
 		echo
 		echo
-		echo "ERROR: Python script failed!"
+		echo "1 ERROR: Python script failed!"
 		echo "       See error above..."
 		exit 1
 	    fi
@@ -1366,7 +1366,7 @@ if [[ $i_flag != "true" ]]; then
 	    if [ $? -ne 0 ]; then
 		echo
 		echo
-		echo "ERROR: Python script failed!"
+		echo "1 ERROR: Python script failed!"
 		echo "       See error above..."
 		exit 1
 	    fi
@@ -1715,7 +1715,7 @@ else
 	if [ $? -ne 0 ]; then
 	    echo
 	    echo
-	    echo "ERROR: Python script failed!"
+	    echo "1 ERROR: Python script failed!"
 	    echo "       See error above..."
 	    exit 1
 	fi	

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 13:13:06 trottar"
+# Time-stamp: "2023-09-26 13:26:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -163,7 +163,7 @@ eval "gfortran -o average_kinematics average_kinematics.f"
 if [ $? -ne 0 ]; then
     echo
     echo
-    echo "ERROR: Fortran script failed!"
+    echo "2 ERROR: Fortran script failed!"
     echo "       See error above..."
     exit 1
 fi
@@ -178,7 +178,7 @@ eval "gfortran -o calc_xsect calc_xsect.f"
 if [ $? -ne 0 ]; then
     echo
     echo
-    echo "ERROR: Fortran script failed!"
+    echo "2 ERROR: Fortran script failed!"
     echo "       See error above..."
     exit 1
 fi
@@ -200,7 +200,7 @@ python3 plot_unsep.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${Numt
 if [ $? -ne 0 ]; then
     echo
     echo
-    echo "ERROR: Python script failed!"
+    echo "2 ERROR: Python script failed!"
     echo "       See error above..."
     exit 1
 fi

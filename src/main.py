@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 13:21:17 trottar"
+# Time-stamp: "2023-09-26 13:26:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -557,7 +557,6 @@ if EPSSET == "high":
     # if still iterating weights
     try:
         subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, NumtBins, NumPhiBins])
-        print("HERE")
     except Exception as e:
         sys.exit(2)
 
