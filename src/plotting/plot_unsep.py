@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 17:09:29 trottar"
+# Time-stamp: "2023-09-26 17:23:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -220,15 +220,19 @@ for i,row in file_df_dict['setting_df'].iterrows():
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ################################################################################################################################################
 
+C_ratio_phi = TCanvas()
+C_ratio_phi.SetGrid()
+C_ratio_phi.Divide(1,NumtBins)
+
+G_ratio_phi = ROOT.TGraphErrors()
+
+G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
+
 for k in np.arange(NumtBins):
-    C_ratio_phi = TCanvas()
-    C_ratio_phi.SetGrid()
-
-    G_ratio_phi = ROOT.TGraphErrors()
-
-    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
 
     phi_setting = ['left', 'center']
+
+    C_ratio_phi.cd(k)
     
     for j, ps in enumerate(phi_setting):
         for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
@@ -242,10 +246,7 @@ for k in np.arange(NumtBins):
     
     G_ratio_phi.Draw('AP')
 
-    if k==0:
-        C_ratio_phi.Print(outputpdf + '(')
-    else:
-        C_ratio_phi.Print(outputpdf)        
+C_ratio_phi.Print(outputpdf + '(')
 
 C_ratio_t = TCanvas()
 C_ratio_t.SetGrid()
