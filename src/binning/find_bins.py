@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 15:41:13 trottar"
+# Time-stamp: "2023-09-26 16:01:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,8 +179,8 @@ def check_bins(histlist, inpDict):
     tmin = inpDict["tmin"]
     tmax = inpDict["tmax"]
 
-    t_bins = inpDict["t_bins"]
-    phi_bins = inpDict["phi_bins"]
+    t_bins = histlist[0]["t_bins"]
+    phi_bins = histlist[0]["phi_bins"]
 
     ################################################################################################################################################
     # Define root file trees of interest
