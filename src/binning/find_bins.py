@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 15:38:21 trottar"
+# Time-stamp: "2023-09-26 15:41:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -243,3 +243,7 @@ def check_bins(histlist, inpDict):
         
         print("t_bins = ", bins)
     
+
+    find_phibins(H_phi_BinTest)
+    find_tbins(H_t_BinTest)
+        
