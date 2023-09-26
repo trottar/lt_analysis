@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 18:29:49 trottar"
+# Time-stamp: "2023-09-26 02:14:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -119,7 +119,8 @@ def fix_spacing(f_name):
 # Fix file spacing to work in pandas
 fix_spacing(LTANAPATH+"/src/{}/averages/avek.{}.dat".format(ParticleType, Q2.replace("p","")))
 fix_spacing(LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100))
-fix_spacing(LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100))
+fix_spacing(LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100)) fix_spacing(LTANAPATH+"/src/{}/xsects/x_sep.{}_{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100))
+fix_spacing(LTANAPATH+"/src/{}/xsects/x_sep.{}_{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100))
 ################################################################################################################################################
 # Read in files and convert to dataframes
 
@@ -161,11 +162,15 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                                 LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
                                                                                 .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
                                                                                 , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            file_df_dict['xsects_file_loeps'] = file_to_df( \
+            file_df_dict['unsep_file_loeps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
                                                             , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'W', 'Q2'])
 
+            file_df_dict['sep_file_loeps'] = file_to_df( \
+                                                            LTANAPATH+"/src/{}/xsects/x_sep.{}_{}_{:.0f}.dat" \
+                                                            .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
+                                                            , ['sigL', 'dsigL','sigT', 'dsigT','sigTT', 'dsigTT','sigLT', 'dsigLT', 'tm', 'Q2'])
         if row['EPSVAL'] == float(HIEPS):
             if row['thpq'] < 0.0:
                 file_df_dict['aver_hieps_{}'.format('right')] = file_to_df( \
@@ -194,11 +199,16 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                                                 LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
                                                                                 .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
                                                                                 , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
-            file_df_dict['xsects_file_hieps'] = file_to_df( \
+            file_df_dict['unsep_file_hieps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
                                                             , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'W', 'Q2'])
+            file_df_dict['sep_file_hieps'] = file_to_df( \
+                                                            LTANAPATH+"/src/{}/xsects/x_sep.{}_{}_{:.0f}.dat" \
+                                                            .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
+                                                            , ['sigL', 'dsigL','sigT', 'dsigT','sigTT', 'dsigTT','sigLT', 'dsigLT', 'tm', 'Q2'])
 
+            
 ################################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ################################################################################################################################################
@@ -256,9 +266,9 @@ l_Q2_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_Q2_tbin.SetTitle("eps = %s ; #theta_{cm}; Q^{2} Average" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
-    G_Q2_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
-    l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['Q2'].tolist())):
+    G_Q2_tbin.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
+    l_Q2_tbin.AddEntry(G_Q2_tbin, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_Q2_tbin.SetMarkerColor(i+1)
 
 G_Q2_tbin.SetMarkerStyle(21)
@@ -278,9 +288,9 @@ l_W_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_W_tbin.SetTitle("eps = %s ; #theta_{cm}; W Average" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
-    G_W_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
-    l_W_tbin.AddEntry(G_W_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['W'].tolist())):
+    G_W_tbin.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
+    l_W_tbin.AddEntry(G_W_tbin, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_W_tbin.SetMarkerColor(i+1)
 
 G_W_tbin.SetMarkerStyle(21)
@@ -300,9 +310,9 @@ l_t_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_t_tbin.SetTitle("eps = %s ; #theta_{cm}; t Average" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
-    G_t_tbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
-    l_t_tbin.AddEntry(G_t_tbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['tm'].tolist())):
+    G_t_tbin.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i])
+    l_t_tbin.AddEntry(G_t_tbin, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_t_tbin.SetMarkerColor(i+1)
 
 G_t_tbin.SetMarkerStyle(21)
@@ -322,9 +332,9 @@ l_Q2_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_Q2_phitbin.SetTitle("eps = %s ; #phi; Q^{2} Average" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['Q2'].tolist())):
-    G_Q2_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['Q2'].tolist())[i])
-    l_Q2_phitbin.AddEntry(G_Q2_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['Q2'].tolist())):
+    G_Q2_phitbin.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
+    l_Q2_phitbin.AddEntry(G_Q2_phitbin, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_Q2_phitbin.SetMarkerColor(i+1)
 
 G_Q2_phitbin.SetMarkerStyle(21)
@@ -344,9 +354,9 @@ l_W_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_W_phitbin.SetTitle("eps = %s ; #phi; W Average" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['W'].tolist())):
-    G_W_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['W'].tolist())[i])
-    l_W_phitbin.AddEntry(G_W_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['W'].tolist())):
+    G_W_phitbin.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
+    l_W_phitbin.AddEntry(G_W_phitbin, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_W_phitbin.SetMarkerColor(i+1)
 
 G_W_phitbin.SetMarkerStyle(21)
@@ -366,9 +376,9 @@ l_t_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_t_phitbin.SetTitle("eps = %s ; #phi; t Average" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['tm'].tolist())):
-    G_t_phitbin.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i])
-    l_t_phitbin.AddEntry(G_t_phitbin, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['tm'].tolist())):
+    G_t_phitbin.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i])
+    l_t_phitbin.AddEntry(G_t_phitbin, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_t_phitbin.SetMarkerColor(i+1)
 
 G_t_phitbin.SetMarkerStyle(21)
@@ -388,10 +398,10 @@ l_xreal_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_xreal_th.SetTitle("eps = %s ; #theta_{cm}; x_real" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-    G_xreal_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-    G_xreal_th.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_th.AddEntry(G_xreal_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['x_real'].tolist())):
+    G_xreal_th.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+    G_xreal_th.SetPointError(i, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
+    l_xreal_th.AddEntry(G_xreal_th, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_xreal_th.SetMarkerColor(i+1)
 
 G_xreal_th.SetMarkerStyle(21)
@@ -411,9 +421,9 @@ l_xmod_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_xmod_th.SetTitle("eps = %s ; #theta_{cm}; x_mod" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-    G_xmod_th.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
-    l_xmod_th.AddEntry(G_xmod_th, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['x_mod'].tolist())):
+    G_xmod_th.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
+    l_xmod_th.AddEntry(G_xmod_th, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_xmod_th.SetMarkerColor(i+1)
 
 G_xmod_th.SetMarkerStyle(21)
@@ -433,10 +443,10 @@ l_xreal_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_xreal_phi.SetTitle("eps = %s ; #phi; x_real" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-    G_xreal_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-    G_xreal_phi.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_phi.AddEntry(G_xreal_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['x_real'].tolist())):
+    G_xreal_phi.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+    G_xreal_phi.SetPointError(i, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
+    l_xreal_phi.AddEntry(G_xreal_phi, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_xreal_phi.SetMarkerColor(i+1)
 
 G_xreal_phi.SetMarkerStyle(21)
@@ -456,9 +466,9 @@ l_xmod_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_xmod_phi.SetTitle("eps = %s ; #phi; x_mod" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-    G_xmod_phi.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
-    l_xmod_phi.AddEntry(G_xmod_phi, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['x_mod'].tolist())):
+    G_xmod_phi.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
+    l_xmod_phi.AddEntry(G_xmod_phi, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_xmod_phi.SetMarkerColor(i+1)
 
 G_xmod_phi.SetMarkerStyle(21)
@@ -469,6 +479,98 @@ l_xmod_phi.Draw()
 
 C_xmod_phi.Print(outputpdf)
 
+C_sigl_t = TCanvas()
+C_sigl_t.SetGrid()
+
+G_sigl_t = ROOT.TGraphErrors()
+
+l_sigl_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+
+G_sigl_t.SetTitle("eps = %s ; t; sigL" % LOEPS)
+
+for i in range(len(file_df_dict['sep_file_loeps']['sigL'].tolist())):
+    G_sigl_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigL'].tolist())[i])
+    G_sigl_t.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigL'].tolist())[i])
+    l_sigl_t.AddEntry(G_sigl_t, "t = {:.4f}".format(np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i]))
+    G_sigl_t.SetMarkerColor(i+1)
+
+G_sigl_t.SetMarkerStyle(21)
+G_sigl_t.SetMarkerSize(1)
+    
+G_sigl_t.Draw('AP')
+l_sigl_t.Draw()
+
+C_sigl_t.Print(outputpdf)
+
+C_sigt_t = TCanvas()
+C_sigt_t.SetGrid()
+
+G_sigt_t = ROOT.TGraphErrors()
+
+l_sigt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+
+G_sigt_t.SetTitle("eps = %s ; t; sigt" % LOEPS)
+
+for i in range(len(file_df_dict['sep_file_loeps']['sigt'].tolist())):
+    G_sigt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigt'].tolist())[i])
+    G_sigt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigt'].tolist())[i])
+    l_sigt_t.AddEntry(G_sigt_t, "t = {:.4f}".format(np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i]))
+    G_sigt_t.SetMarkerColor(i+1)
+
+G_sigt_t.SetMarkerStyle(21)
+G_sigt_t.SetMarkerSize(1)
+    
+G_sigt_t.Draw('AP')
+l_sigt_t.Draw()
+
+C_sigt_t.Print(outputpdf)
+
+C_sigtt_t = TCanvas()
+C_sigtt_t.SetGrid()
+
+G_sigtt_t = ROOT.TGraphErrors()
+
+l_sigtt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+
+G_sigtt_t.SetTitle("eps = %s ; t; sigtt" % LOEPS)
+
+for i in range(len(file_df_dict['sep_file_loeps']['sigtt'].tolist())):
+    G_sigtt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigtt'].tolist())[i])
+    G_sigtt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigtt'].tolist())[i])
+    l_sigtt_t.AddEntry(G_sigtt_t, "t = {:.4f}".format(np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i]))
+    G_sigtt_t.SetMarkerColor(i+1)
+
+G_sigtt_t.SetMarkerStyle(21)
+G_sigtt_t.SetMarkerSize(1)
+    
+G_sigtt_t.Draw('AP')
+l_sigtt_t.Draw()
+
+C_sigtt_t.Print(outputpdf)
+
+C_siglt_t = TCanvas()
+C_siglt_t.SetGrid()
+
+G_siglt_t = ROOT.TGraphErrors()
+
+l_siglt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+
+G_siglt_t.SetTitle("eps = %s ; t; siglt" % LOEPS)
+
+for i in range(len(file_df_dict['sep_file_loeps']['siglt'].tolist())):
+    G_siglt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['siglt'].tolist())[i])
+    G_siglt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsiglt'].tolist())[i])
+    l_siglt_t.AddEntry(G_siglt_t, "t = {:.4f}".format(np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i]))
+    G_siglt_t.SetMarkerColor(i+1)
+
+G_siglt_t.SetMarkerStyle(21)
+G_siglt_t.SetMarkerSize(1)
+    
+G_siglt_t.Draw('AP')
+l_siglt_t.Draw()
+
+C_siglt_t.Print(outputpdf)
+
 C_xreal_t = TCanvas()
 C_xreal_t.SetGrid()
 
@@ -478,10 +580,10 @@ l_xreal_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_xreal_t.SetTitle("eps = %s ; t; x_real" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_real'].tolist())):
-    G_xreal_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_real'].tolist())[i])
-    G_xreal_t.SetPointError(i, 0, np.array(file_df_dict['xsects_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_t.AddEntry(G_xreal_t, "t = {:.4f}".format(np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i]))
+for i in range(len(file_df_dict['unsep_file_loeps']['x_real'].tolist())):
+    G_xreal_t.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+    G_xreal_t.SetPointError(i, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
+    l_xreal_t.AddEntry(G_xreal_t, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
     G_xreal_t.SetMarkerColor(i+1)
 
 G_xreal_t.SetMarkerStyle(21)
@@ -499,8 +601,8 @@ G_xmod_t = ROOT.TGraph()
 
 G_xmod_t.SetTitle("eps = %s ; t; x_mod" % LOEPS)
 
-for i in range(len(file_df_dict['xsects_file_loeps']['x_mod'].tolist())):
-    G_xmod_t.SetPoint(i, np.array(file_df_dict['xsects_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['xsects_file_loeps']['x_mod'].tolist())[i])
+for i in range(len(file_df_dict['unsep_file_loeps']['x_mod'].tolist())):
+    G_xmod_t.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
     G_xmod_t.SetMarkerColor(i+1)
 
 G_xmod_t.SetMarkerStyle(21)
