@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 17:41:43 trottar"
+# Time-stamp: "2023-09-26 17:51:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,11 +224,13 @@ C_ratio_phi = TCanvas()
 C_ratio_phi.SetGrid()
 C_ratio_phi.Divide(1,NumtBins)
 
+multiDict = {}
 for k in range(0,NumtBins-1):
+
+    multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
     
     G_ratio_phi = ROOT.TGraphErrors()
-    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)    
-    C_ratio_phi.cd(k+1)
+    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
 
     phi_setting = ['left', 'center']
     
@@ -241,8 +243,10 @@ for k in range(0,NumtBins-1):
                 G_ratio_phi.SetMarkerColor(j)
                 G_ratio_phi.SetMarkerStyle(21)
                 G_ratio_phi.SetMarkerSize(1)    
-        G_ratio_phi.Draw('AP')
-
+    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi)
+    C_ratio_phi.cd(k+1)
+    multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
+    
 C_ratio_phi.Print(outputpdf + '(')
 
 C_ratio_t = TCanvas()
