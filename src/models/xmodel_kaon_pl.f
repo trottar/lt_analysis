@@ -16,7 +16,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       real w,q2,tm,phi
       real eps_mod,th_mod,x_mod
 
-      real targ,mp,mn
+      real targ,mp,mn,pi
       parameter (pi=3.14159)      
       parameter (mp=.93827231)   !mp
       parameter (mn=.93956563)   !mn
