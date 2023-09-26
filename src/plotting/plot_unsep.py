@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 17:23:25 trottar"
+# Time-stamp: "2023-09-26 17:29:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -228,7 +228,7 @@ G_ratio_phi = ROOT.TGraphErrors()
 
 G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
 
-for k in np.arange(NumtBins):
+for k in range(0,NumtBins-1):
 
     phi_setting = ['left', 'center']
 
@@ -236,6 +236,7 @@ for k in np.arange(NumtBins):
     
     for j, ps in enumerate(phi_setting):
         for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
+            print("_____________________",i//NumPhiBins," = ",k)
             if i//NumPhiBins == k:
                 G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
                 G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
