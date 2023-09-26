@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 13:35:43 trottar"
+# Time-stamp: "2023-09-26 13:48:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,8 +38,8 @@ W = sys.argv[4]
 LOEPS = sys.argv[5]
 HIEPS = sys.argv[6]
 
-NumtBins = sys.argv[7]
-NumPhiBins = sys.argv[8]
+NumtBins = int(sys.argv[7])
+NumPhiBins = int(sys.argv[8])
 
 kinematics = sys.argv[9]
 OutFilename = sys.argv[10]
