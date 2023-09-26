@@ -1,7 +1,7 @@
 *=======================================================================
 * xmodel for K^+ for KaonLT 2018-19
 *=======================================================================      
-      subroutine xmodel(pid,npol_set,Eb,q2_set,w,q2,tm,phi,
+      subroutine xmodel(pid,npol_set,Eb,q2_set,eps_set,w,q2,tm,phi,
      *     eps_mod,th_mod,x_mod)
 
 c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
