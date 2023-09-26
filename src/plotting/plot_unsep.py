@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 13:12:12 trottar"
+# Time-stamp: "2023-09-26 13:35:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,10 +31,13 @@ if len(sys.argv)-1!=10:
 
 ParticleType = sys.argv[1]
 POL = sys.argv[2]
+
 Q2 = sys.argv[3]
 W = sys.argv[4]
+
 LOEPS = sys.argv[5]
 HIEPS = sys.argv[6]
+
 NumtBins = sys.argv[7]
 NumPhiBins = sys.argv[8]
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 13:12:40 trottar"
+# Time-stamp: "2023-09-26 13:36:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -416,6 +416,7 @@ if EPSSET == "high":
     try:
         subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, NumtBins, NumPhiBins])
     except Exception as e:
+        print("1 ERROR: {}".format(e))
         sys.exit(2)
 
     output_file_lst.append(OUTPATH+"/{}_unsep_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
