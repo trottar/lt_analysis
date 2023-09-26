@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 14:38:27 trottar"
+# Time-stamp: "2023-09-26 14:46:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -282,7 +282,7 @@ G_ratio_phi.SetMarkerSize(1)
     
 G_ratio_phi.Draw('AP')
 
-C_ratio_phi.Print(outputpdf
+C_ratio_phi.Print(outputpdf)
 
 C_ratio_t = TCanvas()
 C_ratio_t.SetGrid()
