@@ -50,7 +50,8 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer npol_set
       real q2_set,eps_set
 
-      character*80 r_fn, kin_fn, xunsep_fn, mod_fn
+      character*80 r_fn, kin_fn, mod_fn
+      character*80 xunsep_fn, xsep_fn
       character*2 pol
       character*4 pid
 
@@ -141,9 +142,18 @@ c     construct kinematics data file name.
      *     i2.2,'_',i2,'.dat')
       print*,'xsect: xunsep_fn=',xunsep_fn
 c      pause
-
+      
       open(61,file=xunsep_fn,status='replace')
 
+*     construct output file name.
+      write(xsep_fn,50) pid,pol,nint(q2_set*10),nint(eps_set*100)
+ 50   format(a4,'/xsects/x_sep.',a2,'_',
+     *     i2.2,'_',i2,'.dat')
+      print*,'xsect: xsep_fn=',xsep_fn
+c      pause
+
+      open(71,file=xsep_fn,status='replace')
+      
       mod_fn='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
       print*,'xmodel: file=',mod_fn
 
@@ -214,6 +224,7 @@ c        Write out kinematics for Henk.
       close(51)
       close(52)
       close(61)
+      close(71)
       print*,' '
 
       end

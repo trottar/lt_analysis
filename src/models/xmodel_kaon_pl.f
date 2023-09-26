@@ -30,7 +30,6 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       real dsig,dsigT,dsigL,dsigLT,dsigTT
 
       character*80 fn
-      character*80 xsep_fn      
       character*2 pol
       character*4 pid
 
@@ -114,21 +113,10 @@ c     Correct for W.
       dsigT=sqrt(abs(sigT))/abs(sigT)
       dsigTT=sqrt(abs(sigTT))/abs(sigTT)
       dsigLT=sqrt(abs(sigLT))/abs(sigLT)
-      
-*     construct output file name.
-      write(xsep_fn,50) pid,pol,nint(q2_set*10),nint(eps_set*100)
- 50   format(a4,'/xsects/x_sep.',a2,'_',
-     *     i2.2,'_',i2,'.dat')
-      print*,'xsect: xsep_fn=',xsep_fn
-c      pause
-
-      open(71,file=xsep_fn,status='replace')
-      
+            
       write(71,60) sigL,dsigL,sigT,dsigT,sigTT,
      *     dsigTT,sigLT,dsigLT,q2,tm
  60   format(8G15.2,2f8.2)
-
-      close(71)
       
       end
 
