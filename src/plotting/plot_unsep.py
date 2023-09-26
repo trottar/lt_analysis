@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 14:11:34 trottar"
+# Time-stamp: "2023-09-26 14:18:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -494,6 +494,7 @@ l_sigl_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
 G_sigl_t.SetTitle("eps = %s ; t; sigL" % LOEPS)
 
 for i in range(len(file_df_dict['sep_file_loeps']['sigL'].tolist())):
+    print(file_df_dict['sep_file_loeps']['sigL'].tolist())
     G_sigl_t.SetPoint(i//NumPhiBins, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i//NumPhiBins], np.array(file_df_dict['sep_file_loeps']['sigL'].tolist())[i//NumPhiBins])
     G_sigl_t.SetPointError(i//NumPhiBins, 0, np.array(file_df_dict['sep_file_loeps']['dsigL'].tolist())[i//NumPhiBins])
     l_sigl_t.AddEntry(G_sigl_t, "t = {:.4f}".format(np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i//NumPhiBins]))
