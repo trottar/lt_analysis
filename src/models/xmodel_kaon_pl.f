@@ -116,7 +116,7 @@ c     Correct for W.
             
       write(71,60) sigL,dsigL,sigT,dsigT,sigTT,
      *     dsigTT,sigLT,dsigLT,q2,tm
- 60   format(8G15.2,2f8.2)
+ 60   format(8G15.5,2f8.5)
       
       end
 
