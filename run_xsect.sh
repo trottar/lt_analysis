@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 18:28:36 trottar"
+# Time-stamp: "2023-09-26 13:13:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,6 +100,9 @@ fi
 ParticleType=$3
 POL=$4
 
+NumtBins=$5
+NumPhiBins=$6
+
 ##############
 # HARD CODED #
 ##############
@@ -192,7 +195,7 @@ KIN="Q${Q2}W${W}"
 OutUnsepxsectsFilename="${ParticleType}_unsep_xsects_${KIN}"
 
 cd "${LTANAPATH}/src/plotting/"
-python3 plot_unsep.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${KIN} ${OutUnsepxsectsFilename}
+python3 plot_unsep.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${NumtBins} ${NumPhiBins} ${KIN} ${OutUnsepxsectsFilename}
 # Check the exit status of the Python script
 if [ $? -ne 0 ]; then
     echo
