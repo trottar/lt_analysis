@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 03:01:25 trottar"
+# Time-stamp: "2023-09-26 03:11:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -171,7 +171,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['sep_file_loeps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_sep.{}_{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
-                                                            , ['sigL', 'dsigL','sigT', 'dsigT','sigTT', 'dsigTT','sigLT', 'dsigLT', 'tm', 'Q2'])
+                                                            , ['sigL', 'dsigL','sigT', 'dsigT','sigTT', 'dsigTT','sigLT', 'dsigLT', 'Q2', 'tm'])
         if row['EPSVAL'] == float(HIEPS):
             if row['thpq'] < 0.0:
                 file_df_dict['aver_hieps_{}'.format('right')] = file_to_df( \
@@ -207,7 +207,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['sep_file_hieps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_sep.{}_{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
-                                                            , ['sigL', 'dsigL','sigT', 'dsigT','sigTT', 'dsigTT','sigLT', 'dsigLT', 'tm', 'Q2'])
+                                                            , ['sigL', 'dsigL','sigT', 'dsigT','sigTT', 'dsigTT','sigLT', 'dsigLT', 'Q2', 'tm'])
 
             
 ################################################################################################################################################
