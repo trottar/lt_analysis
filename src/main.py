@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 15:48:44 trottar"
+# Time-stamp: "2023-09-26 16:07:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -564,15 +564,17 @@ if EPSSET == "high":
         print("{}".format(e))
         sys.exit(2)
         
-    output_file_lst.append(OUTPATH+"/{}_unsep_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
 
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***
     # ***The old parameters, used for this iteration, are saved in the summary!***
     new_param_file = '{}/parameters/par.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""))
     output_file_lst.append(new_param_file) 
-    xsect_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
-    output_file_lst.append(xsect_file) 
+    unsep_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
+    output_file_lst.append(unsep_file)
+    sep_file = '{}/xsects/x_sep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
+    output_file_lst.append(sep_file)     
 
 ##############################
 # Step 8 of the lt_analysis: #
