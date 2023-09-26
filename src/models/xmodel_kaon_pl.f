@@ -110,10 +110,10 @@ c     Correct for W.
 ***
 *     RLT (9/25/2023): Temporary errors!!!!
 ***
-      dsigL=sqrt(sigL)/sigL
-      dsigT=sqrt(sigT)/sigT
-      dsigTT=sqrt(sigTT)/sigTT
-      dsigLT=sqrt(sigLT)/sigLT
+      dsigL=sqrt(abs(sigL))/abs(sigL)
+      dsigT=sqrt(abs(sigT))/abs(sigT)
+      dsigTT=sqrt(abs(sigTT))/abs(sigTT)
+      dsigLT=sqrt(abs(sigLT))/abs(sigLT)
       
 *     construct output file name.
       write(xsep_fn,50) pid,pol,nint(q2_set*10),nint(eps_set*100)
