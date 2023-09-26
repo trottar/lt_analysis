@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 14:30:27 trottar"
+# Time-stamp: "2023-09-26 14:38:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -253,6 +253,48 @@ for j, ps in enumerate(phi_setting):
     for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
         G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['tbin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
         G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
+        G_ratio_t.SetMarkerColor(j)
+
+G_ratio_t.SetMarkerStyle(21)
+G_ratio_t.SetMarkerSize(1)
+    
+G_ratio_t.Draw('AP')
+
+C_ratio_t.Print(outputpdf)
+
+C_ratio_phi = TCanvas()
+C_ratio_phi.SetGrid()
+
+G_ratio_phi = ROOT.TGraphErrors()
+
+G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % HIEPS)
+
+phi_setting = ['left', 'center']
+
+for j, ps in enumerate(phi_setting):
+    for i in range(len(file_df_dict['aver_hieps_{}'.format(ps)]['ratio'].tolist())):
+        G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_hieps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps_{}'.format(ps)]['ratio'].tolist())[i])
+        G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_hieps_{}'.format(ps)]['dratio'].tolist())[i])
+        G_ratio_phi.SetMarkerColor(j)
+
+G_ratio_phi.SetMarkerStyle(21)
+G_ratio_phi.SetMarkerSize(1)
+    
+G_ratio_phi.Draw('AP')
+
+C_ratio_phi.Print(outputpdf
+
+C_ratio_t = TCanvas()
+C_ratio_t.SetGrid()
+
+G_ratio_t = ROOT.TGraphErrors()
+
+G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % HIEPS)
+
+for j, ps in enumerate(phi_setting):
+    for i in range(len(file_df_dict['aver_hieps_{}'.format(ps)]['ratio'].tolist())):
+        G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_hieps_{}'.format(ps)]['tbin'].tolist())[i], np.array(file_df_dict['aver_hieps_{}'.format(ps)]['ratio'].tolist())[i])
+        G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_hieps_{}'.format(ps)]['dratio'].tolist())[i])
         G_ratio_t.SetMarkerColor(j)
 
 G_ratio_t.SetMarkerStyle(21)
