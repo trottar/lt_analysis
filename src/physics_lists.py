@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 16:29:52 trottar"
+# Time-stamp: "2023-09-26 16:12:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,26 +137,26 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             if phiset == "Right":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
-                        tbin_right.append(k)
+                        tbin_right.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
-                        phibin_right.append(k)                        
+                        phibin_right.append(k+1)                        
                 ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
-                        tbin_left.append(k)
+                        tbin_left.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
-                        phibin_left.append(k)                        
+                        phibin_left.append(k+1)                        
                 ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
             if phiset == "Center":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
-                        tbin_center.append(k)
+                        tbin_center.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
-                        phibin_center.append(k)                        
+                        phibin_center.append(k+1)                        
                 ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
 
     ################################################################################################################################################
