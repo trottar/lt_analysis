@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 15:38:56 trottar"
+# Time-stamp: "2023-09-26 15:48:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -300,8 +300,6 @@ from find_bins import find_bins, check_bins
 
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
-else:
-    bin_vals = check_bins(histlist, inpDict)
 
 try:
     with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
@@ -336,6 +334,9 @@ except IOError:
 for hist in histlist:
     hist["t_bins"] = t_bins
     hist["phi_bins"] = phi_bins
+
+if EPSSET == "high":
+    check_bins(histlist, inpDict)
     
 ##############################
 # Step 5 of the lt_analysis: #
