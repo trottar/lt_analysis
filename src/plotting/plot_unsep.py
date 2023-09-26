@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 02:48:57 trottar"
+# Time-stamp: "2023-09-26 02:54:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -512,8 +512,8 @@ l_sigt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_sigt_t.SetTitle("eps = %s ; t; sigt" % LOEPS)
 
-for i in range(len(file_df_dict['sep_file_loeps']['sigt'].tolist())):
-    G_sigt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigt'].tolist())[i])
+for i in range(len(file_df_dict['sep_file_loeps']['sigT'].tolist())):
+    G_sigt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigT'].tolist())[i])
     G_sigt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigt'].tolist())[i])
     l_sigt_t.AddEntry(G_sigt_t, "t = {:.4f}".format(np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i]))
     G_sigt_t.SetMarkerColor(i+1)
@@ -535,8 +535,8 @@ l_sigtt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_sigtt_t.SetTitle("eps = %s ; t; sigtt" % LOEPS)
 
-for i in range(len(file_df_dict['sep_file_loeps']['sigtt'].tolist())):
-    G_sigtt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigtt'].tolist())[i])
+for i in range(len(file_df_dict['sep_file_loeps']['sigTT'].tolist())):
+    G_sigtt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigTT'].tolist())[i])
     G_sigtt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigtt'].tolist())[i])
     l_sigtt_t.AddEntry(G_sigtt_t, "t = {:.4f}".format(np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i]))
     G_sigtt_t.SetMarkerColor(i+1)
@@ -558,8 +558,8 @@ l_siglt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
 
 G_siglt_t.SetTitle("eps = %s ; t; siglt" % LOEPS)
 
-for i in range(len(file_df_dict['sep_file_loeps']['siglt'].tolist())):
-    G_siglt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['siglt'].tolist())[i])
+for i in range(len(file_df_dict['sep_file_loeps']['sigLT'].tolist())):
+    G_siglt_t.SetPoint(i, np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigLT'].tolist())[i])
     G_siglt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsiglt'].tolist())[i])
     l_siglt_t.AddEntry(G_siglt_t, "t = {:.4f}".format(np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i]))
     G_siglt_t.SetMarkerColor(i+1)
