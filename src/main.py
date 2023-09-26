@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 14:01:10 trottar"
+# Time-stamp: "2023-09-26 15:38:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -296,10 +296,12 @@ for hist in histlist:
 '''
 
 sys.path.append("binning")
-from find_bins import find_bins
+from find_bins import find_bins, check_bins
 
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
+else:
+    bin_vals = check_bins(histlist, inpDict)
 
 try:
     with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
