@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 17:39:47 trottar"
+# Time-stamp: "2023-09-26 17:41:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -228,7 +228,7 @@ for k in range(0,NumtBins-1):
     
     G_ratio_phi = ROOT.TGraphErrors()
     G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)    
-    C_ratio_phi.cd(k)
+    C_ratio_phi.cd(k+1)
 
     phi_setting = ['left', 'center']
     
