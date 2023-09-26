@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 14:46:06 trottar"
+# Time-stamp: "2023-09-26 17:09:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -220,27 +220,32 @@ for i,row in file_df_dict['setting_df'].iterrows():
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ################################################################################################################################################
 
-C_ratio_phi = TCanvas()
-C_ratio_phi.SetGrid()
+for k in np.arange(NumtBins):
+    C_ratio_phi = TCanvas()
+    C_ratio_phi.SetGrid()
 
-G_ratio_phi = ROOT.TGraphErrors()
+    G_ratio_phi = ROOT.TGraphErrors()
 
-G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
+    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
 
-phi_setting = ['left', 'center']
-
-for j, ps in enumerate(phi_setting):
-    for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
-        G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
-        G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
-        G_ratio_phi.SetMarkerColor(j)
-
-G_ratio_phi.SetMarkerStyle(21)
-G_ratio_phi.SetMarkerSize(1)
+    phi_setting = ['left', 'center']
     
-G_ratio_phi.Draw('AP')
+    for j, ps in enumerate(phi_setting):
+        for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
+            if i//NumPhiBins == k:
+                G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
+                G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
+                G_ratio_phi.SetMarkerColor(j)
 
-C_ratio_phi.Print(outputpdf + '(')
+    G_ratio_phi.SetMarkerStyle(21)
+    G_ratio_phi.SetMarkerSize(1)
+    
+    G_ratio_phi.Draw('AP')
+
+    if k==0:
+        C_ratio_phi.Print(outputpdf + '(')
+    else:
+        C_ratio_phi.Print(outputpdf)        
 
 C_ratio_t = TCanvas()
 C_ratio_t.SetGrid()
