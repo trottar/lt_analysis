@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 13:26:22 trottar"
+# Time-stamp: "2023-09-26 13:32:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -556,7 +556,7 @@ if EPSSET == "high":
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
     # if still iterating weights
     try:
-        subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, NumtBins, NumPhiBins])
+        subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL])
     except Exception as e:
         sys.exit(2)
 
