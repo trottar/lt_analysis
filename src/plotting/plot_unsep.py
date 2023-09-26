@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 17:51:53 trottar"
+# Time-stamp: "2023-09-26 18:00:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,7 +14,7 @@ import pandas as pd
 import root_pandas as rpd
 import numpy as np
 import ROOT
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
+from ROOT import TCanvas, TGraph, TGraphErrors, TMultiGraph, TLegend
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 import re
@@ -229,14 +229,13 @@ for k in range(0,NumtBins-1):
 
     multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_ratio_phi = ROOT.TGraphErrors()
+    G_ratio_phi = TGraphErrors()
     G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
 
     phi_setting = ['left', 'center']
     
     for j, ps in enumerate(phi_setting):
         for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
-            print("_____________________",i//NumPhiBins," = ",k)
             if i//NumPhiBins == k:
                 G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
                 G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
@@ -252,7 +251,7 @@ C_ratio_phi.Print(outputpdf + '(')
 C_ratio_t = TCanvas()
 C_ratio_t.SetGrid()
 
-G_ratio_t = ROOT.TGraphErrors()
+G_ratio_t = TGraphErrors()
 
 G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % LOEPS)
 
@@ -272,7 +271,7 @@ C_ratio_t.Print(outputpdf)
 C_ratio_phi = TCanvas()
 C_ratio_phi.SetGrid()
 
-G_ratio_phi = ROOT.TGraphErrors()
+G_ratio_phi = TGraphErrors()
 
 G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % HIEPS)
 
@@ -294,7 +293,7 @@ C_ratio_phi.Print(outputpdf)
 C_ratio_t = TCanvas()
 C_ratio_t.SetGrid()
 
-G_ratio_t = ROOT.TGraphErrors()
+G_ratio_t = TGraphErrors()
 
 G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % HIEPS)
 
@@ -314,9 +313,9 @@ C_ratio_t.Print(outputpdf)
 C_Q2_tbin = TCanvas()
 C_Q2_tbin.SetGrid()
 
-G_Q2_tbin = ROOT.TGraph()
+G_Q2_tbin = TGraph()
 
-l_Q2_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_Q2_tbin = TLegend(0.8,0.8,0.95,0.95)
 
 G_Q2_tbin.SetTitle("eps = %s ; #theta_{cm}; Q^{2} Average" % LOEPS)
 
@@ -336,9 +335,9 @@ C_Q2_tbin.Print(outputpdf)
 C_W_tbin = TCanvas()
 C_W_tbin.SetGrid()
 
-G_W_tbin = ROOT.TGraph()
+G_W_tbin = TGraph()
 
-l_W_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_W_tbin = TLegend(0.8,0.8,0.95,0.95)
 
 G_W_tbin.SetTitle("eps = %s ; #theta_{cm}; W Average" % LOEPS)
 
@@ -358,9 +357,9 @@ C_W_tbin.Print(outputpdf)
 C_t_tbin = TCanvas()
 C_t_tbin.SetGrid()
 
-G_t_tbin = ROOT.TGraph()
+G_t_tbin = TGraph()
 
-l_t_tbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_t_tbin = TLegend(0.8,0.8,0.95,0.95)
 
 G_t_tbin.SetTitle("eps = %s ; #theta_{cm}; t Average" % LOEPS)
 
@@ -380,9 +379,9 @@ C_t_tbin.Print(outputpdf)
 C_Q2_phitbin = TCanvas()
 C_Q2_phitbin.SetGrid()
 
-G_Q2_phitbin = ROOT.TGraph()
+G_Q2_phitbin = TGraph()
 
-l_Q2_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_Q2_phitbin = TLegend(0.8,0.8,0.95,0.95)
 
 G_Q2_phitbin.SetTitle("eps = %s ; #phi; Q^{2} Average" % LOEPS)
 
@@ -402,9 +401,9 @@ C_Q2_phitbin.Print(outputpdf)
 C_W_phitbin = TCanvas()
 C_W_phitbin.SetGrid()
 
-G_W_phitbin = ROOT.TGraph()
+G_W_phitbin = TGraph()
 
-l_W_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_W_phitbin = TLegend(0.8,0.8,0.95,0.95)
 
 G_W_phitbin.SetTitle("eps = %s ; #phi; W Average" % LOEPS)
 
@@ -424,9 +423,9 @@ C_W_phitbin.Print(outputpdf)
 C_t_phitbin = TCanvas()
 C_t_phitbin.SetGrid()
 
-G_t_phitbin = ROOT.TGraph()
+G_t_phitbin = TGraph()
 
-l_t_phitbin = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_t_phitbin = TLegend(0.8,0.8,0.95,0.95)
 
 G_t_phitbin.SetTitle("eps = %s ; #phi; t Average" % LOEPS)
 
@@ -446,9 +445,9 @@ C_t_phitbin.Print(outputpdf)
 C_xreal_th = TCanvas()
 C_xreal_th.SetGrid()
 
-G_xreal_th = ROOT.TGraphErrors()
+G_xreal_th = TGraphErrors()
 
-l_xreal_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_xreal_th = TLegend(0.8,0.8,0.95,0.95)
 
 G_xreal_th.SetTitle("eps = %s ; #theta_{cm}; x_real" % LOEPS)
 
@@ -469,9 +468,9 @@ C_xreal_th.Print(outputpdf)
 C_xmod_th = TCanvas()
 C_xmod_th.SetGrid()
 
-G_xmod_th = ROOT.TGraph()
+G_xmod_th = TGraph()
 
-l_xmod_th = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_xmod_th = TLegend(0.8,0.8,0.95,0.95)
 
 G_xmod_th.SetTitle("eps = %s ; #theta_{cm}; x_mod" % LOEPS)
 
@@ -491,9 +490,9 @@ C_xmod_th.Print(outputpdf)
 C_xreal_phi = TCanvas()
 C_xreal_phi.SetGrid()
 
-G_xreal_phi = ROOT.TGraphErrors()
+G_xreal_phi = TGraphErrors()
 
-l_xreal_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_xreal_phi = TLegend(0.8,0.8,0.95,0.95)
 
 G_xreal_phi.SetTitle("eps = %s ; #phi; x_real" % LOEPS)
 
@@ -514,9 +513,9 @@ C_xreal_phi.Print(outputpdf)
 C_xmod_phi = TCanvas()
 C_xmod_phi.SetGrid()
 
-G_xmod_phi = ROOT.TGraph()
+G_xmod_phi = TGraph()
 
-l_xmod_phi = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_xmod_phi = TLegend(0.8,0.8,0.95,0.95)
 
 G_xmod_phi.SetTitle("eps = %s ; #phi; x_mod" % LOEPS)
 
@@ -536,9 +535,9 @@ C_xmod_phi.Print(outputpdf)
 C_sigl_t = TCanvas()
 C_sigl_t.SetGrid()
 
-G_sigl_t = ROOT.TGraphErrors()
+G_sigl_t = TGraphErrors()
 
-l_sigl_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_sigl_t = TLegend(0.8,0.8,0.95,0.95)
 
 G_sigl_t.SetTitle(" ; t; sigL")
 
@@ -562,9 +561,9 @@ C_sigl_t.Print(outputpdf)
 C_sigt_t = TCanvas()
 C_sigt_t.SetGrid()
 
-G_sigt_t = ROOT.TGraphErrors()
+G_sigt_t = TGraphErrors()
 
-l_sigt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_sigt_t = TLegend(0.8,0.8,0.95,0.95)
 
 G_sigt_t.SetTitle(" ; t; sigt")
 
@@ -588,9 +587,9 @@ C_sigt_t.Print(outputpdf)
 C_sigtt_t = TCanvas()
 C_sigtt_t.SetGrid()
 
-G_sigtt_t = ROOT.TGraphErrors()
+G_sigtt_t = TGraphErrors()
 
-l_sigtt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_sigtt_t = TLegend(0.8,0.8,0.95,0.95)
 
 G_sigtt_t.SetTitle(" ; t; sigtt")
 
@@ -614,9 +613,9 @@ C_sigtt_t.Print(outputpdf)
 C_siglt_t = TCanvas()
 C_siglt_t.SetGrid()
 
-G_siglt_t = ROOT.TGraphErrors()
+G_siglt_t = TGraphErrors()
 
-l_siglt_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_siglt_t = TLegend(0.8,0.8,0.95,0.95)
 
 G_siglt_t.SetTitle(" ; t; siglt")
 
@@ -640,9 +639,9 @@ C_siglt_t.Print(outputpdf)
 C_xreal_t = TCanvas()
 C_xreal_t.SetGrid()
 
-G_xreal_t = ROOT.TGraphErrors()
+G_xreal_t = TGraphErrors()
 
-l_xreal_t = ROOT.TLegend(0.8,0.8,0.95,0.95)
+l_xreal_t = TLegend(0.8,0.8,0.95,0.95)
 
 G_xreal_t.SetTitle("eps = %s ; t; x_real" % LOEPS)
 
@@ -663,7 +662,7 @@ C_xreal_t.Print(outputpdf)
 C_xmod_t = TCanvas()
 C_xmod_t.SetGrid()
 
-G_xmod_t = ROOT.TGraph()
+G_xmod_t = TGraph()
 
 G_xmod_t.SetTitle("eps = %s ; t; x_mod" % LOEPS)
 
