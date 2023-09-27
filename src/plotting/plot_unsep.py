@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 19:01:29 trottar"
+# Time-stamp: "2023-09-27 19:11:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -303,7 +303,7 @@ for k in range(NumtBins):
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
             if bin_check:
-                break
+                continue
             else:
                 G_Q2_tbin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
                 j+=1
@@ -319,14 +319,14 @@ for k in range(NumtBins):
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
             if bin_check:
-                break
+                continue
             else:
                 G_Q2_tbin_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
                 j+=1
                 bin_check = True
     G_Q2_tbin_hieps.SetMarkerStyle(21)
     G_Q2_tbin_hieps.SetMarkerSize(1)
-    G_Q2_tbin_hieps.SetMarkerColor(1)
+    G_Q2_tbin_hieps.SetMarkerColor(2)
     multiDict["G_Q2_tbin_{}".format(k+1)].Add(G_Q2_tbin_hieps)
     
     C_Q2_tbin.cd(k+1)
@@ -359,7 +359,7 @@ for k in range(NumtBins):
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
             if bin_check:
-                break
+                continue
             else:
                 G_W_tbin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
                 j+=1
@@ -375,14 +375,14 @@ for k in range(NumtBins):
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
             if bin_check:
-                break
+                continue
             else:
                 G_W_tbin_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['W'].tolist())[i])
                 j+=1
                 bin_check = True
     G_W_tbin_hieps.SetMarkerStyle(21)
     G_W_tbin_hieps.SetMarkerSize(1)
-    G_W_tbin_hieps.SetMarkerColor(1)
+    G_W_tbin_hieps.SetMarkerColor(2)
     multiDict["G_W_tbin_{}".format(k+1)].Add(G_W_tbin_hieps)
     
     C_W_tbin.cd(k+1)
@@ -415,7 +415,7 @@ for k in range(NumtBins):
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
             if bin_check:
-                break
+                continue
             else:
                 G_Q2_phibin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
                 j+=1
@@ -431,14 +431,14 @@ for k in range(NumtBins):
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
             if bin_check:
-                break
+                continue
             else:
                 G_Q2_phibin_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
                 j+=1
                 bin_check = True                
     G_Q2_phibin_hieps.SetMarkerStyle(21)
     G_Q2_phibin_hieps.SetMarkerSize(1)
-    G_Q2_phibin_hieps.SetMarkerColor(1)
+    G_Q2_phibin_hieps.SetMarkerColor(2)
     multiDict["G_Q2_phibin_{}".format(k+1)].Add(G_Q2_phibin_hieps)
     
     C_Q2_phibin.cd(k+1)
@@ -471,11 +471,11 @@ for k in range(NumtBins):
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
             if bin_check:
-                break
+                continue
             else:
                 G_W_phibin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
                 j+=1
-                bin_check = True                
+                bin_check = True
     G_W_phibin_loeps.SetMarkerStyle(21)
     G_W_phibin_loeps.SetMarkerSize(1)
     G_W_phibin_loeps.SetMarkerColor(1)
@@ -487,14 +487,14 @@ for k in range(NumtBins):
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
             if bin_check:
-                break
+                continue
             else:
                 G_W_phibin_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['W'].tolist())[i])
                 j+=1
                 bin_check = True                
     G_W_phibin_hieps.SetMarkerStyle(21)
     G_W_phibin_hieps.SetMarkerSize(1)
-    G_W_phibin_hieps.SetMarkerColor(1)
+    G_W_phibin_hieps.SetMarkerColor(2)
     multiDict["G_W_phibin_{}".format(k+1)].Add(G_W_phibin_hieps)
     
     C_W_phibin.cd(k+1)
