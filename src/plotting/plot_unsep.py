@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 18:18:15 trottar"
+# Time-stamp: "2023-09-27 01:25:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,29 +142,21 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])        
         
         if row['EPSVAL'] == float(LOEPS):
+            file_df_dict['aver_loeps'] = file_to_df( \
+                                                     LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                     .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
+                                                     , ['ratio', 'dratio', 'phibin', 'tbin'])            
             if row['thpq'] < 0.0:
-                file_df_dict['aver_loeps_{}'.format('right')] = file_to_df( \
-                                                                            LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                            .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                            , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('right')] = file_to_df( \
                                                                                LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
                                                                                .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
-                file_df_dict['aver_loeps_{}'.format('left')] = file_to_df( \
-                                                                           LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                           .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                           , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('left')] = file_to_df( \
                                                                               LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                               .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100, int(row['thpq']*1000)) \
                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] == 0.0:
-                file_df_dict['aver_loeps_{}'.format('center')] = file_to_df( \
-                                                                             LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
-                                                                             , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_loeps_{}'.format('center')] = file_to_df( \
                                                                                 LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
                                                                                 .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
@@ -179,29 +171,21 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
                                                             , ['sigL', 'dsigL','sigT', 'dsigT','sigTT', 'dsigTT','sigLT', 'dsigLT', 'Q2', 'tm'])
         if row['EPSVAL'] == float(HIEPS):
+            file_df_dict['aver_hieps'] = file_to_df( \
+                                                     LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
+                                                     .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
+                                                     , ['ratio', 'dratio', 'phibin', 'tbin'])            
             if row['thpq'] < 0.0:
-                file_df_dict['aver_hieps_{}'.format('right')] = file_to_df( \
-                                                                            LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                            .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                            , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('right')] = file_to_df( \
                                                                                LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_{}.dat" \
                                                                                .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                                , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] > 0.0:
-                file_df_dict['aver_hieps_{}'.format('left')] = file_to_df( \
-                                                                           LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                           .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                           , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('left')] = file_to_df( \
                                                                               LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat" \
                                                                               .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100, int(row['thpq']*1000)) \
                                                                               , ['Q2', 'dQ2', 'W', 'dW', 't', 'dt'])
             if row['thpq'] == 0.0:
-                file_df_dict['aver_hieps_{}'.format('center')] = file_to_df( \
-                                                                             LTANAPATH+"/src/{}/averages/aver.{}_{}_{:.0f}.dat" \
-                                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
-                                                                             , ['ratio', 'dratio', 'phibin', 'tbin'])
                 file_df_dict['kindata_hieps_{}'.format('center')] = file_to_df( \
                                                                                 LTANAPATH+"/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat" \
                                                                                 .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
@@ -231,16 +215,13 @@ for k in range(0,NumtBins-1):
     
     G_ratio_phi = TGraphErrors()
     G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
-
-    phi_setting = ['left', 'center']
     
-    for j, ps in enumerate(phi_setting):
-        for i in range(0,NumPhiBins-1):
-            G_ratio_phi.SetPoint(((i+1)*(k+1)-1), np.array(file_df_dict['aver_loeps_{}'.format(ps)]['phibin'].tolist())[((i+1)*(k+1)-1)], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[((i+1)*(k+1)-1)])
-            G_ratio_phi.SetPointError(((i+1)*(k+1)-1), 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[((i+1)*(k+1)-1)])
-            G_ratio_phi.SetMarkerColor(j+1)
-            G_ratio_phi.SetMarkerStyle(21)
-            G_ratio_phi.SetMarkerSize(1)    
+    for i in range(0,NumPhiBins-1):
+        G_ratio_phi.SetPoint(((i+1)*(k+1)-1), np.array(file_df_dict['aver_loeps']['phibin'].tolist())[((i+1)*(k+1)-1)], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[((i+1)*(k+1)-1)])
+        G_ratio_phi.SetPointError(((i+1)*(k+1)-1), 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[((i+1)*(k+1)-1)])
+    G_ratio_phi.SetMarkerColor(1)
+    G_ratio_phi.SetMarkerStyle(21)
+    G_ratio_phi.SetMarkerSize(1)    
     multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi)
     C_ratio_phi.cd(k+1)
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
@@ -254,11 +235,10 @@ G_ratio_t = TGraphErrors()
 
 G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % LOEPS)
 
-for j, ps in enumerate(phi_setting):
-    for i in range(len(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())):
-        G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['tbin'].tolist())[i], np.array(file_df_dict['aver_loeps_{}'.format(ps)]['ratio'].tolist())[i])
-        G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_loeps_{}'.format(ps)]['dratio'].tolist())[i])
-        G_ratio_t.SetMarkerColor(j)
+for i in range(len(file_df_dict['aver_loeps']['ratio'].tolist())):
+    G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
+    G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
+    G_ratio_t.SetMarkerColor(1)
 
 G_ratio_t.SetMarkerStyle(21)
 G_ratio_t.SetMarkerSize(1)
@@ -274,13 +254,10 @@ G_ratio_phi = TGraphErrors()
 
 G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % HIEPS)
 
-phi_setting = ['left', 'center']
-
-for j, ps in enumerate(phi_setting):
-    for i in range(len(file_df_dict['aver_hieps_{}'.format(ps)]['ratio'].tolist())):
-        G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_hieps_{}'.format(ps)]['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps_{}'.format(ps)]['ratio'].tolist())[i])
-        G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_hieps_{}'.format(ps)]['dratio'].tolist())[i])
-        G_ratio_phi.SetMarkerColor(j)
+for i in range(len(file_df_dict['aver_hieps']['ratio'].tolist())):
+    G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
+    G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
+    G_ratio_phi.SetMarkerColor(1)
 
 G_ratio_phi.SetMarkerStyle(21)
 G_ratio_phi.SetMarkerSize(1)
@@ -296,11 +273,10 @@ G_ratio_t = TGraphErrors()
 
 G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % HIEPS)
 
-for j, ps in enumerate(phi_setting):
-    for i in range(len(file_df_dict['aver_hieps_{}'.format(ps)]['ratio'].tolist())):
-        G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_hieps_{}'.format(ps)]['tbin'].tolist())[i], np.array(file_df_dict['aver_hieps_{}'.format(ps)]['ratio'].tolist())[i])
-        G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_hieps_{}'.format(ps)]['dratio'].tolist())[i])
-        G_ratio_t.SetMarkerColor(j)
+for i in range(len(file_df_dict['aver_hieps']['ratio'].tolist())):
+    G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
+    G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
+    G_ratio_t.SetMarkerColor(j)
 
 G_ratio_t.SetMarkerStyle(21)
 G_ratio_t.SetMarkerSize(1)
