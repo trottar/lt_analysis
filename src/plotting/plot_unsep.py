@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 13:38:41 trottar"
+# Time-stamp: "2023-09-27 13:49:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -214,7 +214,7 @@ for k in range(NumtBins):
 
     multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_ratio_phi_loeps = TGraphErrors()    
+    G_ratio_phi_loeps = TGraphErrors(NumPhiBins)
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             print("tbin {}".format(k+1))
@@ -226,7 +226,7 @@ for k in range(NumtBins):
     G_ratio_phi_loeps.SetMarkerColor(1)
     multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_loeps)
 
-    G_ratio_phi_hieps = TGraphErrors()    
+    G_ratio_phi_hieps = TGraphErrors(NumPhiBins)
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             print("tbin {}".format(k+1))
