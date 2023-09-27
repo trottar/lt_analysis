@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 19:29:26 trottar"
+# Time-stamp: "2023-09-27 19:35:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -302,7 +302,7 @@ for k in range(NumtBins):
     bin_check = False
     for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
-        print(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]," == ",np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:)
+            print(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]," == ",np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1])
             if bin_check:
                 continue
             else:
