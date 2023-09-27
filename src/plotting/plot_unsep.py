@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 16:55:37 trottar"
+# Time-stamp: "2023-09-27 17:17:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -300,7 +300,7 @@ for k in range(NumtBins):
     G_Q2_tbin_loeps = TGraph()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == t_bin_centers[k]:
+        if "{:.2f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]) == "{:.2f}".format(t_bin_centers[k]):
             G_Q2_tbin_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
             j+=1
     G_Q2_tbin_loeps.SetMarkerStyle(21)
@@ -311,7 +311,7 @@ for k in range(NumtBins):
     G_Q2_tbin_hieps = TGraph()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == t_bin_centers[k]:
+        if "{:.2f}".format(np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i]) == "{:.2f}".format(t_bin_centers[k]):
             G_Q2_tbin_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
     G_Q2_tbin_hieps.SetMarkerStyle(21)
@@ -322,7 +322,7 @@ for k in range(NumtBins):
     C_Q2_tbin.cd(k+1)
     
     multiDict["G_Q2_tbin_{}".format(k+1)].Draw('AP')
-    multiDict["G_Q2_tbin_{}".format(k+1)].SetTitle("t = {} ; #phi; Ratio".format(t_bin_centers[k]))
+    multiDict["G_Q2_tbin_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; Q^2".format(t_bin_centers[k]))
     
     multiDict["G_Q2_tbin_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_Q2_tbin_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
