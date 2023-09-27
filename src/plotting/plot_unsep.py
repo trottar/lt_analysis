@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 12:30:36 trottar"
+# Time-stamp: "2023-09-27 12:37:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,7 +216,7 @@ for k in range(NumtBins):
     G_ratio_phi = TGraphErrors()
     G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
     
-    for i in range(0,len(file_df_dict['aver_loeps']['tbin'].tolist())-1):
+    for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i] == (k+1):
             print("tbin {}".format(k+1))
             print("phibin = {}, r = {}".format(np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i]))
