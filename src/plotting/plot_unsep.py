@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 17:44:02 trottar"
+# Time-stamp: "2023-09-27 17:52:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -300,8 +300,7 @@ for k in range(NumtBins):
     G_Q2_tbin_loeps = TGraph()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        print("{:.1f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]), "==", "{:.1f}".format(t_bin_centers[k]))
-        if "{:.1f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]) == "{:.1f}".format(t_bin_centers[k]):
+        if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] != np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
             G_Q2_tbin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
             j+=1
     G_Q2_tbin_loeps.SetMarkerStyle(21)
@@ -312,8 +311,7 @@ for k in range(NumtBins):
     G_Q2_tbin_hieps = TGraph()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        print("{:.1f}".format(np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i]), "==", "{:.1f}".format(t_bin_centers[k]))
-        if "{:.1f}".format(np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i]) == "{:.1f}".format(t_bin_centers[k]):
+        if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] != np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
             G_Q2_tbin_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
     G_Q2_tbin_hieps.SetMarkerStyle(21)
@@ -324,7 +322,7 @@ for k in range(NumtBins):
     C_Q2_tbin.cd(k+1)
     
     multiDict["G_Q2_tbin_{}".format(k+1)].Draw('AP')
-    multiDict["G_Q2_tbin_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; Q^2".format(t_bin_centers[k]))
+    multiDict["G_Q2_tbin_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; Q^2".format(np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i]))
     
     multiDict["G_Q2_tbin_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_Q2_tbin_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
