@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 15:02:02 trottar"
+# Time-stamp: "2023-09-27 15:12:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,8 +150,9 @@ except FileNotFoundError:
 except IOError:
     print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
 
-t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2    
-    
+#t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2    
+t_bin_centers = t_bins
+
 try:
     with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
         # Read all lines from the file into a list
@@ -167,7 +168,8 @@ except FileNotFoundError:
 except IOError:
     print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
 
-phi_bin_centers = (phi_bins[:-1] + phi_bins[1:]) / 2
+#phi_bin_centers = (phi_bins[:-1] + phi_bins[1:]) / 2
+phi_bin_centers = phi_bins
     
 for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
