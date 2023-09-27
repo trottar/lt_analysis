@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 17:52:59 trottar"
+# Time-stamp: "2023-09-27 17:58:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -310,7 +310,7 @@ for k in range(NumtBins):
 
     G_Q2_tbin_hieps = TGraph()
     j=0
-    for i in range(NumtBins*NumPhiBins):
+    for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] != np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
             G_Q2_tbin_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
