@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 01:37:47 trottar"
+# Time-stamp: "2023-09-27 01:47:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,6 +217,7 @@ for k in range(0,NumtBins-1):
     G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
     
     for i in range(0,NumPhiBins-1):
+        print("!!!!!!!!!!!!!!!!!!",((i+1)*(k+1)-1))
         G_ratio_phi.SetPoint(((i+1)*(k+1)-1), np.array(file_df_dict['aver_loeps']['phibin'].tolist())[((i+1)*(k+1)-1)], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[((i+1)*(k+1)-1)])
         G_ratio_phi.SetPointError(((i+1)*(k+1)-1), 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[((i+1)*(k+1)-1)])
     G_ratio_phi.SetMarkerColor(1)
