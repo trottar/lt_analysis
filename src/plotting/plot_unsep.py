@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 12:49:31 trottar"
+# Time-stamp: "2023-09-27 13:08:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -214,7 +214,6 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
     
     G_ratio_phi = TGraphErrors()
-    G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
     
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
@@ -222,12 +221,16 @@ for k in range(NumtBins):
             print("phibin = {}, r = {}".format(np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i]))
             G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
             G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
-    G_ratio_phi.SetMarkerColor(1)
     G_ratio_phi.SetMarkerStyle(21)
-    G_ratio_phi.SetMarkerSize(1)    
+    G_ratio_phi.SetMarkerSize(1)
+    G_ratio_phi.SetMarkerColor(1)
     multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi)
     C_ratio_phi.cd(k+1)
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
+    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {} ; #phi_{bin}; Ratio".format(k+1))
+    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
+    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
+    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     
 C_ratio_phi.Print(outputpdf + '(')
 
