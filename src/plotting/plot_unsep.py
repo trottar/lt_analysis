@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 01:56:49 trottar"
+# Time-stamp: "2023-09-27 11:55:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,10 +216,10 @@ for k in range(0,NumtBins-1):
     G_ratio_phi = TGraphErrors()
     G_ratio_phi.SetTitle("eps = %s ; #phi_{bin}; Ratio" % LOEPS)
     
-    for i in range(0,NumPhiBins-1):
-        print("!!!!!!!!!!!!!!!!!!(",i,k,")->",((i+1)*(k+1)-1))
-        G_ratio_phi.SetPoint(((i+1)*(k+1)-1), np.array(file_df_dict['aver_loeps']['phibin'].tolist())[((i+1)*(k+1)-1)], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[((i+1)*(k+1)-1)])
-        G_ratio_phi.SetPointError(((i+1)*(k+1)-1), 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[((i+1)*(k+1)-1)])
+    for i in range(0,len(file_df_dict['aver_loeps']['tbin'].tolist())-1):
+        if np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i] == (k+1):
+            G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
+            G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
     G_ratio_phi.SetMarkerColor(1)
     G_ratio_phi.SetMarkerStyle(21)
     G_ratio_phi.SetMarkerSize(1)    
