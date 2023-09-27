@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 13:38:23 trottar"
+# Time-stamp: "2023-09-27 13:38:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -235,7 +235,7 @@ for k in range(NumtBins):
             G_ratio_phi_hieps.SetPointError(i, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
     G_ratio_phi_hieps.SetMarkerStyle(21)
     G_ratio_phi_hieps.SetMarkerSize(1)
-    G_ratio_phi_hieps.SetMarkerColor(1)
+    G_ratio_phi_hieps.SetMarkerColor(2)
     multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)    
     
     C_ratio_phi.cd(k+1)
