@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 13:18:17 trottar"
+# Time-stamp: "2023-09-27 13:27:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -227,7 +227,7 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi)
     C_ratio_phi.cd(k+1)
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {} ; #phi_\{bin\}; Ratio".format(k+1))
+    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {} ; #phi_{{bin}}; Ratio".format(k+1))
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
