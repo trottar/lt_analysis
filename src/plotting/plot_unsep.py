@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 15:12:45 trottar"
+# Time-stamp: "2023-09-27 15:43:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,8 +150,7 @@ except FileNotFoundError:
 except IOError:
     print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
 
-#t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2    
-t_bin_centers = t_bins
+t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2    
 
 try:
     with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
@@ -269,8 +268,8 @@ for k in range(NumtBins):
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             print("hieps | tbin {}".format(k+1))
-            print("hieps | phibin = {}, r = {}".format(phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i]))
-            G_ratio_phi_hieps.SetPoint(j, np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
+            print("hieps | phibin = {}, r = {}".format(np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i]))
+            G_ratio_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
             G_ratio_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
             j+=1
     G_ratio_phi_hieps.SetMarkerStyle(21)
