@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 16:07:23 trottar"
+# Time-stamp: "2023-09-27 16:17:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -563,7 +563,10 @@ if EPSSET == "high":
     except Exception as e:
         print("{}".format(e))
         sys.exit(2)
-        
+
+    if DEBUG:
+        show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
 
     # Save new parameters and unsep values from current iteration
@@ -574,7 +577,7 @@ if EPSSET == "high":
     unsep_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
     output_file_lst.append(unsep_file)
     sep_file = '{}/xsects/x_sep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
-    output_file_lst.append(sep_file)     
+    output_file_lst.append(sep_file)
 
 ##############################
 # Step 8 of the lt_analysis: #
