@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 12:03:34 trottar"
+# Time-stamp: "2023-09-27 12:10:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -218,7 +218,7 @@ for k in range(0,NumtBins-1):
     
     for i in range(0,len(file_df_dict['aver_loeps']['tbin'].tolist())-1):
         if np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i] == (k+1):
-            #print("tbin {}",k+1)
+            print("tbin {}",k+1)
             G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
             G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
     G_ratio_phi.SetMarkerColor(1)
