@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 01:25:04 trottar"
+# Time-stamp: "2023-09-27 01:37:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -276,7 +276,7 @@ G_ratio_t.SetTitle("eps = %s ; t_{bin}; Ratio" % HIEPS)
 for i in range(len(file_df_dict['aver_hieps']['ratio'].tolist())):
     G_ratio_t.SetPoint(i, np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
     G_ratio_t.SetPointError(i, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
-    G_ratio_t.SetMarkerColor(j)
+    G_ratio_t.SetMarkerColor(1)
 
 G_ratio_t.SetMarkerStyle(21)
 G_ratio_t.SetMarkerSize(1)
