@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 13:27:25 trottar"
+# Time-stamp: "2023-09-27 13:38:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,31 +207,49 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 C_ratio_phi = TCanvas()
 C_ratio_phi.SetGrid()
 C_ratio_phi.Divide(1,NumtBins)
+l_ratio_phi = TLegend(0.115,0.35,0.33,0.5)
 
 multiDict = {}
 for k in range(NumtBins):
 
     multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_ratio_phi = TGraphErrors()
-    
+    G_ratio_phi_loeps = TGraphErrors()    
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             print("tbin {}".format(k+1))
             print("phibin = {}, r = {}".format(np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i]))
-            G_ratio_phi.SetPoint(i, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
-            G_ratio_phi.SetPointError(i, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
-    G_ratio_phi.SetMarkerStyle(21)
-    G_ratio_phi.SetMarkerSize(1)
-    G_ratio_phi.SetMarkerColor(1)
-    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi)
+            G_ratio_phi_loeps.SetPoint(i, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
+            G_ratio_phi_loeps.SetPointError(i, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
+    G_ratio_phi_loeps.SetMarkerStyle(21)
+    G_ratio_phi_loeps.SetMarkerSize(1)
+    G_ratio_phi_loeps.SetMarkerColor(1)
+    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_loeps)
+
+    G_ratio_phi_hieps = TGraphErrors()    
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
+            print("tbin {}".format(k+1))
+            print("phibin = {}, r = {}".format(np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i]))
+            G_ratio_phi_hieps.SetPoint(i, np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
+            G_ratio_phi_hieps.SetPointError(i, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
+    G_ratio_phi_hieps.SetMarkerStyle(21)
+    G_ratio_phi_hieps.SetMarkerSize(1)
+    G_ratio_phi_hieps.SetMarkerColor(1)
+    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)    
+    
     C_ratio_phi.cd(k+1)
+    
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {} ; #phi_{{bin}}; Ratio".format(k+1))
+    
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
-    
+
+l_ratio_phi.AddEntry(G_ratio_phi_loeps)
+l_ratio_phi.AddEntry(G_ratio_phi_hieps)
+l_ratio_phi.Draw()
 C_ratio_phi.Print(outputpdf + '(')
 
 C_ratio_t = TCanvas()
