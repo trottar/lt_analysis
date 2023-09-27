@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 16:09:56 trottar"
+# Time-stamp: "2023-09-27 16:16:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -285,8 +285,6 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
-
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetLogy()
     
 l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
