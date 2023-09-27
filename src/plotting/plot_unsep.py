@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 14:42:21 trottar"
+# Time-stamp: "2023-09-27 15:02:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -135,6 +135,40 @@ file_df_dict = {}
 setting_file = LTANAPATH+"/src/{}/list.settings".format(ParticleType)
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins'])
 
+try:
+    with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+        # Read all lines from the file into a list
+        all_lines = file.readlines()
+        # Check if the file has at least two lines
+        if len(all_lines) >= 2:
+            # Extract the second line and remove leading/trailing whitespace
+            t_bins = all_lines[1].split("\t")
+            del t_bins[0]
+            t_bins = np.array([float(element) for element in t_bins])
+except FileNotFoundError:
+    print("{} not found...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
+except IOError:
+    print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
+
+t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2    
+    
+try:
+    with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+        # Read all lines from the file into a list
+        all_lines = file.readlines()
+        # Check if the file has at least two lines
+        if len(all_lines) >= 2:
+            # Extract the second line and remove leading/trailing whitespace
+            phi_bins = all_lines[1].split("\t")
+            del phi_bins[0]
+            phi_bins = np.array([float(element) for element in phi_bins])
+except FileNotFoundError:
+    print("{} not found...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
+except IOError:
+    print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
+
+phi_bin_centers = (phi_bins[:-1] + phi_bins[1:]) / 2
+    
 for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat".format(ParticleType), ['ebeam', 'Q2', 'EPSVAL'])
@@ -220,7 +254,7 @@ for k in range(NumtBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             print("loeps | tbin {}".format(k+1))
             print("loeps | phibin = {}, r = {}".format(np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i]))
-            G_ratio_phi_loeps.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
+            G_ratio_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
             G_ratio_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
             j+=1
     G_ratio_phi_loeps.SetMarkerStyle(21)
@@ -233,7 +267,7 @@ for k in range(NumtBins):
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             print("hieps | tbin {}".format(k+1))
-            print("hieps | phibin = {}, r = {}".format(np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i]))
+            print("hieps | phibin = {}, r = {}".format(phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i]))
             G_ratio_phi_hieps.SetPoint(j, np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
             G_ratio_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
             j+=1
@@ -245,14 +279,14 @@ for k in range(NumtBins):
     C_ratio_phi.cd(k+1)
     
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {} ; #phi_{{bin}}; Ratio".format(k+1))
+    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {} ; #phi_{{bin}}; Ratio".format(t_bin_centers[k]))
     
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_ratio_phi.AddEntry(G_ratio_phi_loeps)
-l_ratio_phi.AddEntry(G_ratio_phi_hieps)
+l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
+l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
 l_ratio_phi.Draw()
 C_ratio_phi.Print(outputpdf + '(')
 
