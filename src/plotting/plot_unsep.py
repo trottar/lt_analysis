@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 22:42:34 trottar"
+# Time-stamp: "2023-09-28 14:08:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -323,7 +323,7 @@ G_Q2_tbin_hieps.SetMarkerColor(2)
 multiDict["G_Q2_tbin"].Add(G_Q2_tbin_hieps)
 
 multiDict["G_Q2_tbin"].Draw('AP')
-multiDict["G_Q2_tbin"].SetTitle("; #theta_{{cm}}; Q2")
+multiDict["G_Q2_tbin"].SetTitle("; #theta_{cm}; Q2")
 
 multiDict["G_Q2_tbin"].GetYaxis().SetTitleOffset(1.5)
 multiDict["G_Q2_tbin"].GetXaxis().SetTitleOffset(1.5)
@@ -366,7 +366,7 @@ G_W_tbin_hieps.SetMarkerColor(2)
 multiDict["G_W_tbin"].Add(G_W_tbin_hieps)
 
 multiDict["G_W_tbin"].Draw('AP')
-multiDict["G_W_tbin"].SetTitle("; #theta_{{cm}}; W")
+multiDict["G_W_tbin"].SetTitle("; #theta_{cm}; W")
 
 multiDict["G_W_tbin"].GetYaxis().SetTitleOffset(1.5)
 multiDict["G_W_tbin"].GetXaxis().SetTitleOffset(1.5)
@@ -465,50 +465,101 @@ l_W_phibin.AddEntry(G_W_phibin_hieps,"hieps")
 l_W_phibin.Draw()
 C_W_phibin.Print(outputpdf)
 
-C_xreal_th = TCanvas()
-C_xreal_th.SetGrid()
+C_xreal_thcm = TCanvas()
+C_xreal_thcm.SetGrid()
+C_xreal_thcm.Divide(1,NumtBins)
+l_xreal_thcm = TLegend(0.115,0.35,0.33,0.5)
 
-G_xreal_th = TGraphErrors()
+multiDict = {}
+for k in range(NumtBins):
 
-l_xreal_th = TLegend(0.8,0.8,0.95,0.95)
-
-G_xreal_th.SetTitle("eps = %s ; #theta_{cm}; x_real" % LOEPS)
-
-for i in range(len(file_df_dict['unsep_file_loeps']['x_real'].tolist())):
-    G_xreal_th.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
-    G_xreal_th.SetPointError(i, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_th.AddEntry(G_xreal_th, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
-    G_xreal_th.SetMarkerColor(i)
-
-G_xreal_th.SetMarkerStyle(21)
-G_xreal_th.SetMarkerSize(1)
+    multiDict["G_xreal_thcm_{}".format(k+1)] = TMultiGraph()
     
-G_xreal_th.Draw('AP')
-l_xreal_th.Draw()
+    G_xreal_thcm_loeps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['unsep_file_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_thcm_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+            G_xreal_thcm_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
+            j+=1
+    G_xreal_thcm_loeps.SetMarkerStyle(21)
+    G_xreal_thcm_loeps.SetMarkerSize(1)
+    G_xreal_thcm_loeps.SetMarkerColor(1)
+    multiDict["G_xreal_thcm_{}".format(k+1)].Add(G_xreal_thcm_loeps)
 
-C_xreal_th.Print(outputpdf)
-
-C_xmod_th = TCanvas()
-C_xmod_th.SetGrid()
-
-G_xmod_th = TGraph()
-
-l_xmod_th = TLegend(0.8,0.8,0.95,0.95)
-
-G_xmod_th.SetTitle("eps = %s ; #theta_{cm}; x_mod" % LOEPS)
-
-for i in range(len(file_df_dict['unsep_file_loeps']['x_mod'].tolist())):
-    G_xmod_th.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
-    l_xmod_th.AddEntry(G_xmod_th, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
-    G_xmod_th.SetMarkerColor(i)
-
-G_xmod_th.SetMarkerStyle(21)
-G_xmod_th.SetMarkerSize(1)
+    G_xreal_thcm_hieps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['unsep_file_hieps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_thcm_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
+            G_xreal_thcm_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
+            j+=1
+    G_xreal_thcm_hieps.SetMarkerStyle(21)
+    G_xreal_thcm_hieps.SetMarkerSize(1)
+    G_xreal_thcm_hieps.SetMarkerColor(2)
+    multiDict["G_xreal_thcm_{}".format(k+1)].Add(G_xreal_thcm_hieps)    
     
-G_xmod_th.Draw('AP')
-l_xmod_th.Draw()
+    C_xreal_thcm.cd(k+1)
+    
+    multiDict["G_xreal_thcm_{}".format(k+1)].Draw('AP')
+    multiDict["G_xmod_thcm_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
+    
+    multiDict["G_xreal_thcm_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
+    multiDict["G_xreal_thcm_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
+    multiDict["G_xreal_thcm_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    
+l_xreal_thcm.AddEntry(G_xreal_thcm_loeps,"loeps")
+l_xreal_thcm.AddEntry(G_xreal_thcm_hieps,"hieps")
+l_xreal_thcm.Draw()
+C_xreal_thcm.Print(outputpdf)
 
-C_xmod_th.Print(outputpdf)
+C_xmod_thcm = TCanvas()
+C_xmod_thcm.SetGrid()
+C_xmod_thcm.Divide(1,NumtBins)
+l_xmod_thcm = TLegend(0.115,0.35,0.33,0.5)
+
+multiDict = {}
+for k in range(NumtBins):
+
+    multiDict["G_xmod_thcm_{}".format(k+1)] = TMultiGraph()
+    
+    G_xmod_thcm_loeps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['unsep_file_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xmod_thcm_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
+            G_xmod_thcm_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
+            j+=1
+    G_xmod_thcm_loeps.SetMarkerStyle(21)
+    G_xmod_thcm_loeps.SetMarkerSize(1)
+    G_xmod_thcm_loeps.SetMarkerColor(1)
+    multiDict["G_xmod_thcm_{}".format(k+1)].Add(G_xmod_thcm_loeps)
+
+    G_xmod_thcm_hieps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['unsep_file_hieps']['tbin'].tolist())[i] == (k+1):
+            G_xmod_thcm_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
+            G_xmod_thcm_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
+            j+=1
+    G_xmod_thcm_hieps.SetMarkerStyle(21)
+    G_xmod_thcm_hieps.SetMarkerSize(1)
+    G_xmod_thcm_hieps.SetMarkerColor(2)
+    multiDict["G_xmod_thcm_{}".format(k+1)].Add(G_xmod_thcm_hieps)    
+    
+    C_xmod_thcm.cd(k+1)
+    
+    multiDict["G_xmod_thcm_{}".format(k+1)].Draw('AP')
+    multiDict["G_xmod_thcm_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
+    
+    multiDict["G_xmod_thcm_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
+    multiDict["G_xmod_thcm_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
+    multiDict["G_xmod_thcm_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    
+l_xmod_thcm.AddEntry(G_xmod_thcm_loeps,"loeps")
+l_xmod_thcm.AddEntry(G_xmod_thcm_hieps,"hieps")
+l_xmod_thcm.Draw()
+C_xmod_thcm.Print(outputpdf)
 
 C_xreal_phi = TCanvas()
 C_xreal_phi.SetGrid()
@@ -708,45 +759,4 @@ G_siglt_t.SetMarkerSize(1)
     
 G_siglt_t.Draw('AP')
 
-C_siglt_t.Print(outputpdf)
-
-C_xreal_t = TCanvas()
-C_xreal_t.SetGrid()
-
-G_xreal_t = TGraphErrors()
-
-l_xreal_t = TLegend(0.8,0.8,0.95,0.95)
-
-G_xreal_t.SetTitle("eps = %s ; t; x_real" % LOEPS)
-
-for i in range(len(file_df_dict['unsep_file_loeps']['x_real'].tolist())):
-    G_xreal_t.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
-    G_xreal_t.SetPointError(i, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_t.AddEntry(G_xreal_t, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
-    G_xreal_t.SetMarkerColor(i)
-
-G_xreal_t.SetMarkerStyle(21)
-G_xreal_t.SetMarkerSize(1)
-    
-G_xreal_t.Draw('AP')
-l_xreal_t.Draw()
-
-C_xreal_t.Print(outputpdf)
-
-C_xmod_t = TCanvas()
-C_xmod_t.SetGrid()
-
-G_xmod_t = TGraph()
-
-G_xmod_t.SetTitle("eps = %s ; t; x_mod" % LOEPS)
-
-for i in range(len(file_df_dict['unsep_file_loeps']['x_mod'].tolist())):
-    G_xmod_t.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
-    G_xmod_t.SetMarkerColor(i)
-
-G_xmod_t.SetMarkerStyle(21)
-G_xmod_t.SetMarkerSize(1)
-    
-G_xmod_t.Draw('AP')
-
-C_xmod_t.Print(outputpdf + ')')
+C_siglt_t.Print(outputpdf+')')
