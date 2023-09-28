@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 16:17:38 trottar"
+# Time-stamp: "2023-09-27 20:45:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,8 +224,7 @@ for p in [1,2,3,4]:
         print("ERROR: Invalid diamond cut paramters")
         sys.exit(2)
     else:
-        print("a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
-    
+        print("a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))    
     
 if DEBUG:
     # Show plot pdf for each setting

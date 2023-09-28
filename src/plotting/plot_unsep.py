@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 20:39:22 trottar"
+# Time-stamp: "2023-09-27 20:46:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -304,8 +304,8 @@ for k in range(NumtBins):
     j=0
     bin_check = False
     for i in range(0,NumtBins*NumPhiBins-1):
+        print(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]," == ",np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1])
         if are_within_tolerance(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i],t_bin_centers[k]):
-            print(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]," == ",np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1])
             if bin_check:
                 break
             else:
