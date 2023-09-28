@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 22:19:31 trottar"
+# Time-stamp: "2023-09-27 22:26:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -523,9 +523,9 @@ for k in range(NumtBins):
     G_xreal_phi_loeps = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_xreal_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['xreal'].tolist())[i])
-            G_xreal_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['aver_loeps']['dxreal'].tolist())[i])
+        if np.array(file_df_dict['unsep_file_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['xreal'].tolist())[i])
+            G_xreal_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dxreal'].tolist())[i])
             j+=1
     G_xreal_phi_loeps.SetMarkerStyle(21)
     G_xreal_phi_loeps.SetMarkerSize(1)
@@ -535,9 +535,9 @@ for k in range(NumtBins):
     G_xreal_phi_hieps = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['xreal'].tolist())[i])
-            G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dxreal'].tolist())[i])
+        if np.array(file_df_dict['unsep_file_hieps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['xreal'].tolist())[i])
+            G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dxreal'].tolist())[i])
             j+=1
     G_xreal_phi_hieps.SetMarkerStyle(21)
     G_xreal_phi_hieps.SetMarkerSize(1)
@@ -571,9 +571,9 @@ for k in range(NumtBins):
     G_xmod_phi_loeps = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['xmod'].tolist())[i])
-            G_xmod_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['aver_loeps']['dxmod'].tolist())[i])
+        if np.array(file_df_dict['unsep_file_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['xmod'].tolist())[i])
+            G_xmod_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dxmod'].tolist())[i])
             j+=1
     G_xmod_phi_loeps.SetMarkerStyle(21)
     G_xmod_phi_loeps.SetMarkerSize(1)
@@ -583,9 +583,9 @@ for k in range(NumtBins):
     G_xmod_phi_hieps = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['xmod'].tolist())[i])
-            G_xmod_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dxmod'].tolist())[i])
+        if np.array(file_df_dict['unsep_file_hieps']['tbin'].tolist())[i] == (k+1):
+            G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['xmod'].tolist())[i])
+            G_xmod_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dxmod'].tolist())[i])
             j+=1
     G_xmod_phi_hieps.SetMarkerStyle(21)
     G_xmod_phi_hieps.SetMarkerSize(1)
