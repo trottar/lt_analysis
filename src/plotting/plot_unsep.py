@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-28 15:17:43 trottar"
+# Time-stamp: "2023-09-28 15:58:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -279,7 +279,7 @@ for k in range(NumtBins):
     C_ratio_phi.cd(k+1)
     
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; Ratio".format(t_bin_centers[k]))
+    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Ratio".format(t_bin_centers[k]))
     
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -325,7 +325,7 @@ for k in range(NumtBins):
     C_Q2_phi.cd(k+1)
     
     multiDict["G_Q2_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_Q2_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; Q2".format(t_bin_centers[k]))
+    multiDict["G_Q2_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Q2".format(t_bin_centers[k]))
     
     multiDict["G_Q2_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_Q2_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -371,7 +371,7 @@ for k in range(NumtBins):
     C_W_phi.cd(k+1)
     
     multiDict["G_W_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_W_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; W".format(t_bin_centers[k]))
+    multiDict["G_W_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; W".format(t_bin_centers[k]))
     
     multiDict["G_W_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_W_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -419,7 +419,7 @@ for k in range(NumtBins):
     C_xreal_thcm.cd(k+1)
     
     multiDict["G_xreal_thcm_{}".format(k+1)].Draw('AP')
-    multiDict["G_xreal_thcm_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
+    multiDict["G_xreal_thcm_{}".format(k+1)].SetTitle("t = {:.2f} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
     
     multiDict["G_xreal_thcm_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_thcm_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -467,7 +467,7 @@ for k in range(NumtBins):
     C_xmod_thcm.cd(k+1)
     
     multiDict["G_xmod_thcm_{}".format(k+1)].Draw('AP')
-    multiDict["G_xmod_thcm_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
+    multiDict["G_xmod_thcm_{}".format(k+1)].SetTitle("t = {:.2f} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
     
     multiDict["G_xmod_thcm_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xmod_thcm_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -503,7 +503,7 @@ for k in range(NumtBins):
     C_xreal_phi.cd(k+1)
     
     multiDict["G_xreal_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; xreal".format(t_bin_centers[k]))
+    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xreal".format(t_bin_centers[k]))
     
     multiDict["G_xreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -538,7 +538,7 @@ for k in range(NumtBins):
     C_xreal_phi.cd(k+1)
     
     multiDict["G_xreal_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; xreal".format(t_bin_centers[k]))
+    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xreal".format(t_bin_centers[k]))
     
     multiDict["G_xreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -585,7 +585,7 @@ for k in range(NumtBins):
     C_xmod_phi.cd(k+1)
     
     multiDict["G_xmod_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_xmod_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; xmod".format(t_bin_centers[k]))
+    multiDict["G_xmod_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xmod".format(t_bin_centers[k]))
     
     multiDict["G_xmod_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xmod_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
