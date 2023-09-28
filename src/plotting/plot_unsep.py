@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 22:12:10 trottar"
+# Time-stamp: "2023-09-27 22:19:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,7 +347,7 @@ G_W_tbin_loeps = TGraph()
 j=0
 for i in range(0,NumtBins*NumPhiBins-1):
     if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
-            G_W_tbin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
+        G_W_tbin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
         j+=1
 G_W_tbin_loeps.SetMarkerStyle(21)
 G_W_tbin_loeps.SetMarkerSize(1)
