@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-28 15:10:25 trottar"
+# Time-stamp: "2023-09-28 15:17:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -499,7 +499,30 @@ for k in range(NumtBins):
     G_xreal_phi_loeps.SetMarkerSize(1)
     G_xreal_phi_loeps.SetMarkerColor(1)
     multiDict["G_xreal_phi_{}".format(k+1)].Add(G_xreal_phi_loeps)
+    
+    C_xreal_phi.cd(k+1)
+    
+    multiDict["G_xreal_phi_{}".format(k+1)].Draw('AP')
+    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; xreal".format(t_bin_centers[k]))
+    
+    multiDict["G_xreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
+    multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
+    multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    
+l_xreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
+l_xreal_phi.Draw()
+C_xreal_phi.Print(outputpdf)
 
+C_xreal_phi = TCanvas()
+C_xreal_phi.SetGrid()
+C_xreal_phi.Divide(1,NumtBins)
+l_xreal_phi = TLegend(0.7, 0.6, 0.9, 0.9)
+
+multiDict = {}
+for k in range(NumtBins):
+
+    multiDict["G_xreal_phi_{}".format(k+1)] = TMultiGraph()
+    
     G_xreal_phi_hieps = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
@@ -521,7 +544,6 @@ for k in range(NumtBins):
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     
-l_xreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
 l_xreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")
 l_xreal_phi.Draw()
 C_xreal_phi.Print(outputpdf)
