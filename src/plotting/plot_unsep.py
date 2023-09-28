@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 21:45:59 trottar"
+# Time-stamp: "2023-09-27 21:52:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -303,7 +303,7 @@ j=0
 bin_check = False
 for i in range(0,NumtBins*NumPhiBins-1):
     print(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]," - ",t_bin_centers[k],np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i],np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i])
-    if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]
+    if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
         print("^^")
         if bin_check:
             break
@@ -320,7 +320,7 @@ G_Q2_tbin_hieps = TGraph()
 j=0
 bin_check = False
 for i in range(0,NumtBins*NumPhiBins-1):
-    if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]
+    if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
         if bin_check:
             break
         else:
@@ -357,7 +357,7 @@ G_W_tbin_loeps = TGraph()
 j=0
 bin_check = False
 for i in range(0,NumtBins*NumPhiBins-1):
-    if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]
+    if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
         if bin_check:
             break
         else:
@@ -373,7 +373,7 @@ G_W_tbin_hieps = TGraph()
 j=0
 bin_check = False
 for i in range(0,NumtBins*NumPhiBins-1):
-    if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]
+    if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
         if bin_check:
             break
         else:
@@ -411,7 +411,7 @@ j=0
 bin_check = False
 for i in range(0,NumtBins*NumPhiBins-1):
     print(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]," - ",t_bin_centers[k],np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i],np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i])        
-    if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]
+    if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
         print("^^")
         if bin_check:
             break
@@ -428,7 +428,7 @@ G_Q2_phibin_hieps = TGraph()
 j=0
 bin_check = False
 for i in range(0,NumtBins*NumPhiBins-1):
-    if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]
+    if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
         if bin_check:
             break
         else:
@@ -465,7 +465,7 @@ G_W_phibin_loeps = TGraph()
 j=0
 bin_check = False
 for i in range(0,NumtBins*NumPhiBins-1):
-    if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]
+    if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
         if bin_check:
             break
         else:
@@ -481,7 +481,7 @@ G_W_phibin_hieps = TGraph()
 j=0
 bin_check = False
 for i in range(0,NumtBins*NumPhiBins-1):
-    if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]
+    if np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i+1]:
         if bin_check:
             break
         else:
