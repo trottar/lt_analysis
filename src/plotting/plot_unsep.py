@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-28 15:01:49 trottar"
+# Time-stamp: "2023-09-28 15:10:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,7 +245,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 C_ratio_phi = TCanvas()
 C_ratio_phi.SetGrid()
 C_ratio_phi.Divide(1,NumtBins)
-l_ratio_phi = TLegend(0.115,0.35,0.33,0.5)
+l_ratio_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -293,7 +293,7 @@ C_ratio_phi.Print(outputpdf + '(')
 C_Q2_phi = TCanvas()
 C_Q2_phi.SetGrid()
 C_Q2_phi.Divide(1,NumtBins)
-l_Q2_phi = TLegend(0.115,0.35,0.33,0.5)
+l_Q2_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -339,7 +339,7 @@ C_Q2_phi.Print(outputpdf)
 C_W_phi = TCanvas()
 C_W_phi.SetGrid()
 C_W_phi.Divide(1,NumtBins)
-l_W_phi = TLegend(0.115,0.35,0.33,0.5)
+l_W_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -385,7 +385,7 @@ C_W_phi.Print(outputpdf)
 C_xreal_thcm = TCanvas()
 C_xreal_thcm.SetGrid()
 C_xreal_thcm.Divide(1,NumtBins)
-l_xreal_thcm = TLegend(0.115,0.35,0.33,0.5)
+l_xreal_thcm = TLegend(0.7, 0.6, 0.9, 0.9)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -433,7 +433,7 @@ C_xreal_thcm.Print(outputpdf)
 C_xmod_thcm = TCanvas()
 C_xmod_thcm.SetGrid()
 C_xmod_thcm.Divide(1,NumtBins)
-l_xmod_thcm = TLegend(0.115,0.35,0.33,0.5)
+l_xmod_thcm = TLegend(0.7, 0.6, 0.9, 0.9)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -481,7 +481,7 @@ C_xmod_thcm.Print(outputpdf)
 C_xreal_phi = TCanvas()
 C_xreal_phi.SetGrid()
 C_xreal_phi.Divide(1,NumtBins)
-l_xreal_phi = TLegend(0.115,0.35,0.33,0.5)
+l_xreal_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -529,7 +529,7 @@ C_xreal_phi.Print(outputpdf)
 C_xmod_phi = TCanvas()
 C_xmod_phi.SetGrid()
 C_xmod_phi.Divide(1,NumtBins)
-l_xmod_phi = TLegend(0.115,0.35,0.33,0.5)
+l_xmod_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 
 multiDict = {}
 for k in range(NumtBins):
