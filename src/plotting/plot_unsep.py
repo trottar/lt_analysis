@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-28 14:15:48 trottar"
+# Time-stamp: "2023-09-28 14:24:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -475,7 +475,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_xreal_thcm_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+            G_xreal_thcm_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
             G_xreal_thcm_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
             j+=1
     G_xreal_thcm_loeps.SetMarkerStyle(21)
@@ -523,7 +523,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_xmod_thcm_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
+            G_xmod_thcm_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
             G_xmod_thcm_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
             j+=1
     G_xmod_thcm_loeps.SetMarkerStyle(21)
