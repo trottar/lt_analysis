@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-27 22:01:13 trottar"
+# Time-stamp: "2023-09-27 22:12:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -323,7 +323,7 @@ G_Q2_tbin_hieps.SetMarkerColor(2)
 multiDict["G_Q2_tbin"].Add(G_Q2_tbin_hieps)
 
 multiDict["G_Q2_tbin"].Draw('AP')
-multiDict["G_Q2_tbin"].SetTitle("t = {} ; #theta_{{cm}}; Q2".format(np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i]))
+multiDict["G_Q2_tbin"].SetTitle("; #theta_{{cm}}; Q2")
 
 multiDict["G_Q2_tbin"].GetYaxis().SetTitleOffset(1.5)
 multiDict["G_Q2_tbin"].GetXaxis().SetTitleOffset(1.5)
@@ -347,7 +347,7 @@ G_W_tbin_loeps = TGraph()
 j=0
 for i in range(0,NumtBins*NumPhiBins-1):
     if np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i+1]:
-        G_W_tbin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
+            G_W_tbin_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
         j+=1
 G_W_tbin_loeps.SetMarkerStyle(21)
 G_W_tbin_loeps.SetMarkerSize(1)
@@ -366,7 +366,7 @@ G_W_tbin_hieps.SetMarkerColor(2)
 multiDict["G_W_tbin"].Add(G_W_tbin_hieps)
 
 multiDict["G_W_tbin"].Draw('AP')
-multiDict["G_W_tbin"].SetTitle("t = {} ; #theta_{{cm}}; W".format(np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i]))
+multiDict["G_W_tbin"].SetTitle("; #theta_{{cm}}; W")
 
 multiDict["G_W_tbin"].GetYaxis().SetTitleOffset(1.5)
 multiDict["G_W_tbin"].GetXaxis().SetTitleOffset(1.5)
@@ -411,7 +411,7 @@ G_Q2_phibin_hieps.SetMarkerColor(2)
 multiDict["G_Q2_phibin"].Add(G_Q2_phibin_hieps)
 
 multiDict["G_Q2_phibin"].Draw('AP')
-multiDict["G_Q2_phibin"].SetTitle("t = {} ; #phi; Q2".format(np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i]))
+multiDict["G_Q2_phibin"].SetTitle(";#phi; Q2")
 
 multiDict["G_Q2_phibin"].GetYaxis().SetTitleOffset(1.5)
 multiDict["G_Q2_phibin"].GetXaxis().SetTitleOffset(1.5)
@@ -454,7 +454,7 @@ G_W_phibin_hieps.SetMarkerColor(2)
 multiDict["G_W_phibin"].Add(G_W_phibin_hieps)
 
 multiDict["G_W_phibin"].Draw('AP')
-multiDict["G_W_phibin"].SetTitle("t = {} ; #theta_{{cm}}; W".format(np.array(file_df_dict['unsep_file_hieps']['tm'].tolist())[i]))
+multiDict["G_W_phibin"].SetTitle(";#phi; Q2")
 
 multiDict["G_W_phibin"].GetYaxis().SetTitleOffset(1.5)
 multiDict["G_W_phibin"].GetXaxis().SetTitleOffset(1.5)
@@ -512,47 +512,98 @@ C_xmod_th.Print(outputpdf)
 
 C_xreal_phi = TCanvas()
 C_xreal_phi.SetGrid()
+C_xreal_phi.Divide(1,NumtBins)
+l_xreal_phi = TLegend(0.115,0.35,0.33,0.5)
 
-G_xreal_phi = TGraphErrors()
+multiDict = {}
+for k in range(NumtBins):
 
-l_xreal_phi = TLegend(0.8,0.8,0.95,0.95)
-
-G_xreal_phi.SetTitle("eps = %s ; #phi; x_real" % LOEPS)
-
-for i in range(len(file_df_dict['unsep_file_loeps']['x_real'].tolist())):
-    G_xreal_phi.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
-    G_xreal_phi.SetPointError(i, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
-    l_xreal_phi.AddEntry(G_xreal_phi, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
-    G_xreal_phi.SetMarkerColor(i)
-
-G_xreal_phi.SetMarkerStyle(21)
-G_xreal_phi.SetMarkerSize(1)
+    multiDict["G_xreal_phi_{}".format(k+1)] = TMultiGraph()
     
-G_xreal_phi.Draw('AP')
-l_xreal_phi.Draw()
+    G_xreal_phi_loeps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['xreal'].tolist())[i])
+            G_xreal_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['aver_loeps']['dxreal'].tolist())[i])
+            j+=1
+    G_xreal_phi_loeps.SetMarkerStyle(21)
+    G_xreal_phi_loeps.SetMarkerSize(1)
+    G_xreal_phi_loeps.SetMarkerColor(1)
+    multiDict["G_xreal_phi_{}".format(k+1)].Add(G_xreal_phi_loeps)
 
+    G_xreal_phi_hieps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['xreal'].tolist())[i])
+            G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dxreal'].tolist())[i])
+            j+=1
+    G_xreal_phi_hieps.SetMarkerStyle(21)
+    G_xreal_phi_hieps.SetMarkerSize(1)
+    G_xreal_phi_hieps.SetMarkerColor(2)
+    multiDict["G_xreal_phi_{}".format(k+1)].Add(G_xreal_phi_hieps)    
+    
+    C_xreal_phi.cd(k+1)
+    
+    multiDict["G_xreal_phi_{}".format(k+1)].Draw('AP')
+    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; xreal".format(t_bin_centers[k]))
+    
+    multiDict["G_xreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
+    multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
+    multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    
+l_xreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
+l_xreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")
+l_xreal_phi.Draw()
 C_xreal_phi.Print(outputpdf)
 
 C_xmod_phi = TCanvas()
 C_xmod_phi.SetGrid()
+C_xmod_phi.Divide(1,NumtBins)
+l_xmod_phi = TLegend(0.115,0.35,0.33,0.5)
 
-G_xmod_phi = TGraph()
+multiDict = {}
+for k in range(NumtBins):
 
-l_xmod_phi = TLegend(0.8,0.8,0.95,0.95)
-
-G_xmod_phi.SetTitle("eps = %s ; #phi; x_mod" % LOEPS)
-
-for i in range(len(file_df_dict['unsep_file_loeps']['x_mod'].tolist())):
-    G_xmod_phi.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
-    l_xmod_phi.AddEntry(G_xmod_phi, "t = {:.4f}".format(np.array(file_df_dict['unsep_file_loeps']['tm'].tolist())[i]))
-    G_xmod_phi.SetMarkerColor(i)
-
-G_xmod_phi.SetMarkerStyle(21)
-G_xmod_phi.SetMarkerSize(1)
+    multiDict["G_xmod_phi_{}".format(k+1)] = TMultiGraph()
     
-G_xmod_phi.Draw('AP')
-l_xmod_phi.Draw()
+    G_xmod_phi_loeps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['xmod'].tolist())[i])
+            G_xmod_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['aver_loeps']['dxmod'].tolist())[i])
+            j+=1
+    G_xmod_phi_loeps.SetMarkerStyle(21)
+    G_xmod_phi_loeps.SetMarkerSize(1)
+    G_xmod_phi_loeps.SetMarkerColor(1)
+    multiDict["G_xmod_phi_{}".format(k+1)].Add(G_xmod_phi_loeps)
 
+    G_xmod_phi_hieps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
+            G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['xmod'].tolist())[i])
+            G_xmod_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dxmod'].tolist())[i])
+            j+=1
+    G_xmod_phi_hieps.SetMarkerStyle(21)
+    G_xmod_phi_hieps.SetMarkerSize(1)
+    G_xmod_phi_hieps.SetMarkerColor(2)
+    multiDict["G_xmod_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)    
+    
+    C_xmod_phi.cd(k+1)
+    
+    multiDict["G_xmod_phi_{}".format(k+1)].Draw('AP')
+    multiDict["G_xmod_phi_{}".format(k+1)].SetTitle("t = {} ; #phi; xmod".format(t_bin_centers[k]))
+    
+    multiDict["G_xmod_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
+    multiDict["G_xmod_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
+    multiDict["G_xmod_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    
+l_xmod_phi.AddEntry(G_xmod_phi_loeps,"loeps")
+l_xmod_phi.AddEntry(G_xmod_phi_hieps,"hieps")
+l_xmod_phi.Draw()
 C_xmod_phi.Print(outputpdf)
 
 C_sigl_t = TCanvas()
