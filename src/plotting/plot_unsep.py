@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-28 14:37:03 trottar"
+# Time-stamp: "2023-09-28 14:44:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -450,7 +450,7 @@ G_W_phibin_hieps.SetMarkerColor(2)
 multiDict["G_W_phibin"].Add(G_W_phibin_hieps)
 
 multiDict["G_W_phibin"].Draw('AP')
-multiDict["G_W_phibin"].SetTitle(";#phi; Q2")
+multiDict["G_W_phibin"].SetTitle(";#phi; W")
 
 multiDict["G_W_phibin"].GetYaxis().SetTitleOffset(1.5)
 multiDict["G_W_phibin"].GetXaxis().SetTitleOffset(1.5)

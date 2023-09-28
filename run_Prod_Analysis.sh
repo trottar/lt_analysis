@@ -88,7 +88,7 @@ else
 fi
 
 NumtBins=3
-NumPhiBins=8
+NumPhiBins=9
 
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity
