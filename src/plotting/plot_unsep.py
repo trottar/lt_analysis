@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-28 14:30:34 trottar"
+# Time-stamp: "2023-09-28 14:37:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -498,7 +498,7 @@ for k in range(NumtBins):
     C_xreal_thcm.cd(k+1)
     
     multiDict["G_xreal_thcm_{}".format(k+1)].Draw('AP')
-    multiDict["G_xmod_thcm_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
+    multiDict["G_xreal_thcm_{}".format(k+1)].SetTitle("t = {} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
     
     multiDict["G_xreal_thcm_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_thcm_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
