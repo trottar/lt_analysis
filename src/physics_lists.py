@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 16:12:36 trottar"
+# Time-stamp: "2023-09-29 12:54:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -199,6 +199,46 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 else:
                     continue
 
+
+    ################################################################################################################################################
+    # TESTING
+    ################################################################################################################################################
+    
+    # Define thpq vector relative to middle setting
+    for phiset in phisetlist:
+        if phiset == "Right":
+            runNums = runNumRight
+            for i, run in enumerate(runNumRight.split(' ')):
+                runNum = run
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
+                if os.path.exists(pid_log):
+                    print("Run {}".format(run))
+                    print("E_{} = {}".format(phiset, EbeamValRight[i]))
+                    print("theta_{} = {}".format(phiset, pThetaValRight[i]))
+
+        if phiset == "Left":
+            runNums = runNumLeft
+            for i, run in enumerate(runNumLeft.split(' ')):
+                runNum = run
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
+                if os.path.exists(pid_log):
+                    print("Run {}".format(run))
+                    print("E_{} = {}".format(phiset, EbeamValLeft[i]))
+                    print("theta_{} = {}".format(phiset, pThetaValLeft[i]))
+
+        if phiset == "Center":
+            runNums = runNumCenter
+            for i, run in enumerate(runNumCenter.split(' ')):
+                runNum = run
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
+                if os.path.exists(pid_log):
+                    print("Run {}".format(run))
+                    print("E_{} = {}".format(phiset, EbeamValCenter[i]))
+                    print("theta_{} = {}".format(phiset, pThetaValCenter[i]))
+                    
+    ################################################################################################################################################
+    # TESTING
+    ################################################################################################################################################                
     ################################################################################################################################################
 
     f_list_settings = '{}/src/{}/beam/Eb_KLT.dat'.format(LTANAPATH, ParticleType)

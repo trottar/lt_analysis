@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-28 15:58:02 trottar"
+# Time-stamp: "2023-09-29 12:16:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -558,24 +558,22 @@ for k in range(NumtBins):
 
     multiDict["G_xmod_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_xmod_phi_loeps = TGraphErrors()
+    G_xmod_phi_loeps = TGraph()
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
-            G_xmod_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
             j+=1
     G_xmod_phi_loeps.SetMarkerStyle(21)
     G_xmod_phi_loeps.SetMarkerSize(1)
     G_xmod_phi_loeps.SetMarkerColor(1)
     multiDict["G_xmod_phi_{}".format(k+1)].Add(G_xmod_phi_loeps)
 
-    G_xmod_phi_hieps = TGraphErrors()
+    G_xmod_phi_hieps = TGraph()
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
-            G_xmod_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
             j+=1
     G_xmod_phi_hieps.SetMarkerStyle(21)
     G_xmod_phi_hieps.SetMarkerSize(1)
