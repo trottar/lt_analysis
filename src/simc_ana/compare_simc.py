@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 14:58:36 trottar"
+# Time-stamp: "2023-09-29 15:00:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -211,7 +211,7 @@ def compare_simc(hist, inpDict):
           H_hsxptar_SIMC.Fill(evt.hsxptar, evt.Weight)	
           H_hsyptar_SIMC.Fill(evt.hsyptar, evt.Weight)
 
-          # SIMC goes from 0 to 2pi but data -pi to pi, so matching data
+          # SIMC goes from 0 to 2pi, but data -pi to pi. So matching data with -pi
           H_ph_q_SIMC.Fill(evt.phipq-math.pi, evt.Weight)
           H_th_q_SIMC.Fill(evt.thetapq, evt.Weight)
 
