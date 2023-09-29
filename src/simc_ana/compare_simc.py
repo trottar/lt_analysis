@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:47:16 trottar"
+# Time-stamp: "2023-09-29 14:02:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,6 +168,9 @@ def compare_simc(hist, inpDict):
     H_pmy_SIMC  = TH1D("H_pmy_SIMC","pmy ", 500, -10.0, 10.0)
     H_pmz_SIMC  = TH1D("H_pmz_SIMC","pmz", 500, -10.0, 10.0)
 
+    polar_phiq_vs_t_SIMC = TGraphPolar()
+    polar_phiq_vs_t_SIMC.SetName("polar_phiq_vs_t_SIMC")
+    
     ################################################################################################################################################
     # Fill data histograms for various trees called above
 
@@ -188,6 +191,8 @@ def compare_simc(hist, inpDict):
       #Fill SIMC events
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
+          polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (evt.ph_q)*(180/math.pi), evt.t, , evt.Weight)
+          
           H_Weight_SIMC.Fill(evt.Weight)
 
           H_ssxfp_SIMC.Fill(evt.ssxfp, evt.Weight)

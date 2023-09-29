@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 12:13:42 trottar"
+# Time-stamp: "2023-09-29 13:58:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -589,6 +589,25 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cqw.Print(outputpdf)
 
+    Cpht_simc = TCanvas()
+
+    # Create a list to store all polar plots
+    polar_plots = []
+
+    for i, hist in enumerate(histlist):
+        polar_plot = TGraphPolar(hist["polar_phiq_vs_t_SIMC"].GetN(), hist["polar_phiq_vs_t_SIMC"].GetX(), hist["polar_phiq_vs_t_SIMC"].GetY())
+        polar_plot.SetMarkerColor(i+1)
+        polar_plot.SetMarkerSize(0.5)
+        polar_plot.SetMarkerStyle(20)
+        polar_plots.append(polar_plot)  # Store the plot in the list
+        polar_plot.Draw("AP same")
+
+    # Set titles and axes for the last plot
+    polar_plots[-1].GetXaxis().SetName("#Phi")
+    polar_plots[-1].GetYaxis().SetName("-t")
+
+    Cpht_simc.Print(outputpdf)
+    
     Cpht = TCanvas()
 
     # Create a list to store all polar plots
