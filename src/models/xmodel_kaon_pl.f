@@ -58,8 +58,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       do while(.true.)
          read(56,*,end=9) p,e,i
          par(i)=p
-         write(6,101)par(i),e,i
-* 101     format(' xmodel: '2f11.4,i4) c Print statenment
+c     Print Statements         
+*         write(6,101)par(i),e,i 
+* 101     format(' xmodel: '2f11.4,i4)
 c         pause
       end do
       
