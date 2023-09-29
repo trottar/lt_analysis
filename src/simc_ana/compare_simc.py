@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 14:02:24 trottar"
+# Time-stamp: "2023-09-29 14:03:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,6 +265,7 @@ def compare_simc(hist, inpDict):
     histDict["H_pmy_SIMC"] =     H_pmy_SIMC
     histDict["H_pmz_SIMC"] =     H_pmz_SIMC
     histDict["H_W_SIMC"] =     H_W_SIMC
+    histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC    
           
     ################################################################################################################################################
 
