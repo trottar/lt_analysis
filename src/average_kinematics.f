@@ -128,16 +128,16 @@ c     Get low, high eps. and neg., pos. polarity data.
                   else
                      stop '*** aver: wrong pol ***'
                   endif
-                  WRITE(*,*) '------------'
-                  WRITE(*,*) 'Values read:'
-                  WRITE(*,*) '------------'
-                  WRITE(*,*) 'ipol = ', ipol
-                  WRITE(*,*) 'pol = ', pol
-                  WRITE(*,*) 'q2 = ', q2
-                  WRITE(*,*) 'eps = ', eps
-                  WRITE(*,*) 'th_pq = ', th_pq
-                  WRITE(*,*) 'tmn = ', tmn
-                  WRITE(*,*) 'tmx = ', tmx
+*                  WRITE(*,*) '------------'
+*                  WRITE(*,*) 'Values read:'
+*                  WRITE(*,*) '------------'
+*                  WRITE(*,*) 'ipol = ', ipol
+*                  WRITE(*,*) 'pol = ', pol
+*                  WRITE(*,*) 'q2 = ', q2
+*                  WRITE(*,*) 'eps = ', eps
+*                  WRITE(*,*) 'th_pq = ', th_pq
+*                  WRITE(*,*) 'tmn = ', tmn
+*                  WRITE(*,*) 'tmx = ', tmx
                   write(fn,'(a4,''/kindata/kindata.'',a2,''_'',i2.2,
      *                 ''_'',i2.2,''_'',SP,i5.4,S,''.dat'')') pid, pol,
      *                 nint(q2_set*10.), nint(eps_set(lh)*100.),
@@ -148,14 +148,14 @@ c                 pause
                   open(66,file=fn)
                   do it=1,nt
                      read(66,*) W,dW,Q2,dQ2,tt,dtt
-                     WRITE(*,*) 'it = ', it
-                     WRITE(*,*) 'nt = ', nt
-                     WRITE(*,*) 'W = ', W
-                     WRITE(*,*) 'dW = ', dW
-                     WRITE(*,*) 'Q2 = ', Q2
-                     WRITE(*,*) 'dQ2 = ', dQ2
-                     WRITE(*,*) 'tt = ', tt
-                     WRITE(*,*) 'dtt = ', dtt                     
+*                     WRITE(*,*) 'it = ', it
+*                     WRITE(*,*) 'nt = ', nt
+*                     WRITE(*,*) 'W = ', W
+*                     WRITE(*,*) 'dW = ', dW
+*                     WRITE(*,*) 'Q2 = ', Q2
+*                     WRITE(*,*) 'dQ2 = ', dQ2
+*                     WRITE(*,*) 'tt = ', tt
+*                     WRITE(*,*) 'dtt = ', dtt                     
                      if(dW.gt.0.) then
                         aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
                         eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
@@ -183,7 +183,7 @@ c                 pause
 
  9          continue
             close(55)
-            WRITE(*,*) '------------'
+*            WRITE(*,*) '------------'
             print*,'nset=',nset
 
          end do                 !lh=1,2
