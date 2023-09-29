@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:47:30 trottar"
+# Time-stamp: "2023-09-29 15:17:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,7 +256,7 @@ def rand_sub(phi_setting, inpDict):
     H_MM_DATA  = TH1D("H_MM_DATA","MM_{K}", 500, 0.0, 1.5)
     H_th_DATA  = TH1D("H_th_DATA","X' tar", 500, -0.1, 0.1)
     H_ph_DATA  = TH1D("H_ph_DATA","Y' tar", 500, -0.1, 0.1)
-    H_ph_q_DATA  = TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 500, -5.0, 5.0)
+    H_ph_q_DATA  = TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 500, 0.0, 2*math.pi)
     H_th_q_DATA  = TH1D("H_th_q_DATA","Theta Detected (th_xq)", 500, -0.2, 0.2)
     H_ph_recoil_DATA  = TH1D("H_ph_recoil_DATA","Phi Recoil (ph_bq)", 500, -10.0, 10.0)
     H_th_recoil_DATA  = TH1D("H_th_recoil_DATA","Theta Recoil (th_bq)", 500, -10.0, 10.0)
@@ -294,7 +294,7 @@ def rand_sub(phi_setting, inpDict):
     H_MM_DUMMY  = TH1D("H_MM_DUMMY","MM_{K}", 500, 0.0, 1.5)
     H_th_DUMMY  = TH1D("H_th_DUMMY","X' tar", 500, -0.1, 0.1)
     H_ph_DUMMY  = TH1D("H_ph_DUMMY","Y' tar", 500, -0.1, 0.1)
-    H_ph_q_DUMMY  = TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 500, -5.0, 5.0)
+    H_ph_q_DUMMY  = TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 500, 0.0, 2*math.pi)
     H_th_q_DUMMY  = TH1D("H_th_q_DUMMY","Theta Detected (th_xq)", 500, -0.2, 0.2)
     H_ph_recoil_DUMMY  = TH1D("H_ph_recoil_DUMMY","Phi Recoil (ph_bq)", 500, -10.0, 10.0)
     H_th_recoil_DUMMY  = TH1D("H_th_recoil_DUMMY","Theta Recoil (th_bq)", 500, -10.0, 10.0)
@@ -327,7 +327,7 @@ def rand_sub(phi_setting, inpDict):
     H_MM_RAND  = TH1D("H_MM_RAND","MM_{K}", 500, 0.0, 1.5)
     H_th_RAND  = TH1D("H_th_RAND","X' tar", 500, -0.1, 0.1)
     H_ph_RAND  = TH1D("H_ph_RAND","Y' tar", 500, -0.1, 0.1)
-    H_ph_q_RAND  = TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 500, -5.0, 5.0)
+    H_ph_q_RAND  = TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 500, 0.0, 2*math.pi)
     H_th_q_RAND  = TH1D("H_th_q_RAND","Theta Detected (th_xq)", 500, -0.2, 0.2)
     H_ph_recoil_RAND  = TH1D("H_ph_recoil_RAND","Phi Recoil (ph_bq)", 500, -10.0, 10.0)
     H_th_recoil_RAND  = TH1D("H_th_recoil_RAND","Theta Recoil (th_bq)", 500, -10.0, 10.0)
@@ -360,7 +360,7 @@ def rand_sub(phi_setting, inpDict):
     H_MM_DUMMY_RAND  = TH1D("H_MM_DUMMY_RAND","MM_{K}", 500, 0.0, 1.5)
     H_th_DUMMY_RAND  = TH1D("H_th_DUMMY_RAND","X' tar", 500, -0.1, 0.1)
     H_ph_DUMMY_RAND  = TH1D("H_ph_DUMMY_RAND","Y' tar", 500, -0.1, 0.1)
-    H_ph_q_DUMMY_RAND  = TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 500, -5.0, 5.0)
+    H_ph_q_DUMMY_RAND  = TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 500, 0.0, 2*math.pi)
     H_th_q_DUMMY_RAND  = TH1D("H_th_q_DUMMY_RAND","Theta Detected (th_xq)", 500, -0.2, 0.2)
     H_ph_recoil_DUMMY_RAND  = TH1D("H_ph_recoil_DUMMY_RAND","Phi Recoil (ph_bq)", 500, -10.0, 10.0)
     H_th_recoil_DUMMY_RAND  = TH1D("H_th_recoil_DUMMY_RAND","Theta Recoil (th_bq)", 500, -10.0, 10.0)
@@ -460,9 +460,8 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
-          phiq_vs_t_DATA.Fill(evt.ph_q, -evt.MandelT)
+          phiq_vs_t_DATA.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
-          # Must be outside diamond cuts to avoid weird overflow errors
           polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
           
           H_ct_DATA.Fill(evt.CTime_ROC1)
@@ -483,7 +482,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_DATA.Fill(evt.hsxptar)	
           H_hsyptar_DATA.Fill(evt.hsyptar)
 
-          H_ph_q_DATA.Fill(evt.ph_q)
+          H_ph_q_DATA.Fill(evt.ph_q+math.pi)
           H_th_q_DATA.Fill(evt.th_q)
           H_ph_recoil_DATA.Fill(evt.ph_recoil)
           H_th_recoil_DATA.Fill(evt.th_recoil)
@@ -566,9 +565,8 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY.Fill(evt.MM,evt.P_gtr_beta)
-          phiq_vs_t_DUMMY.Fill(evt.ph_q, -evt.MandelT)
+          phiq_vs_t_DUMMY.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
-          # Must be outside diamond cuts to avoid weird overflow errors
           polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)            
 
           H_ct_DUMMY.Fill(evt.CTime_ROC1)
@@ -589,7 +587,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_DUMMY.Fill(evt.hsxptar)	
           H_hsyptar_DUMMY.Fill(evt.hsyptar)
 
-          H_ph_q_DUMMY.Fill(evt.ph_q)
+          H_ph_q_DUMMY.Fill(evt.ph_q+math.pi)
           H_th_q_DUMMY.Fill(evt.th_q)
           H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
           H_th_recoil_DUMMY.Fill(evt.th_recoil)
@@ -665,7 +663,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_RAND.Fill(evt.MM,evt.P_gtr_beta)
-          phiq_vs_t_RAND.Fill(evt.ph_q, -evt.MandelT)
+          phiq_vs_t_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
 
           H_ct_RAND.Fill(evt.CTime_ROC1)          
@@ -755,7 +753,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY_RAND.Fill(evt.MM,evt.P_gtr_beta)
-          phiq_vs_t_DUMMY_RAND.Fill(evt.ph_q, -evt.MandelT)
+          phiq_vs_t_DUMMY_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
 
           H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)                   
