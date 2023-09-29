@@ -52,7 +52,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
       write(fn,10) pid,pol,nint(q2_set*10)
  10   format(a4,'/parameters/par.',a2,'_',i2.2,'.dat')
-      print*, 'param: fn=',fn
+*      print*, 'param: fn=',fn
 
       open(56,file=fn)
       do while(.true.)
