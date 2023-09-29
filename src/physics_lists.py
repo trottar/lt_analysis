@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 12:54:57 trottar"
+# Time-stamp: "2023-09-29 13:10:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,15 +206,17 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     
     # Define thpq vector relative to middle setting
     for phiset in phisetlist:
+        
         if phiset == "Right":
             runNums = runNumRight
             for i, run in enumerate(runNumRight.split(' ')):
                 runNum = run
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
                 if os.path.exists(pid_log):
-                    print("Run {}".format(run))
-                    print("E_{} = {}".format(phiset, EbeamValRight[i]))
-                    print("theta_{} = {}".format(phiset, pThetaValRight[i]))
+                    if EbeamValRight[0] != EbeamValRight[i] or pThetaValRight[0] != pThetaValRight[i]:
+                        print("Run {}".format(run))
+                        print("{} | E_{} = {}".format(EbeamValRight[0], phiset, EbeamValRight[i]))
+                        print("{} | theta_{} = {}".format(pThetaValRight[0], phiset, pThetaValRight[i]))
 
         if phiset == "Left":
             runNums = runNumLeft
@@ -222,9 +224,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 runNum = run
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
                 if os.path.exists(pid_log):
-                    print("Run {}".format(run))
-                    print("E_{} = {}".format(phiset, EbeamValLeft[i]))
-                    print("theta_{} = {}".format(phiset, pThetaValLeft[i]))
+                    if EbeamValLeft[0] != EbeamValLeft[i] or pThetaValLeft[0] != pThetaValLeft[i]:
+                        print("Run {}".format(run))
+                        print("{} | E_{} = {}".format(EbeamValLeft[0], phiset, EbeamValLeft[i]))
+                        print("{} | theta_{} = {}".format(pThetaValLeft[0], phiset, pThetaValLeft[i]))
 
         if phiset == "Center":
             runNums = runNumCenter
@@ -232,10 +235,11 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 runNum = run
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
                 if os.path.exists(pid_log):
-                    print("Run {}".format(run))
-                    print("E_{} = {}".format(phiset, EbeamValCenter[i]))
-                    print("theta_{} = {}".format(phiset, pThetaValCenter[i]))
-                    
+                    if EbeamValCenter[0] != EbeamValCenter[i] or pThetaValCenter[0] != pThetaValCenter[i]:
+                        print("Run {}".format(run))
+                        print("{} | E_{} = {}".format(EbeamValCenter[0], phiset, EbeamValCenter[i]))
+                        print("{} | theta_{} = {}".format(pThetaValCenter[0], phiset, pThetaValCenter[i]))
+                        
     ################################################################################################################################################
     # TESTING
     ################################################################################################################################################                
