@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 13:58:44 trottar"
+# Time-stamp: "2023-09-29 14:43:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -605,7 +605,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     # Set titles and axes for the last plot
     polar_plots[-1].GetXaxis().SetName("#Phi")
     polar_plots[-1].GetYaxis().SetName("-t")
-
+    polar_plots[-1].SetTitle("SIMC")
+    
     Cpht_simc.Print(outputpdf)
     
     Cpht = TCanvas()
@@ -624,7 +625,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     # Set titles and axes for the last plot
     polar_plots[-1].GetXaxis().SetName("#Phi")
     polar_plots[-1].GetYaxis().SetName("-t")
-
+    polar_plots[-1].SetTitle("DATA")
+    
     Cpht.Print(outputpdf)
 
     cut_summary_lst = ""
