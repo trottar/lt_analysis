@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 10:57:06 trottar"
+# Time-stamp: "2023-09-29 13:50:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -155,7 +155,8 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
                 if t_bins[j] <= tbin_center <= t_bins[j+1]:
                     if hist_simc.GetBinContent(tbin_index) > 0:
                         for phibin_index in range(1, phi_simc.GetNbinsX() + 1):
-                            phibin_center = (phi_simc.GetBinCenter(phibin_index)+math.pi)*(180 / math.pi)
+                            #phibin_center = (phi_simc.GetBinCenter(phibin_index)+math.pi)*(180 / math.pi)
+                            phibin_center = (phi_simc.GetBinCenter(phibin_index))*(180 / math.pi)
                             if phi_bins[k] <= phibin_center <= phi_bins[k+1]:
                                 if hist_simc.GetBinContent(phibin_index) > 0:
                                     #print("Checking if t: {} <= {} <= {}".format(t_bins[j], tbin_center, t_bins[j+1]))
