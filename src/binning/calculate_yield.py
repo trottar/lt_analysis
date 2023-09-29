@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 15:18:06 trottar"
+# Time-stamp: "2023-09-29 15:39:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,7 +165,7 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
                                     tmp_t_simc[0].append(t_simc.GetBinCenter(tbin_index))
                                     tmp_t_simc[1].append(t_simc.GetBinContent(tbin_index))
                                     tmp_phi_simc[0].append(phi_simc.GetBinCenter(phibin_index))
-                                    tmp_phi_simc[1].append(phi_simc.GetBinContent(phibin_index))                                    
+                                    tmp_phi_simc[1].append(phi_simc.GetBinContent(phibin_index))
                                     tmp_hist_simc[0].append(hist_simc.GetBinCenter(phibin_index))
                                     tmp_hist_simc[1].append(hist_simc.GetBinContent(phibin_index))
             binned_t_simc.append(tmp_t_simc)

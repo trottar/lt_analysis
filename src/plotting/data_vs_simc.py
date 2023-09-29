@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 14:43:15 trottar"
+# Time-stamp: "2023-09-29 15:42:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -431,7 +431,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     binned_phi_tmp = []
     for val in phi_bins:
-        binned_phi_tmp.append(((float(val)/180)-1)*math.pi)
+        binned_phi_tmp.append(((float(val)/180))*math.pi)
     phiBin_line = TLine()
     for i,b in enumerate(binned_phi_tmp):
         b = float(b)
