@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 13:47:23 trottar"
+# Time-stamp: "2023-09-29 14:16:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,6 +167,9 @@ def compare_simc(rootFileSimc, hist, inpDict):
     H_pmy_SIMC  = TH1D("H_pmy_SIMC","pmy ", 500, -10.0, 10.0)
     H_pmz_SIMC  = TH1D("H_pmz_SIMC","pmz", 500, -10.0, 10.0)
 
+    polar_phiq_vs_t_SIMC = TGraphPolar()
+    polar_phiq_vs_t_SIMC.SetName("polar_phiq_vs_t_SIMC")
+    
     ################################################################################################################################################
     # Fill data histograms for various trees called above
 
@@ -187,6 +190,8 @@ def compare_simc(rootFileSimc, hist, inpDict):
       #Fill SIMC events
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
+          polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (evt.phipq)*(180/math.pi), -evt.t)
+          
           H_Weight_SIMC.Fill(evt.iter_weight)
 
           H_ssxfp_SIMC.Fill(evt.ssxfp, evt.iter_weight)
@@ -259,7 +264,8 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["H_pmy_SIMC"] =     H_pmy_SIMC
     histDict["H_pmz_SIMC"] =     H_pmz_SIMC
     histDict["H_W_SIMC"] =     H_W_SIMC
-          
+    histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC
+    
     ################################################################################################################################################
 
     #################
