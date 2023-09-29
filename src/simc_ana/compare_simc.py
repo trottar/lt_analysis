@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 14:55:30 trottar"
+# Time-stamp: "2023-09-29 14:58:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,8 +158,7 @@ def compare_simc(hist, inpDict):
     H_MM_SIMC  = TH1D("H_MM_SIMC","MM_{K}", 500, 0.0, 1.5)
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 500, -0.1, 0.1)
     H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 500, -0.1, 0.1)
-    # SIMC goes from 0 to 2pi so no need for +pi
-    H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 500, 0.0, 5.0)
+    H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 500, -5.0, 5.0)
     H_th_q_SIMC  = TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 500, -0.2, 0.2)
     H_ph_recoil_SIMC  = TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 500, -10.0, 10.0)
     H_th_recoil_SIMC  = TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 500, -10.0, 10.0)
@@ -192,6 +191,7 @@ def compare_simc(hist, inpDict):
       #Fill SIMC events
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
+          # SIMC goes from 0 to 2pi so no need for +pi
           polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (evt.phipq)*(180/math.pi), -evt.t)
           
           H_Weight_SIMC.Fill(evt.Weight)
@@ -211,7 +211,8 @@ def compare_simc(hist, inpDict):
           H_hsxptar_SIMC.Fill(evt.hsxptar, evt.Weight)	
           H_hsyptar_SIMC.Fill(evt.hsyptar, evt.Weight)
 
-          H_ph_q_SIMC.Fill(evt.phipq, evt.Weight)
+          # SIMC goes from 0 to 2pi but data -pi to pi, so matching data
+          H_ph_q_SIMC.Fill(evt.phipq-math.pi, evt.Weight)
           H_th_q_SIMC.Fill(evt.thetapq, evt.Weight)
 
           H_pmiss_SIMC.Fill(evt.Pm, evt.Weight)	
