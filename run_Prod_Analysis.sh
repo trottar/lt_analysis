@@ -39,7 +39,7 @@ while getopts 'hcip' flag; do
         echo "The following flags can be called for the heep analysis..."
 	echo "    Q2=arg1, W=arg2"
         echo "    -h, help"
-        echo "    -c, combine data for each phi setting"
+        echo "    -c, combine all runs for each setting"
 	echo "    -i, iterate SIMC to find proper weight"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
 	echo
