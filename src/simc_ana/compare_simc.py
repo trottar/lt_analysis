@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 14:07:21 trottar"
+# Time-stamp: "2023-09-29 14:08:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,8 +192,6 @@ def compare_simc(hist, inpDict):
       if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
           polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (evt.phipq)*(180/math.pi), evt.t)
-          # Set the weight for the point
-          polar_phiq_vs_t_SIMC.SetPointError(polar_phiq_vs_t_SIMC.GetN(), 0, 0, evt.Weight)
           
           H_Weight_SIMC.Fill(evt.Weight)
 
