@@ -94,16 +94,12 @@ NumPhiBins=9
 POL="+1" # All KaonLT is positive polarity
 # TMIN should not equal zero (unless calc_xsect.f is adapted)
 # Make sure 3 sig figs (no more)
-if [[ $Q2 = "2p1" ]]; then
-    TMIN=0.001
-    TMAX=0.600
-elif [[ $Q2 = "5p5" ]]; then
-    TMIN=0.001
-    TMAX=1.999
-else
-    TMIN=0.001
-    TMAX=0.600
-fi
+# Q2=2p1
+#TMIN=0.001
+#TMAX=0.600
+#Q2=5p5
+TMIN=0.001
+TMAX=1.999
 # Efficiency csv file
 #EffData="coin_production_Prod_efficiency_data_2022_12_05.csv"
 #EffData="coin_production_Prod_efficiency_data_2022_12_30.csv"
