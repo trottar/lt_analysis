@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-02 12:31:15 trottar"
+# Time-stamp: "2023-10-02 12:37:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,8 +99,7 @@ outfile.Close()
 
 with open(err_fout, 'r') as file:
     lines = file.readlines()
-
-    # Check if there are less than 3 lines
+    # Check if there are no errors then delete
     if len(lines) <= 2:
         # Remove the file
         os.remove(err_fout)
