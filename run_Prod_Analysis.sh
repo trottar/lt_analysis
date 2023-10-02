@@ -535,7 +535,7 @@ do
 		    echo "Combining right ${pid} data..."
 		    echo
 		    cd "${LTANAPATH}/src/setup"
-		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data""${TreeNames}" "${pid}_${OutDATAFilename}_Right" "${data_right[*]}" "${pid}" "${LTANAPATH}/log/${pid}_${OutDATAFilename}.err"
+		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDATAFilename}_Right" "${data_right[*]}" "${pid}" "${LTANAPATH}/log/${pid}_${OutDATAFilename}.err"
 		    echo
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDATAFilename}_Right.root" ]; then
 			for i in "${data_right[@]}"
@@ -562,7 +562,7 @@ do
 		    echo "Combining left ${pid} dummy..."
 		    echo
 		    cd "${LTANAPATH}/src/setup"
-		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data""${TreeNames}" "${pid}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${pid}" "${LTANAPATH}/log/${pid}_${OutDUMMYFilename}.err"
+		    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${pid}_${OutDUMMYFilename}_Left" "${dummy_left[*]}" "${pid}" "${LTANAPATH}/log/${pid}_${OutDUMMYFilename}.err"
 		    echo
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${OutDUMMYFilename}_Left.root" ]; then
 			for i in "${dummy_left[@]}"
