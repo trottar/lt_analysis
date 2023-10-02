@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-02 11:37:33 trottar"
+# Time-stamp: "2023-10-02 12:08:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,6 +31,10 @@ ltsep package import and pathing definitions
 from ltsep import Misc
 
 ###############################################################################################################################################
+
+# Overwrite error file if already exists
+with open(err_fout, 'w') as f:
+    f.write("Bad runs for {}...".format(output_file_name))
 
 def log_bad_runs(err_fout, bad_run):
     with open(err_fout, 'a') as f:
