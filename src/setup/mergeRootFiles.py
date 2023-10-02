@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-02 12:18:14 trottar"
+# Time-stamp: "2023-10-02 12:18:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,7 +101,7 @@ with open(err_fout, 'r') as file:
     lines = file.readlines()
 
     # Check if there are less than 3 lines
-    if len(lines) < 3:
+    if len(lines) <= 2:
         # Remove the file
         #os.remove(file_path)
         print("!!!!!!!!!!!!!!!!",len(lines))
