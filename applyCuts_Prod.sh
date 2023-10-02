@@ -493,9 +493,9 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing right data..."
 	echo
 	echo
-	echo "--------------------------------"
-	echo "Analysing right data run ${RUNNUM}..."
-	echo "--------------------------------"
+	echo "------------------------------------------------------"
+	echo "Analysing right data ${ParticleType} run ${RUNNUM}..."
+	echo "------------------------------------------------------"
 	echo
 	cd "${LTANAPATH}/src/setup"
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -508,9 +508,9 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing left data..."
 	echo
 	echo
-	echo "--------------------------------"
-	echo "Analysing left data run ${RUNNUM}..."
-	echo "--------------------------------"
+	echo "------------------------------------------------------"
+	echo "Analysing left data ${ParticleType} run ${RUNNUM}..."
+	echo "------------------------------------------------------"
 	echo
 	cd "${LTANAPATH}/src/setup"
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -522,9 +522,9 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing center data..."
 	echo
 	echo
-	echo "--------------------------------"
-	echo "Analysing center data run ${RUNNUM}..."
-	echo "--------------------------------"
+	echo "------------------------------------------------------"
+	echo "Analysing center data ${ParticleType} run ${RUNNUM}..."
+	echo "------------------------------------------------------"
 	echo
 	cd "${LTANAPATH}/src/setup"
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -546,9 +546,9 @@ else
 	    echo "Analysing right data..."
 	    echo
 	    echo
-	    echo "--------------------------------"
-	    echo "Analysing right data run ${RUNNUM}..."
-	    echo "--------------------------------"
+	    echo "------------------------------------------------------"
+	    echo "Analysing right data ${ParticleType} run ${RUNNUM}..."
+	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Right_Analysed_Prod_${i}_${RUNNUM}.log
@@ -561,9 +561,9 @@ else
 	    echo "Analysing left data..."
 	    echo
 	    echo
-	    echo "--------------------------------"
-	    echo "Analysing left data run ${RUNNUM}..."
-	    echo "--------------------------------"
+	    echo "------------------------------------------------------"
+	    echo "Analysing left data ${ParticleType} run ${RUNNUM}..."
+	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Left_Analysed_Prod_${i}_${RUNNUM}.log
@@ -575,9 +575,9 @@ else
 	    echo "Analysing center data..."
 	    echo
 	    echo
-	    echo "--------------------------------"
-	    echo "Analysing center data run ${RUNNUM}..."
-	    echo "--------------------------------"
+	    echo "------------------------------------------------------"
+	    echo "Analysing center data ${ParticleType} run ${RUNNUM}..."
+	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Center_Analysed_Prod_${i}_${RUNNUM}.log
