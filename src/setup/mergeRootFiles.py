@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-02 12:08:56 trottar"
+# Time-stamp: "2023-10-02 12:17:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -34,7 +34,7 @@ from ltsep import Misc
 
 # Overwrite error file if already exists
 with open(err_fout, 'w') as f:
-    f.write("Bad runs for {}...".format(output_file_name))
+    f.write("Bad runs for {}...\n\n".format(output_file_name))
 
 def log_bad_runs(err_fout, bad_run):
     with open(err_fout, 'a') as f:
@@ -96,4 +96,13 @@ for tree in input_tree_names.split():
     print("\n\tTree {} added to {}.root".format(tree,output_file_name))
     
 outfile.Close()
+
+with open(err_fout, 'r') as file:
+    lines = file.readlines()
+
+    # Check if there are less than 3 lines
+    if len(lines) < 3:
+        # Remove the file
+        #os.remove(file_path)
+        print("!!!!!!!!!!!!!!!!",lines)
 
