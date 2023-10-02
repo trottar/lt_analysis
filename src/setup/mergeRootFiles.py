@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-02 12:18:49 trottar"
+# Time-stamp: "2023-10-02 12:24:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,5 +104,5 @@ with open(err_fout, 'r') as file:
     if len(lines) <= 2:
         # Remove the file
         #os.remove(file_path)
-        print("!!!!!!!!!!!!!!!!",len(lines))
+        print("!!!!!!!!!!!!!!!!",lines)
 

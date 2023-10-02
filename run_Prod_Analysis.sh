@@ -516,7 +516,7 @@ do
 			    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 				cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			    else
-				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDUMMYFilename}.err"
+				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDUMMYFilename}_Right.err"
 				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			    fi
 			done	 
@@ -543,7 +543,7 @@ do
 			    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 				cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			    else
-				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDATAFilename}.err"
+				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDATAFilename}_Right.err"
 				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			    fi
 			done	 
@@ -570,7 +570,7 @@ do
 			    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 				cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			    else
-				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDUMMYFilename}.err"
+				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDUMMYFilename}_Left.err"
 				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			    fi
 			done	 
@@ -597,7 +597,7 @@ do
 			    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 				cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			    else
-				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDATAFilename}.err"
+				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDATAFilename}_Left.err"
 				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			    fi
 			done	 
@@ -624,7 +624,7 @@ do
 			    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 				cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			    else
-				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDUMMYFilename}.err"
+				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDUMMYFilename}_Center.err"
 				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			    fi
 			done	 
@@ -651,7 +651,7 @@ do
 			    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${pid}_${i}_-1_Raw_Data.root" ]; then
 				cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			    else
-				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDATAFilename}.err"
+				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${pid}_${OutDATAFilename}_Center.err"
 				echo "WARNING: ${pid}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			    fi
 			done	 
@@ -691,7 +691,7 @@ do
 			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			else
-			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}.err"
+			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Right.err"
 			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			fi
 		    done	 
@@ -718,7 +718,7 @@ do
 			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			else
-			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}.err"
+			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Right.err"
 			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			fi
 		    done	 
@@ -745,7 +745,7 @@ do
 			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			else
-			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}.err"
+			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Left.err"
 			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			fi
 		    done	 
@@ -772,7 +772,7 @@ do
 			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			else
-			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}.err"
+			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Left.err"
 			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			fi
 		    done	 
@@ -799,7 +799,7 @@ do
 			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			else
-			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}.err"
+			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Center.err"
 			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			fi
 		    done	 
@@ -826,7 +826,7 @@ do
 			if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			    cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 			else
-			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}.err"
+			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Center.err"
 			    echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 			fi
 		    done	 
