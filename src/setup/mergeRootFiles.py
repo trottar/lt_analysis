@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-02 11:36:54 trottar"
+# Time-stamp: "2023-10-02 11:37:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,7 +33,7 @@ from ltsep import Misc
 ###############################################################################################################################################
 
 def log_bad_runs(err_fout, bad_run):
-    with open(err_foutm 'a') as f:
+    with open(err_fout, 'a') as f:
         f.write(bad_run+'\n')
     
 
