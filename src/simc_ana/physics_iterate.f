@@ -19,6 +19,7 @@
 * photon-NUCLEON center of mass, not the photon-NUCLEUS!  The model gives
 * the cross section in the photon-nucleon center of mass frame.
 
+	real*8 mpipl, mkpl
 	parameter (mpipl=0.139570)
 	parameter (mkpl=0.493677)
 	

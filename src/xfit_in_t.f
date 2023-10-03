@@ -9,6 +9,7 @@ c Fit sigL in t
       character*3 q2set
       integer t1,t2
 
+      real mpipl, mkpl
       parameter (mpipl=0.139570)
       parameter (mkpl=0.493677)
       

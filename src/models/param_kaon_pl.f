@@ -2,6 +2,7 @@
 	implicit none
 	
 	real pi,mtar_gev
+	real mpipl, mkpl
 	parameter (pi=3.14159)
 	parameter (mtar_gev=0.93827231)
 	parameter (mpipl=0.139570)
