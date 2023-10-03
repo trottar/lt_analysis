@@ -8,6 +8,9 @@ c Fit sigL in t
       character*2 pol
       character*3 q2set
       integer t1,t2
+
+      parameter (mpipl=0.139570)
+      parameter (mkpl=0.493677)
       
       external fcn_sigL
       
@@ -345,7 +348,7 @@ c Fit sigT in t
       real weight(6)
       save weight
 
-c      f(t)=abs(t)/(abs(t)+0.139570**2)**2
+c      f(t)=abs(t)/(abs(t)+mkpl**2)**2
       g(Wi)=1./(Wi**2-(targ/1.D+3)**2)**2
 
 c      print*,'=== in FCN: npar=',npar,'   iflag=',iflag
@@ -808,7 +811,7 @@ c Fit sigTT
       real weight(6)
       save weight
       
-      f(t)=abs(t)/(abs(t)+0.139570**2)**2
+      f(t)=abs(t)/(abs(t)+mkpl**2)**2
       g(Wi)=1./(Wi**2-(targ/1.D+3)**2)**2
       
 c      print*,'=== in FCN: npar=',npar,'   iflag=',iflag

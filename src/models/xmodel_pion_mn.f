@@ -17,7 +17,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       real targ,mp,mn
       parameter (mp=.93827231)   !mp
       parameter (mn=.93956563)   !mn
-
+      parameter (mpipl=0.139570)
+      parameter (mkpl=0.493677)
+      
       real wfactor
       real thetacm
 
@@ -67,7 +69,7 @@ c         pause
 
 *     Model sigL, sigT, sigTT, sigLT.
 
-      f_tm=abs(tm)/(abs(tm)+0.139570**2)**2 ! pole factor
+      f_tm=abs(tm)/(abs(tm)+mpipl**2)**2 ! pole factor
 
       g_W=1./(W**2-targ**2)**2       ! W factor
 

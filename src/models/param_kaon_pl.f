@@ -4,6 +4,8 @@
 	real pi,mtar_gev
 	parameter (pi=3.14159)
 	parameter (mtar_gev=0.93827231)
+	parameter (mpipl=0.139570)
+	parameter (mkpl=0.493677)
 
 	real*8 q2_gev, t_gev, s, s_gev
 	real*8 tav, ftav, ft
@@ -121,7 +123,7 @@ c	print *, "p12 =", p12
 	
 	tav=(0.0735+0.028*log(q2_gev))*q2_gev
 	ftav=(abs(t_gev)-tav)/tav
-	ft=t_gev/(abs(t_gev)+0.139570**2)**2
+	ft=t_gev/(abs(t_gev)+mkpl**2)**2
 
 	sigl=(p1+p2*log(q2_gev))
      &       *exp((p3+p4*log(q2_gev))*(abs(t_gev)-0.2))

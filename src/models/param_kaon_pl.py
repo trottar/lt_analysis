@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-25 14:11:08 trottar"
+# Time-stamp: "2023-10-03 15:35:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,6 +17,8 @@ def iterWeight(arg_str):
     # Define constants
     pi = 3.14159
     mtar_gev = 0.93827231
+    mpipl=0.139570
+    mkpl=0.493677
 
     # Split and convert the input string into a list of floats
     args = list(map(float, arg_str.split()))
@@ -32,7 +34,7 @@ def iterWeight(arg_str):
     # Calculate tav, ftav, ft
     tav = (0.0735 + 0.028 * math.log(q2_gev)) * q2_gev
     ftav = (abs(t_gev) - tav) / tav
-    ft = abs(t_gev) / (abs(t_gev) + 0.139570**2)**2
+    ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2
 
     # Calculate sigl, sigt, siglt, sigtt, sig219, sig
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12 = params

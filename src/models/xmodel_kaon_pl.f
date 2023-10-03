@@ -20,7 +20,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       parameter (pi=3.14159)      
       parameter (mp=.93827231)   !mp
       parameter (mn=.93956563)   !mn
-
+      parameter (mpipl=0.139570)
+      parameter (mkpl=0.493677)
+      
       real wfactor
       real thetacm
 
@@ -72,7 +74,7 @@ c         pause
 * Revised for IT26, 12.11.09
       tav=(0.0735+0.028*log(q2_set))*q2_set
       f_tav=(abs(tm)-tav)/tav
-      f_tm=abs(tm)/(abs(tm)+0.139570**2)**2 ! pole factor
+      f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
       
       sigL=(par(1)+par(2)*log(q2))*exp((par(3)
      >     +par(4)*log(q2))*(abs(tm)-0.2))
