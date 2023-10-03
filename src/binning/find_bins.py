@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 16:01:02 trottar"
+# Time-stamp: "2023-10-03 11:56:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,7 +80,7 @@ def find_bins(histlist, inpDict):
     for i,hist in enumerate(histlist):
         
         t = flatten_hist(hist["H_t_DATA"])
-        phi_deg = [(phi + math.pi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
+        phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
         
         if hist["phi_setting"] == 'Right':
             H_t_Right = np.append(H_t_Right, t)
