@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 15:42:47 trottar"
+# Time-stamp: "2023-10-03 16:48:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -162,7 +162,9 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     c_pid.Print(outputpdf)
 
     ct = TCanvas()
-
+    
+    gPad.SetLogy()
+    
     for i,hist in enumerate(histlist):
         hist["H_ct_DATA"].SetLineColor(i+1)
         hist["H_ct_DATA"].Draw("same, E1")
@@ -529,6 +531,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cmmct.Divide(2,2)
 
+    gPad.SetLogy()
+    
     for i,hist in enumerate(histlist):
         Cmmct.cd(i+1)
 
