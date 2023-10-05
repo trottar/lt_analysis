@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-03 22:06:01 trottar"
+# Time-stamp: "2023-10-04 21:36:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,7 +265,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DATA  = TH1D("H_pmx_DATA","pmx", 500, -10.0, 10.0)
     H_pmy_DATA  = TH1D("H_pmy_DATA","pmy ", 500, -10.0, 10.0)
     H_pmz_DATA  = TH1D("H_pmz_DATA","pmz", 500, -10.0, 10.0)
-    H_ct_DATA = TH1D("H_ct_DATA", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -10, 10)
+    H_ct_DATA = TH1D("H_ct_DATA", "Electron-{} CTime".format(ParticleType.capitalize()), 500, 500, -50, 50)
     H_cal_etottracknorm_DATA = TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 500, 0.2, 1.8)
     H_cer_npeSum_DATA = TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 500, 0, 30)
     P_cal_etottracknorm_DATA = TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 500, 0, 1)
@@ -303,7 +303,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DUMMY  = TH1D("H_pmx_DUMMY","pmx", 500, -10.0, 10.0)
     H_pmy_DUMMY  = TH1D("H_pmy_DUMMY","pmy ", 500, -10.0, 10.0)
     H_pmz_DUMMY  = TH1D("H_pmz_DUMMY","pmz", 500, -10.0, 10.0)
-    H_ct_DUMMY = TH1D("H_ct_DUMMY", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -10, 10)
+    H_ct_DUMMY = TH1D("H_ct_DUMMY", "Electron-{} CTime".format(ParticleType.capitalize()), 500, 500, -50, 50)
 
     H_hsdelta_RAND  = TH1D("H_hsdelta_RAND","HMS Delta", 500, -20.0, 20.0)
     H_hsxptar_RAND  = TH1D("H_hsxptar_RAND","HMS xptar", 500, -0.1, 0.1)
@@ -336,7 +336,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_RAND  = TH1D("H_pmx_RAND","pmx", 500, -10.0, 10.0)
     H_pmy_RAND  = TH1D("H_pmy_RAND","pmy ", 500, -10.0, 10.0)
     H_pmz_RAND  = TH1D("H_pmz_RAND","pmz", 500, -10.0, 10.0)
-    H_ct_RAND = TH1D("H_ct_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -10, 10)
+    H_ct_RAND = TH1D("H_ct_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, 500, -50, 50)
 
     H_hsdelta_DUMMY_RAND  = TH1D("H_hsdelta_DUMMY_RAND","HMS Delta", 500, -20.0, 20.0)
     H_hsxptar_DUMMY_RAND  = TH1D("H_hsxptar_DUMMY_RAND","HMS xptar", 500, -0.1, 0.1)
@@ -369,12 +369,12 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DUMMY_RAND  = TH1D("H_pmx_DUMMY_RAND","pmx", 500, -10.0, 10.0)
     H_pmy_DUMMY_RAND  = TH1D("H_pmy_DUMMY_RAND","pmy ", 500, -10.0, 10.0)
     H_pmz_DUMMY_RAND  = TH1D("H_pmz_DUMMY_RAND","pmz", 500, -10.0, 10.0)
-    H_ct_DUMMY_RAND = TH1D("H_ct_DUMMY_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -10, 10)
+    H_ct_DUMMY_RAND = TH1D("H_ct_DUMMY_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, 500, -50, 50)
 
     ################################################################################################################################################
     # 2D histograms
 
-    MM_vs_CoinTime_DATA = TH2D("MM_vs_CoinTime_DATA","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -2, 2)
+    MM_vs_CoinTime_DATA = TH2D("MM_vs_CoinTime_DATA","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -50, 50)
     CoinTime_vs_beta_DATA = TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -2, 2, 500, 0, 2)
     MM_vs_beta_DATA = TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 500, 0, 2, 500, 0, 2)
     phiq_vs_t_DATA = TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
@@ -382,7 +382,7 @@ def rand_sub(phi_setting, inpDict):
     polar_phiq_vs_t_DATA.SetName("polar_phiq_vs_t_DATA")
     Q2_vs_W_DATA = TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 500, inpDict["Q2min"], inpDict["Q2max"], 500, inpDict["Wmin"], inpDict["Wmax"])
 
-    MM_vs_CoinTime_DUMMY = TH2D("MM_vs_CoinTime_DUMMY","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -2, 2)
+    MM_vs_CoinTime_DUMMY = TH2D("MM_vs_CoinTime_DUMMY","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -50, 50)
     CoinTime_vs_beta_DUMMY = TH2D("CoinTime_vs_beta_DUMMY", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -2, 2, 500, 0, 2)
     MM_vs_beta_DUMMY = TH2D("MM_vs_beta_DUMMY", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 500, 0, 2, 500, 0, 2)
     phiq_vs_t_DUMMY = TH2D("phiq_vs_t_DUMMY","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
@@ -390,14 +390,14 @@ def rand_sub(phi_setting, inpDict):
     polar_phiq_vs_t_DUMMY.SetName("polar_phiq_vs_t_DUMMY")
     Q2_vs_W_DUMMY = TH2D("Q2_vs_W_DUMMY", "Q^{2} vs W; Q^{2}; W", 500, inpDict["Q2min"], inpDict["Q2max"], 500, inpDict["Wmin"], inpDict["Wmax"])
 
-    MM_vs_CoinTime_RAND = TH2D("MM_vs_CoinTime_RAND","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -2, 2)
+    MM_vs_CoinTime_RAND = TH2D("MM_vs_CoinTime_RAND","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -50, 50)
     CoinTime_vs_beta_RAND = TH2D("CoinTime_vs_beta_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -2, 2, 500, 0, 2)
     MM_vs_beta_RAND = TH2D("MM_vs_beta_RAND", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 500, 0, 2, 500, 0, 2)
     phiq_vs_t_RAND = TH2D("phiq_vs_t_RAND","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
     Q2_vs_W_RAND = TH2D("Q2_vs_W_RAND", "Q^{2} vs W; Q^{2}; W", 500, inpDict["Q2min"], inpDict["Q2max"], 500, inpDict["Wmin"], inpDict["Wmax"])
 
 
-    MM_vs_CoinTime_DUMMY_RAND = TH2D("MM_vs_CoinTime_DUMMY_RAND","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -2, 2)
+    MM_vs_CoinTime_DUMMY_RAND = TH2D("MM_vs_CoinTime_DUMMY_RAND","Missing Mass vs CTime; MM; Coin_Time",500, 0, 2, 500, -50, 50)
     CoinTime_vs_beta_DUMMY_RAND = TH2D("CoinTime_vs_beta_DUMMY_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -2, 2, 500, 0, 2)
     MM_vs_beta_DUMMY_RAND = TH2D("MM_vs_beta_DUMMY_RAND", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 500, 0, 2, 500, 0, 2)
     phiq_vs_t_DUMMY_RAND = TH2D("phiq_vs_t_DUMMY_RAND","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
