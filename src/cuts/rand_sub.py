@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-04 21:36:57 trottar"
+# Time-stamp: "2023-10-04 21:39:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,7 +265,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DATA  = TH1D("H_pmx_DATA","pmx", 500, -10.0, 10.0)
     H_pmy_DATA  = TH1D("H_pmy_DATA","pmy ", 500, -10.0, 10.0)
     H_pmz_DATA  = TH1D("H_pmz_DATA","pmz", 500, -10.0, 10.0)
-    H_ct_DATA = TH1D("H_ct_DATA", "Electron-{} CTime".format(ParticleType.capitalize()), 500, 500, -50, 50)
+    H_ct_DATA = TH1D("H_ct_DATA", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -50, 50)
     H_cal_etottracknorm_DATA = TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 500, 0.2, 1.8)
     H_cer_npeSum_DATA = TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 500, 0, 30)
     P_cal_etottracknorm_DATA = TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 500, 0, 1)
@@ -303,7 +303,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DUMMY  = TH1D("H_pmx_DUMMY","pmx", 500, -10.0, 10.0)
     H_pmy_DUMMY  = TH1D("H_pmy_DUMMY","pmy ", 500, -10.0, 10.0)
     H_pmz_DUMMY  = TH1D("H_pmz_DUMMY","pmz", 500, -10.0, 10.0)
-    H_ct_DUMMY = TH1D("H_ct_DUMMY", "Electron-{} CTime".format(ParticleType.capitalize()), 500, 500, -50, 50)
+    H_ct_DUMMY = TH1D("H_ct_DUMMY", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -50, 50)
 
     H_hsdelta_RAND  = TH1D("H_hsdelta_RAND","HMS Delta", 500, -20.0, 20.0)
     H_hsxptar_RAND  = TH1D("H_hsxptar_RAND","HMS xptar", 500, -0.1, 0.1)
@@ -336,7 +336,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_RAND  = TH1D("H_pmx_RAND","pmx", 500, -10.0, 10.0)
     H_pmy_RAND  = TH1D("H_pmy_RAND","pmy ", 500, -10.0, 10.0)
     H_pmz_RAND  = TH1D("H_pmz_RAND","pmz", 500, -10.0, 10.0)
-    H_ct_RAND = TH1D("H_ct_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, 500, -50, 50)
+    H_ct_RAND = TH1D("H_ct_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -50, 50)
 
     H_hsdelta_DUMMY_RAND  = TH1D("H_hsdelta_DUMMY_RAND","HMS Delta", 500, -20.0, 20.0)
     H_hsxptar_DUMMY_RAND  = TH1D("H_hsxptar_DUMMY_RAND","HMS xptar", 500, -0.1, 0.1)
@@ -369,7 +369,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DUMMY_RAND  = TH1D("H_pmx_DUMMY_RAND","pmx", 500, -10.0, 10.0)
     H_pmy_DUMMY_RAND  = TH1D("H_pmy_DUMMY_RAND","pmy ", 500, -10.0, 10.0)
     H_pmz_DUMMY_RAND  = TH1D("H_pmz_DUMMY_RAND","pmz", 500, -10.0, 10.0)
-    H_ct_DUMMY_RAND = TH1D("H_ct_DUMMY_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, 500, -50, 50)
+    H_ct_DUMMY_RAND = TH1D("H_ct_DUMMY_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 500, -50, 50)
 
     ################################################################################################################################################
     # 2D histograms
