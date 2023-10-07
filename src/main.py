@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-07 16:07:38 trottar"
+# Time-stamp: "2023-10-07 16:09:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -205,7 +205,7 @@ WVal = float(W.replace("p","."))
 ##############
 # May need to adjust these for diamond plots to work
 # 2/7 seems to work for most Q2 of KaonLT 2018-19
-if Q2Val == 3.0 or Q2Val == 2.1:
+if Q2Val == 3.0:
     inpDict["Q2min"] = Q2Val - (3/7)*Q2Val
     inpDict["Q2max"] = Q2Val + (3/7)*Q2Val
     inpDict["Wmin"] = WVal - (3/7)*WVal
