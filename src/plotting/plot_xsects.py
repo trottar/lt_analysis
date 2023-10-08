@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 15:24:59 trottar"
+# Time-stamp: "2023-10-08 15:26:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,7 +153,8 @@ except FileNotFoundError:
 except IOError:
     print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
 
-t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2    
+#t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
+t_bin_centers = t_bins
 
 try:
     with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
