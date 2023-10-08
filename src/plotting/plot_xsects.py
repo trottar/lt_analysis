@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 16:06:15 trottar"
+# Time-stamp: "2023-10-08 16:12:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -322,7 +322,7 @@ for k in range(NumtBins):
     G_Q2_t.Add(G_Q2_t_hieps)    
     
     G_Q2_t.Draw('AP')
-    G_Q2_t.SetTitle("t = {:.2f} ; #phi; Q2".format(t_bin_centers[k]))
+    G_Q2_t.SetTitle("; t; Q2")
     
     G_Q2_t.GetYaxis().SetTitleOffset(1.5)
     G_Q2_t.GetXaxis().SetTitleOffset(1.5)
