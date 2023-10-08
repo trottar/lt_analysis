@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 12:16:58 trottar"
+# Time-stamp: "2023-10-08 13:12:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -289,6 +289,41 @@ l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
 l_ratio_phi.Draw()
 C_ratio_phi.Print(outputpdf + '(')
+
+C_Q2_t = TCanvas()
+C_Q2_t.SetGrid()
+l_Q2_t = TLegend(0.7, 0.6, 0.9, 0.9)
+
+multiDict = {}
+multiDict["G_Q2_t"] = TMultiGraph()
+
+G_Q2_t_loeps = TGraph()
+for i in range(NumtBins):
+    G_Q2_t_loeps.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i], t_bin_centers[np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i]])
+G_Q2_t_loeps.SetMarkerStyle(21)
+G_Q2_t_loeps.SetMarkerSize(1)
+G_Q2_t_loeps.SetMarkerColor(1)
+multiDict["G_Q2_t"].Add(G_Q2_t_loeps)
+
+G_Q2_t_hieps = TGraph()
+for i in range(NumtBins):
+    G_Q2_t_hieps.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i], t_bin_centers[np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i]])
+G_Q2_t_hieps.SetMarkerStyle(21)
+G_Q2_t_hieps.SetMarkerSize(1)
+G_Q2_t_hieps.SetMarkerColor(2)
+multiDict["G_Q2_t"].Add(G_Q2_t_hieps)    
+
+multiDict["G_Q2_t"].Draw('AP')
+multiDict["G_Q2_t"].SetTitle("; #phi; Q2".format(t_bin_centers[k]))
+
+multiDict["G_Q2_t"].GetYaxis().SetTitleOffset(1.5)
+multiDict["G_Q2_t"].GetXaxis().SetTitleOffset(1.5)
+multiDict["G_Q2_t"].GetXaxis().SetLabelSize(0.04)
+    
+l_Q2_t.AddEntry(G_Q2_t_loeps,"loeps")
+l_Q2_t.AddEntry(G_Q2_t_hieps,"hieps")
+l_Q2_t.Draw()
+C_Q2_t.Print(outputpdf)
 
 C_Q2_phi = TCanvas()
 C_Q2_phi.SetGrid()
