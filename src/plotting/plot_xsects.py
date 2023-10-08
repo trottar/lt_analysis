@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 13:35:18 trottar"
+# Time-stamp: "2023-10-08 13:43:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -294,31 +294,24 @@ C_Q2_t = TCanvas()
 C_Q2_t.SetGrid()
 l_Q2_t = TLegend(0.7, 0.6, 0.9, 0.9)
 
-multiDict = {}
-multiDict["G_Q2_t"] = TMultiGraph()
-
 G_Q2_t_loeps = TGraph()
 for i in range(NumtBins):
-    G_Q2_t_loeps.SetPoint(i+1, np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i])
-G_Q2_t_loeps.SetMarkerStyle(21)
-G_Q2_t_loeps.SetMarkerSize(1)
-G_Q2_t_loeps.SetMarkerColor(1)
-multiDict["G_Q2_t"].Add(G_Q2_t_loeps)
+    G_Q2_t_loeps.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i])
+    G_Q2_t_loeps.SetMarkerStyle(21)
+    G_Q2_t_loeps.SetMarkerSize(1)
+    G_Q2_t_loeps.SetMarkerColor(1)
 
 G_Q2_t_hieps = TGraph()
 for i in range(NumtBins):
     G_Q2_t_hieps.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['tm'].tolist())[i])
-G_Q2_t_hieps.SetMarkerStyle(21)
-G_Q2_t_hieps.SetMarkerSize(1)
-G_Q2_t_hieps.SetMarkerColor(2)
-multiDict["G_Q2_t"].Add(G_Q2_t_hieps)    
+    G_Q2_t_hieps.SetMarkerStyle(21)
+    G_Q2_t_hieps.SetMarkerSize(1)
+    G_Q2_t_hieps.SetMarkerColor(2)
 
-multiDict["G_Q2_t"].Draw('AP')
-multiDict["G_Q2_t"].SetTitle("; Q2; t".format(t_bin_centers[k]))
-
-multiDict["G_Q2_t"].GetYaxis().SetTitleOffset(1.5)
-multiDict["G_Q2_t"].GetXaxis().SetTitleOffset(1.5)
-multiDict["G_Q2_t"].GetXaxis().SetLabelSize(0.04)
+G_Q2_t_loeps.SetTitle("; Q2; t")
+    
+G_Q2_t_loeps.Draw('AP')
+G_Q2_t_hieps.Draw('AP, same')
     
 l_Q2_t.AddEntry(G_Q2_t_loeps,"loeps")
 l_Q2_t.AddEntry(G_Q2_t_hieps,"hieps")
