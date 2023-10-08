@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 15:26:17 trottar"
+# Time-stamp: "2023-10-08 16:06:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -295,11 +295,10 @@ C_Q2_t = TCanvas()
 C_Q2_t.SetGrid()
 l_Q2_t = TLegend(0.7, 0.6, 0.9, 0.9)
 
-multiDict = {}
+
+G_Q2_t = TMultiGraph()
 for k in range(NumtBins):
 
-    multiDict["G_Q2_t_{}".format(k+1)] = TMultiGraph()
-    
     G_Q2_t_loeps = TGraph()
     j=0
     for i in range(NumtBins*NumPhiBins):
@@ -309,7 +308,7 @@ for k in range(NumtBins):
     G_Q2_t_loeps.SetMarkerStyle(21)
     G_Q2_t_loeps.SetMarkerSize(1)
     G_Q2_t_loeps.SetMarkerColor(1)
-    multiDict["G_Q2_t_{}".format(k+1)].Add(G_Q2_t_loeps)
+    G_Q2_t.Add(G_Q2_t_loeps)
 
     G_Q2_t_hieps = TGraph()
     j=0
@@ -320,14 +319,14 @@ for k in range(NumtBins):
     G_Q2_t_hieps.SetMarkerStyle(21)
     G_Q2_t_hieps.SetMarkerSize(1)
     G_Q2_t_hieps.SetMarkerColor(2)
-    multiDict["G_Q2_t_{}".format(k+1)].Add(G_Q2_t_hieps)    
+    G_Q2_t.Add(G_Q2_t_hieps)    
     
-    multiDict["G_Q2_t_{}".format(k+1)].Draw('AP')
-    multiDict["G_Q2_t_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Q2".format(t_bin_centers[k]))
+    G_Q2_t.Draw('AP')
+    G_Q2_t.SetTitle("t = {:.2f} ; #phi; Q2".format(t_bin_centers[k]))
     
-    multiDict["G_Q2_t_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
-    multiDict["G_Q2_t_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
-    multiDict["G_Q2_t_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    G_Q2_t.GetYaxis().SetTitleOffset(1.5)
+    G_Q2_t.GetXaxis().SetTitleOffset(1.5)
+    G_Q2_t.GetXaxis().SetLabelSize(0.04)
     
 l_Q2_t.AddEntry(G_Q2_t_loeps,"loeps")
 l_Q2_t.AddEntry(G_Q2_t_hieps,"hieps")
