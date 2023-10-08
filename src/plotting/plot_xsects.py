@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 15:17:40 trottar"
+# Time-stamp: "2023-10-08 15:24:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -303,7 +303,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_Q2_t_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
+            G_Q2_t_loeps.SetPoint(j, t_bin_centers[np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
             j+=1
     G_Q2_t_loeps.SetMarkerStyle(21)
     G_Q2_t_loeps.SetMarkerSize(1)
@@ -314,7 +314,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_Q2_t_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
+            G_Q2_t_hieps.SetPoint(j, t_bin_centers[np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
     G_Q2_t_hieps.SetMarkerStyle(21)
     G_Q2_t_hieps.SetMarkerSize(1)
