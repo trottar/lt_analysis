@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 13:43:41 trottar"
+# Time-stamp: "2023-10-08 13:48:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -311,7 +311,7 @@ for i in range(NumtBins):
 G_Q2_t_loeps.SetTitle("; Q2; t")
     
 G_Q2_t_loeps.Draw('AP')
-G_Q2_t_hieps.Draw('AP, same')
+G_Q2_t_hieps.Draw('AP')
     
 l_Q2_t.AddEntry(G_Q2_t_loeps,"loeps")
 l_Q2_t.AddEntry(G_Q2_t_hieps,"hieps")
