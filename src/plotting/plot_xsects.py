@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 13:12:58 trottar"
+# Time-stamp: "2023-10-08 13:18:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -298,16 +298,16 @@ multiDict = {}
 multiDict["G_Q2_t"] = TMultiGraph()
 
 G_Q2_t_loeps = TGraph()
-for i in range(NumtBins):
-    G_Q2_t_loeps.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i], t_bin_centers[np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i]])
+for i in range(0,NumtBins-1):
+    G_Q2_t_loeps.SetPoint(i+1, np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i], t_bin_centers[np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i]])
 G_Q2_t_loeps.SetMarkerStyle(21)
 G_Q2_t_loeps.SetMarkerSize(1)
 G_Q2_t_loeps.SetMarkerColor(1)
 multiDict["G_Q2_t"].Add(G_Q2_t_loeps)
 
 G_Q2_t_hieps = TGraph()
-for i in range(NumtBins):
-    G_Q2_t_hieps.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i], t_bin_centers[np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i]])
+for i in range(0,NumtBins-1):
+    G_Q2_t_hieps.SetPoint(i+1, np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i], t_bin_centers[np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i]])
 G_Q2_t_hieps.SetMarkerStyle(21)
 G_Q2_t_hieps.SetMarkerSize(1)
 G_Q2_t_hieps.SetMarkerColor(2)
