@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 13:27:50 trottar"
+# Time-stamp: "2023-10-08 13:35:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,8 +153,8 @@ except FileNotFoundError:
 except IOError:
     print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
 
-#t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2    
-t_bin_centers = t_bins
+t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2    
+
 try:
     with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
         # Read all lines from the file into a list
@@ -299,7 +299,7 @@ multiDict["G_Q2_t"] = TMultiGraph()
 
 G_Q2_t_loeps = TGraph()
 for i in range(NumtBins):
-    G_Q2_t_loeps.SetPoint(i+1, np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i], t_bin_centers[np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i]])
+    G_Q2_t_loeps.SetPoint(i+1, np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['tm'].tolist())[i])
 G_Q2_t_loeps.SetMarkerStyle(21)
 G_Q2_t_loeps.SetMarkerSize(1)
 G_Q2_t_loeps.SetMarkerColor(1)
@@ -307,14 +307,14 @@ multiDict["G_Q2_t"].Add(G_Q2_t_loeps)
 
 G_Q2_t_hieps = TGraph()
 for i in range(NumtBins):
-    G_Q2_t_hieps.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i], t_bin_centers[np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i]])
+    G_Q2_t_hieps.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['tm'].tolist())[i])
 G_Q2_t_hieps.SetMarkerStyle(21)
 G_Q2_t_hieps.SetMarkerSize(1)
 G_Q2_t_hieps.SetMarkerColor(2)
 multiDict["G_Q2_t"].Add(G_Q2_t_hieps)    
 
 multiDict["G_Q2_t"].Draw('AP')
-multiDict["G_Q2_t"].SetTitle("; #phi; Q2".format(t_bin_centers[k]))
+multiDict["G_Q2_t"].SetTitle("; Q2; t".format(t_bin_centers[k]))
 
 multiDict["G_Q2_t"].GetYaxis().SetTitleOffset(1.5)
 multiDict["G_Q2_t"].GetXaxis().SetTitleOffset(1.5)
