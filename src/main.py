@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-07 16:09:56 trottar"
+# Time-stamp: "2023-10-11 15:17:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -511,6 +511,9 @@ output_file_lst.append(foutjson)
 
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
+
+# Copy initial parameterization to specific particle type directory
+shutil.copy('{}/src/{}/simc_ana/par_pl'.format(LTANAPATH), '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
