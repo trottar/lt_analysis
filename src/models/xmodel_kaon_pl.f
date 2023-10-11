@@ -73,7 +73,9 @@ c         pause
 *     Model sigL, sigT, sigTT, sigLT.
 
 * Revised for IT26, 12.11.09
-      tav=(0.0735+0.028*log(q2_set))*q2_set
+*      tav=(0.0735+0.028*log(q2_set))*q2_set
+*       RLT (10/8/2023): Testing new tav parameterization
+      tav=(0.1112 + 0.0066*log(q2_set))*q2_set      
       f_tav=(abs(tm)-tav)/tav
       f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
       

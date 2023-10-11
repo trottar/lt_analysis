@@ -122,7 +122,9 @@ c	print *, "p12 =", p12
 	s = w_sim**2
 	s_gev=s/1.d6
 	
-	tav=(0.0735+0.028*log(q2_gev))*q2_gev
+*	tav=(0.0735+0.028*log(q2_gev))*q2_gev
+*       RLT (10/8/2023): Testing new tav parameterization
+	tav=(0.1112 + 0.0066*log(q2_set))*q2_set	
 	ftav=(abs(t_gev)-tav)/tav
 	ft=t_gev/(abs(t_gev)+mkpl**2)**2
 

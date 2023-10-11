@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-03 15:35:28 trottar"
+# Time-stamp: "2023-10-11 14:57:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,7 +32,9 @@ def iterWeight(arg_str):
     s_gev = s # Already GeV
 
     # Calculate tav, ftav, ft
-    tav = (0.0735 + 0.028 * math.log(q2_gev)) * q2_gev
+    #tav = (0.0735 + 0.028 * math.log(q2_gev)) * q2_gev
+    # RLT (10/8/2023): Testing new tav parameterization
+    tav=(0.1112 + 0.0066*math.log(q2_set))*q2_set
     ftav = (abs(t_gev) - tav) / tav
     ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2
 
