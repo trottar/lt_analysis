@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-12 13:59:59 trottar"
+# Time-stamp: "2023-10-12 14:10:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -681,9 +681,9 @@ for k in range(NumtBins):
             G_sigl_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_hieps']['sigL'].tolist())[i])
             G_sigl_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file_hieps']['dsigL'].tolist())[i])
             j+=1
-    G_sigl_phi_hieps.SetMarkerColor(1)
+    G_sigl_phi_hieps.SetMarkerColor(2)
     G_sigl_phi_hieps.SetMarkerStyle(21)
-    G_sigl_phi_hieps.SetMarkerSize(2)
+    G_sigl_phi_hieps.SetMarkerSize(1)
     multiDict["G_sigl_phi_{}".format(k+1)].Add(G_sigl_phi_hieps)    
 
     C_sigl_phi.cd(k+1)
@@ -729,9 +729,9 @@ for k in range(NumtBins):
             G_sigt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_hieps']['sigT'].tolist())[i])
             G_sigt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file_hieps']['dsigT'].tolist())[i])
             j+=1
-    G_sigt_phi_hieps.SetMarkerColor(1)
+    G_sigt_phi_hieps.SetMarkerColor(2)
     G_sigt_phi_hieps.SetMarkerStyle(21)
-    G_sigt_phi_hieps.SetMarkerSize(2)
+    G_sigt_phi_hieps.SetMarkerSize(1)
     multiDict["G_sigt_phi_{}".format(k+1)].Add(G_sigt_phi_hieps)    
 
     C_sigt_phi.cd(k+1)
@@ -788,9 +788,9 @@ for k in range(NumtBins):
             G_siglt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_hieps']['sigLT'].tolist())[i])
             G_siglt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file_hieps']['dsigLT'].tolist())[i])
             j+=1
-    G_siglt_phi_hieps.SetMarkerColor(1)
+    G_siglt_phi_hieps.SetMarkerColor(2)
     G_siglt_phi_hieps.SetMarkerStyle(21)
-    G_siglt_phi_hieps.SetMarkerSize(2)
+    G_siglt_phi_hieps.SetMarkerSize(1)
     multiDict["G_siglt_phi_{}".format(k+1)].Add(G_siglt_phi_hieps)    
 
     C_siglt_phi.cd(k+1)
@@ -847,9 +847,9 @@ for k in range(NumtBins):
             G_sigtt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_hieps']['sigTT'].tolist())[i])
             G_sigtt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file_hieps']['dsigTT'].tolist())[i])
             j+=1
-    G_sigtt_phi_hieps.SetMarkerColor(1)
+    G_sigtt_phi_hieps.SetMarkerColor(2)
     G_sigtt_phi_hieps.SetMarkerStyle(21)
-    G_sigtt_phi_hieps.SetMarkerSize(2)
+    G_sigtt_phi_hieps.SetMarkerSize(1)
     multiDict["G_sigtt_phi_{}".format(k+1)].Add(G_sigtt_phi_hieps)    
 
     C_sigtt_phi.cd(k+1)
