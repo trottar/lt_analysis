@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-12 12:02:07 trottar"
+# Time-stamp: "2023-10-12 12:20:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,8 +153,7 @@ except FileNotFoundError:
 except IOError:
     print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
 
-#t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
-t_bin_centers = t_bins
+t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
 
 try:
     with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
@@ -303,7 +302,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_Q2_t_loeps.SetPoint(j, t_bin_centers[np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
+            G_Q2_t_loeps.SetPoint(j, t_bins[np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
             j+=1
     G_Q2_t_loeps.SetMarkerStyle(21)
     G_Q2_t_loeps.SetMarkerSize(1)
@@ -314,7 +313,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_Q2_t_hieps.SetPoint(j, t_bin_centers[np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
+            G_Q2_t_hieps.SetPoint(j, t_bins[np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
     G_Q2_t_hieps.SetMarkerStyle(21)
     G_Q2_t_hieps.SetMarkerSize(1)
@@ -368,7 +367,7 @@ for k in range(NumtBins):
     C_Q2_phi.cd(k+1)
     
     multiDict["G_Q2_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_Q2_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Q2".format(t_bin_centers[k]))
+    multiDict["G_Q2_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Q2".format(t_bins[k]))
     
     multiDict["G_Q2_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_Q2_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -414,7 +413,7 @@ for k in range(NumtBins):
     C_W_phi.cd(k+1)
     
     multiDict["G_W_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_W_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; W".format(t_bin_centers[k]))
+    multiDict["G_W_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; W".format(t_bins[k]))
     
     multiDict["G_W_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_W_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -462,7 +461,7 @@ for k in range(NumtBins):
     C_xreal_thcm.cd(k+1)
     
     multiDict["G_xreal_thcm_{}".format(k+1)].Draw('AP')
-    multiDict["G_xreal_thcm_{}".format(k+1)].SetTitle("t = {:.2f} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
+    multiDict["G_xreal_thcm_{}".format(k+1)].SetTitle("t = {:.2f} ; #theta_{{cm}}; xmod".format(t_bins[k]))
     
     multiDict["G_xreal_thcm_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_thcm_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -510,7 +509,7 @@ for k in range(NumtBins):
     C_xmod_thcm.cd(k+1)
     
     multiDict["G_xmod_thcm_{}".format(k+1)].Draw('AP')
-    multiDict["G_xmod_thcm_{}".format(k+1)].SetTitle("t = {:.2f} ; #theta_{{cm}}; xmod".format(t_bin_centers[k]))
+    multiDict["G_xmod_thcm_{}".format(k+1)].SetTitle("t = {:.2f} ; #theta_{{cm}}; xmod".format(t_bins[k]))
     
     multiDict["G_xmod_thcm_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xmod_thcm_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -548,7 +547,7 @@ for k in range(NumtBins):
     C_xreal_phi.cd(k+1)
     
     multiDict["G_xreal_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xreal".format(t_bin_centers[k]))
+    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xreal".format(t_bins[k]))
     
     multiDict["G_xreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -597,7 +596,7 @@ for k in range(NumtBins):
     C_xreal_phi.cd(k+1)
     
     multiDict["G_xreal_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xreal".format(t_bin_centers[k]))
+    multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xreal".format(t_bins[k]))
     
     multiDict["G_xreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -642,7 +641,7 @@ for k in range(NumtBins):
     C_xmod_phi.cd(k+1)
     
     multiDict["G_xmod_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_xmod_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xmod".format(t_bin_centers[k]))
+    multiDict["G_xmod_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xmod".format(t_bins[k]))
     
     multiDict["G_xmod_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xmod_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
