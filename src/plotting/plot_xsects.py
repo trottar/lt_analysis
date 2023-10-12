@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-12 12:20:24 trottar"
+# Time-stamp: "2023-10-12 12:53:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -651,6 +651,110 @@ l_xmod_phi.AddEntry(G_xmod_phi_loeps,"loeps")
 l_xmod_phi.AddEntry(G_xmod_phi_hieps,"hieps")
 l_xmod_phi.Draw()
 C_xmod_phi.Print(outputpdf)
+
+C_sigl_phi = TCanvas()
+C_sigl_phi.SetGrid()
+
+G_sigl_phi = TGraphErrors()
+
+l_sigl_phi = TLegend(0.8,0.8,0.95,0.95)
+
+G_sigl_phi.SetTitle(" ; #phi; sigL")
+
+for i in range(len(file_df_dict['sep_file_loeps']['sigL'].tolist())):
+    G_sigl_phi.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigL'].tolist())[i])
+    G_sigl_phi.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigL'].tolist())[i])
+    G_sigl_phi.SetMarkerColor(1)
+
+for i in range(len(file_df_dict['sep_file_hieps']['sigL'].tolist())):
+    G_sigl_phi.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['sigL'].tolist())[i])
+    G_sigl_phi.SetPointError(i, 0, np.array(file_df_dict['sep_file_hieps']['dsigL'].tolist())[i])
+    G_sigl_phi.SetMarkerColor(2)
+    
+G_sigl_phi.SetMarkerStyle(21)
+G_sigl_phi.SetMarkerSize(1)
+    
+G_sigl_phi.Draw('AP')
+
+C_sigl_phi.Print(outputpdf)
+
+C_sigt_phi = TCanvas()
+C_sigt_phi.SetGrid()
+
+G_sigt_phi = TGraphErrors()
+
+l_sigt_phi = TLegend(0.8,0.8,0.95,0.95)
+
+G_sigt_phi.SetTitle(" ; #phi; sigt")
+
+for i in range(len(file_df_dict['sep_file_loeps']['sigT'].tolist())):
+    G_sigt_phi.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigT'].tolist())[i])
+    G_sigt_phi.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigT'].tolist())[i])
+    G_sigt_phi.SetMarkerColor(1)
+
+for i in range(len(file_df_dict['sep_file_hieps']['sigT'].tolist())):
+    G_sigt_phi.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['sigT'].tolist())[i])
+    G_sigt_phi.SetPointError(i, 0, np.array(file_df_dict['sep_file_hieps']['dsigT'].tolist())[i])
+    G_sigt_phi.SetMarkerColor(2)
+    
+G_sigt_phi.SetMarkerStyle(21)
+G_sigt_phi.SetMarkerSize(1)
+    
+G_sigt_phi.Draw('AP')
+
+C_sigt_phi.Print(outputpdf)
+
+C_sigtt_phi = TCanvas()
+C_sigtt_phi.SetGrid()
+
+G_sigtt_phi = TGraphErrors()
+
+l_sigtt_phi = TLegend(0.8,0.8,0.95,0.95)
+
+G_sigtt_phi.SetTitle(" ; #phi; sigtt")
+
+for i in range(len(file_df_dict['sep_file_loeps']['sigTT'].tolist())):
+    G_sigtt_phi.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigTT'].tolist())[i])
+    G_sigtt_phi.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigTT'].tolist())[i])
+    G_sigtt_phi.SetMarkerColor(1)
+
+for i in range(len(file_df_dict['sep_file_hieps']['sigTT'].tolist())):
+    G_sigtt_phi.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['sigTT'].tolist())[i])
+    G_sigtt_phi.SetPointError(i, 0, np.array(file_df_dict['sep_file_hieps']['dsigTT'].tolist())[i])
+    G_sigtt_phi.SetMarkerColor(2)
+    
+G_sigtt_phi.SetMarkerStyle(21)
+G_sigtt_phi.SetMarkerSize(1)
+    
+G_sigtt_phi.Draw('AP')
+
+C_sigtt_phi.Print(outputpdf)
+
+C_siglt_phi = TCanvas()
+C_siglt_phi.SetGrid()
+
+G_siglt_phi = TGraphErrors()
+
+l_siglt_phi = TLegend(0.8,0.8,0.95,0.95)
+
+G_siglt_phi.SetTitle(" ; #phi; siglt")
+
+for i in range(len(file_df_dict['sep_file_loeps']['sigLT'].tolist())):
+    G_siglt_phi.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigLT'].tolist())[i])
+    G_siglt_phi.SetPointError(i, 0, np.array(file_df_dict['sep_file_loeps']['dsigLT'].tolist())[i])
+    G_siglt_phi.SetMarkerColor(1)
+
+for i in range(len(file_df_dict['sep_file_hieps']['sigLT'].tolist())):
+    G_siglt_phi.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['sigLT'].tolist())[i])
+    G_siglt_phi.SetPointError(i, 0, np.array(file_df_dict['sep_file_hieps']['dsigLT'].tolist())[i])
+    G_siglt_phi.SetMarkerColor(2)
+    
+G_siglt_phi.SetMarkerStyle(21)
+G_siglt_phi.SetMarkerSize(1)
+    
+G_siglt_phi.Draw('AP')
+
+C_siglt_phi.Print(outputpdf)
 
 C_sigl_t = TCanvas()
 C_sigl_t.SetGrid()
