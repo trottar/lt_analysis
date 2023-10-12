@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-12 13:32:10 trottar"
+# Time-stamp: "2023-10-12 13:51:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -694,7 +694,7 @@ for k in range(NumtBins):
             j+=1
     G_sigl_phi_hieps.SetMarkerColor(1)
     G_sigl_phi_hieps.SetMarkerStyle(21)
-    G_sigl_phi_hieps.SetMarkerSize(1)
+    G_sigl_phi_hieps.SetMarkerSize(2)
     multiDict["G_sigl_phi_{}".format(k+1)].Add(G_sigl_phi_hieps)    
 
     C_sigl_phi.cd(k+1)
@@ -753,7 +753,7 @@ for k in range(NumtBins):
             j+=1
     G_sigt_phi_hieps.SetMarkerColor(1)
     G_sigt_phi_hieps.SetMarkerStyle(21)
-    G_sigt_phi_hieps.SetMarkerSize(1)
+    G_sigt_phi_hieps.SetMarkerSize(2)
     multiDict["G_sigt_phi_{}".format(k+1)].Add(G_sigt_phi_hieps)    
 
     C_sigt_phi.cd(k+1)
@@ -812,7 +812,7 @@ for k in range(NumtBins):
             j+=1
     G_siglt_phi_hieps.SetMarkerColor(1)
     G_siglt_phi_hieps.SetMarkerStyle(21)
-    G_siglt_phi_hieps.SetMarkerSize(1)
+    G_siglt_phi_hieps.SetMarkerSize(2)
     multiDict["G_siglt_phi_{}".format(k+1)].Add(G_siglt_phi_hieps)    
 
     C_siglt_phi.cd(k+1)
@@ -871,7 +871,7 @@ for k in range(NumtBins):
             j+=1
     G_sigtt_phi_hieps.SetMarkerColor(1)
     G_sigtt_phi_hieps.SetMarkerStyle(21)
-    G_sigtt_phi_hieps.SetMarkerSize(1)
+    G_sigtt_phi_hieps.SetMarkerSize(2)
     multiDict["G_sigtt_phi_{}".format(k+1)].Add(G_sigtt_phi_hieps)    
 
     C_sigtt_phi.cd(k+1)
