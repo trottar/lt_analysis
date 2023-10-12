@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-12 13:51:03 trottar"
+# Time-stamp: "2023-10-12 13:59:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -666,18 +666,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigl_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigL'].tolist())[i])
-            G_sigl_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigL'].tolist())[i])
-            j+=1
-    G_sigl_phi_loeps.SetMarkerColor(1)
-    G_sigl_phi_loeps.SetMarkerStyle(21)
-    G_sigl_phi_loeps.SetMarkerSize(1)
-    multiDict["G_sigl_phi_{}".format(k+1)].Add(G_sigl_phi_loeps)
-    G_sigl_phi_loeps = TGraphErrors()
-    j=0
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigl_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigL'].tolist())[i])
+            G_sigl_phi_loeps.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_loeps']['sigL'].tolist())[i])
             G_sigl_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigL'].tolist())[i])
             j+=1
     G_sigl_phi_loeps.SetMarkerColor(1)
@@ -689,7 +678,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_sigl_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['sigL'].tolist())[i])
+            G_sigl_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_hieps']['sigL'].tolist())[i])
             G_sigl_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file_hieps']['dsigL'].tolist())[i])
             j+=1
     G_sigl_phi_hieps.SetMarkerColor(1)
@@ -725,18 +714,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigt_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigT'].tolist())[i])
-            G_sigt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigT'].tolist())[i])
-            j+=1
-    G_sigt_phi_loeps.SetMarkerColor(1)
-    G_sigt_phi_loeps.SetMarkerStyle(21)
-    G_sigt_phi_loeps.SetMarkerSize(1)
-    multiDict["G_sigt_phi_{}".format(k+1)].Add(G_sigt_phi_loeps)
-    G_sigt_phi_loeps = TGraphErrors()
-    j=0
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigt_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigT'].tolist())[i])
+            G_sigt_phi_loeps.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_loeps']['sigT'].tolist())[i])
             G_sigt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigT'].tolist())[i])
             j+=1
     G_sigt_phi_loeps.SetMarkerColor(1)
@@ -748,7 +726,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_sigt_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['sigT'].tolist())[i])
+            G_sigt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_hieps']['sigT'].tolist())[i])
             G_sigt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file_hieps']['dsigT'].tolist())[i])
             j+=1
     G_sigt_phi_hieps.SetMarkerColor(1)
@@ -784,7 +762,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_siglt_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigLT'].tolist())[i])
+            G_siglt_phi_loeps.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_loeps']['sigLT'].tolist())[i])
             G_siglt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigLT'].tolist())[i])
             j+=1
     G_siglt_phi_loeps.SetMarkerColor(1)
@@ -795,7 +773,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_siglt_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigLT'].tolist())[i])
+            G_siglt_phi_loeps.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigLT'].tolist())[i])
             G_siglt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigLT'].tolist())[i])
             j+=1
     G_siglt_phi_loeps.SetMarkerColor(1)
@@ -807,7 +785,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_siglt_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['sigLT'].tolist())[i])
+            G_siglt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_hieps']['sigLT'].tolist())[i])
             G_siglt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file_hieps']['dsigLT'].tolist())[i])
             j+=1
     G_siglt_phi_hieps.SetMarkerColor(1)
@@ -843,7 +821,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigtt_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigTT'].tolist())[i])
+            G_sigtt_phi_loeps.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_loeps']['sigTT'].tolist())[i])
             G_sigtt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigTT'].tolist())[i])
             j+=1
     G_sigtt_phi_loeps.SetMarkerColor(1)
@@ -854,7 +832,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigtt_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigTT'].tolist())[i])
+            G_sigtt_phi_loeps.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['sep_file_loeps']['sigTT'].tolist())[i])
             G_sigtt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigTT'].tolist())[i])
             j+=1
     G_sigtt_phi_loeps.SetMarkerColor(1)
@@ -866,7 +844,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_sigtt_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['sep_file_hieps']['sigTT'].tolist())[i])
+            G_sigtt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_hieps']['sigTT'].tolist())[i])
             G_sigtt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file_hieps']['dsigTT'].tolist())[i])
             j+=1
     G_sigtt_phi_hieps.SetMarkerColor(1)
