@@ -87,7 +87,7 @@ else
     done
 fi
 
-NumtBins=3
+NumtBins=4
 NumPhiBins=8
 
 # Define global variables for lt_analysis scripts
