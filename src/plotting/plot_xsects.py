@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-12 15:21:12 trottar"
+# Time-stamp: "2023-10-12 16:54:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -689,7 +689,7 @@ for k in range(NumtBins):
     C_sigl_phi.cd(k+1)
 
     multiDict["G_sigl_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_sigl_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; sigt".format(t_bin_centers[k]))
+    multiDict["G_sigl_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; sigl".format(t_bin_centers[k]))
     
     multiDict["G_sigl_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_sigl_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
@@ -817,17 +817,6 @@ for k in range(NumtBins):
 
     multiDict["G_sigtt_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_sigtt_phi_loeps = TGraphErrors()
-    j=0
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigtt_phi_loeps.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file_loeps']['sigTT'].tolist())[i])
-            G_sigtt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file_loeps']['dsigTT'].tolist())[i])
-            j+=1
-    G_sigtt_phi_loeps.SetMarkerColor(1)
-    G_sigtt_phi_loeps.SetMarkerStyle(21)
-    G_sigtt_phi_loeps.SetMarkerSize(1)
-    multiDict["G_sigtt_phi_{}".format(k+1)].Add(G_sigtt_phi_loeps)
     G_sigtt_phi_loeps = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
