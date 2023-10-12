@@ -383,7 +383,9 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *       simple way to let the parmeterization know which equation to use.
 *       Please don't try anything complicated, it's only meant to be simple. 
 ***	   
-	   tav=(0.0735+0.028*log(q2_set))*q2_set
+*       tav=(0.0735+0.028*log(q2_set))*q2_set
+*       RLT (10/8/2023): Testing new tav parameterization
+	   tav=(0.1112 + 0.0066*log(q2_set))*q2_set
 	   ftav=(abs(t_gev)-tav)/tav
 *       ft=t_gev/(abs(t_gev)+mkpl**2)**2
 *       RLT (9/21/2023): t_gev should be abs(t_gev)
