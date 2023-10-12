@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-12 13:09:23 trottar"
+# Time-stamp: "2023-10-12 13:15:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -697,7 +697,7 @@ for k in range(NumtBins):
     G_sigl_phi_hieps.SetMarkerSize(1)
     multiDict["G_sigl_phi_{}".format(k+1)].Add(G_sigl_phi_hieps)    
 
-    C_sigl_phi_phi.cd(k+1)
+    C_sigl_phi.cd(k+1)
 
     multiDict["G_sigl_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_sigl_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; sigt".format(t_bin_centers[k]))
@@ -756,7 +756,7 @@ for k in range(NumtBins):
     G_sigt_phi_hieps.SetMarkerSize(1)
     multiDict["G_sigt_phi_{}".format(k+1)].Add(G_sigt_phi_hieps)    
 
-    C_sigt_phi_phi.cd(k+1)
+    C_sigt_phi.cd(k+1)
 
     multiDict["G_sigt_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_sigt_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; sigt".format(t_bin_centers[k]))
@@ -815,7 +815,7 @@ for k in range(NumtBins):
     G_siglt_phi_hieps.SetMarkerSize(1)
     multiDict["G_siglt_phi_{}".format(k+1)].Add(G_siglt_phi_hieps)    
 
-    C_siglt_phi_phi.cd(k+1)
+    C_siglt_phi.cd(k+1)
 
     multiDict["G_siglt_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_siglt_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; siglt".format(t_bin_centers[k]))
@@ -874,7 +874,7 @@ for k in range(NumtBins):
     G_sigtt_phi_hieps.SetMarkerSize(1)
     multiDict["G_sigtt_phi_{}".format(k+1)].Add(G_sigtt_phi_hieps)    
 
-    C_sigtt_phi_phi.cd(k+1)
+    C_sigtt_phi.cd(k+1)
 
     multiDict["G_sigtt_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_sigtt_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; sigtt".format(t_bin_centers[k]))
