@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-08 16:12:08 trottar"
+# Time-stamp: "2023-10-12 12:02:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -526,6 +526,8 @@ C_xreal_phi.SetGrid()
 C_xreal_phi.Divide(1,NumtBins)
 l_xreal_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 
+'''
+
 multiDict = {}
 for k in range(NumtBins):
 
@@ -556,6 +558,8 @@ l_xreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
 l_xreal_phi.Draw()
 C_xreal_phi.Print(outputpdf)
 
+'''
+
 C_xreal_phi = TCanvas()
 C_xreal_phi.SetGrid()
 C_xreal_phi.Divide(1,NumtBins)
@@ -565,6 +569,18 @@ multiDict = {}
 for k in range(NumtBins):
 
     multiDict["G_xreal_phi_{}".format(k+1)] = TMultiGraph()
+
+    G_xreal_phi_loeps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+            G_xreal_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
+            j+=1
+    G_xreal_phi_loeps.SetMarkerStyle(21)
+    G_xreal_phi_loeps.SetMarkerSize(1)
+    G_xreal_phi_loeps.SetMarkerColor(1)
+    multiDict["G_xreal_phi_{}".format(k+1)].Add(G_xreal_phi_loeps)
     
     G_xreal_phi_hieps = TGraphErrors()
     j=0
