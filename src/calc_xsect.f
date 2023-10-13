@@ -175,27 +175,6 @@ c      pause
 
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
-*            print*,"=============="
-*            print*,'it',it
-*            print*,'nt',nt            
-*            print*,'ip',ip
-*            print*,'nphi',nphi
-*            print*,'ratio',r
-*            print*,'dratio',dr
-*            print*,""
-*            print*,"xmodel inputs:"
-*            print*,"pid: ", pid
-*            print*,"npol_set: ", npol_set
-*            print*,"Eb: ", Eb
-*            print*,"q2_set: ", q2_set
-*            print*,"w: ", w
-*            print*,"q2: ", q2
-*            print*,"tm: ", tm
-*            print*,"phi: ", phi
-*            print*,"eps_mod: ", eps_mod
-*            print*,"th_mod: ", th_mod
-*            print*,"x_mod: ", x_mod
-*            print*,"=============="
             
             call xmodel(pid,npol_set,Eb,q2_set,eps_set,w,q2,tm,phi,
      *           eps_mod,th_mod,x_mod)
@@ -214,6 +193,30 @@ c angle check
      *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
  40         format(3G15.5,f8.5,2f7.2,3f8.5)
 
+            print,"=============="
+            print,'it',it
+            print,'nt',nt            
+            print,'ip',ip
+            print,'nphi',nphi
+            print,'ratio',r
+            print,'dratio',dr
+            print,""
+            print,"xmodel inputs:"
+            print,"pid: ", pid
+            print,"npol_set: ", npol_set
+            print,"Eb: ", Eb
+            print,"q2_set: ", q2_set
+            print,"w: ", w
+            print,"q2: ", q2
+            print,"tm: ", tm
+            print,"phi: ", phi
+            print,"eps_mod: ", eps_mod
+            print,"th_mod: ", th_mod
+            print,"x_mod: ", x_mod
+            print,"x_real: ", x_real
+            print,"=============="
+
+            
          end do                 !phi
 
 c        Write out kinematics for Henk.
