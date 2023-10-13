@@ -89,7 +89,7 @@ fi
 
 # Q2=2p1
 NumtBins=3
-NumPhiBins=9
+NumPhiBins=10
 # Q2=5p5
 #NumtBins=3
 #NumPhiBins=8
