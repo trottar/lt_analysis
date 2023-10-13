@@ -79,12 +79,12 @@ c         pause
       f_tav=(abs(tm)-tav)/tav
       f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
       
-*     sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
-*     1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)-0.2))
+*     sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+*     >     +par(4)*log(q2))*(abs(tm)-0.2))
 *     RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for
 *                       initial start parameterization
-      sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
-     1     *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)))
+      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+     >     +par(4)*log(q2))*(abs(tm)))      
       sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
