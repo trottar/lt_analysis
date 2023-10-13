@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-11 14:57:22 trottar"
+# Time-stamp: "2023-10-13 11:40:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,7 +40,9 @@ def iterWeight(arg_str):
 
     # Calculate sigl, sigt, siglt, sigtt, sig219, sig
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12 = params
-    sigl = (p1 + p2 * math.log(q2_sim)) * math.exp((p3 + p4 * math.log(q2_sim)) * (abs(t_gev) - 0.2))
+    #sigl = (p1 + p2 * math.log(q2_sim)) * math.exp((p3 + p4 * math.log(q2_sim)) * (abs(t_gev) - 0.2))
+    # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
+    sigl = (p1 + p2 * math.log(q2_sim)) * math.exp((p3 + p4 * math.log(q2_sim)) * (abs(t_gev)))
     sigt = p5 + p6 * math.log(q2_sim) + (p7 + p8 * math.log(q2_sim)) * ftav
     siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     sigtt = (p12 * q2_sim * math.exp(-q2_sim)) * ft * math.sin(thetacm_sim)**2
