@@ -12,7 +12,7 @@ begin parm kinematics_main
   hadron_arm = 5                ;  1=hms,2=sos,3=hrsr,4=hrsl,5=shms
   spec%e%P = 6590.0		;  e arm central momentum (MeV/c) G.H Offsets
   spec%e%theta = 18.902		;  e arm angle setting (degrees) G.H Offsets
-  spec%p%P = 4356.0		;  p arm central momentum (MeV/c) G.H Offsets
+  spec%p%P = 4835.16		;  p arm central momentum (MeV/c) G.H Offsets
   spec%p%theta = 26.197   	;  p arm angle setting (degrees) G.H Offsets
 end parm kinematics_main
 
