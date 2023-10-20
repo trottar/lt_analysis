@@ -6,14 +6,14 @@ begin parm experiment
 end parm experiment
 
 begin parm kinematics_main
-  Ebeam = 10582.20  		;  (MeV) G.H Offsets
+  Ebeam = 4933.0 		;  (MeV) G.H Offsets
   dEbeam = 0.05			;  beam energy variation (%)
-  electron_arm = 1              ;  1=hms,2=sos,3=hrsr,4=hrsl,5=shms 		
+  electron_arm = 1              ;  1=hms,2=sos,3=hrsr,4=hrsl,5=shms
   hadron_arm = 5                ;  1=hms,2=sos,3=hrsr,4=hrsl,5=shms
-  spec%e%P = 6590.0		;  e arm central momentum (MeV/c) G.H Offsets
-  spec%e%theta = 18.902		;  e arm angle setting (degrees) G.H Offsets
-  spec%p%P = 4835.2		;  p arm central momentum (MeV/c) G.H Offsets
-  spec%p%theta = 26.197   	;  p arm angle setting (degrees) G.H Offsets
+  spec%e%P = 3124.0		;  e arm central momentum (MeV/c) G.H Offsets
+  spec%e%theta = 27.207  	;  e arm angle setting (degrees) G.H Offsets
+  spec%p%P = 2580.4		;  p arm central momentum (MeV/c) G.H Offsets
+  spec%p%theta = 33.552  	;  p arm angle setting (degrees) G.H Offsets
 end parm kinematics_main
 
 begin parm target
@@ -25,7 +25,7 @@ begin parm target
   targ%thick = 723.00		;  target thick (mg/cm^2) 10.0cm long
   targ%angle = 0.		;  target angle (for solid target) (degrees)
   targ%abundancy = 100.		;  target purity (%)
-  targ%can = 2			;  1=beer can (fpi), 2=pudding can (nucpi)
+  targ%can = 3			;  1=beer can (fpi), 2=pudding can (nucpi), 3=cryo17
 end parm target
 
 begin parm debug		;  (ONES give helpful debug info)
@@ -97,7 +97,7 @@ begin parm simulate
   cuts%Em%min = 0.      ;  (Em.min=Em.max=0.0 gives wide open cuts)
   cuts%Em%max = 0.      ;  Must be wider than cuts in analysis(elastic or e,e'p)
   using_Eloss = 1       ;  (ONE = TRUE)
-  correct_Eloss = 1     ;  ONE = correct reconstructed events for eloss.
+  correct_Eloss = 0     ;  ONE = correct reconstructed events for eloss.
   correct_raster = 1    ;  ONE = Reconstruct events using 'raster' matrix elements.
   mc_smear = 1          ;  ONE = target & hut mult scatt AND DC smearing.
   deForest_flag = 0     ;  0=sigcc1, 1=sigcc2, -1=sigcc1 ONSHELL
