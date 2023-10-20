@@ -91,7 +91,7 @@ if [[ $s_flag = "true" ]]; then
     OutDATAFilename="Analysed_Data_${SPEC}_${KIN}"
     OutDUMMYFilename="Analysed_DummyData_${SPEC}_${KIN}"
     if [[ $o_flag = "true" ]]; then
-	OutFullAnalysisFilename="FullAnalysis_Offset_${SPEC}_${KIN}"
+	OutFullAnalysisFilename="FullAnalysis_${SPEC}_${KIN}_Offset"
     else
 	OutFullAnalysisFilename="FullAnalysis_${SPEC}_${KIN}"
     fi
@@ -112,7 +112,7 @@ else
     OutDATAFilename="Analysed_Data_${KIN}"
     OutDUMMYFilename="Analysed_DummyData_${KIN}"
     if [[ $o_flag = "true" ]]; then
-	OutFullAnalysisFilename="FullAnalysis_Offset_${KIN}"
+	OutFullAnalysisFilename="FullAnalysis_${KIN}_Offset"
     else
 	OutFullAnalysisFilename="FullAnalysis_${KIN}"
     fi
