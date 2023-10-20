@@ -83,7 +83,11 @@ if [[ $s_flag = "true" ]]; then
     fi
     InDATAFilename="Raw_Data_${SPEC}_${KIN}.root"
     InDUMMYFilename="Raw_DummyData_${SPEC}_${KIN}.root"
-    InSIMCFilename="Heep_${SPEC}_${KIN}.root"
+    if [[ $o_flag = "true" ]]; then
+	InSIMCFilename="Heep_${SPEC}_${KIN}_Offset.root"
+    else
+	InSIMCFilename="Heep_${SPEC}_${KIN}.root"
+    fi
     OutDATAFilename="Analysed_Data_${SPEC}_${KIN}"
     OutDUMMYFilename="Analysed_DummyData_${SPEC}_${KIN}"
     if [[ $o_flag = "true" ]]; then
@@ -100,7 +104,11 @@ else
     EffData="coin_heep_HeePCoin_efficiency_data_2022_12_02.csv"
     InDATAFilename="Raw_Data_${KIN}.root"
     InDUMMYFilename="Raw_DummyData_${KIN}.root"
-    InSIMCFilename="Heep_Coin_${KIN}.root"
+    if [[ $o_flag = "true" ]]; then
+	InSIMCFilename="Heep_Coin_${KIN}_Offset.root"
+    else
+	InSIMCFilename="Heep_Coin_${KIN}.root"
+    fi    
     OutDATAFilename="Analysed_Data_${KIN}"
     OutDUMMYFilename="Analysed_DummyData_${KIN}"
     if [[ $o_flag = "true" ]]; then
