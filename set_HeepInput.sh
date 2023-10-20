@@ -27,7 +27,7 @@ SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
 # Flag definitions (flags: h, c, a, s)
-while getopts 'hcas' flag; do
+while getopts 'hcaso' flag; do
     case "${flag}" in
         h) 
         echo "----------------------------------------------------------"
@@ -38,6 +38,7 @@ while getopts 'hcas' flag; do
         echo
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
+	echo "    -o, offset to replay applied"
         echo "    -c, compile fortran code (singles only)"
 	echo "    -a, run SIMC with new settings"
 	echo "        coin -> KIN=arg1"
@@ -48,6 +49,7 @@ while getopts 'hcas' flag; do
         c) c_flag='true' ;;
 	a) a_flag='true' ;;
 	s) s_flag='true' ;;
+	o) o_flag='true' ;;
         *) print_usage
         exit 1 ;;
     esac
@@ -107,7 +109,11 @@ elif [[ $a_flag = "true" ]]; then
     cd ${LTANAPATH}/src/HeeP/COIN
     KIN=$2
 
-    InputSIMC="Heep_Coin_${KIN}"
+    if [[ $o_flag = "true" ]]; then
+	InputSIMC="Heep_Coin_${KIN}_Offset"
+    else
+	InputSIMC="Heep_Coin_${KIN}"
+    fi
     
     echo
     echo 
