@@ -45,10 +45,12 @@ while getopts 'hcs' flag; do
 	echo "        coin -> KIN=arg1"
 	echo "        sing -> SPEC=arg1 KIN=arg2 (requires -s flag)"	
 	echo "    -s, single arm"
+	echo "    -o, offset to replay applied "	
         exit 0
         ;;
         c) c_flag='true' ;;
 	s) s_flag='true' ;;
+	o) o_flag='true' ;;
         *) print_usage
         exit 1 ;;
     esac
@@ -56,6 +58,7 @@ done
 
 HEEPFOR="heepcheck"
 
+cd ${LTANAPATH}/src/HeeP
 # When any flag is used then the user input changes argument order
 if [[ $c_flag = "true" && $s_flag = "true" ]]; then
     echo "Compiling ${HEEPFOR}.f..."
@@ -68,15 +71,27 @@ elif [[ $c_flag = "true" && $s_flag != "true" ]]; then
     echo "Compiling ${HEEPFOR}.f..."
     eval "gfortran -o  ${HEEPFOR} ${HEEPFOR}.f"
     KIN=$2
-    InputSIMC="Heep_Coin_${KIN}"
+    if [[ $o_flag = "true" ]]; then
+	InputSIMC="Heep_Coin_${KIN}_Offset"
+    else
+	InputSIMC="Heep_Coin_${KIN}"
+    fi
 elif [[ $s_flag = "true" ]]; then
     spec=$2
     SPEC=$(echo "$spec" | tr '[:lower:]' '[:upper:]')
     KIN=$3
-    InputSIMC="Heep_${SPEC}_${KIN}"
+    if [[ $o_flag = "true" ]]; then
+	InputSIMC="Heep_${SPEC}_${KIN}_Offset"
+    else
+	InputSIMC="Heep_${SPEC}_${KIN}"
+    fi
 else
     KIN=$1
-    InputSIMC="Heep_Coin_${KIN}"
+    if [[ $o_flag = "true" ]]; then
+	InputSIMC="Heep_Coin_${KIN}_Offset"
+    else
+	InputSIMC="Heep_Coin_${KIN}"
+    fi
 fi
 
 cd ${LTANAPATH}/src/setup
