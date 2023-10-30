@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-30 17:47:09 trottar"
+# Time-stamp: "2023-10-30 18:14:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ def iterWeight(arg_str):
              math.sqrt(2.0 * eps_sim * (1. + eps_sim)) * math.cos(phicm_sim) * siglt) / 1.0
 
     wfactor = 1.0 / (s_gev - mtar_gev**2)**2
-    sig = sig219 * wfactor
+    sig = sig219*wfactor
     sigl = sigl*wfactor
     sigt = sigt*wfactor
     sigtt = sigtt*wfactor
