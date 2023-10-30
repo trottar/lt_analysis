@@ -56,7 +56,7 @@ done
 
 HEEPFOR="heepcheck"
 
-cd ${LTANAPATH}/src/setup
+cd ${LTANAPATH}/src/HeeP
 # When any flag is used then the user input changes argument order
 if [[ $c_flag = "true" && $s_flag = "true" ]]; then
     echo "Compiling ${HEEPFOR}.f..."
