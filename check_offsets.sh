@@ -80,6 +80,7 @@ else
     InputSIMC="Heep_Coin_${KIN}"
 fi
 
+cd ${LTANAPATH}/src/setup
 # Python script that gets current values of simc input file
 SIMCINP=`python3 getSetting.py ${InputSIMC}`
 
