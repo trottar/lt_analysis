@@ -1731,7 +1731,7 @@ else
 	    echo "Finding new simc weight for for high epsilon..."
 	fi
 
-	python3 main_iter.py ${KIN} ${W} ${Q2} ${EPSVAL} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date}
+	python3 main_iter.py ${KIN} ${W} ${Q2} ${EPSVAL} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${NumtBins} ${NumPhiBins}
 
 	# Check the exit status of the Python script
 	if [ $? -ne 0 ]; then

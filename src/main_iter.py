@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-26 16:07:59 trottar"
+# Time-stamp: "2023-10-30 15:54:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,8 +41,8 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=9:
-    print("!!!!! ERROR !!!!!\n Expected 9 arguments\n Usage is with - KIN W Q2 EPSVAL ParticleType EPSSET POL OutFilename formatted_date\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=11:
+    print("!!!!! ERROR !!!!!\n Expected 11 arguments\n Usage is with - KIN W Q2 EPSVAL ParticleType EPSSET POL OutFilename formatted_date NumtBins NumPhiBins\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -59,6 +59,9 @@ EPSSET = sys.argv[6]
 POL = sys.argv[7]
 OutFilename = sys.argv[8]
 formatted_date = sys.argv[9]
+NumtBins = sys.argv[10]
+NumPhiBins = sys.argv[11]
+
 
 if int(POL) == 1:
     pol_str = "pl"
