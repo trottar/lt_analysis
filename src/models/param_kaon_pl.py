@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-30 16:56:48 trottar"
+# Time-stamp: "2023-10-30 17:10:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,9 +65,11 @@ def iterWeight(arg_str):
     #wtn = wt_sim * sig / sigcm_sim
     wtn = wt_sim
 
+    '''
     if wtn > 0.0:
         pass
     else:
         wtn = 0.0
-
+    '''
+    
     return float(wtn)
