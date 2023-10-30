@@ -56,7 +56,6 @@ done
 
 HEEPFOR="heepcheck"
 
-cd ${LTANAPATH}/src/HeeP
 # When any flag is used then the user input changes argument order
 if [[ $c_flag = "true" && $s_flag = "true" ]]; then
     echo "Compiling ${HEEPFOR}.f..."
@@ -89,6 +88,7 @@ SIMCINP=`python3 getSetting.py ${InputSIMC}`
 BEAMINP=`echo ${SIMCINP} | cut -d ',' -f1`
 THETAINP=`echo ${SIMCINP} | cut -d ',' -f2`
 
+cd ${LTANAPATH}/src/HeeP
 # Runs fortran code using 'expect' which takes the user input
 # value then runs the heepcheck script to check offsets
 # (Fotran script is run in background)
