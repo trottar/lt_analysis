@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-13 11:40:44 trottar"
+# Time-stamp: "2023-10-30 16:56:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,7 +62,8 @@ def iterWeight(arg_str):
     siglt = siglt*wfactor    
     sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     
-    wtn = wt_sim * sig / sigcm_sim
+    #wtn = wt_sim * sig / sigcm_sim
+    wtn = wt_sim
 
     if wtn > 0.0:
         pass
