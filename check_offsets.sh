@@ -45,12 +45,10 @@ while getopts 'hcs' flag; do
 	echo "        coin -> KIN=arg1"
 	echo "        sing -> SPEC=arg1 KIN=arg2 (requires -s flag)"	
 	echo "    -s, single arm"
-	echo "    -o, offset to replay applied "	
         exit 0
         ;;
         c) c_flag='true' ;;
 	s) s_flag='true' ;;
-	o) o_flag='true' ;;
         *) print_usage
         exit 1 ;;
     esac
@@ -71,27 +69,15 @@ elif [[ $c_flag = "true" && $s_flag != "true" ]]; then
     echo "Compiling ${HEEPFOR}.f..."
     eval "gfortran -o  ${HEEPFOR} ${HEEPFOR}.f"
     KIN=$2
-    if [[ $o_flag = "true" ]]; then
-	InputSIMC="Heep_Coin_${KIN}_Offset"
-    else
-	InputSIMC="Heep_Coin_${KIN}"
-    fi
+    InputSIMC="Heep_Coin_${KIN}"
 elif [[ $s_flag = "true" ]]; then
     spec=$2
     SPEC=$(echo "$spec" | tr '[:lower:]' '[:upper:]')
     KIN=$3
-    if [[ $o_flag = "true" ]]; then
-	InputSIMC="Heep_${SPEC}_${KIN}_Offset"
-    else
-	InputSIMC="Heep_${SPEC}_${KIN}"
-    fi
+    InputSIMC="Heep_${SPEC}_${KIN}"
 else
     KIN=$1
-    if [[ $o_flag = "true" ]]; then
-	InputSIMC="Heep_Coin_${KIN}_Offset"
-    else
-	InputSIMC="Heep_Coin_${KIN}"
-    fi
+    InputSIMC="Heep_Coin_${KIN}"
 fi
 
 cd ${LTANAPATH}/src/setup
