@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-10-31 10:26:37 trottar"
+# Time-stamp: "2023-10-31 11:06:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,8 +107,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     
     # Create a new branch with the updated values
     iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-    new_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed
     isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+    new_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed
     new_branch = new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed
     
     ################################################################################################################################################
@@ -135,6 +135,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       iweight[0] = iter_lst[0]
       new_Weight_SIMC.SetAddress(iweight)
 
+      # Fill the new branch with the new value for this entry
+      new_branch.Fill()
+      
       # Set the value of isig
       isig[0] = iter_lst[1]
       new_sig_SIMC.SetAddress(isig)
