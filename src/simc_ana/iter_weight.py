@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-10-30 18:11:51 trottar"
+# Time-stamp: "2023-10-30 23:01:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,6 +91,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     InFile_SIMC = TFile.Open(simc_root, "OPEN")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
     Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
+    sig_SIMC  = TBRANCH_SIMC.GetBranch("sig")
 
     # Create a new ROOT file for writing
     new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace(".root","_new.root"), "RECREATE")
@@ -100,10 +101,15 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     # Get the Weight branch from the new tree
     new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
+
+    # Get the sig branch from the new tree
+    new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sig")    
     
     # Create a new branch with the updated values
     iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
     new_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed
+    isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+    new_branch = new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
@@ -121,11 +127,17 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #print("-"*25,"\n",i,"\n",inp_param)
 
-      iweight[0] = iterWeight(inp_param)
+      iter_lst = iterWeight(inp_param)
+      
+      iweight[0] = iter_lst[0]
+      isig[0] = iter_lst[1]
 
       # Set the value of iweight
       new_Weight_SIMC.SetAddress(iweight)
-
+      
+      # Set the value of isig
+      new_sig_SIMC.SetAddress(isig)
+      
       # Fill the new branch with the new value for this entry
       new_branch.Fill()
           
