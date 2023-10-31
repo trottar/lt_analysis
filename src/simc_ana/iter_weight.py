@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-10-31 10:02:58 trottar"
+# Time-stamp: "2023-10-31 10:26:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -123,11 +123,13 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       TBRANCH_SIMC.GetEntry(i)
 
       # phipq == phicm
-      #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
-      inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+      inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+      #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #print("-"*25,"\n",i,"\n",inp_param)
 
       iter_lst = iterWeight(inp_param)
+
+      print(iter_lst)
 
       # Set the value of iweight
       iweight[0] = iter_lst[0]
