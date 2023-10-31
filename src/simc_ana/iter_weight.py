@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-10-31 11:28:03 trottar"
+# Time-stamp: "2023-10-31 11:48:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,6 +133,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       # Set the value of iweight
       iweight[0] = iter_lst[0]
+      print("iweight",iweight[0])
       new_Weight_SIMC.SetAddress(iweight)
 
       # Fill the new branch with the new value for this entry
@@ -140,6 +141,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       
       # Set the value of isig
       isig[0] = iter_lst[1]
+      print("isig",isig[0])
       new_sig_SIMC.SetAddress(isig)
       
       # Fill the new branch with the new value for this entry
