@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-31 13:55:24 trottar"
+# Time-stamp: "2023-10-31 14:21:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -27,7 +27,7 @@ def iterWeight(arg_str):
     q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params = args
 
     q2_gev = q2_set # Already GeV
-    t_gev = t_sim
+    t_gev = t_sim  # Already GeV
     s = w_sim**2
     s_gev = s # Already GeV
 
