@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-11 15:52:21 trottar"
+# Time-stamp: "2023-10-31 00:20:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -573,8 +573,7 @@ if EPSSET == "high":
         sys.exit(2)
 
     if DEBUG:
-        show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
-    show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
+        show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))    
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
 
     # Save new parameters and unsep values from current iteration
@@ -684,8 +683,3 @@ for hist in histlist:
     key_str = ', '.join(hist.keys())
     print("{} keys: {}".format(hist["phi_setting"],key_str))
 '''
-
-#sys.path.append("plotting")
-#from plot_unsep import unsep_xsect
-
-#unsep_xsect(inpDict)
