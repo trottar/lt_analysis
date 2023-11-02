@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-02 08:40:52 trottar"
+# Time-stamp: "2023-11-02 08:42:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -543,8 +543,8 @@ H_ct_ep_DUMMY = ROOT.TH1D("H_ct_ep_DUMMY", "Electron-Proton CTime", 200, -10, 10
 H_ct_ep_DUMMY_nocut = ROOT.TH1D("H_ct_ep_DUMMY_nocut", "Electron-Proton CTime", 200, -10, 10)
 H_ct_ep_DUMMY_nopid = ROOT.TH1D("H_ct_ep_DUMMY_nopid", "Electron-Proton CTime", 200, -10, 10)
 
-CoinTime_vs_beta_DATA = ROOT.TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
-CoinTime_vs_beta_DATA_nocut = ROOT.TH2D("CoinTime_vs_beta_DATA_nocut", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
+CoinTime_vs_eta_DATA = ROOT.TH2D("CoinTime_vs_eta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
+CoinTime_vs_eta_DATA_nocut = ROOT.TH2D("CoinTime_vs_eta_DATA_nocut", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
 
 H_ct_ep_vs_H_MMp2_DATA = ROOT.TH2D("H_ct_ep_vs_H_MMp2_DATA","Electron-Proton CTime vs (MM)^{2}_{p}; e p Coin_Time; (MM)^{2}_{p}", 200, -10, 10, 200, -0.1, 0.1)
 #H_ct_ep_vs_H_MMp2_DATA_rand = ROOT.TH2D("H_ct_ep_vs_H_MMp2_DATA_rand","Electron-Proton CTime vs (MM)^{2}_{p}; e p Coin_Time; (MM)^{2}_{p}", 200, -10, 10, 200, -0.1, 0.1)
@@ -642,7 +642,7 @@ ibin = 1
 for evt in TBRANCH_DATA:
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_etanotrack > 0.5 & P_hod_etanotrack < 1.4
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
   HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
@@ -655,7 +655,7 @@ for evt in TBRANCH_DATA:
       H_ct_ep_vs_H_MMp2_DATA.Fill(evt.CTime_epCoinTime_ROC1, evt.MMp)
       H_ct_ep_DATA.Fill(evt.CTime_epCoinTime_ROC1)
 
-      CoinTime_vs_beta_DATA.Fill(evt.CTime_epCoinTime_ROC1, evt.P_gtr_beta)
+      CoinTime_vs_eta_DATA.Fill(evt.CTime_epCoinTime_ROC1, evt.P_gtr_eta)
       
       H_emiss_vs_H_hsdelta_DATA.Fill(evt.emiss, evt.hsdelta)
       H_emiss_vs_H_ssdelta_DATA.Fill(evt.emiss, evt.ssdelta)
@@ -808,7 +808,7 @@ for evt in TBRANCH_DATA_nocut:
 
   H_ct_ep_DATA_nocut.Fill(evt.CTime_epCoinTime_ROC1)
 
-  CoinTime_vs_beta_DATA_nocut.Fill(evt.CTime_epCoinTime_ROC1, evt.P_gtr_beta)
+  CoinTime_vs_eta_DATA_nocut.Fill(evt.CTime_epCoinTime_ROC1, evt.P_gtr_eta)
   
   H_ssxfp_DATA_nocut.Fill(evt.ssxfp)
   H_ssyfp_DATA_nocut.Fill(evt.ssyfp)
@@ -907,7 +907,7 @@ ibin = 1
 for evt in TBRANCH_DATA_nopid:
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_etanotrack > 0.5 & P_hod_etanotrack < 1.4
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
   HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
@@ -1018,7 +1018,7 @@ for evt in TBRANCH_DUMMY:
   #......... Define Cuts.................
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_etanotrack > 0.5 & P_hod_etanotrack < 1.4
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
   HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
@@ -1222,7 +1222,7 @@ for evt in TBRANCH_DUMMY_nopid:
   #......... Define Cuts.................
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_etanotrack > 0.5 & P_hod_etanotrack < 1.4
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
   HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
@@ -1825,10 +1825,10 @@ c_ctvbeta = TCanvas()
 c_ctvbeta.Divide(2,1)
 
 c_ctvbeta.cd(1)
-CoinTime_vs_beta_DATA_nocut.Draw("colz")
+CoinTime_vs_eta_DATA_nocut.Draw("colz")
 
 c_ctvbeta.cd(2)
-CoinTime_vs_beta_DATA.Draw("colz")
+CoinTime_vs_eta_DATA.Draw("colz")
 
 c_ctvbeta.Print(outputpdf)
 
