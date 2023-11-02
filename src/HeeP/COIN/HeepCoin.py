@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-02 08:49:20 trottar"
+# Time-stamp: "2023-11-02 08:51:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -544,16 +544,16 @@ H_ct_ep_DUMMY_nocut = ROOT.TH1D("H_ct_ep_DUMMY_nocut", "Electron-Proton CTime", 
 H_ct_ep_DUMMY_nopid = ROOT.TH1D("H_ct_ep_DUMMY_nopid", "Electron-Proton CTime", 200, -10, 10)
 
 H_peta_DATA = ROOT.TH1D("H_peta_DATA", "SHMS_#beta", 200, 0, 2)
-H_peta_DATA_nocut = ROOT.TH1D("H_peta_DATA_nocut", "SHMS_#beta", 200, 0, 2)
+H_peta_DATA_nocut = ROOT.TH1D("H_peta_DATA_nocut", "SHMS_#beta no cut", 200, 0, 2)
 
-H_heta_DATA = ROOT.TH1D("H_heta_DATA", "SHMS_#beta", 200, 0, 2)
-H_heta_DATA_nocut = ROOT.TH1D("H_heta_DATA_nocut", "SHMS_#beta", 200, 0, 2)
+H_heta_DATA = ROOT.TH1D("H_heta_DATA", "HMS_#beta", 200, 0, 2)
+H_heta_DATA_nocut = ROOT.TH1D("H_heta_DATA_nocut", "HMS_#beta no cut", 200, 0, 2)
 
 CoinTime_vs_peta_DATA = ROOT.TH2D("CoinTime_vs_peta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
-CoinTime_vs_peta_DATA_nocut = ROOT.TH2D("CoinTime_vs_peta_DATA_nocut", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
+CoinTime_vs_peta_DATA_nocut = ROOT.TH2D("CoinTime_vs_peta_DATA_nocut", "CTime vs SHMS #beta  no cut; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
 
 CoinTime_vs_heta_DATA = ROOT.TH2D("CoinTime_vs_heta_DATA", "CTime vs HMS #beta; Coin_Time; HMS_#beta", 500, -50, 50, 500, 0, 2)
-CoinTime_vs_heta_DATA_nocut = ROOT.TH2D("CoinTime_vs_heta_DATA_nocut", "CTime vs HMS #beta; Coin_Time; HMS_#beta", 500, -50, 50, 500, 0, 2)
+CoinTime_vs_heta_DATA_nocut = ROOT.TH2D("CoinTime_vs_heta_DATA_nocut", "CTime vs HMS #beta  no cut; Coin_Time; HMS_#beta", 500, -50, 50, 500, 0, 2)
 
 H_ct_ep_vs_H_MMp2_DATA = ROOT.TH2D("H_ct_ep_vs_H_MMp2_DATA","Electron-Proton CTime vs (MM)^{2}_{p}; e p Coin_Time; (MM)^{2}_{p}", 200, -10, 10, 200, -0.1, 0.1)
 #H_ct_ep_vs_H_MMp2_DATA_rand = ROOT.TH2D("H_ct_ep_vs_H_MMp2_DATA_rand","Electron-Proton CTime vs (MM)^{2}_{p}; e p Coin_Time; (MM)^{2}_{p}", 200, -10, 10, 200, -0.1, 0.1)
