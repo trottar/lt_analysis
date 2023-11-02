@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-02 08:42:54 trottar"
+# Time-stamp: "2023-11-02 08:49:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -543,8 +543,17 @@ H_ct_ep_DUMMY = ROOT.TH1D("H_ct_ep_DUMMY", "Electron-Proton CTime", 200, -10, 10
 H_ct_ep_DUMMY_nocut = ROOT.TH1D("H_ct_ep_DUMMY_nocut", "Electron-Proton CTime", 200, -10, 10)
 H_ct_ep_DUMMY_nopid = ROOT.TH1D("H_ct_ep_DUMMY_nopid", "Electron-Proton CTime", 200, -10, 10)
 
-CoinTime_vs_eta_DATA = ROOT.TH2D("CoinTime_vs_eta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
-CoinTime_vs_eta_DATA_nocut = ROOT.TH2D("CoinTime_vs_eta_DATA_nocut", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
+H_peta_DATA = ROOT.TH1D("H_peta_DATA", "SHMS_#beta", 200, 0, 2)
+H_peta_DATA_nocut = ROOT.TH1D("H_peta_DATA_nocut", "SHMS_#beta", 200, 0, 2)
+
+H_heta_DATA = ROOT.TH1D("H_heta_DATA", "SHMS_#beta", 200, 0, 2)
+H_heta_DATA_nocut = ROOT.TH1D("H_heta_DATA_nocut", "SHMS_#beta", 200, 0, 2)
+
+CoinTime_vs_peta_DATA = ROOT.TH2D("CoinTime_vs_peta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
+CoinTime_vs_peta_DATA_nocut = ROOT.TH2D("CoinTime_vs_peta_DATA_nocut", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 500, -50, 50, 500, 0, 2)
+
+CoinTime_vs_heta_DATA = ROOT.TH2D("CoinTime_vs_heta_DATA", "CTime vs HMS #beta; Coin_Time; HMS_#beta", 500, -50, 50, 500, 0, 2)
+CoinTime_vs_heta_DATA_nocut = ROOT.TH2D("CoinTime_vs_heta_DATA_nocut", "CTime vs HMS #beta; Coin_Time; HMS_#beta", 500, -50, 50, 500, 0, 2)
 
 H_ct_ep_vs_H_MMp2_DATA = ROOT.TH2D("H_ct_ep_vs_H_MMp2_DATA","Electron-Proton CTime vs (MM)^{2}_{p}; e p Coin_Time; (MM)^{2}_{p}", 200, -10, 10, 200, -0.1, 0.1)
 #H_ct_ep_vs_H_MMp2_DATA_rand = ROOT.TH2D("H_ct_ep_vs_H_MMp2_DATA_rand","Electron-Proton CTime vs (MM)^{2}_{p}; e p Coin_Time; (MM)^{2}_{p}", 200, -10, 10, 200, -0.1, 0.1)
@@ -655,7 +664,11 @@ for evt in TBRANCH_DATA:
       H_ct_ep_vs_H_MMp2_DATA.Fill(evt.CTime_epCoinTime_ROC1, evt.MMp)
       H_ct_ep_DATA.Fill(evt.CTime_epCoinTime_ROC1)
 
-      CoinTime_vs_eta_DATA.Fill(evt.CTime_epCoinTime_ROC1, evt.P_gtr_eta)
+      H_peta_DATA.Fill(evt.P_gtr_eta)
+      H_heta_DATA.Fill(evt.H_gtr_eta)
+      
+      CoinTime_vs_peta_DATA.Fill(evt.CTime_epCoinTime_ROC1, evt.P_gtr_eta)
+      CoinTime_vs_heta_DATA.Fill(evt.CTime_epCoinTime_ROC1, evt.H_gtr_eta)
       
       H_emiss_vs_H_hsdelta_DATA.Fill(evt.emiss, evt.hsdelta)
       H_emiss_vs_H_ssdelta_DATA.Fill(evt.emiss, evt.ssdelta)
@@ -808,7 +821,11 @@ for evt in TBRANCH_DATA_nocut:
 
   H_ct_ep_DATA_nocut.Fill(evt.CTime_epCoinTime_ROC1)
 
-  CoinTime_vs_eta_DATA_nocut.Fill(evt.CTime_epCoinTime_ROC1, evt.P_gtr_eta)
+  H_peta_DATA_nocut.Fill(evt.P_gtr_eta)
+  H_heta_DATA_nocut.Fill(evt.H_gtr_eta)
+  
+  CoinTime_vs_peta_DATA_nocut.Fill(evt.CTime_epCoinTime_ROC1, evt.P_gtr_eta)
+  CoinTime_vs_heta_DATA_nocut.Fill(evt.CTime_epCoinTime_ROC1, evt.H_gtr_eta)
   
   H_ssxfp_DATA_nocut.Fill(evt.ssxfp)
   H_ssyfp_DATA_nocut.Fill(evt.ssyfp)
@@ -1820,17 +1837,53 @@ l_eff_plt.Draw()
 
 eff_plt.Print(outputpdf + '(')
 
-c_ctvbeta = TCanvas()
+c_pbeta = TCanvas()
 
-c_ctvbeta.Divide(2,1)
+c_pbeta.Divide(2,1)
 
-c_ctvbeta.cd(1)
-CoinTime_vs_eta_DATA_nocut.Draw("colz")
+c_pbeta.cd(1)
+H_peta_DATA_nocut.Draw("colz")
 
-c_ctvbeta.cd(2)
-CoinTime_vs_eta_DATA.Draw("colz")
+c_pbeta.cd(2)
+H_peta_DATA.Draw("colz")
 
-c_ctvbeta.Print(outputpdf)
+c_pbeta.Print(outputpdf)
+
+c_hbeta = TCanvas()
+
+c_hbeta.Divide(2,1)
+
+c_hbeta.cd(1)
+H_heta_DATA_nocut.Draw("colz")
+
+c_hbeta.cd(2)
+H_heta_DATA.Draw("colz")
+
+c_hbeta.Print(outputpdf)
+
+c_ctvpbeta = TCanvas()
+
+c_ctvpbeta.Divide(2,1)
+
+c_ctvpbeta.cd(1)
+CoinTime_vs_peta_DATA_nocut.Draw("colz")
+
+c_ctvpbeta.cd(2)
+CoinTime_vs_peta_DATA.Draw("colz")
+
+c_ctvpbeta.Print(outputpdf)
+
+c_ctvhbeta = TCanvas()
+
+c_ctvhbeta.Divide(2,1)
+
+c_ctvhbeta.cd(1)
+CoinTime_vs_peta_DATA_nocut.Draw("colz")
+
+c_ctvhbeta.cd(2)
+CoinTime_vs_peta_DATA.Draw("colz")
+
+c_ctvhbeta.Print(outputpdf)
 
 c_pid = TCanvas()
 l_pid = ROOT.TLegend(0.115,0.55,0.33,0.9)
