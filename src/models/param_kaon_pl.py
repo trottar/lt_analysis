@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-08 15:42:13 trottar"
+# Time-stamp: "2023-11-08 15:45:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -26,10 +26,10 @@ def iterWeight(arg_str):
     # Extract individual values from the list
     q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params = args
 
-    q2_gev = q2_set/1e6 # Already GeV
-    t_gev = t_sim/1e6  # Already GeV
+    q2_gev = q2_set # Already GeV
+    t_gev = t_sim  # Already GeV
     s = w_sim**2
-    s_gev = s/1e6 # Already GeV
+    s_gev = s # Already GeV
 
     tmp = q2_gev
     
