@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-08 18:16:40 trottar"
+# Time-stamp: "2023-11-08 18:24:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,8 +31,8 @@ def iterWeight(arg_str):
     s = w_sim**2
     s_gev = s # Already GeV
 
-    if Q2 == 2.1:
-        Q2 = 2.115
+    if q2_set == 2.1:
+        q2_set = 2.115
     
     # Calculate tav, ftav, ft
     #tav = (0.0735 + 0.028 * math.log(q2_set)) * q2_set
