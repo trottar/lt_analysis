@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-03 15:32:37 trottar"
+# Time-stamp: "2023-11-08 15:42:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,6 +31,8 @@ def iterWeight(arg_str):
     s = w_sim**2
     s_gev = s/1e6 # Already GeV
 
+    tmp = q2_gev
+    
     # Calculate tav, ftav, ft
     #tav = (0.0735 + 0.028 * math.log(q2_gev)) * q2_gev
     # RLT (10/8/2023): Testing new tav parameterization
@@ -69,4 +71,5 @@ def iterWeight(arg_str):
     print("wtn",wtn)
     print("wt_sim",wt_sim)
     
-    return [float(wtn),float(sig)]
+    #return [float(wtn),float(sig)]
+    return [float(wtn),float(tmp)]
