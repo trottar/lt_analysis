@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-11-03 14:51:51 trottar"
+# Time-stamp: "2023-11-08 16:03:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,7 +58,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     
     formatted_date  = inpDict["formatted_date"]
     ParticleType  = inpDict["ParticleType"]
-    Q2 = inpDict["Q2"].replace("p","")
+    Q2 = inpDict["Q2"].replace("p",".")
     POL = inpDict["POL"]
     
     if int(POL) == 1:
