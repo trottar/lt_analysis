@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-11-08 17:56:32 trottar"
+# Time-stamp: "2023-11-08 18:42:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,8 +124,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
       #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
-      # phipq == phicm
-      inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.ti, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+      #       This goes for Q2i, Wi, and phiqpi as well
+      inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #print("-"*25,"\n",i,"\n",inp_param)
 
