@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-08 17:28:16 trottar"
+# Time-stamp: "2023-11-08 17:56:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,8 +25,6 @@ def iterWeight(arg_str):
 
     # Extract individual values from the list
     q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params = args
-
-    print(q2_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim)
     
     q2_gev = q2_sim # Already GeV
     t_gev = t_sim  # Already GeV, issue here!!! t_sim makes no sense
@@ -39,8 +37,6 @@ def iterWeight(arg_str):
     tav=(0.1112 + 0.0066*math.log(q2_set))*q2_set
     ftav = (abs(t_gev) - tav) / tav
     ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2
-
-    tmp = ftav
     
     # Calculate sigl, sigt, siglt, sigtt, sig219, sig
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12 = params
@@ -73,5 +69,4 @@ def iterWeight(arg_str):
     #print("wtn",wtn)
     #print("wt_sim",wt_sim)
     
-    #return [float(wtn),float(sig)]
-    return [float(wtn),float(tmp)]
+    return [float(wtn),float(sig)]

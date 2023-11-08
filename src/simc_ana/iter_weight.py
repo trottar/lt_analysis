@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-11-08 17:43:57 trottar"
+# Time-stamp: "2023-11-08 17:56:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,14 +122,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       TBRANCH_SIMC.GetEntry(i)
 
-      # phipq == phicm, notice ti is used instead of t
+      # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
+      #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
+      # phipq == phicm
       inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.ti, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #print("-"*25,"\n",i,"\n",inp_param)
 
       iter_lst = iterWeight(inp_param)
-
-      print(iter_lst)
 
       # Set the value of iweight
       iweight[0] = iter_lst[0]
