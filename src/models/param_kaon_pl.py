@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-08 18:56:04 trottar"
+# Time-stamp: "2023-11-08 19:07:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,7 +30,16 @@ def iterWeight(arg_str):
     t_gev = t_sim  # Already GeV, issue here!!! t_sim makes no sense
     s = w_sim**2
     s_gev = s # Already GeV
-    
+
+    ##############
+    # HARD CODED #
+    ##############
+    if q2_set == 2.1:
+        q2_set = 2.115
+    ##############
+    ##############
+    ##############
+
     # Calculate tav, ftav, ft
     #tav = (0.0735 + 0.028 * math.log(q2_set)) * q2_set
     # RLT (10/8/2023): Testing new tav parameterization
