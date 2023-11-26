@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-26 11:54:01 trottar"
+# Time-stamp: "2023-11-26 11:56:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2959,7 +2959,7 @@ l_W.Draw()
 
 CW.Print(outputpdf + ')')
 
-print("{:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e}".format(b_mean_W_simc,b_mean_W_data,b_mean_pmz_simc,b_mean_pmz_data,b_mean_pmy_simc,b_mean_pmy_data,b_mean_pmx_simc,b_mean_pmx_data,b_mean_emiss_simc,b_mean_emiss_data))
+print("{:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e}".format(b_mean_W_simc,b_mean_err_W_simc,b_mean_W_data,b_mean_err_W_data,b_mean_pmz_simc,b_mean_err_pmz_simc,b_mean_pmz_data,b_mean_err_pmz_data,b_mean_pmy_simc,b_mean_err_pmy_simc,b_mean_pmy_data,b_mean_err_pmy_data,b_mean_pmx_simc,b_mean_err_pmx_simc,b_mean_pmx_data,b_mean_err_pmx_data,b_mean_emiss_simc,b_mean_err_emiss_simc,b_mean_emiss_data,b_mean_err_emiss_data))
 
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
