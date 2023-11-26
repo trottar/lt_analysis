@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-02 08:53:01 trottar"
+# Time-stamp: "2023-11-26 11:51:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1789,8 +1789,9 @@ def fit_gaussian(hist, x_min, x_max, dtype):
         fit_func.SetLineColor(kGreen)    
     
     mean = fit_func.GetParameter(1)
+    mean_err = fit_func.GetParError(1)
     
-    return mean
+    return [mean, mean_err]
 
 ################################################################################################################################################
 # Removes stat box
@@ -2061,17 +2062,16 @@ bpm_tar_x_DATA.SetLineColor(kRed)
 bpm_tar_x_DATA_nocut.SetLineColor(kCyan)
 bpm_tar_x_DATA_nopid.SetLineColor(kMagenta)
 
-b_mean_bpm_tar_x_data = fit_gaussian(bpm_tar_x_DATA, -0.1, 0.1, "data")
+tmp_b_mean_bpm_tar_x_data = fit_gaussian(bpm_tar_x_DATA, -0.1, 0.1, "data")
+b_mean_bpm_tar_x_data = tmp_b_mean_bpm_tar_x_data[0]
+b_mean_err_bpm_tar_x_data = tmp_b_mean_err_bpm_tar_x_data[1]
 
 bpm_tar_x_DATA.Draw("E1")
 if DEBUG:
     bpm_tar_x_DATA_nocut.Draw("same, E1")
     bpm_tar_x_DATA_nopid.Draw("same, E1")
 
-l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = {:.4e}".format( b_mean_bpm_tar_x_data))
-if DEBUG:
-    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nocut,"DATA (no cut), Mean = {:.4e}".format( b_mean_bpm_tar_x_data_nocut))
-    l_bpm_tar_x.AddEntry(bpm_tar_x_DATA_nopid,"DATA (no PID cut), Mean = {:.4e}".format( b_mean_bpm_tar_x_data_nopid))
+l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = {:.4e}$\pm${:.4e}".format( b_mean_bpm_tar_x_data, b_mean_err_bpm_tar_x_data))
     
 b_stddev_bpm_tar_x_data = (bpm_tar_x_DATA.GetStdDev())
 b_stddev_bpm_tar_x_data_nocut = (bpm_tar_x_DATA_nocut.GetStdDev())
@@ -2093,14 +2093,16 @@ bpm_tar_y_DATA.SetLineColor(kRed)
 bpm_tar_y_DATA_nocut.SetLineColor(kCyan)
 bpm_tar_y_DATA_nopid.SetLineColor(kMagenta)
 
-b_mean_bpm_tar_y_data = fit_gaussian(bpm_tar_y_DATA, 0.0, 0.2, "data")
+tmp_b_mean_bpm_tar_y_data = fit_gaussian(bpm_tar_y_DATA, 0.0, 0.2, "data")
+b_mean_bpm_tar_y_data = tmp_b_mean_bpm_tar_y_data[0]
+b_mean_err_bpm_tar_y_data = tmp_b_mean_err_bpm_tar_y_data[1]
 
 bpm_tar_y_DATA.Draw("E1")
 if DEBUG:
     bpm_tar_y_DATA_nocut.Draw("same, E1")
     bpm_tar_y_DATA_nopid.Draw("same, E1")
 
-l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.4e}".format( b_mean_bpm_tar_y_data))
+l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.4e}$\pm${:.4e}".format( b_mean_bpm_tar_y_data, b_mean_err_bpm_tar_y_data))
 if DEBUG:
     l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = {:.4e}".format( b_mean_bpm_tar_y_data_nocut))
     l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = {:.4e}".format( b_mean_bpm_tar_y_data_nopid))
@@ -2713,9 +2715,15 @@ H_pmiss_DATA_nocut.SetLineColor(kCyan)
 H_pmiss_DATA_nopid.SetLineColor(kMagenta)
 H_pmiss_DUMMY.SetLineColor(kGreen)
 
-b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.1, 0.1, "simc")
-b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.1, 0.1, "data")
-b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.1, 0.1, "dummy")
+tmp_b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.1, 0.1, "simc")
+b_mean_pmiss_simc = tmp_b_mean_pmiss_simc[0]
+b_mean_err_pmiss_simc = tmp_b_mean_err_pmiss_simc[1]
+tmp_b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.1, 0.1, "data")
+b_mean_pmiss_data = tmp_b_mean_pmiss_data[0]
+b_mean_err_pmiss_data = tmp_b_mean_err_pmiss_data[1]
+tmp_b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.1, 0.1, "dummy")
+b_mean_pmiss_dummy = tmp_b_mean_pmiss_dummy[0]
+b_mean_err_pmiss_dummy = tmp_b_mean_err_pmiss_dummy[1]
 
 H_pmiss_SIMC.Draw("E1")
 H_pmiss_DATA.Draw("same, E1")
@@ -2732,16 +2740,10 @@ b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
 
 l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
 l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
-if DEBUG:
-    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmiss_data_nocut))
-    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmiss_data_nopid))
 l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmiss_dummy))
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_pmiss_simc))
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}".format(b_mean_pmiss_data))
-if DEBUG:
-    l_pmiss.AddEntry(H_pmiss_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_pmiss_data_nocut))
-    l_pmiss.AddEntry(H_pmiss_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_pmiss_data_nopid))
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_pmiss_dummy))
+l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_simc, b_mean_err_pmiss_simc))))
+l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_data, b_mean_err_pmiss_data))))
+l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_dummy, b_mean_err_pmiss_dummy))))
 
 l_pmiss.Draw()
 
@@ -2755,9 +2757,15 @@ H_emiss_DATA_nocut.SetLineColor(kCyan)
 H_emiss_DATA_nopid.SetLineColor(kMagenta)
 H_emiss_DUMMY.SetLineColor(kGreen)
 
-b_mean_emiss_simc = fit_gaussian(H_emiss_SIMC,-0.1, 0.1, "simc")
-b_mean_emiss_data = fit_gaussian(H_emiss_DATA,-0.1, 0.1, "data")
-b_mean_emiss_dummy = fit_gaussian(H_emiss_DUMMY,-0.1, 0.1, "dummy")
+tmp_b_mean_emiss_simc = fit_gaussian(H_emiss_SIMC,-0.1, 0.1, "simc")
+b_mean_emiss_simc = tmp_b_mean_emiss_simc[0]
+b_mean_err_emiss_simc = tmp_b_mean_err_emiss_simc[1]
+tmp_b_mean_emiss_data = fit_gaussian(H_emiss_DATA,-0.1, 0.1, "data")
+b_mean_emiss_data = tmp_b_mean_emiss_data[0]
+b_mean_err_emiss_data = tmp_b_mean_err_emiss_data[1]
+tmp_b_mean_emiss_dummy = fit_gaussian(H_emiss_DUMMY,-0.1, 0.1, "dummy")
+b_mean_emiss_dummy = tmp_b_mean_emiss_dummy[0]
+b_mean_err_emiss_dummy = tmp_b_mean_err_emiss_dummy[1]
 
 H_emiss_SIMC.Draw("E1")
 H_emiss_DATA.Draw("same, E1")
@@ -2774,16 +2782,10 @@ b_int_emiss_dummy = int(H_emiss_DUMMY.Integral())
 
 l_emiss.AddEntry(H_emiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_emiss_simc))
 l_emiss.AddEntry(H_emiss_DATA,"DATA, INT = {:.0f}".format( b_int_emiss_data))
-if DEBUG:
-    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_emiss_data_nocut))
-    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_emiss_data_nopid))
 l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_emiss_dummy))
-l_emiss.AddEntry(H_emiss_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_emiss_simc))
-l_emiss.AddEntry(H_emiss_DATA,"DATA, MEAN = {:.4e}".format(b_mean_emiss_data))
-if DEBUG:
-    l_emiss.AddEntry(H_emiss_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_emiss_data_nocut))
-    l_emiss.AddEntry(H_emiss_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_emiss_data_nopid))
-l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_emiss_dummy))
+l_emiss.AddEntry(H_emiss_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_emiss_simc, b_mean_err_emiss_simc))
+l_emiss.AddEntry(H_emiss_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_emiss_data, b_mean_err_emiss_data))
+l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_emiss_dummy, b_mean_err_emiss_dummy))
 
 l_emiss.Draw()
 
@@ -2797,9 +2799,15 @@ H_pmx_DATA_nocut.SetLineColor(kCyan)
 H_pmx_DATA_nopid.SetLineColor(kMagenta)
 H_pmx_DUMMY.SetLineColor(kGreen)
 
-b_mean_pmx_simc = fit_gaussian(H_pmx_SIMC,-0.1, 0.1, "simc")
-b_mean_pmx_data = fit_gaussian(H_pmx_DATA,-0.1, 0.1, "data")
-b_mean_pmx_dummy = fit_gaussian(H_pmx_DUMMY,-0.1, 0.1, "dummy")
+tmp_b_mean_pmx_simc = fit_gaussian(H_pmx_SIMC,-0.1, 0.1, "simc")
+b_mean_pmx_simc = tmp_b_mean_pmx_simc[0]
+b_mean_err_pmx_simc = tmp_b_mean_err_pmx_simc[1]
+tmp_b_mean_pmx_data = fit_gaussian(H_pmx_DATA,-0.1, 0.1, "data")
+b_mean_pmx_data = tmp_b_mean_pmx_data[0]
+b_mean_err_pmx_data = tmp_b_mean_err_pmx_data[1]
+tmp_b_mean_pmx_dummy = fit_gaussian(H_pmx_DUMMY,-0.1, 0.1, "dummy")
+b_mean_pmx_dummy = tmp_b_mean_pmx_dummy[0]
+b_mean_err_pmx_dummy = tmp_b_mean_err_pmx_dummy[1]
 
 H_pmx_SIMC.Draw("E1")
 H_pmx_DATA.Draw("same, E1")
@@ -2816,16 +2824,10 @@ b_int_pmx_dummy = int(H_pmx_DUMMY.Integral())
 
 l_pmx.AddEntry(H_pmx_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmx_simc))
 l_pmx.AddEntry(H_pmx_DATA,"DATA, INT = {:.0f}".format( b_int_pmx_data))
-if DEBUG:
-    l_pmx.AddEntry(H_pmx_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmx_data_nocut))
-    l_pmx.AddEntry(H_pmx_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmx_data_nopid))
 l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmx_dummy))
-l_pmx.AddEntry(H_pmx_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_pmx_simc))
-l_pmx.AddEntry(H_pmx_DATA,"DATA, MEAN = {:.4e}".format(b_mean_pmx_data))
-if DEBUG:
-    l_pmx.AddEntry(H_pmx_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_pmx_data_nocut))
-    l_pmx.AddEntry(H_pmx_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_pmx_data_nopid))
-l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_pmx_dummy))
+l_pmx.AddEntry(H_pmx_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmx_simc, b_mean_err_pmx_simc))
+l_pmx.AddEntry(H_pmx_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmx_data, b_mean_err_pmx_data))
+l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmx_dummy, b_mean_err_pmx_dummy))
 
 l_pmx.Draw()
 
@@ -2839,9 +2841,15 @@ H_pmy_DATA_nocut.SetLineColor(kCyan)
 H_pmy_DATA_nopid.SetLineColor(kMagenta)
 H_pmy_DUMMY.SetLineColor(kGreen)
 
-b_mean_pmy_simc = fit_gaussian(H_pmy_SIMC,-0.1, 0.1, "simc")
-b_mean_pmy_data = fit_gaussian(H_pmy_DATA,-0.1, 0.1, "data")
-b_mean_pmy_dummy = fit_gaussian(H_pmy_DUMMY,-0.1, 0.1, "dummy")
+tmp_b_mean_pmy_simc = fit_gaussian(H_pmy_SIMC,-0.1, 0.1, "simc")
+b_mean_pmy_simc = tmp_b_mean_pmy_simc[0]
+b_mean_err_pmy_simc = tmp_b_mean_err_pmy_simc[1]
+tmp_b_mean_pmy_data = fit_gaussian(H_pmy_DATA,-0.1, 0.1, "data")
+b_mean_pmy_data = tmp_b_mean_pmy_data[0]
+b_mean_err_pmy_data = tmp_b_mean_err_pmy_data[1]
+tmp_b_mean_pmy_dummy = fit_gaussian(H_pmy_DUMMY,-0.1, 0.1, "dummy")
+b_mean_pmy_dummy = tmp_b_mean_pmy_dummy[0]
+b_mean_err_pmy_dummy = tmp_b_mean_err_pmy_dummy[1]
 
 H_pmy_SIMC.Draw("E1")
 H_pmy_DATA.Draw("same, E1")
@@ -2858,16 +2866,10 @@ b_int_pmy_dummy = int(H_pmy_DUMMY.Integral())
 
 l_pmy.AddEntry(H_pmy_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmy_simc))
 l_pmy.AddEntry(H_pmy_DATA,"DATA, INT = {:.0f}".format( b_int_pmy_data))
-if DEBUG:
-    l_pmy.AddEntry(H_pmy_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmy_data_nocut))
-    l_pmy.AddEntry(H_pmy_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmy_data_nopid))
 l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmy_dummy))
-l_pmy.AddEntry(H_pmy_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_pmy_simc))
-l_pmy.AddEntry(H_pmy_DATA,"DATA, MEAN = {:.4e}".format(b_mean_pmy_data))
-if DEBUG:
-    l_pmy.AddEntry(H_pmy_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_pmy_data_nocut))
-    l_pmy.AddEntry(H_pmy_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_pmy_data_nopid))
-l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_pmy_dummy))
+l_pmy.AddEntry(H_pmy_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmy_simc, b_mean_err_pmy_simc))
+l_pmy.AddEntry(H_pmy_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmy_data, b_mean_err_pmy_data))
+l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmy_dummy, b_mean_err_pmy_dummy))
 
 l_pmy.Draw()
 
@@ -2881,9 +2883,15 @@ H_pmz_DATA_nocut.SetLineColor(kCyan)
 H_pmz_DATA_nopid.SetLineColor(kMagenta)
 H_pmz_DUMMY.SetLineColor(kGreen)
 
-b_mean_pmz_simc = fit_gaussian(H_pmz_SIMC,-0.1, 0.1, "simc")
-b_mean_pmz_data = fit_gaussian(H_pmz_DATA,-0.1, 0.1, "data")
-b_mean_pmz_dummy = fit_gaussian(H_pmz_DUMMY,-0.1, 0.1, "dummy")
+tmp_b_mean_pmz_simc = fit_gaussian(H_pmz_SIMC,-0.1, 0.1, "simc")
+b_mean_pmz_simc = tmp_b_mean_pmz_simc[0]
+b_mean_err_pmz_simc = tmp_b_mean_err_pmz_simc[1]
+tmp_b_mean_pmz_data = fit_gaussian(H_pmz_DATA,-0.1, 0.1, "data")
+b_mean_pmz_data = tmp_b_mean_pmz_data[0]
+b_mean_err_pmz_data = tmp_b_mean_err_pmz_data[1]
+tmp_b_mean_pmz_dummy = fit_gaussian(H_pmz_DUMMY,-0.1, 0.1, "dummy")
+b_mean_pmz_dummy = tmp_b_mean_pmz_dummy[0]
+b_mean_err_pmz_dummy = tmp_b_mean_err_pmz_dummy[1]
 
 H_pmz_SIMC.Draw("E1")
 H_pmz_DATA.Draw("same, E1")
@@ -2900,16 +2908,10 @@ b_int_pmz_dummy = int(H_pmz_DUMMY.Integral())
 
 l_pmz.AddEntry(H_pmz_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmz_simc))
 l_pmz.AddEntry(H_pmz_DATA,"DATA, INT = {:.0f}".format( b_int_pmz_data))
-if DEBUG:
-    l_pmz.AddEntry(H_pmz_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_pmz_data_nocut))
-    l_pmz.AddEntry(H_pmz_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_pmz_data_nopid))
 l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmz_dummy))
-l_pmz.AddEntry(H_pmz_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_pmz_simc))
-l_pmz.AddEntry(H_pmz_DATA,"DATA, MEAN = {:.4e}".format(b_mean_pmz_data))
-if DEBUG:
-    l_pmz.AddEntry(H_pmz_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_pmz_data_nocut))
-    l_pmz.AddEntry(H_pmz_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_pmz_data_nopid))
-l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_pmz_dummy))
+l_pmz.AddEntry(H_pmz_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmz_simc, b_mean_err_pmz_simc))
+l_pmz.AddEntry(H_pmz_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmz_data, b_mean_err_pmz_data))
+l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmz_dummy, b_mean_err_pmz_dummy))
 
 l_pmz.Draw()
 
@@ -2923,9 +2925,15 @@ H_W_DATA_nocut.SetLineColor(kCyan)
 H_W_DATA_nopid.SetLineColor(kMagenta)
 H_W_DUMMY.SetLineColor(kGreen)
 
-b_mean_W_simc = fit_gaussian(H_W_SIMC,0.7, 1.1, "simc")
-b_mean_W_data = fit_gaussian(H_W_DATA,0.7, 1.1, "data")
-b_mean_W_dummy = fit_gaussian(H_W_DUMMY,0.7, 1.1, "dummy")
+tmp_b_mean_W_simc = fit_gaussian(H_W_SIMC,0.7, 1.1, "simc")
+b_mean_W_simc = tmp_b_mean_W_simc[0]
+b_mean_err_W_simc = tmp_b_mean_err_W_simc[1]
+tmp_b_mean_W_data = fit_gaussian(H_W_DATA,0.7, 1.1, "data")
+b_mean_W_data = tmp_b_mean_W_data[0]
+b_mean_err_W_data = tmp_b_mean_err_W_data[1]
+tmp_b_mean_W_dummy = fit_gaussian(H_W_DUMMY,0.7, 1.1, "dummy")
+b_mean_W_dummy = tmp_b_mean_W_dummy[0]
+b_mean_err_W_dummy = tmp_b_mean_err_W_dummy[1]
 
 H_W_SIMC.Draw("E1")
 H_W_DATA.Draw("same, E1")
@@ -2942,16 +2950,10 @@ b_int_W_dummy = int(H_W_DUMMY.Integral())
 
 l_W.AddEntry(H_W_SIMC,"SIMC, INT = {:.0f}".format( b_int_W_simc))
 l_W.AddEntry(H_W_DATA,"DATA, INT = {:.0f}".format( b_int_W_data))
-if DEBUG:
-    l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), INT = {:.0f}".format( b_int_W_data_nocut))
-    l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), INT = {:.0f}".format( b_int_W_data_nopid))
 l_W.AddEntry(H_W_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_W_dummy))
-l_W.AddEntry(H_W_SIMC,"SIMC, MEAN = {:.4e}".format(b_mean_W_simc))
-l_W.AddEntry(H_W_DATA,"DATA, MEAN = {:.4e}".format(b_mean_W_data))
-if DEBUG:
-    l_W.AddEntry(H_W_DATA_nocut,"DATA (no cut), MEAN = {:.4e}".format(b_mean_W_data_nocut))
-    l_W.AddEntry(H_W_DATA_nopid,"DATA (no PID cut), MEAN = {:.4e}".format(b_mean_W_data_nopid))
-l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {:.4e}".format(b_mean_W_dummy))
+l_W.AddEntry(H_W_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_W_simc, b_mean_err_W_simc))
+l_W.AddEntry(H_W_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_W_data, b_mean_err_W_data))
+l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_W_dummy, b_mean_err_W_dummy))
 
 l_W.Draw()
 
