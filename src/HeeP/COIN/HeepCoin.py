@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-26 11:56:55 trottar"
+# Time-stamp: "2023-11-26 12:02:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2071,7 +2071,7 @@ if DEBUG:
     bpm_tar_x_DATA_nocut.Draw("same, E1")
     bpm_tar_x_DATA_nopid.Draw("same, E1")
 
-l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = {:.4e}$\pm${:.4e}".format( b_mean_bpm_tar_x_data, b_mean_err_bpm_tar_x_data))
+l_bpm_tar_x.AddEntry(bpm_tar_x_DATA,"DATA, Mean = {:.4e}\pm{:.4e}".format( b_mean_bpm_tar_x_data, b_mean_err_bpm_tar_x_data))
     
 b_stddev_bpm_tar_x_data = (bpm_tar_x_DATA.GetStdDev())
 b_stddev_bpm_tar_x_data_nocut = (bpm_tar_x_DATA_nocut.GetStdDev())
@@ -2102,7 +2102,7 @@ if DEBUG:
     bpm_tar_y_DATA_nocut.Draw("same, E1")
     bpm_tar_y_DATA_nopid.Draw("same, E1")
 
-l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.4e}$\pm${:.4e}".format( b_mean_bpm_tar_y_data, b_mean_err_bpm_tar_y_data))
+l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.4e}\pm{:.4e}".format( b_mean_bpm_tar_y_data, b_mean_err_bpm_tar_y_data))
 if DEBUG:
     l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = {:.4e}".format( b_mean_bpm_tar_y_data_nocut))
     l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = {:.4e}".format( b_mean_bpm_tar_y_data_nopid))
@@ -2741,9 +2741,9 @@ b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
 l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
 l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
 l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmiss_dummy))
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_simc, b_mean_err_pmiss_simc))
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_data, b_mean_err_pmiss_data))
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_dummy, b_mean_err_pmiss_dummy))
+l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmiss_simc, b_mean_err_pmiss_simc))
+l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmiss_data, b_mean_err_pmiss_data))
+l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmiss_dummy, b_mean_err_pmiss_dummy))
 
 l_pmiss.Draw()
 
@@ -2783,9 +2783,9 @@ b_int_emiss_dummy = int(H_emiss_DUMMY.Integral())
 l_emiss.AddEntry(H_emiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_emiss_simc))
 l_emiss.AddEntry(H_emiss_DATA,"DATA, INT = {:.0f}".format( b_int_emiss_data))
 l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_emiss_dummy))
-l_emiss.AddEntry(H_emiss_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_emiss_simc, b_mean_err_emiss_simc))
-l_emiss.AddEntry(H_emiss_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_emiss_data, b_mean_err_emiss_data))
-l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_emiss_dummy, b_mean_err_emiss_dummy))
+l_emiss.AddEntry(H_emiss_SIMC,"SIMC, MEAN = {:.4e}\pm{:.4e}".format(b_mean_emiss_simc, b_mean_err_emiss_simc))
+l_emiss.AddEntry(H_emiss_DATA,"DATA, MEAN = {:.4e}\pm{:.4e}".format(b_mean_emiss_data, b_mean_err_emiss_data))
+l_emiss.AddEntry(H_emiss_DUMMY,"DUMMY, MEAN = {:.4e}\pm{:.4e}".format(b_mean_emiss_dummy, b_mean_err_emiss_dummy))
 
 l_emiss.Draw()
 
@@ -2825,9 +2825,9 @@ b_int_pmx_dummy = int(H_pmx_DUMMY.Integral())
 l_pmx.AddEntry(H_pmx_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmx_simc))
 l_pmx.AddEntry(H_pmx_DATA,"DATA, INT = {:.0f}".format( b_int_pmx_data))
 l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmx_dummy))
-l_pmx.AddEntry(H_pmx_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmx_simc, b_mean_err_pmx_simc))
-l_pmx.AddEntry(H_pmx_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmx_data, b_mean_err_pmx_data))
-l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmx_dummy, b_mean_err_pmx_dummy))
+l_pmx.AddEntry(H_pmx_SIMC,"SIMC, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmx_simc, b_mean_err_pmx_simc))
+l_pmx.AddEntry(H_pmx_DATA,"DATA, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmx_data, b_mean_err_pmx_data))
+l_pmx.AddEntry(H_pmx_DUMMY,"DUMMY, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmx_dummy, b_mean_err_pmx_dummy))
 
 l_pmx.Draw()
 
@@ -2867,9 +2867,9 @@ b_int_pmy_dummy = int(H_pmy_DUMMY.Integral())
 l_pmy.AddEntry(H_pmy_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmy_simc))
 l_pmy.AddEntry(H_pmy_DATA,"DATA, INT = {:.0f}".format( b_int_pmy_data))
 l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmy_dummy))
-l_pmy.AddEntry(H_pmy_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmy_simc, b_mean_err_pmy_simc))
-l_pmy.AddEntry(H_pmy_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmy_data, b_mean_err_pmy_data))
-l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmy_dummy, b_mean_err_pmy_dummy))
+l_pmy.AddEntry(H_pmy_SIMC,"SIMC, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmy_simc, b_mean_err_pmy_simc))
+l_pmy.AddEntry(H_pmy_DATA,"DATA, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmy_data, b_mean_err_pmy_data))
+l_pmy.AddEntry(H_pmy_DUMMY,"DUMMY, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmy_dummy, b_mean_err_pmy_dummy))
 
 l_pmy.Draw()
 
@@ -2909,9 +2909,9 @@ b_int_pmz_dummy = int(H_pmz_DUMMY.Integral())
 l_pmz.AddEntry(H_pmz_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmz_simc))
 l_pmz.AddEntry(H_pmz_DATA,"DATA, INT = {:.0f}".format( b_int_pmz_data))
 l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmz_dummy))
-l_pmz.AddEntry(H_pmz_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmz_simc, b_mean_err_pmz_simc))
-l_pmz.AddEntry(H_pmz_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmz_data, b_mean_err_pmz_data))
-l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmz_dummy, b_mean_err_pmz_dummy))
+l_pmz.AddEntry(H_pmz_SIMC,"SIMC, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmz_simc, b_mean_err_pmz_simc))
+l_pmz.AddEntry(H_pmz_DATA,"DATA, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmz_data, b_mean_err_pmz_data))
+l_pmz.AddEntry(H_pmz_DUMMY,"DUMMY, MEAN = {:.4e}\pm{:.4e}".format(b_mean_pmz_dummy, b_mean_err_pmz_dummy))
 
 l_pmz.Draw()
 
@@ -2951,14 +2951,15 @@ b_int_W_dummy = int(H_W_DUMMY.Integral())
 l_W.AddEntry(H_W_SIMC,"SIMC, INT = {:.0f}".format( b_int_W_simc))
 l_W.AddEntry(H_W_DATA,"DATA, INT = {:.0f}".format( b_int_W_data))
 l_W.AddEntry(H_W_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_W_dummy))
-l_W.AddEntry(H_W_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_W_simc, b_mean_err_W_simc))
-l_W.AddEntry(H_W_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_W_data, b_mean_err_W_data))
-l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_W_dummy, b_mean_err_W_dummy))
+l_W.AddEntry(H_W_SIMC,"SIMC, MEAN = {:.4e}\pm{:.4e}".format(b_mean_W_simc, b_mean_err_W_simc))
+l_W.AddEntry(H_W_DATA,"DATA, MEAN = {:.4e}\pm{:.4e}".format(b_mean_W_data, b_mean_err_W_data))
+l_W.AddEntry(H_W_DUMMY,"DUMMY, MEAN = {:.4e}\pm{:.4e}".format(b_mean_W_dummy, b_mean_err_W_dummy))
 
 l_W.Draw()
 
 CW.Print(outputpdf + ')')
 
+print("W_simc W_simc W_data W_data pmz_simc pmz_simc pmz_data pmz_data pmy_simc pmy_simc pmy_data pmy_data pmx_simc pmx_simc pmx_data pmx_data emiss_simc emiss_simc emiss_data emiss_data")
 print("{:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e}".format(b_mean_W_simc,b_mean_err_W_simc,b_mean_W_data,b_mean_err_W_data,b_mean_pmz_simc,b_mean_err_pmz_simc,b_mean_pmz_data,b_mean_err_pmz_data,b_mean_pmy_simc,b_mean_err_pmy_simc,b_mean_pmy_data,b_mean_err_pmy_data,b_mean_pmx_simc,b_mean_err_pmx_simc,b_mean_pmx_data,b_mean_err_pmx_data,b_mean_emiss_simc,b_mean_err_emiss_simc,b_mean_emiss_data,b_mean_err_emiss_data))
 
 #############################################################################################################################################
