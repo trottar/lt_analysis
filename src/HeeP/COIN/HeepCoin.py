@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-26 11:51:46 trottar"
+# Time-stamp: "2023-11-26 11:54:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2741,9 +2741,9 @@ b_int_pmiss_dummy = int(H_pmiss_DUMMY.Integral())
 l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, INT = {:.0f}".format( b_int_pmiss_simc))
 l_pmiss.AddEntry(H_pmiss_DATA,"DATA, INT = {:.0f}".format( b_int_pmiss_data))
 l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, INT = {:.0f}".format( b_int_pmiss_dummy))
-l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_simc, b_mean_err_pmiss_simc))))
-l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_data, b_mean_err_pmiss_data))))
-l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_dummy, b_mean_err_pmiss_dummy))))
+l_pmiss.AddEntry(H_pmiss_SIMC,"SIMC, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_simc, b_mean_err_pmiss_simc))
+l_pmiss.AddEntry(H_pmiss_DATA,"DATA, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_data, b_mean_err_pmiss_data))
+l_pmiss.AddEntry(H_pmiss_DUMMY,"DUMMY, MEAN = {:.4e}$\pm${:.4e}".format(b_mean_pmiss_dummy, b_mean_err_pmiss_dummy))
 
 l_pmiss.Draw()
 
