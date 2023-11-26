@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-26 12:02:50 trottar"
+# Time-stamp: "2023-11-26 16:57:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2959,8 +2959,8 @@ l_W.Draw()
 
 CW.Print(outputpdf + ')')
 
-print("W_simc W_simc W_data W_data pmz_simc pmz_simc pmz_data pmz_data pmy_simc pmy_simc pmy_data pmy_data pmx_simc pmx_simc pmx_data pmx_data emiss_simc emiss_simc emiss_data emiss_data")
-print("{:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e} {:.4e}+/-{:.4e}".format(b_mean_W_simc,b_mean_err_W_simc,b_mean_W_data,b_mean_err_W_data,b_mean_pmz_simc,b_mean_err_pmz_simc,b_mean_pmz_data,b_mean_err_pmz_data,b_mean_pmy_simc,b_mean_err_pmy_simc,b_mean_pmy_data,b_mean_err_pmy_data,b_mean_pmx_simc,b_mean_err_pmx_simc,b_mean_pmx_data,b_mean_err_pmx_data,b_mean_emiss_simc,b_mean_err_emiss_simc,b_mean_emiss_data,b_mean_err_emiss_data))
+print("W_simc err_W_simc W_data err_W_data pmz_simc err_pmz_simc pmz_data err_pmz_data pmy_simc err_pmy_simc pmy_data err_pmy_data pmx_simc err_pmx_simc pmx_data err_pmx_data emiss_simc err_emiss_simc emiss_data err_emiss_data")
+print("{:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e}".format(b_mean_W_simc,b_mean_err_W_simc,b_mean_W_data,b_mean_err_W_data,b_mean_pmz_simc,b_mean_err_pmz_simc,b_mean_pmz_data,b_mean_err_pmz_data,b_mean_pmy_simc,b_mean_err_pmy_simc,b_mean_pmy_data,b_mean_err_pmy_data,b_mean_pmx_simc,b_mean_err_pmx_simc,b_mean_pmx_data,b_mean_err_pmx_data,b_mean_emiss_simc,b_mean_err_emiss_simc,b_mean_emiss_data,b_mean_err_emiss_data))
 
 #############################################################################################################################################
 # Create new root file with trees representing cut simc and data used above. Good for those who see python as...problematic
