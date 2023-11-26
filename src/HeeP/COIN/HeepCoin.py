@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-11-26 11:56:25 trottar"
+# Time-stamp: "2023-11-26 11:56:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2064,7 +2064,7 @@ bpm_tar_x_DATA_nopid.SetLineColor(kMagenta)
 
 tmp_b_mean_bpm_tar_x_data = fit_gaussian(bpm_tar_x_DATA, -0.1, 0.1, "data")
 b_mean_bpm_tar_x_data = tmp_b_mean_bpm_tar_x_data[0]
-b_mean_err_bpm_tar_x_data = tmp_b_mean_err_bpm_tar_x_data[1]
+b_mean_err_bpm_tar_x_data = tmp_b_mean_bpm_tar_x_data[1]
 
 bpm_tar_x_DATA.Draw("E1")
 if DEBUG:
@@ -2095,7 +2095,7 @@ bpm_tar_y_DATA_nopid.SetLineColor(kMagenta)
 
 tmp_b_mean_bpm_tar_y_data = fit_gaussian(bpm_tar_y_DATA, 0.0, 0.2, "data")
 b_mean_bpm_tar_y_data = tmp_b_mean_bpm_tar_y_data[0]
-b_mean_err_bpm_tar_y_data = tmp_b_mean_err_bpm_tar_y_data[1]
+b_mean_err_bpm_tar_y_data = tmp_b_mean_bpm_tar_y_data[1]
 
 bpm_tar_y_DATA.Draw("E1")
 if DEBUG:
@@ -2717,13 +2717,13 @@ H_pmiss_DUMMY.SetLineColor(kGreen)
 
 tmp_b_mean_pmiss_simc = fit_gaussian(H_pmiss_SIMC,-0.1, 0.1, "simc")
 b_mean_pmiss_simc = tmp_b_mean_pmiss_simc[0]
-b_mean_err_pmiss_simc = tmp_b_mean_err_pmiss_simc[1]
+b_mean_err_pmiss_simc = tmp_b_mean_pmiss_simc[1]
 tmp_b_mean_pmiss_data = fit_gaussian(H_pmiss_DATA,-0.1, 0.1, "data")
 b_mean_pmiss_data = tmp_b_mean_pmiss_data[0]
-b_mean_err_pmiss_data = tmp_b_mean_err_pmiss_data[1]
+b_mean_err_pmiss_data = tmp_b_mean_pmiss_data[1]
 tmp_b_mean_pmiss_dummy = fit_gaussian(H_pmiss_DUMMY,-0.1, 0.1, "dummy")
 b_mean_pmiss_dummy = tmp_b_mean_pmiss_dummy[0]
-b_mean_err_pmiss_dummy = tmp_b_mean_err_pmiss_dummy[1]
+b_mean_err_pmiss_dummy = tmp_b_mean_pmiss_dummy[1]
 
 H_pmiss_SIMC.Draw("E1")
 H_pmiss_DATA.Draw("same, E1")
@@ -2759,13 +2759,13 @@ H_emiss_DUMMY.SetLineColor(kGreen)
 
 tmp_b_mean_emiss_simc = fit_gaussian(H_emiss_SIMC,-0.1, 0.1, "simc")
 b_mean_emiss_simc = tmp_b_mean_emiss_simc[0]
-b_mean_err_emiss_simc = tmp_b_mean_err_emiss_simc[1]
+b_mean_err_emiss_simc = tmp_b_mean_emiss_simc[1]
 tmp_b_mean_emiss_data = fit_gaussian(H_emiss_DATA,-0.1, 0.1, "data")
 b_mean_emiss_data = tmp_b_mean_emiss_data[0]
-b_mean_err_emiss_data = tmp_b_mean_err_emiss_data[1]
+b_mean_err_emiss_data = tmp_b_mean_emiss_data[1]
 tmp_b_mean_emiss_dummy = fit_gaussian(H_emiss_DUMMY,-0.1, 0.1, "dummy")
 b_mean_emiss_dummy = tmp_b_mean_emiss_dummy[0]
-b_mean_err_emiss_dummy = tmp_b_mean_err_emiss_dummy[1]
+b_mean_err_emiss_dummy = tmp_b_mean_emiss_dummy[1]
 
 H_emiss_SIMC.Draw("E1")
 H_emiss_DATA.Draw("same, E1")
@@ -2801,13 +2801,13 @@ H_pmx_DUMMY.SetLineColor(kGreen)
 
 tmp_b_mean_pmx_simc = fit_gaussian(H_pmx_SIMC,-0.1, 0.1, "simc")
 b_mean_pmx_simc = tmp_b_mean_pmx_simc[0]
-b_mean_err_pmx_simc = tmp_b_mean_err_pmx_simc[1]
+b_mean_err_pmx_simc = tmp_b_mean_pmx_simc[1]
 tmp_b_mean_pmx_data = fit_gaussian(H_pmx_DATA,-0.1, 0.1, "data")
 b_mean_pmx_data = tmp_b_mean_pmx_data[0]
-b_mean_err_pmx_data = tmp_b_mean_err_pmx_data[1]
+b_mean_err_pmx_data = tmp_b_mean_pmx_data[1]
 tmp_b_mean_pmx_dummy = fit_gaussian(H_pmx_DUMMY,-0.1, 0.1, "dummy")
 b_mean_pmx_dummy = tmp_b_mean_pmx_dummy[0]
-b_mean_err_pmx_dummy = tmp_b_mean_err_pmx_dummy[1]
+b_mean_err_pmx_dummy = tmp_b_mean_pmx_dummy[1]
 
 H_pmx_SIMC.Draw("E1")
 H_pmx_DATA.Draw("same, E1")
@@ -2843,13 +2843,13 @@ H_pmy_DUMMY.SetLineColor(kGreen)
 
 tmp_b_mean_pmy_simc = fit_gaussian(H_pmy_SIMC,-0.1, 0.1, "simc")
 b_mean_pmy_simc = tmp_b_mean_pmy_simc[0]
-b_mean_err_pmy_simc = tmp_b_mean_err_pmy_simc[1]
+b_mean_err_pmy_simc = tmp_b_mean_pmy_simc[1]
 tmp_b_mean_pmy_data = fit_gaussian(H_pmy_DATA,-0.1, 0.1, "data")
 b_mean_pmy_data = tmp_b_mean_pmy_data[0]
-b_mean_err_pmy_data = tmp_b_mean_err_pmy_data[1]
+b_mean_err_pmy_data = tmp_b_mean_pmy_data[1]
 tmp_b_mean_pmy_dummy = fit_gaussian(H_pmy_DUMMY,-0.1, 0.1, "dummy")
 b_mean_pmy_dummy = tmp_b_mean_pmy_dummy[0]
-b_mean_err_pmy_dummy = tmp_b_mean_err_pmy_dummy[1]
+b_mean_err_pmy_dummy = tmp_b_mean_pmy_dummy[1]
 
 H_pmy_SIMC.Draw("E1")
 H_pmy_DATA.Draw("same, E1")
@@ -2885,13 +2885,13 @@ H_pmz_DUMMY.SetLineColor(kGreen)
 
 tmp_b_mean_pmz_simc = fit_gaussian(H_pmz_SIMC,-0.1, 0.1, "simc")
 b_mean_pmz_simc = tmp_b_mean_pmz_simc[0]
-b_mean_err_pmz_simc = tmp_b_mean_err_pmz_simc[1]
+b_mean_err_pmz_simc = tmp_b_mean_pmz_simc[1]
 tmp_b_mean_pmz_data = fit_gaussian(H_pmz_DATA,-0.1, 0.1, "data")
 b_mean_pmz_data = tmp_b_mean_pmz_data[0]
-b_mean_err_pmz_data = tmp_b_mean_err_pmz_data[1]
+b_mean_err_pmz_data = tmp_b_mean_pmz_data[1]
 tmp_b_mean_pmz_dummy = fit_gaussian(H_pmz_DUMMY,-0.1, 0.1, "dummy")
 b_mean_pmz_dummy = tmp_b_mean_pmz_dummy[0]
-b_mean_err_pmz_dummy = tmp_b_mean_err_pmz_dummy[1]
+b_mean_err_pmz_dummy = tmp_b_mean_pmz_dummy[1]
 
 H_pmz_SIMC.Draw("E1")
 H_pmz_DATA.Draw("same, E1")
@@ -2927,13 +2927,13 @@ H_W_DUMMY.SetLineColor(kGreen)
 
 tmp_b_mean_W_simc = fit_gaussian(H_W_SIMC,0.7, 1.1, "simc")
 b_mean_W_simc = tmp_b_mean_W_simc[0]
-b_mean_err_W_simc = tmp_b_mean_err_W_simc[1]
+b_mean_err_W_simc = tmp_b_mean_W_simc[1]
 tmp_b_mean_W_data = fit_gaussian(H_W_DATA,0.7, 1.1, "data")
 b_mean_W_data = tmp_b_mean_W_data[0]
-b_mean_err_W_data = tmp_b_mean_err_W_data[1]
+b_mean_err_W_data = tmp_b_mean_W_data[1]
 tmp_b_mean_W_dummy = fit_gaussian(H_W_DUMMY,0.7, 1.1, "dummy")
 b_mean_W_dummy = tmp_b_mean_W_dummy[0]
-b_mean_err_W_dummy = tmp_b_mean_err_W_dummy[1]
+b_mean_err_W_dummy = tmp_b_mean_W_dummy[1]
 
 H_W_SIMC.Draw("E1")
 H_W_DATA.Draw("same, E1")
