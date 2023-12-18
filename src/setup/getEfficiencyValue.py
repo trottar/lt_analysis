@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-18 15:22:38 trottar"
+# Time-stamp: "2023-12-18 16:01:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,7 +47,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import calculate_effError
 
-        tot_effError = calculate_effError(runNum,effError_table)
+        tot_effError = calculate_effError(runNum,efficiency_table)
 
         ################################################################################################################################################
 
