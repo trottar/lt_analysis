@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-18 15:53:26 trottar"
+# Time-stamp: "2023-12-18 15:55:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,7 +49,7 @@ pTheta_val = ""
 for runNum in RUNLIST:
 
     efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
-    effError = getEfficiencyValue(runNum,effError_table,"effError")
+    effError = getEfficiencyValue(runNum,efficiency_table,"effError")
     charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
 
     # Need to convert to int value for bash to interpret correctly
