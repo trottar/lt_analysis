@@ -101,7 +101,8 @@ else
     ##############
     # Defines efficiency table to use
     #EffData="coin_heep_HeePCoin_efficiency_data_2022_09_09.csv"
-    EffData="coin_heep_HeePCoin_efficiency_data_2022_12_02.csv"
+    #EffData="coin_heep_HeePCoin_efficiency_data_2022_12_02.csv"
+    EffData="coin_heep_HeePCoin_efficiency_data_2023_12_18.csv"
     InDATAFilename="Raw_Data_${KIN}.root"
     InDUMMYFilename="Raw_DummyData_${KIN}.root"
     if [[ $o_flag = "true" ]]; then

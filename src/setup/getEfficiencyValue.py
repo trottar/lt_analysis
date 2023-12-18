@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-02-14 17:23:18 trottar"
+# Time-stamp: "2023-12-18 15:22:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,6 +41,19 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         return tot_efficiency
 
+    if table_val == "effError":
+        ################################################################################################################################################
+        # Grab and calculate effError 
+
+        from getDataTable import calculate_effError
+
+        tot_effError = calculate_effError(runNum,effError_table)
+
+        ################################################################################################################################################
+
+        return tot_effError
+
+    
     if table_val == "bcm":
         ################################################################################################################################################
         # Grab beam energy
