@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-06 11:37:58 trottar"
+# Time-stamp: "2023-12-18 12:53:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -423,7 +423,7 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            # Defined Geomatrical cuts
+            # Defined HGCer Geometric cuts
             cutg = TCutG("cutg",21)
             cutg.SetVarX("P_hgcer_yAtCer")
             cutg.SetVarY("P_hgcer_xAtCer")
@@ -528,7 +528,7 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            # Defined Geomatrical cuts
+            # Defined HGCer Geometric cuts
             cutg = TCutG("cutg",21)
             cutg.SetVarX("P_hgcer_yAtCer")
             cutg.SetVarY("P_hgcer_xAtCer")
@@ -626,7 +626,7 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            # Defined Geomatrical cuts
+            # Defined HGCer Geometric cuts
             cutg = TCutG("cutg",21)
             cutg.SetVarX("P_hgcer_yAtCer")
             cutg.SetVarY("P_hgcer_xAtCer")
@@ -716,7 +716,7 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            # Defined Geomatrical cuts
+            # Defined HGCer Geometric cuts
             cutg = TCutG("cutg",21)
             cutg.SetVarX("P_hgcer_yAtCer")
             cutg.SetVarY("P_hgcer_xAtCer")
