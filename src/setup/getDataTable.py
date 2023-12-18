@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-18 15:19:37 trottar"
+# Time-stamp: "2023-12-18 15:42:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -139,8 +139,10 @@ def get_efficiencies(runNum,efficiency_table):
             # EDTM
             "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
             # Hodo
-            "HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            "SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+            #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+            #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.01*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
+            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.01*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
             # HMS Cal
             "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
             # HMS Cer
@@ -178,8 +180,10 @@ def get_efficiencies(runNum,efficiency_table):
             # EDTM
             "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
             # Hodo
-            "HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            "SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+            #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+            #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.01*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
+            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.01*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
             # HMS Cal
             "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
             # HMS Cer
