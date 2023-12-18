@@ -110,7 +110,8 @@ TMAX=0.600
 # Efficiency csv file
 #EffData="coin_production_Prod_efficiency_data_2022_12_05.csv"
 #EffData="coin_production_Prod_efficiency_data_2022_12_30.csv"
-EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
+#EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
+EffData="coin_production_Prod_efficiency_data_2023_12_18.csv"
 
 ##############
 ##############
