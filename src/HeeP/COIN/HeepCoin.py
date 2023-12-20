@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-20 16:47:31 trottar"
+# Time-stamp: "2023-12-20 16:49:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1327,7 +1327,7 @@ for evt in TBRANCH_DUMMY_nopid:
 
 ################################################################################################################################################
 
-normfac_data = 1/(data_charge*data_target_corr)
+normfac_data = 1/(data_charge)
 normfac_dummy = 1/(dummy_charge*dummy_target_corr)
 normfac_simc = (simc_normfactor)/(simc_nevents)
 
