@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-20 15:57:41 trottar"
+# Time-stamp: "2023-12-20 16:35:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2962,11 +2962,11 @@ CW.Print(outputpdf + ')')
 print("W_simc err_W_simc W_data err_W_data pmz_simc err_pmz_simc pmz_data err_pmz_data pmy_simc err_pmy_simc pmy_data err_pmy_data pmx_simc err_pmx_simc pmx_data err_pmx_data emiss_simc err_emiss_simc emiss_data err_emiss_data")
 print("{:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e} {:.4e}".format(b_mean_W_simc,b_mean_err_W_simc,b_mean_W_data,b_mean_err_W_data,b_mean_pmz_simc,b_mean_err_pmz_simc,b_mean_pmz_data,b_mean_err_pmz_data,b_mean_pmy_simc,b_mean_err_pmy_simc,b_mean_pmy_data,b_mean_err_pmy_data,b_mean_pmx_simc,b_mean_err_pmx_simc,b_mean_pmx_data,b_mean_err_pmx_data,b_mean_emiss_simc,b_mean_err_emiss_simc,b_mean_emiss_data,b_mean_err_emiss_data))
 
-num_evts_data = b_int_W_data
-yield_data = num_evts_data/normfac_data
+num_evts_data = b_int_W_data - b_int_W_dummy
+yield_data = num_evts_data*normfac_data
 print("\n\nY_data = {0:.2e}".format(yield_data))
 num_evts_simc = b_int_W_simc
-yield_simc = num_evts_simc/normfac_simc
+yield_simc = num_evts_simc*normfac_simc
 print("\n\nY_simc = {0:.2e}".format(yield_simc))
 rel_yield = yield_data/yield_simc
 print("R = {0:.2e}".format(rel_yield))
