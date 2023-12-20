@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-20 16:49:54 trottar"
+# Time-stamp: "2023-12-20 16:53:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1328,6 +1328,7 @@ for evt in TBRANCH_DUMMY_nopid:
 ################################################################################################################################################
 
 normfac_data = 1/(data_charge)
+dummy_target_corr = 4.8579
 normfac_dummy = 1/(dummy_charge*dummy_target_corr)
 normfac_simc = (simc_normfactor)/(simc_nevents)
 
@@ -1346,35 +1347,32 @@ print("\nR = {0:.2e}".format(rel_yield))
 # Normalize simc by normfactor/nevents
 # Normalize data by effective charge
 
-normfac_simc = (simc_normfactor)/(simc_nevents)
-H_ssxfp_SIMC.Scale(normfac_simc)                                                                                                                                   
-H_ssyfp_SIMC.Scale(normfac_simc)                                                                                                                                  
-H_ssxpfp_SIMC.Scale(normfac_simc)                                                                                                                              
-H_ssypfp_SIMC.Scale(normfac_simc)                                                                                                                                      
-H_hsxfp_SIMC.Scale(normfac_simc)                                                                                                                                              
-H_hsyfp_SIMC.Scale(normfac_simc)                                                                                                                                               
-H_hsxpfp_SIMC.Scale(normfac_simc)                                                                                                                                                                    
-H_hsypfp_SIMC.Scale(normfac_simc)                                                                                                                                                                    
-H_ssdelta_SIMC.Scale(normfac_simc)                                                                                                                                                                  
-H_hsdelta_SIMC.Scale(normfac_simc)                                                                                                                                                                  
-H_ssxptar_SIMC.Scale(normfac_simc)                                                                                                                                                                  
-H_ssyptar_SIMC.Scale(normfac_simc)                                                                                                                                                                  
-H_hsxptar_SIMC.Scale(normfac_simc)                                                                                                                                                                  
+H_ssxfp_SIMC.Scale(normfac_simc)
+H_ssyfp_SIMC.Scale(normfac_simc)
+H_ssxpfp_SIMC.Scale(normfac_simc)
+H_ssypfp_SIMC.Scale(normfac_simc)
+H_hsxfp_SIMC.Scale(normfac_simc)
+H_hsyfp_SIMC.Scale(normfac_simc)
+H_hsxpfp_SIMC.Scale(normfac_simc)
+H_hsypfp_SIMC.Scale(normfac_simc)
+H_ssdelta_SIMC.Scale(normfac_simc)
+H_hsdelta_SIMC.Scale(normfac_simc)
+H_ssxptar_SIMC.Scale(normfac_simc)
+H_ssyptar_SIMC.Scale(normfac_simc)
+H_hsxptar_SIMC.Scale(normfac_simc)
 H_hsyptar_SIMC.Scale(normfac_simc)
 H_ph_q_SIMC.Scale(normfac_simc)
 H_th_q_SIMC.Scale(normfac_simc)
-H_pmiss_SIMC.Scale(normfac_simc)                                                                                                                                        
-H_emiss_SIMC.Scale(normfac_simc)                                                                                                                                            
-H_pmx_SIMC.Scale(normfac_simc)                                                                                                                                                
-H_pmy_SIMC.Scale(normfac_simc)                                                                                                                                                
-H_pmz_SIMC.Scale(normfac_simc)                                                                                                                                                
+H_pmiss_SIMC.Scale(normfac_simc)
+H_emiss_SIMC.Scale(normfac_simc)
+H_pmx_SIMC.Scale(normfac_simc)
+H_pmy_SIMC.Scale(normfac_simc)
+H_pmz_SIMC.Scale(normfac_simc)
 H_Q2_SIMC.Scale(normfac_simc)
-H_W_SIMC.Scale(normfac_simc)                                                                                                                                                         
-H_epsilon_SIMC.Scale(normfac_simc)                                                                                                                                                    
+H_W_SIMC.Scale(normfac_simc)
+H_epsilon_SIMC.Scale(normfac_simc)
 H_MMp2_SIMC.Scale(normfac_simc)
 
-dummy_target_corr = 4.8579
-normfac_dummy = 1/(dummy_charge*dummy_target_corr)
 H_ssxfp_DUMMY.Scale(normfac_dummy)
 H_ssyfp_DUMMY.Scale(normfac_dummy)
 H_ssxpfp_DUMMY.Scale(normfac_dummy)
@@ -1461,7 +1459,6 @@ H_W_DUMMY_nopid.Scale(normfac_dummy)
 H_ct_ep_DUMMY_nocut.Scale(normfac_dummy)
 H_ct_ep_DUMMY_nopid.Scale(normfac_dummy)
 
-normfac_data = 1/(data_charge)
 H_ssxfp_DATA.Scale(normfac_data)
 H_ssyfp_DATA.Scale(normfac_data)
 H_ssxpfp_DATA.Scale(normfac_data)
