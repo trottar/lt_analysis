@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-20 16:44:34 trottar"
+# Time-stamp: "2023-12-20 16:47:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1326,6 +1326,10 @@ for evt in TBRANCH_DUMMY_nopid:
       ibin += 1
 
 ################################################################################################################################################
+
+normfac_data = 1/(data_charge*data_target_corr)
+normfac_dummy = 1/(dummy_charge*dummy_target_corr)
+normfac_simc = (simc_normfactor)/(simc_nevents)
 
 num_evts_data = int(H_W_DATA.Integral()) - int(H_W_DUMMY.Integral())
 yield_data = num_evts_data*normfac_data
