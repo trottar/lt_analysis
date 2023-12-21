@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-21 14:44:34 trottar"
+# Time-stamp: "2023-12-21 14:50:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,6 +45,8 @@ slope_data, intercept_data, _, _, _ = linregress(Q2, y_data)
 # Calculate linear fit for y_simc
 slope_simc, intercept_simc, _, _, _ = linregress(Q2, y_simc)
 
+slope_relyield, intercept_relyield, _, _, _ = linregress(Q2, rel_yield)
+
 # Plotting
 plt.figure(figsize=(12,8))
 
@@ -52,8 +54,8 @@ plt.figure(figsize=(12,8))
 plt.subplot(221)
 plt.plot(Q2, y_data_nooffset, 'bo', label='y_data_nooffset')
 plt.plot(Q2, y_simc_nooffset, 'ro', label='y_simc_nooffset')
-plt.plot(Q2, slope_data_nooffset * np.array(Q2) + intercept_data_nooffset, 'b--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_data_nooffset, intercept_data_nooffset))
-plt.plot(Q2, slope_simc_nooffset * np.array(Q2) + intercept_simc_nooffset, 'r--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_simc_nooffset, intercept_simc_nooffset))
+plt.plot(Q2, slope_data_nooffset * np.array(Q2) + intercept_data_nooffset, 'b--', label='m={:.2f}, b={:.2f}'.format(slope_data_nooffset, intercept_data_nooffset))
+plt.plot(Q2, slope_simc_nooffset * np.array(Q2) + intercept_simc_nooffset, 'r--', label='m={:.2f}, b={:.2f}'.format(slope_simc_nooffset, intercept_simc_nooffset))
 plt.title("No Offset")
 plt.xlabel('Q2')
 plt.ylabel('Yield')
@@ -63,8 +65,8 @@ plt.legend()
 plt.subplot(222)
 plt.plot(Q2, y_data, 'bo', label='y_data')
 plt.plot(Q2, y_simc, 'ro', label='y_simc')
-plt.plot(Q2, slope_data * np.array(Q2) + intercept_data, 'b--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_data, intercept_data))
-plt.plot(Q2, slope_simc * np.array(Q2) + intercept_simc, 'r--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_simc, intercept_simc))
+plt.plot(Q2, slope_data * np.array(Q2) + intercept_data, 'b--', label='m={:.2f}, b={:.2f}'.format(slope_data, intercept_data))
+plt.plot(Q2, slope_simc * np.array(Q2) + intercept_simc, 'r--', label='m={:.2f}, b={:.2f}'.format(slope_simc, intercept_simc))
 plt.title("Offset")
 plt.xlabel('Q2')
 plt.ylabel('Yield')
@@ -72,16 +74,18 @@ plt.legend()
 
 # Plot rel_yield on a different plot with a horizontal line at y=1.0
 plt.subplot(223)
-plt.plot(Q2, rel_yield, 'go', label='rel_yield')
-plt.axhline(y=1.0, color='gray', linestyle='--', label='Reference Line at y=1.0')
+plt.plot(Q2, rel_yield, 'go')
+plt.plot(Q2, slope_relyield_nooffset * np.array(Q2) + intercept_relyield_nooffset, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield_nooffset, intercept_relyield_nooffset))
+plt.axhline(y=1.0, color='gray')
 plt.xlabel('Q2')
 plt.ylabel('Rel. Yield')
 plt.legend()
 
 # Duplicate the third plot for better visualization
 plt.subplot(224)
-plt.plot(Q2, rel_yield, 'go', label='rel_yield')
-plt.axhline(y=1.0, color='gray', linestyle='--', label='Reference Line at y=1.0')
+plt.plot(Q2, rel_yield, 'go')
+plt.plot(Q2, slope_relyield * np.array(Q2) + intercept_relyield, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield, intercept_relyield))
+plt.axhline(y=1.0, color='gray')
 plt.xlabel('Q2')
 plt.ylabel('Rel. Yield')
 plt.legend()
@@ -101,6 +105,8 @@ slope_data, intercept_data, _, _, _ = linregress(Ebeam, y_data)
 # Calculate linear fit for y_simc
 slope_simc, intercept_simc, _, _, _ = linregress(Ebeam, y_simc)
 
+slope_relyield, intercept_relyield, _, _, _ = linregress(Ebeam, rel_yield)
+
 # Plotting
 plt.figure(figsize=(12,8))
 
@@ -108,8 +114,8 @@ plt.figure(figsize=(12,8))
 plt.subplot(221)
 plt.plot(Ebeam, y_data_nooffset, 'bo', label='y_data_nooffset')
 plt.plot(Ebeam, y_simc_nooffset, 'ro', label='y_simc_nooffset')
-plt.plot(Ebeam, slope_data_nooffset * np.array(Ebeam) + intercept_data_nooffset, 'b--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_data_nooffset, intercept_data_nooffset))
-plt.plot(Ebeam, slope_simc_nooffset * np.array(Ebeam) + intercept_simc_nooffset, 'r--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_simc_nooffset, intercept_simc_nooffset))
+plt.plot(Ebeam, slope_data_nooffset * np.array(Ebeam) + intercept_data_nooffset, 'b--', label='m={:.2f}, b={:.2f}'.format(slope_data_nooffset, intercept_data_nooffset))
+plt.plot(Ebeam, slope_simc_nooffset * np.array(Ebeam) + intercept_simc_nooffset, 'r--', label='m={:.2f}, b={:.2f}'.format(slope_simc_nooffset, intercept_simc_nooffset))
 plt.title("No Offset")
 plt.xlabel('Ebeam')
 plt.ylabel('Yield')
@@ -119,8 +125,8 @@ plt.legend()
 plt.subplot(222)
 plt.plot(Ebeam, y_data, 'bo', label='y_data')
 plt.plot(Ebeam, y_simc, 'ro', label='y_simc')
-plt.plot(Ebeam, slope_data * np.array(Ebeam) + intercept_data, 'b--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_data, intercept_data))
-plt.plot(Ebeam, slope_simc * np.array(Ebeam) + intercept_simc, 'r--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_simc, intercept_simc))
+plt.plot(Ebeam, slope_data * np.array(Ebeam) + intercept_data, 'b--', label='m={:.2f}, b={:.2f}'.format(slope_data, intercept_data))
+plt.plot(Ebeam, slope_simc * np.array(Ebeam) + intercept_simc, 'r--', label='m={:.2f}, b={:.2f}'.format(slope_simc, intercept_simc))
 plt.title("Offset")
 plt.xlabel('Ebeam')
 plt.ylabel('Yield')
@@ -128,16 +134,18 @@ plt.legend()
 
 # Plot rel_yield on a different plot with a horizontal line at y=1.0
 plt.subplot(223)
-plt.plot(Ebeam, rel_yield, 'go', label='rel_yield')
-plt.axhline(y=1.0, color='gray', linestyle='--', label='Reference Line at y=1.0')
+plt.plot(Ebeam, rel_yield, 'go')
+plt.plot(Ebeam, slope_relyield_nooffset * np.array(Ebeam) + intercept_relyield_nooffset, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield_nooffset, intercept_relyield_nooffset))
+plt.axhline(y=1.0, color='gray')
 plt.xlabel('Ebeam')
 plt.ylabel('Rel. Yield')
 plt.legend()
 
 # Duplicate the third plot for better visualization
 plt.subplot(224)
-plt.plot(Ebeam, rel_yield, 'go', label='rel_yield')
-plt.axhline(y=1.0, color='gray', linestyle='--', label='Reference Line at y=1.0')
+plt.plot(Ebeam, rel_yield, 'go')
+plt.plot(Ebeam, slope_relyield * np.array(Ebeam) + intercept_relyield, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield, intercept_relyield))
+plt.axhline(y=1.0, color='gray')
 plt.xlabel('Ebeam')
 plt.ylabel('Rel. Yield')
 plt.legend()
