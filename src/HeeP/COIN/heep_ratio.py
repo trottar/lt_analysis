@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-21 14:43:24 trottar"
+# Time-stamp: "2023-12-21 14:44:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,7 +49,7 @@ slope_simc, intercept_simc, _, _, _ = linregress(Q2, y_simc)
 plt.figure(figsize=(12,8))
 
 # Plot y_data_nooffset and y_simc_nooffset on the same plot with linear fits
-plt.subplot(121)
+plt.subplot(221)
 plt.plot(Q2, y_data_nooffset, 'bo', label='y_data_nooffset')
 plt.plot(Q2, y_simc_nooffset, 'ro', label='y_simc_nooffset')
 plt.plot(Q2, slope_data_nooffset * np.array(Q2) + intercept_data_nooffset, 'b--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_data_nooffset, intercept_data_nooffset))
@@ -60,7 +60,7 @@ plt.ylabel('Yield')
 plt.legend()
 
 # Plot y_data and y_simc on the same plot with linear fits
-plt.subplot(122)
+plt.subplot(222)
 plt.plot(Q2, y_data, 'bo', label='y_data')
 plt.plot(Q2, y_simc, 'ro', label='y_simc')
 plt.plot(Q2, slope_data * np.array(Q2) + intercept_data, 'b--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_data, intercept_data))
@@ -105,7 +105,7 @@ slope_simc, intercept_simc, _, _, _ = linregress(Ebeam, y_simc)
 plt.figure(figsize=(12,8))
 
 # Plot y_data_nooffset and y_simc_nooffset on the same plot with linear fits
-plt.subplot(121)
+plt.subplot(221)
 plt.plot(Ebeam, y_data_nooffset, 'bo', label='y_data_nooffset')
 plt.plot(Ebeam, y_simc_nooffset, 'ro', label='y_simc_nooffset')
 plt.plot(Ebeam, slope_data_nooffset * np.array(Ebeam) + intercept_data_nooffset, 'b--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_data_nooffset, intercept_data_nooffset))
@@ -116,7 +116,7 @@ plt.ylabel('Yield')
 plt.legend()
 
 # Plot y_data and y_simc on the same plot with linear fits
-plt.subplot(122)
+plt.subplot(222)
 plt.plot(Ebeam, y_data, 'bo', label='y_data')
 plt.plot(Ebeam, y_simc, 'ro', label='y_simc')
 plt.plot(Ebeam, slope_data * np.array(Ebeam) + intercept_data, 'b--', label='Linear Fit (m={:.2f}, b={:.2f})'.format(slope_data, intercept_data))
