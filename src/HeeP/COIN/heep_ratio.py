@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-21 14:37:32 trottar"
+# Time-stamp: "2023-12-21 14:42:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -26,12 +26,14 @@ Ebeam = [10.59070, 8.21290, 6.18720, 4.92950, 3.8338]
 #y_simc = [5.01e1, 8.32e1, 2.62e2, 1.30e3 9.04e2]
 #rel_yield = [1.17, 1.08, 1.10, 1.03, 9.64e-1]
 # Data W(0.5,2.0)
-y_data_nooffset = [6.5e1, 1.07e2, 3.23e2, 1.46e3, 9.11e2]
+y_data_nooffset = [6.50e1, 1.07e2, 3.23e2, 1.46e3, 9.11e2]
 y_simc_nooffset = [5.56e1, 8.32e1, 3.05e2, 1.37e3, 9.04e2]
 rel_yield_nooffset = [1.17, 1.29, 1.06, 1.06, 1.01]
 y_data = [6.50e1, 1.07e2, 3.23e2, 1.46e3, 9.11e2]
 y_simc = [5.57e1, 8,32e1, 3.06e2, 1.41e3, 9.04e2]
 rel_yield = [1.17, 1.29, 1.05, 1.03, 1.01]
+
+print(len(Q2), len(y_data_nooffset), len(y_simc_nooffset), len(rel_yield_nooffset), len(y_data), len(y_simc), len(rel_yield))
 
 # Calculate linear fit for y_data_nooffset
 slope_data_nooffset, intercept_data_nooffset, _, _, _ = linregress(Q2, y_data_nooffset)
