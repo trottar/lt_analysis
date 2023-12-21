@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-21 14:50:30 trottar"
+# Time-stamp: "2023-12-21 14:52:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,6 +44,8 @@ slope_data, intercept_data, _, _, _ = linregress(Q2, y_data)
 
 # Calculate linear fit for y_simc
 slope_simc, intercept_simc, _, _, _ = linregress(Q2, y_simc)
+
+slope_relyield_nooffset, intercept_relyield_nooffset, _, _, _ = linregress(Q2, rel_yield_nooffset)
 
 slope_relyield, intercept_relyield, _, _, _ = linregress(Q2, rel_yield)
 
@@ -104,6 +106,8 @@ slope_data, intercept_data, _, _, _ = linregress(Ebeam, y_data)
 
 # Calculate linear fit for y_simc
 slope_simc, intercept_simc, _, _, _ = linregress(Ebeam, y_simc)
+
+slope_relyield_nooffset, intercept_relyield_nooffset, _, _, _ = linregress(Ebeam, rel_yield_nooffset)
 
 slope_relyield, intercept_relyield, _, _, _ = linregress(Ebeam, rel_yield)
 
