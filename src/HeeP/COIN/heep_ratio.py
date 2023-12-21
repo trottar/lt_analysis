@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-21 14:31:16 trottar"
+# Time-stamp: "2023-12-21 14:33:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,6 +59,7 @@ plt.xlabel('Q2')
 plt.ylabel('Yield')
 plt.legend()
 
+# Plot y_data and y_simc on the same plot with linear fits
 plt.subplot(122)
 plt.plot(Q2, y_data, 'bo', label='y_data')
 plt.plot(Q2, y_simc, 'ro', label='y_simc')
@@ -70,14 +71,15 @@ plt.ylabel('Yield')
 plt.legend()
 
 # Plot rel_yield on a different plot with a horizontal line at y=1.0
-plt.subplot(123)
+plt.subplot(223)
 plt.plot(Q2, rel_yield, 'go', label='rel_yield')
 plt.axhline(y=1.0, color='gray', linestyle='--', label='Reference Line at y=1.0')
 plt.xlabel('Q2')
 plt.ylabel('Rel. Yield')
 plt.legend()
 
-plt.subplot(124)
+# Duplicate the third plot for better visualization
+plt.subplot(224)
 plt.plot(Q2, rel_yield, 'go', label='rel_yield')
 plt.axhline(y=1.0, color='gray', linestyle='--', label='Reference Line at y=1.0')
 plt.xlabel('Q2')
@@ -101,6 +103,7 @@ plt.xlabel('Ebeam')
 plt.ylabel('Yield')
 plt.legend()
 
+# Plot y_data and y_simc on the same plot with linear fits
 plt.subplot(122)
 plt.plot(Ebeam, y_data, 'bo', label='y_data')
 plt.plot(Ebeam, y_simc, 'ro', label='y_simc')
@@ -112,14 +115,15 @@ plt.ylabel('Yield')
 plt.legend()
 
 # Plot rel_yield on a different plot with a horizontal line at y=1.0
-plt.subplot(123)
+plt.subplot(223)
 plt.plot(Ebeam, rel_yield, 'go', label='rel_yield')
 plt.axhline(y=1.0, color='gray', linestyle='--', label='Reference Line at y=1.0')
 plt.xlabel('Ebeam')
 plt.ylabel('Rel. Yield')
 plt.legend()
 
-plt.subplot(124)
+# Duplicate the third plot for better visualization
+plt.subplot(224)
 plt.plot(Ebeam, rel_yield, 'go', label='rel_yield')
 plt.axhline(y=1.0, color='gray', linestyle='--', label='Reference Line at y=1.0')
 plt.xlabel('Ebeam')
