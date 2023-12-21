@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-20 16:53:48 trottar"
+# Time-stamp: "2023-12-20 17:14:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1326,6 +1326,8 @@ for evt in TBRANCH_DUMMY_nopid:
       ibin += 1
 
 ################################################################################################################################################
+# Normalize simc by normfactor/nevents
+# Normalize data by effective charge
 
 normfac_data = 1/(data_charge)
 dummy_target_corr = 4.8579
@@ -1334,18 +1336,11 @@ normfac_simc = (simc_normfactor)/(simc_nevents)
 
 num_evts_data = int(H_W_DATA.Integral()) - int(H_W_DUMMY.Integral())
 yield_data = num_evts_data*normfac_data
-#yield_data = num_evts_data
-print("\n\nY_data = {0:.2e}".format(yield_data))
 num_evts_simc = int(H_W_SIMC.Integral())
 yield_simc = num_evts_simc*normfac_simc
-#yield_simc = num_evts_simc
-print("Y_simc = {0:.2e}".format(yield_simc))
 rel_yield = yield_data/yield_simc
-print("\nR = {0:.2e}".format(rel_yield))
       
 ################################################################################################################################################
-# Normalize simc by normfactor/nevents
-# Normalize data by effective charge
 
 H_ssxfp_SIMC.Scale(normfac_simc)
 H_ssyfp_SIMC.Scale(normfac_simc)
