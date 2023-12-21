@@ -6,14 +6,14 @@ begin parm experiment
 end parm experiment
 
 begin parm kinematics_main
-  Ebeam = 4933.0 		;  (MeV) G.H Offsets
+  Ebeam = 4929.5 		;  (MeV) G.H Offsets
   dEbeam = 0.05			;  beam energy variation (%)
   electron_arm = 1              ;  1=hms,2=sos,3=hrsr,4=hrsl,5=shms
   hadron_arm = 5                ;  1=hms,2=sos,3=hrsr,4=hrsl,5=shms
-  spec%e%P = 3124.0		;  e arm central momentum (MeV/c) G.H Offsets
+  spec%e%P = 3120.9		;  e arm central momentum (MeV/c) G.H Offsets
   spec%e%theta = 27.207  	;  e arm angle setting (degrees) G.H Offsets
-  spec%p%P = 2580.4		;  p arm central momentum (MeV/c) G.H Offsets
-  spec%p%theta = 33.552  	;  p arm angle setting (degrees) G.H Offsets
+  spec%p%P = 2577.8		;  p arm central momentum (MeV/c) G.H Offsets
+  spec%p%theta = 33.563  	;  p arm angle setting (degrees) G.H Offsets
 end parm kinematics_main
 
 begin parm target
