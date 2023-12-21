@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-21 14:36:25 trottar"
+# Time-stamp: "2023-12-21 14:37:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,6 +88,18 @@ plt.legend()
 
 # Adjust layout for better spacing
 plt.tight_layout()
+
+# Calculate linear fit for y_data_nooffset
+slope_data_nooffset, intercept_data_nooffset, _, _, _ = linregress(Ebeam, y_data_nooffset)
+
+# Calculate linear fit for y_simc_nooffset
+slope_simc_nooffset, intercept_simc_nooffset, _, _, _ = linregress(Ebeam, y_simc_nooffset)
+
+# Calculate linear fit for y_data
+slope_data, intercept_data, _, _, _ = linregress(Ebeam, y_data)
+
+# Calculate linear fit for y_simc
+slope_simc, intercept_simc, _, _, _ = linregress(Ebeam, y_simc)
 
 # Plotting
 plt.figure(figsize=(12,8))
