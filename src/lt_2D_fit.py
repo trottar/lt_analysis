@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-25 18:22:09 trottar"
+# Time-stamp: "2023-12-25 18:39:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,7 +80,7 @@ def LT_sep_x_hi_fun_unsep(x, par):
 
 def single_setting(q2_set, fn_lo, fn_hi):
 
-sig_L_g  = TGraphErrors()
+    sig_L_g  = TGraphErrors()
     sig_T_g  = TGraphErrors()
     sig_LT_g = TGraphErrors()
     sig_TT_g = TGraphErrors()
