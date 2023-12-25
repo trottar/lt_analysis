@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-12 16:54:24 trottar"
+# Time-stamp: "2023-12-25 17:38:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -202,7 +202,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['unsep_file_loeps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(LOEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'W', 'Q2'])
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'tm', 'W', 'Q2'])
 
             file_df_dict['sep_file_loeps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_sep.{}_{}_{:.0f}.dat" \
@@ -231,7 +231,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['unsep_file_hieps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 'tm', 'W', 'Q2'])
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'tm', 'W', 'Q2'])
             file_df_dict['sep_file_hieps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_sep.{}_{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), float(HIEPS)*100) \
