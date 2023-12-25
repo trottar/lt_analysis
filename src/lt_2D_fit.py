@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-25 18:39:25 trottar"
+# Time-stamp: "2023-12-25 18:49:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,11 +122,11 @@ def single_setting(q2_set, fn_lo, fn_hi):
     t_min_list = []
     lo_eps_list = []
     hi_eps_list = []
-    
+
     for i in range(0,N):
 
         nlo.GetEntry(i)
-    	nhi.GetEntry(i)
+        nhi.GetEntry(i)
         
         q2_list.append(qq)
         w_list.append(ww)
