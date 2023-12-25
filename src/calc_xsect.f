@@ -167,7 +167,7 @@ c      pause
          WRITE(*,*) '------------'
  32      format('xsect: ',7f10.4)
 
-         tm = tt
+*         tm = tt
          
          th_cm=th_cm*3.14159D0/180.D0
          
@@ -190,8 +190,8 @@ c angle check
             dx_real=x_mod*dr
 
             write(61,40) x_real,dx_real,x_mod,eps_mod,
-     *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
- 40         format(3G15.5,f8.5,2f7.2,3f8.5)
+     *           th_mod*180./3.14159,phi*180./3.14159,tt,tm,w,q2
+ 40         format(3G15.5,f8.5,2f7.2,4f8.5)
 
             print *,"=============="
             print *,'it',it
