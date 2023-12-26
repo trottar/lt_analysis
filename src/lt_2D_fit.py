@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-26 12:17:02 trottar"
+# Time-stamp: "2023-12-26 15:21:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -178,7 +178,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
             sig_lo.SetPoint(sig_lo.GetN(), t_list[i], ave_sig_lo)
             sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
 
-	    nhi.Draw("x:phi:dx", tpp, "goff")
+            nhi.Draw("x:phi:dx", tpp, "goff")
 
             ghi_tmp = TGraphErrors(nhi.GetSelectedRows(), nhi.GetV2(), nhi.GetV1(), 0, nhi.GetV3())
             
