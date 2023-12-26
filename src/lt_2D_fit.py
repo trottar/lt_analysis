@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-25 18:49:25 trottar"
+# Time-stamp: "2023-12-25 19:13:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -157,9 +157,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
             else:
                 tpp.Form("(t > %lf && t < %lf) && x!=0.0", t_list[i - 1] + 0.01, t_list[i] + 0.01)
 
-	    lo_eps = lo_eps_list[i]
-	    hi_eps = hi_eps_list[i]
-                
+            lo_eps = lo_eps_list[i]
+            hi_eps = hi_eps_list[i]
+            
             nlow.Draw("x:phi:dx", tpp, "goff")
 
             glo_tmp = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), [0]*n1.GetSelectedRows(), n1.GetV3())
