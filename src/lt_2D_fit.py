@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-26 15:44:09 trottar"
+# Time-stamp: "2023-12-26 15:51:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -584,8 +584,8 @@ def lt_2D_fit():
     single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 
     ROOT.gStyle.SetOptFit(1)
-    
-    c_total = new TCanvas()
+
+    c_total = TCanvas()
 
     g_sig_l_total.Draw("A*")
     c_total.Print("sig_L_total.png")
