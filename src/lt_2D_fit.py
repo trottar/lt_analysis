@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-26 15:21:44 trottar"
+# Time-stamp: "2023-12-26 15:29:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,7 +182,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
             ghi_tmp = TGraphErrors(nhi.GetSelectedRows(), nhi.GetV2(), nhi.GetV1(), 0, nhi.GetV3())
             
-            ghi = (TGraphErrors*) ghi_tmp.Clone("ghi")
+            ghi = ghi_tmp.Clone("ghi")
 
             ave_sig_hi = ghi.GetMean(2)
             err_sig_hi = ghi.GetRMS(2)
