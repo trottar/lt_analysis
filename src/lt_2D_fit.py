@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:10:29 trottar"
+# Time-stamp: "2023-12-27 07:15:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,20 +51,22 @@ OUTPATH=lt.OUTPATH
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
 
+# Constants
 pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
+PI = ROOT.TMath.Pi()
 
 # Low epsilon drawing function
 def LT_sep_x_lo_fun(x, par):
     eps = LOEPS
     xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * ROOT.TMath.Pi() / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * ROOT.TMath.Pi() / 180)
+    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
     return xs
 
 # High epsilon drawing function
 def LT_sep_x_hi_fun(x, par):
     eps = HIEPS
     xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * ROOT.TMath.Pi() / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * ROOT.TMath.Pi() / 180)
+    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
     return xs
 
 # Low epsilon calculating unseparated cross section
@@ -594,8 +596,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c3
 
 
-fn_lo = LTANAPATH + "/{}/src/xsects/x_unsep.{}_{}_{:.0f}".format(ParticleType, POL, Q2.replace("p",""), float(LOEPS)*100)
-fn_hi = LTANAPATH + "/{}/src/xsects/x_unsep.{}_{}_{:.0f}".format(ParticleType, POL, Q2.replace("p",""), float(HIEPS)*100)
+fn_lo = LTANAPATH + "/{}/src/xsects/x_unsep.{}_{}_{:.0f}.dat".format(ParticleType, POL, Q2.replace("p",""), float(LOEPS)*100)
+fn_hi = LTANAPATH + "/{}/src/xsects/x_unsep.{}_{}_{:.0f}.dat".format(ParticleType, POL, Q2.replace("p",""), float(HIEPS)*100)
 
 g_sig_l_total = TGraphErrors()
 g_sig_t_total = TGraphErrors()
