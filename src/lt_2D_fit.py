@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 10:00:47 trottar"
+# Time-stamp: "2023-12-27 10:10:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,7 +63,7 @@ PI = ROOT.TMath.Pi()
 # Low epsilon drawing function
 def LT_sep_x_lo_fun(x, par):
     eps = LOEPS
-    print("$$$$$$$$$$$$$$$$$$$",x[0],par[1],par[2],par[3])
+    print("$$$$$$$$$$$$$$$$$$$LT_sep_x_lo_fun",x[0],par[1],par[2],par[3])
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
     return xs
@@ -71,12 +71,14 @@ def LT_sep_x_lo_fun(x, par):
 # High epsilon drawing function
 def LT_sep_x_hi_fun(x, par):
     eps = HIEPS
+    print("$$$$$$$$$$$$$$$$$$$LT_sep_x_hi_fun",x[0],par[1],par[2],par[3])
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
     return xs
 
 # Low epsilon calculating unseparated cross section
 def LT_sep_x_lo_fun_unsep(x, par):
+    print("$$$$$$$$$$$$$$$$$$$LT_sep_x_lo_fun_unsep",x[0],par[1],par[2],par[3])
     eps = LOEPS
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
@@ -85,6 +87,7 @@ def LT_sep_x_lo_fun_unsep(x, par):
 # High epsilon calculating unseparated cross section
 def LT_sep_x_hi_fun_unsep(x, par):
     eps = HIEPS
+    print("$$$$$$$$$$$$$$$$$$$LT_sep_x_hi_fun_unsep",x[0],par[1],par[2],par[3])
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
     return xs
