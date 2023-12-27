@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:08:16 trottar"
+# Time-stamp: "2023-12-27 07:10:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,6 +48,8 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
+ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
+###############################################################################################################################################
 
 pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
 
