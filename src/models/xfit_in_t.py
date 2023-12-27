@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:51:44 trottar"
+# Time-stamp: "2023-12-27 06:59:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,7 +101,7 @@ def single_setting(closest_date, q2_set):
 
     fn_sep = "x_sep.{}_{}.dat".format(POL, q2_set)
 
-    nsep = TNtuple("nsep", "nsep", "t:t_e:l:l_e:lt:lt_e:tt:tt_e:chi:t:t_min:w:q2")
+    nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
 
     prv_par_vec = []
@@ -118,7 +118,6 @@ def single_setting(closest_date, q2_set):
 
     t0, t1, t2, t3, l0, l1, l2, l3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     
-
     ave_file_in = LTANAPATH + "src/averages/avek." + q2_set + ".dat"
     with open(ave_file_in, 'r') as ave_file:
         for line in ave_file:
@@ -152,11 +151,11 @@ def single_setting(closest_date, q2_set):
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
-    n1.Draw("u:u_min", "", "goff")
-    u_umin_map = TGraph(n1.GetSelectedRows(), n1.GetV1(), n1.GetV2())
+    n1.Draw("t:t_min", "", "goff")
+    t_tmin_map = TGraph(n1.GetSelectedRows(), n1.GetV1(), n1.GetV2())
 
-    u_list = u_umin_map.GetX()
-    u_min_list = u_umin_map.GetY()
+    t_list = t_tmin_map.GetX()
+    t_min_list = t_tmin_map.GetY()
 
     ########
     # SigT #
@@ -166,7 +165,7 @@ def single_setting(closest_date, q2_set):
     print("Fit for Sig T")
     
     c1.cd(1).SetLeftMargin(0.12)
-    n1.Draw("t:u:t_e", "", "goff")
+    n1.Draw("sigt:t:sigt_e", "", "goff")
     g_sigt = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), [0] * n1.GetSelectedRows(), n1.GetV3())
     
     f_sigT_pre = TF1("sig_T_pre", fun_Sig_T, 0, 0.5, 2)
@@ -207,7 +206,7 @@ def single_setting(closest_date, q2_set):
 
     g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigt.GetXaxis().CenterTitle()
-    g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{du}}#right)_{T} [#mub/GeV^{2}]")
+    g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [#mub/GeV^{2}]")
     g_sigt.GetYaxis().SetTitleOffset(1.5)
     g_sigt.GetYaxis().SetTitleSize(0.035)
     g_sigt.GetYaxis().CenterTitle()
@@ -274,7 +273,7 @@ def single_setting(closest_date, q2_set):
     print("Fit for Sig L")
 
     c1.cd(2).SetLeftMargin(0.12)
-    n1.Draw("l:u:l_e", "", "goff")
+    n1.Draw("sigl:t:sigl_e", "", "goff")
 
     f_sigL_pre = TF1("sig_L", fun_Sig_L, 0, 0.5, 2)
     f_sigL_pre.SetParameters(l0, l1)
@@ -314,9 +313,9 @@ def single_setting(closest_date, q2_set):
     g_sigl.SetMarkerStyle(5)
     g_sigl.Draw("AP")
 
-    g_sigl.GetXaxis().SetTitle("#it{-u} [GeV^{2}]")
+    g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigl.GetXaxis().CenterTitle()
-    g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{du}}#right)_{L} [#mub/GeV^{2}]")
+    g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [#mub/GeV^{2}]")
     g_sigl.GetYaxis().SetTitleOffset(1.5)
     g_sigl.GetYaxis().SetTitleSize(0.035)
     g_sigl.GetYaxis().CenterTitle()
@@ -377,7 +376,7 @@ def single_setting(closest_date, q2_set):
     print("Fit for Sig LT")
 
     c1.cd(3).SetLeftMargin(0.12)
-    n1.Draw("lt:u:lt_e", "", "goff")
+    n1.Draw("siglt:t:siglt_e", "", "goff")
 
     f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, 0, 0.5, 2)
     f_sigLT_pre.SetParameters(lt0, lt1)
@@ -421,9 +420,9 @@ def single_setting(closest_date, q2_set):
     g_siglt.SetMarkerStyle(5)
     g_siglt.Draw("AP")
 
-    g_siglt.GetXaxis().SetTitle("#it{-u} [GeV^{2}]")
+    g_siglt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_siglt.GetXaxis().CenterTitle()
-    g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{du}}#right)_{LT} [#mub/GeV^{2}]")
+    g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [#mub/GeV^{2}]")
     g_siglt.GetYaxis().SetTitleOffset(1.5)
     g_siglt.GetYaxis().SetTitleSize(0.035)
     g_siglt.GetYaxis().CenterTitle()
@@ -487,7 +486,7 @@ def single_setting(closest_date, q2_set):
     print("Fit for Sig TT")
 
     c1.cd(4).SetLeftMargin(0.12)
-    n1.Draw("tt:u:tt_e", "", "goff")
+    n1.Draw("sigtt:t:sigtt_e", "", "goff")
     
     f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, 0, 0.5, 2)
     f_sigTT_pre.SetParameters(tt0, tt1)
@@ -532,9 +531,9 @@ def single_setting(closest_date, q2_set):
     g_sigtt.SetMarkerStyle(5)
     g_sigtt.Draw("AP")
 
-    g_sigtt.GetXaxis().SetTitle("#it{-u} [GeV^{2}]")
+    g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigtt.GetXaxis().CenterTitle()
-    g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{du}}#right)_{TT} [#mub/GeV^{2}]")
+    g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [#mub/GeV^{2}]")
     g_sigtt.GetYaxis().SetTitleOffset(1.5)
     g_sigtt.GetYaxis().SetTitleSize(0.035)
     g_sigtt.GetYaxis().CenterTitle()
