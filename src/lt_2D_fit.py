@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:23:39 trottar"
+# Time-stamp: "2023-12-27 07:29:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,12 +20,16 @@ import os, sys
 ParticleType = sys.argv[1]
 POL = sys.argv[2]
 
+if POL > 0:
+    polID = 'pl'
+else:
+    polID = 'mn'
+
 Q2 = sys.argv[3]
 W = sys.argv[4]
 
 LOEPS = sys.argv[5]
-HIEPS = sys.argv[6]
-
+HIEPS = sys.argv[6] 
 ################################################################################################################################################
 '''
 ltsep package import and pathing definitions
@@ -499,7 +503,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
             # Print values to console
             print("Outputting...  ", sig_t, "  ", sig_l, "  ", tt, "  ", ww, "  ", qq, "  ", lo_eps_real, "  ", hi_eps_real)
 
-            fn_sep = "x_sep.{}_{}.dat".format(POL, q2_set)
+            fn_sep = "x_sep.{}_{}.dat".format(polID, q2_set)
             try:
                 with open(fn_sep, 'w') as fn_sep:
                     # Write values to output file
@@ -596,8 +600,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c3
 
 
-fn_lo =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, POL, Q2.replace("p",""), float(LOEPS)*100)
-fn_hi =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, POL, Q2.replace("p",""), float(HIEPS)*100)
+fn_lo =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(LOEPS)*100)
+fn_hi =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(HIEPS)*100)
 
 g_sig_l_total = TGraphErrors()
 g_sig_t_total = TGraphErrors()
