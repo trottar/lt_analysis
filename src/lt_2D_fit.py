@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:10:11 trottar"
+# Time-stamp: "2023-12-27 06:17:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -590,37 +590,35 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c2
         del c3
 
-            
-def lt_2D_fit():
 
-    fn_lo = LTANAPATH + "{}/src/x_unsep.{}_{}_{}".format(ParticleType, POL, Q2.replace("p",""), float(LOEPS)*100)
-    fn_hi = LTANAPATH + "{}/src/x_unsep.{}_{}_{}".format(ParticleType, POL, Q2.replace("p",""), float(HIEPS)*100)
-    
-    g_sig_l_total = TGraphErrors()
-    g_sig_t_total = TGraphErrors()
-    g_sig_lt_total = TGraphErrors()
-    g_sig_tt_total = TGraphErrors()
+fn_lo = LTANAPATH + "{}/src/x_unsep.{}_{}_{}".format(ParticleType, POL, Q2.replace("p",""), float(LOEPS)*100)
+fn_hi = LTANAPATH + "{}/src/x_unsep.{}_{}_{}".format(ParticleType, POL, Q2.replace("p",""), float(HIEPS)*100)
 
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Start")    
-    single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
+g_sig_l_total = TGraphErrors()
+g_sig_t_total = TGraphErrors()
+g_sig_lt_total = TGraphErrors()
+g_sig_tt_total = TGraphErrors()
 
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!End")
-    ROOT.gStyle.SetOptFit(1)
+print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Start")    
+single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 
-    c_total = TCanvas()
+print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!End")
+ROOT.gStyle.SetOptFit(1)
 
-    g_sig_l_total.Draw("A*")
-    c_total.Print("sig_L_total.png")
-    c_total.Clear()
+c_total = TCanvas()
 
-    g_sig_t_total.Draw("A*")
-    c_total.Print("sig_T_total.png")
-    c_total.Clear()
+g_sig_l_total.Draw("A*")
+c_total.Print("sig_L_total.png")
+c_total.Clear()
 
-    g_sig_lt_total.Draw("A*")
-    c_total.Print("sig_LT_total.png")
-    c_total.Clear()
+g_sig_t_total.Draw("A*")
+c_total.Print("sig_T_total.png")
+c_total.Clear()
 
-    g_sig_tt_total.Draw("A*")
-    c_total.Print("sig_TT_total.png")
-    c_total.Clear()
+g_sig_lt_total.Draw("A*")
+c_total.Print("sig_LT_total.png")
+c_total.Clear()
+
+g_sig_tt_total.Draw("A*")
+c_total.Print("sig_TT_total.png")
+c_total.Clear()

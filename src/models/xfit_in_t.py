@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:08:02 trottar"
+# Time-stamp: "2023-12-27 06:15:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,4 +357,110 @@ def single_setting(closest_date, q2_set):
 
     f_sigLT_pre = ROOT.TF1("sig_LT", fun_Sig_LT, 0, 0.5, 2)
     f_sigLT_pre.SetParameters(lt0, lt1)
+    
+    g_siglt = ROOT.TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), ROOT.nullptr, n1.GetV3())
+
+    for i in range(len(w_vec)):
+
+        siglt_X_pre = 0.0
+        q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
+
+        q2_dep = q2_vec[i]
+
+        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * math.sin(th_vec[i] * pi / 180)
+        g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
+
+        siglt_X_fit, siglt_X_fit_err = 0.0, 1.0
+
+        if th_vec[i] != 180:
+            siglt_X_fit = (g_siglt.GetY()[i] / g_vec[i] / math.sin(th_vec[i] * pi / 180) - q2_term) * q2_dep
+            siglt_X_fit_err = g_siglt.GetEY()[i] / g_vec[i] / math.sin(th_vec[i] * pi / 180) * q2_dep
+
+        g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
+        g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
+
+    g_max = g_siglt.GetYaxis().GetXmax()
+    gp_max = max(g_siglt_prv.GetN(), g_siglt_prv.GetY())
+    g_min = g_siglt.GetYaxis().GetXmin()
+    gp_min = min(g_siglt_prv.GetN(), g_siglt_prv.GetY())
+
+    difff = (g_max - g_min) / 5
+
+    if g_max < gp_max:
+        g_siglt.SetMaximum(gp_max + difff)
+
+    if g_min > gp_min:
+        g_siglt.SetMinimum(gp_min - difff)
+        
+    g_siglt.SetTitle("Sig LT")
+
+    g_siglt.SetMarkerStyle(5)
+    g_siglt.Draw("AP")
+
+    g_siglt.GetXaxis().SetTitle("#it{-u} [GeV^{2}]")
+    g_siglt.GetXaxis().CenterTitle()
+    g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{du}}#right)_{LT} [#mub/GeV^{2}]")
+    g_siglt.GetYaxis().SetTitleOffset(1.5)
+    g_siglt.GetYaxis().SetTitleSize(0.035)
+    g_siglt.GetYaxis().CenterTitle()
+
+    g_siglt_prv.SetMarkerColor(4)
+    g_siglt_prv.SetMarkerStyle(21)
+    g_siglt_prv.Draw("P")
+
+    c2.cd(3)
+    g_siglt_fit.SetTitle("Sigma LT Model Fit")
+    g_siglt_fit.Draw("A*")
+
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, 0, 0.5, 2)
+    f_sigLT.SetParameters(lt0, lt1)
+
+    g_siglt_fit.Fit(f_sigLT)
+    
+    for i in range(len(w_vec)):
+        siglt_X = 0.0
+        q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
+
+        q2_dep = q2_vec[i]
+
+        if th_vec[i] != 180:
+            siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * sin(th_vec[i] * pi / 180)
+
+        g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
+
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
+
+    c1.cd(3)
+
+    g_siglt_fit_tot.SetMarkerStyle(26)
+    g_siglt_fit_tot.SetMarkerColor(2)
+    g_siglt_fit_tot.SetLineColor(2)
+    g_siglt_fit_tot.Draw("LP")
+
+    lt0 = f_sigLT.GetParameter(0)
+    lt1 = f_sigLT.GetParameter(1)
+        
+    par_vec.append(lt0)
+    par_vec.append(lt1)
+    par_vec.append(lt2)
+    par_vec.append(lt3)
+
+    par_err_vec.append(f_sigLT.GetParError(0))
+    par_err_vec.append(f_sigLT.GetParError(1))
+    par_err_vec.append(0.0)
+    par_err_vec.append(0.0)
+
+    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(f_sigLT.GetChisquare())
+
+    ########
+    # SigTT #
+    ########
+
+    print("/*--------------------------------------------------*/")
+    print("Fit for Sig TT")
+
+    
     
