@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 09:07:45 trottar"
+# Time-stamp: "2023-12-27 09:12:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -197,10 +197,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
             glo_tmp.SetPointError(i, 0, nlo.GetV3()[i])
 
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
-        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*pi, 4)
+        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
 
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
-        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*pi, 4)
+        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
 
         glo = TGraphErrors(glo_tmp.GetN(), glo_tmp.GetY(), glo_tmp.GetX(), [0]*glo_tmp.GetN(), glo_tmp.GetEY())
 
@@ -478,8 +478,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fhi.Draw("same")
 
         # Calculate integrated cross sections
-        lo_cross_sec[i] = flo_unsep.Integral(0, 2*pi) / (2*pi)
-        hi_cross_sec[i] = fhi_unsep.Integral(0, 2*pi) / (2*pi)
+        lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
+        hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
 
         # Create and draw TLegend
         leg = ROOT.TLegend(0.7, 0.7, 0.97, 0.97)
