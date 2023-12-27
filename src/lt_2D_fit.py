@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 10:24:53 trottar"
+# Time-stamp: "2023-12-27 10:32:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,7 +63,6 @@ PI = ROOT.TMath.Pi()
 # Low epsilon drawing function
 def LT_sep_x_lo_fun(x, par):
     eps = float(LOEPS)
-    print("$$$$$$$$$$$$$$$$$$$LT_sep_x_lo_fun",x[0],par[1],par[2],par[3])
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
     return xs
@@ -71,14 +70,12 @@ def LT_sep_x_lo_fun(x, par):
 # High epsilon drawing function
 def LT_sep_x_hi_fun(x, par):
     eps = float(HIEPS)
-    print("$$$$$$$$$$$$$$$$$$$LT_sep_x_hi_fun",x[0],par[1],par[2],par[3])
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
     return xs
 
 # Low epsilon calculating unseparated cross section
 def LT_sep_x_lo_fun_unsep(x, par):
-    print("$$$$$$$$$$$$$$$$$$$LT_sep_x_lo_fun_unsep",x[0],par[1],par[2],par[3])
     eps = float(LOEPS)
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
@@ -87,7 +84,6 @@ def LT_sep_x_lo_fun_unsep(x, par):
 # High epsilon calculating unseparated cross section
 def LT_sep_x_hi_fun_unsep(x, par):
     eps = float(HIEPS)
-    print("$$$$$$$$$$$$$$$$$$$LT_sep_x_hi_fun_unsep",x[0],par[1],par[2],par[3])
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
     return xs
@@ -510,7 +506,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
         fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
-        fit_status.DrawTextNDC(0.15, 0.80, "Fit Status: " + gMinuit.fCstatu)
+        fit_status.DrawTextNDC(0.15, 0.80, "Fit Status: " + ROOT.gMinuit.fCstatu)
 
         # Adjust the maximum and minimum of glo based on ghi values
         if ghi.GetMaximum() > glo.GetMaximum():
