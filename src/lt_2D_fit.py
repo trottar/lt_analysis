@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:46:41 trottar"
+# Time-stamp: "2023-12-27 07:51:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -166,10 +166,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c1 =  TCanvas("c1", "c1", 600, 600)
         c2 =  TCanvas("c2", "c2", 600, 600)
 
-        lo_cross_sec = np.zeros(t_bin_num_int, dtype=float)
-        hi_cross_sec = np.zeros(t_bin_num_int, dtype=float)
-        lo_cross_sec_err = np.zeros(t_bin_num_int, dtype=float)
-        hi_cross_sec_err = np.zeros(t_bin_num_int, dtype=float)        
+        lo_cross_sec = np.zeros(t_bin_num, dtype=float)
+        hi_cross_sec = np.zeros(t_bin_num, dtype=float)
+        lo_cross_sec_err = np.zeros(t_bin_num, dtype=float)
+        hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)        
 
         for i in range(0, t_bin_num-1):
             
@@ -599,7 +599,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c1
         del c2
         del c3
-
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(LOEPS)*100)
 fn_hi =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(HIEPS)*100)
