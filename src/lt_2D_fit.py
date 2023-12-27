@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 17:56:55 trottar"
+# Time-stamp: "2023-12-27 18:32:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -530,7 +530,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Print values to console
         print("Outputting...  ", sig_t, "  ", sig_l, "  ", tt, "  ", ww, "  ", qq, "  ", lo_eps_real, "  ", hi_eps_real)
 
-        fn_sep = "x_sep.{}_{}.dat".format(polID, q2_set)
+        fn_sep = "x_sep.{}_{}.dat".format(polID, q2_set.replace("p",""))
         try:
             mode = 'w' if i == 0 else 'a'
             with open(fn_sep, mode) as f:
