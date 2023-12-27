@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 16:26:19 trottar"
+# Time-stamp: "2023-12-27 17:56:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -644,17 +644,17 @@ ROOT.gStyle.SetOptFit(1)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-c_Print(outputpdf)
+c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.Draw("A*")
-c_Print(outputpdf)
+c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-c_Print(outputpdf)
+c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-c_Print(outputpdf+')')
+c_total.Print(outputpdf+')')
 c_total.Clear()
