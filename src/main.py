@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-14 21:12:15 trottar"
+# Time-stamp: "2023-12-27 08:24:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -524,7 +524,7 @@ shutil.copy(LTANAPATH+'/src/simc_ana/par_pl', '{}/src/{}/parameters/par.{}_{}.da
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
 try:
-    cut_summary_lst += "\n\nUnsep Parameterization for {}...".format(formatted_date)
+    cut_summary_lst += "\n\nUnsep Parameterization for {}...\n".format(formatted_date)
     with open(old_param_file, 'r') as file:
         for line in file:
             cut_summary_lst += line
