@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 10:32:32 trottar"
+# Time-stamp: "2023-12-27 10:40:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -502,11 +502,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
         leg.AddEntry(fhi, "High #it{#font[120]{e}} fit", "l")
         leg.Draw()
 
+        gMinuit = ROOT.TMinuit()
+        
         # Create TText for fit status
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
         fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
-        fit_status.DrawTextNDC(0.15, 0.80, "Fit Status: " + ROOT.gMinuit.fCstatu)
+        fit_status.DrawTextNDC(0.15, 0.80, "Fit Status: " + gMinuit.fCstatu)
 
         # Adjust the maximum and minimum of glo based on ghi values
         if ghi.GetMaximum() > glo.GetMaximum():
