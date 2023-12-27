@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:15:22 trottar"
+# Time-stamp: "2023-12-27 06:26:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -462,5 +462,30 @@ def single_setting(closest_date, q2_set):
     print("/*--------------------------------------------------*/")
     print("Fit for Sig TT")
 
+    c1.cd(4).SetLeftMargin(0.12)
+    n1.Draw("tt:u:tt_e", "", "goff")
     
+    f_sigTT_pre = ROOT.TF1("sig_TT", fun_Sig_TT, 0, 0.5, 2)
+    f_sigTT_pre.SetParameters(tt0, tt1)
+    
+    g_sigtt = ROOT.TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), [0]*n1.GetSelectedRows(), n1.GetV3())
+
+    for i in range(len(w_vec)):
+        sigtt_X_pre = 0.0
+        q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
+        q2_dep = q2_vec[i]
+
+        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
+                      sin(th_vec[i] * pi / 180) * sin(th_vec[i] * pi / 180)
+
+        g_sigtt_prv.SetPoint(i, n1.GetV2()[i], sigtt_X_pre)
+
+        sigtt_X_fit, sigtt_X_fit_err = 0.0, 1.0
+
+        if th_vec[i] != 180:
+            sigtt_X_fit = (g_sigtt.GetY()[i] / g_vec[i] / sin(th_vec[i] * pi / 180) / sin(th_vec[i] * pi / 180) - q2_term) * q2_dep
+            sigtt_X_fit_err = g_sigtt.GetEY()[i] / g_vec[i] / sin(th_vec[i] * pi / 180) / sin(th_vec[i] * pi / 180) * q2_dep
+
+        g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+        g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
     

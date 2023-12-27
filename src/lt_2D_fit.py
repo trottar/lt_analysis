@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:17:39 trottar"
+# Time-stamp: "2023-12-27 06:26:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,6 +14,7 @@ import numpy as np
 import ROOT
 from ROOT import TGraphErrors, TF1, TF2, TGraph2DErrors, TCanvas
 from ROOT import TString, TNtuple
+import array
 import os, sys
 
 ParticleType = sys.argv[1]
