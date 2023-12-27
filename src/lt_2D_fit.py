@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 05:44:14 trottar"
+# Time-stamp: "2023-12-27 06:03:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -494,17 +494,17 @@ def single_setting(q2_set, fn_lo, fn_hi):
             # Print values to console
             print("Outputting...  ", sig_t, "  ", sig_l, "  ", tt, "  ", ww, "  ", qq, "  ", lo_eps_real, "  ", hi_eps_real)
 
-            file_out = "x_sep.pl_" + q2_set
+            fn_sep = "x_sep.pl_" + q2_set
             try:
-                with open(file_out, 'w') as file_out:
+                with open(fn_sep, 'w') as fn_sep:
                     # Write values to output file
-                    file_out.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
+                    fn_sep.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
                         sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
                         fff2.GetChisquare(), tt, t_min, ww, qq, thetacm
                     ))
 
             except IOError:
-                print("Error writing to file {}."..format(file_out))
+                print("Error writing to file {}.".format(fn_sep))
             
             # Delete g_plot_err
             del g_plot_err
@@ -584,9 +584,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sig_TT_g.Draw("a*")
         c3.Print("sigTT_" + q2_set + ".png")
-
-        # Close the output file
-        file_out.close()
 
         # Delete c1, c2, and c3 canvases
         del c1
