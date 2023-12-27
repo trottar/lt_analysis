@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:59:29 trottar"
+# Time-stamp: "2023-12-27 07:07:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,15 +73,11 @@ def fun_Sig_TT(x, par):
     f = par[0] + par[1]*xx
     return f
 
-def x_fit_in_t():
-    lt_ratio_file = open("x_sep/LT_ratio.txt", "w")
+def x_fit_in_t(closest_date, Q2):
 
-    single_setting("160", lt_ratio_file)
-    single_setting("245", lt_ratio_file)
+    single_setting(closest_date, Q2)
 
-    lt_ratio_file.close()
-
-def single_setting(closest_date, q2_set):
+def single_setting(dir_iter, q2_set):
     prv_par_vec = []
     g_vec = []
     w_vec = []
@@ -105,7 +101,7 @@ def single_setting(closest_date, q2_set):
     nsep.ReadFile(fn_sep)
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, closest_date, POL, q2_set)
+    para_file_in =  "{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, dir_iter, POL, q2_set)
     try:
         with open(para_file_in, 'r') as para_file_in:
             for line in para_file_in:
