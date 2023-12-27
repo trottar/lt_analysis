@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 09:25:50 trottar"
+# Time-stamp: "2023-12-27 09:32:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -205,7 +205,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         #glo = TGraphErrors(glo_tmp.GetN(), glo_tmp.GetY(), glo_tmp.GetX(), [0]*glo_tmp.GetN(), glo_tmp.GetEY())
         glo = TGraphErrors()
         # Use SetPoint and SetPointError to fill the graph
-        for i in range(nlo.GetSelectedRows()):
+        for i in range(glo_tmp.GetN()):
             glo.SetPoint(i, glo_tmp.GetY()[i], glo_tmp.GetX()[i])
             glo.SetPointError(i, 0, glo_tmp.GetEY()[i])
 
@@ -217,7 +217,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         nhi.Draw("x:phi:dx", tpp, "goff")
 
-        ghi_tmp = TGraphErrors(nhi.GetSelectedRows(), nhi.GetV2(), nhi.GetV1(), 0, nhi.GetV3())
+        #ghi_tmp = TGraphErrors(nhi.GetSelectedRows(), nhi.GetV2(), nhi.GetV1(), 0, nhi.GetV3())
+        ghi_tmp = TGraphErrors()
+        # Use SetPoint and SetPointError to fill the graph
+        for i in range(nhi.GetSelectedRows()):
+            ghi_tmp.SetPoint(i, nhi.GetV2()[i], nhi.GetV1()[i])
+            ghi_tmp.SetPointError(i, 0, nhi.GetV3()[i])
+
 
         ghi = ghi_tmp.Clone("ghi")
 
