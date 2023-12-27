@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-25 17:20:27 trottar"
+# Time-stamp: "2023-12-27 05:15:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,6 +206,7 @@ if [ $? -ne 0 ]; then
 fi
 
 cd "${LTANAPATH}/src/"
+echo "LT Sep Starting..."
 python3 lt_2D_fit.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 # Check the exit status of the Python script
 if [ $? -ne 0 ]; then
@@ -215,3 +216,4 @@ if [ $? -ne 0 ]; then
     echo "       See error above..."
     exit 1
 fi
+echo "LT Sep Complete!"

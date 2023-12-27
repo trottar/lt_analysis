@@ -3,13 +3,15 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-08 14:00:48 trottar"
+# Time-stamp: "2023-12-27 05:13:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
+import ROOT
+from ROOT import TFile, TNtuple, TText
 
 '''
 1) ?????????grab file src/kaon/xsects/x_sep.pl_{q_set}_{eps} -> sigL,dsigL,sigT,dsigT,sigTT, dsigTT,sigLT,dsigLT,q2,tm
@@ -713,5 +715,38 @@ mtar_gev = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
 
+hi_bound =  0.7;
+lo_bound = -0.1;
+
+def x_fit_in_t():
+    lt_ratio_file = open("x_sep/LT_ratio.txt", "w")
+
+    single_setting("160", lt_ratio_file)
+    single_setting("245", lt_ratio_file)
+
+    lt_ratio_file.close()
+
 def single_setting(q2_set):
+    prv_par_vec = []
+    g_vec = []
+    w_vec = []
+    q2_vec = []
+    th_vec = []
+    logq2_vec = []
+    par_vec = []
+    par_err_vec = []
+    par_chi2_vec = []
+
+    t0, t1, t2, t3 = 0, 0, 0, 0
+    l0, l1, l2, l3 = 0, 0, 0, 0
+    lt0, lt1, lt2, lt3 = 0, 0, 0, 0
+    tt0, tt1, tt2, tt3 = 0, 0, 0, 0
+
+    fit_status = TText()
+
+    fn_par = "x_sep.pl_" + q2_set
+
+    npar = TNtuple("npar", "npar", "t:t_e:l:l_e:lt:lt_e:tt:tt_e:chi:u:u_min:t:w:q2")
+    npar.ReadFile(fn_par)
+
     
