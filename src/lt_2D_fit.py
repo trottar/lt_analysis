@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 05:36:17 trottar"
+# Time-stamp: "2023-12-27 05:44:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -498,10 +498,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
             try:
                 with open(file_out, 'w') as file_out:
                     # Write values to output file
-                    file_out.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n". /
-                                   format(sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err, /
-                                          fff2.GetChisquare(), tt, t_min, ww, qq, thetacm))
-
+                    file_out.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
+                        sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
+                        fff2.GetChisquare(), tt, t_min, ww, qq, thetacm
+                    ))
 
             except IOError:
                 print("Error writing to file {}."..format(file_out))

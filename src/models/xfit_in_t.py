@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 05:31:47 trottar"
+# Time-stamp: "2023-12-27 05:42:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -770,15 +770,18 @@ def single_setting(closest_date, q2_set):
 
     fn_sep = "x_sep.pl_" + q2_set
 
-    nsep = TNtuple("nsep", "nsep", "t:t_e:l:l_e:lt:lt_e:tt:tt_e:chi:u:u_min:t:w:q2")
+    nsep = TNtuple("nsep", "nsep", "t:t_e:l:l_e:lt:lt_e:tt:tt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
 
-    file_path = CACHEPATH + closest_date + "par.pl_" + q2_set
+    prv_par_vec = []
+    para_file_in = CACHEPATH + closest_date + "par.pl_" + q2_set
     try:
-        with open(file_path, 'r') as para_file_in:
-            # Continue with your file processing code here
-            # You can use para_file_in.readlines() to read lines from the file
-            # Make sure to handle file processing based on Python syntax and conventions
+        with open(para_file_in, 'r') as para_file_in:
+            for line in para_file_in:
+                data = line.split()
+                par, par_err, indx, chi2 = map(float, data)
+                print("!!!!  {}".format(par))
+                prv_par_vec.append(par)
     except FileNotFoundError:
-        print(f"File {file_path} not found.")
+        print("File {} not found.".format(para_file_in))
 
