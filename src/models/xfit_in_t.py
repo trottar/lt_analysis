@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:26:37 trottar"
+# Time-stamp: "2023-12-27 06:32:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,7 +81,7 @@ def single_setting(closest_date, q2_set):
     nsep.ReadFile(fn_sep)
 
     prv_par_vec = []
-    para_file_in = CACHEPATH + closest_date + "par.pl_" + q2_set
+    para_file_in =  "{}/{}/parameters/par.pl_{}.dat".format(CACHEPATH, closest_date, q2_set)
     try:
         with open(para_file_in, 'r') as para_file_in:
             for line in para_file_in:
@@ -488,4 +488,66 @@ def single_setting(closest_date, q2_set):
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
+    
+    g_max = g_sigtt.GetYaxis().GetXmax()
+    gp_max = ROOT.TMath.MaxElement(g_sigtt_prv.GetN(), g_sigtt_prv.GetY())
+
+    g_min = g_sigtt.GetYaxis().GetXmin()
+    gp_min = ROOT.TMath.MinElement(g_sigtt_prv.GetN(), g_sigtt_prv.GetY())
+
+    difff = (g_max - g_min) / 5
+
+    if g_max < gp_max:
+        g_sigtt.SetMaximum(gp_max + difff)
+
+    if g_min > gp_min:
+        g_sigtt.SetMinimum(gp_min - difff)
+
+    g_sigtt.SetTitle("Sig TT")
+
+    g_sigtt.SetMarkerStyle(5)
+    g_sigtt.Draw("AP")
+
+    g_sigtt.GetXaxis().SetTitle("#it{-u} [GeV^{2}]")
+    g_sigtt.GetXaxis().CenterTitle()
+    g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{du}}#right)_{TT} [#mub/GeV^{2}]")
+    g_sigtt.GetYaxis().SetTitleOffset(1.5)
+    g_sigtt.GetYaxis().SetTitleSize(0.035)
+    g_sigtt.GetYaxis().CenterTitle()
+
+    g_sigtt_prv.SetMarkerColor(4)
+    g_sigtt_prv.SetMarkerStyle(21)
+    g_sigtt_prv.Draw("P")
+
+    c2.cd(4)
+
+    g_sigtt_fit.SetTitle("Sigma TT Model Fit")
+    g_sigtt_fit.Draw("A*")
+
+    f_sigTT = ROOT.TF1("sig_TT", fun_Sig_TT, 0, 0.5, 2)
+    f_sigTT.SetParameters(tt0, tt1)
+    g_sigtt_fit.Fit(f_sigTT)
+        
+    for i in range(len(w_vec)):
+        sigtt_X = 0.0
+        q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
+        q2_dep = q2_vec[i]
+
+        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
+                  sin(th_vec[i] * pi / 180) * sin(th_vec[i] * pi / 180)
+
+        g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
+        
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
+
+    c1.cd(4)
+
+    g_sigtt_fit_tot.SetMarkerStyle(26)
+    g_sigtt_fit_tot.SetMarkerColor(2)
+    g_sigtt_fit_tot.SetLineColor(2)
+    g_sigtt_fit_tot.Draw("LP")
+
+    c1.Print("separated_" + q2_set + ".png")
+    c2.Print("separated_" + q2_set + "_fit.png")
+
     
