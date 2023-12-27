@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 09:12:39 trottar"
+# Time-stamp: "2023-12-27 09:18:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -202,7 +202,12 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
         fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
 
-        glo = TGraphErrors(glo_tmp.GetN(), glo_tmp.GetY(), glo_tmp.GetX(), [0]*glo_tmp.GetN(), glo_tmp.GetEY())
+        #glo = TGraphErrors(glo_tmp.GetN(), glo_tmp.GetY(), glo_tmp.GetX(), [0]*glo_tmp.GetN(), glo_tmp.GetEY())
+        glo = TGraphErrors()
+        # Use SetPoint and SetPointError to fill the graph
+        for i in range(nlo.GetSelectedRows()):
+            glo.SetPoint(i, glo_tmp.GetY()[i], glo_tmp.GetX()[i])
+            glo.SetPointError(i, 0, glo_tmp.GetEY()[i])
 
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
