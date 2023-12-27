@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 05:13:47 trottar"
+# Time-stamp: "2023-12-27 05:29:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -726,7 +726,7 @@ def x_fit_in_t():
 
     lt_ratio_file.close()
 
-def single_setting(q2_set):
+def single_setting(closest_date, q2_set):
     prv_par_vec = []
     g_vec = []
     w_vec = []
@@ -744,9 +744,17 @@ def single_setting(q2_set):
 
     fit_status = TText()
 
-    fn_par = "x_sep.pl_" + q2_set
+    fn_sep = "x_sep.pl_" + q2_set
 
-    npar = TNtuple("npar", "npar", "t:t_e:l:l_e:lt:lt_e:tt:tt_e:chi:u:u_min:t:w:q2")
-    npar.ReadFile(fn_par)
+    nsep = TNtuple("nsep", "nsep", "t:t_e:l:l_e:lt:lt_e:tt:tt_e:chi:u:u_min:t:w:q2")
+    nsep.ReadFile(fn_sep)
 
-    
+    file_path = CACHEPATH + closest_date + "par.pl_" + q2_set
+    try:
+        with open(file_path, 'r') as para_file_in:
+            # Continue with your file processing code here
+            # You can use para_file_in.readlines() to read lines from the file
+            # Make sure to handle file processing based on Python syntax and conventions
+    except FileNotFoundError:
+        print(f"File {file_path} not found.")
+
