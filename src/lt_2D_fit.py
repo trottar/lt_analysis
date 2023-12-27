@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:33:51 trottar"
+# Time-stamp: "2023-12-27 07:37:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,7 +29,8 @@ Q2 = sys.argv[3]
 W = sys.argv[4]
 
 LOEPS = sys.argv[5]
-HIEPS = sys.argv[6] 
+HIEPS = sys.argv[6]
+
 ################################################################################################################################################
 '''
 ltsep package import and pathing definitions
@@ -142,6 +143,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
     q2_list = []
     w_list = []
     theta_list = []
+    t_list = []
     t_min_list = []
     lo_eps_list = []
     hi_eps_list = []
