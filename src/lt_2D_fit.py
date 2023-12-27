@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:29:15 trottar"
+# Time-stamp: "2023-12-27 07:33:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,7 +20,7 @@ import os, sys
 ParticleType = sys.argv[1]
 POL = sys.argv[2]
 
-if POL > 0:
+if float(POL) > 0:
     polID = 'pl'
 else:
     polID = 'mn'
