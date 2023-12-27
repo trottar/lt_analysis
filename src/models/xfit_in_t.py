@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:32:25 trottar"
+# Time-stamp: "2023-12-27 06:46:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,13 +75,13 @@ def single_setting(closest_date, q2_set):
 
     fit_status = TText()
 
-    fn_sep = "x_sep.pl_" + q2_set
+    fn_sep = "x_sep.{}_{}.dat".format(POL, q2_set)
 
     nsep = TNtuple("nsep", "nsep", "t:t_e:l:l_e:lt:lt_e:tt:tt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/parameters/par.pl_{}.dat".format(CACHEPATH, closest_date, q2_set)
+    para_file_in =  "{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, closest_date, POL, q2_set)
     try:
         with open(para_file_in, 'r') as para_file_in:
             for line in para_file_in:
@@ -549,5 +549,12 @@ def single_setting(closest_date, q2_set):
 
     c1.Print("separated_" + q2_set + ".png")
     c2.Print("separated_" + q2_set + "_fit.png")
-
     
+    with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, POL, q2_set), 'w') as para_file_out:
+        print(fixed, file=sys.stdout)
+        print(fixed, file=para_file_out)
+        para_file_out.write(f"{:.5f}")
+        for i in range(len(par_vec)):
+            print("{:>10}   {:>15.4f} {:>14} {:>10}".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
+            para_file_out.write("{:>12}   {:>15.4f} {:>12} {:>5}\n".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
+        

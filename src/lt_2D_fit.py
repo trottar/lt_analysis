@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:33:09 trottar"
+# Time-stamp: "2023-12-27 06:47:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,7 +14,7 @@ import numpy as np
 import ROOT
 from ROOT import TGraphErrors, TF1, TF2, TGraph2DErrors, TCanvas
 from ROOT import TString, TNtuple
-import array
+from array import array
 import os, sys
 
 ParticleType = sys.argv[1]
@@ -495,7 +495,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
             # Print values to console
             print("Outputting...  ", sig_t, "  ", sig_l, "  ", tt, "  ", ww, "  ", qq, "  ", lo_eps_real, "  ", hi_eps_real)
 
-            fn_sep = "x_sep.pl_" + q2_set
+            fn_sep = "x_sep.{}_{}.dat".format(POL, q2_set)
             try:
                 with open(fn_sep, 'w') as fn_sep:
                     # Write values to output file
