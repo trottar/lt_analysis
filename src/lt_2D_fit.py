@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:37:55 trottar"
+# Time-stamp: "2023-12-27 07:42:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,7 +156,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         q2_list.append(qq)
         w_list.append(ww)
         theta_list.append(thetacm)
-        t_list.append(t)
+        t_list.append(tt)
         t_min_list.append(t_min)
         lo_eps_list.append(lo_eps_real)
         hi_eps_list.append(hi_eps_real)
