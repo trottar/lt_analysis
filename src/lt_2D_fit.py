@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 10:51:52 trottar"
+# Time-stamp: "2023-12-27 11:03:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -540,23 +540,23 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del g_plot_err
 
         # Set points and errors for g_sig_l_total, g_sig_t_total, g_sig_lt_total, and g_sig_tt_total
-        g_sig_l_total.SetPoint(g_sig_l_total.GetN(), tt, sig_l)
+        g_sig_l_total.SetPoint(g_sig_l_total.GetN(), tt[0], sig_l)
         g_sig_l_total.SetPointError(g_sig_l_total.GetN() - 1, 0, sig_l_err)
 
-        g_sig_t_total.SetPoint(g_sig_t_total.GetN(), tt, sig_t)
+        g_sig_t_total.SetPoint(g_sig_t_total.GetN(), tt[0], sig_t)
         g_sig_t_total.SetPointError(g_sig_t_total.GetN() - 1, 0, sig_t_err)
 
-        g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), tt, sig_lt)
+        g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), tt[0], sig_lt)
         g_sig_lt_total.SetPointError(g_sig_lt_total.GetN() - 1, 0, sig_lt_err)
 
-        g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), tt, sig_tt)
+        g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), tt[0], sig_tt)
         g_sig_tt_total.SetPointError(g_sig_tt_total.GetN() - 1, 0, sig_tt_err)
 
         # Set points and errors for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
-        sig_L_g.SetPoint(i, tt, sig_l)
-        sig_T_g.SetPoint(i, tt, sig_t)
-        sig_LT_g.SetPoint(i, tt, sig_lt)
-        sig_TT_g.SetPoint(i, tt, sig_tt)
+        sig_L_g.SetPoint(i, tt[0], sig_l)
+        sig_T_g.SetPoint(i, tt[0], sig_t)
+        sig_LT_g.SetPoint(i, tt[0], sig_lt)
+        sig_TT_g.SetPoint(i, tt[0], sig_tt)
 
         sig_L_g.SetPointError(i, 0.0, sig_l_err)
         sig_T_g.SetPointError(i, 0.0, sig_t_err)
