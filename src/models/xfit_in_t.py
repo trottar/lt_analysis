@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 05:29:55 trottar"
+# Time-stamp: "2023-12-27 05:31:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -12,6 +12,31 @@
 #
 import ROOT
 from ROOT import TFile, TNtuple, TText
+import math
+
+################################################################################################################################################
+'''
+ltsep package import and pathing definitions
+'''
+
+# Import package for cuts
+from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
+
+lt=Root(os.path.realpath(__file__),"Plot_Prod")
+
+# Add this to all files for more dynamic pathing
+USER=lt.USER # Grab user info for file finding
+HOST=lt.HOST
+REPLAYPATH=lt.REPLAYPATH
+UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH
+ANATYPE=lt.ANATYPE
+OUTPATH=lt.OUTPATH
+CACHEPATH=lt.CACHEPATH
+
+################################################################################################################################################
 
 '''
 1) ?????????grab file src/kaon/xsects/x_sep.pl_{q_set}_{eps} -> sigL,dsigL,sigT,dsigT,sigTT, dsigTT,sigLT,dsigLT,q2,tm
@@ -707,7 +732,6 @@ Double_t fun_Sig_TT(Double_t *x, Double_t *par) {
 
 
 '''
-import math
 
 # Define constants
 pi = 3.14159
