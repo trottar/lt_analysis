@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 12:08:42 trottar"
+# Time-stamp: "2023-12-27 12:16:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -574,10 +574,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots
         sigL_change.Draw("a*")
-        cc4.Print(sig_check_str + "_" + q2_set + ".png")
+        cc4.Print(sig_check_str + "_" + q2_set + ".png", "png")
 
         sigT_change.Draw("a*")
-        cc4.Print(sig_check_str2 + "_" + q2_set + ".png")
+        cc4.Print(sig_check_str2 + "_" + q2_set + ".png", "png")
 
         # Clear canvas
         cc4.Clear()
@@ -590,8 +590,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetRightMargin(0.03)
 
         # Print plots for c1 and c2 canvases
-        c1.Print("check_" + q2_set + filename + ".png")
-        c2.Print("money" + q2_set + filename + ".png")
+        c1.Print("check_" + q2_set + filename + ".png", "png")
+        c2.Print("money" + q2_set + filename + ".png", "png")
         #c2.Print("money" + q2_set + filename + ".root")
 
         # Clear c1 and c2 canvases
@@ -606,16 +606,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.Draw("a*")
-        c3.Print("sigL_" + q2_set + ".png")
+        c3.Print("sigL_" + q2_set + ".png", "png")
 
         sig_T_g.Draw("a*")
-        c3.Print("sigT_" + q2_set + ".png")
+        c3.Print("sigT_" + q2_set + ".png", "png")
 
         sig_LT_g.Draw("a*")
-        c3.Print("sigLT_" + q2_set + ".png")
+        c3.Print("sigLT_" + q2_set + ".png", "png")
 
         sig_TT_g.Draw("a*")
-        c3.Print("sigTT_" + q2_set + ".png")
+        c3.Print("sigTT_" + q2_set + ".png", "png")
 
         # Delete c1, c2, and c3 canvases
         del c1
