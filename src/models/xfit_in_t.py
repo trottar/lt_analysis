@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:46:05 trottar"
+# Time-stamp: "2023-12-27 06:51:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,6 +48,30 @@ mkpl=0.493677
 
 hi_bound =  0.7;
 lo_bound = -0.1;
+
+# Function for SigT
+def fun_Sig_T(x, par):
+    xx = x[0]
+    f = par[0] + par[1]*xx
+    return f
+
+# Function for SigL
+def fun_Sig_L(x, par):
+    xx = x[0]
+    f = par[0] + par[1]*xx
+    return f
+
+# Function for SigLT
+def fun_Sig_LT(x, par):
+    xx = x[0]
+    f = par[0] + par[1]*xx
+    return f
+
+# Function for SigTT
+def fun_Sig_TT(x, par):
+    xx = x[0]
+    f = par[0] + par[1]*xx
+    return f
 
 def x_fit_in_t():
     lt_ratio_file = open("x_sep/LT_ratio.txt", "w")
@@ -196,7 +220,7 @@ def single_setting(closest_date, q2_set):
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
-    f_sigT = ROOT.TF1("sig_T", fun_Sig_T, 0, 0.5, 2)
+    f_sigT = TF1("sig_T", fun_Sig_T, 0, 0.5, 2)
     f_sigT.SetParameters(t0, t1)
 
     fit_t_result = g_sigt_fit.Fit(f_sigT, "S")
@@ -355,10 +379,10 @@ def single_setting(closest_date, q2_set):
     c1.cd(3).SetLeftMargin(0.12)
     n1.Draw("lt:u:lt_e", "", "goff")
 
-    f_sigLT_pre = ROOT.TF1("sig_LT", fun_Sig_LT, 0, 0.5, 2)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, 0, 0.5, 2)
     f_sigLT_pre.SetParameters(lt0, lt1)
     
-    g_siglt = ROOT.TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), ROOT.nullptr, n1.GetV3())
+    g_siglt = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), ROOT.nullptr, n1.GetV3())
 
     for i in range(len(w_vec)):
 
@@ -465,10 +489,10 @@ def single_setting(closest_date, q2_set):
     c1.cd(4).SetLeftMargin(0.12)
     n1.Draw("tt:u:tt_e", "", "goff")
     
-    f_sigTT_pre = ROOT.TF1("sig_TT", fun_Sig_TT, 0, 0.5, 2)
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, 0, 0.5, 2)
     f_sigTT_pre.SetParameters(tt0, tt1)
     
-    g_sigtt = ROOT.TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), [0]*n1.GetSelectedRows(), n1.GetV3())
+    g_sigtt = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), [0]*n1.GetSelectedRows(), n1.GetV3())
 
     for i in range(len(w_vec)):
         sigtt_X_pre = 0.0
@@ -524,7 +548,7 @@ def single_setting(closest_date, q2_set):
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
-    f_sigTT = ROOT.TF1("sig_TT", fun_Sig_TT, 0, 0.5, 2)
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, 0, 0.5, 2)
     f_sigTT.SetParameters(tt0, tt1)
     g_sigtt_fit.Fit(f_sigTT)
         
@@ -558,3 +582,13 @@ def single_setting(closest_date, q2_set):
             print("{:>10}   {:>15.4f} {:>14} {:>10}".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
             para_file_out.write("{:>12}   {:>15.4f} {:>12} {:>5}\n".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
         
+    l_t_ratio = 0.0
+    l_t_ratio_err = 0.0
+
+    lt_ratio = TGraphErrors()
+
+    for i in range(len(w_vec)):
+        l_t_ratio = f_sigL.Eval(g_sigt.GetX()[i]) / f_sigT.Eval(g_sigt.GetX()[i])
+
+        l_t_ratio_err = (0.03 / g_sigl_fit_tot.GetY()[i])**2 + (0.03 / g_sigt_fit_tot.GetY()[i])**2
+        l_t_ratio_err = pow(l_t_ratio_err, 0.5) * l_t_ratio
