@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 12:22:49 trottar"
+# Time-stamp: "2023-12-27 16:14:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,6 +161,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         lo_eps_list.append(lo_eps_real)
         hi_eps_list.append(hi_eps_real)
 
+    print("$$$$$$$$$$$$$$$$",t_list)
+        
     t_bin_num = len(t_list)
 
     lo_cross_sec = np.zeros(t_bin_num, dtype=float)
