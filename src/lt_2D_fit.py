@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:42:05 trottar"
+# Time-stamp: "2023-12-27 07:46:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -166,10 +166,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c1 =  TCanvas("c1", "c1", 600, 600)
         c2 =  TCanvas("c2", "c2", 600, 600)
 
-        lo_cross_sec = np.zeros(u_bin_num_int, dtype=float)
-        hi_cross_sec = np.zeros(u_bin_num_int, dtype=float)
-        lo_cross_sec_err = np.zeros(u_bin_num_int, dtype=float)
-        hi_cross_sec_err = np.zeros(u_bin_num_int, dtype=float)        
+        lo_cross_sec = np.zeros(t_bin_num_int, dtype=float)
+        hi_cross_sec = np.zeros(t_bin_num_int, dtype=float)
+        lo_cross_sec_err = np.zeros(t_bin_num_int, dtype=float)
+        hi_cross_sec_err = np.zeros(t_bin_num_int, dtype=float)        
 
         for i in range(0, t_bin_num-1):
             
@@ -236,7 +236,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
                 g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
                 g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, g_yy_err)
             
-
             g_plot_err.SetFillColor(29)
             g_plot_err.SetMarkerSize(0.8)
             g_plot_err.SetMarkerStyle(20)
