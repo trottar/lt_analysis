@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:13:20 trottar"
+# Time-stamp: "2023-12-27 12:09:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,8 +103,8 @@ def single_setting(dir_iter, q2_set):
     prv_par_vec = []
     para_file_in =  "{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, dir_iter, POL, q2_set)
     try:
-        with open(para_file_in, 'r') as para_file_in:
-            for line in para_file_in:
+        with open(para_file_in, 'r') as f:
+            for line in f:
                 data = line.split()
                 par, par_err, indx, chi2 = map(float, data)
                 print("!!!!  {}".format(par))
@@ -115,8 +115,8 @@ def single_setting(dir_iter, q2_set):
     t0, t1, t2, t3, l0, l1, l2, l3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     
     ave_file_in = LTANAPATH + "src/averages/avek." + q2_set + ".dat"
-    with open(ave_file_in, 'r') as ave_file:
-        for line in ave_file:
+    with open(ave_file_in, 'r') as f:
+        for line in f:
             w, w_e, q2, q2_e, tt, tt_e, thetacm, it = map(float, line.strip().split())
 
             g = 1 / ((w**2) - (m_p**2))**2
@@ -569,13 +569,13 @@ def single_setting(dir_iter, q2_set):
     c1.Print("separated_" + q2_set + ".png")
     c2.Print("separated_" + q2_set + "_fit.png")
     
-    with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, POL, q2_set), 'w') as para_file_out:
+    with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, POL, q2_set), 'w') as f:
         print(fixed, file=sys.stdout)
-        print(fixed, file=para_file_out)
-        para_file_out.write(f"{:.5f}")
+        print(fixed, file=f)
+        f.write(f"{:.5f}")
         for i in range(len(par_vec)):
             print("{:>10}   {:>15.4f} {:>14} {:>10}".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
-            para_file_out.write("{:>12}   {:>15.4f} {:>12} {:>5}\n".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
+            f.write("{:>12}   {:>15.4f} {:>12} {:>5}\n".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
         
     l_t_ratio = 0.0
     l_t_ratio_err = 0.0

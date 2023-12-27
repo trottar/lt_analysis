@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 11:55:07 trottar"
+# Time-stamp: "2023-12-27 12:08:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -528,9 +528,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         for i in range(0, t_bin_num-1):
             try:
                 mode = 'w' if i == 0 else 'a'
-                with open(fn_sep, mode) as fn_sep:
+                with open(fn_sep, mode) as f:
                     # Write values to output file
-                    fn_sep.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
+                    f.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
                         sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
                         fff2.GetChisquare(), tt[0], t_min[0], ww[0], qq[0], thetacm[0]
                     ))
