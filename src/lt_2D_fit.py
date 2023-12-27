@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 12:16:13 trottar"
+# Time-stamp: "2023-12-27 12:22:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -525,18 +525,17 @@ def single_setting(q2_set, fn_lo, fn_hi):
         print("Outputting...  ", sig_t, "  ", sig_l, "  ", tt, "  ", ww, "  ", qq, "  ", lo_eps_real, "  ", hi_eps_real)
 
         fn_sep = "x_sep.{}_{}.dat".format(polID, q2_set)
-        for i in range(0, t_bin_num-1):
-            try:
-                mode = 'w' if i == 0 else 'a'
-                with open(fn_sep, mode) as f:
-                    # Write values to output file
-                    f.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
-                        sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
-                        fff2.GetChisquare(), tt[0], t_min[0], ww[0], qq[0], thetacm[0]
-                    ))
+        try:
+            mode = 'w' if i == 0 else 'a'
+            with open(fn_sep, mode) as f:
+                # Write values to output file
+                f.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
+                    sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
+                    fff2.GetChisquare(), tt[0], t_min[0], ww[0], qq[0], thetacm[0]
+                ))
 
-            except IOError:
-                print("Error writing to file {}.".format(fn_sep))
+        except IOError:
+            print("Error writing to file {}.".format(fn_sep))
 
         # Delete g_plot_err
         del g_plot_err
@@ -574,10 +573,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots
         sigL_change.Draw("a*")
-        cc4.Print(sig_check_str + "_" + q2_set + ".png", "png")
+        cc4.Print(sig_check_str + "_" + q2_set + ".png")
 
         sigT_change.Draw("a*")
-        cc4.Print(sig_check_str2 + "_" + q2_set + ".png", "png")
+        cc4.Print(sig_check_str2 + "_" + q2_set + ".png")
 
         # Clear canvas
         cc4.Clear()
@@ -590,8 +589,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetRightMargin(0.03)
 
         # Print plots for c1 and c2 canvases
-        c1.Print("check_" + q2_set + filename + ".png", "png")
-        c2.Print("money" + q2_set + filename + ".png", "png")
+        c1.Print("check_" + q2_set + filename + ".png")
+        c2.Print("money" + q2_set + filename + ".png")
         #c2.Print("money" + q2_set + filename + ".root")
 
         # Clear c1 and c2 canvases
@@ -606,16 +605,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.Draw("a*")
-        c3.Print("sigL_" + q2_set + ".png", "png")
+        c3.Print("sigL_" + q2_set + ".png")
 
         sig_T_g.Draw("a*")
-        c3.Print("sigT_" + q2_set + ".png", "png")
+        c3.Print("sigT_" + q2_set + ".png")
 
         sig_LT_g.Draw("a*")
-        c3.Print("sigLT_" + q2_set + ".png", "png")
+        c3.Print("sigLT_" + q2_set + ".png")
 
         sig_TT_g.Draw("a*")
-        c3.Print("sigTT_" + q2_set + ".png", "png")
+        c3.Print("sigTT_" + q2_set + ".png")
 
         # Delete c1, c2, and c3 canvases
         del c1
