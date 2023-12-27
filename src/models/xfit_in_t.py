@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 06:02:39 trottar"
+# Time-stamp: "2023-12-27 06:08:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -12,7 +12,8 @@
 #
 import ROOT
 from ROOT import TFile, TNtuple, TText
-from ROOT import TF1, TGraph, TGraphErrors, TCanvas
+from ROOT import TGraph, TGraphErrors, TCanvas
+from ROOT import TF1, TFitResultPtr
 import math
 
 ################################################################################################################################################
@@ -304,4 +305,56 @@ def single_setting(closest_date, q2_set):
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
+    f_sigL = TF1("sig_L", fun_Sig_L, 0, 0.5, 2)
+    f_sigL.SetParameters(l0, l1)
+    g_sigl_fit.Fit(f_sigL)
+
+    for i in range(len(w_vec)):
+
+        sigl_X = 0.0
+        q2_term = l2 * q2_vec[i] + l3 * g_sigl.GetX()[i] * q2_vec[i]
+
+        q2_dep = q2_vec[i] * q2_vec[i]
+
+        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i]) / q2_dep + q2_term) * g_vec[i]
+        g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
+    
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
+    c1.cd(2)
+
+    g_sigl_fit_tot.SetMarkerStyle(26)
+    g_sigl_fit_tot.SetMarkerColor(2)
+    g_sigl_fit_tot.SetLineColor(2)
+    g_sigl_fit_tot.Draw("LP")
+
+    l0 = f_sigL.GetParameter(0)
+    l1 = f_sigL.GetParameter(1)
+
+    par_vec.append(l0)
+    par_vec.append(l1)
+    par_vec.append(l2)
+    par_vec.append(l3)
+
+    par_err_vec.append(f_sigL.GetParError(0))
+    par_err_vec.append(f_sigL.GetParError(1))
+    par_err_vec.append(0)
+    par_err_vec.append(0)
+
+    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL.GetChisquare())
+    
+    ########
+    # SigLT #
+    ########
+
+    print("/*--------------------------------------------------*/")
+    print("Fit for Sig LT")
+
+    c1.cd(3).SetLeftMargin(0.12)
+    n1.Draw("lt:u:lt_e", "", "goff")
+
+    f_sigLT_pre = ROOT.TF1("sig_LT", fun_Sig_LT, 0, 0.5, 2)
+    f_sigLT_pre.SetParameters(lt0, lt1)
     
