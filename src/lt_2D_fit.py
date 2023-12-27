@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 07:51:14 trottar"
+# Time-stamp: "2023-12-27 07:58:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -178,9 +178,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
             tpp = TString()
 
             if i == 0:
-                tpp.Form("t < %lf && x!=0.0", t_list[i] + 0.01)
+                tpp.Form("t < %f && x!=0.0", t_list[i] + 0.01)
             else:
-                tpp.Form("(t > %lf && t < %lf) && x!=0.0", t_list[i - 1] + 0.01, t_list[i] + 0.01)
+                tpp.Form("(t > %f && t < %f) && x!=0.0", t_list[i - 1] + 0.01, t_list[i] + 0.01)
 
             lo_eps = lo_eps_list[i]
             hi_eps = hi_eps_list[i]
