@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 11:09:09 trottar"
+# Time-stamp: "2023-12-27 11:19:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -530,7 +530,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
                 # Write values to output file
                 fn_sep.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
                     sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
-                    fff2.GetChisquare(), tt, t_min, ww, qq, thetacm
+                    fff2.GetChisquare(), tt[0], t_min[0], ww[0], qq[0], thetacm[0]
                 ))
 
         except IOError:
