@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-26 16:27:45 trottar"
+# Time-stamp: "2023-12-27 05:08:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,6 +95,20 @@ def single_setting(q2_set, fn_lo, fn_hi):
     nhi = TNtuple("nhi", "nhi", "x/F:dx:x_mod:eps:theta:phi:t:t_min:w:Q2")
     nhi.ReadFile(fn_hi)
 
+    # Print values for nlo
+    print("Values for nlo:")
+    for entry in nlo:
+        print("x: {}, dx: {}, x_mod: {}, eps: {}, theta: {}, phi: {}, t: {}, t_min: {}, w: {}, Q2: {}".format(
+            entry.x, entry.dx, entry.x_mod, entry.eps, entry.theta, entry.phi, entry.t, entry.t_min, entry.w, entry.Q2
+        ))
+
+    # Print values for nhi
+    print("\nValues for nhi:")
+    for entry in nhi:
+        print("x: {}, dx: {}, x_mod: {}, eps: {}, theta: {}, phi: {}, t: {}, t_min: {}, w: {}, Q2: {}".format(
+            entry.x, entry.dx, entry.x_mod, entry.eps, entry.theta, entry.phi, entry.t, entry.t_min, entry.w, entry.Q2
+        ))
+    
     # Define variables
     qq = array('f', [0.0])
     ww = array('f', [0.0])
