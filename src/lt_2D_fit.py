@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 08:16:01 trottar"
+# Time-stamp: "2023-12-27 08:20:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -178,9 +178,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         tpp = ""
 
         if i == 0:
-            tpp = "t < {0} && x!=0.0".format(t_list[i] + 0.01)
+            tpp = "t < {0} && x!=0.0".format(str(t_list[i] + 0.01))
         else:
-            tpp = "(t > {0} && t < {1}) && x!=0.0".format(t_list[i - 1] + 0.01, t_list[i] + 0.01)
+            tpp = "(t > {0} && t < {1}) && x!=0.0".format(str(t_list[i - 1] + 0.01), str(t_list[i] + 0.01))
 
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
