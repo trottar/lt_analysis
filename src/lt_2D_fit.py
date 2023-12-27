@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 16:14:05 trottar"
+# Time-stamp: "2023-12-27 16:26:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,6 +51,10 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+################################################################################################################################################
+
+outputpdf  = OUTPATH + "/" + ParticleType + "_lt_fit.pdf"
 
 ################################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
@@ -575,10 +579,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots
         sigL_change.Draw("a*")
-        cc4.Print(sig_check_str + "_" + q2_set + ".png")
+        cc4.Print(outputpdf+'(')
 
         sigT_change.Draw("a*")
-        cc4.Print(sig_check_str2 + "_" + q2_set + ".png")
+        cc4.Print(outputpdf)
 
         # Clear canvas
         cc4.Clear()
@@ -591,8 +595,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetRightMargin(0.03)
 
         # Print plots for c1 and c2 canvases
-        c1.Print("check_" + q2_set + filename + ".png")
-        c2.Print("money" + q2_set + filename + ".png")
+        c1.Print(outputpdf)
+        c2.Print(outputpdf)
         #c2.Print("money" + q2_set + filename + ".root")
 
         # Clear c1 and c2 canvases
@@ -607,16 +611,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.Draw("a*")
-        c3.Print("sigL_" + q2_set + ".png")
+        c3.Print(outputpdf)
 
         sig_T_g.Draw("a*")
-        c3.Print("sigT_" + q2_set + ".png")
+        c3.Print(outputpdf)
 
         sig_LT_g.Draw("a*")
-        c3.Print("sigLT_" + q2_set + ".png")
+        c3.Print(outputpdf)
 
         sig_TT_g.Draw("a*")
-        c3.Print("sigTT_" + q2_set + ".png")
+        c3.Print(outputpdf)
 
         # Delete c1, c2, and c3 canvases
         del c1
@@ -640,17 +644,17 @@ ROOT.gStyle.SetOptFit(1)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-c_total.Print("sig_L_total.png")
+c_Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.Draw("A*")
-c_total.Print("sig_T_total.png")
+c_Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-c_total.Print("sig_LT_total.png")
+c_Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-c_total.Print("sig_TT_total.png")
+c_Print(outputpdf+')')
 c_total.Clear()
