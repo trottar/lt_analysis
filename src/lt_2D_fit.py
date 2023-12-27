@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 09:39:55 trottar"
+# Time-stamp: "2023-12-27 10:00:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,6 +63,7 @@ PI = ROOT.TMath.Pi()
 # Low epsilon drawing function
 def LT_sep_x_lo_fun(x, par):
     eps = LOEPS
+    print("$$$$$$$$$$$$$$$$$$$",x[0],par[1],par[2],par[3])
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
     return xs
@@ -196,11 +197,11 @@ def single_setting(q2_set, fn_lo, fn_hi):
             glo_tmp.SetPoint(i, nlo.GetV2()[i], nlo.GetV1()[i])
             glo_tmp.SetPointError(i, 0, nlo.GetV3()[i])
 
-        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
-        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
+        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)  # 4 is the number of input params
+        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4) # 4 is the number of input params
 
-        fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
-        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
+        fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)  # 4 is the number of input params
+        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)  # 4 is the number of input params
 
         #glo = TGraphErrors(glo_tmp.GetN(), glo_tmp.GetY(), glo_tmp.GetX(), [0]*glo_tmp.GetN(), glo_tmp.GetEY())
         glo = TGraphErrors()
