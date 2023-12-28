@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 18:37:46 trottar"
+# Time-stamp: "2023-12-28 18:43:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,11 +74,11 @@ def fun_Sig_TT(x, par):
     f = par[0] + par[1]*xx
     return f
 
-def x_fit_in_t(ParticleType, closest_date, Q2):
+def x_fit_in_t(ParticleType, pol_str, closest_date, Q2):
 
-    single_setting(ParticleType, closest_date, Q2)
+    single_setting(ParticleType, pol_str, closest_date, Q2)
 
-def single_setting(ParticleType, dir_iter, q2_set):
+def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     outputpdf  = OUTPATH + "/" + ParticleType + "_xfit_in_t.pdf"
     
