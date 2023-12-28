@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 17:23:25 trottar"
+# Time-stamp: "2023-12-28 17:30:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,12 +224,6 @@ py_param_active = 'models/param_active.py'
 print("Copying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
 shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 
-# Run weight iteration script for optimizing parameterization
-sys.path.append("models")
-from xfit_in_t import x_fit_in_t
-x_fit_in_t(closest_date, Q2)
-
-# Calculate weight with newly calculation parameterization
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
 from compare_simc_iter import compare_simc
@@ -429,7 +423,14 @@ if EPSSET == "high":
         sys.exit(2)
 
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
-
+    output_file_lst.append(OUTPATH+"/{}_lt_2D_fit.pdf".format(ParticleType))
+    
+    # Run weight iteration script for optimizing parameterization
+    sys.path.append("models")
+    from xfit_in_t import x_fit_in_t
+    x_fit_in_t(closest_date, Q2)
+    output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
+    
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***
     # ***The old parameters, used for this iteration, are saved in the summary!***
