@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 06:57:35 trottar"
+# Time-stamp: "2023-12-28 17:44:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -580,7 +580,14 @@ if EPSSET == "high":
     if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))    
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    output_file_lst.append(OUTPATH+"/{}_lt_2D_fit.pdf".format(ParticleType))
 
+    # Run weight iteration script for optimizing parameterization
+    sys.path.append("models")
+    from xfit_in_t import x_fit_in_t
+    x_fit_in_t(closest_date, Q2)
+    output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
+    
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***
     # ***The old parameters, used for this iteration, are saved in the summary!***
