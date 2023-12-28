@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 15:32:10 trottar"
+# Time-stamp: "2023-12-28 15:36:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -566,6 +566,22 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), tt[0], sig_tt)
         g_sig_tt_total.SetPointError(g_sig_tt_total.GetN() - 1, 0, sig_tt_err)
 
+        sig_L_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        sig_L_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [#mub/GeV^{2}]")
+        sig_L_g.SetTitle("{}".format(i))
+        
+        sig_T_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        sig_T_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [#mub/GeV^{2}]")
+        sig_T_g.SetTitle("{}".format(i))
+
+        sig_LT_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        sig_LT_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [#mub/GeV^{2}]")
+        sig_LT_g.SetTitle("{}".format(i))
+
+        sig_TT_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        sig_TT_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [#mub/GeV^{2}]")
+        sig_TT_g.SetTitle("{}".format(i))        
+        
         # Set points and errors for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.SetPoint(i, tt[0], sig_l)
         sig_T_g.SetPoint(i, tt[0], sig_t)
