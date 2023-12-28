@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 16:36:11 trottar"
+# Time-stamp: "2023-12-28 16:46:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -634,8 +634,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetRightMargin(0.03)
 
         # Print plots for c1 and c2 canvases
-        c1.Print(outputpdf)
-        c2.Print(outputpdf)
+        #c1.Print(outputpdf)
+        #c2.Print(outputpdf)
         #c2.Print("money" + q2_set + filename + ".root")
 
         # Clear c1 and c2 canvases
