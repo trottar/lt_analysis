@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 18:03:03 trottar"
+# Time-stamp: "2023-12-28 18:15:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -434,7 +434,7 @@ if EPSSET == "high":
         sys.exit(2)
 
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
-    output_file_lst.append(OUTPATH+"/{}_lt_2D_fit.pdf".format(ParticleType))    
+    output_file_lst.append(OUTPATH+"/{}_lt_fit.pdf".format(ParticleType))    
     
     # Save sep and unsep values from current iteration
     unsep_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)

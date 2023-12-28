@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 17:45:46 trottar"
+# Time-stamp: "2023-12-28 18:15:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -580,7 +580,7 @@ if EPSSET == "high":
     if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))    
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
-    output_file_lst.append(OUTPATH+"/{}_lt_2D_fit.pdf".format(ParticleType))
+    output_file_lst.append(OUTPATH+"/{}_lt_fit.pdf".format(ParticleType))
     
     # Save new parameters and unsep values from current iteration
     # ***Old parameter file defined in step 7, the new parameter values are saved here!***
