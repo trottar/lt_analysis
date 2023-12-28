@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 15:36:57 trottar"
+# Time-stamp: "2023-12-28 16:06:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -294,7 +294,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MR")
 
-        sigL_change.Litle("sigL_change {}".format(i))
+        sigL_change.Title("sigL_change {}".format(i))
         sigL_change.GetXaxis().SetTitle("Index")
         sigL_change.GetYaxis().SetTitle("Parameter Value")
         
