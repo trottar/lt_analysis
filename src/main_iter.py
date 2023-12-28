@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 18:15:23 trottar"
+# Time-stamp: "2023-12-28 18:38:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,7 +133,7 @@ with open(prev_iter_json, 'r') as f:
 #Run weight iteration script for optimizing parameterization
 sys.path.append("models")
 from xfit_in_t import x_fit_in_t
-x_fit_in_t(closest_date, Q2)
+x_fit_in_t(ParticleType, closest_date, Q2)
 output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
 
 # ***Parameter file for new iteration!***

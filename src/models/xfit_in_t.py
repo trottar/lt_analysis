@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 18:29:37 trottar"
+# Time-stamp: "2023-12-28 18:37:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,10 +40,6 @@ OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
 
 ################################################################################################################################################
-
-outputpdf  = OUTPATH + "/" + ParticleType + "_xfit_in_t.pdf"
-
-################################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
 
@@ -78,11 +74,14 @@ def fun_Sig_TT(x, par):
     f = par[0] + par[1]*xx
     return f
 
-def x_fit_in_t(closest_date, Q2):
+def x_fit_in_t(ParticleType, closest_date, Q2):
 
-    single_setting(closest_date, Q2)
+    single_setting(ParticleType, closest_date, Q2)
 
-def single_setting(dir_iter, q2_set):
+def single_setting(ParticleType, dir_iter, q2_set):
+
+    outputpdf  = OUTPATH + "/" + ParticleType + "_xfit_in_t.pdf"
+    
     prv_par_vec = []
     g_vec = []
     w_vec = []
