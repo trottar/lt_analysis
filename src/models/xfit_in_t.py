@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 18:43:15 trottar"
+# Time-stamp: "2023-12-28 18:48:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,13 +99,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     fit_status = TText()
 
-    fn_sep = "x_sep.{}_{}.dat".format(POL, q2_set)
+    fn_sep = "x_sep.{}_{}.dat".format(pol_str, q2_set)
 
     nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, dir_iter, POL, q2_set)
+    para_file_in =  "{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, dir_iter, pol_str, q2_set)
     try:
         with open(para_file_in, 'r') as f:
             for line in f:
@@ -573,7 +573,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
     
-    with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, POL, q2_set), 'w') as f:
+    with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set), 'w') as f:
         sys.stdout.write(fixed)
         f.write(fixed)
         f.write("{:.5f}\n".format(par_value))
