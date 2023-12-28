@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 16:19:38 trottar"
+# Time-stamp: "2023-12-28 16:36:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -553,6 +553,22 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Delete g_plot_err
         del g_plot_err
 
+        g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [#mub/GeV^{2}]")
+        g_sig_l_total.SetTitle("{}".format(i))
+        
+        g_sig_t_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        g_sig_t_total.GetYaxis().SetTitle("#it{#sigma}_{T} [#mub/GeV^{2}]")
+        g_sig_t_total.SetTitle("{}".format(i))
+
+        g_sig_lt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        g_sig_lt_total.GetYaxis().SetTitle("#it{#sigma}_{LT} [#mub/GeV^{2}]")
+        g_sig_lt_total.SetTitle("{}".format(i))
+
+        g_sig_tt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        g_sig_tt_total.GetYaxis().SetTitle("#it{#sigma}_{TT} [#mub/GeV^{2}]")
+        g_sig_tt_total.SetTitle("{}".format(i))        
+        
         # Set points and errors for g_sig_l_total, g_sig_t_total, g_sig_lt_total, and g_sig_tt_total
         g_sig_l_total.SetPoint(g_sig_l_total.GetN(), tt[0], sig_l)
         g_sig_l_total.SetPointError(g_sig_l_total.GetN() - 1, 0, sig_l_err)
@@ -625,9 +641,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Clear c1 and c2 canvases
         c1.Clear()
         c2.Clear()
-
-        # Delete cc4 canvas
-        del cc4
             
         # Create TCanvas
         c3 = ROOT.TCanvas()
@@ -645,10 +658,11 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_TT_g.Draw("a*")
         c3.Print(outputpdf)
 
-        # Delete c1, c2, and c3 canvases
+        # Delete canvases
         del c1
         del c2
         del c3
+        del cc4
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(LOEPS)*100)
 fn_hi =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(HIEPS)*100)
