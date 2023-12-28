@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 19:33:47 trottar"
+# Time-stamp: "2023-12-28 15:32:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -230,7 +230,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
             ghi_tmp.SetPoint(i, nhi.GetV2()[i], nhi.GetV1()[i])
             ghi_tmp.SetPointError(i, 0, nhi.GetV3()[i])
 
-
         ghi = ghi_tmp.Clone("ghi")
 
         ave_sig_hi = ghi.GetMean(2)
@@ -295,6 +294,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MR")
 
+        sigL_change.Litle("sigL_change {}".format(i))
         sigL_change.GetXaxis().SetTitle("Index")
         sigL_change.GetYaxis().SetTitle("Parameter Value")
         
@@ -302,6 +302,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
 
+        sigT_change.Title("sigT_change {}".format(i))
         sigT_change.GetXaxis().SetTitle("Index")
         sigT_change.GetYaxis().SetTitle("Parameter Value")
         
