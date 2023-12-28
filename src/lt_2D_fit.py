@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 19:20:27 trottar"
+# Time-stamp: "2023-12-27 19:33:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -641,10 +641,8 @@ g_sig_t_total = TGraphErrors()
 g_sig_lt_total = TGraphErrors()
 g_sig_tt_total = TGraphErrors()
 
-print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Start")    
 single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 
-print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!End")
 ROOT.gStyle.SetOptFit(1)
 
 c_total = TCanvas()
