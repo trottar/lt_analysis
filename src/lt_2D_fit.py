@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 16:46:41 trottar"
+# Time-stamp: "2023-12-28 17:01:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,7 +266,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
 
-        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*[2]*cos(0.017453*x)  + y*[3]*cos(0.0b34906*x)", 0, 360, 0.1, 0.6)
+        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*[2]*cos(0.017453*x)  + y*[3]*cos(0.034906*x)", 0, 360, 0.1, 0.6)
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
