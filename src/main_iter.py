@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 17:43:53 trottar"
+# Time-stamp: "2023-12-28 18:01:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,6 +101,22 @@ output_file_lst = []
 ################################################################################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
+
+################################
+# Step 0 of the lt_analysis: #
+################################
+'''
+Run weight iteration script for optimizing parameterization
+'''
+sys.path.append("models")
+from xfit_in_t import x_fit_in_t
+x_fit_in_t(closest_date, Q2)
+output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
+
+# ***Parameter file from new iteration!***
+# ***These parameters are newly generated for this iteration. See README for more info on procedure!***
+new_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
+output_file_lst.append(new_param_file) 
 
 ################################
 # Step 1-4 of the lt_analysis: #
@@ -208,10 +224,6 @@ create_dir(new_dir)
 # ***Also must create new root directory in iter directory***
 create_dir(new_dir+"/root")
 
-# ***Parameter file from last iteration!***
-# ***These old parameters are needed for this iteration. See README for more info on procedure!***
-old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
-
 # ***Moved from main.py location below because neede for weight iteration***
 # Save fortran scripts that contain iteration functional form of parameterization
 py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
@@ -244,7 +256,7 @@ for hist in histlist:
         # Make sure new simc root file exists
         if os.path.exists(new_simc_root):
             # Function to calculation new weight and apply it to simc root file 
-            iter_weight(old_param_file, new_simc_root, inpDict, hist["phi_setting"])
+            iter_weight(new_param_file, new_simc_root, inpDict, hist["phi_setting"])
             # Overwrite root file with updated weight
             os.rename(new_simc_root.replace(".root","_new.root"),new_simc_root)
             hist.update(compare_simc(new_simc_root, hist, inpDict))
@@ -368,14 +380,17 @@ from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Redefinition from above, but should be the same! This is just to stay consistent with main.py
-# ***Parameter file from last iteration!***
-# ***These old parameters are needed for this iteration. See README for more info on procedure!***
-old_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
+# ***Parameter files from last and this iteration!***
+old_param_file = '{}/{}/parameters/par.{}_{}.dat'.format(CACHEPATH, closest_date, ParticleType, pol_str, Q2.replace("p",""))
 try:
-    cut_summary_lst += "\nUnsep Parameterization for {}...".format(formatted_date)
+    cut_summary_lst += "\nUnsep Parameterization for {}...".format(closest_date)
     with open(old_param_file, 'r') as file:
         for line in file:
             cut_summary_lst += line
+    cut_summary_lst += "\nUnsep Parameterization for {}...".format(formatted_date)
+    with open(new_param_file, 'r') as file:
+        for line in file:
+            cut_summary_lst += line            
 except FileNotFoundError:
     print('''
     \n\n
@@ -425,11 +440,7 @@ if EPSSET == "high":
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_lt_2D_fit.pdf".format(ParticleType))    
     
-    # Save new parameters and unsep values from current iteration
-    # ***Old parameter file defined in step 7, the new parameter values are saved here!***
-    # ***The old parameters, used for this iteration, are saved in the summary!***
-    new_param_file = '{}/parameters/par.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""))
-    output_file_lst.append(new_param_file) 
+    # Save sep and unsep values from current iteration
     unsep_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
     output_file_lst.append(unsep_file)
     sep_file = '{}/xsects/x_sep.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""))
