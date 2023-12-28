@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 06:57:13 trottar"
+# Time-stamp: "2023-12-28 17:23:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,6 +224,12 @@ py_param_active = 'models/param_active.py'
 print("Copying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
 shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 
+# Run weight iteration script for optimizing parameterization
+sys.path.append("models")
+from xfit_in_t import x_fit_in_t
+x_fit_in_t(closest_date, Q2)
+
+# Calculate weight with newly calculation parameterization
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
 from compare_simc_iter import compare_simc
@@ -412,7 +418,7 @@ if EPSSET == "high":
     # Copying content of used models to actively used files
     print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
     shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
-
+    
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
     # if still iterating weights
