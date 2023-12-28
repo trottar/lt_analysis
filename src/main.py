@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 08:24:40 trottar"
+# Time-stamp: "2023-12-28 06:57:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -588,7 +588,7 @@ if EPSSET == "high":
     output_file_lst.append(new_param_file) 
     unsep_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
     output_file_lst.append(unsep_file)
-    sep_file = '{}/xsects/x_sep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
+    sep_file = '{}/xsects/x_sep.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""))
     output_file_lst.append(sep_file)
 
 ##############################

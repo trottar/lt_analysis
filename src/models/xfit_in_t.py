@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-27 12:09:47 trottar"
+# Time-stamp: "2023-12-28 06:48:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,6 +37,10 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
+
+################################################################################################################################################
+
+outputpdf  = OUTPATH + "/" + ParticleType + "_xfit_in_t.pdf"
 
 ################################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
@@ -566,8 +570,8 @@ def single_setting(dir_iter, q2_set):
     g_sigtt_fit_tot.SetLineColor(2)
     g_sigtt_fit_tot.Draw("LP")
 
-    c1.Print("separated_" + q2_set + ".png")
-    c2.Print("separated_" + q2_set + "_fit.png")
+    c1.Print(outputpdf+'(')
+    c2.Print(outputpdf+')')
     
     with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, POL, q2_set), 'w') as f:
         print(fixed, file=sys.stdout)
