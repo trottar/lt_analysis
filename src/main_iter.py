@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 18:01:04 trottar"
+# Time-stamp: "2023-12-28 18:03:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,21 +102,6 @@ output_file_lst = []
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
 
-################################
-# Step 0 of the lt_analysis: #
-################################
-'''
-Run weight iteration script for optimizing parameterization
-'''
-sys.path.append("models")
-from xfit_in_t import x_fit_in_t
-x_fit_in_t(closest_date, Q2)
-output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
-
-# ***Parameter file from new iteration!***
-# ***These parameters are newly generated for this iteration. See README for more info on procedure!***
-new_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
-output_file_lst.append(new_param_file) 
 
 ################################
 # Step 1-4 of the lt_analysis: #
@@ -144,6 +129,17 @@ prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
 # Redefine dictionaries from old iteration information, see main.py
 with open(prev_iter_json, 'r') as f:
     prev_iter_combineDict = json.load(f)
+
+#Run weight iteration script for optimizing parameterization
+sys.path.append("models")
+from xfit_in_t import x_fit_in_t
+x_fit_in_t(closest_date, Q2)
+output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
+
+# ***Parameter file for new iteration!***
+# ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
+new_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
+output_file_lst.append(new_param_file) 
 
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
