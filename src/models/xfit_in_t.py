@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 11:46:28 trottar"
+# Time-stamp: "2023-12-29 11:51:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,6 +14,7 @@ import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
+from array import array
 import math
 import os
 
@@ -158,7 +159,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     y_values = [nsep.GetV2()[i] for i in range(nsep.GetSelectedRows())]
 
     t_tmin_map = TGraph(len(x_values), array('d', x_values), array('d', y_values))
-
 
     t_list = t_tmin_map.GetX()
     t_min_list = t_tmin_map.GetY()
