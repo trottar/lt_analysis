@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 12:22:58 trottar"
+# Time-stamp: "2023-12-29 12:37:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,11 +74,11 @@ def fun_Sig_TT(x, par):
     f = par[0] + par[1]*xx
     return f
 
-def x_fit_in_t(ParticleType, pol_str, closest_date, Q2):
+def x_fit_in_t(ParticleType, polID, closest_date, Q2):
 
-    single_setting(ParticleType, pol_str, closest_date, Q2)
+    single_setting(ParticleType, polID, closest_date, Q2)
 
-def single_setting(ParticleType, pol_str, dir_iter, q2_set):
+def single_setting(ParticleType, polID, dir_iter, q2_set):
 
     outputpdf  = OUTPATH + "/" + ParticleType + "_xfit_in_t.pdf"
     
@@ -104,7 +104,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     nsep.ReadFile(fn_sep)
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, pol_str, q2_set.replace("p",""))
+    para_file_in =  "{}/{}/{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, polID, q2_set.replace("p",""))
     print("Reading {}...".format(para_file_in))
     try:
         with open(para_file_in, 'r') as f:
@@ -578,7 +578,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
     
-    with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set), 'w') as f:
+    with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set), 'w') as f:
         sys.stdout.write(fixed)
         f.write(fixed)
         f.write("{:.5f}\n".format(par_value))
