@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 20:45:04 trottar"
+# Time-stamp: "2023-12-28 21:09:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,6 +116,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
 
+    print(prv_par_vec)
+    print(len(prv_par_vec))
+        
     #t0, t1, t2, t3, l0, l1, l2, l3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     t0, t1, t2, l0, l1, l2, lt0, lt1, lt2, tt0, tt1, tt2 = prv_par_vec[:12] # RLT too many parameters
     
