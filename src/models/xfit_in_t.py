@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 13:41:12 trottar"
+# Time-stamp: "2023-12-29 13:52:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,6 +102,13 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     fn_sep = "{}/src/{}/xsects/x_sep.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set.replace("p",""))
     nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
+
+    # Print values for nsep
+    print("Values for nsep:")
+    for entry in nsep:
+        print("sigt: {}, sigt_e: {}, sigl: {}, sigl_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, t_min: {}, w: {}, q2: {}".format(
+            entry.sigt, entry.sigt_e, entry.sigl, entry.sigl_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.t_min, entry.w, entry.q2
+        ))
 
     prv_par_vec = []
     para_file_in =  "{}/{}/{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, polID, q2_set.replace("p",""))
