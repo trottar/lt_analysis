@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 15:02:03 trottar"
+# Time-stamp: "2023-12-29 15:25:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -362,7 +362,9 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
 
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i]) / q2_dep + q2_term) * g_vec[i]
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
-    
+
+    gMinuit = ROOT.TMinuit()
+        
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
     c1.cd(2)
 
@@ -478,6 +480,9 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
 
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
+
+    gMinuit = ROOT.TMinuit()
+    
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
 
     c1.cd(3)
@@ -593,6 +598,8 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
                   sin(th_vec[i] * PI / 180) * sin(th_vec[i] * PI / 180)
 
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
+
+    gMinuit = ROOT.TMinuit()
         
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
 
