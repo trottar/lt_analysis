@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 12:07:25 trottar"
+# Time-stamp: "2023-12-29 12:22:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,8 +99,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     fit_status = TText()
 
-    fn_sep = "x_sep.{}_{}.dat".format(pol_str, q2_set)
-
+    fn_sep = "{}/src/{}/xsects/x_sep.{}_{}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(LOEPS)*100)
     nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
 
