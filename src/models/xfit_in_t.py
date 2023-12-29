@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 14:37:35 trottar"
+# Time-stamp: "2023-12-29 14:42:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,13 +100,13 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     fit_status = TText()
 
     fn_sep = "{}/src/{}/xsects/x_sep.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set.replace("p",""))
-    nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2:theta")
+    nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
 
     print("Reading {}...".format(fn_sep))
     for entry in nsep:
-        print("sigt: {}, sigt_e: {}, sigl: {}, sigl_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, t_min: {}, w: {}, q2: {}, theta: {}".format(
-            entry.sigt, entry.sigt_e, entry.sigl, entry.sigl_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.t_min, entry.w, entry.q2, entry.theta
+        print("sigt: {}, sigt_e: {}, sigl: {}, sigl_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, t_min: {}, w: {}, q2: {}".format(
+            entry.sigt, entry.sigt_e, entry.sigl, entry.sigl_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.t_min, entry.w, entry.q2
         ))
 
     prv_par_vec = []
