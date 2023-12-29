@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 00:24:55 trottar"
+# Time-stamp: "2023-12-29 00:29:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -129,7 +129,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
             w_vec.append(w)
             q2_vec.append(q2)
             th_vec.append(thetacm)
-            logq2_vec.append(log(q2))
+            logq2_vec.append(math.log(q2))
 
     g_sigt_prv = TGraph()
     g_sigl_prv = TGraph()
