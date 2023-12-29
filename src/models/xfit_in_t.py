@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 00:14:31 trottar"
+# Time-stamp: "2023-12-29 00:20:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -119,7 +119,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     #t0, t1, t2, t3, l0, l1, l2, l3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     t0, t1, t2, l0, l1, l2, lt0, lt1, lt2, tt0, tt1, tt2 = prv_par_vec[:12] # RLT too many parameters
     
-    ave_file_in = LTANAPATH + "src/averages/avek." + q2_set.replace("p","") + ".dat"
+    ave_file_in = "{}/src/{}/averages/avek.".format(LTANAPATH, ParticleType, q2_set.replace("p",""), ".dat")
     with open(ave_file_in, 'r') as f:
         for line in f:
             w, w_e, q2, q2_e, tt, tt_e, thetacm, it = map(float, line.strip().split())
