@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 18:48:11 trottar"
+# Time-stamp: "2023-12-28 20:42:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -281,7 +281,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     g_sigl = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), 0, n1.GetV3())
 
     for i in range(len(w_vec)):
-        sigl_X_pre = 0.0
+        
         q2_term = l2 / q2_vec[i] + l3 * g_sigl.GetX()[i] / q2_vec[i]
         q2_dep = q2_vec[i] * q2_vec[i]
 
@@ -386,7 +386,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     for i in range(len(w_vec)):
 
         siglt_X_pre = 0.0
-        q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
+        #q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
+        q2_term = 0.0 # RLT Too many parameters
 
         q2_dep = q2_vec[i]
 
@@ -442,7 +443,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     
     for i in range(len(w_vec)):
         siglt_X = 0.0
-        q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
+        #q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
+        q2_term = 0.0 # RLT Too many parameters
 
         q2_dep = q2_vec[i]
 
@@ -495,7 +497,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     for i in range(len(w_vec)):
         sigtt_X_pre = 0.0
-        q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
+        #q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
+        q2_term = 0.0 # RLT Too many parameters
         q2_dep = q2_vec[i]
 
         sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
@@ -553,7 +556,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         
     for i in range(len(w_vec)):
         sigtt_X = 0.0
-        q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
+        #q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
+        q2_term = 0.0 # RLT Too many parameters
         q2_dep = q2_vec[i]
 
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
