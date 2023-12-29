@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 13:40:04 trottar"
+# Time-stamp: "2023-12-29 14:05:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -542,11 +542,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
             mode = 'w' if i == 0 else 'a'
             with open(fn_sep, mode) as f:
                 # Write values to output file
-                f.write("{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}\n".format(
+                # Concatenate values to a single string without adding a new line
+                line_to_write = "{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}".format(
                     sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
                     fff2.GetChisquare(), tt[0], t_min[0], ww[0], qq[0], thetacm[0]
-                ))
-
+                )
+                # Write the concatenated string to the file
+                f.write(line_to_write)
         except IOError:
             print("Error writing to file {}.".format(fn_sep))
 
