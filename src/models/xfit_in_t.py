@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 14:42:11 trottar"
+# Time-stamp: "2023-12-29 14:47:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -190,7 +190,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         sigt_X_pre = 0.0
 
         q2_term = t2 / logq2_vec[i] + t3 * g_sigt.GetX()[i] / logq2_vec[i]
-        q2_dep = sqrt(q2_vec[i])
+        q2_dep = math.sqrt(q2_vec[i])
 
         sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i]) / q2_dep + q2_term) * g_vec[i]
         g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
@@ -244,7 +244,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
 
         q2_term = t2 / logq2_vec[i] + t3 * g_sigt.GetX()[i] / logq2_vec[i]
 
-        q2_dep = sqrt(q2_vec[i])
+        q2_dep = math.sqrt(q2_vec[i])
 
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i]) / q2_dep + q2_term) * g_vec[i]
 
