@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 13:33:02 trottar"
+# Time-stamp: "2023-12-29 13:41:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,7 +180,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     f_sigT_pre = TF1("sig_T_pre", fun_Sig_T, 0, 0.5, 2)
     f_sigT_pre.SetParameters(t0, t1)
 
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
         sigt_X_pre = 0.0
 
         q2_term = t2 / logq2_vec[i] + t3 * g_sigt.GetX()[i] / logq2_vec[i]
@@ -233,7 +233,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
 
     fit_t_result = g_sigt_fit.Fit(f_sigT, "S")
 
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
         sigt_X = 0.0
 
         q2_term = t2 / logq2_vec[i] + t3 * g_sigt.GetX()[i] / logq2_vec[i]
@@ -293,7 +293,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         g_sigl.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigl.SetPointError(i, 0, nsep.GetV3()[i])
 
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
         
         q2_term = l2 / q2_vec[i] + l3 * g_sigl.GetX()[i] / q2_vec[i]
         q2_dep = q2_vec[i] * q2_vec[i]
@@ -345,7 +345,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     f_sigL.SetParameters(l0, l1)
     g_sigl_fit.Fit(f_sigL)
 
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
 
         sigl_X = 0.0
         q2_term = l2 * q2_vec[i] + l3 * g_sigl.GetX()[i] * q2_vec[i]
@@ -400,7 +400,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         g_siglt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_siglt.SetPointError(i, 0, nsep.GetV3()[i])
 
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
 
         siglt_X_pre = 0.0
         #q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
@@ -458,7 +458,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
 
     g_siglt_fit.Fit(f_sigLT)
     
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
         siglt_X = 0.0
         #q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
         q2_term = 0.0 # RLT Too many parameters
@@ -516,7 +516,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
 
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
         sigtt_X_pre = 0.0
         #q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
         q2_term = 0.0 # RLT Too many parameters
@@ -575,7 +575,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     f_sigTT.SetParameters(tt0, tt1)
     g_sigtt_fit.Fit(f_sigTT)
         
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
         sigtt_X = 0.0
         #q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
         q2_term = 0.0 # RLT Too many parameters
@@ -612,7 +612,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
 
     lt_ratio = TGraphErrors()
 
-    for i in range(len(w_vec)):
+    for i in range(0, len(w_vec)-1):
         l_t_ratio = f_sigL.Eval(g_sigt.GetX()[i]) / f_sigT.Eval(g_sigt.GetX()[i])
 
         l_t_ratio_err = (0.03 / g_sigl_fit_tot.GetY()[i])**2 + (0.03 / g_sigt_fit_tot.GetY()[i])**2

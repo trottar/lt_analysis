@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 12:53:09 trottar"
+# Time-stamp: "2023-12-29 13:40:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -198,9 +198,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         #glo_tmp = TGraphErrors(nlo.GetSelectedRows(), nlo.GetV2(), nlo.GetV1(), [0]*nlo.GetSelectedRows(), nlo.GetV3())
         glo_tmp = TGraphErrors()
         # Use SetPoint and SetPointError to fill the graph
-        for i in range(nlo.GetSelectedRows()):
-            glo_tmp.SetPoint(i, nlo.GetV2()[i], nlo.GetV1()[i])
-            glo_tmp.SetPointError(i, 0, nlo.GetV3()[i])
+        for j in range(nlo.GetSelectedRows()):
+            glo_tmp.SetPoint(j, nlo.GetV2()[j], nlo.GetV1()[j])
+            glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
 
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)  # 4 is the number of input params
         flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4) # 4 is the number of input params
@@ -211,9 +211,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         #glo = TGraphErrors(glo_tmp.GetN(), glo_tmp.GetY(), glo_tmp.GetX(), [0]*glo_tmp.GetN(), glo_tmp.GetEY())
         glo = TGraphErrors()
         # Use SetPoint and SetPointError to fill the graph
-        for i in range(glo_tmp.GetN()):
-            glo.SetPoint(i, glo_tmp.GetY()[i], glo_tmp.GetX()[i])
-            glo.SetPointError(i, 0, glo_tmp.GetEY()[i])
+        for j in range(glo_tmp.GetN()):
+            glo.SetPoint(j, glo_tmp.GetY()[j], glo_tmp.GetX()[j])
+            glo.SetPointError(j, 0, glo_tmp.GetEY()[j])
 
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
@@ -226,9 +226,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         #ghi_tmp = TGraphErrors(nhi.GetSelectedRows(), nhi.GetV2(), nhi.GetV1(), 0, nhi.GetV3())
         ghi_tmp = TGraphErrors()
         # Use SetPoint and SetPointError to fill the graph
-        for i in range(nhi.GetSelectedRows()):
-            ghi_tmp.SetPoint(i, nhi.GetV2()[i], nhi.GetV1()[i])
-            ghi_tmp.SetPointError(i, 0, nhi.GetV3()[i])
+        for j in range(nhi.GetSelectedRows()):
+            ghi_tmp.SetPoint(j, nhi.GetV2()[j], nhi.GetV1()[j])
+            ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
 
         ghi = ghi_tmp.Clone("ghi")
 
