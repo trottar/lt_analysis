@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 12:53:15 trottar"
+# Time-stamp: "2023-12-29 13:03:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,7 +153,11 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     c2.Divide(2, 2)
 
     nsep.Draw("t:t_min", "", "goff")
-    t_tmin_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
+    #t_tmin_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
+    t_tmin_map = TGraph()
+    # Use SetPoint to fill the graph
+    for i in range(nsep.GetSelectedRows()):
+        t_tmin_map.SetPoint(i, nsep.GetV1()[i], nsep.GetV2()[i])
 
     t_list = t_tmin_map.GetX()
     t_min_list = t_tmin_map.GetY()
