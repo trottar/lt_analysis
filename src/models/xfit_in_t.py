@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 21:09:53 trottar"
+# Time-stamp: "2023-12-28 21:47:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,7 +105,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     nsep.ReadFile(fn_sep)
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, dir_iter, pol_str, q2_set)
+    para_file_in =  "{}/{}/{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, pol_str, q2_set)
     try:
         with open(para_file_in, 'r') as f:
             for line in f:
