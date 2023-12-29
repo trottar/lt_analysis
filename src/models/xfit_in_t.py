@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 11:51:38 trottar"
+# Time-stamp: "2023-12-29 12:02:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,7 +14,6 @@ import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
-from array import array
 import math
 import os
 
@@ -107,12 +106,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     prv_par_vec = []
     para_file_in =  "{}/{}/{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, pol_str, q2_set.replace("p",""))
+    print("Reading {}...".format(para_file_in))
     try:
         with open(para_file_in, 'r') as f:
             for line in f:
                 data = line.split()
                 par, par_err, indx, chi2 = map(float, data)
-                print("!!!!  {}".format(par))
+                print("  {}".format(par))
                 prv_par_vec.append(par)
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
@@ -155,10 +155,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     nsep.Draw("t:t_min", "", "goff")
     #t_tmin_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
-    x_values = [nsep.GetV1()[i] for i in range(nsep.GetSelectedRows())]
-    y_values = [nsep.GetV2()[i] for i in range(nsep.GetSelectedRows())]
+    from array import array
 
-    t_tmin_map = TGraph(len(x_values), array('d', x_values), array('d', y_values))
+    # Convert Python lists to arrays
+    x_array = array('d', x_values)
+    y_array = array('d', y_values)
+
+    # Create the TGraph object
+    t_tmin_map = TGraph(len(x_values), x_array, y_array)    
 
     t_list = t_tmin_map.GetX()
     t_min_list = t_tmin_map.GetY()
