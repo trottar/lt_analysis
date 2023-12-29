@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 14:47:23 trottar"
+# Time-stamp: "2023-12-29 14:53:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -202,9 +202,11 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
     
     g_max = g_sigt.GetYaxis().GetXmax()
-    gp_max = max(g_sigt_prv.GetN(), key=lambda i: g_sigt_prv.GetY()[i])
+    #gp_max = max(g_sigt_prv.GetN(), key=lambda i: g_sigt_prv.GetY()[i])
+    gp_max = max(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
     g_min = g_sigt.GetYaxis().GetXmin()
-    gp_min = min(g_sigt_prv.GetN(), key=lambda i: g_sigt_prv.GetY()[i])
+    #gp_min = min(g_sigt_prv.GetN(), key=lambda i: g_sigt_prv.GetY()[i])
+    gp_min = min(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
 
     difff = (g_max - g_min) / 5
 
