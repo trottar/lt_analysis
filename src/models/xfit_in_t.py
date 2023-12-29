@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 12:02:26 trottar"
+# Time-stamp: "2023-12-29 12:07:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,15 +154,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     c2.Divide(2, 2)
 
     nsep.Draw("t:t_min", "", "goff")
-    #t_tmin_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
-    from array import array
-
-    # Convert Python lists to arrays
-    x_array = array('d', x_values)
-    y_array = array('d', y_values)
-
-    # Create the TGraph object
-    t_tmin_map = TGraph(len(x_values), x_array, y_array)    
+    t_tmin_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
 
     t_list = t_tmin_map.GetX()
     t_min_list = t_tmin_map.GetY()
