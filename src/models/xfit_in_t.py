@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 00:35:50 trottar"
+# Time-stamp: "2023-12-29 11:38:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,8 +152,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
-    n1.Draw("t:t_min", "", "goff")
-    t_tmin_map = TGraph(n1.GetSelectedRows(), n1.GetV1(), n1.GetV2())
+    nsep.Draw("t:t_min", "", "goff")
+    t_tmin_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
 
     t_list = t_tmin_map.GetX()
     t_min_list = t_tmin_map.GetY()
@@ -166,8 +166,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     print("Fit for Sig T")
     
     c1.cd(1).SetLeftMargin(0.12)
-    n1.Draw("sigt:t:sigt_e", "", "goff")
-    g_sigt = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), [0] * n1.GetSelectedRows(), n1.GetV3())
+    nsep.Draw("sigt:t:sigt_e", "", "goff")
+    g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
     
     f_sigT_pre = TF1("sig_T_pre", fun_Sig_T, 0, 0.5, 2)
     f_sigT_pre.SetParameters(t0, t1)
@@ -274,12 +274,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     print("Fit for Sig L")
 
     c1.cd(2).SetLeftMargin(0.12)
-    n1.Draw("sigl:t:sigl_e", "", "goff")
+    nsep.Draw("sigl:t:sigl_e", "", "goff")
 
     f_sigL_pre = TF1("sig_L", fun_Sig_L, 0, 0.5, 2)
     f_sigL_pre.SetParameters(l0, l1)
     
-    g_sigl = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), 0, n1.GetV3())
+    g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
 
     for i in range(len(w_vec)):
         
@@ -377,12 +377,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     print("Fit for Sig LT")
 
     c1.cd(3).SetLeftMargin(0.12)
-    n1.Draw("siglt:t:siglt_e", "", "goff")
+    nsep.Draw("siglt:t:siglt_e", "", "goff")
 
     f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, 0, 0.5, 2)
     f_sigLT_pre.SetParameters(lt0, lt1)
     
-    g_siglt = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), ROOT.nullptr, n1.GetV3())
+    g_siglt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), ROOT.nullptr, nsep.GetV3())
 
     for i in range(len(w_vec)):
 
@@ -489,12 +489,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     print("Fit for Sig TT")
 
     c1.cd(4).SetLeftMargin(0.12)
-    n1.Draw("sigtt:t:sigtt_e", "", "goff")
+    nsep.Draw("sigtt:t:sigtt_e", "", "goff")
     
     f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, 0, 0.5, 2)
     f_sigTT_pre.SetParameters(tt0, tt1)
     
-    g_sigtt = TGraphErrors(n1.GetSelectedRows(), n1.GetV2(), n1.GetV1(), [0]*n1.GetSelectedRows(), n1.GetV3())
+    g_sigtt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0]*nsep.GetSelectedRows(), nsep.GetV3())
 
     for i in range(len(w_vec)):
         sigtt_X_pre = 0.0
@@ -505,7 +505,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
                       sin(th_vec[i] * PI / 180) * sin(th_vec[i] * PI / 180)
 
-        g_sigtt_prv.SetPoint(i, n1.GetV2()[i], sigtt_X_pre)
+        g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
         sigtt_X_fit, sigtt_X_fit_err = 0.0, 1.0
 
