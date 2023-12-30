@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-30 12:28:13 trottar"
+# Time-stamp: "2023-12-30 12:35:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -618,9 +618,9 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     c2.Print(outputpdf+')')
     
     with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set), 'w') as f:
-        sys.stdout.write(fixed)
-        f.write(fixed)
-        f.write("{:.5f}\n".format(par_value))
+        format_specifier = "{:.5f}"
+        sys.stdout.write(format_specifier)
+        f.write(format_specifier + "\n")
 
         for i in range(len(par_vec)):
             sys.stdout.write("{:>10}   {:>15.4f} {:>14} {:>10}\n".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
