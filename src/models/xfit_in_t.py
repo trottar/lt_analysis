@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-30 12:16:02 trottar"
+# Time-stamp: "2023-12-30 12:23:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -479,7 +479,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         q2_dep = q2_vec[i]
 
         if th_vec[i] != 180:
-            siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * sin(th_vec[i] * PI / 180)
+            siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * math.sin(th_vec[i] * PI / 180)
 
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
@@ -539,24 +539,25 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         q2_dep = q2_vec[i]
 
         sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
-                      sin(th_vec[i] * PI / 180) * sin(th_vec[i] * PI / 180)
+                      math.sin(th_vec[i] * PI / 180) * math.sin(th_vec[i] * PI / 180)
 
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
         sigtt_X_fit, sigtt_X_fit_err = 0.0, 1.0
 
         if th_vec[i] != 180:
-            sigtt_X_fit = (g_sigtt.GetY()[i] / g_vec[i] / sin(th_vec[i] * PI / 180) / sin(th_vec[i] * PI / 180) - q2_term) * q2_dep
-            sigtt_X_fit_err = g_sigtt.GetEY()[i] / g_vec[i] / sin(th_vec[i] * PI / 180) / sin(th_vec[i] * PI / 180) * q2_dep
+            sigtt_X_fit = (g_sigtt.GetY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) / math.sin(th_vec[i] * PI / 180) - q2_term) * q2_dep
+            sigtt_X_fit_err = g_sigtt.GetEY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) / math.sin(th_vec[i] * PI / 180) * q2_dep
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
     
     g_max = g_sigtt.GetYaxis().GetXmax()
-    gp_max = ROOT.TMath.MaxElement(g_sigtt_prv.GetN(), g_sigtt_prv.GetY())
-
+    #gp_max = ROOT.TMath.MaxElement(g_sigtt_prv.GetN(), g_sigtt_prv.GetY())
+    gp_max = max(range(g_sigtt_prv.GetN()), key=lambda i: g_sigtt_prv.GetY()[i])
     g_min = g_sigtt.GetYaxis().GetXmin()
-    gp_min = ROOT.TMath.MinElement(g_sigtt_prv.GetN(), g_sigtt_prv.GetY())
+    #gp_min = ROOT.TMath.MinElement(g_sigtt_prv.GetN(), g_sigtt_prv.GetY())
+    gp_min = min(range(g_sigtt_prv.GetN()), key=lambda i: g_sigtt_prv.GetY()[i])
 
     difff = (g_max - g_min) / 5
 
@@ -598,7 +599,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         q2_dep = q2_vec[i]
 
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
-                  sin(th_vec[i] * PI / 180) * sin(th_vec[i] * PI / 180)
+                  math.sin(th_vec[i] * PI / 180) * math.sin(th_vec[i] * PI / 180)
 
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
