@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-28 18:43:06 trottar"
+# Time-stamp: "2023-12-30 12:48:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -209,6 +209,7 @@ print("\n\n")
 
 sys.path.append("normalize")
 from get_eff_charge import get_eff_charge
+
 # Upate hist dictionary with effective charge
 for hist in histlist:
     hist.update(get_eff_charge(hist, inpDict))

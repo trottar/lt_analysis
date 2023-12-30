@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-30 12:35:45 trottar"
+# Time-stamp: "2023-12-30 12:44:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -618,13 +618,11 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     c2.Print(outputpdf+')')
     
     with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set), 'w') as f:
-        format_specifier = "{:.5f}"
-        sys.stdout.write(format_specifier)
-        f.write(format_specifier + "\n")
+        format_specifier = "{:>13.5E} {:>13.5E} {:>3} {:>12.1f}"
 
         for i in range(len(par_vec)):
-            sys.stdout.write("{:>10}   {:>15.4f} {:>14} {:>10}\n".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
-            f.write("{:>12}   {:>15.4f} {:>12} {:>5}\n".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))
+            sys.stdout.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
+            f.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
         
     l_t_ratio = 0.0
     l_t_ratio_err = 0.0
