@@ -222,7 +222,9 @@ do
 	declare -a PHI=("RIGHT" "LEFT" "CENTER")
 	for i in "${PHI[@]}"
 	do
-
+	    ##############
+	    # HARD CODED #
+	    ##############
 	    if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
 		if [[ $i = "RIGHT" ]]; then
 		    # Define run list based off kinematics selected
@@ -482,6 +484,9 @@ do
 		fi
 		KIN="Q0p5W2p40_${EPSILON}e"
 	    fi
+	    ##############
+	    ##############
+	    ##############
 	done
 
 	# Define input and output file names
@@ -892,7 +897,9 @@ if [[ $i_flag != "true" ]]; then
 	declare -a PHI=("RIGHT" "LEFT" "CENTER")
 	for i in "${PHI[@]}"
 	do
-
+	    ##############
+	    # HARD CODED #
+	    ##############	    
 	    if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
 		if [[ $i = "RIGHT" ]]; then
 		    # Define run list based off kinematics selected
@@ -1152,7 +1159,9 @@ if [[ $i_flag != "true" ]]; then
 		fi
 		KIN="Q0p5W2p40_${EPSILON}e"
 	    fi
-
+	    ##############
+	    ##############
+	    ##############
 	done
 
 	# Define input and output file names
@@ -1454,7 +1463,9 @@ else
 	declare -a PHI=("RIGHT" "LEFT" "CENTER")
 	for i in "${PHI[@]}"
 	do
-
+	    ##############
+	    # HARD CODED #
+	    ##############
 	    if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
 		if [[ $i = "RIGHT" ]]; then
 		    # Define run list based off kinematics selected
@@ -1714,7 +1725,9 @@ else
 		fi
 		KIN="Q0p5W2p40_${EPSILON}e"
 	    fi
-
+	    ##############
+	    ##############
+	    ##############
 	done
 
 	# Define input and output file names

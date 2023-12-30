@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-30 13:20:59 trottar"
+# Time-stamp: "2023-12-30 13:42:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,7 +117,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
             for line in f:
                 data = line.split()
                 par, par_err, indx, chi2 = map(float, data)
-                print("  {}".format(par))
+                print("  {}".format(par, par_err, indx, chi2))
                 prv_par_vec.append(par)
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
@@ -618,11 +618,11 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     c2.Print(outputpdf+')')
 
     para_file_out = "{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set)
-    print("Writing {}...".format(para_file_out))
+    print("\nWriting {}...".format(para_file_out))
     with open(para_file_out, 'w') as f:
         format_specifier = "{:>13.5E} {:>13.5E} {:>3} {:>12.1f}"
 
         for i in range(len(par_vec)):
             sys.stdout.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
-            f.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
-            print("  {}".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))            
+            f.write(format_specifier.format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]) + "\n")
+            print("  {}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
