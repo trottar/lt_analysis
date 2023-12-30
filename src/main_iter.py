@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-30 12:48:59 trottar"
+# Time-stamp: "2023-12-30 13:25:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,12 +207,8 @@ iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H
 
 print("\n\n")
 
-sys.path.append("normalize")
-from get_eff_charge import get_eff_charge
+# ***Removed effective charge calculation since it is grabbed from prev iter***
 
-# Upate hist dictionary with effective charge
-for hist in histlist:
-    hist.update(get_eff_charge(hist, inpDict))
 
 # Create a new directory for each iteration in cache
 # ***Moved up in procedure vs main.py since required for weight iteration***
@@ -221,7 +217,7 @@ create_dir(new_dir)
 # ***Also must create new root directory in iter directory***
 create_dir(new_dir+"/root")
 
-# ***Moved from main.py location below because neede for weight iteration***
+# ***Moved from main.py location below because needed for weight iteration***
 # Save fortran scripts that contain iteration functional form of parameterization
 py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
 output_file_lst.append(py_param) 

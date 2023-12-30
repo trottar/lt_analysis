@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-30 12:44:41 trottar"
+# Time-stamp: "2023-12-30 13:20:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -616,21 +616,13 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
 
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
-    
-    with open("{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set), 'w') as f:
+
+    para_file_out = "{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set)
+    print("Writing {}...".format(para_file_out))
+    with open(para_file_out, 'w') as f:
         format_specifier = "{:>13.5E} {:>13.5E} {:>3} {:>12.1f}"
 
         for i in range(len(par_vec)):
             sys.stdout.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
             f.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
-        
-    l_t_ratio = 0.0
-    l_t_ratio_err = 0.0
-
-    lt_ratio = TGraphErrors()
-
-    for i in range(0, len(w_vec)-1):
-        l_t_ratio = f_sigL.Eval(g_sigt.GetX()[i]) / f_sigT.Eval(g_sigt.GetX()[i])
-
-        l_t_ratio_err = (0.03 / g_sigl_fit_tot.GetY()[i])**2 + (0.03 / g_sigt_fit_tot.GetY()[i])**2
-        l_t_ratio_err = pow(l_t_ratio_err, 0.5) * l_t_ratio
+            print("  {}".format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i))            
