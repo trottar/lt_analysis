@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 15:25:28 trottar"
+# Time-stamp: "2023-12-30 12:16:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -316,11 +316,12 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
     g_max = g_sigl.GetYaxis().GetXmax()
-    gp_max = max(g_sigl_prv.GetN(), max(g_sigl_prv.GetY()))
-
+    #gp_max = max(g_sigl_prv.GetN(), max(g_sigl_prv.GetY()))
+    gp_max = max(range(g_sigl_prv.GetN()), key=lambda i: g_sigl_prv.GetY()[i])
     g_min = g_sigl.GetYaxis().GetXmin()
-    gp_min = min(g_sigl_prv.GetN(), min(g_sigl_prv.GetY()))
-
+    #gp_min = min(g_sigl_prv.GetN(), min(g_sigl_prv.GetY()))
+    gp_min = min(range(g_sigl_prv.GetN()), key=lambda i: g_sigl_prv.GetY()[i])
+    
     difff = (g_max - g_min) / 5
 
     if g_max < gp_max:
@@ -431,10 +432,12 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
     g_max = g_siglt.GetYaxis().GetXmax()
-    gp_max = max(g_siglt_prv.GetN(), g_siglt_prv.GetY())
+    #gp_max = max(g_siglt_prv.GetN(), g_siglt_prv.GetY())
+    gp_max = max(range(g_siglt_prv.GetN()), key=lambda i: g_siglt_prv.GetY()[i])
     g_min = g_siglt.GetYaxis().GetXmin()
-    gp_min = min(g_siglt_prv.GetN(), g_siglt_prv.GetY())
-
+    #gp_min = min(g_siglt_prv.GetN(), g_siglt_prv.GetY())
+    gp_min = min(range(g_siglt_prv.GetN()), key=lambda i: g_siglt_prv.GetY()[i])
+    
     difff = (g_max - g_min) / 5
 
     if g_max < gp_max:

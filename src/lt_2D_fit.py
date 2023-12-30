@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-29 14:41:55 trottar"
+# Time-stamp: "2023-12-30 12:13:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -175,6 +175,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
     for i in range(0, t_bin_num-1):
+
+        print("\n/*--------------------------------------------------*/")
+        print(" Starting t-bin {} (t={:.4f})...".format(i, t_list[i]))
+        print("\n/*--------------------------------------------------*/\n\n")
         
         c1 =  TCanvas("c1", "c1", 600, 600)
         c2 =  TCanvas("c2", "c2", 600, 600)
