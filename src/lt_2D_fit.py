@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-31 00:45:31 trottar"
+# Time-stamp: "2023-12-31 01:20:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -175,7 +175,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
     for i in range(0, t_bin_num-1):
 
         print("\n/*--------------------------------------------------*/")
-        print(" Starting t-bin {0} (t={1:.4f})...".format(i, t_list[i]))
+        print(" Starting t-bin {0} (t={1:.4f})...".format(i, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
         
         c1 =  TCanvas("c1", "c1", 600, 600)
