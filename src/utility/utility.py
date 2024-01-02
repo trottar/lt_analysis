@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-01 19:40:39 trottar"
+# Time-stamp: "2024-01-01 19:43:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -261,8 +261,13 @@ def hist_in_dir(root_file, directory_name):
         current_dir = ROOT.gDirectory
         histograms_in_dir = current_dir.GetListOfKeys()
         for hist_key in histograms_in_dir:
-            
-            print("!!!!!!!!!!!!!!!!!!!!!G_data_eff",hist_key)
+
+            # Get the TObject associated with the key
+            obj = hist_key.ReadObj()
+
+            # Check if the object is a TH1 (histogram) and if its name is "G_data_eff"
+            if obj.GetName() == "G_data_eff":
+                print("!!!!!!!!!!!!!!!!!!!!!G_data_eff",str(hist_key))
 
             # Get the histogram
             histogram = current_dir.Get(hist_key.GetName())
