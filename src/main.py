@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 00:45:24 trottar"
+# Time-stamp: "2024-01-02 00:54:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -398,7 +398,6 @@ cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpD
 if DEBUG:
     show_pdf_with_evince(outputpdf)
 output_file_lst.append(outputpdf)
-
 
 for hist in histlist:
     print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
