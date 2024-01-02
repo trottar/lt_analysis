@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 12:18:47 trottar"
+# Time-stamp: "2024-01-02 12:22:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,11 +92,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     eff_plt.SetGrid()
 
     for i,hist in enumerate(histlist):
-        G_data_eff_clone = hist["G_data_eff"]
-        G_data_eff_clone.SetMarkerStyle(21)
-        G_data_eff_clone.SetMarkerSize(1)
-        G_data_eff_clone.SetMarkerColor(i+1)
-        G_eff_plt.Add(G_data_eff_clone)
+        hist["G_data_eff"].Clone().SetMarkerStyle(21)
+        hist["G_data_eff"].Clone().SetMarkerSize(1)
+        hist["G_data_eff"].Clone().SetMarkerColor(i+1)
+        G_eff_plt.Add(hist["G_data_eff"].Clone())
 
     G_eff_plt.Draw("AP")
 
@@ -113,6 +112,9 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     G_eff_plt.GetYaxis().SetTitleOffset(1.5)
     G_eff_plt.GetXaxis().SetTitleOffset(1.5)
     G_eff_plt.GetXaxis().SetLabelSize(0.04)
+
+    for i,hist in enumerate(histlist):
+        l_eff_plt.AddEntry(hist["G_data_eff"],hist["phi_setting"])
 
     l_eff_plt.Draw()
 
@@ -680,7 +682,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             Ctext.Print(outputpdf)
 
     for hist in histlist:
-        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$¬",G_data_eff_clone)
         print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
             
     return cut_summary_lst
