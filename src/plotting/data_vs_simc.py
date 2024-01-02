@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 12:34:27 trottar"
+# Time-stamp: "2024-01-02 12:37:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,6 +85,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     ################################################################################################################################################
 
+    # Creating clone of efficiency plots because otherwise things
+    # crash due to pointer issues with TMultiGraph's Add() function
     data_eff_dict = {}
     for i,hist in enumerate(histlist):
         data_eff_dict[hist["phi_setting"]] = hist["G_data_eff"].Clone()
@@ -684,8 +686,5 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             Ctext.Print(outputpdf+')')
         else:
             Ctext.Print(outputpdf)
-
-    for hist in histlist:
-        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
             
     return cut_summary_lst

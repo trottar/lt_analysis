@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 11:56:37 trottar"
+# Time-stamp: "2024-01-02 12:38:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -395,9 +395,6 @@ from data_vs_simc import plot_data_vs_simc
 # Variable defines string of cuts applied during analysis
 cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict)
 
-for hist in histlist:
-    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$2", hist["G_data_eff"])
-
 if DEBUG:
     show_pdf_with_evince(outputpdf)
 output_file_lst.append(outputpdf)
@@ -454,14 +451,12 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 #if not os.path.exists(foutroot):
 if os.path.exists(foutroot):
     for hist in histlist:
-        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$3",hist["G_data_eff"])
         print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
         # Loop through all keggys,values of dictionary
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if is_hist(val):
-                print("!!!!!!!!!!!!!!!",key)
                 if "eff" in key:
                     print("!!!!!!!!!!!!!!!G_data_eff")
                     hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
