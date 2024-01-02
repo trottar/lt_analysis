@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 00:34:05 trottar"
+# Time-stamp: "2024-01-02 00:38:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -446,12 +446,15 @@ if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
 
+for hist in histlist:
+    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
+
 # Save histograms to root file
 # Check that root file doesnt already exist    
 #if not os.path.exists(foutroot):
 if os.path.exists(foutroot):
     for hist in histlist:
-        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$",hist["G_data_eff"])
+        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$2",hist["G_data_eff"])
         print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
         # Loop through all keggys,values of dictionary
         for i, (key, val) in enumerate(hist.items()):
