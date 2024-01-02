@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 01:28:51 trottar"
+# Time-stamp: "2024-01-02 01:49:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -401,6 +401,8 @@ if DEBUG:
     show_pdf_with_evince(outputpdf)
 output_file_lst.append(outputpdf)
 
+for hist in histlist:
+        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$2",hist["G_data_eff"])
 
 ##############################
 # Step 6 of the lt_analysis: #
