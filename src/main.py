@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 00:38:29 trottar"
+# Time-stamp: "2024-01-02 00:45:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -398,7 +398,12 @@ cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpD
 if DEBUG:
     show_pdf_with_evince(outputpdf)
 output_file_lst.append(outputpdf)
-    
+
+
+for hist in histlist:
+    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
+
+
 ##############################
 # Step 6 of the lt_analysis: #
 ##############################
@@ -445,9 +450,6 @@ plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDic
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
-
-for hist in histlist:
-    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
