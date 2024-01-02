@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-31 00:37:48 trottar"
+# Time-stamp: "2024-01-01 19:28:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -125,8 +125,6 @@ prev_iter_dir = "{}/{}/{}/{}".format(CACHEPATH,USER,ParticleType.lower(),closest
 
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
-
-print("!!!!!!!!!!!!!!!!!!!!",prev_iter_json)
 
 # Redefine dictionaries from old iteration information, see main.py
 with open(prev_iter_json, 'r') as f:
