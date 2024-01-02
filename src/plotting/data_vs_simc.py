@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 01:28:37 trottar"
+# Time-stamp: "2024-01-02 02:34:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -680,5 +680,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             Ctext.Print(outputpdf+')')
         else:
             Ctext.Print(outputpdf)
+
+    for hist in histlist:
+        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
             
     return cut_summary_lst
