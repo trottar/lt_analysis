@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-01 23:39:36 trottar"
+# Time-stamp: "2024-01-02 00:29:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -381,6 +381,8 @@ from get_eff_charge import get_eff_charge
 # Upate hist dictionary with effective charge
 for hist in histlist:
     hist.update(get_eff_charge(hist, inpDict))
+
+    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$",hist["G_data_eff"])
 
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
