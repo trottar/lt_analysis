@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-01 19:20:18 trottar"
+# Time-stamp: "2024-01-01 19:21:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -262,7 +262,7 @@ def hist_in_dir(root_file, directory_name):
         histograms_in_dir = current_dir.GetListOfKeys()
         for hist_key in histograms_in_dir:
 
-            if hist_key = "G_data_eff":
+            if hist_key == "G_data_eff":
                 print("!!!!!!!!!!!!!!!!!!!!!G_data_eff",type(G_data_eff))
 
             # Get the histogram
