@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-01 17:28:12 trottar"
+# Time-stamp: "2024-01-01 20:02:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -448,15 +448,18 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
-if not os.path.exists(foutroot):
-#if os.path.exists(foutroot):
+#if not os.path.exists(foutroot):
+if os.path.exists(foutroot):
     for hist in histlist:
         print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
         # Loop through all keggys,values of dictionary
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-            if is_hist(val):            
+            if is_hist(val):
+                if "G_data_eff" in key:
+                    print("!!!!!!!!!!!!!!!G_data_eff")
+                    hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
                 if "ratio" in key:
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                 if "DATA" in key:
