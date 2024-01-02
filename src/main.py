@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-01 20:02:59 trottar"
+# Time-stamp: "2024-01-01 22:22:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -457,7 +457,7 @@ if os.path.exists(foutroot):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if is_hist(val):
-                if "G_data_eff" in key:
+                if "eff" in key:
                     print("!!!!!!!!!!!!!!!G_data_eff")
                     hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
                 if "ratio" in key:
