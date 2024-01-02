@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 02:32:15 trottar"
+# Time-stamp: "2024-01-02 11:48:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -396,7 +396,8 @@ from data_vs_simc import plot_data_vs_simc
 cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict)
 
 for hist in histlist:
-        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$2",hist["G_data_eff"])
+    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$2", hist["Q2_vs_W_DATA"])
+    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$2", hist["G_data_eff"])
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
