@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 12:09:23 trottar"
+# Time-stamp: "2024-01-02 12:15:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,6 +85,42 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     ################################################################################################################################################
     
+    eff_plt = TCanvas()
+    G_eff_plt = TMultiGraph()
+    l_eff_plt = TLegend(0.115,0.35,0.33,0.5)
+
+    eff_plt.SetGrid()
+
+    for i,hist in enumerate(histlist):
+        G_data_eff_clone = hist["G_data_eff"]
+        G_data_eff_clone.SetMarkerStyle(21)
+        G_data_eff_clone.SetMarkerSize(1)
+        G_data_eff_clone.SetMarkerColor(i+1)
+        G_eff_plt.Add(G_data_eff_clone)
+
+    G_eff_plt.Draw("AP")
+
+    G_eff_plt.SetTitle(" ;Run Numbers; Total Efficiency")
+
+    i=0
+    for i,hist in enumerate(histlist):
+        while i <= G_eff_plt.GetXaxis().GetXmax():
+            bin_ix = G_eff_plt.GetXaxis().FindBin(i)
+            if str(i) in hist["runNums"]: 
+                G_eff_plt.GetXaxis().SetBinLabel(bin_ix,"%d" % i)
+            i+=1
+
+    G_eff_plt.GetYaxis().SetTitleOffset(1.5)
+    G_eff_plt.GetXaxis().SetTitleOffset(1.5)
+    G_eff_plt.GetXaxis().SetLabelSize(0.04)
+
+    for i,hist in enumerate(histlist):
+        l_eff_plt.AddEntry(G_data_eff_clone,hist["phi_setting"])
+
+    l_eff_plt.Draw()
+
+    eff_plt.Print(outputpdf + '(')
+
     # Plot histograms
     c_pid = TCanvas()
 
@@ -124,7 +160,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     c_pid.Draw()
 
-    c_pid.Print(outputpdf+'(')
+    c_pid.Print(outputpdf)
 
     ct = TCanvas()
     
@@ -598,41 +634,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
     Cpht.Print(outputpdf)
 
-    eff_plt = TCanvas()
-    G_eff_plt = TMultiGraph()
-    l_eff_plt = TLegend(0.115,0.35,0.33,0.5)
-
-    eff_plt.SetGrid()
-
-    for i,hist in enumerate(histlist):
-        hist["G_data_eff"].SetMarkerStyle(21)
-        hist["G_data_eff"].SetMarkerSize(1)
-        hist["G_data_eff"].SetMarkerColor(i+1)
-        G_eff_plt.Add(hist["G_data_eff"])
-
-    G_eff_plt.Draw("AP")
-
-    G_eff_plt.SetTitle(" ;Run Numbers; Total Efficiency")
-
-    i=0
-    for i,hist in enumerate(histlist):
-        while i <= G_eff_plt.GetXaxis().GetXmax():
-            bin_ix = G_eff_plt.GetXaxis().FindBin(i)
-            if str(i) in hist["runNums"]: 
-                G_eff_plt.GetXaxis().SetBinLabel(bin_ix,"%d" % i)
-            i+=1
-
-    G_eff_plt.GetYaxis().SetTitleOffset(1.5)
-    G_eff_plt.GetXaxis().SetTitleOffset(1.5)
-    G_eff_plt.GetXaxis().SetLabelSize(0.04)
-
-    for i,hist in enumerate(histlist):
-        l_eff_plt.AddEntry(hist["G_data_eff"],hist["phi_setting"])
-
-    l_eff_plt.Draw()
-
-    eff_plt.Print(outputpdf)
-    
     cut_summary_lst = ""
     for i,hist in enumerate(histlist):
         texlist = []
@@ -682,6 +683,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             Ctext.Print(outputpdf)
 
     for hist in histlist:
+        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$¬",G_data_eff_clone)
         print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
             
     return cut_summary_lst
