@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 01:03:09 trottar"
+# Time-stamp: "2024-01-02 01:18:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -381,8 +381,6 @@ from get_eff_charge import get_eff_charge
 # Upate hist dictionary with effective charge
 for hist in histlist:
     hist.update(get_eff_charge(hist, inpDict))
-    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
-
 
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
@@ -390,7 +388,6 @@ from compare_simc import compare_simc
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     hist.update(compare_simc(hist, inpDict))    
-    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$2",hist["G_data_eff"])
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-03 16:48:20 trottar"
+# Time-stamp: "2024-01-02 01:20:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,6 +92,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     eff_plt.SetGrid()
 
     for i,hist in enumerate(histlist):
+        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
         hist["G_data_eff"].SetMarkerStyle(21)
         hist["G_data_eff"].SetMarkerSize(1)
         hist["G_data_eff"].SetMarkerColor(i+1)
@@ -680,5 +681,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             Ctext.Print(outputpdf+')')
         else:
             Ctext.Print(outputpdf)
+        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$2",hist["G_data_eff"])
             
     return cut_summary_lst
