@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 02:34:01 trottar"
+# Time-stamp: "2024-01-02 12:00:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,12 +91,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     eff_plt.SetGrid()
 
-    for i,hist in enumerate(histlist):
-        hist["G_data_eff"].SetMarkerStyle(21)
-        hist["G_data_eff"].SetMarkerSize(1)
-        hist["G_data_eff"].SetMarkerColor(i+1)
-        G_eff_plt.Add(hist["G_data_eff"])
-
     G_eff_plt.Draw("AP")
 
     G_eff_plt.SetTitle(" ;Run Numbers; Total Efficiency")
@@ -114,7 +108,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     G_eff_plt.GetXaxis().SetLabelSize(0.04)
 
     for i,hist in enumerate(histlist):
-        l_eff_plt.AddEntry(hist["G_data_eff"],hist["phi_setting"])
+        #l_eff_plt.AddEntry(hist["G_data_eff"],hist["phi_setting"])
 
     l_eff_plt.Draw()
 
