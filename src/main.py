@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 01:18:27 trottar"
+# Time-stamp: "2024-01-02 01:28:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -392,6 +392,8 @@ for hist in histlist:
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
 
+for hist in histlist:
+        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$1",hist["G_data_eff"])
 # Variable defines string of cuts applied during analysis
 cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict)
 
