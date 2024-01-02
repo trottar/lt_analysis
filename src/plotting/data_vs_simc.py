@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 12:00:46 trottar"
+# Time-stamp: "2024-01-02 12:00:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,7 +90,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     l_eff_plt = TLegend(0.115,0.35,0.33,0.5)
 
     eff_plt.SetGrid()
-
+    
     G_eff_plt.Draw("AP")
 
     G_eff_plt.SetTitle(" ;Run Numbers; Total Efficiency")
