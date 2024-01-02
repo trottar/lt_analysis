@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 00:32:28 trottar"
+# Time-stamp: "2024-01-02 00:34:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -387,8 +387,7 @@ from compare_simc import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    hist.update(compare_simc(hist, inpDict))
-    print("\n\n\n\n\n$$$$$$$$$$$$$$$$$",hist["G_data_eff"])
+    hist.update(compare_simc(hist, inpDict))    
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
@@ -452,6 +451,7 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 #if not os.path.exists(foutroot):
 if os.path.exists(foutroot):
     for hist in histlist:
+        print("\n\n\n\n\n$$$$$$$$$$$$$$$$$",hist["G_data_eff"])
         print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
         # Loop through all keggys,values of dictionary
         for i, (key, val) in enumerate(hist.items()):
