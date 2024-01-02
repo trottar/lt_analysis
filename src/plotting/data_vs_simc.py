@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 12:16:16 trottar"
+# Time-stamp: "2024-01-02 12:18:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,9 +113,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     G_eff_plt.GetYaxis().SetTitleOffset(1.5)
     G_eff_plt.GetXaxis().SetTitleOffset(1.5)
     G_eff_plt.GetXaxis().SetLabelSize(0.04)
-
-    for i,hist in enumerate(histlist):
-        l_eff_plt.AddEntry(hist["G_data_eff"],hist["phi_setting"])
 
     l_eff_plt.Draw()
 
