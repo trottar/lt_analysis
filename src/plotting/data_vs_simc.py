@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 12:32:12 trottar"
+# Time-stamp: "2024-01-02 12:34:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,6 +84,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
     ################################################################################################################################################
+
+    data_eff_dict = {}
+    for i,hist in enumerate(histlist):
+        data_eff_dict[hist["phi_setting"]] = hist["G_data_eff"].Clone()
     
     eff_plt = TCanvas()
     G_eff_plt = TMultiGraph()
@@ -92,10 +96,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     eff_plt.SetGrid()
 
     for i,hist in enumerate(histlist):
-        hist["G_data_eff"].SetMarkerStyle(21)
-        hist["G_data_eff"].SetMarkerSize(1)
-        hist["G_data_eff"].SetMarkerColor(i+1)
-        G_eff_plt.Add(hist["G_data_eff"])
+        data_eff_dict[hist["phi_setting"]].SetMarkerStyle(21)
+        data_eff_dict[hist["phi_setting"]].SetMarkerSize(1)
+        data_eff_dict[hist["phi_setting"]].SetMarkerColor(i+1)
+        G_eff_plt.Add(data_eff_dict[hist["phi_setting"]])
 
     G_eff_plt.Draw("AP")
 
@@ -114,7 +118,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     G_eff_plt.GetXaxis().SetLabelSize(0.04)
 
     for i,hist in enumerate(histlist):
-        l_eff_plt.AddEntry(hist["G_data_eff"],hist["phi_setting"])
+        l_eff_plt.AddEntry(data_eff_dict[hist["phi_setting"]],hist["phi_setting"])
 
     l_eff_plt.Draw()
 
