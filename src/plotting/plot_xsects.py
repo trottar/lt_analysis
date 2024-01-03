@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 18:34:38 trottar"
+# Time-stamp: "2024-01-03 18:40:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -654,7 +654,8 @@ l_sigl_phi = TLegend(0.8,0.8,0.95,0.95)
 
 multiDict = {}
 for k in range(NumtBins):
-
+    print("$$$$$$$$$$$$$$$$",NumtBins*NumPhiBins)
+    print("!!!!!!!!!!!!!!!!",len(np.array(file_df_dict['sep_file']['sigL'].tolist())))
     multiDict["G_sigl_phi_{}".format(k+1)] = TMultiGraph()
     
     G_sigl_phi = TGraphErrors()
