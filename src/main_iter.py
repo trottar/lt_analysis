@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-01 19:28:00 trottar"
+# Time-stamp: "2024-01-02 14:26:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,6 +151,9 @@ for hist in histlist:
     hist.update(hist_in_dir(root_file, "{}/simc".format(hist["phi_setting"])))
     hist.update(hist_in_dir(root_file, "{}/dummy".format(hist["phi_setting"])))
 
+for hist in histlist:
+    print("!!!!!!!!!!!!!!!!!!!!!!!",hist["G_data_eff"])
+    
 # t/phi bins are the same for all settings
 # so arbitrarily grabbing from first setting of list
 t_bins = np.array(histlist[0]["t_bins"])
@@ -323,6 +326,8 @@ if not os.path.exists(foutroot):
         for i, (key, val) in enumerate(hist.items()):
             # Progress bar
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+            if "G_data_eff" in key:
+                hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))            
             if is_hist(val):
                 if "ratio" in key:
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
