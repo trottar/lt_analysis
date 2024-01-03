@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 22:02:23 trottar"
+# Time-stamp: "2024-01-02 22:20:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -282,6 +282,21 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     t0 = f_sigT.GetParameter(0)
     t1 = f_sigT.GetParameter(1)
 
+    par_vec.append(t0)
+    par_vec.append(t1)
+    par_vec.append(t2)
+    #par_vec.append(t3)
+
+    par_err_vec.append(f_sigT.GetParError(0))
+    par_err_vec.append(f_sigT.GetParError(1))
+    par_err_vec.append(0)
+    #par_err_vec.append(0)
+
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    #par_chi2_vec.append(f_sigT.GetChisquare())
+    
     ########
     # SigL #
     ########
@@ -380,17 +395,17 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     par_vec.append(l0)
     par_vec.append(l1)
     par_vec.append(l2)
-    par_vec.append(l3)
+    #par_vec.append(l3)
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
     par_err_vec.append(0)
-    par_err_vec.append(0)
+    #par_err_vec.append(0)
 
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
+    #par_chi2_vec.append(f_sigL.GetChisquare())
     
     ########
     # SigLT #
@@ -501,17 +516,17 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     par_vec.append(lt0)
     par_vec.append(lt1)
     par_vec.append(lt2)
-    par_vec.append(lt3)
+    #par_vec.append(lt3)
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
     par_err_vec.append(0.0)
-    par_err_vec.append(0.0)
+    #par_err_vec.append(0.0)
 
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
+    #par_chi2_vec.append(f_sigLT.GetChisquare())
 
     ########
     # SigTT #
@@ -614,6 +629,24 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     g_sigtt_fit_tot.SetLineColor(2)
     g_sigtt_fit_tot.Draw("LP")
 
+    tt0 = f_sigTT.GetParameter(0)
+    tt1 = f_sigTT.GetParameter(1)
+    
+    par_vec.append(tt0)
+    par_vec.append(tt1)
+    par_vec.append(tt2)
+    #par_vec.append(tt3)
+
+    par_err_vec.append(f_sigTT.GetParError(0))
+    par_err_vec.append(f_sigTT.GetParError(1))
+    par_err_vec.append(0)
+    #par_err_vec.append(0)
+
+    par_chi2_vec.append(f_sigTT.GetChisquare())
+    par_chi2_vec.append(f_sigTT.GetChisquare())
+    par_chi2_vec.append(f_sigTT.GetChisquare())
+    #par_chi2_vec.append(f_sigTT.GetChisquare())
+    
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
 
