@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 21:59:45 trottar"
+# Time-stamp: "2024-01-03 13:55:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,11 +130,12 @@ prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
 with open(prev_iter_json, 'r') as f:
     prev_iter_combineDict = json.load(f)
 
-#Run weight iteration script for optimizing parameterization
-sys.path.append("models")
-from xfit_in_t import x_fit_in_t
-x_fit_in_t(ParticleType, pol_str, closest_date, Q2)
-output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
+if EPSSET == "low":
+    # Run weight iteration script for optimizing parameterization
+    sys.path.append("models")
+    from xfit_in_t import x_fit_in_t
+    x_fit_in_t(ParticleType, pol_str, closest_date, Q2)
+    output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
 
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
@@ -508,8 +509,8 @@ if EPSSET == "high":
                 if "{}".format(ParticleType) not in f_dir:
                     create_dir(new_dir+"/"+f_dir)
                     f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
+                    print("Copying {} to {}".format(f,f_new))
+                    shutil.copy(f, f_new)
         else:
             f_new = new_dir
             print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
