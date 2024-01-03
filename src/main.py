@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 22:01:26 trottar"
+# Time-stamp: "2024-01-02 22:02:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -448,8 +448,8 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
-#if not os.path.exists(foutroot):
-if os.path.exists(foutroot):
+if not os.path.exists(foutroot):
+#if os.path.exists(foutroot):
     for hist in histlist:
         print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
         # Loop through all keggys,values of dictionary
