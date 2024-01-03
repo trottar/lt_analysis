@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 18:40:07 trottar"
+# Time-stamp: "2024-01-03 18:44:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -654,13 +654,12 @@ l_sigl_phi = TLegend(0.8,0.8,0.95,0.95)
 
 multiDict = {}
 for k in range(NumtBins):
-    print("$$$$$$$$$$$$$$$$",NumtBins*NumPhiBins)
-    print("!!!!!!!!!!!!!!!!",len(np.array(file_df_dict['sep_file']['sigL'].tolist())))
+
     multiDict["G_sigl_phi_{}".format(k+1)] = TMultiGraph()
     
     G_sigl_phi = TGraphErrors()
     j=0
-    for i in range(NumtBins*NumPhiBins):
+    for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             G_sigl_phi.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigL'].tolist())[i])
             G_sigl_phi.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigL'].tolist())[i])
@@ -694,7 +693,7 @@ for k in range(NumtBins):
     
     G_sigt_phi = TGraphErrors()
     j=0
-    for i in range(NumtBins*NumPhiBins):
+    for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             G_sigt_phi.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigT'].tolist())[i])
             G_sigt_phi.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigT'].tolist())[i])
@@ -728,7 +727,7 @@ for k in range(NumtBins):
     
     G_siglt_phi = TGraphErrors()
     j=0
-    for i in range(NumtBins*NumPhiBins):
+    for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             G_siglt_phi.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigLT'].tolist())[i])
             G_siglt_phi.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigLT'].tolist())[i])
@@ -762,7 +761,7 @@ for k in range(NumtBins):
     
     G_sigtt_phi = TGraphErrors()
     j=0
-    for i in range(NumtBins*NumPhiBins):
+    for i in range(0,NumtBins*NumPhiBins-1):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             G_sigtt_phi.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['sep_file']['sigTT'].tolist())[i])
             G_sigtt_phi.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigTT'].tolist())[i])
