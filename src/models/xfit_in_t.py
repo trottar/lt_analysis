@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-01 19:39:40 trottar"
+# Time-stamp: "2024-01-02 22:02:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -617,7 +617,7 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
 
-    para_file_out = "{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set)
+    para_file_out = "{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, polID, q2_set.replace("p",""))
     print("\nWriting {}...".format(para_file_out))
     with open(para_file_out, 'w') as f:
         format_specifier = "{:>13.5E} {:>13.5E} {:>3} {:>12.1f}"
