@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 20:54:00 trottar"
+# Time-stamp: "2024-01-02 20:55:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,9 +266,7 @@ def hist_in_dir(root_file, directory_name):
             obj = hist_key.ReadObj()
 
             # Get the histogram
-            histogram = current_dir.Get(hist_key.GetName())
-
-            print("!!!!!!!!!!!!!!!!!",hist_key.GetName())
+            histogram = current_dir.Get(hist_key.GetName()))
 
             if not histogram:
                 print("Error: Unable to find histogram {}.".format(hist_key.GetName()))
