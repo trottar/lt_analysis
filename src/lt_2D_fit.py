@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 15:35:56 trottar"
+# Time-stamp: "2024-01-03 15:51:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,15 +153,15 @@ def single_setting(q2_set, fn_lo, fn_hi):
     hi_eps_list = []
 
     for entry in nlo:        
-        q2_list.append(entry.qq)
-        w_list.append(entry.ww)
-        theta_list.append(entry.thetacm)
-        t_list.append(entry.tt)
+        q2_list.append(entry.Q2)
+        w_list.append(entry.w)
+        theta_list.append(entry.theta)
+        t_list.append(entry.t)
         t_min_list.append(entry.t_min)
-        lo_eps_list.append(entry.lo_eps_real)
+        lo_eps_list.append(entry.eps)
         
     for entry in nhi:
-        hi_eps_list.append(entry.hi_eps_real)
+        hi_eps_list.append(entry.eps)
         
     t_bin_num = len(t_list)
 
