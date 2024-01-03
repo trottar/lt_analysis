@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 14:51:11 trottar"
+# Time-stamp: "2024-01-03 15:35:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,19 +152,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
     lo_eps_list = []
     hi_eps_list = []
 
-    # ERROR?: Possible issue here, need to check if all values are properly iterating
-    for i in range(0,N):
-
-        nlo.GetEntry(i)
-        nhi.GetEntry(i)
+    for entry in nlo:        
+        q2_list.append(entry.qq)
+        w_list.append(entry.ww)
+        theta_list.append(entry.thetacm)
+        t_list.append(entry.tt)
+        t_min_list.append(entry.t_min)
+        lo_eps_list.append(entry.lo_eps_real)
         
-        q2_list.append(qq)
-        w_list.append(ww)
-        theta_list.append(thetacm)
-        t_list.append(tt)
-        t_min_list.append(t_min)
-        lo_eps_list.append(lo_eps_real)
-        hi_eps_list.append(hi_eps_real)
+    for entry in nhi:
+        hi_eps_list.append(entry.hi_eps_real)
         
     t_bin_num = len(t_list)
 
