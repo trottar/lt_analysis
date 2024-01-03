@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 22:20:09 trottar"
+# Time-stamp: "2024-01-02 22:26:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,8 +122,8 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
         
-    #t0, t1, t2, t3, l0, l1, l2, l3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
-    t0, t1, t2, l0, l1, l2, lt0, lt1, lt2, tt0, tt1, tt2 = prv_par_vec[:12] # RLT too many parameters
+    t0, t1, t2, t3, l0, l1, l2, l3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
+    #t0, t1, t2, l0, l1, l2, lt0, lt1, lt2, tt0, tt1, tt2 = prv_par_vec[:12] # RLT too many parameters
     
     ave_file_in = "{}/src/{}/averages/avek.{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""))
     with open(ave_file_in, 'r') as f:
@@ -285,17 +285,17 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     par_vec.append(t0)
     par_vec.append(t1)
     par_vec.append(t2)
-    #par_vec.append(t3)
+    par_vec.append(t3)
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
     par_err_vec.append(0)
-    #par_err_vec.append(0)
+    par_err_vec.append(0)
 
     par_chi2_vec.append(f_sigT.GetChisquare())
     par_chi2_vec.append(f_sigT.GetChisquare())
     par_chi2_vec.append(f_sigT.GetChisquare())
-    #par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
     
     ########
     # SigL #
@@ -395,17 +395,17 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     par_vec.append(l0)
     par_vec.append(l1)
     par_vec.append(l2)
-    #par_vec.append(l3)
+    par_vec.append(l3)
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
     par_err_vec.append(0)
-    #par_err_vec.append(0)
+    par_err_vec.append(0)
 
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
-    #par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL.GetChisquare())
     
     ########
     # SigLT #
@@ -429,8 +429,8 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     for i in range(0, len(w_vec)-1):
 
         siglt_X_pre = 0.0
-        #q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
-        q2_term = 0.0 # RLT Too many parameters
+        q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
+        #q2_term = 0.0 # RLT Too many parameters
 
         q2_dep = q2_vec[i]
 
@@ -488,8 +488,8 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     
     for i in range(0, len(w_vec)-1):
         siglt_X = 0.0
-        #q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
-        q2_term = 0.0 # RLT Too many parameters
+        q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
+        #q2_term = 0.0 # RLT Too many parameters
 
         q2_dep = q2_vec[i]
 
@@ -516,17 +516,17 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     par_vec.append(lt0)
     par_vec.append(lt1)
     par_vec.append(lt2)
-    #par_vec.append(lt3)
+    par_vec.append(lt3)
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
     par_err_vec.append(0.0)
-    #par_err_vec.append(0.0)
+    par_err_vec.append(0.0)
 
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
-    #par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(f_sigLT.GetChisquare())
 
     ########
     # SigTT #
@@ -549,8 +549,8 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
 
     for i in range(0, len(w_vec)-1):
         sigtt_X_pre = 0.0
-        #q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
-        q2_term = 0.0 # RLT Too many parameters
+        q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
+        #q2_term = 0.0 # RLT Too many parameters
         q2_dep = q2_vec[i]
 
         sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
@@ -609,8 +609,8 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         
     for i in range(0, len(w_vec)-1):
         sigtt_X = 0.0
-        #q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
-        q2_term = 0.0 # RLT Too many parameters
+        q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
+        #q2_term = 0.0 # RLT Too many parameters
         q2_dep = q2_vec[i]
 
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
@@ -635,17 +635,17 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
     par_vec.append(tt0)
     par_vec.append(tt1)
     par_vec.append(tt2)
-    #par_vec.append(tt3)
+    par_vec.append(tt3)
 
     par_err_vec.append(f_sigTT.GetParError(0))
     par_err_vec.append(f_sigTT.GetParError(1))
     par_err_vec.append(0)
-    #par_err_vec.append(0)
+    par_err_vec.append(0)
 
     par_chi2_vec.append(f_sigTT.GetChisquare())
     par_chi2_vec.append(f_sigTT.GetChisquare())
     par_chi2_vec.append(f_sigTT.GetChisquare())
-    #par_chi2_vec.append(f_sigTT.GetChisquare())
+    par_chi2_vec.append(f_sigTT.GetChisquare())
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
