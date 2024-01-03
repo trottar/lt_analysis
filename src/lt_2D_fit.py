@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 16:09:04 trottar"
+# Time-stamp: "2024-01-03 16:14:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -184,10 +184,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         tpp = ""
 
         if i == 0:
-            tpp = "t < {0} && x!=0.0".format(float(t_list[i][0]) + 0.01)
+            tpp = "t < {0} && x!=0.0".format(float(t_list[i]) + 0.01)
             print(tpp)
         else:
-            tpp = "(t > {0} && t < {1}) && x!=0.0".format(float(t_list[i - 1][0]) + 0.01, float(t_list[i][0]) + 0.01)
+            tpp = "(t > {0} && t < {1}) && x!=0.0".format(float(t_list[i - 1][0]) + 0.01, float(t_list[i]) + 0.01)
             print(tpp)
 
         lo_eps = lo_eps_list[i]
@@ -218,7 +218,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
 
-        sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i][0]), ave_sig_lo)
+        sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
 
         nhi.Draw("x:phi:dx", tpp, "goff")
@@ -235,7 +235,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         ave_sig_hi = ghi.GetMean(2)
         err_sig_hi = ghi.GetRMS(2)
 
-        sig_hi.SetPoint(sig_hi.GetN(), float(t_list[i][0]), ave_sig_hi)
+        sig_hi.SetPoint(sig_hi.GetN(), float(t_list[i]), ave_sig_hi)
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
 
         g_plot_err = TGraph2DErrors()
