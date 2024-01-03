@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 13:14:32 trottar"
+# Time-stamp: "2024-01-02 22:01:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -667,7 +667,7 @@ if EPSSET == "high":
                 create_dir(new_dir+"/root")
                 f_new = f.replace(OUTPATH,new_dir+"/root")
                 print("Copying {} to {}".format(f,f_new))
-                shutil.copy(f, f_new)                
+                shutil.copy(f, f_new)
         elif "{}/".format(ParticleType) in f:
             f_arr = f.split("/")
             f_tmp = f_arr.pop()
