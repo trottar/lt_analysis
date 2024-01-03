@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-31 01:32:18 trottar"
+# Time-stamp: "2024-01-03 14:51:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,6 +152,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
     lo_eps_list = []
     hi_eps_list = []
 
+    # ERROR?: Possible issue here, need to check if all values are properly iterating
     for i in range(0,N):
 
         nlo.GetEntry(i)
@@ -268,6 +269,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
 
+        # ERROR?: No idea where this comes from
         fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*[2]*cos(0.017453*x)  + y*[3]*cos(0.034906*x)", 0, 360, 0.1, 0.6)
 
         sigL_change = TGraphErrors()

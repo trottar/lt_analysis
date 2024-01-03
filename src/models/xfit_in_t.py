@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 22:26:41 trottar"
+# Time-stamp: "2024-01-03 15:10:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -46,6 +46,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 # Define constants
 PI = ROOT.TMath.Pi()
 m_p = 0.93827231
+m_n = 0.93956541
 
 hi_bound =  0.7;
 lo_bound = -0.1;
@@ -130,7 +131,10 @@ def single_setting(ParticleType, polID, dir_iter, q2_set):
         for line in f:
             w, w_e, q2, q2_e, tt, tt_e, thetacm, it = map(float, line.strip().split())
 
-            g = 1 / ((w**2) - (m_p**2))**2
+            if polID = "pl":
+                g = 1 / ((w**2) - (m_p**2))**2
+            else:
+                g = 1 / ((w**2) - (m_n**2))**2
             g_vec.append(g)
             w_vec.append(w)
             q2_vec.append(q2)

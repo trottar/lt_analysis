@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 13:55:24 trottar"
+# Time-stamp: "2024-01-03 15:26:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -210,7 +210,6 @@ print("\n\n")
 
 # ***Removed effective charge calculation since it is grabbed from prev iter***
 
-
 # Create a new directory for each iteration in cache
 # ***Moved up in procedure vs main.py since required for weight iteration***
 new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
@@ -251,7 +250,8 @@ for hist in histlist:
         if os.path.exists(new_simc_root):
             # Function to calculation new weight and apply it to simc root file 
             iter_weight(new_param_file, new_simc_root, inpDict, hist["phi_setting"])
-            # Overwrite root file with updated weight
+            # Overwrite
+            root file with updated weight
             os.rename(new_simc_root.replace(".root","_new.root"),new_simc_root)
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:

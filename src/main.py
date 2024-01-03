@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 22:02:46 trottar"
+# Time-stamp: "2024-01-03 15:26:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -458,7 +458,7 @@ if not os.path.exists(foutroot):
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if "G_data_eff" in key:
                 hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
-            if is_hist(val):
+            if is_hist(val):                
                 if "ratio" in key:
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                 if "DATA" in key:
