@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 18:27:26 trottar"
+# Time-stamp: "2024-01-03 18:34:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -657,29 +657,17 @@ for k in range(NumtBins):
 
     multiDict["G_sigl_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_sigl_phi_loeps = TGraphErrors()
+    G_sigl_phi = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigl_phi_loeps.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigL'].tolist())[i])
-            G_sigl_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigL'].tolist())[i])
+            G_sigl_phi.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigL'].tolist())[i])
+            G_sigl_phi.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigL'].tolist())[i])
             j+=1
-    G_sigl_phi_loeps.SetMarkerColor(1)
-    G_sigl_phi_loeps.SetMarkerStyle(21)
-    G_sigl_phi_loeps.SetMarkerSize(1)
-    multiDict["G_sigl_phi_{}".format(k+1)].Add(G_sigl_phi_loeps)
-
-    G_sigl_phi_hieps = TGraphErrors()
-    j=0
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_sigl_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigL'].tolist())[i])
-            G_sigl_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigL'].tolist())[i])
-            j+=1
-    G_sigl_phi_hieps.SetMarkerColor(2)
-    G_sigl_phi_hieps.SetMarkerStyle(21)
-    G_sigl_phi_hieps.SetMarkerSize(1)
-    multiDict["G_sigl_phi_{}".format(k+1)].Add(G_sigl_phi_hieps)    
+    G_sigl_phi.SetMarkerColor(1)
+    G_sigl_phi.SetMarkerStyle(21)
+    G_sigl_phi.SetMarkerSize(1)
+    multiDict["G_sigl_phi_{}".format(k+1)].Add(G_sigl_phi)
 
     C_sigl_phi.cd(k+1)
 
@@ -690,8 +678,6 @@ for k in range(NumtBins):
     multiDict["G_sigl_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_sigl_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_sigl_phi.AddEntry(G_sigl_phi_loeps,"loeps")
-l_sigl_phi.AddEntry(G_sigl_phi_hieps,"hieps")
 l_sigl_phi.Draw()    
 C_sigl_phi.Print(outputpdf)
 
@@ -705,29 +691,17 @@ for k in range(NumtBins):
 
     multiDict["G_sigt_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_sigt_phi_loeps = TGraphErrors()
+    G_sigt_phi = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigt_phi_loeps.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigT'].tolist())[i])
-            G_sigt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigT'].tolist())[i])
+            G_sigt_phi.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigT'].tolist())[i])
+            G_sigt_phi.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigT'].tolist())[i])
             j+=1
-    G_sigt_phi_loeps.SetMarkerColor(1)
-    G_sigt_phi_loeps.SetMarkerStyle(21)
-    G_sigt_phi_loeps.SetMarkerSize(1)
-    multiDict["G_sigt_phi_{}".format(k+1)].Add(G_sigt_phi_loeps)
-
-    G_sigt_phi_hieps = TGraphErrors()
-    j=0
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_sigt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigT'].tolist())[i])
-            G_sigt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigT'].tolist())[i])
-            j+=1
-    G_sigt_phi_hieps.SetMarkerColor(2)
-    G_sigt_phi_hieps.SetMarkerStyle(21)
-    G_sigt_phi_hieps.SetMarkerSize(1)
-    multiDict["G_sigt_phi_{}".format(k+1)].Add(G_sigt_phi_hieps)    
+    G_sigt_phi.SetMarkerColor(1)
+    G_sigt_phi.SetMarkerStyle(21)
+    G_sigt_phi.SetMarkerSize(1)
+    multiDict["G_sigt_phi_{}".format(k+1)].Add(G_sigt_phi)
 
     C_sigt_phi.cd(k+1)
 
@@ -738,8 +712,6 @@ for k in range(NumtBins):
     multiDict["G_sigt_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_sigt_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_sigt_phi.AddEntry(G_sigt_phi_loeps,"loeps")
-l_sigt_phi.AddEntry(G_sigt_phi_hieps,"hieps")
 l_sigt_phi.Draw()    
 C_sigt_phi.Print(outputpdf)
 
@@ -753,40 +725,17 @@ for k in range(NumtBins):
 
     multiDict["G_siglt_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_siglt_phi_loeps = TGraphErrors()
+    G_siglt_phi = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_siglt_phi_loeps.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigLT'].tolist())[i])
-            G_siglt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigLT'].tolist())[i])
+            G_siglt_phi.SetPoint(j, phi_bin_centers[file_df_dict['aver_loeps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigLT'].tolist())[i])
+            G_siglt_phi.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigLT'].tolist())[i])
             j+=1
-    G_siglt_phi_loeps.SetMarkerColor(1)
-    G_siglt_phi_loeps.SetMarkerStyle(21)
-    G_siglt_phi_loeps.SetMarkerSize(1)
-    multiDict["G_siglt_phi_{}".format(k+1)].Add(G_siglt_phi_loeps)
-    G_siglt_phi_loeps = TGraphErrors()
-    j=0
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_siglt_phi_loeps.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['sep_file']['sigLT'].tolist())[i])
-            G_siglt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigLT'].tolist())[i])
-            j+=1
-    G_siglt_phi_loeps.SetMarkerColor(1)
-    G_siglt_phi_loeps.SetMarkerStyle(21)
-    G_siglt_phi_loeps.SetMarkerSize(1)
-    multiDict["G_siglt_phi_{}".format(k+1)].Add(G_siglt_phi_loeps)
-
-    G_siglt_phi_hieps = TGraphErrors()
-    j=0
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_siglt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigLT'].tolist())[i])
-            G_siglt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigLT'].tolist())[i])
-            j+=1
-    G_siglt_phi_hieps.SetMarkerColor(2)
-    G_siglt_phi_hieps.SetMarkerStyle(21)
-    G_siglt_phi_hieps.SetMarkerSize(1)
-    multiDict["G_siglt_phi_{}".format(k+1)].Add(G_siglt_phi_hieps)    
+    G_siglt_phi.SetMarkerColor(1)
+    G_siglt_phi.SetMarkerStyle(21)
+    G_siglt_phi.SetMarkerSize(1)
+    multiDict["G_siglt_phi_{}".format(k+1)].Add(G_siglt_phi)
 
     C_siglt_phi.cd(k+1)
 
@@ -797,8 +746,6 @@ for k in range(NumtBins):
     multiDict["G_siglt_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_siglt_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_siglt_phi.AddEntry(G_siglt_phi_loeps,"loeps")
-l_siglt_phi.AddEntry(G_siglt_phi_hieps,"hieps")
 l_siglt_phi.Draw()    
 C_siglt_phi.Print(outputpdf)
 
@@ -812,29 +759,17 @@ for k in range(NumtBins):
 
     multiDict["G_sigtt_phi_{}".format(k+1)] = TMultiGraph()
     
-    G_sigtt_phi_loeps = TGraphErrors()
+    G_sigtt_phi = TGraphErrors()
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_sigtt_phi_loeps.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['sep_file']['sigTT'].tolist())[i])
-            G_sigtt_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigTT'].tolist())[i])
+            G_sigtt_phi.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['sep_file']['sigTT'].tolist())[i])
+            G_sigtt_phi.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigTT'].tolist())[i])
             j+=1
-    G_sigtt_phi_loeps.SetMarkerColor(1)
-    G_sigtt_phi_loeps.SetMarkerStyle(21)
-    G_sigtt_phi_loeps.SetMarkerSize(1)
-    multiDict["G_sigtt_phi_{}".format(k+1)].Add(G_sigtt_phi_loeps)
-
-    G_sigtt_phi_hieps = TGraphErrors()
-    j=0
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_sigtt_phi_hieps.SetPoint(j, phi_bin_centers[file_df_dict['aver_hieps']['phibin'].tolist()[i]], np.array(file_df_dict['sep_file']['sigTT'].tolist())[i])
-            G_sigtt_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['sep_file']['dsigTT'].tolist())[i])
-            j+=1
-    G_sigtt_phi_hieps.SetMarkerColor(2)
-    G_sigtt_phi_hieps.SetMarkerStyle(21)
-    G_sigtt_phi_hieps.SetMarkerSize(1)
-    multiDict["G_sigtt_phi_{}".format(k+1)].Add(G_sigtt_phi_hieps)    
+    G_sigtt_phi.SetMarkerColor(1)
+    G_sigtt_phi.SetMarkerStyle(21)
+    G_sigtt_phi.SetMarkerSize(1)
+    multiDict["G_sigtt_phi_{}".format(k+1)].Add(G_sigtt_phi)
 
     C_sigtt_phi.cd(k+1)
 
@@ -845,8 +780,6 @@ for k in range(NumtBins):
     multiDict["G_sigtt_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_sigtt_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_sigtt_phi.AddEntry(G_sigtt_phi_loeps,"loeps")
-l_sigtt_phi.AddEntry(G_sigtt_phi_hieps,"hieps")
 l_sigtt_phi.Draw()    
 C_sigtt_phi.Print(outputpdf)
 
@@ -863,11 +796,6 @@ for i in range(len(file_df_dict['sep_file']['sigL'].tolist())):
     G_sigl_t.SetPoint(i, np.array(file_df_dict['sep_file']['t'].tolist())[i], np.array(file_df_dict['sep_file']['sigL'].tolist())[i])
     G_sigl_t.SetPointError(i, 0, np.array(file_df_dict['sep_file']['dsigL'].tolist())[i])
     G_sigl_t.SetMarkerColor(1)
-
-for i in range(len(file_df_dict['sep_file']['sigL'].tolist())):
-    G_sigl_t.SetPoint(i, np.array(file_df_dict['sep_file']['t'].tolist())[i], np.array(file_df_dict['sep_file']['sigL'].tolist())[i])
-    G_sigl_t.SetPointError(i, 0, np.array(file_df_dict['sep_file']['dsigL'].tolist())[i])
-    G_sigl_t.SetMarkerColor(2)
     
 G_sigl_t.SetMarkerStyle(21)
 G_sigl_t.SetMarkerSize(1)
@@ -889,11 +817,6 @@ for i in range(len(file_df_dict['sep_file']['sigT'].tolist())):
     G_sigt_t.SetPoint(i, np.array(file_df_dict['sep_file']['t'].tolist())[i], np.array(file_df_dict['sep_file']['sigT'].tolist())[i])
     G_sigt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file']['dsigT'].tolist())[i])
     G_sigt_t.SetMarkerColor(1)
-
-for i in range(len(file_df_dict['sep_file']['sigT'].tolist())):
-    G_sigt_t.SetPoint(i, np.array(file_df_dict['sep_file']['t'].tolist())[i], np.array(file_df_dict['sep_file']['sigT'].tolist())[i])
-    G_sigt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file']['dsigT'].tolist())[i])
-    G_sigt_t.SetMarkerColor(2)
     
 G_sigt_t.SetMarkerStyle(21)
 G_sigt_t.SetMarkerSize(1)
@@ -915,11 +838,6 @@ for i in range(len(file_df_dict['sep_file']['sigTT'].tolist())):
     G_sigtt_t.SetPoint(i, np.array(file_df_dict['sep_file']['t'].tolist())[i], np.array(file_df_dict['sep_file']['sigTT'].tolist())[i])
     G_sigtt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file']['dsigTT'].tolist())[i])
     G_sigtt_t.SetMarkerColor(1)
-
-for i in range(len(file_df_dict['sep_file']['sigTT'].tolist())):
-    G_sigtt_t.SetPoint(i, np.array(file_df_dict['sep_file']['t'].tolist())[i], np.array(file_df_dict['sep_file']['sigTT'].tolist())[i])
-    G_sigtt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file']['dsigTT'].tolist())[i])
-    G_sigtt_t.SetMarkerColor(2)
     
 G_sigtt_t.SetMarkerStyle(21)
 G_sigtt_t.SetMarkerSize(1)
@@ -941,11 +859,6 @@ for i in range(len(file_df_dict['sep_file']['sigLT'].tolist())):
     G_siglt_t.SetPoint(i, np.array(file_df_dict['sep_file']['t'].tolist())[i], np.array(file_df_dict['sep_file']['sigLT'].tolist())[i])
     G_siglt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file']['dsigLT'].tolist())[i])
     G_siglt_t.SetMarkerColor(1)
-
-for i in range(len(file_df_dict['sep_file']['sigLT'].tolist())):
-    G_siglt_t.SetPoint(i, np.array(file_df_dict['sep_file']['t'].tolist())[i], np.array(file_df_dict['sep_file']['sigLT'].tolist())[i])
-    G_siglt_t.SetPointError(i, 0, np.array(file_df_dict['sep_file']['dsigLT'].tolist())[i])
-    G_siglt_t.SetMarkerColor(2)
     
 G_siglt_t.SetMarkerStyle(21)
 G_siglt_t.SetMarkerSize(1)
