@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 14:38:35 trottar"
+# Time-stamp: "2024-01-04 14:53:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,7 +187,7 @@ plt.legend()
 
 # No PID vs PID
 rel_yield_nopid = [1.3268, 1.4303, 1.1699, 1.0780, 1.0498]
-rel_yield_pid = [1.17, 1.29, 1.05, 1.03, 1.01]
+rel_yield_pid = [1.1670, 1.2861, 1.0556, 1.0355, 1.0077]
 
 slope_relyield_nopid, intercept_relyield_nopid, _, _, _ = linregress(Q2, rel_yield_nopid)
 slope_relyield_pid, intercept_relyield_pid, _, _, _ = linregress(Q2, rel_yield_pid)
