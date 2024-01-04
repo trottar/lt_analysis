@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 12:37:57 trottar"
+# Time-stamp: "2024-01-04 12:55:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,9 +71,6 @@ tot_effError_dummy = [calculate_effError(run,efficiency_table) for run in dummy_
 #print(tot_effError_dummy)
 eff_errProp_dummy = sum(tot_effError_dummy) # Error propagation for addition
 
-print("\n\nTotal Data Efficiency Uncertainty =",eff_errProp_data)
-print("Total Dummy Efficiency Uncertainty =",eff_errProp_dummy)
-
 ###############################################################################################################################################
 # Define total efficiency vs run number plots
 G_data_eff = ROOT.TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in data_runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
@@ -125,7 +122,7 @@ for line in f_simc:
         simc_normfactor = float(val[1])
 if 'simc_nevents' and 'simc_normfactor' in locals():
     print('\n\nsimc_nevents = ',simc_nevents,'\nsimc_normfactor = ',simc_normfactor,'\n\n')
-    print('\n\ndata_charge = {} +/- {}'.format(data_charge, eff_errProp_data),'\ndummy_charge = {} +/- {}'.format(dummy_charge, eff_errProp_dummy),'\n\n')
+    print('\n\ndata_charge = {:.4f} +/- {:.4f}'.format(data_charge, eff_errProp_data),'\ndummy_charge = {:.4f} +/- {:.4f}'.format(dummy_charge, eff_errProp_dummy),'\n\n')
 else:
     print("ERROR: Invalid simc hist file %s" % simc_hist)
     sys.exit(1)
@@ -651,10 +648,10 @@ ibin = 1
 for evt in TBRANCH_DATA:
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) # & (evt.P_dc_InsideDipoleExit == 1) 
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-  HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+  HMS_FixCut = (evt.H_hod_goodstarttime == 1) # & (evt.H_dc_InsideDipoleExit == 1)
   HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)       
 
   #........................................
@@ -924,10 +921,10 @@ ibin = 1
 for evt in TBRANCH_DATA_nopid:
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) # & (evt.P_dc_InsideDipoleExit == 1) 
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-  HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+  HMS_FixCut = (evt.H_hod_goodstarttime == 1) # & (evt.H_dc_InsideDipoleExit == 1)
   HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)       
 
   #........................................  
@@ -1035,10 +1032,10 @@ for evt in TBRANCH_DUMMY:
   #......... Define Cuts.................
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) # & (evt.P_dc_InsideDipoleExit == 1) 
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-  HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+  HMS_FixCut = (evt.H_hod_goodstarttime == 1) # & (evt.H_dc_InsideDipoleExit == 1)
   HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)       
   
   #........................................
@@ -1239,10 +1236,10 @@ for evt in TBRANCH_DUMMY_nopid:
   #......... Define Cuts.................
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) # & (evt.P_dc_InsideDipoleExit == 1) 
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-  HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+  HMS_FixCut = (evt.H_hod_goodstarttime == 1) # & (evt.H_dc_InsideDipoleExit == 1)
   HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)       
   
   #........................................
