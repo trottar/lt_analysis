@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 18:44:28 trottar"
+# Time-stamp: "2024-01-03 18:52:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -650,7 +650,6 @@ C_xmod_phi.Print(outputpdf)
 C_sigl_phi = TCanvas()
 C_sigl_phi.Divide(1,NumtBins)
 C_sigl_phi.SetGrid()
-l_sigl_phi = TLegend(0.8,0.8,0.95,0.95)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -678,13 +677,11 @@ for k in range(NumtBins):
     multiDict["G_sigl_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_sigl_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_sigl_phi.Draw()    
 C_sigl_phi.Print(outputpdf)
 
 C_sigt_phi = TCanvas()
 C_sigt_phi.Divide(1,NumtBins)
 C_sigt_phi.SetGrid()
-l_sigt_phi = TLegend(0.8,0.8,0.95,0.95)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -712,13 +709,11 @@ for k in range(NumtBins):
     multiDict["G_sigt_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_sigt_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_sigt_phi.Draw()    
 C_sigt_phi.Print(outputpdf)
 
 C_siglt_phi = TCanvas()
 C_siglt_phi.Divide(1,NumtBins)
 C_siglt_phi.SetGrid()
-l_siglt_phi = TLegend(0.8,0.8,0.95,0.95)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -746,13 +741,11 @@ for k in range(NumtBins):
     multiDict["G_siglt_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_siglt_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_siglt_phi.Draw()    
 C_siglt_phi.Print(outputpdf)
 
 C_sigtt_phi = TCanvas()
 C_sigtt_phi.Divide(1,NumtBins)
 C_sigtt_phi.SetGrid()
-l_sigtt_phi = TLegend(0.8,0.8,0.95,0.95)
 
 multiDict = {}
 for k in range(NumtBins):
@@ -780,16 +773,12 @@ for k in range(NumtBins):
     multiDict["G_sigtt_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_sigtt_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-l_sigtt_phi.Draw()    
 C_sigtt_phi.Print(outputpdf)
 
 C_sigl_t = TCanvas()
 C_sigl_t.SetGrid()
 
 G_sigl_t = TGraphErrors()
-
-l_sigl_t = TLegend(0.8,0.8,0.95,0.95)
-
 G_sigl_t.SetTitle(" ; t; sigL")
 
 for i in range(len(file_df_dict['sep_file']['sigL'].tolist())):
@@ -808,9 +797,6 @@ C_sigt_t = TCanvas()
 C_sigt_t.SetGrid()
 
 G_sigt_t = TGraphErrors()
-
-l_sigt_t = TLegend(0.8,0.8,0.95,0.95)
-
 G_sigt_t.SetTitle(" ; t; sigt")
 
 for i in range(len(file_df_dict['sep_file']['sigT'].tolist())):
@@ -829,9 +815,6 @@ C_sigtt_t = TCanvas()
 C_sigtt_t.SetGrid()
 
 G_sigtt_t = TGraphErrors()
-
-l_sigtt_t = TLegend(0.8,0.8,0.95,0.95)
-
 G_sigtt_t.SetTitle(" ; t; sigtt")
 
 for i in range(len(file_df_dict['sep_file']['sigTT'].tolist())):
@@ -850,9 +833,6 @@ C_siglt_t = TCanvas()
 C_siglt_t.SetGrid()
 
 G_siglt_t = TGraphErrors()
-
-l_siglt_t = TLegend(0.8,0.8,0.95,0.95)
-
 G_siglt_t.SetTitle(" ; t; siglt")
 
 for i in range(len(file_df_dict['sep_file']['sigLT'].tolist())):
