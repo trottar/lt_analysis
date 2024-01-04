@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-21 14:52:02 trottar"
+# Time-stamp: "2024-01-04 14:07:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,6 +153,57 @@ plt.axhline(y=1.0, color='gray')
 plt.xlabel('Ebeam')
 plt.ylabel('Rel. Yield')
 plt.legend()
+
+# Adjust layout for better spacing
+plt.tight_layout()
+
+# No PID vs PID
+rel_yield_nopid = [1.1992, 1.1178, 0.9967, 0.8298, ]
+rel_yield_pid = []
+
+slope_relyield_nopid, intercept_relyield_nopid, _, _, _ = linregress(Ebeam, rel_yield_nopid)
+
+slope_relyield_pid, intercept_relyield_pid, _, _, _ = linregress(Ebeam, rel_yield_pid)
+
+# Plotting
+plt.figure(figsize=(12,8))
+
+# Plot rel_yield on a different plot with a horizontal line at y=1.0
+plt.subplot(221)
+plt.plot(Q2, rel_yield, 'go')
+plt.plot(Q2, slope_relyield_nopid * np.array(Q2) + intercept_relyield_nopid, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield_nopid, intercept_relyield_nopid))
+plt.axhline(y=1.0, color='gray')
+plt.xlabel('Q2')
+plt.ylabel('Rel. Yield')
+plt.legend()
+
+# Duplicate the third plot for better visualization
+plt.subplot(222)
+plt.plot(Q2, rel_yield, 'go')
+plt.plot(Q2, slope_relyield_pid * np.array(Q2) + intercept_relyield_pid, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield_pid, intercept_relyield_pid))
+plt.axhline(y=1.0, color='gray')
+plt.xlabel('Q2')
+plt.ylabel('Rel. Yield')
+plt.legend()
+
+# Plot rel_yield on a different plot with a horizontal line at y=1.0
+plt.subplot(223)
+plt.plot(ebeam, rel_yield, 'go')
+plt.plot(ebeam, slope_relyield_nopid * np.array(ebeam) + intercept_relyield_nopid, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield_nopid, intercept_relyield_nopid))
+plt.axhline(y=1.0, color='gray')
+plt.xlabel('ebeam')
+plt.ylabel('Rel. Yield')
+plt.legend()
+
+# Duplicate the third plot for better visualization
+plt.subplot(224)
+plt.plot(ebeam, rel_yield, 'go')
+plt.plot(ebeam, slope_relyield_pid * np.array(ebeam) + intercept_relyield_pid, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield_pid, intercept_relyield_pid))
+plt.axhline(y=1.0, color='gray')
+plt.xlabel('ebeam')
+plt.ylabel('Rel. Yield')
+plt.legend()
+
 
 # Adjust layout for better spacing
 plt.tight_layout()
