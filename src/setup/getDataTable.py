@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 13:35:02 trottar"
+# Time-stamp: "2024-01-04 13:36:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,8 +141,8 @@ def get_efficiencies(runNum,efficiency_table):
             # Hodo
             #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
             #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
-            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
+            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
+            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
             # HMS Cal
             #"HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
             # HMS Cer
@@ -151,7 +151,7 @@ def get_efficiencies(runNum,efficiency_table):
             "HMS_Elec_ALL_TRACK_EFF_ERROR" : eff_data["HMS_Elec_ALL_TRACK_EFF_ERROR"].iloc[0],
             "SHMS_Prot_ALL_TRACK_EFF_ERROR" : eff_data["SHMS_Prot_ALL_TRACK_EFF_ERROR"].iloc[0],
             # Boiling Correction
-            "BOIL_Eff_ERROR" : eff_data["BOIL_Eff_ERROR"].iloc[0],            
+            "BOIL_Eff_ERROR" : eff_data["BOIL_Eff_ERROR"].iloc[0],
         }
 
     else:
@@ -182,8 +182,8 @@ def get_efficiencies(runNum,efficiency_table):
             # Hodo
             #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
             #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
-            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
+            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
+            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
             # HMS Cal
             "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
             # HMS Cer
