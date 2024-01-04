@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 13:22:52 trottar"
+# Time-stamp: "2024-01-04 13:35:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,8 +141,8 @@ def get_efficiencies(runNum,efficiency_table):
             # Hodo
             #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
             #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.01*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
-            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.01*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
+            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
+            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
             # HMS Cal
             #"HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
             # HMS Cer
@@ -182,8 +182,8 @@ def get_efficiencies(runNum,efficiency_table):
             # Hodo
             #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
             #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.01*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
-            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.01*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
+            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
+            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
             # HMS Cal
             "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
             # HMS Cer
