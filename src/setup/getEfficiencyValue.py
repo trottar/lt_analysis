@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 13:46:19 trottar"
+# Time-stamp: "2024-01-04 13:51:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
         from getDataTable import calculate_efficiency
 
         #tot_efficiency = calculate_efficiency(runNum,efficiency_table)
-        tot_efficiency = 1.20
+        tot_efficiency = 1.0
 
         ################################################################################################################################################
 
