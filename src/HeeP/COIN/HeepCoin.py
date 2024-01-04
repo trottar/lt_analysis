@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 12:56:59 trottar"
+# Time-stamp: "2024-01-04 13:09:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,7 +122,7 @@ for line in f_simc:
         simc_normfactor = float(val[1])
 if 'simc_nevents' and 'simc_normfactor' in locals():
     print('\n\nsimc_nevents = ',simc_nevents,'\nsimc_normfactor = ',simc_normfactor,'\n\n')
-    print('\n\ndata_charge = {:.4f} +/- {:.4f}'.format(data_charge, data_charge*eff_errProp_data),'\ndummy_charge = {:.4f} +/- {:.4f}'.format(dummy_charge, dummy_charge*eff_errProp_dummy),'\n\n')
+    print('\n\ndata_charge = {:.4f} +/- {:.4f}'.format(data_charge, data_charge*eff_errProp_data),'\ndummy_charge = {:.4f} +/- {:.4f}'.format(dummy_charge, dummy_chargeeff_errProp_dummy),'\n\n')
 else:
     print("ERROR: Invalid simc hist file %s" % simc_hist)
     sys.exit(1)
@@ -648,10 +648,10 @@ ibin = 1
 for evt in TBRANCH_DATA:
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) # & (evt.P_dc_InsideDipoleExit == 1) 
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) 
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-  HMS_FixCut = (evt.H_hod_goodstarttime == 1) # & (evt.H_dc_InsideDipoleExit == 1)
+  HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
   HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)       
 
   #........................................
@@ -715,6 +715,7 @@ for evt in TBRANCH_DATA:
       
       ###################################################################################################################################################
 
+      '''
       H_ct_ep_DATA.SetBinError(ibin,eff_errProp_data*evt.CTime_epCoinTime_ROC1)
       
       H_ssxfp_DATA.SetBinError(ibin,eff_errProp_data*evt.ssxfp)
@@ -758,10 +759,12 @@ for evt in TBRANCH_DATA:
       P_hgcer_npeSum_DATA.SetBinError(ibin,eff_errProp_data*evt.P_hgcer_npeSum)
       P_aero_npeSum_DATA.SetBinError(ibin,eff_errProp_data*evt.P_aero_npeSum)
 
+      '''
+
       bpm_tar_x_DATA.Fill(evt.bpm_tar_x)
       bpm_tar_y_DATA.Fill(evt.bpm_tar_y)      
-      bpm_tar_x_DATA.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_x)
-      bpm_tar_y_DATA.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_y)
+      #bpm_tar_x_DATA.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_x)
+      #bpm_tar_y_DATA.SetBinError(ibin,eff_errProp_data*evt.bpm_tar_y)
       
       ###################################################################################################################################################
       
@@ -921,10 +924,10 @@ ibin = 1
 for evt in TBRANCH_DATA_nopid:
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) # & (evt.P_dc_InsideDipoleExit == 1) 
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) 
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-  HMS_FixCut = (evt.H_hod_goodstarttime == 1) # & (evt.H_dc_InsideDipoleExit == 1)
+  HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
   HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)       
 
   #........................................  
@@ -1032,10 +1035,10 @@ for evt in TBRANCH_DUMMY:
   #......... Define Cuts.................
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) # & (evt.P_dc_InsideDipoleExit == 1) 
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) 
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-  HMS_FixCut = (evt.H_hod_goodstarttime == 1) # & (evt.H_dc_InsideDipoleExit == 1)
+  HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
   HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)       
   
   #........................................
@@ -1112,6 +1115,8 @@ for evt in TBRANCH_DUMMY:
       '''
       ###################################################################################################################################################
 
+      '''
+      
       H_ct_ep_DUMMY.SetBinError(ibin,eff_errProp_data*evt.CTime_epCoinTime_ROC1)
       
       H_ssxfp_DUMMY.SetBinError(ibin,eff_errProp_data*evt.ssxfp)
@@ -1147,6 +1152,8 @@ for evt in TBRANCH_DUMMY:
       H_MMp2_DUMMY.SetBinError(ibin,eff_errProp_data*(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))
       #H_MMp2_DUMMY.SetBinError(ibin,eff_errProp_data*evt.MMp2)
       #H_MMp2_DUMMY.SetBinError(ibin,eff_errProp_data*evt.Mrecoil)
+
+      '''
       
       ###################################################################################################################################################
       ibin += 1
@@ -1236,10 +1243,10 @@ for evt in TBRANCH_DUMMY_nopid:
   #......... Define Cuts.................
 
   #CUTs Definations 
-  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) # & (evt.P_dc_InsideDipoleExit == 1) 
+  SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) 
   SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-  HMS_FixCut = (evt.H_hod_goodstarttime == 1) # & (evt.H_dc_InsideDipoleExit == 1)
+  HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
   HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)       
   
   #........................................
