@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 12:55:15 trottar"
+# Time-stamp: "2024-01-04 12:56:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,7 +122,7 @@ for line in f_simc:
         simc_normfactor = float(val[1])
 if 'simc_nevents' and 'simc_normfactor' in locals():
     print('\n\nsimc_nevents = ',simc_nevents,'\nsimc_normfactor = ',simc_normfactor,'\n\n')
-    print('\n\ndata_charge = {:.4f} +/- {:.4f}'.format(data_charge, eff_errProp_data),'\ndummy_charge = {:.4f} +/- {:.4f}'.format(dummy_charge, eff_errProp_dummy),'\n\n')
+    print('\n\ndata_charge = {:.4f} +/- {:.4f}'.format(data_charge, data_charge*eff_errProp_data),'\ndummy_charge = {:.4f} +/- {:.4f}'.format(dummy_charge, dummy_charge*eff_errProp_dummy),'\n\n')
 else:
     print("ERROR: Invalid simc hist file %s" % simc_hist)
     sys.exit(1)
