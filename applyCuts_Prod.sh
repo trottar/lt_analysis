@@ -497,7 +497,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing right data ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
-	cd "${LTANAPATH}/src/setup"
+	cd "${LTANAPATH}/src/setup"	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
 	echo
     fi
