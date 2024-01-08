@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 16:35:30 trottar"
+# Time-stamp: "2024-01-08 16:39:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -276,6 +276,7 @@ def coin_proton():
 
 def main():
 
+    print("Applying cuts for {}...".format(ParticleType))
     if ParticleType == "kaon":
         COIN_Data = coin_kaon()
     if ParticleType == "pion":
