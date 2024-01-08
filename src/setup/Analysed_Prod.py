@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 16:49:24 trottar"
+# Time-stamp: "2024-01-08 16:50:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,7 +29,7 @@ import sys, math, os, subprocess
 
 # Check the number of arguments provided to the script
 if len(sys.argv)-1!=3:
-    print("!!!!! ERROR !!!!!\n Expected 3 arguments\n Usage is with -  RunNumber ParticleType ROOTprefix\n!!!!! ERROR !!!!!")
+    print("!!!!! ERROR !!!!!\n Expected 3 arguments\n Usage is with -  RunNumber ParticleType ROOTPrefix\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################
@@ -37,7 +37,7 @@ if len(sys.argv)-1!=3:
 # Input params - run number, particle type, and max number of events
 runNum = sys.argv[1]
 ParticleType = sys.argv[2]
-ROOTprefix = sys.argv[3]
+ROOTPrefix = sys.argv[3]
 MaxEvent = "-1"
 
 
