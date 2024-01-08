@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 16:29:32 trottar"
+# Time-stamp: "2024-01-08 16:35:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,12 +116,18 @@ def coin_kaon():
     coin_ek_cut_prompt_RF_tmp = []
     coin_ek_cut_rand_RF_tmp = []
 
-    for arr in Cut_COIN_Kaon_tmp:
+    for i, arr in enumerate(Cut_COIN_Kaon_tmp):
+        print("Applying cuts to coin_ek_cut_all_noRF...")
         coin_ek_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_all_noRF"))
+        print("Applying cuts to coin_ek_cut_prompt_noRF...")
         coin_ek_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_prompt_noRF"))
+        print("Applying cuts to coin_ek_cut_rand_noRF...")
         coin_ek_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_rand_noRF"))
+        print("Applying cuts to coin_ek_cut_all_RF...")
         coin_ek_cut_all_RF_tmp.append(c.add_cut(arr, "coin_ek_cut_all_RF"))
+        print("Applying cuts to coin_ek_cut_prompt_RF...")
         coin_ek_cut_prompt_RF_tmp.append(c.add_cut(arr, "coin_ek_cut_prompt_RF"))
+        print("Applying cuts to coin_ek_cut_rand_RF...")
         coin_ek_cut_rand_RF_tmp.append(c.add_cut(arr, "coin_ek_cut_rand_RF"))
 
     Cut_Kaon_Events_all_noRF = [(tree["H_gtr_yp"],tree["H_gtr_xp"],tree["H_dc_yp_fp"],tree["H_dc_xp_fp"],tree["H_dc_y_fp"],tree["H_dc_x_fp"],tree["P_gtr_yp"],tree["P_gtr_xp"],tree["P_dc_yp_fp"],tree["P_dc_xp_fp"],tree["P_dc_y_fp"],tree["P_dc_x_fp"],tree["P_dc_InsideDipoleExit"],tree["H_dc_InsideDipoleExit"],tree["H_gtr_beta"],  tree["H_gtr_dp"], tree["H_gtr_p"], tree["H_hod_goodscinhit"], tree["H_hod_goodstarttime"], tree["H_cal_etotnorm"], tree["H_cal_etottracknorm"], tree["H_cer_npeSum"], tree["CTime_eKCoinTime_ROC1"], tree["P_gtr_beta"],  tree["P_gtr_p"], tree["P_gtr_dp"], tree["P_hod_goodscinhit"], tree["P_hod_goodstarttime"], tree["P_cal_etotnorm"], tree["P_cal_etottracknorm"], tree["P_aero_npeSum"], tree["P_aero_xAtAero"], tree["P_aero_yAtAero"], tree["P_hgcer_npeSum"], tree["P_hgcer_xAtCer"], tree["P_hgcer_yAtCer"], tree["MMK"], tree["H_RF_Dist"],tree["P_RF_Dist"], tree["Q2"], tree["W"], tree["epsilon"], tree["ph_q"],tree["ph_recoil"],tree["th_q"],tree["th_recoil"], tree["MandelT"], tree["emiss"],tree["pmiss"], tree["pmiss_x"], tree["pmiss_y"], tree["pmiss_z"],tree["Erecoil"],tree["emiss_nuc"],tree["Mrecoil"],tree["raster_x"],tree["raster_y"],tree["raster_z"]) for (tree["H_gtr_yp"],tree["H_gtr_xp"],tree["H_dc_yp_fp"],tree["H_dc_xp_fp"],tree["H_dc_y_fp"],tree["H_dc_x_fp"],tree["P_gtr_yp"],tree["P_gtr_xp"],tree["P_dc_yp_fp"],tree["P_dc_xp_fp"],tree["P_dc_y_fp"],tree["P_dc_x_fp"],tree["P_dc_InsideDipoleExit"],tree["H_dc_InsideDipoleExit"],tree["H_gtr_beta"],  tree["H_gtr_dp"], tree["H_gtr_p"], tree["H_hod_goodscinhit"], tree["H_hod_goodstarttime"], tree["H_cal_etotnorm"], tree["H_cal_etottracknorm"], tree["H_cer_npeSum"], tree["CTime_eKCoinTime_ROC1"], tree["P_gtr_beta"],  tree["P_gtr_p"], tree["P_gtr_dp"], tree["P_hod_goodscinhit"], tree["P_hod_goodstarttime"], tree["P_cal_etotnorm"], tree["P_cal_etottracknorm"], tree["P_aero_npeSum"], tree["P_aero_xAtAero"], tree["P_aero_yAtAero"], tree["P_hgcer_npeSum"], tree["P_hgcer_xAtCer"], tree["P_hgcer_yAtCer"], tree["MMK"], tree["H_RF_Dist"],tree["P_RF_Dist"], tree["Q2"], tree["W"], tree["epsilon"], tree["ph_q"],tree["ph_recoil"],tree["th_q"],tree["th_recoil"], tree["MandelT"], tree["emiss"],tree["pmiss"], tree["pmiss_x"], tree["pmiss_y"], tree["pmiss_z"],tree["Erecoil"],tree["emiss_nuc"],tree["Mrecoil"],tree["raster_x"],tree["raster_y"],tree["raster_z"]) in zip(*coin_ek_cut_all_noRF_tmp)]
@@ -169,12 +175,18 @@ def coin_pion():
     coin_epi_cut_prompt_RF_tmp = []
     coin_epi_cut_rand_RF_tmp = []
 
-    for arr in Cut_COIN_Pion_tmp:
+    for i, arr in enumerate(Cut_COIN_Pion_tmp):
+        print("Applying cuts to coin_epi_cut_all_noRF...")
         coin_epi_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_all_noRF"))
+        print("Applying cuts to coin_epi_cut_prompt_noRF...")
         coin_epi_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_prompt_noRF"))
+        print("Applying cuts to coin_epi_cut_rand_noRF...")
         coin_epi_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_rand_noRF"))
+        print("Applying cuts to coin_epi_cut_all_RF...")
         coin_epi_cut_all_RF_tmp.append(c.add_cut(arr, "coin_epi_cut_all_RF"))
+        print("Applying cuts to coin_epi_cut_prompt_RF...")
         coin_epi_cut_prompt_RF_tmp.append(c.add_cut(arr, "coin_epi_cut_prompt_RF"))
+        print("Applying cuts to coin_epi_cut_rand_RF...")
         coin_epi_cut_rand_RF_tmp.append(c.add_cut(arr, "coin_epi_cut_rand_RF"))
 
     Cut_Pion_Events_all_noRF = [(tree["H_gtr_yp"],tree["H_gtr_xp"],tree["H_dc_yp_fp"],tree["H_dc_xp_fp"],tree["H_dc_y_fp"],tree["H_dc_x_fp"],tree["P_gtr_yp"],tree["P_gtr_xp"],tree["P_dc_yp_fp"],tree["P_dc_xp_fp"],tree["P_dc_y_fp"],tree["P_dc_x_fp"],tree["P_dc_InsideDipoleExit"],tree["H_dc_InsideDipoleExit"],tree["H_gtr_beta"],  tree["H_gtr_dp"], tree["H_gtr_p"], tree["H_hod_goodscinhit"], tree["H_hod_goodstarttime"], tree["H_cal_etotnorm"], tree["H_cal_etottracknorm"], tree["H_cer_npeSum"], tree["CTime_ePiCoinTime_ROC1"], tree["P_gtr_beta"],  tree["P_gtr_p"], tree["P_gtr_dp"], tree["P_hod_goodscinhit"], tree["P_hod_goodstarttime"], tree["P_cal_etotnorm"], tree["P_cal_etottracknorm"], tree["P_aero_npeSum"], tree["P_aero_xAtAero"], tree["P_aero_yAtAero"], tree["P_hgcer_npeSum"], tree["P_hgcer_xAtCer"], tree["P_hgcer_yAtCer"], tree["MMK"], tree["H_RF_Dist"],tree["P_RF_Dist"], tree["Q2"], tree["W"], tree["epsilon"], tree["ph_q"],tree["ph_recoil"],tree["th_q"],tree["th_recoil"], tree["MandelT"], tree["emiss"],tree["pmiss"], tree["pmiss_x"], tree["pmiss_y"], tree["pmiss_z"],tree["Erecoil"],tree["emiss_nuc"],tree["Mrecoil"],tree["raster_x"],tree["raster_y"],tree["raster_z"]) for (tree["H_gtr_yp"],tree["H_gtr_xp"],tree["H_dc_yp_fp"],tree["H_dc_xp_fp"],tree["H_dc_y_fp"],tree["H_dc_x_fp"],tree["P_gtr_yp"],tree["P_gtr_xp"],tree["P_dc_yp_fp"],tree["P_dc_xp_fp"],tree["P_dc_y_fp"],tree["P_dc_x_fp"],tree["P_dc_InsideDipoleExit"],tree["H_dc_InsideDipoleExit"],tree["H_gtr_beta"],  tree["H_gtr_dp"], tree["H_gtr_p"], tree["H_hod_goodscinhit"], tree["H_hod_goodstarttime"], tree["H_cal_etotnorm"], tree["H_cal_etottracknorm"], tree["H_cer_npeSum"], tree["CTime_ePiCoinTime_ROC1"], tree["P_gtr_beta"],  tree["P_gtr_p"], tree["P_gtr_dp"], tree["P_hod_goodscinhit"], tree["P_hod_goodstarttime"], tree["P_cal_etotnorm"], tree["P_cal_etottracknorm"], tree["P_aero_npeSum"], tree["P_aero_xAtAero"], tree["P_aero_yAtAero"], tree["P_hgcer_npeSum"], tree["P_hgcer_xAtCer"], tree["P_hgcer_yAtCer"], tree["MMK"], tree["H_RF_Dist"],tree["P_RF_Dist"], tree["Q2"], tree["W"], tree["epsilon"], tree["ph_q"],tree["ph_recoil"],tree["th_q"],tree["th_recoil"], tree["MandelT"], tree["emiss"],tree["pmiss"], tree["pmiss_x"], tree["pmiss_y"], tree["pmiss_z"],tree["Erecoil"],tree["emiss_nuc"],tree["Mrecoil"],tree["raster_x"],tree["raster_y"],tree["raster_z"]) in zip(*coin_epi_cut_all_noRF_tmp)]
@@ -222,12 +234,18 @@ def coin_proton():
     coin_ep_cut_prompt_RF_tmp = []
     coin_ep_cut_rand_RF_tmp = []
 
-    for arr in Cut_COIN_Proton_tmp:
+    for i, arr in enumerate(Cut_COIN_Proton_tmp):
+        print("Applying cuts to coin_ep_cut_all_noRF...")
         coin_ep_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_all_noRF"))
+        print("Applying cuts to coin_ep_cut_prompt_noRF...")
         coin_ep_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_prompt_noRF"))
+        print("Applying cuts to coin_ep_cut_rand_noRF...")
         coin_ep_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_rand_noRF"))
+        print("Applying cuts to coin_ep_cut_all_RF...")
         coin_ep_cut_all_RF_tmp.append(c.add_cut(arr, "coin_ep_cut_all_RF"))
+        print("Applying cuts to coin_ep_cut_prompt_RF...")
         coin_ep_cut_prompt_RF_tmp.append(c.add_cut(arr, "coin_ep_cut_prompt_RF"))
+        print("Applying cuts to coin_ep_cut_rand_RF...")
         coin_ep_cut_rand_RF_tmp.append(c.add_cut(arr, "coin_ep_cut_rand_RF"))
 
     Cut_Proton_Events_all_noRF = [(tree["H_gtr_yp"],tree["H_gtr_xp"],tree["H_dc_yp_fp"],tree["H_dc_xp_fp"],tree["H_dc_y_fp"],tree["H_dc_x_fp"],tree["P_gtr_yp"],tree["P_gtr_xp"],tree["P_dc_yp_fp"],tree["P_dc_xp_fp"],tree["P_dc_y_fp"],tree["P_dc_x_fp"],tree["P_dc_InsideDipoleExit"],tree["H_dc_InsideDipoleExit"],tree["H_gtr_beta"],  tree["H_gtr_dp"], tree["H_gtr_p"], tree["H_hod_goodscinhit"], tree["H_hod_goodstarttime"], tree["H_cal_etotnorm"], tree["H_cal_etottracknorm"], tree["H_cer_npeSum"], tree["CTime_epCoinTime_ROC1"], tree["P_gtr_beta"],  tree["P_gtr_p"], tree["P_gtr_dp"], tree["P_hod_goodscinhit"], tree["P_hod_goodstarttime"], tree["P_cal_etotnorm"], tree["P_cal_etottracknorm"], tree["P_aero_npeSum"], tree["P_aero_xAtAero"], tree["P_aero_yAtAero"], tree["P_hgcer_npeSum"], tree["P_hgcer_xAtCer"], tree["P_hgcer_yAtCer"], tree["MMK"], tree["H_RF_Dist"],tree["P_RF_Dist"], tree["Q2"], tree["W"], tree["epsilon"], tree["ph_q"],tree["ph_recoil"],tree["th_q"],tree["th_recoil"], tree["MandelT"], tree["emiss"],tree["pmiss"], tree["pmiss_x"], tree["pmiss_y"], tree["pmiss_z"],tree["Erecoil"],tree["emiss_nuc"],tree["Mrecoil"],tree["raster_x"],tree["raster_y"],tree["raster_z"]) for (tree["H_gtr_yp"],tree["H_gtr_xp"],tree["H_dc_yp_fp"],tree["H_dc_xp_fp"],tree["H_dc_y_fp"],tree["H_dc_x_fp"],tree["P_gtr_yp"],tree["P_gtr_xp"],tree["P_dc_yp_fp"],tree["P_dc_xp_fp"],tree["P_dc_y_fp"],tree["P_dc_x_fp"],tree["P_dc_InsideDipoleExit"],tree["H_dc_InsideDipoleExit"],tree["H_gtr_beta"],  tree["H_gtr_dp"], tree["H_gtr_p"], tree["H_hod_goodscinhit"], tree["H_hod_goodstarttime"], tree["H_cal_etotnorm"], tree["H_cal_etottracknorm"], tree["H_cer_npeSum"], tree["CTime_epCoinTime_ROC1"], tree["P_gtr_beta"],  tree["P_gtr_p"], tree["P_gtr_dp"], tree["P_hod_goodscinhit"], tree["P_hod_goodstarttime"], tree["P_cal_etotnorm"], tree["P_cal_etottracknorm"], tree["P_aero_npeSum"], tree["P_aero_xAtAero"], tree["P_aero_yAtAero"], tree["P_hgcer_npeSum"], tree["P_hgcer_xAtCer"], tree["P_hgcer_yAtCer"], tree["MMK"], tree["H_RF_Dist"],tree["P_RF_Dist"], tree["Q2"], tree["W"], tree["epsilon"], tree["ph_q"],tree["ph_recoil"],tree["th_q"],tree["th_recoil"], tree["MandelT"], tree["emiss"],tree["pmiss"], tree["pmiss_x"], tree["pmiss_y"], tree["pmiss_z"],tree["Erecoil"],tree["emiss_nuc"],tree["Mrecoil"],tree["raster_x"],tree["raster_y"],tree["raster_z"]) in zip(*coin_ep_cut_all_noRF_tmp)]
@@ -283,7 +301,8 @@ def main():
         term_search = "Pion"
     if ParticleType == "proton":
         term_search = "Proton"
-    
+
+    print("\n\nSaving data to new root files...")
     for i in range (0, len(data_keys)):
         # Progress bar
         Misc.progressBar(i, len(data_keys)-1,bar_length=25)
