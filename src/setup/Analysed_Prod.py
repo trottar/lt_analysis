@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-10-02 17:37:47 trottar"
+# Time-stamp: "2024-01-08 16:29:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -46,6 +46,8 @@ ltsep package import and pathing definitions
 
 # Import package for cuts
 from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
 
 lt=Root(os.path.realpath(__file__))
 
@@ -283,6 +285,8 @@ def main():
         term_search = "Proton"
     
     for i in range (0, len(data_keys)):
+        # Progress bar
+        Misc.progressBar(i, len(data_keys)-1,bar_length=25)
         if(term_search in data_keys[i]):
             DFHeader=list(COIN_Data_Header)
         else:
