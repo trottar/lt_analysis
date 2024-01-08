@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 16:45:02 trottar"
+# Time-stamp: "2024-01-08 16:49:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,8 +28,8 @@ import sys, math, os, subprocess
 ##################################################################################################################################################
 
 # Check the number of arguments provided to the script
-if len(sys.argv)-1!=2:
-    print("!!!!! ERROR !!!!!\n Expected 2 arguments\n Usage is with -  RunNumber ParticleType \n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=3:
+    print("!!!!! ERROR !!!!!\n Expected 3 arguments\n Usage is with -  RunNumber ParticleType ROOTprefix\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################
@@ -37,32 +37,9 @@ if len(sys.argv)-1!=2:
 # Input params - run number, particle type, and max number of events
 runNum = sys.argv[1]
 ParticleType = sys.argv[2]
+ROOTprefix = sys.argv[3]
 MaxEvent = "-1"
 
-################################################################################################################################################
-'''
-ltsep package import and pathing definitions
-'''
-
-# Import package for cuts
-from ltsep import Root
-# Import package for progress bar
-from ltsep import Misc
-
-lt=Root(os.path.realpath(__file__))
-
-# Add this to all files for more dynamic pathing
-USER=lt.USER # Grab user info for file finding
-HOST=lt.HOST
-REPLAYPATH=lt.REPLAYPATH
-UTILPATH=lt.UTILPATH
-LTANAPATH=lt.LTANAPATH
-ANATYPE=lt.ANATYPE
-OUTPATH=lt.OUTPATH
-
-##############################################################################################################################################
-
-ROOTPrefix = "%s_coin_replay_production" % ANATYPE
 
 ##############################################################################################################################################
 '''
@@ -79,6 +56,16 @@ if ParticleType == "pion":
 if ParticleType == "proton":
     cuts = ["coin_ep_cut_all_noRF","coin_ep_cut_prompt_noRF","coin_ep_cut_rand_noRF","coin_ep_cut_all_RF","coin_ep_cut_prompt_RF","coin_ep_cut_rand_RF"]    
 
+################################################################################################################################################
+'''
+ltsep package import and pathing definitions
+'''
+
+# Import package for cuts
+from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
+    
 lt=Root(os.path.realpath(__file__),"Prod",ROOTPrefix,runNum,MaxEvent,cut_f,cuts)
 
 # Add this to all files for more dynamic pathing

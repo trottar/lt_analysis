@@ -497,8 +497,8 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing right data ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
-	cd "${LTANAPATH}/src/setup"	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	cd "${LTANAPATH}/src/setup"
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" | tee ../../log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
 	echo
     fi
 
@@ -513,7 +513,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "------------------------------------------------------"
 	echo
 	cd "${LTANAPATH}/src/setup"
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" | tee ../../log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
     fi
 
     # Checks that array isn't empty
@@ -527,7 +527,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "------------------------------------------------------"
 	echo
 	cd "${LTANAPATH}/src/setup"
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" | tee ../../log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" | tee ../../log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
     fi
 
 else
@@ -551,7 +551,7 @@ else
 	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Right_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" | tee ../../log/Right_Analysed_Prod_${i}_${RUNNUM}.log
 	    echo
 	fi
 
@@ -566,7 +566,7 @@ else
 	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Left_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" | tee ../../log/Left_Analysed_Prod_${i}_${RUNNUM}.log
 	fi
 
 	# Checks that array isn't empty
@@ -580,7 +580,7 @@ else
 	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" | tee ../../log/Center_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" | tee ../../log/Center_Analysed_Prod_${i}_${RUNNUM}.log
 	    
 	fi
     done
