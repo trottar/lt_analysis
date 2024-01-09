@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-09 12:07:42 trottar"
+# Time-stamp: "2024-01-09 12:10:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -277,8 +277,6 @@ def main():
 
     print("\n\nSaving data to new root files...")
     for i in range (0, len(data_keys)):
-        # Progress bar
-        Misc.progressBar(i, len(data_keys)-1,bar_length=25)
         if(term_search in data_keys[i]):
             DFHeader=list(COIN_Data_Header)
         else:
@@ -289,6 +287,7 @@ def main():
             pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root("%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent), key ="%s" % data_keys[i])
         elif (i != 0):
             pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root("%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent), key ="%s" % data_keys[i], mode ='a')
+        Misc.progressBar(i, len(data_keys)-1,bar_length=25)
 
 if __name__ == '__main__':
     main()
