@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 22:39:17 trottar"
+# Time-stamp: "2024-01-08 22:40:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,19 +61,10 @@ echo "Run Numbers: [${numbers_to_match[@]}]"
 # Directory containing files
 directory_path="${ROOTPATH}/${ANATYPE}LT"
 
-# Loop through each file in the directory
-for file in "$directory_path"/*
+# Loop through each number in the list
+for number in "${numbers_to_match[@]}"
 do
-    # Extract the number from the filename
-    file_number=$(echo "$file" | sed 's/[^0-9-]*//g')
-
-    echo ${directory_path}
-    echo "${numbers_to_match[@]}"
-    echo "$file_number"
-    # Check if the number matches any in the list
-    if [[ "${numbers_to_match[@]}" =~ "$file_number" ]]; then
-        # Remove the file
-        rm "$file"
-        echo "Removed: $file"
-    fi
+    # Remove files with the specified number in the filename
+    rm "$directory_path"/*"$number"*
+    echo "Removed files with number $number"
 done
