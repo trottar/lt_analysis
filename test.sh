@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 22:32:25 trottar"
+# Time-stamp: "2024-01-08 22:35:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,7 +56,7 @@ grab_runs () {
 file_name="Prod_Test"
 numbers_to_match=()
 IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"             # RIGHT, Q2=5p5, W=3p02
-echo "Dummy Run Numbers: [${numbers_to_match[@]}]"
+echo "Run Numbers: [${numbers_to_match[@]}]"
 
 # Directory containing files
 directory_path="${ROOTPATH}/${ANATYPE}LT"
@@ -67,6 +67,8 @@ do
     # Extract the number from the filename
     file_number=$(echo "$file" | sed 's/[^0-9]*//g')
 
+    echo ${directory_path}
+    echo ${file_number}
     # Check if the number matches any in the list
     if [[ "${numbers_to_match[@]}" =~ "$file_number" ]]; then
         # Remove the file
