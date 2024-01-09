@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 22:29:44 trottar"
+# Time-stamp: "2024-01-08 22:30:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,14 +62,15 @@ echo "Dummy Run Numbers: [${numbers_to_match[@]}]"
 directory_path="ROOTPATH/Analysis/${ANATYPE}LT"
 
 # Loop through each file in the directory
-foreach file (`ls $directory_path`)
+for file in "$directory_path"/*
+do
     # Extract the number from the filename
-    set file_number = `echo $file | sed 's/[^0-9]*//g'`
+    file_number=$(echo "$file" | sed 's/[^0-9]*//g')
 
     # Check if the number matches any in the list
-    if ( "$file_number" in $numbers_to_match ) then
+    if [[ "${numbers_to_match[@]}" =~ "$file_number" ]]; then
         # Remove the file
-        rm $directory_path/$file
+        rm "$file"
         echo "Removed: $file"
-    endif
-end
+    fi
+done
