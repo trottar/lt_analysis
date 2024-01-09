@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-09 18:55:56 trottar"
+# Time-stamp: "2024-01-09 18:57:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,6 +75,11 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent)
+if os.path.exists(out_f_file):
+    print("{} already exists. Removing...\n\n".format(out_f_file))
+    os.remove(out_f_file)
 
 proc_root = lt.setup_ana()
 c = proc_root[0] # Cut object
@@ -246,11 +251,6 @@ def coin_proton():
 ##################################################################################################################################################################
 
 def main():
-
-    out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent)
-    if os.path.exists(out_f_file):
-        print("{} already exists. Removing...\n\n".format(out_f_file))
-        os.remove(out_f_file)
         
     print("Applying cuts for {}...".format(ParticleType))
     if ParticleType == "kaon":
