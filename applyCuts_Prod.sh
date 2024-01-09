@@ -499,7 +499,7 @@ if [[ $p_flag = "true" ]]; then
 	echo
 	cd "${LTANAPATH}/src/setup"
 	# Check if file already exists and delete if so
-	out_f_file="$OUTPATH/$ParticleType_$runNum_-1_Raw_Data.root"
+	out_f_file="${OUTPATH}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
 	    echo "$out_f_file already exists."
 	    echo "Removing..."
@@ -521,7 +521,7 @@ if [[ $p_flag = "true" ]]; then
 	echo
 	cd "${LTANAPATH}/src/setup"
 	# Check if file already exists and delete if so
-	out_f_file="$OUTPATH/$ParticleType_$runNum_-1_Raw_Data.root"
+	out_f_file="${OUTPATH}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
 	    echo "$out_f_file already exists."
 	    echo "Removing..."
@@ -542,8 +542,7 @@ if [[ $p_flag = "true" ]]; then
 	echo
 	cd "${LTANAPATH}/src/setup"
 	# Check if file already exists and delete if so
-	out_f_file="$OUTPATH/$ParticleType_$runNum_-1_Raw_Data.root"
-	echo $out_f_file
+	out_f_file="${OUTPATH}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
 	    echo "$out_f_file already exists."
 	    echo "Removing..."
@@ -574,7 +573,7 @@ else
 	    echo
 	    cd "${LTANAPATH}/src/setup"
 	    # Check if file already exists and delete if so
-	    out_f_file="$OUTPATH/$ParticleType_$runNum_-1_Raw_Data.root"
+	    out_f_file="${OUTPATH}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
 		echo "$out_f_file already exists."
 		echo "Removing..."
@@ -596,7 +595,7 @@ else
 	    echo
 	    cd "${LTANAPATH}/src/setup"
 	    # Check if file already exists and delete if so
-	    out_f_file="$OUTPATH/$ParticleType_$runNum_-1_Raw_Data.root"
+	    out_f_file="${OUTPATH}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
 		echo "$out_f_file already exists."
 		echo "Removing..."
@@ -617,7 +616,7 @@ else
 	    echo
 	    cd "${LTANAPATH}/src/setup"
 	    # Check if file already exists and delete if so
-	    out_f_file="$OUTPATH/$ParticleType_$runNum_-1_Raw_Data.root"
+	    out_f_file="${OUTPATH}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
 		echo "$out_f_file already exists."
 		echo "Removing..."
