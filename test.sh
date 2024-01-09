@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 22:35:39 trottar"
+# Time-stamp: "2024-01-08 22:36:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,7 +68,8 @@ do
     file_number=$(echo "$file" | sed 's/[^0-9]*//g')
 
     echo ${directory_path}
-    echo ${file_number}
+    echo "${numbers_to_match[@]}"
+    echo "$file_number"
     # Check if the number matches any in the list
     if [[ "${numbers_to_match[@]}" =~ "$file_number" ]]; then
         # Remove the file
