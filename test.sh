@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 22:36:45 trottar"
+# Time-stamp: "2024-01-08 22:39:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ directory_path="${ROOTPATH}/${ANATYPE}LT"
 for file in "$directory_path"/*
 do
     # Extract the number from the filename
-    file_number=$(echo "$file" | sed 's/[^0-9]*//g')
+    file_number=$(echo "$file" | sed 's/[^0-9-]*//g')
 
     echo ${directory_path}
     echo "${numbers_to_match[@]}"
