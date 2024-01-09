@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-09 17:58:40 trottar"
+# Time-stamp: "2024-01-09 17:59:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -39,14 +39,6 @@ runNum = sys.argv[1]
 ParticleType = sys.argv[2]
 ROOTPrefix = sys.argv[3]
 MaxEvent = "-1"
-
-##################################################################################################################################################
-
-# Check if file already exists and delete if so
-out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent)
-if os.path.exists(out_f_file):
-    print("{} already exists.\nRemoving...".format(out_f_file))
-    os.remove(out_f_file)
 
 ##############################################################################################################################################
 '''
