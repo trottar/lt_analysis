@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 22:31:55 trottar"
+# Time-stamp: "2024-01-08 22:32:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,7 +59,7 @@ IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"          
 echo "Dummy Run Numbers: [${numbers_to_match[@]}]"
 
 # Directory containing files
-directory_path="${ROOTPATH}/Analysis/${ANATYPE}LT"
+directory_path="${ROOTPATH}/${ANATYPE}LT"
 
 # Loop through each file in the directory
 for file in "$directory_path"/*
