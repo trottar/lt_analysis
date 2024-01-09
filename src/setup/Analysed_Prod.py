@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 21:09:11 trottar"
+# Time-stamp: "2024-01-09 12:07:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,6 +104,7 @@ def coin_kaon():
     coin_ek_cut_rand_RF_tmp = []
 
     for i, arr in enumerate(Cut_COIN_Kaon_tmp):
+        Misc.progressBar(i, len(Cut_COIN_Kaon_tmp)-1,bar_length=25)
         coin_ek_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_all_noRF"))
         coin_ek_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_prompt_noRF"))
         coin_ek_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_rand_noRF"))
@@ -157,6 +158,7 @@ def coin_pion():
     coin_epi_cut_rand_RF_tmp = []
 
     for i, arr in enumerate(Cut_COIN_Pion_tmp):
+        Misc.progressBar(i, len(Cut_COIN_Pion_tmp)-1,bar_length=25)
         coin_epi_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_all_noRF"))
         coin_epi_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_prompt_noRF"))
         coin_epi_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_rand_noRF"))
@@ -210,6 +212,7 @@ def coin_proton():
     coin_ep_cut_rand_RF_tmp = []
 
     for i, arr in enumerate(Cut_COIN_Proton_tmp):
+        Misc.progressBar(i, len(Cut_COIN_Proton_tmp)-1,bar_length=25)
         coin_ep_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_all_noRF"))
         coin_ep_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_prompt_noRF"))
         coin_ep_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_rand_noRF"))
