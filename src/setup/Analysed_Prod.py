@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-09 17:33:51 trottar"
+# Time-stamp: "2024-01-09 17:54:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -247,6 +247,12 @@ def coin_proton():
 
 def main():
 
+    out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent)
+    # Check if the file exists
+    if os.path.exists(out_f_file):
+        print("{} already exists.\nRemoving...".format(out_f_file))
+        os.remove(out_f_file)
+        
     print("Applying cuts for {}...".format(ParticleType))
     if ParticleType == "kaon":
         COIN_Data = coin_kaon()
@@ -283,9 +289,9 @@ def main():
             # Uncomment the line below if you want .csv file output, WARNING the files can be very large and take a long time to process!                                                                      
             #pd.DataFrame(data.get(data_keys[i])).to_csv("%s/%s_%s.csv" % (OUTPATH, data_keys[i], runNum), header=DFHeader, index=False) # Convert array to panda dataframe and write to csv with correct header                                                                                                      
         if (i == 0):
-            pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root("%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent), key ="%s" % data_keys[i])
+            pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i])
         elif (i != 0):
-            pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root("%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent), key ="%s" % data_keys[i], mode ='a')
+            pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i], mode ='a')
         Misc.progressBar(i, len(data_keys)-1,bar_length=25)
 
 if __name__ == '__main__':
