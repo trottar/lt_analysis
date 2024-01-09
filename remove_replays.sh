@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-08 22:40:44 trottar"
+# Time-stamp: "2024-01-09 17:30:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,13 +58,24 @@ numbers_to_match=()
 IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"             # RIGHT, Q2=5p5, W=3p02
 echo "Run Numbers: [${numbers_to_match[@]}]"
 
-# Directory containing files
-directory_path="${ROOTPATH}/${ANATYPE}LT"
+while true; do
+    # Prompt for confirmation before proceeding
+    read -p "Are you sure you want to remove files with specified numbers in the filename? (yes/no): " answer
 
-# Loop through each number in the list
-for number in "${numbers_to_match[@]}"
-do
-    # Remove files with the specified number in the filename
-    rm "$directory_path"/*"$number"*
-    echo "Removed files with number $number"
+    case "$answer" in
+        [Yy]* ) 
+            # Loop through each number in the list
+            for number in "${numbers_to_match[@]}"
+            do
+                # Remove files with the specified number in the filename
+                rm "$directory_path"/*"$number"*
+                echo "Removed files with number $number"
+            done
+            break ;;
+        [Nn]* ) 
+            echo "Operation aborted."
+            exit ;;
+        * ) 
+            echo "Please answer yes or no." ;;
+    esac
 done
