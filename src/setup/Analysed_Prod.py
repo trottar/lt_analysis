@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-09 12:10:27 trottar"
+# Time-stamp: "2024-01-09 12:13:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ from ltsep import Root
 # Import package for progress bar
 from ltsep import Misc
     
-lt=Root(os.path.realpath(__file__),"Prod",ROOTPrefix,runNum,MaxEvent,cut_f,cuts,DEBUG=True)
+lt=Root(os.path.realpath(__file__),"Prod",ROOTPrefix,runNum,MaxEvent,cut_f,cuts)
 
 # Add this to all files for more dynamic pathing
 USER=lt.USER # Grab user info for file finding
