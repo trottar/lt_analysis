@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 18:26:44 trottar"
+# Time-stamp: "2024-01-10 18:27:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         tt = abs(x[0])
         qq = abs(x[1])
         f_av = (abs(tt)-tav)/tav
-        print("Calculating params for func_SigT...\nQ2_{:.1e}, t = {:.3e}\npar = {:.2e}".format(qq, tt, *par))
+        print("Calculating params for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq))*f_av
         return f
 
