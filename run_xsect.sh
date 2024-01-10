@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 17:37:51 trottar"
+# Time-stamp: "2024-01-10 17:44:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -202,8 +202,6 @@ if [ $? -ne 0 ]; then
     echo "       See error above..."
     exit 1
 fi
-echo "LT Sep Complete!"
-
 
 # Define input and output file names
 OutUnsepxsectsFilename="${ParticleType}_xsects_${KIN}"
@@ -217,3 +215,5 @@ if [ $? -ne 0 ]; then
     echo "       See error above..."
     exit 1
 fi
+
+echo "LT Sep Complete!"
