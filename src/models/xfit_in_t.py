@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 18:21:30 trottar"
+# Time-stamp: "2024-01-10 18:22:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         tt = x[0]
         qq = x[1]
         f_av = (abs(tt)-tav)/tav
-        print("Calculating params for func_SigT...\nQ2_{}, t = {}",format(qq,tt))
+        print("Calculating params for func_SigT...\nQ2_{:.1e}, t = {:.3e}\npar = {}",format(qq, tt, par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq))*f_av
         return f
 
@@ -73,7 +73,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     def fun_Sig_L(x, par):
         tt = x[0]
         qq = x[1]
-        print("Calculating params for func_SigT...\nQ2_{}, t = {}",format(qq,tt))
         f = (par[0]+par[1]*math.log(qq))*math.exp((par[2]+par[3]*math.log(qq))*(abs(tt)))
         return f
 
@@ -82,7 +81,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     def fun_Sig_LT(x, par):
         tt = x[0]
         qq = x[1]
-        print("Calculating params for func_SigT...\nQ2_{}, t = {}",format(qq,tt))
         f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
         return f
 
@@ -93,7 +91,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         qq = x[1]
         if pol_str == "pl":
             f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-        print("Calculating params for func_SigT...\nQ2_{}, t = {}",format(qq,tt))
         f = (par[0]*qq*math.exp(-qq))*f_tt
         return f
     
