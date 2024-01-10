@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 18:16:51 trottar"
+# Time-stamp: "2024-01-10 18:18:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,14 +65,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         tt = x[0]
         qq = x[1]
         f_av = (abs(tt)-tav)/tav
-        f = par[5]+par[6]*math.log(qq)+(par[7]+par[8]*math.log(qq))*f_tav
+        f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq))*f_tav
         return f
 
     # Function for SigL
     def fun_Sig_L(x, par):
         tt = x[0]
         qq = x[1]
-        f = (par[1]+par[2]*math.log(qq))*math.exp((par[3]+par[4]*math.log(qq))*(abs(tt)))
+        f = (par[0]+par[1]*math.log(qq))*math.exp((par[2]+par[3]*math.log(qq))*(abs(tt)))
         return f
 
     # Function for SigLT
@@ -80,7 +80,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     def fun_Sig_LT(x, par):
         tt = x[0]
         qq = x[1]
-        f = (par[9]*math.exp(par[10]*abs(tt))+par[11]/abs(tt))
+        f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
         return f
 
     # Function for SigTT
@@ -90,7 +90,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         qq = x[1]
         if pol_str == "pl":
             f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-        f = (par[13]*qq*math.exp(-qq))*f_tt
+        f = (par[0]*qq*math.exp(-qq))*f_tt
         return f
     
     outputpdf  = OUTPATH + "/" + ParticleType + "_xfit_in_t.pdf"
