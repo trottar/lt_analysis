@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 18:30:28 trottar"
+# Time-stamp: "2024-01-10 18:50:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,7 +66,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         qq = abs(x[1])
         f_av = (abs(tt)-tav)/tav
         print("Calculating params for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-        f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq))*f_av
+        try:
+            f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq))*f_av
+        except ValueError as e:
+            print("Error:", e)
+            print("qq:", qq)
+            print("f_av:", f_av)
+            # Handle the exception as needed, e.g., set a default value for f
+            f = 0  # Adjust this based on your specific case            
         return f
 
     # Function for SigL
