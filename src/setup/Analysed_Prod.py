@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 16:14:01 trottar"
+# Time-stamp: "2024-01-10 17:28:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -274,6 +274,8 @@ def main():
     if ParticleType == "proton":
         term_search = "Proton"
 
+    out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent)
+        
     print("\n\nSaving data to new root files...")
     for i in range (0, len(data_keys)):
         if(term_search in data_keys[i]):
