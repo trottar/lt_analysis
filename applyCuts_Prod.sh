@@ -501,8 +501,9 @@ if [[ $p_flag = "true" ]]; then
 	# Check if file already exists and delete if so
 	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
-	    echo "$out_f_file already exists."
-	    echo "Removing..."
+	    echo "$out_f_file already exists. Removing..."
+	    echo
+	    echo
 	    rm "$out_f_file"
 	fi	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -523,8 +524,9 @@ if [[ $p_flag = "true" ]]; then
 	# Check if file already exists and delete if so
 	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
-	    echo "$out_f_file already exists."
-	    echo "Removing..."
+	    echo "$out_f_file already exists. Removing..."
+	    echo
+	    echo
 	    rm "$out_f_file"
 	fi	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -543,10 +545,10 @@ if [[ $p_flag = "true" ]]; then
 	cd "${LTANAPATH}/src/setup"
 	# Check if file already exists and delete if so
 	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
-	echo $out_f_file
 	if [ -e "$out_f_file" ]; then
-	    echo "$out_f_file already exists."
-	    echo "Removing..."
+	    echo "$out_f_file already exists. Removing..."
+	    echo
+	    echo
 	    rm "$out_f_file"
 	fi	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -576,8 +578,9 @@ else
 	    # Check if file already exists and delete if so
 	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
-		echo "$out_f_file already exists."
-		echo "Removing..."
+		echo "$out_f_file already exists. Removing..."
+		echo
+		echo
 		rm "$out_f_file"
 	    fi	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Right_Analysed_Prod_${i}_${RUNNUM}.log
@@ -598,8 +601,9 @@ else
 	    # Check if file already exists and delete if so
 	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
-		echo "$out_f_file already exists."
-		echo "Removing..."
+		echo "$out_f_file already exists. Removing..."
+		echo
+		echo
 		rm "$out_f_file"
 	    fi	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Left_Analysed_Prod_${i}_${RUNNUM}.log
@@ -618,10 +622,10 @@ else
 	    cd "${LTANAPATH}/src/setup"
 	    # Check if file already exists and delete if so
 	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
-	    echo $out_f_file
 	    if [ -e "$out_f_file" ]; then
-		echo "$out_f_file already exists."
-		echo "Removing..."
+		echo "$out_f_file already exists. Removing..."
+		echo
+		echo
 		rm "$out_f_file"
 	    fi	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Center_Analysed_Prod_${i}_${RUNNUM}.log
