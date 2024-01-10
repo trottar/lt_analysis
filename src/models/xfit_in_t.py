@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 17:51:03 trottar"
+# Time-stamp: "2024-01-10 17:59:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,7 +13,7 @@
 import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
-from ROOT import TF1, TFitResultPtr
+from ROOT import TF2, TFitResultPtr
 import math
 import os, sys
 
