@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-09 17:30:58 trottar"
+# Time-stamp: "2024-01-10 15:00:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,7 +69,7 @@ while true; do
             do
                 # Remove files with the specified number in the filename
                 rm "$directory_path"/*"$number"*
-                echo "Removed files with number $number"
+                echo "Removed files from $directory_path with number $number"
             done
             break ;;
         [Nn]* ) 
