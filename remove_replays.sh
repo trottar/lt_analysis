@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 15:00:59 trottar"
+# Time-stamp: "2024-01-10 15:56:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,6 +57,8 @@ file_name="Prod_Test"
 numbers_to_match=()
 IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"             # RIGHT, Q2=5p5, W=3p02
 echo "Run Numbers: [${numbers_to_match[@]}]"
+
+directory_path="${ROOTPATH}/${ANATYPE}LT"
 
 while true; do
     # Prompt for confirmation before proceeding
