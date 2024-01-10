@@ -36,7 +36,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       character*2 pol
       character*4 pid
 
-*     RLT (1/2/2023): Need to have 16 parameters (4 for L/T/LT/TT) for
+*     RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
 *                     the xfit_in_t.py script to work. LT/TT are zeros
       real par(16)
       real p,e
@@ -90,7 +90,7 @@ c         pause
       sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
-*     RLT (1/2/2023): Need to have 16 parameters (4 for L/T/LT/TT) for
+*     RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
 *                     the xfit_in_t.py script to work. LT/TT are zeros
 *                     Therefore param 12 was also changed to 13      
       sigTT=(par(13)*q2*exp(-q2))*f_tm*sin(thetacm)**2

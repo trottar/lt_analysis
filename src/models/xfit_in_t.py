@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 16:03:34 trottar"
+# Time-stamp: "2024-01-10 13:50:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,7 +124,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         print("File {} not found.".format(para_file_in))
         
     t0, t1, t2, t3, l0, l1, l2, l3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
-    #t0, t1, t2, l0, l1, l2, lt0, lt1, lt2, tt0, tt1, tt2 = prv_par_vec[:12] # RLT too many parameters
     
     ave_file_in = "{}/src/{}/averages/avek.{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""))
     with open(ave_file_in, 'r') as f:
@@ -187,29 +186,25 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         g_sigt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigt.SetPointError(i, 0, nsep.GetV3()[i])
     
-    f_sigT_pre = TF1("sig_T_pre", fun_Sig_T, 0, 0.5, 2)
-    f_sigT_pre.SetParameters(t0, t1)
+    f_sigT_pre = TF1("sig_T_pre", fun_Sig_T, 0, 0.5, 3)
+    f_sigT_pre.SetParameters(t0, t1, t2)
 
     for i in range(0, len(w_vec)-1):
-        sigt_X_pre = 0.0
 
-        q2_term = t2 / logq2_vec[i] + t3 * g_sigt.GetX()[i] / logq2_vec[i]
-        q2_dep = math.sqrt(q2_vec[i])
+        q2_term = 0.0
 
-        sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i]) / q2_dep + q2_term) * g_vec[i]
+        sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i]) + q2_term) * g_vec[i]
         g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
 
-        sigt_X_fit = ((g_sigt.GetY()[i]) / g_vec[i] - q2_term) * q2_dep
-        sigt_X_fit_err = g_sigt.GetEY()[i] / g_vec[i] * q2_dep
+        sigt_X_fit = (g_sigt.GetY()[i]) / g_vec[i] - q2_term
+        sigt_X_fit_err = g_sigt.GetEY()[i] / g_vec[i]
 
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
     
     g_max = g_sigt.GetYaxis().GetXmax()
-    #gp_max = max(g_sigt_prv.GetN(), key=lambda i: g_sigt_prv.GetY()[i])
     gp_max = max(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
     g_min = g_sigt.GetYaxis().GetXmin()
-    #gp_min = min(g_sigt_prv.GetN(), key=lambda i: g_sigt_prv.GetY()[i])
     gp_min = min(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
 
     difff = (g_max - g_min) / 5
@@ -225,6 +220,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     g_sigt.SetMarkerStyle(5)
     g_sigt.Draw("AP")
 
+    g_sigt.SetMaximum(hi_bound)
+    g_sigt.SetMinimum(lo_bound)
+    
     g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigt.GetXaxis().CenterTitle()
     g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [#mub/GeV^{2}]")
@@ -240,27 +238,26 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
-    f_sigT = TF1("sig_T", fun_Sig_T, 0, 0.5, 2)
-    f_sigT.SetParameters(t0, t1)
+    f_sigT = TF1("sig_T", fun_Sig_T, 0, 0.5, 3)
+    f_sigT.SetParameters(t0, t1, t2)
 
     fit_t_result = g_sigt_fit.Fit(f_sigT, "S")
 
     for i in range(0, len(w_vec)-1):
-        sigt_X = 0.0
 
-        q2_term = t2 / logq2_vec[i] + t3 * g_sigt.GetX()[i] / logq2_vec[i]
+        q2_term = 0.0
 
-        q2_dep = math.sqrt(q2_vec[i])
-
-        sigt_X = (f_sigT.Eval(g_sigt.GetX()[i]) / q2_dep + q2_term) * g_vec[i]
+        sigt_X = (f_sigT.Eval(g_sigt.GetX()[i]) + q2_term) * g_vec[i]
 
         print(f_sigT.Eval(g_sigt.GetX()[i]), sigt_X)
 
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
-    
+
+    gMinuit = ROOT.TMinuit()
+        
     fit_status = TText()
     fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + str(fit_t_result.Status()))
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
 
     c1.cd(1)
 
@@ -271,21 +268,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     t0 = f_sigT.GetParameter(0)
     t1 = f_sigT.GetParameter(1)
+    t2 = f_sigT.GetParameter(2)
     
-    fit_status = TText()
-    fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + str(fit_t_result.Status()))
-
-    c1.cd(1)
-
-    g_sigt_fit_tot.SetMarkerStyle(26)
-    g_sigt_fit_tot.SetMarkerColor(2)
-    g_sigt_fit_tot.SetLineColor(2)
-    g_sigt_fit_tot.Draw("LP")
-
-    t0 = f_sigT.GetParameter(0)
-    t1 = f_sigT.GetParameter(1)
-
     par_vec.append(t0)
     par_vec.append(t1)
     par_vec.append(t2)
@@ -293,7 +277,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
-    par_err_vec.append(0)
+    par_err_vec.append(f_sigT.GetParError(2))
     par_err_vec.append(0)
 
     par_chi2_vec.append(f_sigT.GetChisquare())
@@ -311,8 +295,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     c1.cd(2).SetLeftMargin(0.12)
     nsep.Draw("sigl:t:sigl_e", "", "goff")
 
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, 0, 0.5, 2)
-    f_sigL_pre.SetParameters(l0, l1)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, 0, 0.5, 3)
+    f_sigL_pre.SetParameters(l0, l1, l2)
     
     #g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
     g_sigl = TGraphErrors()
@@ -322,23 +306,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     for i in range(0, len(w_vec)-1):
         
-        q2_term = l2 / q2_vec[i] + l3 * g_sigl.GetX()[i] / q2_vec[i]
-        q2_dep = q2_vec[i] * q2_vec[i]
+        q2_term = 0.0
 
-        sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i]) / q2_dep + q2_term) * g_vec[i]
+        sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i]) + q2_term) * g_vec[i]
         g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
-        sigl_X_fit = (g_sigl.GetY()[i] / g_vec[i] - q2_term) * q2_dep
-        sigl_X_fit_err = g_sigl.GetEY()[i] / g_vec[i] * q2_dep
+        sigl_X_fit = g_sigl.GetY()[i] / g_vec[i] - q2_term
+        sigl_X_fit_err = g_sigl.GetEY()[i] / g_vec[i]
 
         g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
     g_max = g_sigl.GetYaxis().GetXmax()
-    #gp_max = max(g_sigl_prv.GetN(), max(g_sigl_prv.GetY()))
     gp_max = max(range(g_sigl_prv.GetN()), key=lambda i: g_sigl_prv.GetY()[i])
     g_min = g_sigl.GetYaxis().GetXmin()
-    #gp_min = min(g_sigl_prv.GetN(), min(g_sigl_prv.GetY()))
     gp_min = min(range(g_sigl_prv.GetN()), key=lambda i: g_sigl_prv.GetY()[i])
     
     difff = (g_max - g_min) / 5
@@ -353,6 +334,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     g_sigl.SetMarkerStyle(5)
     g_sigl.Draw("AP")
+
+    g_sigl.SetMaximum(hi_bound)
+    g_sigl.SetMinimum(lo_bound)
 
     g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigl.GetXaxis().CenterTitle()
@@ -369,23 +353,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
-    f_sigL = TF1("sig_L", fun_Sig_L, 0, 0.5, 2)
-    f_sigL.SetParameters(l0, l1)
+    f_sigL = TF1("sig_L", fun_Sig_L, 0, 0.5, 3)
+    f_sigL.SetParameters(l0, l1, l2)
     g_sigl_fit.Fit(f_sigL)
 
     for i in range(0, len(w_vec)-1):
 
-        sigl_X = 0.0
-        q2_term = l2 * q2_vec[i] + l3 * g_sigl.GetX()[i] * q2_vec[i]
+        q2_term = 0.0
 
-        q2_dep = q2_vec[i] * q2_vec[i]
-
-        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i]) / q2_dep + q2_term) * g_vec[i]
+        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i]) + q2_term) * g_vec[i]
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-    gMinuit = ROOT.TMinuit()
-        
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
+    
     c1.cd(2)
 
     g_sigl_fit_tot.SetMarkerStyle(26)
@@ -395,6 +375,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     l0 = f_sigL.GetParameter(0)
     l1 = f_sigL.GetParameter(1)
+    l1 = f_sigL.GetParameter(2)
 
     par_vec.append(l0)
     par_vec.append(l1)
@@ -403,7 +384,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
-    par_err_vec.append(0)
+    par_err_vec.append(f_sigL.GetParError(2))
     par_err_vec.append(0)
 
     par_chi2_vec.append(f_sigL.GetChisquare())
@@ -432,29 +413,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
 
     for i in range(0, len(w_vec)-1):
 
-        siglt_X_pre = 0.0
-        q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
-        #q2_term = 0.0 # RLT Too many parameters
+        q2_term = lt2 * logq2_vec[i] + lt3 * g_siglt.GetX()[i] * logq2_vec[i]
 
-        q2_dep = q2_vec[i]
-
-        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * math.sin(th_vec[i] * PI / 180)
+        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) + q2_term) * g_vec[i] * math.sin(th_vec[i] * PI / 180)
         g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
 
-        siglt_X_fit, siglt_X_fit_err = 0.0, 1.0
-
         if th_vec[i] != 180:
-            siglt_X_fit = (g_siglt.GetY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) - q2_term) * q2_dep
-            siglt_X_fit_err = g_siglt.GetEY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) * q2_dep
+            siglt_X_fit = g_siglt.GetY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) - q2_term
+            siglt_X_fit_err = g_siglt.GetEY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180)
+        else:
+            siglt_X_fit = 0.0
+            siglt_X_fit_err = g_siglt.GetEY()[i]
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
     g_max = g_siglt.GetYaxis().GetXmax()
-    #gp_max = max(g_siglt_prv.GetN(), g_siglt_prv.GetY())
     gp_max = max(range(g_siglt_prv.GetN()), key=lambda i: g_siglt_prv.GetY()[i])
     g_min = g_siglt.GetYaxis().GetXmin()
-    #gp_min = min(g_siglt_prv.GetN(), g_siglt_prv.GetY())
     gp_min = min(range(g_siglt_prv.GetN()), key=lambda i: g_siglt_prv.GetY()[i])
     
     difff = (g_max - g_min) / 5
@@ -477,6 +453,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     g_siglt.GetYaxis().SetTitleSize(0.035)
     g_siglt.GetYaxis().CenterTitle()
 
+    g_siglt.SetMaximum(hi_bound)
+    g_siglt.SetMinimum(lo_bound)
+    
     g_siglt_prv.SetMarkerColor(4)
     g_siglt_prv.SetMarkerStyle(21)
     g_siglt_prv.Draw("P")
@@ -491,20 +470,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     g_siglt_fit.Fit(f_sigLT)
     
     for i in range(0, len(w_vec)-1):
-        siglt_X = 0.0
-        q2_term = lt2 / logq2_vec[i] + lt3 * g_siglt.GetX()[i] / logq2_vec[i]
-        #q2_term = 0.0 # RLT Too many parameters
+        
+        q2_term = lt2 * logq2_vec[i] + lt3 * g_siglt.GetX()[i] * logq2_vec[i]
 
-        q2_dep = q2_vec[i]
 
-        if th_vec[i] != 180:
-            siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * math.sin(th_vec[i] * PI / 180)
+        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) + q2_term) * g_vec[i] * math.sin(th_vec[i] * PI / 180)
 
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
 
-    gMinuit = ROOT.TMinuit()
-    
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
 
     c1.cd(3)
@@ -552,30 +526,27 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
 
     for i in range(0, len(w_vec)-1):
-        sigtt_X_pre = 0.0
-        q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
-        #q2_term = 0.0 # RLT Too many parameters
-        q2_dep = q2_vec[i]
+        
+        q2_term = tt2 * logq2_vec[i] + tt3 * g_sigtt.GetX()[i] * logq2_vec[i]
 
-        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
+        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) + q2_term) * g_vec[i] * \
                       math.sin(th_vec[i] * PI / 180) * math.sin(th_vec[i] * PI / 180)
 
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
-        sigtt_X_fit, sigtt_X_fit_err = 0.0, 1.0
-
         if th_vec[i] != 180:
-            sigtt_X_fit = (g_sigtt.GetY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) / math.sin(th_vec[i] * PI / 180) - q2_term) * q2_dep
-            sigtt_X_fit_err = g_sigtt.GetEY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) / math.sin(th_vec[i] * PI / 180) * q2_dep
+            sigtt_X_fit = g_sigtt.GetY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) / math.sin(th_vec[i] * PI / 180) - q2_term
+            sigtt_X_fit_err = g_sigtt.GetEY()[i] / g_vec[i] / math.sin(th_vec[i] * PI / 180) / math.sin(th_vec[i] * PI / 180)
+        else:
+            sigtt_X_fit = 0.0
+            sigtt_X_fit_err = g_sigtt.GetEY()
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
     
     g_max = g_sigtt.GetYaxis().GetXmax()
-    #gp_max = ROOT.TMath.MaxElement(g_sigtt_prv.GetN(), g_sigtt_prv.GetY())
     gp_max = max(range(g_sigtt_prv.GetN()), key=lambda i: g_sigtt_prv.GetY()[i])
     g_min = g_sigtt.GetYaxis().GetXmin()
-    #gp_min = ROOT.TMath.MinElement(g_sigtt_prv.GetN(), g_sigtt_prv.GetY())
     gp_min = min(range(g_sigtt_prv.GetN()), key=lambda i: g_sigtt_prv.GetY()[i])
 
     difff = (g_max - g_min) / 5
@@ -598,6 +569,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     g_sigtt.GetYaxis().SetTitleSize(0.035)
     g_sigtt.GetYaxis().CenterTitle()
 
+    g_sigtt.SetMaximum(hi_bound)
+    g_sigtt.SetMinimum(lo_bound)
+    
     g_sigtt_prv.SetMarkerColor(4)
     g_sigtt_prv.SetMarkerStyle(21)
     g_sigtt_prv.Draw("P")
@@ -612,17 +586,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     g_sigtt_fit.Fit(f_sigTT)
         
     for i in range(0, len(w_vec)-1):
-        sigtt_X = 0.0
-        q2_term = tt2 / logq2_vec[i] + tt3 * g_sigtt.GetX()[i] / logq2_vec[i]
-        #q2_term = 0.0 # RLT Too many parameters
-        q2_dep = q2_vec[i]
+        
+        q2_term = tt2 * logq2_vec[i] + tt3 * g_sigtt.GetX()[i] * logq2_vec[i]
 
-        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) / q2_dep + q2_term) * g_vec[i] * \
+        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) + q2_term) * g_vec[i] * \
                   math.sin(th_vec[i] * PI / 180) * math.sin(th_vec[i] * PI / 180)
 
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
-
-    gMinuit = ROOT.TMinuit()
         
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
 

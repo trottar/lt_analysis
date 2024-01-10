@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 22:38:07 trottar"
+# Time-stamp: "2024-01-10 14:27:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,7 +48,7 @@ def iterWeight(arg_str):
     ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2
     
     # Calculate sigl, sigt, siglt, sigtt, sig219, sig
-    # RLT (1/2/2023): Need to have 16 parameters (4 for L/T/LT/TT) for the
+    # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
     #                 xfit_in_t.py script to work. LT/TT are zeros
     #p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12 = params
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
@@ -58,7 +58,7 @@ def iterWeight(arg_str):
     sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
     sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
     siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
-    # RLT (1/2/2023): Need to have 16 parameters (4 for L/T/LT/TT) for the
+    # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
     #                 xfit_in_t.py script to work. LT/TT are zeros
     #                 Therefore param 12 was also changed to 13    
     sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
