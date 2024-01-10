@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 15:56:21 trottar"
+# Time-stamp: "2024-01-10 16:03:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,7 +58,7 @@ numbers_to_match=()
 IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"             # RIGHT, Q2=5p5, W=3p02
 echo "Run Numbers: [${numbers_to_match[@]}]"
 
-directory_path="${ROOTPATH}/${ANATYPE}LT"
+replay_root_path="${ROOTPATH}/${ANATYPE}LT"
 
 while true; do
     # Prompt for confirmation before proceeding
@@ -70,8 +70,8 @@ while true; do
             for number in "${numbers_to_match[@]}"
             do
                 # Remove files with the specified number in the filename
-                rm "$directory_path"/*"$number"*
-                echo "Removed files from $directory_path with number $number"
+                rm "$replay_root_path"/*"$number"*
+                echo "Removed files from $replay_root_path with number $number"
             done
             break ;;
         [Nn]* ) 
