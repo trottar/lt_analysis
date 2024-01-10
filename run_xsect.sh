@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 18:10:56 trottar"
+# Time-stamp: "2024-01-10 17:37:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -191,20 +191,6 @@ Q2=${Q2//./p}
 
 KIN="Q${Q2}W${W}"
 
-# Define input and output file names
-OutUnsepxsectsFilename="${ParticleType}_xsects_${KIN}"
-
-cd "${LTANAPATH}/src/plotting/"
-python3 plot_xsects.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${NumtBins} ${NumPhiBins} ${KIN} ${OutUnsepxsectsFilename}
-# Check the exit status of the Python script
-if [ $? -ne 0 ]; then
-    echo
-    echo
-    echo "2 ERROR: Python script failed!"
-    echo "       See error above..."
-    exit 1
-fi
-
 cd "${LTANAPATH}/src/"
 echo "LT Sep Starting..."
 python3 lt_2D_fit.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
@@ -218,3 +204,16 @@ if [ $? -ne 0 ]; then
 fi
 echo "LT Sep Complete!"
 
+
+# Define input and output file names
+OutUnsepxsectsFilename="${ParticleType}_xsects_${KIN}"
+cd "${LTANAPATH}/src/plotting/"
+python3 plot_xsects.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${NumtBins} ${NumPhiBins} ${KIN} ${OutUnsepxsectsFilename}
+# Check the exit status of the Python script
+if [ $? -ne 0 ]; then
+    echo
+    echo
+    echo "2 ERROR: Python script failed!"
+    echo "       See error above..."
+    exit 1
+fi
