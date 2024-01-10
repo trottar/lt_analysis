@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 17:44:55 trottar"
+# Time-stamp: "2024-01-10 17:50:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,4 +216,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "LT Sep Complete!"
+echo "LTSep Complete!"
