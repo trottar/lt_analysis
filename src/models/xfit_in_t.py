@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 18:08:26 trottar"
+# Time-stamp: "2024-01-10 18:12:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
     def fun_Sig_T(x, par):
         tt = x[0]
         qq = x[1]
-        fav = (abs(tt)-tav)/tav
+        f_av = (abs(tt)-tav)/tav
         f = par[5]+par[6]*math.log(qq)+(par[7]+par[8]*math.log(qq))*f_tav
         return f
 
