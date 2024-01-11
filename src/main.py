@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:27:49 trottar"
+# Time-stamp: "2024-01-11 16:32:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -166,9 +166,6 @@ f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 # Check if the file exists
 if os.path.exists(f_path):
     os.remove(f_path)
-
-# Check if any runs do not have root files    
-inpDict = check_runs(OUTPATH, phisetlist, inpDict)
     
 ##############################
 # Step 1 of the lt_analysis: # DONE
@@ -228,6 +225,11 @@ else:
 ##############
 
 phisetlist = ["Center","Left","Right"]
+
+# Check if any runs do not have root files
+for phiset in phisetlist:
+    inpDict = check_runs(OUTPATH, phiset, inpDict)
+
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
     inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))

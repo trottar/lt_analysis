@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:27:57 trottar"
+# Time-stamp: "2024-01-11 16:32:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,17 +18,16 @@ import os, subprocess
 
 ################################################################################################################################################
 
-def check_runs(OUTPATH, phisetlist, inpDict):
+def check_runs(OUTPATH, phiset, inpDict):
 
     ParticleType = inpDict["ParticleType"]
-    for phiset in phisetlist:
-        runs = inpDict["runNum".format(phiset)].split(" ")
-        print("!!!!!!!!!!!!!",phiset, " -> ", run)
-        for run in runs:        
-            root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, MaxEvent)
-            if not os.path.exists(root_file_path):
-                print("Run number {} not found in {}! Removing...".format(run, root_file_path))
-                inpDict["runNum".format(phiset)].replace(" "+run," ")
+    runs = inpDict["runNum".format(phiset)].split(" ")
+    print("!!!!!!!!!!!!!",phiset, " -> ", run)
+    for run in runs:        
+        root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, MaxEvent)
+        if not os.path.exists(root_file_path):
+            print("Run number {} not found in {}! Removing...".format(run, root_file_path))
+            inpDict["runNum".format(phiset)].replace(" "+run," ")
 
     return inpDict    
 
