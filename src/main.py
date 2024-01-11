@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-03 15:26:22 trottar"
+# Time-stamp: "2024-01-10 19:10:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -560,6 +560,7 @@ if EPSSET == "high":
     output_file_lst.append(py_param) 
     fort_xmodel = 'models/xmodel_{}_{}.f'.format(ParticleType, pol_str)
     output_file_lst.append(fort_xmodel)
+    output_file_lst.append('models/lt_2D_fit.py')    
 
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations

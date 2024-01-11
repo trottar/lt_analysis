@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 17:50:15 trottar"
+# Time-stamp: "2024-01-10 19:05:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -191,7 +191,7 @@ Q2=${Q2//./p}
 
 KIN="Q${Q2}W${W}"
 
-cd "${LTANAPATH}/src/"
+cd "${LTANAPATH}/src/models/"
 echo "LT Sep Starting..."
 python3 lt_2D_fit.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 # Check the exit status of the Python script
