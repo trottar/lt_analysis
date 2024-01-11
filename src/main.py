@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 19:24:58 trottar"
+# Time-stamp: "2024-01-10 21:44:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -595,7 +595,7 @@ if EPSSET == "high":
     output_file_lst.append(sep_file)
 # Save for high and low eps
 unsep_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
-output_file_lst.append(unsep_file)    
+output_file_lst.append(unsep_file)
 
 ##############################
 # Step 8 of the lt_analysis: #
