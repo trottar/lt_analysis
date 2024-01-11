@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:33:36 trottar"
+# Time-stamp: "2024-01-11 16:34:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -22,8 +22,8 @@ def check_runs(OUTPATH, phiset, inpDict):
 
     ParticleType = inpDict["ParticleType"]
     runs = inpDict["runNum{}".format(phiset)].split(" ")
-    print("!!!!!!!!!!!!!",phiset, " -> ", run)
-    for run in runs:        
+    for run in runs:
+        print("!!!!!!!!!!!!!",phiset, " -> ", run)
         root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, MaxEvent)
         if not os.path.exists(root_file_path):
             print("Run number {} not found in {}! Removing...".format(run, root_file_path))
