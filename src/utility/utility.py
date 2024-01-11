@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:25:47 trottar"
+# Time-stamp: "2024-01-11 16:27:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,12 +30,7 @@ def check_runs(OUTPATH, phisetlist, inpDict):
                 print("Run number {} not found in {}! Removing...".format(run, root_file_path))
                 inpDict["runNum".format(phiset)].replace(" "+run," ")
 
-    return inpDict
-                
-                
-                
-
-    
+    return inpDict    
 
 ################################################################################################################################################
 

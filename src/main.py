@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:19:26 trottar"
+# Time-stamp: "2024-01-11 16:27:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,7 +168,7 @@ if os.path.exists(f_path):
     os.remove(f_path)
 
 # Check if any runs do not have root files    
-check_runs(OUTPATH, runNum, phisetlist, inpDict)
+inpDict = check_runs(OUTPATH, phisetlist, inpDict)
     
 ##############################
 # Step 1 of the lt_analysis: # DONE
