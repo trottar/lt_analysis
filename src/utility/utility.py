@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:50:45 trottar"
+# Time-stamp: "2024-01-11 16:53:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -19,7 +19,7 @@ import os, subprocess
 ################################################################################################################################################
 
 # Checks if run number if found in analysed root files
-def check_runs_in_bash(run, ParticleType, OUTPATH):
+def check_runs_in_effcharge(run, ParticleType, OUTPATH):
 
     if run != 0:
         print("!!!!!!!!!!!!!", run)
