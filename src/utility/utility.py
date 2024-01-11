@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 17:02:16 trottar"
+# Time-stamp: "2024-01-11 17:04:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ def check_runs_in_effcharge(run, ParticleType, OUTPATH):
         print("!!!!!!!!!!!!!", run)
         root_file_path = "%s/%s_%s_-1_Raw_Data.root" % (OUTPATH, ParticleType, run)
         if not os.path.exists(root_file_path):
-            print("Run number {} not found in {}! Removing...".format(run, root_file_path))
+            print("Run number {} not found in {}\n\t Removing...".format(run, root_file_path))
             return False
         else:
             return True
@@ -45,7 +45,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
             print("!!!!!!!!!!!!!",phiset, " -> ", run)
             root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, -1)
             if not os.path.exists(root_file_path):
-                print("Run number {} not found in {}! Removing...".format(run, root_file_path))
+                print("Run number {} not found in {}\n\t Removing...".format(run, root_file_path))
                 inpDict["runNum{}".format(phiset)].replace(" "+run," ")
         else:
             print("No {} phi setting found...".format(phiset.lower()))
