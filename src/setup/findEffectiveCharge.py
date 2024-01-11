@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:53:44 trottar"
+# Time-stamp: "2024-01-11 16:54:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,7 +38,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("../utility")
-from utility import check_runs_effcharge
+from utility import check_runs_in_effcharge
 
 ################################################################################################################################################
 # Grab and calculate efficiency 
@@ -57,7 +57,7 @@ pTheta_val = ""
 for runNum in RUNLIST:
 
     # Check if run number exists in analysed root files
-    if check_runs_effcharge(runNum, ParticleType, OUTPATH):
+    if check_runs_in_effcharge(runNum, ParticleType, OUTPATH):
     
         efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
         effError = getEfficiencyValue(runNum,efficiency_table,"effError")
