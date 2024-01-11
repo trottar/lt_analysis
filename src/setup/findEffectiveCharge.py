@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 18:30:28 trottar"
+# Time-stamp: "2024-01-11 18:31:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,7 +33,6 @@ lt=Root(os.path.realpath(__file__))
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
-OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -73,6 +72,6 @@ for runNum in RUNLIST:
 
         ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
         pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))        
-    print(check_runs_in_effcharge(runNum, ParticleType, OUTPATH))
+    print(check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ParticleType)))
 BashInput=("{}\n{}\n{}\n{}\n{}\n{}".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, pTheta_val, ebeam_val))
 print(BashInput)
