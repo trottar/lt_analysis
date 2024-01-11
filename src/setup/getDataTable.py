@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 14:36:31 trottar"
+# Time-stamp: "2024-01-11 15:26:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,87 +116,92 @@ def get_efficiencies(runNum,efficiency_table):
     eff_data = eff_data[eff_data['Run_Number'] == int(runNum)]
     #print(eff_data)
 
-    if runType == "heep":
-        # Define dictionary of efficiency values
-        effDict ={
-            # EDTM
-            "Non_Scaler_EDTM_Live_Time" : eff_data["Non_Scaler_EDTM_Live_Time"].iloc[0],
-            # Hodo
-            "HMS_Hodo_3_of_4_EFF" : eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
-            "SHMS_Hodo_3_of_4_EFF" : eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
-            # HMS Cal
-            "HMS_Cal_ALL_Elec_Eff" : eff_data["HMS_Cal_ALL_Elec_Eff"].iloc[0],            
-            # HMS Cer
-            "HMS_Cer_ALL_Elec_Eff" : eff_data["HMS_Cer_ALL_Elec_Eff"].iloc[0],
-            # Tracking
-            "HMS_Elec_ALL_TRACK_EFF" : eff_data["HMS_Elec_ALL_TRACK_EFF"].iloc[0],
-            "SHMS_Prot_ALL_TRACK_EFF" : eff_data["SHMS_Prot_ALL_TRACK_EFF"].iloc[0],
-            # Boiling Correction
-            "BOIL_Eff" : eff_data["BOIL_Eff"].iloc[0],
-        }
-        # Define dictionary of efficiency uncertainty values
-        effErrorDict ={
-            # EDTM
-            "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
-            # Hodo
-            #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
-            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
-            # HMS Cal
-            "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
-            # HMS Cer
-            "HMS_Cer_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cer_ALL_Elec_Eff_ERROR"].iloc[0],
-            # Tracking
-            "HMS_Elec_ALL_TRACK_EFF_ERROR" : eff_data["HMS_Elec_ALL_TRACK_EFF_ERROR"].iloc[0],
-            "SHMS_Prot_ALL_TRACK_EFF_ERROR" : eff_data["SHMS_Prot_ALL_TRACK_EFF_ERROR"].iloc[0],
-            # Boiling Correction
-            "BOIL_Eff_ERROR" : eff_data["BOIL_Eff_ERROR"].iloc[0],
-        }
+    if len(eff_data) > 0:  # Check if eff_data is not empty
+    
+        if runType == "heep":
+            # Define dictionary of efficiency values
+            effDict ={
+                # EDTM
+                "Non_Scaler_EDTM_Live_Time" : eff_data["Non_Scaler_EDTM_Live_Time"].iloc[0],
+                # Hodo
+                "HMS_Hodo_3_of_4_EFF" : eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
+                "SHMS_Hodo_3_of_4_EFF" : eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
+                # HMS Cal
+                "HMS_Cal_ALL_Elec_Eff" : eff_data["HMS_Cal_ALL_Elec_Eff"].iloc[0],            
+                # HMS Cer
+                "HMS_Cer_ALL_Elec_Eff" : eff_data["HMS_Cer_ALL_Elec_Eff"].iloc[0],
+                # Tracking
+                "HMS_Elec_ALL_TRACK_EFF" : eff_data["HMS_Elec_ALL_TRACK_EFF"].iloc[0],
+                "SHMS_Prot_ALL_TRACK_EFF" : eff_data["SHMS_Prot_ALL_TRACK_EFF"].iloc[0],
+                # Boiling Correction
+                "BOIL_Eff" : eff_data["BOIL_Eff"].iloc[0],
+            }
+            # Define dictionary of efficiency uncertainty values
+            effErrorDict ={
+                # EDTM
+                "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
+                # Hodo
+                #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+                #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+                "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
+                "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
+                # HMS Cal
+                "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
+                # HMS Cer
+                "HMS_Cer_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cer_ALL_Elec_Eff_ERROR"].iloc[0],
+                # Tracking
+                "HMS_Elec_ALL_TRACK_EFF_ERROR" : eff_data["HMS_Elec_ALL_TRACK_EFF_ERROR"].iloc[0],
+                "SHMS_Prot_ALL_TRACK_EFF_ERROR" : eff_data["SHMS_Prot_ALL_TRACK_EFF_ERROR"].iloc[0],
+                # Boiling Correction
+                "BOIL_Eff_ERROR" : eff_data["BOIL_Eff_ERROR"].iloc[0],
+            }
 
+        else:
+            # Define dictionary of efficiency values
+            effDict ={
+                # EDTM
+                "Non_Scaler_EDTM_Live_Time" : eff_data["Non_Scaler_EDTM_Live_Time"].iloc[0],
+                # Hodo
+                "HMS_Hodo_3_of_4_EFF" : eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
+                "SHMS_Hodo_3_of_4_EFF" : eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
+                # HMS Cal
+                "HMS_Cal_ALL_Elec_Eff" : eff_data["HMS_Cal_ALL_Elec_Eff"].iloc[0],            
+                # HMS Cer
+                "HMS_Cer_ALL_Elec_Eff" : eff_data["HMS_Cer_ALL_Elec_Eff"].iloc[0],
+                # SHMS Aero
+                "SHMS_Aero_ALL_Pion_Eff" : eff_data["SHMS_Aero_ALL_Pion_Eff"].iloc[0],
+                # Tracking
+                "HMS_Elec_ALL_TRACK_EFF" : eff_data["HMS_Elec_ALL_TRACK_EFF"].iloc[0],
+                "SHMS_Pion_ALL_TRACK_EFF" : eff_data["SHMS_Pion_ALL_TRACK_EFF"].iloc[0],
+                # Boiling Correction
+                "BOIL_Eff" : eff_data["BOIL_Eff"].iloc[0],
+            }
+
+            # Define dictionary of efficiency uncertainty values
+            effErrorDict ={
+                # EDTM
+                "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
+                # Hodo
+                #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+                #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
+                "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
+                "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
+                # HMS Cal
+                "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
+                # HMS Cer
+                "HMS_Cer_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cer_ALL_Elec_Eff_ERROR"].iloc[0],
+                # SHMS Aero
+                "SHMS_Aero_ALL_Pion_Eff_ERROR" : eff_data["SHMS_Aero_ALL_Pion_Eff_ERROR"].iloc[0],
+                # Tracking
+                "HMS_Elec_ALL_TRACK_EFF_ERROR" : eff_data["HMS_Elec_ALL_TRACK_EFF_ERROR"].iloc[0],
+                "SHMS_Pion_ALL_TRACK_EFF_ERROR" : eff_data["SHMS_Pion_ALL_TRACK_EFF_ERROR"].iloc[0],
+                # Boiling Correction
+                "BOIL_Eff_ERROR" : eff_data["BOIL_Eff_ERROR"].iloc[0],
+            }        
     else:
-        # Define dictionary of efficiency values
-        effDict ={
-            # EDTM
-            "Non_Scaler_EDTM_Live_Time" : eff_data["Non_Scaler_EDTM_Live_Time"].iloc[0],
-            # Hodo
-            "HMS_Hodo_3_of_4_EFF" : eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
-            "SHMS_Hodo_3_of_4_EFF" : eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
-            # HMS Cal
-            "HMS_Cal_ALL_Elec_Eff" : eff_data["HMS_Cal_ALL_Elec_Eff"].iloc[0],            
-            # HMS Cer
-            "HMS_Cer_ALL_Elec_Eff" : eff_data["HMS_Cer_ALL_Elec_Eff"].iloc[0],
-            # SHMS Aero
-            "SHMS_Aero_ALL_Pion_Eff" : eff_data["SHMS_Aero_ALL_Pion_Eff"].iloc[0],
-            # Tracking
-            "HMS_Elec_ALL_TRACK_EFF" : eff_data["HMS_Elec_ALL_TRACK_EFF"].iloc[0],
-            "SHMS_Pion_ALL_TRACK_EFF" : eff_data["SHMS_Pion_ALL_TRACK_EFF"].iloc[0],
-            # Boiling Correction
-            "BOIL_Eff" : eff_data["BOIL_Eff"].iloc[0],
-        }
+        print("Error: DataFrame 'eff_data' is empty for {}.".format(runNum))
 
-        # Define dictionary of efficiency uncertainty values
-        effErrorDict ={
-            # EDTM
-            "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
-            # Hodo
-            #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-            "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
-            "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
-            # HMS Cal
-            "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
-            # HMS Cer
-            "HMS_Cer_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cer_ALL_Elec_Eff_ERROR"].iloc[0],
-            # SHMS Aero
-            "SHMS_Aero_ALL_Pion_Eff_ERROR" : eff_data["SHMS_Aero_ALL_Pion_Eff_ERROR"].iloc[0],
-            # Tracking
-            "HMS_Elec_ALL_TRACK_EFF_ERROR" : eff_data["HMS_Elec_ALL_TRACK_EFF_ERROR"].iloc[0],
-            "SHMS_Pion_ALL_TRACK_EFF_ERROR" : eff_data["SHMS_Pion_ALL_TRACK_EFF_ERROR"].iloc[0],
-            # Boiling Correction
-            "BOIL_Eff_ERROR" : eff_data["BOIL_Eff_ERROR"].iloc[0],
-        }        
-
+            
     return [effDict,effErrorDict]
 
 def calculate_efficiency(runNum,efficiency_table):
