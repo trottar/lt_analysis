@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:55:03 trottar"
+# Time-stamp: "2024-01-11 16:56:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,7 +23,7 @@ def check_runs_in_effcharge(run, ParticleType, OUTPATH):
 
     if run != 0:
         #print("!!!!!!!!!!!!!", run)
-        root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, -1)
+        root_file_path = "%s/%s_%s_-1_Raw_Data.root" % (OUTPATH, ParticleType, run)
         if not os.path.exists(root_file_path):
             #print("Run number {} not found in {}! Removing...".format(run, root_file_path))
             return False
