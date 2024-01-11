@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:57:50 trottar"
+# Time-stamp: "2024-01-11 16:59:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,23 +71,7 @@ for runNum in RUNLIST:
         tot_efficiency_uncern += " " + str(effError)
 
         ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
-        pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
-    else:
-
-        efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
-        effError = getEfficiencyValue(runNum,efficiency_table,"effError")
-        charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
-
-        # Need to convert to int value for bash to interpret correctly
-        effective_charge += " " + str(int(1000*(float(charge)*float(efficiency))))
-        effective_charge_uncern += " " + str(int(1000*(float(charge)*float(effError))))
-
-        tot_efficiency += " " + str(efficiency)
-        tot_efficiency_uncern += " " + str(effError)
-
-        ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
-        pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))    
-        
+        pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))        
         
 BashInput=("{}\n{}\n{}\n{}\n{}\n{}".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, pTheta_val, ebeam_val))
 print(BashInput)
