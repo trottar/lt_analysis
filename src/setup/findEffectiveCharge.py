@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-18 15:55:41 trottar"
+# Time-stamp: "2024-01-11 16:52:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -19,6 +19,7 @@ User Inputs
 '''
 efficiency_table = sys.argv[1]
 RUNLIST = sys.argv[2].split(" ")
+ParticleType = sys.argv[3]
 
 ################################################################################################################################################
 '''
@@ -31,6 +32,13 @@ lt=Root(os.path.realpath(__file__))
 
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
+OUTPATH=lt.OUTPATH
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import check_runs_effcharge
 
 ################################################################################################################################################
 # Grab and calculate efficiency 
@@ -48,20 +56,22 @@ pTheta_val = ""
 
 for runNum in RUNLIST:
 
-    efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
-    effError = getEfficiencyValue(runNum,efficiency_table,"effError")
-    charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
-
-    # Need to convert to int value for bash to interpret correctly
-    effective_charge += " " + str(int(1000*(float(charge)*float(efficiency))))
-    effective_charge_uncern += " " + str(int(1000*(float(charge)*float(effError))))
+    # Check if run number exists in analysed root files
+    if check_runs_effcharge(runNum, ParticleType, OUTPATH):
     
-    tot_efficiency += " " + str(efficiency)
-    tot_efficiency_uncern += " " + str(effError)
+        efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
+        effError = getEfficiencyValue(runNum,efficiency_table,"effError")
+        charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
+
+        # Need to convert to int value for bash to interpret correctly
+        effective_charge += " " + str(int(1000*(float(charge)*float(efficiency))))
+        effective_charge_uncern += " " + str(int(1000*(float(charge)*float(effError))))
+
+        tot_efficiency += " " + str(efficiency)
+        tot_efficiency_uncern += " " + str(effError)
+
+        ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
+        pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))    
     
-    ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
-    pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
-
-
 BashInput=("{}\n{}\n{}\n{}\n{}\n{}".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, pTheta_val, ebeam_val))
 print(BashInput)

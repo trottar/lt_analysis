@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:32:14 trottar"
+# Time-stamp: "2024-01-11 16:52:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import check_runs, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder
+from utility import check_runs_in_main, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -228,7 +228,7 @@ phisetlist = ["Center","Left","Right"]
 
 # Check if any runs do not have root files
 for phiset in phisetlist:
-    inpDict = check_runs(OUTPATH, phiset, inpDict)
+    inpDict = check_runs_in_main(OUTPATH, phiset, inpDict)
 
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
