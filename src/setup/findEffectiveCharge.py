@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 18:32:45 trottar"
+# Time-stamp: "2024-01-11 18:33:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,7 +71,7 @@ for runNum in RUNLIST:
         tot_efficiency_uncern += " " + str(effError)
 
         ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
-        pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))        
-    print(check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ParticleType.capitalize())))
+        pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
+        
 BashInput=("{}\n{}\n{}\n{}\n{}\n{}".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, pTheta_val, ebeam_val))
 print(BashInput)

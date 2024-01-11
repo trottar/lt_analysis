@@ -1175,7 +1175,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_right[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge right..."
-	    python3 findEffectiveCharge.py ${EffData} "${data_right[*]}" ${ParticleType}
 	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_right[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1209,7 +1208,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_right[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge right..."
-	    python3 findEffectiveCharge.py ${EffData} "${dummy_right[*]}" ${ParticleType}
 	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_right[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1243,7 +1241,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_left[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge left..."
-	    python3 findEffectiveCharge.py ${EffData} "${data_left[*]}" ${ParticleType}
 	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_left[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1277,7 +1274,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_left[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge left..."
-	    python3 findEffectiveCharge.py ${EffData} "${dummy_left[*]}" ${ParticleType}
 	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_left[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1311,7 +1307,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_center[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge center..."
-	    python3 findEffectiveCharge.py ${EffData} "${data_center[*]}" ${ParticleType}
 	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_center[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1345,7 +1340,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_center[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge center..."
-	    python3 findEffectiveCharge.py ${EffData} "${dummy_center[*]}" ${ParticleType}
 	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_center[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
