@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 18:30:03 trottar"
+# Time-stamp: "2024-01-11 18:35:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -228,7 +228,7 @@ phisetlist = ["Center","Left","Right"]
 
 # Check if any runs do not have root files
 for phiset in phisetlist:
-    inpDict = check_runs_in_main("{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ParticleType), phiset, inpDict)
+    inpDict = check_runs_in_main("{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ParticleType.capitalize()), phiset, inpDict)
 
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
