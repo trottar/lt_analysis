@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 16:11:48 trottar"
+# Time-stamp: "2024-01-10 19:03:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,8 +266,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
 
-        # ERROR?: No idea where this comes from
-        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*[2]*cos(0.017453*x)  + y*[3]*cos(0.034906*x)", 0, 360, 0.1, 0.6)
+        # x->phi, y->eps, PI/180 = 0.017453
+        fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]", 0, 360, 0.2, 0.9)
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
