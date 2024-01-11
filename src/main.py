@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 21:44:02 trottar"
+# Time-stamp: "2024-01-11 16:19:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder
+from utility import check_runs, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -167,6 +167,9 @@ f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 if os.path.exists(f_path):
     os.remove(f_path)
 
+# Check if any runs do not have root files    
+check_runs(OUTPATH, runNum, phisetlist, inpDict)
+    
 ##############################
 # Step 1 of the lt_analysis: # DONE
 ##############################
