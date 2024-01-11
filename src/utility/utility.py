@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 18:40:23 trottar"
+# Time-stamp: "2024-01-11 18:51:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -22,15 +22,12 @@ import os, subprocess
 def check_runs_in_effcharge(run, ParticleType, OUTPATH):
 
     if run != 0:
-        #print("!!!!!!!!!!!!!", run)
         root_file_path = "%s/%s_%s_-1_Raw_Data.root" % (OUTPATH, ParticleType, run)
         if not os.path.exists(root_file_path):
-            #print("Run number {} not found in {}\n\t Removing...".format(run, root_file_path))
             return False
         else:
             return True
     else:
-        #print("No {} phi setting found...".format(phiset.lower()))
         return False
 
 ################################################################################################################################################
@@ -48,7 +45,8 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
                 inpDict["runNum{}".format(phiset)].replace(" "+run," ")
         else:
             print("No {} phi setting found...".format(phiset.lower()))
-                
+
+    print("!!!!!!!!!!!!",len(inpDict["runNum{}".format(phiset)].split(" ")))
     return inpDict    
 
 ################################################################################################################################################
