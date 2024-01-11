@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 18:28:21 trottar"
+# Time-stamp: "2024-01-11 18:30:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,6 +32,7 @@ lt=Root(os.path.realpath(__file__))
 
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH
 OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
@@ -57,7 +58,7 @@ pTheta_val = ""
 for runNum in RUNLIST:
 
     # Check if run number exists in analysed root files
-    if check_runs_in_effcharge(runNum, ParticleType, OUTPATH):
+    if check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ParticleType)):
     
         efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
         effError = getEfficiencyValue(runNum,efficiency_table,"effError")
