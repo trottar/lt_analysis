@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 14:23:38 trottar"
+# Time-stamp: "2024-01-12 14:26:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,19 +40,18 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
     print("$$$$$$$$$$",inpDict["runNum{}".format(phiset)])
     efficiencies = inpDict["InData_efficiency_{}".format(phiset.lower())].split(' ')
     print("$$$$$$$$$$",inpDict["InData_efficiency_{}".format(phiset.lower())])
-    for run, eff in zip(runs, efficiencies):
-        print("!!!!!!",run, eff)
-        if run != 0:
+    for i, run in enumerate(runs):
+        print("!!!!!!",run, efficiencies[i])
+        if int(run) != 0:
             root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, -1)
             if not os.path.exists(root_file_path):
                 print("\n\nRun number {} not found in {}\n\t Removing...".format(run, root_file_path))
                 runs.remove(run)
-                efficiencies.remove(eff)
+                efficiencies.remove(efficiencies[i])
                 inpDict["runNum{}".format(phiset)] = ' '.join(map(str, runs))
                 inpDict["InData_efficiency_{}".format(phiset.lower())] = ' '.join(map(str, efficiencies))
         else:
             print("No {} phi setting found...".format(phiset.lower()))
-
             
     return inpDict    
 
