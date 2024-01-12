@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 14:40:59 trottar"
+# Time-stamp: "2024-01-12 15:29:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,6 +72,7 @@ for runNum in RUNLIST:
 
         ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
         pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
+        
     else:
         RUNLIST.remove(runNum)
 
