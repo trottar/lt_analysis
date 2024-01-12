@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 14:22:28 trottar"
+# Time-stamp: "2024-01-12 14:23:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,7 +42,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
     print("$$$$$$$$$$",inpDict["InData_efficiency_{}".format(phiset.lower())])
     for run, eff in zip(runs, efficiencies):
         print("!!!!!!",run, eff)
-        if int(run) != 0:
+        if run != 0:
             root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, -1)
             if not os.path.exists(root_file_path):
                 print("\n\nRun number {} not found in {}\n\t Removing...".format(run, root_file_path))
