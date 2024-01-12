@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 16:14:49 trottar"
+# Time-stamp: "2024-01-12 16:19:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -163,8 +163,8 @@ def get_eff_charge(hist, inpDict):
     # Plot calculate efficiency per run
 
     # Define total efficiency vs run number plots
-    G_data_eff = TGraphErrors(len(InData_efficiency.split(' ')), \
-                              np.array([float(x) for x in runNums.split(' ')]), \
+    G_data_eff = TGraphErrors(len(InData_efficiency), \
+                              np.array([float(x) for x in runNums]), \
                               InData_efficiency, \
                               np.array([0]*len(InData_error_efficiency)), \
                               InData_error_efficiency*InData_efficiency)
@@ -190,8 +190,8 @@ def get_eff_charge(hist, inpDict):
           
     ################################################################################################################################################        
 
-    histDict["InData_efficiency"] = InData_efficiency.split(' ')
-    histDict["InData_error_efficiency"] = InData_error_efficiency.split(' ')
+    histDict["InData_efficiency"] = InData_efficiency
+    histDict["InData_error_efficiency"] = InData_error_efficiency
     histDict["G_data_eff"] = G_data_eff
     histDict["normfac_data"] = normfac_data
     histDict["normfac_dummy"] = normfac_dummy
