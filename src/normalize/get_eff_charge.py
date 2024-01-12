@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 16:42:23 trottar"
+# Time-stamp: "2024-01-12 16:50:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,12 +153,15 @@ def get_eff_charge(hist, inpDict):
         InData_efficiency = np.array([float(x) for x in InData_efficiency_center.split(' ')])
         InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_center.split(' ')])
 
+    '''
     if 'pid_text' in locals():
         print('\n\n',phi_setting,'PID Cuts = ',pid_text,'\n\n')
     else:
         print("ERROR: Invalid {} log file {}!".format(phi_setting.lower(),pid_log))
         pid_text = "\nNo {} cuts file found in logs...".format(phi_setting.lower())
-    
+    '''
+    print('\n\n',phi_setting,'PID Cuts = ',pid_text,'\n\n')
+        
     ################################################################################################################################################
     # Plot calculate efficiency per run
 
