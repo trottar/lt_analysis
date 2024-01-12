@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 16:32:21 trottar"
+# Time-stamp: "2024-01-12 17:14:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -120,7 +120,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     G_eff_plt.GetYaxis().SetTitleOffset(1.5)
     G_eff_plt.GetXaxis().SetTitleOffset(1.5)
-    G_eff_plt.GetXaxis().SetLabelSize(0.02)
+    G_eff_plt.GetXaxis().SetLabelSize(0.03)
 
     for i,hist in enumerate(histlist):
         l_eff_plt.AddEntry(data_eff_dict[hist["phi_setting"]],hist["phi_setting"])
@@ -205,7 +205,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Ct = TCanvas()
     l_t = TLegend(0.115,0.45,0.33,0.95)
-    l_t.SetTextSize(0.0235)
+    l_t.SetTextSize(0.0135)
 
     binmax = []
     for i,hist in enumerate(histlist):
