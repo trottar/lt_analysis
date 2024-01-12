@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 19:30:33 trottar"
+# Time-stamp: "2024-01-11 19:31:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -46,7 +46,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
                 runs.remove(run)
                 efficiencies.remove(eff)
                 inpDict["runNum{}".format(phiset)] = ' '.join(map(str, runs))
-                inpDict["InData_efficiency_{}".format(phiset.lower())].split(" ") = ' '.join(map(str, efficiencies))
+                inpDict["InData_efficiency_{}".format(phiset.lower())] = ' '.join(map(str, efficiencies))
         else:
             print("No {} phi setting found...".format(phiset.lower()))
 
