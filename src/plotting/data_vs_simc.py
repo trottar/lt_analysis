@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 15:59:45 trottar"
+# Time-stamp: "2024-01-12 16:26:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,11 +106,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         data_eff_dict[hist["phi_setting"]].SetMarkerColor(i+1)
         G_eff_plt.Add(data_eff_dict[hist["phi_setting"]])
         
-    # Set the label size and offset for the x-axis
-    gPad.SetTickx(1)  # Set x-axis ticks inside the frame
-    gPad.SetTicky(1)  # Set y-axis ticks inside the frame
-    gPad.SetLabelSize(0.04, 'x')  # Adjust the x-axis label size
-    gPad.SetLabelOffset(0.02, 'x')  # Adjust the x-axis label offset       
+        # Get the x-axis
+        x_axis = gPad.GetXaxis()
+
+        # Adjust the x-axis label size
+        x_axis.SetLabelSize(0.04)
 
     G_eff_plt.Draw("AP")
 
