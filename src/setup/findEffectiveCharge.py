@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 14:38:46 trottar"
+# Time-stamp: "2024-01-12 14:39:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,7 +74,9 @@ for runNum in RUNLIST:
         pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
     else:
         RUNLIST.remove(runNum)
-        ''.join(map(str, RUNLIST))
+
+# Convert back to string        
+''.join(map(str, RUNLIST))        
         
 BashInput=("{}\n{}\n{}\n{}\n{}\n{}\n{}".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, pTheta_val, ebeam_val, RUNLIST))
 print(BashInput)
