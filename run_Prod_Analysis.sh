@@ -1204,6 +1204,7 @@ if [[ $i_flag != "true" ]]; then
 	    #       and later converted to C
 	    DataChargeSumRight=$(IFS=+; echo "$((${DataChargeValRight[*]}))") # Only works for integers
 	    echo "Total Charge Right: ${DataChargeSumRight} uC"
+	    echo "New set of runs: ${data_right[@]}"
 	fi
 
 	# Checks that array isn't empty
@@ -1239,13 +1240,13 @@ if [[ $i_flag != "true" ]]; then
 	    #       and later converted to C
 	    DummyChargeSumRight=$(IFS=+; echo "$((${DummyChargeValRight[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Right: ${DummyChargeSumRight} uC"
+	    echo "New set of runs: ${dummy_right[@]}"
 	fi
 
 	# Checks that array isn't empty
 	if [[ ${#data_left_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge left..."
-	    echo "${data_left_tmp[*]}"
 	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_left_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1275,6 +1276,7 @@ if [[ $i_flag != "true" ]]; then
 	    #       and later converted to C
 	    DataChargeSumLeft=$(IFS=+; echo "$((${DataChargeValLeft[*]}))") # Only works for integers
 	    echo "Total Charge Left: ${DataChargeSumLeft} uC"
+	    echo "New set of runs: ${data_left[@]}"
 	fi
 
 	# Checks that array isn't empty
@@ -1310,6 +1312,7 @@ if [[ $i_flag != "true" ]]; then
 	    #       and later converted to C
 	    DummyChargeSumLeft=$(IFS=+; echo "$((${DummyChargeValLeft[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Left: ${DummyChargeSumLeft} uC"
+	    echo "New set of runs: ${dummy_left[@]}"
 	fi
 
 	# Checks that array isn't empty
@@ -1345,6 +1348,7 @@ if [[ $i_flag != "true" ]]; then
 	    #       and later converted to C
 	    DataChargeSumCenter=$(IFS=+; echo "$((${DataChargeValCenter[*]}))") # Only works for integers
 	    echo "Total Charge Center: ${DataChargeSumCenter} uC"
+	    echo "New set of runs: ${data_center[@]}"
 	fi
 
 	# Checks that array isn't empty
@@ -1380,6 +1384,7 @@ if [[ $i_flag != "true" ]]; then
 	    #       and later converted to C
 	    DummyChargeSumCenter=$(IFS=+; echo "$((${DummyChargeValCenter[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Center: ${DummyChargeSumCenter} uC"
+	    echo "New set of runs: ${dummy_center[@]}"	    
 	fi
 
 	# Run the plotting script if t-flag enabled
