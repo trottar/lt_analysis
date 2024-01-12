@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-29 15:16:40 trottar"
+# Time-stamp: "2024-01-12 15:55:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,7 +76,10 @@ def compare_simc(hist, inpDict):
     dummy_charge_center = inpDict["dummy_charge_center"] 
     InData_efficiency_right = inpDict["InData_efficiency_right"] 
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
-    InData_efficiency_center = inpDict["InData_efficiency_center"] 
+    InData_efficiency_center = inpDict["InData_efficiency_center"]
+    InData_error_efficiency_right = inpDict["InData_error_efficiency_right"] 
+    InData_error_efficiency_left = inpDict["InData_error_efficiency_left"] 
+    InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]     
     efficiency_table = inpDict["efficiency_table"] 
     ParticleType = inpDict["ParticleType"]
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 15:30:00 trottar"
+# Time-stamp: "2024-01-12 15:51:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,13 +36,13 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import check_runs_in_main, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder
+from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=34:
-    print("!!!!! ERROR !!!!!\n Expected 34 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=37:
+    print("!!!!! ERROR !!!!!\n Expected 37 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InData_error_efficiency_right InData_error_efficiency_left InData_error_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -73,17 +73,20 @@ dummy_charge_center = int(sys.argv[20])/1000 # Convert from uC to C
 InData_efficiency_right = sys.argv[21]
 InData_efficiency_left = sys.argv[22]
 InData_efficiency_center = sys.argv[23]
-efficiency_table = sys.argv[24]
-ParticleType = sys.argv[25]
-EPSSET = sys.argv[26]
-pThetaValRight = list(sys.argv[27].split(" "))
-pThetaValLeft = list(sys.argv[28].split(" "))
-pThetaValCenter = list(sys.argv[29].split(" "))
-EbeamValRight = list(sys.argv[30].split(" "))
-EbeamValLeft = list(sys.argv[31].split(" "))
-EbeamValCenter = list(sys.argv[32].split(" "))
-POL = sys.argv[33]
-formatted_date = sys.argv[34]
+InData_error_efficiency_right = sys.argv[24]
+InData_error_efficiency_left = sys.argv[25]
+InData_error_efficiency_center = sys.argv[26]
+efficiency_table = sys.argv[27]
+ParticleType = sys.argv[28]
+EPSSET = sys.argv[29]
+pThetaValRight = list(sys.argv[30].split(" "))
+pThetaValLeft = list(sys.argv[31].split(" "))
+pThetaValCenter = list(sys.argv[32].split(" "))
+EbeamValRight = list(sys.argv[33].split(" "))
+EbeamValLeft = list(sys.argv[34].split(" "))
+EbeamValCenter = list(sys.argv[35].split(" "))
+POL = sys.argv[36]
+formatted_date = sys.argv[37]
 
 if int(POL) == 1:
     pol_str = "pl"
@@ -117,6 +120,9 @@ inpDict = {
     "InData_efficiency_right" : InData_efficiency_right,
     "InData_efficiency_left" : InData_efficiency_left,
     "InData_efficiency_center" : InData_efficiency_center,
+    "InData_error_efficiency_right" : InData_error_efficiency_right,
+    "InData_error_efficiency_left" : InData_error_efficiency_left,
+    "InData_error_efficiency_center" : InData_error_efficiency_center,    
     "efficiency_table" : efficiency_table,
     "ParticleType" : ParticleType,
     "EPSSET" : EPSSET,

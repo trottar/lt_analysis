@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-02 12:37:52 trottar"
+# Time-stamp: "2024-01-12 15:59:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,7 +73,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     dummy_charge_center = inpDict["dummy_charge_center"] 
     InData_efficiency_right = inpDict["InData_efficiency_right"] 
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
-    InData_efficiency_center = inpDict["InData_efficiency_center"] 
+    InData_efficiency_center = inpDict["InData_efficiency_center"]
+    InData_error_efficiency_right = inpDict["InData_error_efficiency_right"] 
+    InData_error_efficiency_left = inpDict["InData_error_efficiency_left"] 
+    InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]         
     efficiency_table = inpDict["efficiency_table"] 
     ParticleType = inpDict["ParticleType"]
 
@@ -102,6 +105,12 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         data_eff_dict[hist["phi_setting"]].SetMarkerSize(1)
         data_eff_dict[hist["phi_setting"]].SetMarkerColor(i+1)
         G_eff_plt.Add(data_eff_dict[hist["phi_setting"]])
+        
+    # Set the label size and offset for the x-axis
+    gPad.SetTickx(1)  # Set x-axis ticks inside the frame
+    gPad.SetTicky(1)  # Set y-axis ticks inside the frame
+    gPad.SetLabelSize(0.04, 'x')  # Adjust the x-axis label size
+    gPad.SetLabelOffset(0.02, 'x')  # Adjust the x-axis label offset       
 
     G_eff_plt.Draw("AP")
 

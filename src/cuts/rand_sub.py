@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-12-18 12:53:56 trottar"
+# Time-stamp: "2024-01-12 15:54:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,7 +74,10 @@ def rand_sub(phi_setting, inpDict):
     dummy_charge_center = inpDict["dummy_charge_center"] 
     InData_efficiency_right = inpDict["InData_efficiency_right"] 
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
-    InData_efficiency_center = inpDict["InData_efficiency_center"] 
+    InData_efficiency_center = inpDict["InData_efficiency_center"]
+    InData_error_efficiency_right = inpDict["InData_error_efficiency_right"] 
+    InData_error_efficiency_left = inpDict["InData_error_efficiency_left"] 
+    InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]    
     efficiency_table = inpDict["efficiency_table"] 
     ParticleType = inpDict["ParticleType"]
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 15:08:21 trottar"
+# Time-stamp: "2024-01-12 15:53:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,7 +76,10 @@ def get_eff_charge(hist, inpDict):
     dummy_charge_center = inpDict["dummy_charge_center"] 
     InData_efficiency_right = inpDict["InData_efficiency_right"] 
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
-    InData_efficiency_center = inpDict["InData_efficiency_center"] 
+    InData_efficiency_center = inpDict["InData_efficiency_center"]
+    InData_error_efficiency_right = inpDict["InData_error_efficiency_right"] 
+    InData_error_efficiency_left = inpDict["InData_error_efficiency_left"] 
+    InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]     
     efficiency_table = inpDict["efficiency_table"] 
     ParticleType = inpDict["ParticleType"]
 
@@ -156,21 +159,10 @@ def get_eff_charge(hist, inpDict):
         pid_text = "\nNo {} cuts file found in logs...".format(phi_setting.lower())
     
     ################################################################################################################################################
-    # Grab and calculate efficiency
+    # Plot calculate efficiency per run
 
-    sys.path.append('setup')
-    from getDataTable import calculate_effError
-
-    tot_effError_data = [calculate_effError(run,efficiency_table) for run in runNums.split(' ')]
-    #print(InData_efficiency)
-    #print(tot_effError_data)
-    eff_errProp_data = sum(tot_effError_data) # Error propagation for addition
-
-    print("\n\nTotal Data Efficiency Uncertainty =",eff_errProp_data)
-
-    print("$$$$$$$$$$$$$$",len(InData_efficiency.split(' ')),len(runNums.split(' ')),len(tot_effError_data))
     # Define total efficiency vs run number plots
-    G_data_eff = TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
+    G_data_eff = TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(InData_error_efficiency.split(' '))),np.array(InData_error_efficiency.split(' '))*np.array([float(x) for x in InData_efficiency.split(' ')]))
     G_data_eff.SetName("G_data_eff")
     
     ################################################################################################################################################    
