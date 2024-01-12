@@ -1205,6 +1205,12 @@ if [[ $i_flag != "true" ]]; then
 	    DataChargeSumRight=$(IFS=+; echo "$((${DataChargeValRight[*]}))") # Only works for integers
 	    echo "Total Charge Right: ${DataChargeSumRight} uC"
 	    echo "Run numbers: [${data_right[@]}]"
+	    echo "Effective Charge per Run: [${DataChargeValRight[@]}]"
+	    echo "Effective Charge Error per Run: [${DataChargeErrRight[@]}]"
+	    echo "Efficiency per Run: [${DataEffValRight[@]}]"
+	    echo "Efficiency Error per Run: [${DataEffErrRight[@]}]"
+	    echo "Theta per Run: [${DatapThetaValRight[@]}]"
+	    echo "Beam Energy per Run: [${DataEbeamValRight[@]}]"
 	fi
 
 	# Checks that array isn't empty
@@ -1232,8 +1238,8 @@ if [[ $i_flag != "true" ]]; then
 	    DummyEffValRight=("${arr3[@]}")
 	    DummyEffErrRight=("${arr4[@]}")
 	    DummypThetaValRight=("${arr5[@]}")
-	    dummy_right=("${arr7[@]}")	    
 	    DummyEbeamValRight=("${arr6[@]}")
+	    dummy_right=("${arr7[@]}")	    
 	    #echo ${DummyChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
@@ -1241,6 +1247,12 @@ if [[ $i_flag != "true" ]]; then
 	    DummyChargeSumRight=$(IFS=+; echo "$((${DummyChargeValRight[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Right: ${DummyChargeSumRight} uC"
 	    echo "Run numbers: [${dummy_right[@]}]"
+	    echo "Effective Charge per Run: [${DummyChargeValRight[@]}]"
+	    echo "Effective Charge Error per Run: [${DummyChargeErrRight[@]}]"
+	    echo "Efficiency per Run: [${DummyEffValRight[@]}]"
+	    echo "Efficiency Error per Run: [${DummyEffErrRight[@]}]"
+	    echo "Theta per Run: [${DummypThetaValRight[@]}]"
+	    echo "Beam Energy per Run: [${DummyEbeamValRight[@]}]"
 	fi
 
 	# Checks that array isn't empty
@@ -1277,6 +1289,12 @@ if [[ $i_flag != "true" ]]; then
 	    DataChargeSumLeft=$(IFS=+; echo "$((${DataChargeValLeft[*]}))") # Only works for integers
 	    echo "Total Charge Left: ${DataChargeSumLeft} uC"
 	    echo "Run numbers: [${data_left[@]}]"
+	    echo "Effective Charge per Run: [${DataChargeValLeft[@]}]"
+	    echo "Effective Charge Error per Run: [${DataChargeErrLeft[@]}]"
+	    echo "Efficiency per Run: [${DataEffValLeft[@]}]"
+	    echo "Efficiency Error per Run: [${DataEffErrLeft[@]}]"
+	    echo "Theta per Run: [${DatapThetaValLeft[@]}]"
+	    echo "Beam Energy per Run: [${DataEbeamValLeft[@]}]"
 	fi
 
 	# Checks that array isn't empty
@@ -1313,6 +1331,12 @@ if [[ $i_flag != "true" ]]; then
 	    DummyChargeSumLeft=$(IFS=+; echo "$((${DummyChargeValLeft[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Left: ${DummyChargeSumLeft} uC"
 	    echo "Run numbers: [${dummy_left[@]}]"
+	    echo "Effective Charge per Run: [${DummyChargeValLeft[@]}]"
+	    echo "Effective Charge Error per Run: [${DummyChargeErrLeft[@]}]"
+	    echo "Efficiency per Run: [${DummyEffValLeft[@]}]"
+	    echo "Efficiency Error per Run: [${DummyEffErrLeft[@]}]"
+	    echo "Theta per Run: [${DummypThetaValLeft[@]}]"
+	    echo "Beam Energy per Run: [${DummyEbeamValLeft[@]}]"
 	fi
 
 	# Checks that array isn't empty
@@ -1349,6 +1373,12 @@ if [[ $i_flag != "true" ]]; then
 	    DataChargeSumCenter=$(IFS=+; echo "$((${DataChargeValCenter[*]}))") # Only works for integers
 	    echo "Total Charge Center: ${DataChargeSumCenter} uC"
 	    echo "Run numbers: [${data_center[@]}]"
+	    echo "Effective Charge per Run: [${DataChargeValCenter[@]}]"
+	    echo "Effective Charge Error per Run: [${DataChargeErrCenter[@]}]"
+	    echo "Efficiency per Run: [${DataEffValCenter[@]}]"
+	    echo "Efficiency Error per Run: [${DataEffErrCenter[@]}]"
+	    echo "Theta per Run: [${DatapThetaValCenter[@]}]"
+	    echo "Beam Energy per Run: [${DataEbeamValCenter[@]}]"
 	fi
 
 	# Checks that array isn't empty
@@ -1385,6 +1415,12 @@ if [[ $i_flag != "true" ]]; then
 	    DummyChargeSumCenter=$(IFS=+; echo "$((${DummyChargeValCenter[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Center: ${DummyChargeSumCenter} uC"
 	    echo "Run numbers: [${dummy_center[@]}]"
+	    echo "Effective Charge per Run: [${DummyChargeValCenter[@]}]"
+	    echo "Effective Charge Error per Run: [${DummyChargeErrCenter[@]}]"
+	    echo "Efficiency per Run: [${DummyEffValCenter[@]}]"
+	    echo "Efficiency Error per Run: [${DummyEffErrCenter[@]}]"
+	    echo "Theta per Run: [${DummypThetaValCenter[@]}]"
+	    echo "Beam Energy per Run: [${DummyEbeamValCenter[@]}]"
 	fi
 
 	# Run the plotting script if t-flag enabled
