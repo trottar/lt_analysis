@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 16:04:58 trottar"
+# Time-stamp: "2024-01-12 16:14:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,10 +97,9 @@ def get_eff_charge(hist, inpDict):
     # Grabs PID cut string
 
     if phi_setting == "Right":
-        runNums= runNumRight
-        for run in runNumRight.split(' '):
-            runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+        runNums = np.array([float(x) for x in runNumRight.split(' ')])
+        for run in runNums:
+            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,run)
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
@@ -113,14 +112,13 @@ def get_eff_charge(hist, inpDict):
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
-
-        InData_efficiency = InData_efficiency_right
-        InData_error_efficiency = InData_error_efficiency_right
+        InData_efficiency = np.array([float(x) for x in InData_efficiency_right.split(' ')])
+        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_right.split(' ')])
+        
     if phi_setting == "Left":
-        runNums= runNumLeft
-        for run in runNumLeft.split(' '):
-            runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+        runNums = np.array([float(x) for x in runNumLeft.split(' ')])
+        for run in runNums:
+            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,run)
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
@@ -133,13 +131,13 @@ def get_eff_charge(hist, inpDict):
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
-        InData_efficiency = InData_efficiency_left
-        InData_error_efficiency = InData_error_efficiency_left
+        InData_efficiency = np.array([float(x) for x in InData_efficiency_left.split(' ')])
+        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_left.split(' ')])
+        
     if phi_setting == "Center":
-        runNums= runNumCenter
-        for run in runNumCenter.split(' '):
-            runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+        runNums = np.array([float(x) for x in runNumCenter.split(' ')])
+        for run in runNums:
+            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,run)
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
@@ -148,12 +146,12 @@ def get_eff_charge(hist, inpDict):
                                 break
                             if "coin_ep_cut_prompt_RF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
-                                break
+                                break                                
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
-        InData_efficiency = InData_efficiency_center
-        InData_error_efficiency = InData_error_efficiency_center
+        InData_efficiency = np.array([float(x) for x in InData_efficiency_center.split(' ')])
+        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_center.split(' ')])
 
     if 'pid_text' in locals():
         print('\n\n',phi_setting,'PID Cuts = ',pid_text,'\n\n')
@@ -165,7 +163,11 @@ def get_eff_charge(hist, inpDict):
     # Plot calculate efficiency per run
 
     # Define total efficiency vs run number plots
-    G_data_eff = TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(InData_error_efficiency.split(' '))),np.array(InData_error_efficiency.split(' '))*np.array([float(x) for x in InData_efficiency.split(' ')]))
+    G_data_eff = TGraphErrors(len(InData_efficiency.split(' ')), \
+                              np.array([float(x) for x in runNums.split(' ')]), \
+                              InData_efficiency, \
+                              np.array([0]*len(InData_error_efficiency)), \
+                              InData_error_efficiency*InData_efficiency)
     G_data_eff.SetName("G_data_eff")
     
     ################################################################################################################################################    
