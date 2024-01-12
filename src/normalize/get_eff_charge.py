@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 15:04:43 trottar"
+# Time-stamp: "2024-01-12 15:08:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,7 +168,7 @@ def get_eff_charge(hist, inpDict):
 
     print("\n\nTotal Data Efficiency Uncertainty =",eff_errProp_data)
 
-    print("$$$$$$$$$$$$$$",len(InData_efficiency.split(' ')),len(runNums.split('')),len(tot_effError_data))
+    print("$$$$$$$$$$$$$$",len(InData_efficiency.split(' ')),len(runNums.split(' ')),len(tot_effError_data))
     # Define total efficiency vs run number plots
     G_data_eff = TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
     G_data_eff.SetName("G_data_eff")
