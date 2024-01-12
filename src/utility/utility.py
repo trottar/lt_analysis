@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 19:31:18 trottar"
+# Time-stamp: "2024-01-11 19:35:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,7 +37,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
     ParticleType = inpDict["ParticleType"]
     runs = inpDict["runNum{}".format(phiset)].split(" ")
-    effiencies = inpDict["InData_efficiency_{}".format(phiset.lower())].split(" ")
+    efficiencies = inpDict["InData_efficiency_{}".format(phiset.lower())].split(" ")
     for run, eff in zip(runs, effiencies):
         if int(run) != 0:
             root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, -1)
