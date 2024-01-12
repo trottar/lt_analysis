@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 16:26:17 trottar"
+# Time-stamp: "2024-01-12 16:32:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,12 +106,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         data_eff_dict[hist["phi_setting"]].SetMarkerColor(i+1)
         G_eff_plt.Add(data_eff_dict[hist["phi_setting"]])
         
-        # Get the x-axis
-        x_axis = gPad.GetXaxis()
-
-        # Adjust the x-axis label size
-        x_axis.SetLabelSize(0.04)
-
     G_eff_plt.Draw("AP")
 
     G_eff_plt.SetTitle(" ;Run Numbers; Total Efficiency")
@@ -126,7 +120,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     G_eff_plt.GetYaxis().SetTitleOffset(1.5)
     G_eff_plt.GetXaxis().SetTitleOffset(1.5)
-    G_eff_plt.GetXaxis().SetLabelSize(0.04)
+    G_eff_plt.GetXaxis().SetLabelSize(0.02)
 
     for i,hist in enumerate(histlist):
         l_eff_plt.AddEntry(data_eff_dict[hist["phi_setting"]],hist["phi_setting"])
