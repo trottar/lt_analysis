@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 16:19:44 trottar"
+# Time-stamp: "2024-01-12 16:42:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,7 +97,7 @@ def get_eff_charge(hist, inpDict):
     # Grabs PID cut string
 
     if phi_setting == "Right":
-        runNums = np.array([float(x) for x in runNumRight.split(' ')])
+        runNums = np.array([int(x) for x in runNumRight.split(' ')])
         for run in runNums:
             pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,run)
             if os.path.exists(pid_log):
@@ -116,7 +116,7 @@ def get_eff_charge(hist, inpDict):
         InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_right.split(' ')])
         
     if phi_setting == "Left":
-        runNums = np.array([float(x) for x in runNumLeft.split(' ')])
+        runNums = np.array([int(x) for x in runNumLeft.split(' ')])
         for run in runNums:
             pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,run)
             if os.path.exists(pid_log):
@@ -135,7 +135,7 @@ def get_eff_charge(hist, inpDict):
         InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_left.split(' ')])
         
     if phi_setting == "Center":
-        runNums = np.array([float(x) for x in runNumCenter.split(' ')])
+        runNums = np.array([int(x) for x in runNumCenter.split(' ')])
         for run in runNums:
             pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,run)
             if os.path.exists(pid_log):
