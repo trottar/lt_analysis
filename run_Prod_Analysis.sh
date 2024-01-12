@@ -1245,6 +1245,7 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_left_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge left..."
+	    echo "${data_left_tmp[*]}"
 	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_left_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
