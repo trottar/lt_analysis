@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 15:53:25 trottar"
+# Time-stamp: "2024-01-12 16:04:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -115,6 +115,7 @@ def get_eff_charge(hist, inpDict):
                 continue
 
         InData_efficiency = InData_efficiency_right
+        InData_error_efficiency = InData_error_efficiency_right
     if phi_setting == "Left":
         runNums= runNumLeft
         for run in runNumLeft.split(' '):
@@ -133,6 +134,7 @@ def get_eff_charge(hist, inpDict):
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
         InData_efficiency = InData_efficiency_left
+        InData_error_efficiency = InData_error_efficiency_left
     if phi_setting == "Center":
         runNums= runNumCenter
         for run in runNumCenter.split(' '):
@@ -151,6 +153,7 @@ def get_eff_charge(hist, inpDict):
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
         InData_efficiency = InData_efficiency_center
+        InData_error_efficiency = InData_error_efficiency_center
 
     if 'pid_text' in locals():
         print('\n\n',phi_setting,'PID Cuts = ',pid_text,'\n\n')
@@ -186,6 +189,7 @@ def get_eff_charge(hist, inpDict):
     ################################################################################################################################################        
 
     histDict["InData_efficiency"] = InData_efficiency.split(' ')
+    histDict["InData_error_efficiency"] = InData_error_efficiency.split(' ')
     histDict["G_data_eff"] = G_data_eff
     histDict["normfac_data"] = normfac_data
     histDict["normfac_dummy"] = normfac_dummy
