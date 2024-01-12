@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 19:07:18 trottar"
+# Time-stamp: "2024-01-11 19:30:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,17 +37,20 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
     ParticleType = inpDict["ParticleType"]
     runs = inpDict["runNum{}".format(phiset)].split(" ")
-    for run in runs:
+    effiencies = inpDict["InData_efficiency_{}".format(phiset.lower())].split(" ")
+    for run, eff in zip(runs, effiencies):
         if int(run) != 0:
             root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, -1)
             if not os.path.exists(root_file_path):
                 print("\n\nRun number {} not found in {}\n\t Removing...".format(run, root_file_path))
                 runs.remove(run)
+                efficiencies.remove(eff)
                 inpDict["runNum{}".format(phiset)] = ' '.join(map(str, runs))
+                inpDict["InData_efficiency_{}".format(phiset.lower())].split(" ") = ' '.join(map(str, efficiencies))
         else:
             print("No {} phi setting found...".format(phiset.lower()))
 
-    print("!!!!!!!!!!!!",len(inpDict["runNum{}".format(phiset)].split(" ")))
+            
     return inpDict    
 
 ################################################################################################################################################
