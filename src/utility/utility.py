@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 14:13:25 trottar"
+# Time-stamp: "2024-01-12 14:14:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,7 +37,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
     ParticleType = inpDict["ParticleType"]
     runs = inpDict["runNum{}".format(phiset)].split(" ")
-    print("$$$$$$$$$$",runs)
+    print("$$$$$$$$$$",inpDict["runNum{}".format(phiset)])
     efficiencies = inpDict["InData_efficiency_{}".format(phiset.lower())].split(" ")
     for run, eff in zip(runs, efficiencies):
         print("!!!!!!",run, eff)
