@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 15:54:59 trottar"
+# Time-stamp: "2024-01-12 17:17:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,10 +167,9 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     # Define thpq vector relative to middle setting
     for phiset in phisetlist:
         if phiset == "Right":
-            runNums = runNumRight
-            for i, run in enumerate(runNumRight.split(' ')):
-                runNum = run
-                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
+            runNums = np.array([int(x) for x in runNumRight.split(' ')])
+            for i, run in enumerate(runNums):
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
                 if os.path.exists(pid_log):
                     thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
                     ebeam_right = float(EbeamValRight[i])
@@ -179,22 +178,20 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     continue
                 
         if phiset == "Left":
-            runNums = runNumLeft
-            for i, run in enumerate(runNumLeft.split(' ')):
-                runNum = run
-                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
+            runNums = np.array([int(x) for x in runNumLeft.split(' ')])
+            for i, run in enumerate(runNums):
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
                 if os.path.exists(pid_log):
                     thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
                     ebeam_left = float(EbeamValLeft[i])
                     break
                 else:
                     continue
-
+                
         if phiset == "Center":
-            runNums = runNumCenter
-            for i, run in enumerate(runNumCenter.split(' ')):
-                runNum = run
-                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,runNum)
+            runNums = np.array([int(x) for x in runNumCenter.split(' ')])
+            for i, run in enumerate(runNums):
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
                 if os.path.exists(pid_log):
                     thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
                     ebeam_center = float(EbeamValCenter[i])
@@ -242,10 +239,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                         print("Run {}".format(run))
                         print("{} | E_{} = {}".format(EbeamValCenter[0], phiset, EbeamValCenter[i]))
                         print("{} | theta_{} = {}".format(pThetaValCenter[0], phiset, pThetaValCenter[i]))
-                        
-    ################################################################################################################################################
-    # TESTING
-    ################################################################################################################################################                
+
     ################################################################################################################################################
 
     f_list_settings = '{}/src/{}/beam/Eb_KLT.dat'.format(LTANAPATH, ParticleType)
