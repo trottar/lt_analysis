@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 19:25:02 trottar"
+# Time-stamp: "2024-01-13 12:38:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,8 +134,8 @@ if EPSSET == "low":
     # Run weight iteration script for optimizing parameterization
     sys.path.append("models")
     from xfit_in_t import x_fit_in_t
-    x_fit_in_t(ParticleType, pol_str, closest_date, Q2)
-    output_file_lst.append(OUTPATH+"/{}_xfit_in_t.pdf".format(ParticleType))
+    x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W)
+    output_file_lst.append(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, q2_set, w_set))
     output_file_lst.append('models/xfit_in_t.py')
 
 # ***Parameter file for new iteration!***
@@ -434,7 +434,7 @@ if EPSSET == "high":
         sys.exit(2)
 
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
-    output_file_lst.append(OUTPATH+"/{}_lt_fit.pdf".format(ParticleType))
+    output_file_lst.append(OUTPATH+"/{}_lt_fit_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append('models/lt_2D_fit.py')
     
     # Save sep and unsep values from current iteration

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 18:50:06 trottar"
+# Time-stamp: "2024-01-13 12:31:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,11 +49,11 @@ m_p = 0.93827231
 m_n = 0.93956541
 mkpl = 0.493677
 
-def x_fit_in_t(ParticleType, pol_str, closest_date, Q2):
+def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W):
 
-    single_setting(ParticleType, pol_str, closest_date, Q2)
+    single_setting(ParticleType, pol_str, closest_date, Q2, W)
 
-def single_setting(ParticleType, pol_str, dir_iter, q2_set):
+def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
 
     hi_bound =  0.7;
     lo_bound = -0.1;
@@ -104,7 +104,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set):
         f = (par[0]*qq*math.exp(-qq))*f_tt
         return f
     
-    outputpdf  = OUTPATH + "/" + ParticleType + "_xfit_in_t.pdf"
+    outputpdf  = "{}/{}_xfit_in_t_Q{}W{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
     
     prv_par_vec = []
     g_vec = []

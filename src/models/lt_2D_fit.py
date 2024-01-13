@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 11:37:03 trottar"
+# Time-stamp: "2024-01-13 12:30:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-outputpdf  = OUTPATH + "/" + ParticleType + "_lt_fit.pdf"
+outputpdf  = "{}/{}_lt_fit_Q{}W{}.pdf".format(OUTPATH, ParticleType, Q2, W)
 
 ################################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
