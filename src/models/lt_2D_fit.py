@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 01:31:00 trottar"
+# Time-stamp: "2024-01-13 01:57:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -243,7 +243,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         for ii in range(glo.GetN()):
             glo.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = sqrt((glo.GetErrorY(ii) / g_yy)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy
+            g_yy_err = math.sqrt((glo.GetErrorY(ii) / g_yy)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy
 
             lo_cross_sec_err[i] += 1 / (g_yy_err**2)
 
@@ -252,7 +252,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         for ii in range(ghi.GetN()):
             ghi.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = sqrt((ghi.GetErrorY(ii) / g_yy)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy
+            g_yy_err = math.sqrt((ghi.GetErrorY(ii) / g_yy)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy
 
             hi_cross_sec_err[i] += 1 / (g_yy_err**2)
 
