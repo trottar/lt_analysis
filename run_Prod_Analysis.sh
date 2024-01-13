@@ -1170,7 +1170,7 @@ if [[ $i_flag != "true" ]]; then
 	OutFullAnalysisFilename="FullAnalysis_${KIN}"
 
 	cd "${LTANAPATH}/src/setup"
-
+	
 	# Checks that array isn't empty
 	if [[ ${#data_right_tmp[@]} -ne 0 ]]; then
 	    echo
@@ -1422,9 +1422,6 @@ if [[ $i_flag != "true" ]]; then
 	    #echo "Theta per Run: [${DummypThetaValCenter[@]}]"
 	    #echo "Beam Energy per Run: [${DummyEbeamValCenter[@]}]"
 	fi
-
-	# Run the plotting script if t-flag enabled
-	# Checks that array isn't empty
 
 	cd "${LTANAPATH}/src"
 
