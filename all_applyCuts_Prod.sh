@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 12:19:15 trottar"
+# Time-stamp: "2024-01-14 12:24:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,16 +53,35 @@ grab_runs () {
     fi
 }
 
-file_name="Q4p4W2p74center_highe" # DONE
-#file_name="Q4p4W2p74left_highe"
-#file_name="Q4p4W2p74right_highe"
-#file_name="Q4p4W2p74center_lowe"
-#file_name="Q4p4W2p74left_lowe"
-#file_name="Q4p4W2p74center_highe_dummy"
-#file_name="Q4p4W2p74left_highe_dummy"
-#file_name="Q4p4W2p74right_highe_dummy"
-#file_name="Q4p4W2p74center_lowe_dummy"
-#file_name="Q4p4W2p74left_lowe_dummy"
+TARGET="LH2"
+#TARGET="dummy"
+
+KIN="Q4p4W2p74"
+
+EPS="high"
+#EPS="low"
+
+PHISET="center"
+#PHISET="left"
+#PHISET="right"
+
+# Q4p4W2p74center_highe # DONE
+# Q4p4W2p74left_highe
+# Q4p4W2p74right_highe
+# Q4p4W2p74center_lowe
+# Q4p4W2p74left_lowe
+# Q4p4W2p74center_highe_dummy
+# Q4p4W2p74left_highe_dummy
+# Q4p4W2p74right_highe_dummy
+# Q4p4W2p74center_lowe_dummy
+# Q4p4W2p74left_lowe_dummy
+
+if [ $TARGET = "dummy" ]; then
+    file_name="${KIN}${PHISET}_{EPS}e_dummy"
+else
+    file_name="${KIN}${PHISET}_{EPS}e"
+fi
+
 numbers_to_match=()
 IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"
 echo
@@ -87,7 +106,7 @@ while true; do
             do
                 echo "Running ${number}"
                 cd $kaonlt/../lt_analysis
-		./applyCuts_Prod.sh -p low left 2p1 2p95 dummy ${number} kaon
+		./applyCuts_Prod.sh -p ${EPS} ${PHISET} 2p1 2p95 ${TARGET} ${number} kaon
             done
             break ;;
         [Nn]* ) 
