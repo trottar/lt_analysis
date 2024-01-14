@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 00:58:24 trottar"
+# Time-stamp: "2024-01-14 01:15:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -79,22 +79,23 @@ while true; do
 
     case "$answer" in
         [Yy]* )
-	    ##Finds number of lines of inpFile
-	    numlines=$(eval "wc -l < ${inpFile}")
-	    echo
-	    echo "Run $(( ${number} + 1 ))/$(( ${numlines} + 1 ))"
+            # Finds number of lines of inpFile
+            numlines=$(eval "wc -l < ${inpFile}")
+            echo
+            echo "Run $(( ${number} + 1 ))/$(( ${numlines} + 1 ))" >> "${file_name}_all_applyCuts_Prod.log"
             # Loop through each number in the list
             for number in "${numbers_to_match[@]}"
             do
-		echo "Running ${number}"
-		cd $kaonlt/../lt_analysis
-		./applyCuts_Prod.sh -p low center 2p1 2p95 LH2 ${number} kaon
+                echo "Running ${number}" >> "${file_name}_all_applyCuts_Prod.log"
+                cd $kaonlt/../lt_analysis
+                ./applyCuts_Prod.sh -p low center 2p1 2p95 LH2 ${number} kaon >> "${file_name}_all_applyCuts_Prod.log"
             done
             break ;;
         [Nn]* ) 
-            echo "Operation aborted."
+            echo "Operation aborted." >> "${file_name}_all_applyCuts_Prod.log"
             exit ;;
         * ) 
-            echo "Please answer yes or no." ;;
+            echo "Please answer yes or no." >> "${file_name}_all_applyCuts_Prod.log"
+            ;;
     esac
 done
