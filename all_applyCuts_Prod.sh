@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 01:31:21 trottar"
+# Time-stamp: "2024-01-14 01:32:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,7 +72,6 @@ echo "Run Numbers: [${numbers_to_match[@]}]"
 inpFile="${UTILPATH}/run_list/${ANATYPE}LT/${file_name}"
 
 replay_root_path="${ROOTPATH}/${ANATYPE}LT"
-
 while true; do
     # Prompt for confirmation before proceeding
     read -p "Are you sure you want to remove files with specified numbers in the filename? (yes/no): " answer
@@ -88,7 +87,8 @@ while true; do
             do
                 echo "Running ${number}"
                 cd $kaonlt/../lt_analysis
-                ./applyCuts_Prod.sh -p low left 2p1 2p95 LH2 ${number} kaon &> "${file_name}_all_applyCuts_Prod.log"
+                #./applyCuts_Prod.sh -p low left 2p1 2p95 LH2 ${number} kaon &>> "${file_name}_all_applyCuts_Prod.log"
+		./applyCuts_Prod.sh -p low left 2p1 2p95 LH2 ${number} kaon
             done
             break ;;
         [Nn]* ) 
