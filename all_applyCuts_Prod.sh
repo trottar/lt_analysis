@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 21:28:05 trottar"
+# Time-stamp: "2024-01-13 21:29:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,7 +69,9 @@ while true; do
             # Loop through each number in the list
             for number in "${numbers_to_match[@]}"
             do
-		set runNum = $number;echo "Running ${runNum}";cd $kaonlt/../lt_analysis;./applyCuts_Prod.sh -p high center 2p1 2p95 LH2 ${runNum} kaon
+		echo "Running ${number}"
+		cd $kaonlt/../lt_analysis
+		./applyCuts_Prod.sh -p high center 2p1 2p95 LH2 ${number} kaon
             done
             break ;;
         [Nn]* ) 
