@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 21:58:36 trottar"
+# Time-stamp: "2024-01-13 21:59:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,8 +77,8 @@ while true; do
 
     case "$answer" in
         [Yy]* )
-	    ##Finds number of lines of file_name
-	    numlines=$(eval "wc -l < ${file_name}")
+	    ##Finds number of lines of INPDIR
+	    numlines=$(eval "wc -l < ${INPDIR}")
 	    echo "Run $(( ${number} + 2 ))/$(( ${numlines} +1 ))"
             # Loop through each number in the list
             for number in "${numbers_to_match[@]}"
