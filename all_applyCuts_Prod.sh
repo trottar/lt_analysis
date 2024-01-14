@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 02:20:43 trottar"
+# Time-stamp: "2024-01-14 02:21:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,7 +62,7 @@ grab_runs () {
 #file_name="Q2p1W2p95left_highe_dummy" # DONE
 #file_name="Q2p1W2p95right_highe_dummy" # DONE
 #file_name="Q2p1W2p95center_lowe_dummy" # DONE
-#file_name="Q2p1W2p95left_lowe_dummy" # DONE
+file_name="Q2p1W2p95left_lowe_dummy" # DONE
 numbers_to_match=()
 IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"
 echo
@@ -87,7 +87,7 @@ while true; do
             do
                 echo "Running ${number}"
                 cd $kaonlt/../lt_analysis
-		./applyCuts_Prod.sh -p low center 2p1 2p95 dummy ${number} kaon
+		./applyCuts_Prod.sh -p low left 2p1 2p95 dummy ${number} kaon
             done
             break ;;
         [Nn]* ) 
