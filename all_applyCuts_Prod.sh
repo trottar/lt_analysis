@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 12:19:00 trottar"
+# Time-stamp: "2024-01-14 12:19:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,16 +53,16 @@ grab_runs () {
     fi
 }
 
-file_name="Q4p4W2p74center_highe"
-#file_name="Q4p4W2p74left_highe" # DONE
-#file_name="Q4p4W2p74right_highe" # DONE
-#file_name="Q4p4W2p74center_lowe" # DONE
-#file_name="Q4p4W2p74left_lowe" # DONE
-#file_name="Q4p4W2p74center_highe_dummy" # DONE
-#file_name="Q4p4W2p74left_highe_dummy" # DONE
-#file_name="Q4p4W2p74right_highe_dummy" # DONE
-#file_name="Q4p4W2p74center_lowe_dummy" # DONE
-#file_name="Q4p4W2p74left_lowe_dummy" # DONE
+file_name="Q4p4W2p74center_highe" # DONE
+#file_name="Q4p4W2p74left_highe"
+#file_name="Q4p4W2p74right_highe"
+#file_name="Q4p4W2p74center_lowe"
+#file_name="Q4p4W2p74left_lowe"
+#file_name="Q4p4W2p74center_highe_dummy"
+#file_name="Q4p4W2p74left_highe_dummy"
+#file_name="Q4p4W2p74right_highe_dummy"
+#file_name="Q4p4W2p74center_lowe_dummy"
+#file_name="Q4p4W2p74left_lowe_dummy"
 numbers_to_match=()
 IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"
 echo
