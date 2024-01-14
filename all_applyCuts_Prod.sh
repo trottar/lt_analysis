@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 21:59:31 trottar"
+# Time-stamp: "2024-01-13 22:00:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,6 +69,8 @@ echo
 echo "${file_name}"
 echo "Run Numbers: [${numbers_to_match[@]}]"
 
+inpFile="${UTILPATH}/run_list/${ANATYPE}LT/${file_name}"
+
 replay_root_path="${ROOTPATH}/${ANATYPE}LT"
 
 while true; do
@@ -77,8 +79,8 @@ while true; do
 
     case "$answer" in
         [Yy]* )
-	    ##Finds number of lines of INPDIR
-	    numlines=$(eval "wc -l < ${INPDIR}")
+	    ##Finds number of lines of inpFile
+	    numlines=$(eval "wc -l < ${inpFile}")
 	    echo "Run $(( ${number} + 2 ))/$(( ${numlines} +1 ))"
             # Loop through each number in the list
             for number in "${numbers_to_match[@]}"
