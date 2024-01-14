@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 22:00:48 trottar"
+# Time-stamp: "2024-01-13 22:01:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,7 +81,7 @@ while true; do
         [Yy]* )
 	    ##Finds number of lines of inpFile
 	    numlines=$(eval "wc -l < ${inpFile}")
-	    echo "Run $(( ${number} + 2 ))/$(( ${numlines} +1 ))"
+	    echo "Run $(( ${number} + 1 ))/$(( ${numlines} + 1 ))"
             # Loop through each number in the list
             for number in "${numbers_to_match[@]}"
             do
