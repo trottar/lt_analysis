@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-10 16:03:38 trottar"
+# Time-stamp: "2024-01-13 21:55:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ grab_runs () {
 
 file_name="Prod_Test"
 numbers_to_match=()
-IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"             # RIGHT, Q2=5p5, W=3p02
+IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"
 echo "Run Numbers: [${numbers_to_match[@]}]"
 
 replay_root_path="${ROOTPATH}/${ANATYPE}LT"

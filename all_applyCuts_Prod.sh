@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 21:30:14 trottar"
+# Time-stamp: "2024-01-13 21:58:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,9 +53,19 @@ grab_runs () {
     fi
 }
 
-file_name="Q2p1W2p95center_highe"
+#file_name="Q2p1W2p95center_highe"
+file_name="Q2p1W2p95left_highe"
+#file_name="Q2p1W2p95right_highe"
+#file_name="Q2p1W2p95center_lowe"
+#file_name="Q2p1W2p95left_lowe"
+#file_name="Q2p1W2p95center_highe_dummy"
+#file_name="Q2p1W2p95left_highe_dummy"
+#file_name="Q2p1W2p95right_highe_dummy"
+#file_name="Q2p1W2p95center_lowe_dummy"
+#file_name="Q2p1W2p95left_lowe_dummy"
 numbers_to_match=()
-IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"             # RIGHT, Q2=5p5, W=3p02
+IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"
+echo
 echo "${file_name}"
 echo "Run Numbers: [${numbers_to_match[@]}]"
 
@@ -66,7 +76,10 @@ while true; do
     read -p "Are you sure you want to remove files with specified numbers in the filename? (yes/no): " answer
 
     case "$answer" in
-        [Yy]* ) 
+        [Yy]* )
+	    ##Finds number of lines of file_name
+	    numlines=$(eval "wc -l < ${file_name}")
+	    echo "Run $(( ${number} + 2 ))/$(( ${numlines} +1 ))"
             # Loop through each number in the list
             for number in "${numbers_to_match[@]}"
             do
