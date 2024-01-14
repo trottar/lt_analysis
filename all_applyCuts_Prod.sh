@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 01:30:32 trottar"
+# Time-stamp: "2024-01-14 01:31:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,7 +88,7 @@ while true; do
             do
                 echo "Running ${number}"
                 cd $kaonlt/../lt_analysis
-                ./applyCuts_Prod.sh -p low left 2p1 2p95 LH2 ${number} kaon >> "${file_name}_all_applyCuts_Prod.log"
+                ./applyCuts_Prod.sh -p low left 2p1 2p95 LH2 ${number} kaon &> "${file_name}_all_applyCuts_Prod.log"
             done
             break ;;
         [Nn]* ) 
