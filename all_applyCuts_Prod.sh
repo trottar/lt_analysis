@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 00:57:55 trottar"
+# Time-stamp: "2024-01-14 00:58:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,8 +55,8 @@ grab_runs () {
 
 #file_name="Q2p1W2p95center_highe" # DONE
 #file_name="Q2p1W2p95left_highe" # DONE
-file_name="Q2p1W2p95right_highe"
-#file_name="Q2p1W2p95center_lowe"
+#file_name="Q2p1W2p95right_highe" # DONE
+file_name="Q2p1W2p95center_lowe"
 #file_name="Q2p1W2p95left_lowe"
 #file_name="Q2p1W2p95center_highe_dummy"
 #file_name="Q2p1W2p95left_highe_dummy"
@@ -88,7 +88,7 @@ while true; do
             do
 		echo "Running ${number}"
 		cd $kaonlt/../lt_analysis
-		./applyCuts_Prod.sh -p high right 2p1 2p95 LH2 ${number} kaon
+		./applyCuts_Prod.sh -p low center 2p1 2p95 LH2 ${number} kaon
             done
             break ;;
         [Nn]* ) 
