@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 12:41:00 trottar"
+# Time-stamp: "2024-01-14 12:54:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,17 +58,17 @@ TARGET="LH2"
 
 KIN="Q4p4W2p74"
 
-EPS="high"
-#EPS="low"
+#EPS="high"
+EPS="low"
 
-#PHISET="center"
+PHISET="center"
 #PHISET="left"
-PHISET="right"
+#PHISET="right"
 
 # Q4p4W2p74center_highe # DONE
 # Q4p4W2p74left_highe # DONE
 # Q4p4W2p74right_highe # DONE
-# Q4p4W2p74center_lowe
+# Q4p4W2p74center_lowe # DONE
 # Q4p4W2p74left_lowe
 # Q4p4W2p74center_highe_dummy
 # Q4p4W2p74left_highe_dummy
