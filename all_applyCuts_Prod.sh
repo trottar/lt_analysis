@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 12:25:46 trottar"
+# Time-stamp: "2024-01-14 12:26:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,14 +99,16 @@ while true; do
         [Yy]* )
             # Finds number of lines of inpFile
             numlines=$(eval "wc -l < ${inpFile}")
+	    i=0
             # Loop through each number in the list
             for number in "${numbers_to_match[@]}"
             do
 		echo
-		echo "Run $(( ${number} + 1 ))/$(( ${numlines} + 1 ))"
+		echo "Run $(( ${i} + 1 ))/$(( ${numlines} + 1 ))"
                 echo "Running ${number}"
                 cd $kaonlt/../lt_analysis
 		./applyCuts_Prod.sh -p ${EPS} ${PHISET} 2p1 2p95 ${TARGET} ${number} kaon
+		i+=1
             done
             break ;;
         [Nn]* ) 
