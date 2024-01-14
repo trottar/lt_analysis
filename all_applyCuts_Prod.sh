@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 17:57:07 trottar"
+# Time-stamp: "2024-01-14 18:13:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ KIN="Q5p5W3p02"
 EPS="high"
 #EPS="low"
 
-#PHISET="center"
-PHISET="left"
+PHISET="center"
+#PHISET="left"
 #PHISET="right"
 
 # Q4p4W2p74center_highe
@@ -70,7 +70,7 @@ PHISET="left"
 # Q4p4W2p74right_highe
 # Q4p4W2p74center_lowe
 # Q4p4W2p74left_lowe
-# Q4p4W2p74center_highe_dummy
+# Q4p4W2p74center_highe_dummy # DONE
 # Q4p4W2p74left_highe_dummy # DONE
 # Q4p4W2p74right_highe_dummy # DONE
 # Q4p4W2p74center_lowe_dummy
