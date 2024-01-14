@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 12:25:11 trottar"
+# Time-stamp: "2024-01-14 12:25:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,9 +77,9 @@ PHISET="center"
 # Q4p4W2p74left_lowe_dummy
 
 if [ $TARGET = "dummy" ]; then
-    file_name="${KIN}${PHISET}_{EPS}e_dummy"
+    file_name="${KIN}${PHISET}_${EPS}e_dummy"
 else
-    file_name="${KIN}${PHISET}_{EPS}e"
+    file_name="${KIN}${PHISET}_${EPS}e"
 fi
 
 numbers_to_match=()
