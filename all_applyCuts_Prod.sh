@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 01:26:59 trottar"
+# Time-stamp: "2024-01-14 01:29:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,7 +95,6 @@ while true; do
             echo "Operation aborted." >> "${file_name}_all_applyCuts_Prod.log"
             exit ;;
         * ) 
-            echo "Please answer yes or no." >> "${file_name}_all_applyCuts_Prod.log"
             ;;
     esac
 done
