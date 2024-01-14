@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 22:01:35 trottar"
+# Time-stamp: "2024-01-13 22:02:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,9 +53,9 @@ grab_runs () {
     fi
 }
 
-#file_name="Q2p1W2p95center_highe"
-file_name="Q2p1W2p95left_highe"
-#file_name="Q2p1W2p95right_highe"
+#file_name="Q2p1W2p95center_highe" # DONE
+#file_name="Q2p1W2p95left_highe" # DONE
+file_name="Q2p1W2p95right_highe"
 #file_name="Q2p1W2p95center_lowe"
 #file_name="Q2p1W2p95left_lowe"
 #file_name="Q2p1W2p95center_highe_dummy"
