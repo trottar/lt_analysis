@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 18:14:41 trottar"
+# Time-stamp: "2024-01-14 18:17:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ KIN="Q5p5W3p02"
 #EPS="high"
 EPS="low"
 
-PHISET="center"
-#PHISET="left"
+#PHISET="center"
+PHISET="left"
 #PHISET="right"
 
 # Q4p4W2p74center_highe
@@ -74,7 +74,7 @@ PHISET="center"
 # Q4p4W2p74left_highe_dummy # DONE
 # Q4p4W2p74right_highe_dummy # DONE
 # Q4p4W2p74center_lowe_dummy # DONE
-# Q4p4W2p74left_lowe_dummy
+# Q4p4W2p74left_lowe_dummy # DONE
 
 if [ $TARGET = "dummy" ]; then
     file_name="${KIN}${PHISET}_${EPS}e_dummy"
