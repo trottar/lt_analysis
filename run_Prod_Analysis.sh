@@ -92,7 +92,7 @@ fi
 #NumPhiBins=10
 # Q2=5p5
 NumtBins=3
-NumPhiBins=6
+NumPhiBins=4
 
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity
