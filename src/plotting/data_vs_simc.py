@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 22:57:22 trottar"
+# Time-stamp: "2024-01-14 23:08:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,8 +88,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     # Check if the value of the dictionary is a Tobject that can use .Clone()
     for hist in histlist_copy:
         hist_copy = {key: value.Clone() if hasattr(value, 'Clone') else value for key, value in hist.items()}
-
-
     
     ################################################################################################################################################
 
@@ -99,6 +97,123 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     ################################################################################################################################################
 
+    for hist in histlist_copy:
+        
+        hist["H_hsdelta_SIMC"] = hist["H_hsdelta_SIMC"]
+        hist["H_hsxptar_SIMC"] = hist["H_hsxptar_SIMC"]
+        hist["H_hsyptar_SIMC"] = hist["H_hsyptar_SIMC"]
+        hist["H_ssxfp_SIMC"] = hist["H_ssxfp_SIMC"]
+        hist["H_ssyfp_SIMC"] = hist["H_ssyfp_SIMC"]
+        hist["H_ssxpfp_SIMC"] = hist["H_ssxpfp_SIMC"]
+        hist["H_ssypfp_SIMC"] = hist["H_ssypfp_SIMC"]
+        hist["H_hsxfp_SIMC"] = hist["H_hsxfp_SIMC"]
+        hist["H_hsyfp_SIMC"] = hist["H_hsyfp_SIMC"]
+        hist["H_hsxpfp_SIMC"] = hist["H_hsxpfp_SIMC"]
+        hist["H_hsypfp_SIMC"] = hist["H_hsypfp_SIMC"]
+        hist["H_ssdelta_SIMC"] = hist["H_ssdelta_SIMC"]
+        hist["H_ssxptar_SIMC"] = hist["H_ssxptar_SIMC"]
+        hist["H_ssyptar_SIMC"] = hist["H_ssyptar_SIMC"]
+        hist["H_q_SIMC"] = hist["H_q_SIMC"]
+        hist["H_Q2_SIMC"] = hist["H_Q2_SIMC"]
+        hist["H_t_SIMC"] = hist["H_t_SIMC"]
+        hist["H_epsilon_SIMC"] = hist["H_epsilon_SIMC"]
+        hist["H_MM_SIMC"] = hist["H_MM_SIMC"]
+        hist["H_th_SIMC"] = hist["H_th_SIMC"]
+        hist["H_ph_SIMC"] = hist["H_ph_SIMC"]
+        hist["H_ph_q_SIMC"] = hist["H_ph_q_SIMC"]
+        hist["H_th_q_SIMC"] = hist["H_th_q_SIMC"]
+        hist["H_ph_recoil_SIMC"] = hist["H_ph_recoil_SIMC"]
+        hist["H_th_recoil_SIMC"] = hist["H_th_recoil_SIMC"]
+        hist["H_pmiss_SIMC"] = hist["H_pmiss_SIMC"]
+        hist["H_emiss_SIMC"] = hist["H_emiss_SIMC"]
+        hist["H_pmx_SIMC"] = hist["H_pmx_SIMC"]
+        hist["H_pmy_SIMC"] = hist["H_pmy_SIMC"]
+        hist["H_pmz_SIMC"] = hist["H_pmz_SIMC"]
+        hist["H_W_SIMC"] = hist["H_W_SIMC"]
+        hist["polar_phiq_vs_t_SIMC"] = hist["polar_phiq_vs_t_SIMC"]
+
+        histDict["H_hsdelta_DUMMY"] = histDict["H_hsdelta_DUMMY"]
+        histDict["H_hsxptar_DUMMY"] = histDict["H_hsxptar_DUMMY"]
+        histDict["H_hsyptar_DUMMY"] = histDict["H_hsyptar_DUMMY"]
+        histDict["H_ssxfp_DUMMY"] = histDict["H_ssxfp_DUMMY"]
+        histDict["H_ssyfp_DUMMY"] = histDict["H_ssyfp_DUMMY"]
+        histDict["H_ssxpfp_DUMMY"] = histDict["H_ssxpfp_DUMMY"]
+        histDict["H_ssypfp_DUMMY"] = histDict["H_ssypfp_DUMMY"]
+        histDict["H_hsxfp_DUMMY"] = histDict["H_hsxfp_DUMMY"]
+        histDict["H_hsyfp_DUMMY"] = histDict["H_hsyfp_DUMMY"]
+        histDict["H_hsxpfp_DUMMY"] = histDict["H_hsxpfp_DUMMY"]
+        histDict["H_hsypfp_DUMMY"] = histDict["H_hsypfp_DUMMY"]
+        histDict["H_ssdelta_DUMMY"] = histDict["H_ssdelta_DUMMY"]
+        histDict["H_ssxptar_DUMMY"] = histDict["H_ssxptar_DUMMY"]
+        histDict["H_ssyptar_DUMMY"] = histDict["H_ssyptar_DUMMY"]
+        histDict["H_q_DUMMY"] = histDict["H_q_DUMMY"]
+        histDict["H_Q2_DUMMY"] = histDict["H_Q2_DUMMY"]
+        histDict["H_t_DUMMY"] = histDict["H_t_DUMMY"]
+        histDict["H_epsilon_DUMMY"] = histDict["H_epsilon_DUMMY"]
+        histDict["H_MM_DUMMY"] = histDict["H_MM_DUMMY"]
+        histDict["H_th_DUMMY"] = histDict["H_th_DUMMY"]
+        histDict["H_ph_DUMMY"] = histDict["H_ph_DUMMY"]
+        histDict["H_ph_q_DUMMY"] = histDict["H_ph_q_DUMMY"]
+        histDict["H_th_q_DUMMY"] = histDict["H_th_q_DUMMY"]
+        histDict["H_ph_recoil_DUMMY"] = histDict["H_ph_recoil_DUMMY"]
+        histDict["H_th_recoil_DUMMY"] = histDict["H_th_recoil_DUMMY"]
+        histDict["H_pmiss_DUMMY"] = histDict["H_pmiss_DUMMY"]
+        histDict["H_emiss_DUMMY"] = histDict["H_emiss_DUMMY"]
+        histDict["H_pmx_DUMMY"] = histDict["H_pmx_DUMMY"]
+        histDict["H_pmy_DUMMY"] = histDict["H_pmy_DUMMY"]
+        histDict["H_pmz_DUMMY"] = histDict["H_pmz_DUMMY"]
+        histDict["H_W_DUMMY"] = histDict["H_W_DUMMY"]
+        histDict["H_ct_DUMMY"] = histDict["H_ct_DUMMY"]
+        histDict["MM_vs_CoinTime_DUMMY"] = histDict["MM_vs_CoinTime_DUMMY"]
+        histDict["CoinTime_vs_beta_DUMMY"] = histDict["CoinTime_vs_beta_DUMMY"]
+        histDict["MM_vs_beta_DUMMY"] = histDict["MM_vs_beta_DUMMY"]
+        histDict["phiq_vs_t_DUMMY"] = histDict["phiq_vs_t_DUMMY"]
+        histDict["polar_phiq_vs_t_DUMMY"] = histDict["polar_phiq_vs_t_DUMMY"]
+        histDict["H_hsdelta_DATA"] = histDict["H_hsdelta_DATA"]
+        histDict["H_hsxptar_DATA"] = histDict["H_hsxptar_DATA"]
+        histDict["H_hsyptar_DATA"] = histDict["H_hsyptar_DATA"]
+        histDict["H_ssxfp_DATA"] = histDict["H_ssxfp_DATA"]
+        histDict["H_ssyfp_DATA"] = histDict["H_ssyfp_DATA"]
+        histDict["H_ssxpfp_DATA"] = histDict["H_ssxpfp_DATA"]
+        histDict["H_ssypfp_DATA"] = histDict["H_ssypfp_DATA"]
+        histDict["H_hsxfp_DATA"] = histDict["H_hsxfp_DATA"]
+        histDict["H_hsyfp_DATA"] = histDict["H_hsyfp_DATA"]
+        histDict["H_hsxpfp_DATA"] = histDict["H_hsxpfp_DATA"]
+        histDict["H_hsypfp_DATA"] = histDict["H_hsypfp_DATA"]
+        histDict["H_ssdelta_DATA"] = histDict["H_ssdelta_DATA"]
+        histDict["H_ssxptar_DATA"] = histDict["H_ssxptar_DATA"]
+        histDict["H_ssyptar_DATA"] = histDict["H_ssyptar_DATA"]
+        histDict["H_q_DATA"] = histDict["H_q_DATA"]
+        histDict["H_Q2_DATA"] = histDict["H_Q2_DATA"]
+        histDict["H_t_DATA"] = histDict["H_t_DATA"]
+        histDict["H_epsilon_DATA"] = histDict["H_epsilon_DATA"]
+        histDict["H_MM_DATA"] = histDict["H_MM_DATA"]
+        histDict["H_th_DATA"] = histDict["H_th_DATA"]
+        histDict["H_ph_DATA"] = histDict["H_ph_DATA"]
+        histDict["H_ph_q_DATA"] = histDict["H_ph_q_DATA"]
+        histDict["H_th_q_DATA"] = histDict["H_th_q_DATA"]
+        histDict["H_ph_recoil_DATA"] = histDict["H_ph_recoil_DATA"]
+        histDict["H_th_recoil_DATA"] = histDict["H_th_recoil_DATA"]
+        histDict["H_pmiss_DATA"] = histDict["H_pmiss_DATA"]
+        histDict["H_emiss_DATA"] = histDict["H_emiss_DATA"]
+        histDict["H_pmx_DATA"] = histDict["H_pmx_DATA"]
+        histDict["H_pmy_DATA"] = histDict["H_pmy_DATA"]
+        histDict["H_pmz_DATA"] = histDict["H_pmz_DATA"]
+        histDict["H_W_DATA"] = histDict["H_W_DATA"]
+        histDict["H_ct_DATA"] = histDict["H_ct_DATA"]
+        histDict["H_cal_etottracknorm_DATA"] = histDict["H_cal_etottracknorm_DATA"]
+        histDict["H_cer_npeSum_DATA"] = histDict["H_cer_npeSum_DATA"]
+        histDict["P_cal_etottracknorm_DATA"] = histDict["P_cal_etottracknorm_DATA"]
+        histDict["P_hgcer_npeSum_DATA"] = histDict["P_hgcer_npeSum_DATA"]
+        histDict["P_aero_npeSum_DATA"] = histDict["P_aero_npeSum_DATA"]
+        histDict["MM_vs_CoinTime_DATA"] = histDict["MM_vs_CoinTime_DATA"]
+        histDict["CoinTime_vs_beta_DATA"] = histDict["CoinTime_vs_beta_DATA"]
+        histDict["MM_vs_beta_DATA"] = histDict["MM_vs_beta_DATA"]
+        histDict["phiq_vs_t_DATA"] = histDict["phiq_vs_t_DATA"]
+        histDict["polar_phiq_vs_t_DATA"] = histDict["polar_phiq_vs_t_DATA"]
+        histDict["Q2_vs_W_DATA"] = histDict["Q2_vs_W_DATA"]
+
+        
     # Creating clone of efficiency plots because otherwise things
     # crash due to pointer issues with TMultiGraph's Add() function
     data_eff_dict = {}
