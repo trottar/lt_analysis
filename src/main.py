@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 21:55:13 trottar"
+# Time-stamp: "2024-01-14 22:01:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,14 +265,19 @@ Apply random subtraction to data and dummy.
 # May need to adjust these for binning
 # Too many zero bins can result in empty bins when t/phi binning
 # Good method is to use std dev around central set value
+#inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+#inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+#inpDict["Wmin"] = WVal - (0.06)*WVal
+#inpDict["Wmax"] = WVal + (0.06)*WVal
+#inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
+#inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
+# Q2=5p5, W=3.02
 inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
 inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
 inpDict["Wmin"] = WVal - (0.06)*WVal
 inpDict["Wmax"] = WVal + (0.06)*WVal
-#inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
-#inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
-inpDict["Epsmin"] = float(EPSVAL) - (0.08)*float(EPSVAL) # Q2=5p5, W=3.02
-inpDict["Epsmax"] = float(EPSVAL) + (0.08)*float(EPSVAL) # Q2=5p5, W=3.02
+inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
+inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
 ##############
 ##############
 ##############
