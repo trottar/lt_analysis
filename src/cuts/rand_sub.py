@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 02:01:38 trottar"
+# Time-stamp: "2024-01-15 02:11:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1050,6 +1050,30 @@ def rand_sub(phi_setting, inpDict):
     polar_plots[-1].SetTitle("")
     
     Cpht_data.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    ###
+    # t plots            
+    Ct = TCanvas()
+    l_t = TLegend(0.115,0.45,0.33,0.95)
+    l_t.SetTextSize(0.0135)
+
+    histDict["H_t_DATA"].SetLineColor(1)
+    l_t.AddEntry(histDict["H_t_DATA"],histDict["phi_setting"])
+    histDict["H_t_DATA"].Draw("same, E1")
+
+    Ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    ###
+    # phi plots            
+    Cphi = TCanvas()
+    l_phi = TLegend(0.115,0.45,0.33,0.95)
+    l_phi.SetTextSize(0.0135)
+
+    histDict["H_ph_q_DATA"].SetLineColor(1)
+    l_phi.AddEntry(histDict["H_ph_q_DATA"],histDict["phi_setting"])
+    histDict["H_ph_q_DATA"].Draw("same, E1")
+
+    Ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
     ###
     # PID Plots
