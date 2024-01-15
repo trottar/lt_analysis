@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 07:37:35 trottar"
+# Time-stamp: "2024-01-15 17:03:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,7 +102,6 @@ output_file_lst = []
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
 
-
 ################################
 # Step 1-4 of the lt_analysis: #
 ################################
@@ -136,8 +135,8 @@ if EPSSET == "low":
     from xfit_in_t import x_fit_in_t
     x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W)
     if DEBUG:
-        show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, q2_set, w_set))
-    output_file_lst.append(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, q2_set, w_set))
+        show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, w_set))
+    output_file_lst.append(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, w_set))
     output_file_lst.append('models/xfit_in_t.py')
 
 # ***Parameter file for new iteration!***

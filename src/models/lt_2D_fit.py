@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 12:30:05 trottar"
+# Time-stamp: "2024-01-15 17:08:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,27 +124,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
             entry.x, entry.dx, entry.x_mod, entry.eps, entry.theta, entry.phi, entry.t, entry.t_min, entry.w, entry.Q2
         ))
     
-    # Define variables
-    qq = array('f', [0.0])
-    ww = array('f', [0.0])
-    thetacm = array('f', [0.0])
-    tt = array('f', [0.0])
-    t_min = array('f', [0.0])
-    lo_eps_real = array('f', [0.0])
-    hi_eps_real = array('f', [0.0])
-
-    # Set branch addresses
-    nlo.SetBranchAddress("Q2", qq)
-    nlo.SetBranchAddress("w", ww)
-    nlo.SetBranchAddress("theta", thetacm)
-    nlo.SetBranchAddress("t", tt)
-    nlo.SetBranchAddress("t_min", t_min)
-    nlo.SetBranchAddress("eps", lo_eps_real)
-
-    nhi.SetBranchAddress("eps", hi_eps_real)
-
-    N = nlo.GetEntries()
-
     q2_list = []
     w_list = []
     theta_list = []
@@ -537,7 +516,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
 
         # Print values to console
-        print("Outputting...  ", sig_t, "  ", sig_l, "  ", tt, "  ", ww, "  ", qq, "  ", lo_eps_real, "  ", hi_eps_real)
+        print("Bin {}: Outputting...  ".format(i), sig_t, "  ", sig_l, "  ", t_list[i], "  ", w_list[i], "  ", q2_list[i], "  ", lo_eps_real, "  ", hi_eps_real)
 
         fn_sep = "{}/src/{}/xsects/x_sep.{}_{}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""))
         try:
@@ -547,7 +526,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
                 f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
                     sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
 
-                    fff2.GetChisquare(), tt[0], t_min[0], ww[0], qq[0]
+                    fff2.GetChisquare(), t_list[i], t_min_list[i], w_list[i], q2_list[i]
                 ))
 
         except IOError:
