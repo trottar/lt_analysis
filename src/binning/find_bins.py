@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 14:29:17 trottar"
+# Time-stamp: "2024-01-15 14:38:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -218,6 +218,10 @@ def check_bins(histlist, inpDict):
 
     ################################################################################################################################################
 
+
+    print(H_phi_Right, H_phi_Left, H_phi_Center)
+    print(len(H_phi_Right)+len(H_phi_Left)+len(H_phi_Center))
+    
     # Concatenate the H_t arrays for Right, Left, and Center
     H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
 
@@ -228,6 +232,8 @@ def check_bins(histlist, inpDict):
     # Concatenate the H_phi arrays for Right, Left, and Center
     H_phi_BinTest = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
 
+    print(len(H_phi_BinTest))
+    
     def find_phibins(H_phi_BinTest):
 
         print("\nFinding phi bins...")
