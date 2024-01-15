@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 14:51:30 trottar"
+# Time-stamp: "2024-01-15 03:14:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,3 +333,33 @@ def run_fortran(fort_script, inp_val=""):
     return completed_process.communicate()
 
 ################################################################################################################################################
+
+def set_dynamic_axis_ranges():
+
+    # Get the number of bins
+    num_bins = histogram.GetNbinsX()
+
+    # Retrieve min and max bin content along the x-axis
+    min_bin_content = histogram.GetBinContent(1)
+    max_bin_content = histogram.GetBinContent(num_bins)
+
+    # Set x-axis range dynamically based on the number of events in the specified histogram
+    total_events = histogram.GetEntries()
+    x_axis_range_factor = 1.2  # Adjust this factor as needed
+    x_axis_min = histogram.GetBinLowEdge(1)
+    x_axis_max = histogram.GetBinLowEdge(num_bins + 1) * (total_events / max_bin_content) * x_axis_range_factor
+    histogram.GetXaxis().SetRangeUser(x_axis_min, x_axis_max)
+
+    # Set y-axis range dynamically
+    histogram.GetYaxis().SetRangeUser(min_bin_content, max_bin_content)
+
+    # Draw the histogram with updated axis ranges
+    histogram.Draw()
+
+    # Optionally, display the canvas
+    ROOT.gPad.GetCanvas().Draw()
+
+    # Close the ROOT file
+    file.Close()
+
+################################################################################################################################################    
