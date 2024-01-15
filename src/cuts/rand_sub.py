@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 04:08:55 trottar"
+# Time-stamp: "2024-01-15 04:23:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -570,9 +570,10 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY.Fill(evt.MM,evt.P_gtr_beta)
+          # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
-          polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)            
+          polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
 
           H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
@@ -592,7 +593,8 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_DUMMY.Fill(evt.hsxptar)	
           H_hsyptar_DUMMY.Fill(evt.hsyptar)
 
-          H_ph_q_DUMMY.Fill(evt.ph_q+math.pi)
+          # SIMC goes from 0 to 2pi so no need for +pi          
+          H_ph_q_DUMMY.Fill((evt.ph_q+math.pi)*(180/math.pi))
           H_th_q_DUMMY.Fill(evt.th_q)
           H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
           H_th_recoil_DUMMY.Fill(evt.th_recoil)
@@ -668,8 +670,10 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_RAND.Fill(evt.MM,evt.P_gtr_beta)
+          # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
+          polar_phiq_vs_t_RAND.SetPoint(polar_phiq_vs_t_RAND.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
 
           H_ct_RAND.Fill(evt.CTime_ROC1)          
           
@@ -689,6 +693,12 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_RAND.Fill(evt.hsxptar)	
           H_hsyptar_RAND.Fill(evt.hsyptar)
 
+          # SIMC goes from 0 to 2pi so no need for +pi          
+          H_ph_q_RAND.Fill((evt.ph_q+math.pi)*(180/math.pi))
+          H_th_q_RAND.Fill(evt.th_q)
+          H_ph_recoil_RAND.Fill(evt.ph_recoil)
+          H_th_recoil_RAND.Fill(evt.th_recoil)
+          
           H_pmiss_RAND.Fill(evt.pmiss)	
           H_emiss_RAND.Fill(evt.emiss)	
           #H_emiss_RAND.Fill(evt.emiss_nuc)
@@ -758,8 +768,10 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY_RAND.Fill(evt.MM,evt.P_gtr_beta)
+          # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
+          polar_phiq_vs_t_DUMMY_RAND.SetPoint(polar_phiq_vs_t_DUMMY_RAND.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
 
           H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)                   
 
@@ -779,6 +791,12 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_DUMMY_RAND.Fill(evt.hsxptar)	
           H_hsyptar_DUMMY_RAND.Fill(evt.hsyptar)
 
+          # SIMC goes from 0 to 2pi so no need for +pi          
+          H_ph_q_DUMMY_RAND.Fill((evt.ph_q+math.pi)*(180/math.pi))
+          H_th_q_DUMMY_RAND.Fill(evt.th_q)
+          H_ph_recoil_DUMMY_RAND.Fill(evt.ph_recoil)
+          H_th_recoil_DUMMY_RAND.Fill(evt.th_recoil)
+          
           H_pmiss_DUMMY_RAND.Fill(evt.pmiss)	
           H_emiss_DUMMY_RAND.Fill(evt.emiss)	
           #H_emiss_DUMMY_RAND.Fill(evt.emiss_nuc)
@@ -816,6 +834,10 @@ def rand_sub(phi_setting, inpDict):
     H_hsyptar_RAND.Scale(1/nWindows)
     H_ssdelta_RAND.Scale(1/nWindows)
     H_hsdelta_RAND.Scale(1/nWindows)
+    H_ph_q_RAND.Scale(1/nWindows)
+    H_th_q_RAND.Scale(1/nWindows)
+    H_ph_recoil_RAND.Scale(1/nWindows)
+    H_th_recoil_RAND.Scale(1/nWindows)
     H_Q2_RAND.Scale(1/nWindows)
     H_t_RAND.Scale(1/nWindows)
     H_epsilon_RAND.Scale(1/nWindows)
@@ -847,6 +869,10 @@ def rand_sub(phi_setting, inpDict):
     H_hsyptar_DUMMY_RAND.Scale(1/nWindows)
     H_ssdelta_DUMMY_RAND.Scale(1/nWindows)
     H_hsdelta_DUMMY_RAND.Scale(1/nWindows)
+    H_ph_q_DUMMY_RAND.Scale(1/nWindows)
+    H_th_q_DUMMY_RAND.Scale(1/nWindows)
+    H_ph_recoil_DUMMY_RAND.Scale(1/nWindows)
+    H_th_recoil_DUMMY_RAND.Scale(1/nWindows)    
     H_Q2_DUMMY_RAND.Scale(1/nWindows)
     H_t_DUMMY_RAND.Scale(1/nWindows)
     H_epsilon_DUMMY_RAND.Scale(1/nWindows)
@@ -880,6 +906,10 @@ def rand_sub(phi_setting, inpDict):
     H_hsyptar_DATA.Add(H_hsyptar_RAND,-1)
     H_ssdelta_DATA.Add(H_ssdelta_RAND,-1)
     H_hsdelta_DATA.Add(H_hsdelta_RAND,-1)
+    H_ph_q_DATA.Add(H_ph_q_RAND,-1)
+    H_th_q_DATA.Add(H_th_q_RAND,-1)
+    H_ph_recoil_DATA.Add(H_ph_recoil_RAND,-1)
+    H_th_recoil_DATA.Add(H_th_recoil_RAND,-1)
     H_Q2_DATA.Add(H_Q2_RAND,-1)
     H_t_DATA.Add(H_t_RAND,-1)
     H_epsilon_DATA.Add(H_epsilon_RAND,-1)
@@ -913,6 +943,10 @@ def rand_sub(phi_setting, inpDict):
     H_hsyptar_DUMMY.Add(H_hsyptar_DUMMY_RAND,-1)
     H_ssdelta_DUMMY.Add(H_ssdelta_DUMMY_RAND,-1)
     H_hsdelta_DUMMY.Add(H_hsdelta_DUMMY_RAND,-1)
+    H_ph_q_DUMMY.Add(H_ph_q_DUMMY_RAND,-1)
+    H_th_q_DUMMY.Add(H_th_q_DUMMY_RAND,-1)
+    H_ph_recoil_DUMMY.Add(H_ph_recoil_DUMMY_RAND,-1)
+    H_th_recoil_DUMMY.Add(H_th_recoil_DUMMY_RAND,-1)    
     H_Q2_DUMMY.Add(H_Q2_DUMMY_RAND,-1)
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
