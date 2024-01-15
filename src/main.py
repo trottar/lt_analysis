@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 21:31:23 trottar"
+# Time-stamp: "2024-01-14 21:40:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -271,8 +271,8 @@ inpDict["Wmin"] = WVal - (0.06)*WVal
 inpDict["Wmax"] = WVal + (0.06)*WVal
 #inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
 #inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
-inpDict["Epsmin"] = float(EPSVAL) - (0.04)*float(EPSVAL)
-inpDict["Epsmax"] = float(EPSVAL) + (0.04)*float(EPSVAL)
+inpDict["Epsmin"] = float(EPSVAL) - (0.06)*float(EPSVAL)
+inpDict["Epsmax"] = float(EPSVAL) + (0.06)*float(EPSVAL)
 ##############
 ##############
 ##############
