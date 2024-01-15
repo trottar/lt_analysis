@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 04:30:29 trottar"
+# Time-stamp: "2024-01-15 04:36:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1111,7 +1111,7 @@ def rand_sub(phi_setting, inpDict):
     # Create custom labels for multiples of pi
     pi_values = []  # Adjust as needed
     pi_labels = []
-    for i in range(10):
+    for i in range(6):
         if i == 0:
             pi_labels.append('0')
         if i == 1:
