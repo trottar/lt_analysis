@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 17:08:43 trottar"
+# Time-stamp: "2024-01-15 17:19:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -516,7 +516,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
 
         # Print values to console
-        print("Bin {}: Outputting...  ".format(i), sig_t, "  ", sig_l, "  ", t_list[i], "  ", w_list[i], "  ", q2_list[i], "  ", lo_eps_real, "  ", hi_eps_real)
+        print("Bin {}: Outputting...  ".format(i), sig_t, "  ", sig_l, "  ", t_list[i], "  ", w_list[i], "  ", q2_list[i], "  ", lo_eps_list[i], "  ", hi_eps_list[i])
 
         fn_sep = "{}/src/{}/xsects/x_sep.{}_{}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""))
         try:
