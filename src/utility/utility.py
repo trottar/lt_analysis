@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 05:59:30 trottar"
+# Time-stamp: "2024-01-15 06:08:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,13 +57,21 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
 def show_pdf_with_evince(file_path):
     try:
-        process = subprocess.Popen(['evince', file_path])
-        process.wait()  # Pauses the script until Evince is closed
+        user_input = input("Do you want to open the file? (y/n): ")
+        
+        if user_input.lower() == 'y':
+            process = subprocess.Popen(['evince', file_path])
+            process.wait()  # Pauses the script until Evince is closed
+        elif user_input.lower() == 'q':
+            print("File opening canceled.")
+        else:
+            print("Invalid input. Please enter 'y' to open or 'q' to cancel.")
+    
     except FileNotFoundError:
         print("Evince not found. Please make sure it is installed.")
     except Exception as e:
         print("An error occurred: {}".format(e))
-
+        
 ################################################################################################################################################
 
 def write_to_file(f_out,line,write_mode='a'):
