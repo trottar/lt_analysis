@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 21:41:12 trottar"
+# Time-stamp: "2024-01-15 02:39:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,7 +161,7 @@ def compare_simc(hist, inpDict):
     H_MM_SIMC  = TH1D("H_MM_SIMC","MM_{K}", 200, 0.0, 1.5)
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 200, -0.1, 0.1)
     H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 200, -0.1, 0.1)
-    H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 200, 0.0, 2*math.pi)
+    H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 200, -2math.pi, 2*math.pi)
     H_th_q_SIMC  = TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 200, -0.2, 0.2)
     H_ph_recoil_SIMC  = TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
     H_th_recoil_SIMC  = TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 200, -10.0, 10.0)
@@ -305,5 +305,72 @@ def compare_simc(hist, inpDict):
     #################
     #################
     #################    
+
+    ###
+    # MM plots    
+    CMM = TCanvas()
+
+    histDict["H_MM_SIMC"].SetLineColor(1)
+    histDict["H_MM_SIMC"].Draw("same, E1")
+
+    CMM.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+'(')
+
+    ###
+    # t-Phi plots        
+    Cpht_data = TCanvas()
+
+    # Create a list to store all polar plots
+    polar_plots = []
+
+    polar_plot = TGraphPolar(histDict["polar_phiq_vs_t_SIMC"].GetN(), histDict["polar_phiq_vs_t_SIMC"].GetX(), histDict["polar_phiq_vs_t_SIMC"].GetY())
+    polar_plot.SetMarkerColor(1)
+    polar_plot.SetMarkerSize(0.5)
+    polar_plot.SetMarkerStyle(20)
+    polar_plots.append(polar_plot)  # Store the plot in the list
+    polar_plot.Draw("AP same")
+
+    # Set titles and axes for the last plot
+    polar_plots[-1].GetXaxis().SetName("#Phi")
+    polar_plots[-1].GetYaxis().SetName("-t")
+    polar_plots[-1].SetTitle("")
+    
+    Cpht_data.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
+
+    ###
+    # t plots            
+    Ct = TCanvas()
+    l_t = TLegend(0.115,0.45,0.33,0.95)
+    l_t.SetTextSize(0.0135)
+
+    histDict["H_t_SIMC"].SetLineColor(1)
+    l_t.AddEntry(histDict["H_t_SIMC"],histDict["phi_setting"])
+    histDict["H_t_SIMC"].Draw("same, E1")
+
+    Ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
+
+    ###
+    # phi plots            
+    Cphi = TCanvas()
+    l_phi = TLegend(0.115,0.45,0.33,0.95)
+    l_phi.SetTextSize(0.0135)
+
+    # Set the x-axis labels to multiples of pi
+    axis = histDict["H_ph_q_SIMC"].GetXaxis()
+    axis.SetNdivisions(505)  # Adjust the number of divisions for clarity
+    axis.SetLabelSize(0.03)  # Adjust label size if needed
+
+    # Create custom labels for multiples of pi
+    pi_values = [0, 1, 2, 3, 4]  # Adjust as needed
+    pi_labels = ['0', '#pi', '2#pi', '3#pi', '4#pi']  # Adjust labels accordingly
+
+    # Set custom labels for the x-axis
+    for i, val in enumerate(pi_values):
+        axis.ChangeLabel(val + 1, -1, -1, -1, -1, -1, pi_labels[i])
+    
+    histDict["H_ph_q_SIMC"].SetLineColor(1)
+    l_phi.AddEntry(histDict["H_ph_q_SIMC"],histDict["phi_setting"])
+    histDict["H_ph_q_SIMC"].Draw("same, E1")    
+
+    Cphi.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+')')
     
     return histDict

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 22:01:31 trottar"
+# Time-stamp: "2024-01-15 02:39:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -402,6 +402,13 @@ from compare_simc import compare_simc
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     hist.update(compare_simc(hist, inpDict))    
+
+if DEBUG:
+    # Show plot pdf for each setting
+    for hist in histlist:        
+        show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(hist["phi_setting"],ParticleType)))
+for hist in histlist:
+    output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(hist["phi_setting"],ParticleType)))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
