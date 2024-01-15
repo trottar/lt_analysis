@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 22:34:05 trottar"
+# Time-stamp: "2024-01-14 22:43:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,13 +84,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     #for hist in histlist_copy:
     #    hist_copy = {key: value.Clone() for key, value in hist.items()}
+
+    # Check if the value of the dictionary is a Tobject that can use .Clone(), if not, add without copy
     for hist in histlist_copy:
-        # Check if value is a TObject and has the .Clone() method
-        if isinstance(value, ROOT.TObject) and hasattr(value, 'Clone'):
-            # Create a new dictionary hist_copy with cloned values
-            hist_copy = {key: value.Clone() for key, value in hist.items()}
-        else:
-            hist_copy = {key: value for key, value in hist.items()}    
+        hist_copy = {key: value.Clone() if hasattr(value, 'Clone') else value for key, value
+
     
     ################################################################################################################################################
 
