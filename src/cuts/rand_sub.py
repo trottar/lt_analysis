@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 18:30:14 trottar"
+# Time-stamp: "2024-01-15 18:32:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,6 +48,9 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
+################################################################################################################################################
+# Suppressing the terminal splash of Print()
+ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ################################################################################################################################################
 
 def rand_sub(phi_setting, inpDict):    
