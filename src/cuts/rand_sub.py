@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 02:53:15 trottar"
+# Time-stamp: "2024-01-15 02:56:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -465,7 +465,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           phiq_vs_t_DATA.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
-          polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), evt.ph_q, -evt.MandelT)
+          polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
           
           H_ct_DATA.Fill(evt.CTime_ROC1)
 
@@ -485,7 +485,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_DATA.Fill(evt.hsxptar)	
           H_hsyptar_DATA.Fill(evt.hsyptar)
 
-          H_ph_q_DATA.Fill(evt.ph_q+math.pi)
+          H_ph_q_DATA.Fill(evt.ph_q)
           H_th_q_DATA.Fill(evt.th_q)
           H_ph_recoil_DATA.Fill(evt.ph_recoil)
           H_th_recoil_DATA.Fill(evt.th_recoil)
