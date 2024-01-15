@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 23:17:08 trottar"
+# Time-stamp: "2024-01-14 23:22:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,7 +130,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmy_SIMC"] = hist["H_pmy_SIMC"].Scale(hist["normfac_simc"])
         hist["H_pmz_SIMC"] = hist["H_pmz_SIMC"].Scale(hist["normfac_simc"])
         hist["H_W_SIMC"] = hist["H_W_SIMC"].Scale(hist["normfac_simc"])
-        hist["polar_phiq_vs_t_SIMC"] = hist["polar_phiq_vs_t_SIMC"].Scale(hist["normfac_simc"])
 
         hist["H_hsdelta_DUMMY"] = hist["H_hsdelta_DUMMY"].Scale(hist["normfac_dummy"])
         hist["H_hsxptar_DUMMY"] = hist["H_hsxptar_DUMMY"].Scale(hist["normfac_dummy"])
@@ -168,7 +167,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["CoinTime_vs_beta_DUMMY"] = hist["CoinTime_vs_beta_DUMMY"].Scale(hist["normfac_dummy"])
         hist["MM_vs_beta_DUMMY"] = hist["MM_vs_beta_DUMMY"].Scale(hist["normfac_dummy"])
         hist["phiq_vs_t_DUMMY"] = hist["phiq_vs_t_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["polar_phiq_vs_t_DUMMY"] = hist["polar_phiq_vs_t_DUMMY"].Scale(hist["normfac_dummy"])
         
         hist["H_hsdelta_DATA"] = hist["H_hsdelta_DATA"].Scale(hist["normfac_data"])
         hist["H_hsxptar_DATA"] = hist["H_hsxptar_DATA"].Scale(hist["normfac_data"])
@@ -211,7 +209,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["CoinTime_vs_beta_DATA"] = hist["CoinTime_vs_beta_DATA"].Scale(hist["normfac_data"])
         hist["MM_vs_beta_DATA"] = hist["MM_vs_beta_DATA"].Scale(hist["normfac_data"])
         hist["phiq_vs_t_DATA"] = hist["phiq_vs_t_DATA"].Scale(hist["normfac_data"])
-        hist["polar_phiq_vs_t_DATA"] = hist["polar_phiq_vs_t_DATA"].Scale(hist["normfac_data"])
         hist["Q2_vs_W_DATA"] = hist["Q2_vs_W_DATA"].Scale(hist["normfac_data"])
         
     # Creating clone of efficiency plots because otherwise things
