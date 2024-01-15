@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 17:14:42 trottar"
+# Time-stamp: "2024-01-14 22:18:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,6 +80,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     efficiency_table = inpDict["efficiency_table"] 
     ParticleType = inpDict["ParticleType"]
 
+    histlist_copy = histlist.copy()
+
+    for hist in histlist_copy:
+        hist_copy = {key: value.Clone() for key, value in hist.items()}
+    
     ################################################################################################################################################
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
@@ -91,7 +96,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     # Creating clone of efficiency plots because otherwise things
     # crash due to pointer issues with TMultiGraph's Add() function
     data_eff_dict = {}
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         data_eff_dict[hist["phi_setting"]] = hist["G_data_eff"].Clone()
     
     eff_plt = TCanvas()
@@ -100,7 +105,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     eff_plt.SetGrid()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         data_eff_dict[hist["phi_setting"]].SetMarkerStyle(21)
         data_eff_dict[hist["phi_setting"]].SetMarkerSize(1)
         data_eff_dict[hist["phi_setting"]].SetMarkerColor(i+1)
@@ -111,7 +116,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     G_eff_plt.SetTitle(" ;Run Numbers; Total Efficiency")
 
     i=0
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         while i <= G_eff_plt.GetXaxis().GetXmax():
             bin_ix = G_eff_plt.GetXaxis().FindBin(i)
             if str(i) in hist["runNums"]: 
@@ -122,7 +127,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     G_eff_plt.GetXaxis().SetTitleOffset(1.5)
     G_eff_plt.GetXaxis().SetLabelSize(0.03)
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         l_eff_plt.AddEntry(data_eff_dict[hist["phi_setting"]],hist["phi_setting"])
 
     l_eff_plt.Draw()
@@ -137,32 +142,32 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     c_pid.cd(1)
     gPad.SetLogy()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_cal_etottracknorm_DATA"].SetLineColor(i+1)
         hist["H_cal_etottracknorm_DATA"].Draw("same, E1")
 
     c_pid.cd(2)
     gPad.SetLogy()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_cer_npeSum_DATA"].SetLineColor(i+1)
         hist["H_cer_npeSum_DATA"].Draw("same, E1")
 
     c_pid.cd(3)
     gPad.SetLogy()
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["P_cal_etottracknorm_DATA"].SetLineColor(i+1)
         hist["P_cal_etottracknorm_DATA"].Draw("same, E1")
 
     c_pid.cd(4)
     gPad.SetLogy()
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["P_hgcer_npeSum_DATA"].SetLineColor(i+1)
         hist["P_hgcer_npeSum_DATA"].Draw("same, E1")
 
     c_pid.cd(5)
     gPad.SetLogy()
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["P_aero_npeSum_DATA"].SetLineColor(i+1)
         hist["P_aero_npeSum_DATA"].Draw("same, E1")
 
@@ -174,7 +179,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
     gPad.SetLogy()
     
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ct_DATA"].SetLineColor(i+1)
         hist["H_ct_DATA"].Draw("same, E1")
 
@@ -183,7 +188,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CQ2 = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_Q2_DATA"].SetLineColor(i+1)
         hist["H_Q2_DATA"].Draw("same, E1")
         hist["H_Q2_SIMC"].SetLineColor(40)
@@ -194,7 +199,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CW = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_W_DATA"].SetLineColor(i+1)
         hist["H_W_DATA"].Draw("same, E1")
         hist["H_W_SIMC"].SetLineColor(40)
@@ -208,7 +213,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     l_t.SetTextSize(0.0135)
 
     binmax = []
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_t_DATA"].SetLineColor(i+1)
         l_t.AddEntry(hist["H_t_DATA"],hist["phi_setting"])
         hist["H_t_DATA"].Draw("same, E1")
@@ -223,7 +228,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     events_between = []
     for j in range(0, len(t_bins)-1):
         events_between_tmp = []
-        for i,hist in enumerate(histlist):
+        for i,hist in enumerate(histlist_copy):
             b = t_bins[j]
             # Find the bins corresponding to the given bin centers
             bin1 = hist["H_t_DATA"].FindBin(t_bins[j])
@@ -253,7 +258,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cepsilon = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_epsilon_DATA"].SetLineColor(i+1)
         hist["H_epsilon_DATA"].Draw("same, E1")
         hist["H_epsilon_SIMC"].SetLineColor(40)
@@ -264,7 +269,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CMM = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_MM_DATA"].SetLineColor(i+1)
         hist["H_MM_DATA"].Draw("same, E1")
         hist["H_MM_SIMC"].SetLineColor(40)
@@ -275,7 +280,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     xfp = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ssxfp_DATA"].SetLineColor(i+1)
         hist["H_ssxfp_DATA"].Draw("same, E1")
         hist["H_ssxfp_SIMC"].SetLineColor(40)
@@ -286,7 +291,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     yfp = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ssyfp_DATA"].SetLineColor(i+1)
         hist["H_ssyfp_DATA"].Draw("same, E1")
         hist["H_ssyfp_SIMC"].SetLineColor(40)
@@ -297,7 +302,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     xpfp = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ssxpfp_DATA"].SetLineColor(i+1)
         hist["H_ssxpfp_DATA"].Draw("same, E1")
         hist["H_ssxpfp_SIMC"].SetLineColor(40)
@@ -308,7 +313,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     ypfp = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ssxpfp_DATA"].SetLineColor(i+1)
         hist["H_ssxpfp_DATA"].Draw("same, E1")
         hist["H_ssxpfp_SIMC"].SetLineColor(40)
@@ -319,7 +324,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hxfp = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_hsxfp_DATA"].SetLineColor(i+1)
         hist["H_hsxfp_DATA"].Draw("same, E1")
         hist["H_hsxfp_SIMC"].SetLineColor(40)
@@ -330,7 +335,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hyfp = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_hsyfp_DATA"].SetLineColor(i+1)
         hist["H_hsyfp_DATA"].Draw("same, E1")
         hist["H_hsyfp_SIMC"].SetLineColor(40)
@@ -341,7 +346,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hxpfp = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_hsxpfp_DATA"].SetLineColor(i+1)
         hist["H_hsxpfp_DATA"].Draw("same, E1")
         hist["H_hsxpfp_SIMC"].SetLineColor(40)
@@ -352,7 +357,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hypfp = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_hsypfp_DATA"].SetLineColor(i+1)
         hist["H_hsypfp_DATA"].Draw("same, E1")
         hist["H_hsypfp_SIMC"].SetLineColor(40)
@@ -363,7 +368,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     xptar = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ssxptar_DATA"].SetLineColor(i+1)
         hist["H_ssxptar_DATA"].Draw("same, E1")
         hist["H_ssxptar_SIMC"].SetLineColor(40)
@@ -374,7 +379,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     yptar = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ssyptar_DATA"].SetLineColor(i+1)
         hist["H_ssyptar_DATA"].Draw("same, E1")
         hist["H_ssyptar_SIMC"].SetLineColor(40)
@@ -385,7 +390,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hxptar = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_hsxptar_DATA"].SetLineColor(i+1)
         hist["H_hsxptar_DATA"].Draw("same, E1")
         hist["H_hsxptar_SIMC"].SetLineColor(40)
@@ -396,7 +401,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hyptar = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_hsyptar_DATA"].SetLineColor(i+1)
         hist["H_hsyptar_DATA"].Draw("same, E1")
         hist["H_hsyptar_SIMC"].SetLineColor(40)
@@ -407,7 +412,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Delta = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ssdelta_DATA"].SetLineColor(i+1)
         hist["H_ssdelta_DATA"].Draw("same, E1")
         hist["H_ssdelta_SIMC"].SetLineColor(40)
@@ -418,7 +423,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hDelta = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_hsdelta_DATA"].SetLineColor(i+1)
         hist["H_hsdelta_DATA"].Draw("same, E1")
         hist["H_hsdelta_SIMC"].SetLineColor(40)
@@ -430,7 +435,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     Cph_q = TCanvas()
 
     binmax = []
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ph_q_DATA"].SetLineColor(i+1)
         l_t.AddEntry(hist["H_ph_q_DATA"],hist["phi_setting"])
         hist["H_ph_q_DATA"].Draw("same, E1")
@@ -456,7 +461,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cth_q = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_th_q_DATA"].SetLineColor(i+1)
         hist["H_th_q_DATA"].Draw("same, E1")
         hist["H_th_q_SIMC"].SetLineColor(40)
@@ -467,7 +472,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cph_recoil = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_ph_recoil_DATA"].SetLineColor(i+1)
         hist["H_ph_recoil_DATA"].Draw("same, E1")
 
@@ -475,7 +480,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cth_recoil = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_th_recoil_DATA"].SetLineColor(i+1)
         hist["H_th_recoil_DATA"].Draw("same, E1")
 
@@ -483,7 +488,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cpmiss = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_pmiss_DATA"].SetLineColor(i+1)
         hist["H_pmiss_DATA"].Draw("same, E1")
         hist["H_pmiss_SIMC"].SetLineColor(40)
@@ -494,7 +499,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cemiss = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_emiss_DATA"].SetLineColor(i+1)
         hist["H_emiss_DATA"].Draw("same, E1")
         hist["H_emiss_SIMC"].SetLineColor(40)
@@ -505,7 +510,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cpmiss_x = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_pmx_DATA"].SetLineColor(i+1)
         hist["H_pmx_DATA"].Draw("same, E1")
         hist["H_pmx_SIMC"].SetLineColor(40)
@@ -516,7 +521,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cpmiss_y = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_pmy_DATA"].SetLineColor(i+1)
         hist["H_pmy_DATA"].Draw("same, E1")
         hist["H_pmy_SIMC"].SetLineColor(40)
@@ -527,7 +532,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cpmiss_z = TCanvas()
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         hist["H_pmz_DATA"].SetLineColor(i+1)
         hist["H_pmz_DATA"].Draw("same, E1")
         hist["H_pmz_SIMC"].SetLineColor(40)
@@ -542,7 +547,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     gPad.SetLogy()
     
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         Cmmct.cd(i+1)
 
         # Set color representing zero events to transparent (alpha = 0)
@@ -558,7 +563,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cctbeta.Divide(2,2)
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         Cctbeta.cd(i+1)
 
         # Set color representing zero events to transparent (alpha = 0)
@@ -574,7 +579,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cmmbeta.Divide(2,2)
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         Cmmbeta.cd(i+1)
 
         # Set color representing zero events to transparent (alpha = 0)
@@ -590,7 +595,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cqw.Divide(2,2)
 
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         Cqw.cd(i+1)
 
         # Set color representing zero events to transparent (alpha = 0)
@@ -607,7 +612,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     # Create a list to store all polar plots
     polar_plots = []
 
-    for i, hist in enumerate(histlist):
+    for i, hist in enumerate(histlist_copy):
         polar_plot = TGraphPolar(hist["polar_phiq_vs_t_SIMC"].GetN(), hist["polar_phiq_vs_t_SIMC"].GetX(), hist["polar_phiq_vs_t_SIMC"].GetY())
         polar_plot.SetMarkerColor(i+1)
         polar_plot.SetMarkerSize(0.5)
@@ -627,7 +632,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     # Create a list to store all polar plots
     polar_plots = []
 
-    for i, hist in enumerate(histlist):
+    for i, hist in enumerate(histlist_copy):
         polar_plot = TGraphPolar(hist["polar_phiq_vs_t_DATA"].GetN(), hist["polar_phiq_vs_t_DATA"].GetX(), hist["polar_phiq_vs_t_DATA"].GetY())
         polar_plot.SetMarkerColor(i+1)
         polar_plot.SetMarkerSize(0.5)
@@ -643,7 +648,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     Cpht.Print(outputpdf)
 
     cut_summary_lst = ""
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         texlist = []
         Ctext = TCanvas()
         for j,line in enumerate(hist["pid_text"]):
@@ -685,7 +690,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         for j, tex in enumerate(texlist):
             tex.Draw()
 
-        if i == len(histlist)-1:
+        if i == len(histlist_copy)-1:
             Ctext.Print(outputpdf+')')
         else:
             Ctext.Print(outputpdf)
