@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 01:53:09 trottar"
+# Time-stamp: "2024-01-15 01:55:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1014,7 +1014,7 @@ def rand_sub(phi_setting, inpDict):
     ct = TCanvas()
     l_ct = TLegend(0.115,0.65,0.33,0.95)
     l_ct.SetTextSize(0.0235)
-    H_ct_DATA.SetLineColor(i)
+    H_ct_DATA.SetLineColor(i+1)
     H_ct_DATA.Draw("same, HIST")
     l_ct.AddEntry(H_ct_DATA,"{}".format(ParticleType.capitalize()))
     l_ct.Draw()
@@ -1025,7 +1025,7 @@ def rand_sub(phi_setting, inpDict):
     # MM plots    
     CMM = TCanvas()
 
-    histDict["H_MM_DATA"].SetLineColor(i)
+    histDict["H_MM_DATA"].SetLineColor(i+1)
     histDict["H_MM_DATA"].Draw("same, E1")
 
     CMM.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
@@ -1039,31 +1039,31 @@ def rand_sub(phi_setting, inpDict):
     c_pid.cd(1)
     gPad.SetLogy()
 
-    H_cal_etottracknorm_DATA.SetLineColor(i)
+    H_cal_etottracknorm_DATA.SetLineColor(i+1)
     H_cal_etottracknorm_DATA.Draw("same, HIST")
 
     c_pid.cd(2)
     gPad.SetLogy()
 
-    H_cer_npeSum_DATA.SetLineColor(i)
+    H_cer_npeSum_DATA.SetLineColor(i+1)
     H_cer_npeSum_DATA.Draw("same, HIST")
 
     c_pid.cd(3)
     gPad.SetLogy()
 
-    P_cal_etottracknorm_DATA.SetLineColor(i)
+    P_cal_etottracknorm_DATA.SetLineColor(i+1)
     P_cal_etottracknorm_DATA.Draw("same, HIST")
 
     c_pid.cd(4)
     gPad.SetLogy()
 
-    P_hgcer_npeSum_DATA.SetLineColor(i)
+    P_hgcer_npeSum_DATA.SetLineColor(i+1)
     P_hgcer_npeSum_DATA.Draw("same, HIST")
 
     c_pid.cd(5)
     gPad.SetLogy()
 
-    P_aero_npeSum_DATA.SetLineColor(i)
+    P_aero_npeSum_DATA.SetLineColor(i+1)
     P_aero_npeSum_DATA.Draw("same, HIST")
 
     c_pid.Draw()
