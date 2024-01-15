@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 17:58:49 trottar"
+# Time-stamp: "2024-01-15 18:08:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -258,9 +258,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Fit 1 #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print(" Fitting Step 1")
-        print(" Fit L and T, while Fix LT and TT")
+        #print("\n/*--------------------------------------------------*/")
+        #print(" Fitting Step 1")
+        #print(" Fit L and T, while Fix LT and TT")
 
         # Set parameter 0 and 1
         fff2.SetParameter(0, 1)
@@ -295,9 +295,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Fit 2 #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print(" Fitting Step 2")
-        print(" Fit LT, while Fix L, T, and TT")
+        #print("\n/*--------------------------------------------------*/")
+        #print(" Fitting Step 2")
+        #print(" Fit LT, while Fix L, T, and TT")
 
         # Fix parameter 0, 1, and 3
         fff2.FixParameter(0, fff2.GetParameter(0))
@@ -317,9 +317,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Fit 3 #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print(" Fitting Step 3")
-        print(" Fit L and T, while Fix LT and TT")
+        #print("\n/*--------------------------------------------------*/")
+        #print(" Fitting Step 3")
+        #print(" Fit L and T, while Fix LT and TT")
 
         # Release parameter 0 and 1
         fff2.ReleaseParameter(0)
@@ -347,9 +347,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Fit 4 #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print(" Fitting Step 4")
-        print(" Fit TT, while Fix T, L, and LT")
+        #print("\n/*--------------------------------------------------*/")
+        #print(" Fitting Step 4")
+        #print(" Fit TT, while Fix T, L, and LT")
 
         # Fix parameter 0, 1, and 2
         fff2.FixParameter(0, fff2.GetParameter(0))
@@ -369,9 +369,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Fit 5 #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print(" Fitting Step 5")
-        print(" Fit T and L, while Fix LT and TT")
+        #print("\n/*--------------------------------------------------*/")
+        #print(" Fitting Step 5")
+        #print(" Fit T and L, while Fix LT and TT")
 
         # Release parameter 0 and 1
         fff2.ReleaseParameter(0)
@@ -391,9 +391,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Last Step #
         #############
 
-        print("\n/*--------------------------------------------------*/")
-        print(" Last Step")
-        print(" Fit All")
+        #print("\n/*--------------------------------------------------*/")
+        #print(" Last Step")
+        #print(" Fit All")
 
         # Release all parameters
         fff2.ReleaseParameter(0)
@@ -516,7 +516,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
 
         # Print values to console
-        print("Bin {}: Outputting...  ".format(i), sig_t, "  ", sig_l, "  ", t_list[i], "  ", w_list[i], "  ", q2_list[i], "  ", lo_eps_list[i], "  ", hi_eps_list[i])
+        print("\nBin {}: Outputting...  ".format(i), "sig_t: ", sig_t, "sig_l: ", sig_l, \
+              "t: ", t_list[i], "W: ", w_list[i], "Q2:", q2_list[i], \
+              "eps_lo: ", lo_eps_list[i], "eps_hi: ", hi_eps_list[i])
 
         fn_sep = "{}/src/{}/xsects/x_sep.{}_{}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""))
         try:
