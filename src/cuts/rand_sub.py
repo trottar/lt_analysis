@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 04:45:21 trottar"
+# Time-stamp: "2024-01-15 06:05:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -487,7 +487,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsyptar_DATA.Fill(evt.hsyptar)
 
           # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DATA.Fill((evt.ph_q+math.pi)*(180/math.pi))
+          H_ph_q_DATA.Fill((evt.ph_q+math.pi))
           H_th_q_DATA.Fill(evt.th_q)
           H_ph_recoil_DATA.Fill(evt.ph_recoil)
           H_th_recoil_DATA.Fill(evt.th_recoil)
@@ -594,7 +594,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsyptar_DUMMY.Fill(evt.hsyptar)
 
           # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DUMMY.Fill((evt.ph_q+math.pi)*(180/math.pi))
+          H_ph_q_DUMMY.Fill((evt.ph_q+math.pi))
           H_th_q_DUMMY.Fill(evt.th_q)
           H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
           H_th_recoil_DUMMY.Fill(evt.th_recoil)
@@ -693,7 +693,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsyptar_RAND.Fill(evt.hsyptar)
 
           # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_RAND.Fill((evt.ph_q+math.pi)*(180/math.pi))
+          H_ph_q_RAND.Fill((evt.ph_q+math.pi))
           H_th_q_RAND.Fill(evt.th_q)
           H_ph_recoil_RAND.Fill(evt.ph_recoil)
           H_th_recoil_RAND.Fill(evt.th_recoil)
@@ -790,7 +790,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsyptar_DUMMY_RAND.Fill(evt.hsyptar)
 
           # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DUMMY_RAND.Fill((evt.ph_q+math.pi)*(180/math.pi))
+          H_ph_q_DUMMY_RAND.Fill((evt.ph_q+math.pi))
           H_th_q_DUMMY_RAND.Fill(evt.th_q)
           H_ph_recoil_DUMMY_RAND.Fill(evt.ph_recoil)
           H_th_recoil_DUMMY_RAND.Fill(evt.th_recoil)
@@ -1102,7 +1102,6 @@ def rand_sub(phi_setting, inpDict):
     Cphi = TCanvas()
     l_phi = TLegend(0.115,0.45,0.33,0.95)
     l_phi.SetTextSize(0.0135)
-    
     histDict["H_ph_q_DATA"].SetLineColor(1)
     l_phi.AddEntry(histDict["H_ph_q_DATA"],histDict["phi_setting"])
     histDict["H_ph_q_DATA"].Draw("same, E1")    
