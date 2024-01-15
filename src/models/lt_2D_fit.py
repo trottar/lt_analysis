@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 17:19:02 trottar"
+# Time-stamp: "2024-01-15 17:27:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -552,16 +552,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_sig_tt_total.SetTitle("{}".format(i))        
         
         # Set points and errors for g_sig_l_total, g_sig_t_total, g_sig_lt_total, and g_sig_tt_total
-        g_sig_l_total.SetPoint(g_sig_l_total.GetN(), tt[0], sig_l)
+        g_sig_l_total.SetPoint(g_sig_l_total.GetN(), t_list[i], sig_l)
         g_sig_l_total.SetPointError(g_sig_l_total.GetN() - 1, 0, sig_l_err)
 
-        g_sig_t_total.SetPoint(g_sig_t_total.GetN(), tt[0], sig_t)
+        g_sig_t_total.SetPoint(g_sig_t_total.GetN(), t_list[i], sig_t)
         g_sig_t_total.SetPointError(g_sig_t_total.GetN() - 1, 0, sig_t_err)
 
-        g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), tt[0], sig_lt)
+        g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), t_list[i], sig_lt)
         g_sig_lt_total.SetPointError(g_sig_lt_total.GetN() - 1, 0, sig_lt_err)
 
-        g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), tt[0], sig_tt)
+        g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), t_list[i], sig_tt)
         g_sig_tt_total.SetPointError(g_sig_tt_total.GetN() - 1, 0, sig_tt_err)
 
         sig_L_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
@@ -581,10 +581,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_TT_g.SetTitle("{}".format(i))        
         
         # Set points and errors for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
-        sig_L_g.SetPoint(i, tt[0], sig_l)
-        sig_T_g.SetPoint(i, tt[0], sig_t)
-        sig_LT_g.SetPoint(i, tt[0], sig_lt)
-        sig_TT_g.SetPoint(i, tt[0], sig_tt)
+        sig_L_g.SetPoint(i, t_list[i], sig_l)
+        sig_T_g.SetPoint(i, t_list[i], sig_t)
+        sig_LT_g.SetPoint(i, t_list[i], sig_lt)
+        sig_TT_g.SetPoint(i, t_list[i], sig_tt)
 
         sig_L_g.SetPointError(i, 0.0, sig_l_err)
         sig_T_g.SetPointError(i, 0.0, sig_t_err)
