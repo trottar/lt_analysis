@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 03:32:45 trottar"
+# Time-stamp: "2024-01-15 03:33:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -346,7 +346,7 @@ def set_dynamic_axis_ranges(inp_str, hist, range_factor="Default", hist_type="DA
             # Handle the case where conversion fails with a specific error message
             print("Error: Unable to convert to float. {}".format(e))
             
-    histogram  = hist["H_{}_{}"format(inp_str,hist_type)]
+    histogram  = hist["H_{}_{}".format(inp_str,hist_type)]
     
     # Get the number of bins
     num_bins = histogram.GetNbinsX()
