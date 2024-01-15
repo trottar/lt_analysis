@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 02:39:29 trottar"
+# Time-stamp: "2024-01-15 03:23:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder
+from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -258,6 +258,7 @@ for phiset in phisetlist:
 Apply random subtraction to data and dummy.
 '''
 
+'''
 ##############
 # HARD CODED #
 ##############
@@ -281,6 +282,7 @@ inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
 ##############
 ##############
 ##############
+'''
 
 sys.path.append("cuts")
 from rand_sub import rand_sub
@@ -292,10 +294,16 @@ histlist = []
 for phiset in phisetlist:
     histlist.append(rand_sub(phiset,inpDict))
 
+# Reset Q2, W, eps TH1F range dynamically
+for i,hist in enumerate(histlist):
+    inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", hist)
+    inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", hist)
+    inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", hist)
+    
 print("\n\n")
 
 settingList = []
-for i,hist in enumerate(histlist):    
+for i,hist in enumerate(histlist):
     if len(hist.keys()) <= 1: # If hist is empty (length of oen for phi setting check)
         print("No {} setting found...".format(hist["phi_setting"]))
         phisetlist.remove(hist["phi_setting"])

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 03:14:56 trottar"
+# Time-stamp: "2024-01-15 03:31:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -334,8 +334,20 @@ def run_fortran(fort_script, inp_val=""):
 
 ################################################################################################################################################
 
-def set_dynamic_axis_ranges():
+def set_dynamic_axis_ranges(inp_str, hist, range_factor="Default", hist_type="DATA"):
 
+    if range_factor == "Default":
+        x_axis_range_factor = 1.2
+    else:
+        try:
+            # Attempt to convert range_factor to float
+            x_axis_range_factor = float(range_factor)
+        except ValueError as e:
+            # Handle the case where conversion fails with a specific error message
+            print("Error: Unable to convert to float. {}".format(e))
+            
+    histogram  = hist["H_{}_{}"format(inp_str,hist_type)]
+    
     # Get the number of bins
     num_bins = histogram.GetNbinsX()
 
@@ -345,7 +357,6 @@ def set_dynamic_axis_ranges():
 
     # Set x-axis range dynamically based on the number of events in the specified histogram
     total_events = histogram.GetEntries()
-    x_axis_range_factor = 1.2  # Adjust this factor as needed
     x_axis_min = histogram.GetBinLowEdge(1)
     x_axis_max = histogram.GetBinLowEdge(num_bins + 1) * (total_events / max_bin_content) * x_axis_range_factor
     histogram.GetXaxis().SetRangeUser(x_axis_min, x_axis_max)
