@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 17:27:07 trottar"
+# Time-stamp: "2024-01-15 17:45:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,8 +150,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
     lo_cross_sec_err = np.zeros(t_bin_num, dtype=float)
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
-    for i in range(0, t_bin_num-1):
-
+    for i in range(len(t_bin_num)-1):
+        
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
@@ -164,10 +164,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         tpp = ""
 
         if i == 0:
-            tpp = "t < {0} && x!=0.0".format(float(t_list[i]) + 0.01)
+            tpp = "t < {0} && x!=0.0".format(float(t_list[i]))
             print(tpp)
         else:
-            tpp = "(t > {0} && t < {1}) && x!=0.0".format(float(t_list[i - 1]) + 0.01, float(t_list[i]) + 0.01)
+            tpp = "(t > {0} && t < {1}) && x!=0.0".format(float(t_list[i]), float(t_list[i+1]))
             print(tpp)
 
         lo_eps = lo_eps_list[i]
