@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 05:51:29 trottar"
+# Time-stamp: "2024-01-15 06:55:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -203,6 +203,39 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmz_DATA"].Scale(hist["normfac_data"])
         hist["H_W_DATA"].Scale(hist["normfac_data"])
         hist["H_ct_DATA"].Scale(hist["normfac_data"])
+
+        hist["H_hsdelta_DATA"].Add(hist["H_hsdelta_DATA"],-1)
+        hist["H_hsxptar_DATA"].Add(hist["H_hsxptar_DATA"],-1)
+        hist["H_hsyptar_DATA"].Add(hist["H_hsyptar_DATA"],-1)
+        hist["H_ssxfp_DATA"].Add(hist["H_ssxfp_DATA"],-1)
+        hist["H_ssyfp_DATA"].Add(hist["H_ssyfp_DATA"],-1)
+        hist["H_ssxpfp_DATA"].Add(hist["H_ssxpfp_DATA"],-1)
+        hist["H_ssypfp_DATA"].Add(hist["H_ssypfp_DATA"],-1)
+        hist["H_hsxfp_DATA"].Add(hist["H_hsxfp_DATA"],-1)
+        hist["H_hsyfp_DATA"].Add(hist["H_hsyfp_DATA"],-1)
+        hist["H_hsxpfp_DATA"].Add(hist["H_hsxpfp_DATA"],-1)
+        hist["H_hsypfp_DATA"].Add(hist["H_hsypfp_DATA"],-1)
+        hist["H_ssdelta_DATA"].Add(hist["H_ssdelta_DATA"],-1)
+        hist["H_ssxptar_DATA"].Add(hist["H_ssxptar_DATA"],-1)
+        hist["H_ssyptar_DATA"].Add(hist["H_ssyptar_DATA"],-1)
+        hist["H_q_DATA"].Add(hist["H_q_DATA"],-1)
+        hist["H_Q2_DATA"].Add(hist["H_Q2_DATA"],-1)
+        hist["H_t_DATA"].Add(hist["H_t_DATA"],-1)
+        hist["H_epsilon_DATA"].Add(hist["H_epsilon_DATA"],-1)
+        hist["H_MM_DATA"].Add(hist["H_MM_DATA"],-1)
+        hist["H_th_DATA"].Add(hist["H_th_DATA"],-1)
+        hist["H_ph_DATA"].Add(hist["H_ph_DATA"],-1)
+        hist["H_ph_q_DATA"].Add(hist["H_ph_q_DATA"],-1)
+        hist["H_th_q_DATA"].Add(hist["H_th_q_DATA"],-1)
+        hist["H_ph_recoil_DATA"].Add(hist["H_ph_recoil_DATA"],-1)
+        hist["H_th_recoil_DATA"].Add(hist["H_th_recoil_DATA"],-1)
+        hist["H_pmiss_DATA"].Add(hist["H_pmiss_DATA"],-1)
+        hist["H_emiss_DATA"].Add(hist["H_emiss_DATA"],-1)
+        hist["H_pmx_DATA"].Add(hist["H_pmx_DATA"],-1)
+        hist["H_pmy_DATA"].Add(hist["H_pmy_DATA"],-1)
+        hist["H_pmz_DATA"].Add(hist["H_pmz_DATA"],-1)
+        hist["H_W_DATA"].Add(hist["H_W_DATA"],-1)
+        hist["H_ct_DATA"].Add(hist["H_ct_DATA"],-1)
         
     # Creating clone of efficiency plots because otherwise things
     # crash due to pointer issues with TMultiGraph's Add() function
