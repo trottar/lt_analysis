@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 02:11:36 trottar"
+# Time-stamp: "2024-01-15 02:18:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1073,7 +1073,7 @@ def rand_sub(phi_setting, inpDict):
     l_phi.AddEntry(histDict["H_ph_q_DATA"],histDict["phi_setting"])
     histDict["H_ph_q_DATA"].Draw("same, E1")
 
-    Ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    Cphi.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
     ###
     # PID Plots
