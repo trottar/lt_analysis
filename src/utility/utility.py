@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 03:39:38 trottar"
+# Time-stamp: "2024-01-15 03:52:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -334,11 +334,14 @@ def run_fortran(fort_script, inp_val=""):
 
 ################################################################################################################################################
 
-def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type="DATA"):
+import numpy as np
 
-    if range_factor == "Default":
-        x_axis_range_factor = 1.2
-    else:
+def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type="DATA"):
+    # Set default x-axis range factor
+    x_axis_range_factor = 1.2
+
+    # Check if a custom range factor is provided
+    if range_factor != "Default":
         try:
             # Attempt to convert range_factor to float
             x_axis_range_factor = float(range_factor)
@@ -348,30 +351,45 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
 
     min_values = []
     max_values = []
-    for i,hist in enumerate(histlist):
 
-        histogram  = hist["H_{}_{}".format(inp_str,hist_type)]
+    # Iterate through the histograms in the list
+    for i, hist in enumerate(histlist):
+        # Access the histogram using the specified input string and histogram type
+        histogram = hist["H_{}_{}".format(inp_str, hist_type)]
 
         # Get the number of bins
         num_bins = histogram.GetNbinsX()
 
-        # Retrieve min and max bin content along the x-axis
-        min_bin_content = histogram.GetBinContent(1)
-        max_bin_content = histogram.GetBinContent(num_bins)
+        # Initialize variables to track non-empty bins
+        non_empty_bins = []
 
-        # Set x-axis range dynamically based on the number of events in the specified histogram
-        total_events = histogram.GetEntries()
-        x_axis_min = histogram.GetBinLowEdge(1)
-        x_axis_max = histogram.GetBinLowEdge(num_bins + 1) * (total_events / max_bin_content) * x_axis_range_factor
+        # Find non-empty bins along the x-axis
+        for bin_idx in range(1, num_bins + 1):
+            bin_content = histogram.GetBinContent(bin_idx)
+            if bin_content > 0:
+                non_empty_bins.append(bin_idx)
+
+        if not non_empty_bins:
+            # Handle the case where all bins are empty
+            print("Warning: All bins are empty for histogram {}".format(i))
+            continue
+
+        # Set x-axis range dynamically based on non-empty bins
+        x_axis_min = histogram.GetBinLowEdge(min(non_empty_bins))
+        x_axis_max = histogram.GetBinLowEdge(max(non_empty_bins) + 1) * x_axis_range_factor
 
         min_values.append(x_axis_min)
         max_values.append(x_axis_max)
 
-        avg_min = np.average(min_values)
-        avg_max = np.average(max_values)
+        # Set the x-axis range for the current histogram
+        histogram.GetXaxis().SetRangeUser(x_axis_min, x_axis_max)
 
-    print(inp_str , "!!!!!!!!!!!!!", avg_min, avg_max)
-    
+    # Calculate the average minimum and maximum values
+    avg_min = np.average(min_values)
+    avg_max = np.average(max_values)
+
+    print(inp_str, "!!!!!!!!!!!!!", avg_min, avg_max)
+
     return avg_min, avg_max
     
 ################################################################################################################################################    
