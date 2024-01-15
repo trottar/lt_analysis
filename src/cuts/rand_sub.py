@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 01:57:20 trottar"
+# Time-stamp: "2024-01-15 02:01:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1029,6 +1029,27 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_DATA"].Draw("same, E1")
 
     CMM.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    ###
+    # t-Phi plots        
+    Cpht_data = TCanvas()
+
+    # Create a list to store all polar plots
+    polar_plots = []
+
+    polar_plot = TGraphPolar(histDict["polar_phiq_vs_t_DATA"].GetN(), histDict["polar_phiq_vs_t_DATA"].GetX(), histDict["polar_phiq_vs_t_DATA"].GetY())
+    polar_plot.SetMarkerColor(1)
+    polar_plot.SetMarkerSize(0.5)
+    polar_plot.SetMarkerStyle(20)
+    polar_plots.append(polar_plot)  # Store the plot in the list
+    polar_plot.Draw("AP same")
+
+    # Set titles and axes for the last plot
+    polar_plots[-1].GetXaxis().SetName("#Phi")
+    polar_plots[-1].GetYaxis().SetName("-t")
+    polar_plots[-1].SetTitle("")
+    
+    Cpht_data.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
     ###
     # PID Plots
