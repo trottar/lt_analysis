@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 23:27:44 trottar"
+# Time-stamp: "2024-01-14 23:37:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -169,10 +169,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmz_DUMMY"] = hist["H_pmz_DUMMY"].Scale(hist["normfac_dummy"])
         hist["H_W_DUMMY"] = hist["H_W_DUMMY"].Scale(hist["normfac_dummy"])
         hist["H_ct_DUMMY"] = hist["H_ct_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["MM_vs_CoinTime_DUMMY"] = hist["MM_vs_CoinTime_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["CoinTime_vs_beta_DUMMY"] = hist["CoinTime_vs_beta_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["MM_vs_beta_DUMMY"] = hist["MM_vs_beta_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["phiq_vs_t_DUMMY"] = hist["phiq_vs_t_DUMMY"].Scale(hist["normfac_dummy"])
         
         hist["H_hsdelta_DATA"] = hist["H_hsdelta_DATA"].Scale(hist["normfac_data"])
         hist["H_hsxptar_DATA"] = hist["H_hsxptar_DATA"].Scale(hist["normfac_data"])
@@ -206,16 +202,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmz_DATA"] = hist["H_pmz_DATA"].Scale(hist["normfac_data"])
         hist["H_W_DATA"] = hist["H_W_DATA"].Scale(hist["normfac_data"])
         hist["H_ct_DATA"] = hist["H_ct_DATA"].Scale(hist["normfac_data"])
-        hist["H_cal_etottracknorm_DATA"] = hist["H_cal_etottracknorm_DATA"].Scale(hist["normfac_data"])
-        hist["H_cer_npeSum_DATA"] = hist["H_cer_npeSum_DATA"].Scale(hist["normfac_data"])
-        hist["P_cal_etottracknorm_DATA"] = hist["P_cal_etottracknorm_DATA"].Scale(hist["normfac_data"])
-        hist["P_hgcer_npeSum_DATA"] = hist["P_hgcer_npeSum_DATA"].Scale(hist["normfac_data"])
-        hist["P_aero_npeSum_DATA"] = hist["P_aero_npeSum_DATA"].Scale(hist["normfac_data"])
-        hist["MM_vs_CoinTime_DATA"] = hist["MM_vs_CoinTime_DATA"].Scale(hist["normfac_data"])
-        hist["CoinTime_vs_beta_DATA"] = hist["CoinTime_vs_beta_DATA"].Scale(hist["normfac_data"])
-        hist["MM_vs_beta_DATA"] = hist["MM_vs_beta_DATA"].Scale(hist["normfac_data"])
-        hist["phiq_vs_t_DATA"] = hist["phiq_vs_t_DATA"].Scale(hist["normfac_data"])
-        hist["Q2_vs_W_DATA"] = hist["Q2_vs_W_DATA"].Scale(hist["normfac_data"])
         
     # Creating clone of efficiency plots because otherwise things
     # crash due to pointer issues with TMultiGraph's Add() function
