@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 04:48:38 trottar"
+# Time-stamp: "2024-01-15 05:11:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -388,8 +388,6 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
     # Calculate the average minimum and maximum values
     avg_min = np.average(min_values)
     avg_max = np.average(max_values)
-
-    print(inp_str, "!!!!!!!!!!!!!", avg_min, avg_max)
 
     return avg_min, avg_max
     
