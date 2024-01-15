@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 16:52:19 trottar"
+# Time-stamp: "2024-01-15 16:55:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,13 +60,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
 
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
 
+    print("tav!!!!!!!!!!!",tav)
+
     # Function for SigT
     def fun_Sig_T(x, par):
         tt = abs(x[0])
         qq = abs(x[1])
-        f_av = (abs(tt)-tav)/tav
+        ftav = (abs(tt)-tav)/tav
+        print("ftav!!!!!!!!!!!",ftav)
         print("Calculating params for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-        f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq))*f_av
+        f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
         return f
 
     # Function for SigL
@@ -74,7 +77,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
         tt = abs(x[0])
         qq = abs(x[1])
         print("Calculating params for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-        f = (par[0]+par[1]*math.log(qq))*math.exp((par[2]+par[3]*math.log(qq))*(abs(tt)))
+        f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
         return f
 
     # Function for SigLT
