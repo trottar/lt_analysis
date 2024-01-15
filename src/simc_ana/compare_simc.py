@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 02:56:21 trottar"
+# Time-stamp: "2024-01-15 03:00:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -343,7 +343,7 @@ def compare_simc(hist, inpDict):
     l_t.SetTextSize(0.0135)
 
     histDict["H_t_SIMC"].SetLineColor(1)
-    l_t.AddEntry(histDict["H_t_SIMC"],histDict["phi_setting"])
+    l_t.AddEntry(histDict["H_t_SIMC"],phi_setting)
     histDict["H_t_SIMC"].Draw("same, E1")
 
     Ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
@@ -368,7 +368,7 @@ def compare_simc(hist, inpDict):
         axis.ChangeLabel(val + 1, -1, -1, -1, -1, -1, pi_labels[i])
     
     histDict["H_ph_q_SIMC"].SetLineColor(1)
-    l_phi.AddEntry(histDict["H_ph_q_SIMC"],histDict["phi_setting"])
+    l_phi.AddEntry(histDict["H_ph_q_SIMC"],phi_setting)
     histDict["H_ph_q_SIMC"].Draw("same, E1")    
 
     Cphi.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+')')
