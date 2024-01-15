@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 23:57:02 trottar"
+# Time-stamp: "2024-01-15 00:11:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,6 +90,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
                 # Clone the TObject if it has the 'Clone' method
                 hist_copy[key] = val.Clone()
+                print("!!!!!!!!!!1",hist[key],hist_copy[key])
             else:
                 # Otherwise, just copy the value
                 hist_copy[key] = val
