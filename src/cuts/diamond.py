@@ -390,7 +390,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     gStyle.SetTitleFontSize(0.03)
     gStyle.SetPalette(86)
     ex1 = TExec("ex1","gStyle->SetPalette(86)")
-    ex2 = TExec("ex2","gStyle->SetPalette(75)")
+    #ex2 = TExec("ex2","gStyle->SetPalette(75)")
+    ex2 = TExec("ex2","gStyle->SetPalette(53)")
     ex3 = TExec("ex3","gStyle->SetPalette(68)")
     gStyle.SetOptStat(0)
     pages = 2
