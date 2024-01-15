@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 04:23:04 trottar"
+# Time-stamp: "2024-01-15 04:26:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -673,7 +673,6 @@ def rand_sub(phi_setting, inpDict):
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
-          polar_phiq_vs_t_RAND.SetPoint(polar_phiq_vs_t_RAND.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
 
           H_ct_RAND.Fill(evt.CTime_ROC1)          
           
@@ -771,7 +770,6 @@ def rand_sub(phi_setting, inpDict):
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
-          polar_phiq_vs_t_DUMMY_RAND.SetPoint(polar_phiq_vs_t_DUMMY_RAND.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
 
           H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)                   
 
