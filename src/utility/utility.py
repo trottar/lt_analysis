@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 03:52:09 trottar"
+# Time-stamp: "2024-01-15 03:55:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,9 +337,7 @@ def run_fortran(fort_script, inp_val=""):
 import numpy as np
 
 def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type="DATA"):
-    # Set default x-axis range factor
-    x_axis_range_factor = 1.2
-
+    
     # Check if a custom range factor is provided
     if range_factor != "Default":
         try:

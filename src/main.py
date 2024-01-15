@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 03:38:09 trottar"
+# Time-stamp: "2024-01-15 03:58:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -293,11 +293,6 @@ from rand_sub import rand_sub
 histlist = []
 for phiset in phisetlist:
     histlist.append(rand_sub(phiset,inpDict))
-
-# Reset Q2, W, eps TH1F range dynamically
-inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist)
-inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist)
-inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist)
     
 print("\n\n")
 
@@ -325,6 +320,11 @@ for hist in histlist:
 
 * These bins will also be used of high eps, so check high eps as well.
 '''
+
+# Reset Q2, W, eps TH1F range dynamically
+inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist)
+inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist)
+inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist)
 
 sys.path.append("binning")
 from find_bins import find_bins, check_bins
