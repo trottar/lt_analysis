@@ -405,7 +405,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             #print("test high mid")
             Q2vsW_mide_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
             Q2vsW_mide_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-            ex2.Draw()
+            ex3.Draw()
             Q2vsW_mide_cut.Draw("col same")
             pages = 3
             if (lowe_input !=False):
@@ -419,7 +419,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             #print("test high low")
             Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
             Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
-            ex2.Draw()
+            ex3.Draw()
             Q2vsW_lowe_cut.Draw("col same")
             pages = 4
     elif (mide_input !=False):
@@ -433,7 +433,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             #print("test mid low")
             Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
             Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)            
-            ex2.Draw()
+            ex3.Draw()
             Q2vsW_lowe_cut.Draw("col same")
             pages = 4
     elif (lowe_input !=False):
