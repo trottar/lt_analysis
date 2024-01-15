@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 06:59:51 trottar"
+# Time-stamp: "2024-01-15 18:26:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,6 +47,10 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
+################################################################################################################################################
+# Suppress canvas print info
+gROOT.SetBatch(True)
+gStyle.SetOptStat(0)
 ################################################################################################################################################
 
 def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):

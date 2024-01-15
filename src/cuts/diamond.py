@@ -43,6 +43,10 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
+################################################################################################################################################
+# Suppress canvas print info
+gROOT.SetBatch(True)
+gStyle.SetOptStat(0)
 #################################################################################################################################################
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
