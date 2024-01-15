@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 02:18:21 trottar"
+# Time-stamp: "2024-01-15 02:22:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1068,10 +1068,12 @@ def rand_sub(phi_setting, inpDict):
     Cphi = TCanvas()
     l_phi = TLegend(0.115,0.45,0.33,0.95)
     l_phi.SetTextSize(0.0135)
-
-    histDict["H_ph_q_DATA"].SetLineColor(1)
-    l_phi.AddEntry(histDict["H_ph_q_DATA"],histDict["phi_setting"])
-    histDict["H_ph_q_DATA"].Draw("same, E1")
+    histDict["H_ph_q_DATA"].Clone()
+    H_ph_q_DATA_clone.Scale(180.0 / ROOT.TMath.Pi())
+    
+    H_ph_q_DATA_clone.SetLineColor(1)
+    l_phi.AddEntry(H_ph_q_DATA_clone,histDict["phi_setting"])
+    H_ph_q_DATA_clone.Draw("same, E1")
 
     Cphi.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
