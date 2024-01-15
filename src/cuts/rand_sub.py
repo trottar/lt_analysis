@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 02:22:31 trottar"
+# Time-stamp: "2024-01-15 02:24:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1067,8 +1067,9 @@ def rand_sub(phi_setting, inpDict):
     # phi plots            
     Cphi = TCanvas()
     l_phi = TLegend(0.115,0.45,0.33,0.95)
+    
     l_phi.SetTextSize(0.0135)
-    histDict["H_ph_q_DATA"].Clone()
+    H_ph_q_DATA_clone = histDict["H_ph_q_DATA"].Clone()
     H_ph_q_DATA_clone.Scale(180.0 / ROOT.TMath.Pi())
     
     H_ph_q_DATA_clone.SetLineColor(1)
