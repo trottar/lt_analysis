@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-13 12:38:17 trottar"
+# Time-stamp: "2024-01-15 07:37:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -135,6 +135,8 @@ if EPSSET == "low":
     sys.path.append("models")
     from xfit_in_t import x_fit_in_t
     x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W)
+    if DEBUG:
+        show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, q2_set, w_set))
     output_file_lst.append(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, q2_set, w_set))
     output_file_lst.append('models/xfit_in_t.py')
 
@@ -433,6 +435,9 @@ if EPSSET == "high":
         print("1 ERROR: {}".format(e))
         sys.exit(2)
 
+    if DEBUG:
+        show_pdf_with_evince(OUTPATH+"/{}_lt_fit_Q{}W{}.pdf".format(ParticleType, Q2, W))
+        show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))        
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_lt_fit_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append('models/lt_2D_fit.py')
