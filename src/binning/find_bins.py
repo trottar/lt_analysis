@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 14:14:39 trottar"
+# Time-stamp: "2024-01-15 14:20:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,10 +97,12 @@ def find_bins(histlist, inpDict):
     ################################################################################################################################################
 
     print(H_phi_Right, H_phi_Left, H_phi_Center)
-    print(len(H_phi_Right), len(H_phi_Left), len(H_phi_Center))
+    print(len(H_phi_Right)+len(H_phi_Left)+len(H_phi_Center))
 
     # Concatenate the H_t arrays for Right, Left, and Center
     H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
+
+    print(len(H_t_BinTest))
 
     # Apply proper boundaries for t
     H_t_BinTest = np.append(H_t_BinTest, tmin)
