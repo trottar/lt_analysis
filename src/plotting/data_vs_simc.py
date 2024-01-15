@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 00:23:54 trottar"
+# Time-stamp: "2024-01-15 01:36:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -304,7 +304,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_Q2_DATA"].SetLineColor(i+1)
         hist["H_Q2_DATA"].Draw("same, E1")
         hist["H_Q2_SIMC"].SetLineColor(40)
-        hist["H_Q2_SIMC"].SetLineStyle(10-i)
+        hist["H_Q2_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_Q2_SIMC"].Draw("same, E1")    
 
     CQ2.Print(outputpdf)
@@ -315,7 +315,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_W_DATA"].SetLineColor(i+1)
         hist["H_W_DATA"].Draw("same, E1")
         hist["H_W_SIMC"].SetLineColor(40)
-        hist["H_W_SIMC"].SetLineStyle(10-i)
+        hist["H_W_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_W_SIMC"].Draw("same, E1")        
 
     CW.Print(outputpdf)
@@ -330,7 +330,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         l_t.AddEntry(hist["H_t_DATA"],hist["phi_setting"])
         hist["H_t_DATA"].Draw("same, E1")
         hist["H_t_SIMC"].SetLineColor(40)
-        hist["H_t_SIMC"].SetLineStyle(10-i)
+        hist["H_t_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_t_SIMC"].Draw("same, E1")
         binmax.append(hist["H_t_DATA"].GetMaximum())
     binmax = max(binmax)
@@ -374,7 +374,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_epsilon_DATA"].SetLineColor(i+1)
         hist["H_epsilon_DATA"].Draw("same, E1")
         hist["H_epsilon_SIMC"].SetLineColor(40)
-        hist["H_epsilon_SIMC"].SetLineStyle(10-i)
+        hist["H_epsilon_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_epsilon_SIMC"].Draw("same, E1")
 
     Cepsilon.Print(outputpdf)
@@ -385,7 +385,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_MM_DATA"].SetLineColor(i+1)
         hist["H_MM_DATA"].Draw("same, E1")
         hist["H_MM_SIMC"].SetLineColor(40)
-        hist["H_MM_SIMC"].SetLineStyle(10-i)
+        hist["H_MM_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_MM_SIMC"].Draw("same, E1")
 
     CMM.Print(outputpdf)
@@ -396,7 +396,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_ssxfp_DATA"].SetLineColor(i+1)
         hist["H_ssxfp_DATA"].Draw("same, E1")
         hist["H_ssxfp_SIMC"].SetLineColor(40)
-        hist["H_ssxfp_SIMC"].SetLineStyle(10-i)
+        hist["H_ssxfp_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_ssxfp_SIMC"].Draw("same, E1")
 
     xfp.Print(outputpdf)
@@ -407,7 +407,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_ssyfp_DATA"].SetLineColor(i+1)
         hist["H_ssyfp_DATA"].Draw("same, E1")
         hist["H_ssyfp_SIMC"].SetLineColor(40)
-        hist["H_ssyfp_SIMC"].SetLineStyle(10-i)
+        hist["H_ssyfp_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_ssyfp_SIMC"].Draw("same, E1")
 
     yfp.Print(outputpdf)
@@ -418,7 +418,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_ssxpfp_DATA"].SetLineColor(i+1)
         hist["H_ssxpfp_DATA"].Draw("same, E1")
         hist["H_ssxpfp_SIMC"].SetLineColor(40)
-        hist["H_ssxpfp_SIMC"].SetLineStyle(10-i)
+        hist["H_ssxpfp_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_ssxpfp_SIMC"].Draw("same, E1")
 
     xpfp.Print(outputpdf)
@@ -429,7 +429,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_ssxpfp_DATA"].SetLineColor(i+1)
         hist["H_ssxpfp_DATA"].Draw("same, E1")
         hist["H_ssxpfp_SIMC"].SetLineColor(40)
-        hist["H_ssxpfp_SIMC"].SetLineStyle(10-i)
+        hist["H_ssxpfp_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_ssxpfp_SIMC"].Draw("same, E1")
 
     ypfp.Print(outputpdf)
@@ -440,7 +440,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_hsxfp_DATA"].SetLineColor(i+1)
         hist["H_hsxfp_DATA"].Draw("same, E1")
         hist["H_hsxfp_SIMC"].SetLineColor(40)
-        hist["H_hsxfp_SIMC"].SetLineStyle(10-i)
+        hist["H_hsxfp_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_hsxfp_SIMC"].Draw("same, E1")
 
     hxfp.Print(outputpdf)
@@ -451,7 +451,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_hsyfp_DATA"].SetLineColor(i+1)
         hist["H_hsyfp_DATA"].Draw("same, E1")
         hist["H_hsyfp_SIMC"].SetLineColor(40)
-        hist["H_hsyfp_SIMC"].SetLineStyle(10-i)
+        hist["H_hsyfp_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_hsyfp_SIMC"].Draw("same, E1")
 
     hyfp.Print(outputpdf)
@@ -462,7 +462,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_hsxpfp_DATA"].SetLineColor(i+1)
         hist["H_hsxpfp_DATA"].Draw("same, E1")
         hist["H_hsxpfp_SIMC"].SetLineColor(40)
-        hist["H_hsxpfp_SIMC"].SetLineStyle(10-i)
+        hist["H_hsxpfp_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_hsxpfp_SIMC"].Draw("same, E1")
 
     hxpfp.Print(outputpdf)
@@ -473,7 +473,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_hsypfp_DATA"].SetLineColor(i+1)
         hist["H_hsypfp_DATA"].Draw("same, E1")
         hist["H_hsypfp_SIMC"].SetLineColor(40)
-        hist["H_hsypfp_SIMC"].SetLineStyle(10-i)
+        hist["H_hsypfp_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_hsypfp_SIMC"].Draw("same, E1")
 
     hypfp.Print(outputpdf)
@@ -484,7 +484,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_ssxptar_DATA"].SetLineColor(i+1)
         hist["H_ssxptar_DATA"].Draw("same, E1")
         hist["H_ssxptar_SIMC"].SetLineColor(40)
-        hist["H_ssxptar_SIMC"].SetLineStyle(10-i)
+        hist["H_ssxptar_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_ssxptar_SIMC"].Draw("same, E1")
 
     xptar.Print(outputpdf)
@@ -495,7 +495,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_ssyptar_DATA"].SetLineColor(i+1)
         hist["H_ssyptar_DATA"].Draw("same, E1")
         hist["H_ssyptar_SIMC"].SetLineColor(40)
-        hist["H_ssyptar_SIMC"].SetLineStyle(10-i)
+        hist["H_ssyptar_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_ssyptar_SIMC"].Draw("same, E1")
 
     yptar.Print(outputpdf)
@@ -506,7 +506,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_hsxptar_DATA"].SetLineColor(i+1)
         hist["H_hsxptar_DATA"].Draw("same, E1")
         hist["H_hsxptar_SIMC"].SetLineColor(40)
-        hist["H_hsxptar_SIMC"].SetLineStyle(10-i)
+        hist["H_hsxptar_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_hsxptar_SIMC"].Draw("same, E1")
 
     hxptar.Print(outputpdf)
@@ -517,7 +517,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_hsyptar_DATA"].SetLineColor(i+1)
         hist["H_hsyptar_DATA"].Draw("same, E1")
         hist["H_hsyptar_SIMC"].SetLineColor(40)
-        hist["H_hsyptar_SIMC"].SetLineStyle(10-i)
+        hist["H_hsyptar_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_hsyptar_SIMC"].Draw("same, E1")
 
     hyptar.Print(outputpdf)
@@ -528,7 +528,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_ssdelta_DATA"].SetLineColor(i+1)
         hist["H_ssdelta_DATA"].Draw("same, E1")
         hist["H_ssdelta_SIMC"].SetLineColor(40)
-        hist["H_ssdelta_SIMC"].SetLineStyle(10-i)
+        hist["H_ssdelta_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_ssdelta_SIMC"].Draw("same, E1")
 
     Delta.Print(outputpdf)
@@ -539,7 +539,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_hsdelta_DATA"].SetLineColor(i+1)
         hist["H_hsdelta_DATA"].Draw("same, E1")
         hist["H_hsdelta_SIMC"].SetLineColor(40)
-        hist["H_hsdelta_SIMC"].SetLineStyle(10-i)
+        hist["H_hsdelta_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_hsdelta_SIMC"].Draw("same, E1")
 
     hDelta.Print(outputpdf)
@@ -552,7 +552,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         l_t.AddEntry(hist["H_ph_q_DATA"],hist["phi_setting"])
         hist["H_ph_q_DATA"].Draw("same, E1")
         hist["H_ph_q_SIMC"].SetLineColor(40)
-        hist["H_ph_q_SIMC"].SetLineStyle(10-i)
+        hist["H_ph_q_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_ph_q_SIMC"].Draw("same, E1")
         binmax.append(hist["H_ph_q_DATA"].GetMaximum())
     binmax = max(binmax)
@@ -577,7 +577,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_th_q_DATA"].SetLineColor(i+1)
         hist["H_th_q_DATA"].Draw("same, E1")
         hist["H_th_q_SIMC"].SetLineColor(40)
-        hist["H_th_q_SIMC"].SetLineStyle(10-i)
+        hist["H_th_q_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_th_q_SIMC"].Draw("same, E1")
 
     Cth_q.Print(outputpdf)
@@ -604,7 +604,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmiss_DATA"].SetLineColor(i+1)
         hist["H_pmiss_DATA"].Draw("same, E1")
         hist["H_pmiss_SIMC"].SetLineColor(40)
-        hist["H_pmiss_SIMC"].SetLineStyle(10-i)
+        hist["H_pmiss_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_pmiss_SIMC"].Draw("same, E1")
 
     Cpmiss.Print(outputpdf)
@@ -615,7 +615,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_emiss_DATA"].SetLineColor(i+1)
         hist["H_emiss_DATA"].Draw("same, E1")
         hist["H_emiss_SIMC"].SetLineColor(40)
-        hist["H_emiss_SIMC"].SetLineStyle(10-i)
+        hist["H_emiss_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_emiss_SIMC"].Draw("same, E1")
 
     Cemiss.Print(outputpdf)
@@ -626,7 +626,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmx_DATA"].SetLineColor(i+1)
         hist["H_pmx_DATA"].Draw("same, E1")
         hist["H_pmx_SIMC"].SetLineColor(40)
-        hist["H_pmx_SIMC"].SetLineStyle(10-i)
+        hist["H_pmx_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_pmx_SIMC"].Draw("same, E1")
 
     Cpmiss_x.Print(outputpdf)
@@ -637,7 +637,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmy_DATA"].SetLineColor(i+1)
         hist["H_pmy_DATA"].Draw("same, E1")
         hist["H_pmy_SIMC"].SetLineColor(40)
-        hist["H_pmy_SIMC"].SetLineStyle(10-i)
+        hist["H_pmy_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_pmy_SIMC"].Draw("same, E1")
 
     Cpmiss_y.Print(outputpdf)
@@ -648,7 +648,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmz_DATA"].SetLineColor(i+1)
         hist["H_pmz_DATA"].Draw("same, E1")
         hist["H_pmz_SIMC"].SetLineColor(40)
-        hist["H_pmz_SIMC"].SetLineStyle(10-i)
+        hist["H_pmz_SIMC"].SetLineStyle(i+(len(phisetlist)+1))
         hist["H_pmz_SIMC"].Draw("same, E1")
 
     Cpmiss_z.Print(outputpdf)
