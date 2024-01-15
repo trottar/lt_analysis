@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 03:31:02 trottar"
+# Time-stamp: "2024-01-15 03:32:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -359,18 +359,12 @@ def set_dynamic_axis_ranges(inp_str, hist, range_factor="Default", hist_type="DA
     total_events = histogram.GetEntries()
     x_axis_min = histogram.GetBinLowEdge(1)
     x_axis_max = histogram.GetBinLowEdge(num_bins + 1) * (total_events / max_bin_content) * x_axis_range_factor
-    histogram.GetXaxis().SetRangeUser(x_axis_min, x_axis_max)
 
-    # Set y-axis range dynamically
-    histogram.GetYaxis().SetRangeUser(min_bin_content, max_bin_content)
 
-    # Draw the histogram with updated axis ranges
-    histogram.Draw()
+    print(inp_str , "!!!!!!!!!!!!!", x_axis_min, x_axis_max)
+    
+    return x_axis_min, x_axis_max
 
-    # Optionally, display the canvas
-    ROOT.gPad.GetCanvas().Draw()
-
-    # Close the ROOT file
-    file.Close()
-
+    
+    
 ################################################################################################################################################    
