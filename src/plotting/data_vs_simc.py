@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-14 23:51:02 trottar"
+# Time-stamp: "2024-01-14 23:57:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,18 +80,22 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     efficiency_table = inpDict["efficiency_table"] 
     ParticleType = inpDict["ParticleType"]
 
-    histlist_copy = histlist.copy()
+    # Create an empty list to store copied histograms
+    histlist_copy = []
 
-    # Check if the value of the dictionary is a Tobject that can use .Clone()
-    for hist in histlist_copy:
-        #hist_copy = {key: val.Clone() if hasattr(val, 'Clone') else val for key, val in hist.items()}
+    # Check if the value of the dictionary is a TObject that can use .Clone()
+    for hist in histlist:
+        hist_copy = {}
         for key, val in hist.items():
-            if hasattr(val, 'Clone'):
-                print("!!!!!",key, type(val))
-                hist_copy = {key: val.Clone()}        
+            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
+                # Clone the TObject if it has the 'Clone' method
+                hist_copy[key] = val.Clone()
             else:
-                hist_copy = {key: val}
-    
+                # Otherwise, just copy the value
+                hist_copy[key] = val
+        # Append the copied histogram dictionary to the new list
+        histlist_copy.append(hist_copy)    
+
     ################################################################################################################################################
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
