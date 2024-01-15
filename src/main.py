@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 03:58:29 trottar"
+# Time-stamp: "2024-01-15 03:58:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -258,32 +258,6 @@ for phiset in phisetlist:
 Apply random subtraction to data and dummy.
 '''
 
-'''
-##############
-# HARD CODED #
-##############
-# Redefine boundaries of Q2, W and eps
-# May need to adjust these for binning
-# Too many zero bins can result in empty bins when t/phi binning
-# Good method is to use std dev around central set value
-#inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
-#inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
-#inpDict["Wmin"] = WVal - (0.06)*WVal
-#inpDict["Wmax"] = WVal + (0.06)*WVal
-#inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
-#inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
-# Q2=5p5, W=3.02
-inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
-inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
-inpDict["Wmin"] = WVal - (0.06)*WVal
-inpDict["Wmax"] = WVal + (0.06)*WVal
-inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
-inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
-##############
-##############
-##############
-'''
-
 sys.path.append("cuts")
 from rand_sub import rand_sub
 
@@ -319,6 +293,32 @@ for hist in histlist:
 * Combine all settings and choose t/phi bins for low eps.
 
 * These bins will also be used of high eps, so check high eps as well.
+'''
+
+'''
+##############
+# HARD CODED #
+##############
+# Redefine boundaries of Q2, W and eps
+# May need to adjust these for binning
+# Too many zero bins can result in empty bins when t/phi binning
+# Good method is to use std dev around central set value
+#inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+#inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+#inpDict["Wmin"] = WVal - (0.06)*WVal
+#inpDict["Wmax"] = WVal + (0.06)*WVal
+#inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
+#inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
+# Q2=5p5, W=3.02
+inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+inpDict["Wmin"] = WVal - (0.06)*WVal
+inpDict["Wmax"] = WVal + (0.06)*WVal
+inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
+inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
+##############
+##############
+##############
 '''
 
 # Reset Q2, W, eps TH1F range dynamically
