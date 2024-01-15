@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 02:29:54 trottar"
+# Time-stamp: "2024-01-15 02:33:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1076,7 +1076,7 @@ def rand_sub(phi_setting, inpDict):
 
     # Create custom labels for multiples of pi
     pi_values = [0, 1, 2, 3, 4]  # Adjust as needed
-    pi_labels = ['0', 'π', '2π', '3π', '4π']  # Adjust labels accordingly
+    pi_labels = ['0', '#pi', '2#pi', '3#pi', '4#pi']  # Adjust labels accordingly
 
     # Set custom labels for the x-axis
     for i, val in enumerate(pi_values):
