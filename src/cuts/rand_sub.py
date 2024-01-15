@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 04:38:49 trottar"
+# Time-stamp: "2024-01-15 04:40:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1121,8 +1121,8 @@ def rand_sub(phi_setting, inpDict):
         pi_values.append(i)
 
     # Set custom labels for the x-axis
-    for i, val in enumerate(pi_values):
-        axis.ChangeLabel(val + 1, -1, -1, -1, -1, -1, pi_labels[i])
+#    for i, val in enumerate(pi_values):
+#        axis.ChangeLabel(val + 1, -1, -1, -1, -1, -1, pi_labels[i])
     
     histDict["H_ph_q_DATA"].SetLineColor(1)
     l_phi.AddEntry(histDict["H_ph_q_DATA"],histDict["phi_setting"])
