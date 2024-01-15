@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 03:41:43 trottar"
+# Time-stamp: "2024-01-15 04:04:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,7 +259,7 @@ def rand_sub(phi_setting, inpDict):
     H_MM_DATA  = TH1D("H_MM_DATA","MM_{K}", 200, 0.0, 1.5)
     H_th_DATA  = TH1D("H_th_DATA","X' tar", 200, -0.1, 0.1)
     H_ph_DATA  = TH1D("H_ph_DATA","Y' tar", 200, -0.1, 0.1)
-    H_ph_q_DATA  = TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 200, -math.pi, 3*math.pi)
+    H_ph_q_DATA  = TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 200, -6math.pi, 6*math.pi)
     H_th_q_DATA  = TH1D("H_th_q_DATA","Theta Detected (th_xq)", 200, -0.2, 0.2)
     H_ph_recoil_DATA  = TH1D("H_ph_recoil_DATA","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
     H_th_recoil_DATA  = TH1D("H_th_recoil_DATA","Theta Recoil (th_bq)", 200, -10.0, 10.0)
@@ -297,7 +297,7 @@ def rand_sub(phi_setting, inpDict):
     H_MM_DUMMY  = TH1D("H_MM_DUMMY","MM_{K}", 200, 0.0, 1.5)
     H_th_DUMMY  = TH1D("H_th_DUMMY","X' tar", 200, -0.1, 0.1)
     H_ph_DUMMY  = TH1D("H_ph_DUMMY","Y' tar", 200, -0.1, 0.1)
-    H_ph_q_DUMMY  = TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 200, -math.pi, 3*math.pi)
+    H_ph_q_DUMMY  = TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 200, -6math.pi, 6*math.pi)
     H_th_q_DUMMY  = TH1D("H_th_q_DUMMY","Theta Detected (th_xq)", 200, -0.2, 0.2)
     H_ph_recoil_DUMMY  = TH1D("H_ph_recoil_DUMMY","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
     H_th_recoil_DUMMY  = TH1D("H_th_recoil_DUMMY","Theta Recoil (th_bq)", 200, -10.0, 10.0)
@@ -330,7 +330,7 @@ def rand_sub(phi_setting, inpDict):
     H_MM_RAND  = TH1D("H_MM_RAND","MM_{K}", 200, 0.0, 1.5)
     H_th_RAND  = TH1D("H_th_RAND","X' tar", 200, -0.1, 0.1)
     H_ph_RAND  = TH1D("H_ph_RAND","Y' tar", 200, -0.1, 0.1)
-    H_ph_q_RAND  = TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 200, -math.pi, 3*math.pi)
+    H_ph_q_RAND  = TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 200, -6math.pi, 6*math.pi)
     H_th_q_RAND  = TH1D("H_th_q_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
     H_ph_recoil_RAND  = TH1D("H_ph_recoil_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
     H_th_recoil_RAND  = TH1D("H_th_recoil_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
@@ -363,7 +363,7 @@ def rand_sub(phi_setting, inpDict):
     H_MM_DUMMY_RAND  = TH1D("H_MM_DUMMY_RAND","MM_{K}", 200, 0.0, 1.5)
     H_th_DUMMY_RAND  = TH1D("H_th_DUMMY_RAND","X' tar", 200, -0.1, 0.1)
     H_ph_DUMMY_RAND  = TH1D("H_ph_DUMMY_RAND","Y' tar", 200, -0.1, 0.1)
-    H_ph_q_DUMMY_RAND  = TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 200, -math.pi, 3*math.pi)
+    H_ph_q_DUMMY_RAND  = TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 200, -6math.pi, 6*math.pi)
     H_th_q_DUMMY_RAND  = TH1D("H_th_q_DUMMY_RAND","Theta Detected (th_xq)", 200, -0.2, 0.2)
     H_ph_recoil_DUMMY_RAND  = TH1D("H_ph_recoil_DUMMY_RAND","Phi Recoil (ph_bq)", 200, -10.0, 10.0)
     H_th_recoil_DUMMY_RAND  = TH1D("H_th_recoil_DUMMY_RAND","Theta Recoil (th_bq)", 200, -10.0, 10.0)
