@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 04:42:54 trottar"
+# Time-stamp: "2024-01-15 04:45:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1102,27 +1102,6 @@ def rand_sub(phi_setting, inpDict):
     Cphi = TCanvas()
     l_phi = TLegend(0.115,0.45,0.33,0.95)
     l_phi.SetTextSize(0.0135)
-
-    # Set the x-axis labels to multiples of pi
-    axis = histDict["H_ph_q_DATA"].GetXaxis()
-    axis.SetNdivisions(505)  # Adjust the number of divisions for clarity
-    axis.SetLabelSize(0.03)  # Adjust label size if needed
-
-    # Create custom labels for multiples of pi
-    pi_values = []  # Adjust as needed
-    pi_labels = []
-    for i in range(0,5):
-        if i == 0:
-            pi_labels.append('0')
-        if i == 1:
-            pi_labels.append('#pi')
-        else:
-            pi_labels.append('{}#pi'.format(i))
-        pi_values.append(i)
-
-    # Set custom labels for the x-axis
-#    for i, val in enumerate(pi_values):
-#        axis.ChangeLabel(val + 1, -1, -1, -1, -1, -1, pi_labels[i])
     
     histDict["H_ph_q_DATA"].SetLineColor(1)
     l_phi.AddEntry(histDict["H_ph_q_DATA"],histDict["phi_setting"])
