@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 17:33:29 trottar"
+# Time-stamp: "2024-01-15 01:19:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -201,7 +201,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
 
 
     ################################################################################################################################################
-    
+
+    '''    
     # Define thpq vector relative to middle setting
     for phiset in phisetlist:
         
@@ -234,6 +235,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                         print("Run {}".format(run))
                         print("{} | E_{} = {}".format(EbeamValCenter[0], phiset, EbeamValCenter[i]))
                         print("{} | theta_{} = {}".format(pThetaValCenter[0], phiset, pThetaValCenter[i]))
+    '''
                         
     ################################################################################################################################################
 
