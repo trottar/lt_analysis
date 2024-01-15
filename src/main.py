@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 16:33:07 trottar"
+# Time-stamp: "2024-01-15 17:50:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -295,7 +295,7 @@ for hist in histlist:
 * These bins will also be used of high eps, so check high eps as well.
 '''
 
-'''
+
 ##############
 # HARD CODED #
 ##############
@@ -303,28 +303,28 @@ for hist in histlist:
 # May need to adjust these for binning
 # Too many zero bins can result in empty bins when t/phi binning
 # Good method is to use std dev around central set value
-#inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
-#inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
-#inpDict["Wmin"] = WVal - (0.06)*WVal
-#inpDict["Wmax"] = WVal + (0.06)*WVal
-#inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
-#inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
-# Q2=5p5, W=3.02
-inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
-inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
-inpDict["Wmin"] = WVal - (0.06)*WVal
-inpDict["Wmax"] = WVal + (0.06)*WVal
-inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
-inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
+if Q2 == "2p1" and W == "2p95":
+    inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+    inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+    inpDict["Wmin"] = WVal - (0.06)*WVal
+    inpDict["Wmax"] = WVal + (0.06)*WVal
+    inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
+    inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
+if Q2 == "5p5" and W == "3p02":
+    inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+    inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+    inpDict["Wmin"] = WVal - (0.06)*WVal
+    inpDict["Wmax"] = WVal + (0.06)*WVal
+    inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
+    inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
 ##############
 ##############
 ##############
-'''
 
 # Reset Q2, W, eps TH1F range dynamically
-inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist)
-inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist)
-inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist)
+#inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist)
+#inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist)
+#inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist)
 
 sys.path.append("binning")
 from find_bins import find_bins, check_bins
