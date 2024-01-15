@@ -506,7 +506,7 @@ if [[ $p_flag = "true" ]]; then
 	    echo
 	    rm "$out_f_file"
 	fi	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
 	echo
     fi
 
@@ -529,7 +529,7 @@ if [[ $p_flag = "true" ]]; then
 	    echo
 	    rm "$out_f_file"
 	fi	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
     fi
 
     # Checks that array isn't empty
@@ -551,7 +551,7 @@ if [[ $p_flag = "true" ]]; then
 	    echo
 	    rm "$out_f_file"
 	fi	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
     fi
 
 else
@@ -583,7 +583,7 @@ else
 		echo
 		rm "$out_f_file"
 	    fi	    
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Right_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log
 	    echo
 	fi
 
@@ -606,7 +606,7 @@ else
 		echo
 		rm "$out_f_file"
 	    fi	    
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Left_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
 	fi
 
 	# Checks that array isn't empty
@@ -628,7 +628,7 @@ else
 		echo
 		rm "$out_f_file"
 	    fi	    
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ../../log/Center_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log
 	    
 	fi
     done
