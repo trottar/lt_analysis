@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 16:29:08 trottar"
+# Time-stamp: "2024-01-15 16:43:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -324,7 +324,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
 
     for i in range(0, len(w_vec)-1):
         
-        sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
+        sigl_X_pre = (TF2(f_sigL_pre).Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
         sigl_X_fit = g_sigl.GetY()[i] / g_vec[i]
