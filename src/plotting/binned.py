@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 15:56:11 trottar"
+# Time-stamp: "2024-01-16 02:03:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,6 +53,9 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import match_to_bin
 
+################################################################################################################################################
+# Suppressing the terminal splash of Print()
+ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ################################################################################################################################################
 
 def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict):

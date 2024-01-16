@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 16:59:26 trottar"
+# Time-stamp: "2024-01-16 02:03:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,6 +40,8 @@ OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
 
 ################################################################################################################################################
+# Suppressing the terminal splash of Print()
+ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
 
