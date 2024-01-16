@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 00:12:14 trottar"
+# Time-stamp: "2024-01-16 00:30:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,8 +51,6 @@ OUTPATH=lt.OUTPATH
 ##################################################################################################################################################
 
 def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins):
-
-    print("X-axis range of the hist_data:", hist_data.GetXaxis().GetXmin(), "to", hist_data.GetXaxis().GetXmax())
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
@@ -140,8 +138,6 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
     return groups
 
 def calculate_ave_simc(kin_type, hist_simc, t_simc, t_bins, phi_bins):
-
-    print("X-axis range of the hist_simc:", hist_simc.GetXaxis().GetXmin(), "to", hist_simc.GetXaxis().GetXmax())
     
     # Initialize lists for binned_t_simc, and binned_hist_simc
     binned_t_simc = []
