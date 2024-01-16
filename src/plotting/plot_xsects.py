@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 03:09:22 trottar"
+# Time-stamp: "2024-01-16 03:20:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -656,7 +656,7 @@ for k in range(NumtBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
             G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
             j+=1
-    G_xmod_phi_loeps.SetMarkerStyle(25)
+    G_xmod_phi_loeps.SetMarkerStyle(30)
     G_xmod_phi_loeps.SetMarkerSize(1)
     G_xmod_phi_loeps.SetMarkerColor(1)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_loeps)
@@ -667,7 +667,7 @@ for k in range(NumtBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
             j+=1
-    G_xmod_phi_hieps.SetMarkerStyle(25)
+    G_xmod_phi_hieps.SetMarkerStyle(30)
     G_xmod_phi_hieps.SetMarkerSize(1)
     G_xmod_phi_hieps.SetMarkerColor(2)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)    
