@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 13:54:27 trottar"
+# Time-stamp: "2024-01-16 13:59:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -252,7 +252,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetLineWidth(2)
 
         # x->phi, y->eps, PI/180 = 0.017453
-        fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]", 0, 360, 0.2, 0.9)
+        fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]", 0, 360, 0.0, 1.0)
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
@@ -623,9 +623,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetRightMargin(0.03)
 
         # Print plots for c1 and c2 canvases
-        #c1.Print(outputpdf)
-        #c2.Print(outputpdf)
-        #c2.Print("money" + q2_set + filename + ".root")
+        c1.Print(outputpdf)
+        c2.Print(outputpdf)
 
         # Clear c1 and c2 canvases
         c1.Clear()
