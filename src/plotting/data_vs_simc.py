@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 21:14:35 trottar"
+# Time-stamp: "2024-01-15 21:22:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -732,7 +732,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         # Set color representing zero events to transparent (alpha = 0)
         hist["Q2_vs_t_DATA"].SetMinimum(1)
         hist["Q2_vs_t_DATA"].SetLineColor(i+1)
-        hist["Q2_vs_t_DATA"].Draq2("same, COLZ")
+        hist["Q2_vs_t_DATA"].Draw("same, COLZ")
         hist["Q2_vs_t_DATA"].SetTitle(phisetlist[i])
 
     Cq2t.Print(outputpdf)    
@@ -762,7 +762,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         # Set color representing zero events to transparent (alpha = 0)
         hist["EPS_vs_t_DATA"].SetMinimum(1)
         hist["EPS_vs_t_DATA"].SetLineColor(i+1)
-        hist["EPS_vs_t_DATA"].Draeps("same, COLZ")
+        hist["EPS_vs_t_DATA"].Draw("same, COLZ")
         hist["EPS_vs_t_DATA"].SetTitle(phisetlist[i])
 
     Cepst.Print(outputpdf)
