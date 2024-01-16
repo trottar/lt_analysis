@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 23:01:22 trottar"
+# Time-stamp: "2024-01-15 23:33:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,6 +51,9 @@ OUTPATH=lt.OUTPATH
 ##################################################################################################################################################
 
 def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins):
+
+    print("X-axis range of the hist_data:", hist_data.GetXaxis().GetXmin(), "to", hist_data.GetXaxis().GetXmax())
+
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
