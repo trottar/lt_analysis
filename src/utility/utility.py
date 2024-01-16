@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 23:49:21 trottar"
+# Time-stamp: "2024-01-15 23:55:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -400,8 +400,9 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
         max_values.append(x_axis_max)
 
         # Set the x-axis range for the current histogram
-        #histogram.GetXaxis().SetRangeUser(x_axis_min, x_axis_max)
-        histogram.SetBins(200, x_axis_min, x_axis_max)
+        hist["H_{}_DATA".format(inp_str, hist_type)].SetBins(200, x_axis_min, x_axis_max)
+        hist["H_{}_DUMMY".format(inp_str, hist_type)].SetBins(200, x_axis_min, x_axis_max)
+        hist["H_{}_SIMC".format(inp_str, hist_type)].SetBins(200, x_axis_min, x_axis_max)
 
     # Calculate the average minimum and maximum values
     avg_min = np.average(min_values)
