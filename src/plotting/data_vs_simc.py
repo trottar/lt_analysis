@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 20:51:39 trottar"
+# Time-stamp: "2024-01-15 21:00:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,7 +107,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     ################################################################################################################################################
 
-    '''
     for hist in histlist_copy:
         
         hist["H_hsdelta_SIMC"].Scale(hist["normfac_simc"])
@@ -240,8 +239,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmz_DATA"].Add(hist["H_pmz_DUMMY"],-1)
         hist["H_W_DATA"].Add(hist["H_W_DUMMY"],-1)
         hist["H_ct_DATA"].Add(hist["H_ct_DUMMY"],-1)
-
-    '''
         
     # Creating clone of efficiency plots because otherwise things
     # crash due to pointer issues with TMultiGraph's Add() function
