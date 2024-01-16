@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 23:58:39 trottar"
+# Time-stamp: "2024-01-16 00:02:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -353,8 +353,9 @@ def run_fortran(fort_script, inp_val=""):
 
 import numpy as np
 
-def set_dynamic_axis_ranges(inp_str, histlist, hist_type, range_factor="Default"):
+def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default"):
 
+    hist_type = "DATA"
     x_axis_range_factor = 0.005
     
     # Check if a custom range factor is provided
@@ -399,13 +400,14 @@ def set_dynamic_axis_ranges(inp_str, histlist, hist_type, range_factor="Default"
         min_values.append(x_axis_min)
         max_values.append(x_axis_max)
 
-        # Set the x-axis range for the current histogram
-        histogram.SetBins(200, x_axis_min, x_axis_max)
-
     # Calculate the average minimum and maximum values
     avg_min = np.average(min_values)
     avg_max = np.average(max_values)
 
+    for i, hist in enumerate(histlist):    
+        # Set the x-axis range for the current histogram
+        hist["H_{}_{}".format(inp_str, hist_type)].SetBins(200, avg_min, avg_max)
+    
     return avg_min, avg_max
     
 ################################################################################################################################################    
