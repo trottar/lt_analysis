@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 02:06:20 trottar"
+# Time-stamp: "2024-01-16 02:22:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,14 +206,14 @@ fi
 # Define input and output file names
 OutUnsepxsectsFilename="${ParticleType}_xsects_${KIN}"
 cd "${LTANAPATH}/src/plotting/"
-#python3 plot_xsects.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${NumtBins} ${NumPhiBins} ${KIN} ${OutUnsepxsectsFilename}
+python3 plot_xsects.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${NumtBins} ${NumPhiBins} ${KIN} ${OutUnsepxsectsFilename}
 # Check the exit status of the Python script
-#if [ $? -ne 0 ]; then
-#    echo
-#    echo
-#    echo "2 ERROR: Python script failed!"
-#    echo "       See error above..."
-#    exit 1
-#fi
+if [ $? -ne 0 ]; then
+    echo
+    echo
+    echo "2 ERROR: Python script failed!"
+    echo "       See error above..."
+    exit 1
+fi
 
 echo "LTSep Complete!"
