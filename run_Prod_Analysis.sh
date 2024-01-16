@@ -99,8 +99,8 @@ POL="+1" # All KaonLT is positive polarity
 # TMIN should not equal zero (unless calc_xsect.f is adapted)
 # Make sure 3 sig figs (no more)
 # Q2=2p1
-TMIN=0.010
-TMAX=0.550
+TMIN=0.001
+TMAX=0.600
 # Q2=3p0
 #TMIN=0.001
 #TMAX=0.990
