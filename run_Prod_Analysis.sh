@@ -106,7 +106,7 @@ POL="+1" # All KaonLT is positive polarity
 #TMAX=0.990
 # Q2=5p5
 TMIN=0.001
-TMAX=1.450
+TMAX=1.250
 # Efficiency csv file
 #EffData="coin_production_Prod_efficiency_data_2022_12_05.csv"
 #EffData="coin_production_Prod_efficiency_data_2022_12_30.csv"
