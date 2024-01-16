@@ -147,7 +147,7 @@ c                 pause
 
                   open(66,file=fn)
                   do it=1,nt
-                     read(66,*) W,dW,Q2,dQ2,tt,dtt
+                     read(66,*) Q2,dQ2,W,dW,tt,dtt
                      WRITE(*,*) 'it = ', it
                      WRITE(*,*) 'nt = ', nt
                      WRITE(*,*) 'W = ', W
