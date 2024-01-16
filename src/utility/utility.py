@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 21:53:08 trottar"
+# Time-stamp: "2024-01-15 22:01:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,7 +57,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
 def show_pdf_with_evince(file_path):
     try:
-        user_input = input("Do you want to open {}? (y/n): ".format(file_path))
+        user_input = input("\nDo you want to open {}? (y/n): ".format(file_path))
 
         while True:
             if user_input.lower() == 'y':
@@ -70,9 +70,11 @@ def show_pdf_with_evince(file_path):
                 break
             elif user_input.lower() == 'q':
                 print("Quitting...")
+                break
                 sys.exit(2)
             else:
                 print("Invalid input. Please enter 'y' to open or 'n'/'c' to continue or 'q' to quit.")
+                continue
     
     except FileNotFoundError:
         print("Evince not found. Please make sure it is installed.")
