@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 19:24:26 trottar"
+# Time-stamp: "2024-01-15 19:28:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -354,7 +354,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     CW.Print(outputpdf)
 
     Ct = TCanvas()
-    #l_t = TLegend(0.115,0.45,0.33,0.95)
     l_t = ROOT.TLegend(0.67, 0.75, 0.92, 0.95)
     l_t.SetTextSize(0.0135)
 

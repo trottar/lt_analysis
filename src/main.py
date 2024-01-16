@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 19:19:23 trottar"
+# Time-stamp: "2024-01-15 19:31:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -322,10 +322,17 @@ if Q2 == "5p5" and W == "3p02":
 ##############
 '''
 
+##############
+# HARD CODED #
+##############
 # Reset Q2, W, eps TH1F range dynamically
+# Adjust range_factor for plot limits (Default=0.005)
 inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist, range_factor=0.01)
-inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist, range_factor=0.005)
-inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist, range_factor=0.005)
+inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist)
+inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon")
+##############
+##############
+##############
 
 sys.path.append("binning")
 from find_bins import find_bins, check_bins
