@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 03:01:17 trottar"
+# Time-stamp: "2024-01-16 03:09:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -636,7 +636,7 @@ for k in range(NumtBins):
     G_xreal_phi_loeps.SetMarkerStyle(21)
     G_xreal_phi_loeps.SetMarkerSize(1)
     G_xreal_phi_loeps.SetMarkerColor(1)
-    multiDict["G_xreal_phi_{}".format(k+1)].Add(G_xreal_phi_loeps)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xreal_phi_loeps)
     
     G_xreal_phi_hieps = TGraphErrors()
     j=0
@@ -648,7 +648,7 @@ for k in range(NumtBins):
     G_xreal_phi_hieps.SetMarkerStyle(21)
     G_xreal_phi_hieps.SetMarkerSize(1)
     G_xreal_phi_hieps.SetMarkerColor(2)
-    multiDict["G_xreal_phi_{}".format(k+1)].Add(G_xreal_phi_hieps)    
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xreal_phi_hieps)    
     
     G_xmod_phi_loeps = TGraph()
     j=0
