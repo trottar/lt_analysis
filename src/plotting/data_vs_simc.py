@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 21:00:05 trottar"
+# Time-stamp: "2024-01-15 21:14:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -331,8 +331,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_ct_DATA"].Draw("same, E1")
 
     ct.Print(outputpdf)
-
-
+    
     CQ2 = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -723,6 +722,51 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cqw.Print(outputpdf)
 
+    Cq2t = TCanvas()
+
+    Cq2t.Divide(2,2)
+
+    for i,hist in enumerate(histlist_copy):
+        Cq2t.cd(i+1)
+
+        # Set color representing zero events to transparent (alpha = 0)
+        hist["Q2_vs_t_DATA"].SetMinimum(1)
+        hist["Q2_vs_t_DATA"].SetLineColor(i+1)
+        hist["Q2_vs_t_DATA"].Draq2("same, COLZ")
+        hist["Q2_vs_t_DATA"].SetTitle(phisetlist[i])
+
+    Cq2t.Print(outputpdf)    
+    
+    Cwt = TCanvas()
+
+    Cwt.Divide(2,2)
+
+    for i,hist in enumerate(histlist_copy):
+        Cwt.cd(i+1)
+
+        # Set color representing zero events to transparent (alpha = 0)
+        hist["W_vs_t_DATA"].SetMinimum(1)
+        hist["W_vs_t_DATA"].SetLineColor(i+1)
+        hist["W_vs_t_DATA"].Draw("same, COLZ")
+        hist["W_vs_t_DATA"].SetTitle(phisetlist[i])
+
+    Cwt.Print(outputpdf)    
+
+    Cepst = TCanvas()
+
+    Cepst.Divide(2,2)
+
+    for i,hist in enumerate(histlist_copy):
+        Cepst.cd(i+1)
+
+        # Set color representing zero events to transparent (alpha = 0)
+        hist["EPS_vs_t_DATA"].SetMinimum(1)
+        hist["EPS_vs_t_DATA"].SetLineColor(i+1)
+        hist["EPS_vs_t_DATA"].Draeps("same, COLZ")
+        hist["EPS_vs_t_DATA"].SetTitle(phisetlist[i])
+
+    Cepst.Print(outputpdf)
+    
     Cpht_simc = TCanvas()
 
     # Create a list to store all polar plots
