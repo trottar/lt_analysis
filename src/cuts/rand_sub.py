@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 21:26:53 trottar"
+# Time-stamp: "2024-01-15 21:40:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -430,7 +430,7 @@ def rand_sub(phi_setting, inpDict):
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
         #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
         SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
@@ -540,7 +540,7 @@ def rand_sub(phi_setting, inpDict):
         Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
 
         #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
         SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
@@ -643,7 +643,7 @@ def rand_sub(phi_setting, inpDict):
         Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
 
         #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
         SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
@@ -743,7 +743,7 @@ def rand_sub(phi_setting, inpDict):
         Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
 
         #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1) # & P_hod_betanotrack > 0.5 & P_hod_betanotrack < 1.4
+        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
         SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
@@ -797,7 +797,7 @@ def rand_sub(phi_setting, inpDict):
           W_vs_t_DUMMY_RAND.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DUMMY_RAND.Fill(evt.epsilon, -evt.MandelT)
           
-          H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)                   
+          H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)
 
           H_ssxfp_DUMMY_RAND.Fill(evt.ssxfp)
           H_ssyfp_DUMMY_RAND.Fill(evt.ssyfp)
