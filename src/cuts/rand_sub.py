@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 22:36:20 trottar"
+# Time-stamp: "2024-01-15 23:17:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -258,7 +258,7 @@ def rand_sub(phi_setting, inpDict):
     H_Q2_DATA       = TH1D("H_Q2_DATA","Q2", 200, inpDict["Q2min"], inpDict["Q2max"])
     H_W_DATA  = TH1D("H_W_DATA","W ", 200, inpDict["Wmin"], inpDict["Wmax"])
     H_t_DATA       = TH1D("H_t_DATA","-t", 200, inpDict["tmin"], inpDict["tmax"])
-    H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", 200, 0.0, 2.0)
+    H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DATA  = TH1D("H_MM_DATA","MM_{K}", 200, 0.0, 1.5)
     H_th_DATA  = TH1D("H_th_DATA","X' tar", 200, -0.1, 0.1)
     H_ph_DATA  = TH1D("H_ph_DATA","Y' tar", 200, -0.1, 0.1)
@@ -296,7 +296,7 @@ def rand_sub(phi_setting, inpDict):
     H_Q2_DUMMY       = TH1D("H_Q2_DUMMY","Q2", 200, inpDict["Q2min"], inpDict["Q2max"])
     H_W_DUMMY  = TH1D("H_W_DUMMY","W ", 200, inpDict["Wmin"], inpDict["Wmax"])
     H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 200, inpDict["tmin"], inpDict["tmax"])  
-    H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", 200, 0.0, 2.0)
+    H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DUMMY  = TH1D("H_MM_DUMMY","MM_{K}", 200, 0.0, 1.5)
     H_th_DUMMY  = TH1D("H_th_DUMMY","X' tar", 200, -0.1, 0.1)
     H_ph_DUMMY  = TH1D("H_ph_DUMMY","Y' tar", 200, -0.1, 0.1)
@@ -329,7 +329,7 @@ def rand_sub(phi_setting, inpDict):
     H_Q2_RAND       = TH1D("H_Q2_RAND","Q2", 200, inpDict["Q2min"], inpDict["Q2max"])
     H_W_RAND  = TH1D("H_W_RAND","W ", 200, inpDict["Wmin"], inpDict["Wmax"])
     H_t_RAND       = TH1D("H_t_RAND","-t", 200, inpDict["tmin"], inpDict["tmax"])
-    H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", 200, 0.0, 2.0)
+    H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_RAND  = TH1D("H_MM_RAND","MM_{K}", 200, 0.0, 1.5)
     H_th_RAND  = TH1D("H_th_RAND","X' tar", 200, -0.1, 0.1)
     H_ph_RAND  = TH1D("H_ph_RAND","Y' tar", 200, -0.1, 0.1)
@@ -362,7 +362,7 @@ def rand_sub(phi_setting, inpDict):
     H_Q2_DUMMY_RAND       = TH1D("H_Q2_DUMMY_RAND","Q2", 200, inpDict["Q2min"], inpDict["Q2max"])
     H_W_DUMMY_RAND  = TH1D("H_W_DUMMY_RAND","W ", 200, inpDict["Wmin"], inpDict["Wmax"])
     H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 200, inpDict["tmin"], inpDict["tmax"])
-    H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 200, 0.0, 2.0)
+    H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DUMMY_RAND  = TH1D("H_MM_DUMMY_RAND","MM_{K}", 200, 0.0, 1.5)
     H_th_DUMMY_RAND  = TH1D("H_th_DUMMY_RAND","X' tar", 200, -0.1, 0.1)
     H_ph_DUMMY_RAND  = TH1D("H_ph_DUMMY_RAND","Y' tar", 200, -0.1, 0.1)
@@ -389,7 +389,7 @@ def rand_sub(phi_setting, inpDict):
     Q2_vs_W_DATA = TH2D("Q2_vs_W_DATA", "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
     Q2_vs_t_DATA = TH2D("Q2_vs_t_DATA", "Q^{2} vs t; Q^{2}; t", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["tmin"], inpDict["tmax"])
     W_vs_t_DATA = TH2D("W_vs_t_DATA", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
-    EPS_vs_t_DATA = TH2D("EPS_vs_t_DATA", "Epsilon vs t; Epsilon; t", 50, 0.0, 1.0, 50, inpDict["tmin"], inpDict["tmax"])
+    EPS_vs_t_DATA = TH2D("EPS_vs_t_DATA", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
 
     MM_vs_CoinTime_DUMMY = TH2D("MM_vs_CoinTime_DUMMY","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_DUMMY = TH2D("CoinTime_vs_beta_DUMMY", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
@@ -400,7 +400,7 @@ def rand_sub(phi_setting, inpDict):
     Q2_vs_W_DUMMY = TH2D("Q2_vs_W_DUMMY", "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
     Q2_vs_t_DUMMY = TH2D("Q2_vs_t_DUMMY", "Q^{2} vs t; Q^{2}; t", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["tmin"], inpDict["tmax"])
     W_vs_t_DUMMY = TH2D("W_vs_t_DUMMY", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
-    EPS_vs_t_DUMMY = TH2D("EPS_vs_t_DUMMY", "Epsilon vs t; Epsilon; t", 50, 0.0, 1.0, 50, inpDict["tmin"], inpDict["tmax"])
+    EPS_vs_t_DUMMY = TH2D("EPS_vs_t_DUMMY", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
     
     MM_vs_CoinTime_RAND = TH2D("MM_vs_CoinTime_RAND","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_RAND = TH2D("CoinTime_vs_beta_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
@@ -409,7 +409,7 @@ def rand_sub(phi_setting, inpDict):
     Q2_vs_W_RAND = TH2D("Q2_vs_W_RAND", "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
     Q2_vs_t_RAND = TH2D("Q2_vs_t_RAND", "Q^{2} vs t; Q^{2}; t", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["tmin"], inpDict["tmax"])
     W_vs_t_RAND = TH2D("W_vs_t_RAND", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
-    EPS_vs_t_RAND = TH2D("EPS_vs_t_RAND", "Epsilon vs t; Epsilon; t", 50, 0.0, 1.0, 50, inpDict["tmin"], inpDict["tmax"])
+    EPS_vs_t_RAND = TH2D("EPS_vs_t_RAND", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
 
     MM_vs_CoinTime_DUMMY_RAND = TH2D("MM_vs_CoinTime_DUMMY_RAND","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_DUMMY_RAND = TH2D("CoinTime_vs_beta_DUMMY_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
@@ -418,7 +418,7 @@ def rand_sub(phi_setting, inpDict):
     Q2_vs_W_DUMMY_RAND = TH2D("Q2_vs_W_DUMMY_RAND", "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
     Q2_vs_t_DUMMY_RAND = TH2D("Q2_vs_t_DUMMY_RAND", "Q^{2} vs t; Q^{2}; t", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["tmin"], inpDict["tmax"])
     W_vs_t_DUMMY_RAND = TH2D("W_vs_t_DUMMY_RAND", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
-    EPS_vs_t_DUMMY_RAND = TH2D("EPS_vs_t_DUMMY_RAND", "Epsilon vs t; Epsilon; t", 50, 0.0, 1.0, 50, inpDict["tmin"], inpDict["tmax"])
+    EPS_vs_t_DUMMY_RAND = TH2D("EPS_vs_t_DUMMY_RAND", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
     
     ################################################################################################################################################
     # Fill histograms for various trees called above

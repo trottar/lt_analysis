@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 23:09:30 trottar"
+# Time-stamp: "2024-01-15 23:18:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,6 +229,9 @@ else:
 ##############
 ##############
 ##############
+# Default starting values no need to change
+inpDict["Epsmin"] = 0.0
+inpDict["Epsmax"] = 1.0
 
 phisetlist = ["Center","Left","Right"]
 
