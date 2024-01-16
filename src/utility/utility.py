@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 22:07:15 trottar"
+# Time-stamp: "2024-01-15 22:08:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,9 +57,9 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
 def show_pdf_with_evince(file_path):
     try:
-        user_input = input("\nDo you want to open {}? (y/n): ".format(file_path))
-
-        while True:
+        while True:            
+            user_input = input("\nDo you want to open {}? (y/n): ".format(file_path))
+            
             if user_input.lower() == 'y':
                 process = subprocess.Popen(['evince', file_path])
                 process.wait()  # Pauses the script until Evince is closed                
