@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 22:08:40 trottar"
+# Time-stamp: "2024-01-15 22:12:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,7 +62,8 @@ def show_pdf_with_evince(file_path):
             
             if user_input.lower() == 'y':
                 process = subprocess.Popen(['evince', file_path])
-                process.wait()  # Pauses the script until Evince is closed                
+                process.wait()  # Pauses the script until Evince is closed
+                break
             elif user_input.lower() == 'c':
                 print("File closed...")
                 break
