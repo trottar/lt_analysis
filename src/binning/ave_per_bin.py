@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 22:57:13 trottar"
+# Time-stamp: "2024-01-15 23:01:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,9 +65,9 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
         for bin_index in range(1, t_data.GetNbinsX() + 1):
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
+                print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+                print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                 if hist_data.GetBinContent(bin_index) > 0:                    
-                    print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
-                    print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                     tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
                     tmp_t_data[1].append(t_data.GetBinContent(bin_index))
                     tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
@@ -80,6 +80,7 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
 
     ave_hist = []
     binned_sub_data = [[],[]]
+    i=0 # iter
     print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
@@ -104,6 +105,7 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
             print("Average for t-bin {}: 0.0".format(i+1))
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append([0]*len(bin_val_data))
+        i+=1
     
     # Print statements to check sizes
     print("Size of binned_t_data:", len(binned_t_data))
@@ -160,6 +162,7 @@ def calculate_ave_simc(kin_type, hist_simc, t_simc, t_bins, phi_bins):
 
     ave_hist = []
     binned_sub_simc = [[],[]]
+    i=0 # iter
     print("-"*25)
     for simc in binned_hist_simc:
         bin_val_simc, hist_val_simc = simc
@@ -182,6 +185,7 @@ def calculate_ave_simc(kin_type, hist_simc, t_simc, t_bins, phi_bins):
             print("Average for t-bin {}: 0.0".format(i+1))
             binned_sub_simc[0].append(bin_val_simc)
             binned_sub_simc[1].append([0]*len(bin_val_simc))
+        i+=1
     
     # Print statements to check sizes
     print("Size of binned_t_simc:", len(binned_t_simc))
@@ -226,7 +230,7 @@ def ave_per_bin_data(histlist, inpDict):
     }
         
     # List of kinematic types
-    kinematic_types = ["W", "Q2", "t", "epsilon"]
+    kinematic_types = ["Q2", "W", "t", "epsilon"]
 
     # Loop through histlist and update aveDict
     for hist in histlist:
