@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 19:31:00 trottar"
+# Time-stamp: "2024-01-15 21:53:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,19 +58,21 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 def show_pdf_with_evince(file_path):
     try:
         user_input = input("Do you want to open {}? (y/n): ".format(file_path))
-        
-        if user_input.lower() == 'y':
-            process = subprocess.Popen(['evince', file_path])
-            process.wait()  # Pauses the script until Evince is closed
-        elif user_input.lower() == 'c':
-            print("File closed...")
-        elif user_input.lower() == 'n':
-            print("")            
-        elif user_input.lower() == 'q':
-            print("Quitting...")
-            sys.exit(2)
-        else:
-            print("Invalid input. Please enter 'y' to open or 'n'/'c' to continue or 'q' to quit.")
+
+        while True:
+            if user_input.lower() == 'y':
+                process = subprocess.Popen(['evince', file_path])
+                process.wait()  # Pauses the script until Evince is closed                
+            elif user_input.lower() == 'c':
+                print("File closed...")
+                break
+            elif user_input.lower() == 'n':
+                break
+            elif user_input.lower() == 'q':
+                print("Quitting...")
+                sys.exit(2)
+            else:
+                print("Invalid input. Please enter 'y' to open or 'n'/'c' to continue or 'q' to quit.")
     
     except FileNotFoundError:
         print("Evince not found. Please make sure it is installed.")
