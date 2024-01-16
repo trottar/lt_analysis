@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 19:28:46 trottar"
+# Time-stamp: "2024-01-15 19:42:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -354,16 +354,12 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     CW.Print(outputpdf)
 
     Ct = TCanvas()
-    l_t = ROOT.TLegend(0.67, 0.75, 0.92, 0.95)
+    l_t = ROOT.TLegend(0.1, 0.75, 0.35, 0.95)
     l_t.SetTextSize(0.0135)
-
-    # Disable the option box for this plot
-    ROOT.gROOT.SetBatch(True)
     
     binmax = []
     for i,hist in enumerate(histlist_copy):
         hist["H_t_DATA"].SetLineColor(i+1)
-        l_t.AddEntry(hist["H_t_DATA"],hist["phi_setting"])
         hist["H_t_DATA"].Draw("same, E1")
         hist["H_t_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_t_SIMC"].Draw("same, E1")                
@@ -389,7 +385,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         if j == 0:
             tBin_line.SetLineColor(7)
         else:
-            tBin_line.SetLineColor(8)        
+            tBin_line.SetLineColor(8)
         l_t.AddEntry(tBin_line,"Evts in {:.2f}-{:.2f}: {:.0f}".format(t_bins[j],t_bins[j+1], events_between[j]))     
         tBin_line.SetLineWidth(4)
         tBin_line.DrawLine(b,0,b,binmax)
