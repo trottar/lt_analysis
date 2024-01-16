@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 01:13:50 trottar"
+# Time-stamp: "2024-01-16 01:56:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -360,7 +360,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_right_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 0.0001, averW_right_data[i], 0.0001, avert_right_data[i], 0.0001)
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 0.001, averW_right_data[i], 0.001, avert_right_data[i], 0.001)
                 write_to_file(f_list,check_line)
                 processed_Q2vals.add(Q2val)
 
@@ -376,7 +376,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_left_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 0.0001, averW_left_data[i], 0.0001, avert_left_data[i], 0.0001)
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 0.001, averW_left_data[i], 0.001, avert_left_data[i], 0.001)
                 write_to_file(f_list,check_line)
                 processed_Q2vals.add(Q2val)
 
@@ -392,7 +392,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_center_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 0.0001, averW_center_data[i], 0.0001, avert_center_data[i], 0.0001)
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 0.001, averW_center_data[i], 0.001, avert_center_data[i], 0.001)
                 write_to_file(f_list,check_line)
                 processed_Q2vals.add(Q2val)
             
@@ -408,7 +408,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list, 'r') as f:
             lines = f.readlines()
             for i, ratio in enumerate(ratio_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.0001, int(phibin_right[i]), int(tbin_right[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.001, int(phibin_right[i]), int(tbin_right[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -418,7 +418,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_left):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.0001, int(phibin_left[i]), int(tbin_left[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.001, int(phibin_left[i]), int(tbin_left[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
@@ -428,7 +428,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list, 'r') as f:
             lines = f.readlines()                    
             for i, ratio in enumerate(ratio_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.0001, int(phibin_center[i]), int(tbin_center[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.001, int(phibin_center[i]), int(tbin_center[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
