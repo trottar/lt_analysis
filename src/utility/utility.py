@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 23:41:29 trottar"
+# Time-stamp: "2024-01-15 23:46:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -373,7 +373,7 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
     # Iterate through the histograms in the list
     for i, hist in enumerate(histlist):
         # Access the histogram using the specified input string and histogram type
-        histogram = hist["H_{}_{}".format(inp_str, hist_type)].Clone()
+        histogram = hist["H_{}_{}".format(inp_str, hist_type)]
 
         # Get the number of bins
         num_bins = histogram.GetNbinsX()
@@ -400,9 +400,8 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
         max_values.append(x_axis_max)
 
         # Set the x-axis range for the current histogram
-        histogram.GetXaxis().SetRangeUser(x_axis_min, x_axis_max)
-
-        hist["H_{}_{}".format(inp_str, hist_type)] = histogram
+        #histogram.GetXaxis().SetRangeUser(x_axis_min, x_axis_max)
+        hist.SetBins(200, x_axis_min, x_axis_max)
 
     # Calculate the average minimum and maximum values
     avg_min = np.average(min_values)
