@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 23:18:40 trottar"
+# Time-stamp: "2024-01-16 00:00:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -330,9 +330,12 @@ if Q2 == "5p5" and W == "3p02":
 ##############
 # Reset Q2, W, eps TH1F range dynamically
 # Adjust range_factor for plot limits (Default=0.005)
-inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist, range_factor=0.01)
-inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist)
-inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist)
+inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist, "DATA", range_factor=0.01)
+inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist, "DATA")
+inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist, "DATA")
+set_dynamic_axis_ranges("Q2", histlist, "DUMMY", range_factor=0.01)
+set_dynamic_axis_ranges("W", histlist, "DUMMY")
+set_dynamic_axis_ranges("epsilon", histlist, "DUMMY")
 ##############
 ##############
 ##############
@@ -427,6 +430,18 @@ if DEBUG:
         show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(hist["phi_setting"],ParticleType)))
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(hist["phi_setting"],ParticleType)))
+
+##############
+# HARD CODED #
+##############
+# Reset Q2, W, eps TH1F range dynamically
+# Adjust range_factor for plot limits (Default=0.005)
+set_dynamic_axis_ranges("Q2", histlist, "SIMC", range_factor=0.01)
+set_dynamic_axis_ranges("W", histlist, "SIMC")
+set_dynamic_axis_ranges("epsilon", histlist, "SIMC")
+##############
+##############
+##############
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
