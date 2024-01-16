@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 22:01:10 trottar"
+# Time-stamp: "2024-01-15 22:07:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,7 +70,6 @@ def show_pdf_with_evince(file_path):
                 break
             elif user_input.lower() == 'q':
                 print("Quitting...")
-                break
                 sys.exit(2)
             else:
                 print("Invalid input. Please enter 'y' to open or 'n'/'c' to continue or 'q' to quit.")
