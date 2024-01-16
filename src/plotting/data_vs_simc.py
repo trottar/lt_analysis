@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 19:14:31 trottar"
+# Time-stamp: "2024-01-15 19:24:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -359,7 +359,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     l_t.SetTextSize(0.0135)
 
     # Disable the option box for this plot
-    ROOT.gROOT.ProcessLine("gROOT->SetBatch(True);")
+    ROOT.gROOT.SetBatch(True)
     
     binmax = []
     for i,hist in enumerate(histlist_copy):
