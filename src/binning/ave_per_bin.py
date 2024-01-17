@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:32:29 trottar"
+# Time-stamp: "2024-01-17 14:36:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
+def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
 
     ParticleType = inpDict["ParticleType"]
 
@@ -351,18 +351,18 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
         result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
         return result
     
-    binned_t_data = hist_sub(binned_t_data, binned_t_rand*hist["nWindows"])
-    binned_hist_data = hist_sub(binned_hist_data, binned_hist_rand*hist["nWindows"])
-    binned_t_dummy = hist_sub(binned_t_dummy, binned_t_dummy_rand*hist["nWindows"])
-    binned_hist_dummy = hist_sub(binned_hist_dummy, binned_hist_dummy_rand*hist["nWindows"])
+    binned_t_data = hist_sub(binned_t_data, binned_t_rand*(1/nWindows))
+    binned_hist_data = hist_sub(binned_hist_data, binned_hist_rand*(1/nWindows))
+    binned_t_dummy = hist_sub(binned_t_dummy, binned_t_dummy_rand*(1/nWindows))
+    binned_hist_dummy = hist_sub(binned_hist_dummy, binned_hist_dummy_rand*(1/nWindows))
                 
     return binned_t_data, binned_hist_data, binned_hist_dummy
 
     
-def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins, tree_data, tree_dummy, inpDict):
+def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins, tree_data, tree_dummy, nWindows, inpDict):
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_t_data, binned_hist_data, binned_hist_dummy = bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict)
+    binned_t_data, binned_hist_data, binned_hist_dummy = bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict)
 
     ave_hist = []
     binned_sub_data = [[],[]]
@@ -528,7 +528,7 @@ def ave_per_bin_data(histlist, inpDict):
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins, hist["InFile_DATA"], hist["InFile_DUMMY"], inpDict)
+            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins, hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"], inpDict)
                 
     return {"binned_DATA" : aveDict}
 
