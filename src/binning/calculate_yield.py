@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 00:22:02 trottar"
+# Time-stamp: "2024-01-17 15:28:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_da
             tmp_phi_data = [[],[]]
             tmp_hist_data = [[],[]]
             tmp_hist_dummy = [[],[]]
-            for tbin_index in range(0, t_data.GetNbinsX()):
+            for tbin_index in range(1, t_data.GetNbinsX()+1):
                 tbin_center = t_data.GetBinCenter(tbin_index)
                 if t_bins[j] <= tbin_center <= t_bins[j+1]:
                     if hist_data.GetBinContent(tbin_index) > 0:
@@ -150,7 +150,7 @@ def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins
             tmp_t_simc = [[],[]]
             tmp_phi_simc = [[],[]]
             tmp_hist_simc = [[],[]]
-            for tbin_index in range(0, t_simc.GetNbinsX()):
+            for tbin_index in range(1, t_simc.GetNbinsX()+1):
                 tbin_center = t_simc.GetBinCenter(tbin_index)
                 if t_bins[j] <= tbin_center <= t_bins[j+1]:
                     if hist_simc.GetBinContent(tbin_index) > 0:

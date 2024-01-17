@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:32:38 trottar"
+# Time-stamp: "2024-01-17 15:25:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -867,6 +867,7 @@ def rand_sub(phi_setting, inpDict):
     H_ph_recoil_RAND.Scale(1/nWindows)
     H_th_recoil_RAND.Scale(1/nWindows)
     H_Q2_RAND.Scale(1/nWindows)
+    H_W_RAND.Scale(1/nWindows)
     H_t_RAND.Scale(1/nWindows)
     H_epsilon_RAND.Scale(1/nWindows)
     H_MM_RAND.Scale(1/nWindows)

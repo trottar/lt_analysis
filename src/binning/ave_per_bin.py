@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 15:04:41 trottar"
+# Time-stamp: "2024-01-17 15:29:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,6 +76,11 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     binned_t_dummy_rand = []    
     binned_hist_dummy_rand = []
 
+    H_Q2_DATA       = TH1D("H_Q2_DATA","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DATA  = TH1D("H_W_DATA","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DATA       = TH1D("H_t_DATA","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])
+    
     TBRANCH_DATA  = tree_data.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
     TBRANCH_RAND  = tree_data.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
     
@@ -138,15 +143,13 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 tmp_t_data = []
                 tmp_hist_data = []
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    tmp_t_data.append(-evt.MandelT)
+                    H_t_DATA.SetBinContent(j+1, -evt.MandelT)
                     if kin_type == "Q2":
-                        tmp_hist_data.append(evt.Q2)
+                        H_Q2_DATA.SetBinContent(j+1, evt.Q2)
                     if kin_type == "W":
-                        tmp_hist_data.append(evt.W)
+                        H_W_DATA.SetBinContent(j+1, evt.W)                        
                     if kin_type == "epsilon":
-                        tmp_hist_data.append(evt.epsilon)
-        binned_t_data.append([tmp_t_data, len(tmp_t_data)])
-        binned_hist_data.append([tmp_hist_data, len(tmp_hist_data)])
+                        H_epsilon_DATA.SetBinContent(j+1, evt.epsilon)
 
     # Loop through bins in t_rand and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -204,15 +207,13 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 tmp_t_rand = []
                 tmp_hist_rand = []
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    tmp_t_rand.append(-evt.MandelT)
+                    H_t_RAND.SetBinContent(j+1, -evt.MandelT)
                     if kin_type == "Q2":
-                        tmp_hist_rand.append(evt.Q2)
+                        H_Q2_RAND.SetBinContent(j+1, evt.Q2)
                     if kin_type == "W":
-                        tmp_hist_rand.append(evt.W)
+                        H_W_RAND.SetBinContent(j+1, evt.W)                        
                     if kin_type == "epsilon":
-                        tmp_hist_rand.append(evt.epsilon)
-        binned_t_rand.append([tmp_t_rand*(1/nWindows), len(tmp_t_rand)])
-        binned_hist_rand.append([tmp_hist_rand*(1/nWindows), len(tmp_hist_rand)])
+                        H_epsilon_RAND.SetBinContent(j+1, evt.epsilon)
 
     # Loop through bins in t_dummy and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -270,15 +271,13 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 tmp_t_dummy = []
                 tmp_hist_dummy = []
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    tmp_t_dummy.append(-evt.MandelT)
+                    H_t_DUMMY.SetBinContent(j+1, -evt.MandelT)
                     if kin_type == "Q2":
-                        tmp_hist_dummy.append(evt.Q2)
+                        H_Q2_DUMMY.SetBinContent(j+1, evt.Q2)
                     if kin_type == "W":
-                        tmp_hist_dummy.append(evt.W)
+                        H_W_DUMMY.SetBinContent(j+1, evt.W)                        
                     if kin_type == "epsilon":
-                        tmp_hist_dummy.append(evt.epsilon)
-        binned_t_dummy.append([tmp_t_dummy, len(tmp_t_dummy)])
-        binned_hist_dummy.append([tmp_hist_dummy, len(tmp_hist_dummy)])
+                        H_epsilon_DUMMY.SetBinContent(j+1, evt.epsilon)
 
     # Loop through bins in t_dummy_rand and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -336,39 +335,127 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 tmp_t_dummy_rand = []
                 tmp_hist_dummy_rand = []
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    tmp_t_dummy_rand.append(-evt.MandelT)
+                    H_t_DUMMY_RAND.SetBinContent(j+1, -evt.MandelT)
                     if kin_type == "Q2":
-                        tmp_hist_dummy_rand.append(evt.Q2)
+                        H_Q2_DUMMY_RAND.SetBinContent(j+1, evt.Q2)
                     if kin_type == "W":
-                        tmp_hist_dummy_rand.append(evt.W)
+                        H_W_DUMMY_RAND.SetBinContent(j+1, evt.W)                        
                     if kin_type == "epsilon":
-                        tmp_hist_dummy_rand.append(evt.epsilon)
-        binned_t_dummy_rand.append([tmp_t_dummy_rand*(1/nWindows), len(tmp_t_dummy_rand)])
-        binned_hist_dummy_rand.append([tmp_hist_dummy_rand*(1/nWindows), len(tmp_hist_dummy_rand)])
+                        H_epsilon_DUMMY_RAND.SetBinContent(j+1, evt.epsilon)                        
+                        
+    H_Q2_RAND.Scale(1/nWindows)
+    H_W_RAND.Scale(1/nWindows)    
+    H_t_RAND.Scale(1/nWindows)
+    H_epsilon_RAND.Scale(1/nWindows)
 
-    def hist_sub(hist1, hist2):
-        print("\n\n!!!!!!!",len(hist1),len(hist2))
-        
-        # Extract the values and bin count from the histograms
-        values1, count1 = hist1[0], hist1[1]
-        values2, count2 = hist2[0], hist2[1]
+    H_Q2_DATA.Add(H_Q2_RAND,-1)
+    H_W_DATA.Add(H_W_RAND,-1)
+    H_t_DATA.Add(H_t_RAND,-1)
+    H_epsilon_DATA.Add(H_epsilon_RAND,-1)    
 
-        # Check if both histograms have the same number of bins
-        if count1 != count2:
-            raise ValueError("Histograms must have the same number of bins for subtraction.")
-        
-        #result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
-        # Subtract the values of hist2 from hist1
-        result_values = np.array(hist1) - np.array(hist2)
+    H_Q2_DUMMY_RAND.Scale(1/nWindows)
+    H_W_DUMMY_RAND.Scale(1/nWindows)    
+    H_t_DUMMY_RAND.Scale(1/nWindows)
+    H_epsilon_DUMMY_RAND.Scale(1/nWindows)
 
-        # Create the resulting histogram
-        result_histogram = [result_values.tolist(), count1]
-        return result_histogram
+    H_Q2_DUMMY.Add(H_Q2_DUMMY_RAND,-1)
+    H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
+    H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
+    H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
     
-    binned_t_data = hist_sub(binned_t_data, binned_t_rand)
-    binned_hist_data = hist_sub(binned_hist_data, binned_hist_rand)
-    binned_t_dummy = hist_sub(binned_t_dummy, binned_t_dummy_rand)
-    binned_hist_dummy = hist_sub(binned_hist_dummy, binned_hist_dummy_rand)
+    # Assuming H_t_DATA is your TH1D histogram
+    bin_centers = []
+    bin_contents = []
+
+    for i in range(1, H_t_DATA.GetNbinsX() + 1):
+        bin_centers.append(H_t_DATA.GetBinCenter(i))
+        bin_contents.append(H_t_DATA.GetBinContent(i))
+
+    # Combine bin centers and bin contents into a list
+    binned_t_data = [bin_centers, bin_contents]
+    if kin_type == "t":
+        binned_hist_data = [bin_centers, bin_contents]
+    
+    if kin_type == "Q2":
+        # Assuming H_Q2_DATA is your TH1D histogram
+        bin_centers = []
+        bin_contents = []
+
+        for i in range(1, H_Q2_DATA.GetNbinsX() + 1):
+            bin_centers.append(H_Q2_DATA.GetBinCenter(i))
+            bin_contents.append(H_Q2_DATA.GetBinContent(i))
+
+        # Combine bin centers and bin contents into a list
+        binned_hist_data = [bin_centers, bin_contents]
+    if kin_type == "W":                        
+        # Assuming H_W_DATA is your TH1D histogram
+        bin_centers = []
+        bin_contents = []
+
+        for i in range(1, H_W_DATA.GetNbinsX() + 1):
+            bin_centers.append(H_W_DATA.GetBinCenter(i))
+            bin_contents.append(H_W_DATA.GetBinContent(i))
+
+        # Combine bin centers and bin contents into a list
+        binned_hist_data = [bin_centers, bin_contents]
+    if kin_type == "epsilon":                        
+        # Assuming H_epsilon_DATA is your TH1D histogram
+        bin_centers = []
+        bin_contents = []
+
+        for i in range(1, H_epsilon_DATA.GetNbinsX() + 1):
+            bin_centers.append(H_epsilon_DATA.GetBinCenter(i))
+            bin_contents.append(H_epsilon_DATA.GetBinContent(i))
+
+        # Combine bin centers and bin contents into a list
+        binned_hist_data = [bin_centers, bin_contents]
+
+    # Assuming H_t_DUMMY is your TH1D histogram
+    bin_centers = []
+    bin_contents = []
+
+    for i in range(1, H_t_DUMMY.GetNbinsX() + 1):
+        bin_centers.append(H_t_DUMMY.GetBinCenter(i))
+        bin_contents.append(H_t_DUMMY.GetBinContent(i))
+
+    # Combine bin centers and bin contents into a list
+    binned_t_dummy = [bin_centers, bin_contents]
+    if kin_type == "t":
+        binned_hist_dummy = [bin_centers, bin_contents]
+    
+    if kin_type == "Q2":
+        # Assuming H_Q2_DUMMY is your TH1D histogram
+        bin_centers = []
+        bin_contents = []
+
+        for i in range(1, H_Q2_DUMMY.GetNbinsX() + 1):
+            bin_centers.append(H_Q2_DUMMY.GetBinCenter(i))
+            bin_contents.append(H_Q2_DUMMY.GetBinContent(i))
+
+        # Combine bin centers and bin contents into a list
+        binned_hist_dummy = [bin_centers, bin_contents]
+    if kin_type == "W":                        
+        # Assuming H_W_DUMMY is your TH1D histogram
+        bin_centers = []
+        bin_contents = []
+
+        for i in range(1, H_W_DUMMY.GetNbinsX() + 1):
+            bin_centers.append(H_W_DUMMY.GetBinCenter(i))
+            bin_contents.append(H_W_DUMMY.GetBinContent(i))
+
+        # Combine bin centers and bin contents into a list
+        binned_hist_dummy = [bin_centers, bin_contents]
+    if kin_type == "epsilon":                        
+        # Assuming H_epsilon_DUMMY is your TH1D histogram
+        bin_centers = []
+        bin_contents = []
+
+        for i in range(1, H_epsilon_DUMMY.GetNbinsX() + 1):
+            bin_centers.append(H_epsilon_DUMMY.GetBinCenter(i))
+            bin_contents.append(H_epsilon_DUMMY.GetBinContent(i))
+
+        # Combine bin centers and bin contents into a list
+        binned_hist_dummy = [bin_centers, bin_contents]        
                 
     return binned_t_data, binned_hist_data, binned_hist_dummy
 
