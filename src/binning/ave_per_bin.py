@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 18:50:42 trottar"
+# Time-stamp: "2024-01-17 18:56:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -415,8 +415,6 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
             binned_t_data.append(tmp_binned_t_data[0]) # Save a list of hists where each one is a t-bin
             binned_hist_data.append(tmp_binned_hist_data[0])
             binned_hist_dummy.append(tmp_binned_hist_dummy[0])
-            if kin_type == "Q2":
-                print(kin_type," ",j+1,"!!!!!!!!!!!",tmp_binned_hist_data[0])
             
             if j+1 == len(t_bins)-1:
                 binned_dict[kin_type] = {
@@ -440,6 +438,8 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
     for kin_type in kinematic_types:
         binned_t_data = binned_dict[kin_type]["binned_t_data"]
         binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
+        if kin_type == "Q2":
+            print("!!!!!!!!!!!",binned_hist_data)
         binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
 
         ave_hist = []
