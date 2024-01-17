@@ -399,50 +399,50 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     pages = 2
     if (highe_input !=False):
         #print("test high")
-        Q2vsW_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-        Q2vsW_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
+        Q2vsW_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+        Q2vsW_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)
         Q2vsW_cut.Draw("col")
         ex1.Draw()
         Q2vsW_cut.Draw("col same")
         if (mide_input !=False):
             #print("test high mid")
-            Q2vsW_mide_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-            Q2vsW_mide_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
+            Q2vsW_mide_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+            Q2vsW_mide_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)
             ex2.Draw()
             Q2vsW_mide_cut.Draw("col same")
             pages = 3
             if (lowe_input !=False):
                 #print("test high mid low")
-                Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-                Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)                
+                Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+                Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)                
                 ex3.Draw()
                 Q2vsW_lowe_cut.Draw("col same")
                 pages = 6
         elif (lowe_input !=False):
             #print("test high low")
-            Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-            Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
+            Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+            Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)
             ex2.Draw()
             Q2vsW_lowe_cut.Draw("col same")
             pages = 4
     elif (mide_input !=False):
 	#print("test mid")
-        Q2vsW_mide_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-        Q2vsW_mide_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
+        Q2vsW_mide_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+        Q2vsW_mide_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)        
         Q2vsW_mide_cut.Draw("colz")
         ex1.Draw()
         Q2vsW_mide_cut.Draw("col same")
         if (lowe_input !=False):
             #print("test mid low")
-            Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-            Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)            
+            Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+            Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)            
             ex2.Draw()
             Q2vsW_lowe_cut.Draw("col same")
             pages = 4
     elif (lowe_input !=False):
         #print("test low")
-        Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-        Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
+        Q2vsW_lowe_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+        Q2vsW_lowe_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)        
         Q2vsW_lowe_cut.Draw("colz")
         ex1.Draw()
         Q2vsW_lowe_cut.Draw("col same")
