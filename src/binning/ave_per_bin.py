@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 17:53:49 trottar"
+# Time-stamp: "2024-01-17 17:59:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -366,50 +366,50 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
 
     for kin_type in kinematic_types:
         for j in range(len(t_bins)-1):
+            tmp_hist_data = []            
             for i in range(1, H_t_DATA.GetNbinsX() + 1):
-                tmp_hist_data = []
                 tmp_hist_data.append(H_t_DATA.GetBinCenter(i))
             binned_t_data.append([tmp_hist_data, len(tmp_hist_data)])
 
             if kin_type == "t":
                 binned_hist_data.append([tmp_hist_data, len(tmp_hist_data)])
             if kin_type == "Q2":
+                tmp_hist_data = []                
                 for i in range(1, H_Q2_DATA.GetNbinsX() + 1):        
-                    tmp_hist_data = []
                     tmp_hist_data.append(H_Q2_DATA.GetBinCenter(i))
                 binned_hist_data.append([tmp_hist_data, len(tmp_hist_data)])
                 print(j+1,"!!!!!!!!!!!",binned_hist_data)
             if kin_type == "W":
+                tmp_hist_data = []                
                 for i in range(1, H_W_DATA.GetNbinsX() + 1):
-                    tmp_hist_data = []
                     tmp_hist_data.append(H_W_DATA.GetBinCenter(i))
                 binned_hist_data.append([tmp_hist_data, len(tmp_hist_data)])        
-            if kin_type == "epsilon":                        
+            if kin_type == "epsilon":
+                tmp_hist_data = []                
                 for i in range(1, H_epsilon_DATA.GetNbinsX() + 1):
-                    tmp_hist_data = []
                     tmp_hist_data.append(H_epsilon_DATA.GetBinCenter(i))
                 binned_hist_data.append([tmp_hist_data, len(tmp_hist_data)])
 
+            tmp_hist_dummy = []                
             for i in range(1, H_t_DUMMY.GetNbinsX() + 1):
-                tmp_hist_dummy = []
                 tmp_hist_dummy.append(H_t_DUMMY.GetBinCenter(i))
             binned_t_dummy.append([tmp_hist_dummy, len(tmp_hist_dummy)])
 
             if kin_type == "t":
                 binned_hist_dummy.append([tmp_hist_dummy, len(tmp_hist_dummy)])
             if kin_type == "Q2":
+                tmp_hist_dummy = []                
                 for i in range(1, H_Q2_DUMMY.GetNbinsX() + 1):
-                    tmp_hist_dummy = []
                     tmp_hist_dummy.append(H_Q2_DUMMY.GetBinCenter(i))
                 binned_hist_dummy.append([tmp_hist_dummy, len(tmp_hist_dummy)])
             if kin_type == "W":
+                tmp_hist_dummy = []                
                 for i in range(1, H_W_DUMMY.GetNbinsX() + 1):
-                    tmp_hist_dummy = []
                     tmp_hist_dummy.append(H_W_DUMMY.GetBinCenter(i))
                 binned_hist_dummy.append([tmp_hist_dummy, len(tmp_hist_dummy)])        
-            if kin_type == "epsilon":                        
+            if kin_type == "epsilon":
+                tmp_hist_dummy = []                
                 for i in range(1, H_epsilon_DUMMY.GetNbinsX() + 1):
-                    tmp_hist_dummy = []
                     tmp_hist_dummy.append(H_epsilon_DUMMY.GetBinCenter(i))
                 binned_hist_dummy.append([tmp_hist_dummy, len(tmp_hist_dummy)])
 
@@ -554,27 +554,27 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict):
     binned_hist_simc = []
 
     for kin_type in kinematic_types:
-        for j in range(len(t_bins)-1):        
+        for j in range(len(t_bins)-1):
+            tmp_hist_simc = []            
             for i in range(1, H_t_SIMC.GetNbinsX() + 1):
-                tmp_hist_simc = []
                 tmp_hist_simc.append(H_t_SIMC.GetBinCenter(i))
             binned_t_simc.append([tmp_hist_simc, len(tmp_hist_simc)])
 
             if kin_type == "t":
                 binned_hist_simc.append([tmp_hist_simc, len(tmp_hist_simc)])
             if kin_type == "Q2":
+                tmp_hist_simc = []                
                 for i in range(1, H_Q2_SIMC.GetNbinsX() + 1):        
-                    tmp_hist_simc = []
                     tmp_hist_simc.append(H_Q2_SIMC.GetBinCenter(i))
                 binned_hist_simc.append([tmp_hist_simc, len(tmp_hist_simc)])
             if kin_type == "W":
+                tmp_hist_simc = []                
                 for i in range(1, H_W_SIMC.GetNbinsX() + 1):
-                    tmp_hist_simc = []
                     tmp_hist_simc.append(H_W_SIMC.GetBinCenter(i))
                 binned_hist_simc.append([tmp_hist_simc, len(tmp_hist_simc)])        
-            if kin_type == "epsilon":                        
+            if kin_type == "epsilon":
+                tmp_hist_simc = []                
                 for i in range(1, H_epsilon_SIMC.GetNbinsX() + 1):
-                    tmp_hist_simc = []
                     tmp_hist_simc.append(H_epsilon_SIMC.GetBinCenter(i))
                 binned_hist_simc.append([tmp_hist_simc, len(tmp_hist_simc)])
 
