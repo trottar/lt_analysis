@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 16:43:56 trottar"
+# Time-stamp: "2024-01-17 16:52:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,25 +76,25 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     binned_t_dummy_rand = []    
     binned_hist_dummy_rand = []
 
-    H_Q2_DATA       = TH1D("H_Q2_DATA","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
-    H_W_DATA  = TH1D("H_W_DATA","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
-    H_t_DATA       = TH1D("H_t_DATA","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
-    H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])
+    H_Q2_DATA       = TH1D("H_Q2_DATA","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DATA  = TH1D("H_W_DATA","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DATA       = TH1D("H_t_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-    H_Q2_RAND       = TH1D("H_Q2_RAND","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
-    H_W_RAND  = TH1D("H_W_RAND","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
-    H_t_RAND       = TH1D("H_t_RAND","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
-    H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])
+    H_Q2_RAND       = TH1D("H_Q2_RAND","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_RAND  = TH1D("H_W_RAND","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_RAND       = TH1D("H_t_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-    H_Q2_DUMMY       = TH1D("H_Q2_DUMMY","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
-    H_W_DUMMY  = TH1D("H_W_DUMMY","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
-    H_t_DUMMY       = TH1D("H_t_DUMMY","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
-    H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])
+    H_Q2_DUMMY       = TH1D("H_Q2_DUMMY","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DUMMY  = TH1D("H_W_DUMMY","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-    H_Q2_DUMMY_RAND       = TH1D("H_Q2_DUMMY_RAND","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
-    H_W_DUMMY_RAND  = TH1D("H_W_DUMMY_RAND","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
-    H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
-    H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])    
+    H_Q2_DUMMY_RAND       = TH1D("H_Q2_DUMMY_RAND","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DUMMY_RAND  = TH1D("H_W_DUMMY_RAND","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])    
     
     TBRANCH_DATA  = tree_data.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
     TBRANCH_RAND  = tree_data.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
@@ -369,7 +369,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
-
+    
     binned_t_data = []
     binned_hist_data = []
     binned_hist_dummy = []
@@ -513,10 +513,10 @@ def bin_simc(kin_type, tree_simc, t_bins, inpDict):
     binned_t_simc = []
     binned_hist_simc = []
 
-    H_Q2_SIMC       = TH1D("H_Q2_SIMC","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
-    H_W_SIMC  = TH1D("H_W_SIMC","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
-    H_t_SIMC       = TH1D("H_t_SIMC","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
-    H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])
+    H_Q2_SIMC       = TH1D("H_Q2_SIMC","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+    H_W_SIMC  = TH1D("H_W_SIMC","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+    H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
     
     TBRANCH_SIMC  = tree_simc.Get("h10")
     
@@ -564,7 +564,6 @@ def bin_simc(kin_type, tree_simc, t_bins, inpDict):
             tmp_hist_simc = [[],[]]
             tmp_hist_simc[0].append(H_Q2_SIMC.GetBinCenter(i))
             tmp_hist_simc[1].append(H_Q2_SIMC.GetBinContent(i))
-            print("!!!!!!!!!!!!",tmp_hist_simc)
             binned_hist_simc.append(tmp_hist_simc)
     if kin_type == "W":
         for i in range(1, H_W_SIMC.GetNbinsX() + 1):
