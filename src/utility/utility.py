@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 02:21:38 trottar"
+# Time-stamp: "2024-01-17 02:32:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -355,7 +355,7 @@ import numpy as np
 
 def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type = "DATA"):
     
-    x_axis_range_factor = 0.00005
+    x_axis_range_factor = 0.005
     
     # Check if a custom range factor is provided
     if range_factor != "Default":
@@ -393,7 +393,7 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
             continue
 
         # Set x-axis range dynamically based on non-empty bins
-        x_axis_min = histogram.GetBinLowEdge(min(non_empty_bins)) - histogram.GetBinLowEdge(min(non_empty_bins)) * x_axis_range_factor
+        x_axis_min = histogram.GetBinLowEdge(min(non_empty_bins))
         x_axis_max = histogram.GetBinLowEdge(max(non_empty_bins) + 1) + histogram.GetBinLowEdge(max(non_empty_bins) + 1) * x_axis_range_factor
 
         min_values.append(x_axis_min)
@@ -406,7 +406,7 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
     for i, hist in enumerate(histlist):    
         # Set the x-axis range for the current histogram
         hist["H_{}_{}".format(inp_str, hist_type)].SetBins(200, avg_min, avg_max)
-        
+    
     return avg_min, avg_max
     
 ################################################################################################################################################    
