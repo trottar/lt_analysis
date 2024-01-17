@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 00:45:27 trottar"
+# Time-stamp: "2024-01-17 01:01:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,9 +52,6 @@ OUTPATH=lt.OUTPATH
 
 def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins):
 
-    for bin_index in range(0, hist_data.GetNbinsX()):
-        print("{} | index {}: {:.4f}->{:.4f}".format(kin_type,bin_index,hist_data.GetBinCenter(bin_index),hist_data.GetBinContent(bin_index)))
-    
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
     binned_hist_data = []
@@ -68,15 +65,15 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
         for bin_index in range(0, t_data.GetNbinsX()):
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
-                if hist_data.GetBinContent(bin_index) > 0:                    
-                    #print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
-                    #print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
-                    tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
-                    tmp_t_data[1].append(t_data.GetBinContent(bin_index))
-                    tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
-                    tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
-                    tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(bin_index))
-                    tmp_hist_dummy[1].append(hist_dummy.GetBinContent(bin_index))
+                #if hist_data.GetBinContent(bin_index) > 0:
+                #print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+                #print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
+                tmp_t_data[1].append(t_data.GetBinContent(bin_index))
+                tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
+                tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
+                tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(bin_index))
+                tmp_hist_dummy[1].append(hist_dummy.GetBinContent(bin_index))
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
