@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 16:11:27 trottar"
+# Time-stamp: "2024-01-17 16:22:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,7 +158,6 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                     H_t_DATA.SetBinContent(j+1, -evt.MandelT)
                     if kin_type == "Q2":
-                        print("$$$$$$$$",j+1, evt.Q2)
                         H_Q2_DATA.SetBinContent(j+1, evt.Q2)
                     if kin_type == "W":
                         H_W_DATA.SetBinContent(j+1, evt.W)                        
@@ -453,9 +452,9 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
             total_count = np.sum(sub_val)
             average = weighted_sum / total_count            
             ave_hist.append(average)
-            #print("Weighted Sum:",weighted_sum)
-            #print("Total Count:",total_count)
-            #print("Average for t-bin {}:".format(i+1),average)
+            print("Weighted Sum:",weighted_sum)
+            print("Total Count:",total_count)
+            print("Average for t-bin {}:".format(i+1),average)
             binned_sub_data[0].append(bin_val_data)
             binned_sub_data[1].append(sub_val)
         else:
