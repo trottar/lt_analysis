@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 17:20:56 trottar"
+# Time-stamp: "2024-01-17 17:24:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -703,7 +703,7 @@ def ave_per_bin_data(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        binned_dict = calculate_ave_data(kin_type, hist, t_bins, phi_bins, inpDict)
+        binned_dict = calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict)
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
                 
@@ -732,7 +732,7 @@ def ave_per_bin_simc(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        binned_dict = calculate_ave_simc(kin_type, hist, t_bins, phi_bins, inpDict)
+        binned_dict = calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict)
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
         
