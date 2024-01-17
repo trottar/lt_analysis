@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 00:30:54 trottar"
+# Time-stamp: "2024-01-17 00:07:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,7 +62,7 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
         tmp_t_data = [[],[]]
         tmp_hist_data = [[],[]]
         tmp_hist_dummy = [[],[]]
-        for bin_index in range(1, t_data.GetNbinsX() + 1):
+        for bin_index in range(0, t_data.GetNbinsX()):
             bin_center = t_data.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
                 if hist_data.GetBinContent(bin_index) > 0:                    
@@ -147,7 +147,7 @@ def calculate_ave_simc(kin_type, hist_simc, t_simc, t_bins, phi_bins):
     for j in range(len(t_bins)-1):
         tmp_t_simc = [[],[]]
         tmp_hist_simc = [[],[]]
-        for bin_index in range(1, t_simc.GetNbinsX() + 1):
+        for bin_index in range(0, t_simc.GetNbinsX()):
             bin_center = t_simc.GetBinCenter(bin_index)
             if t_bins[j] <= bin_center <= t_bins[j+1]:
                 if hist_simc.GetBinContent(bin_index) > 0:

@@ -88,7 +88,7 @@ else
 fi
 
 # Q2=2p1
-NumtBins=4
+NumtBins=3
 NumPhiBins=12
 # Q2=5p5
 #NumtBins=2
