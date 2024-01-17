@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 15:35:40 trottar"
+# Time-stamp: "2024-01-17 15:46:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -356,7 +356,9 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                     if kin_type == "W":
                         H_W_DUMMY_RAND.SetBinContent(j+1, evt.W)                        
                     if kin_type == "epsilon":
-                        H_epsilon_DUMMY_RAND.SetBinContent(j+1, evt.epsilon)                        
+                        H_epsilon_DUMMY_RAND.SetBinContent(j+1, evt.epsilon)
+                else:
+                    continue
                         
     H_Q2_RAND.Scale(1/nWindows)
     H_W_RAND.Scale(1/nWindows)    
@@ -377,101 +379,65 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
-    
-    # Assuming H_t_DATA is your TH1D histogram
-    bin_centers = []
-    bin_contents = []
 
+    binned_t_data = []
+    binned_hist_data = []
+    binned_hist_dummy = []
+    
     for i in range(1, H_t_DATA.GetNbinsX() + 1):
-        bin_centers.append(H_t_DATA.GetBinCenter(i))
-        bin_contents.append(H_t_DATA.GetBinContent(i))
-
-    # Combine bin centers and bin contents into a list
-    binned_t_data = [bin_centers, bin_contents]
-    if kin_type == "t":
-        binned_hist_data = [bin_centers, bin_contents]
+        tmp_hist_data = [[],[]]
+        tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
+        tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))
+    binned_t_data.append(tmp_hist_data)
     
+    if kin_type == "t":
+        binned_hist_data.append(tmp_hist_data)
     if kin_type == "Q2":
-        # Assuming H_Q2_DATA is your TH1D histogram
-        bin_centers = []
-        bin_contents = []
-
         for i in range(1, H_Q2_DATA.GetNbinsX() + 1):
-            bin_centers.append(H_Q2_DATA.GetBinCenter(i))
-            bin_contents.append(H_Q2_DATA.GetBinContent(i))
-
-        # Combine bin centers and bin contents into a list
-        binned_hist_data = [bin_centers, bin_contents]
-    if kin_type == "W":                        
-        # Assuming H_W_DATA is your TH1D histogram
-        bin_centers = []
-        bin_contents = []
-
+            tmp_hist_data = [[],[]]
+            tmp_hist_data[0].append(H_Q2_DATA.GetBinCenter(i))
+            tmp_hist_data[1].append(H_Q2_DATA.GetBinContent(i))
+        binned_hist_data.append(tmp_hist_data)
+    if kin_type == "W":
         for i in range(1, H_W_DATA.GetNbinsX() + 1):
-            bin_centers.append(H_W_DATA.GetBinCenter(i))
-            bin_contents.append(H_W_DATA.GetBinContent(i))
-
-        # Combine bin centers and bin contents into a list
-        binned_hist_data = [bin_centers, bin_contents]
+            tmp_hist_data = [[],[]]
+            tmp_hist_data[0].append(H_W_DATA.GetBinCenter(i))
+            tmp_hist_data[1].append(H_W_DATA.GetBinContent(i))
+        binned_hist_data.append(tmp_hist_data)        
     if kin_type == "epsilon":                        
-        # Assuming H_epsilon_DATA is your TH1D histogram
-        bin_centers = []
-        bin_contents = []
-
         for i in range(1, H_epsilon_DATA.GetNbinsX() + 1):
-            bin_centers.append(H_epsilon_DATA.GetBinCenter(i))
-            bin_contents.append(H_epsilon_DATA.GetBinContent(i))
-
-        # Combine bin centers and bin contents into a list
-        binned_hist_data = [bin_centers, bin_contents]
-
-    # Assuming H_t_DUMMY is your TH1D histogram
-    bin_centers = []
-    bin_contents = []
+            tmp_hist_data = [[],[]]
+            tmp_hist_data[0].append(H_epsilon_DATA.GetBinCenter(i))
+            tmp_hist_data[1].append(H_epsilon_DATA.GetBinContent(i))
+        binned_hist_data.append(tmp_hist_data)
 
     for i in range(1, H_t_DUMMY.GetNbinsX() + 1):
-        bin_centers.append(H_t_DUMMY.GetBinCenter(i))
-        bin_contents.append(H_t_DUMMY.GetBinContent(i))
-
-    # Combine bin centers and bin contents into a list
-    binned_t_dummy = [bin_centers, bin_contents]
-    if kin_type == "t":
-        binned_hist_dummy = [bin_centers, bin_contents]
+        tmp_hist_dummy = [[],[]]
+        tmp_hist_dummy[0].append(H_t_DUMMY.GetBinCenter(i))
+        tmp_hist_dummy[1].append(H_t_DUMMY.GetBinContent(i))
+    binned_t_dummy.append(tmp_hist_dummy)
     
+    if kin_type == "t":
+        binned_hist_dummy.append(tmp_hist_dummy)
     if kin_type == "Q2":
-        # Assuming H_Q2_DUMMY is your TH1D histogram
-        bin_centers = []
-        bin_contents = []
-
         for i in range(1, H_Q2_DUMMY.GetNbinsX() + 1):
-            bin_centers.append(H_Q2_DUMMY.GetBinCenter(i))
-            bin_contents.append(H_Q2_DUMMY.GetBinContent(i))
-
-        # Combine bin centers and bin contents into a list
-        binned_hist_dummy = [bin_centers, bin_contents]
-    if kin_type == "W":                        
-        # Assuming H_W_DUMMY is your TH1D histogram
-        bin_centers = []
-        bin_contents = []
-
+            tmp_hist_dummy = [[],[]]
+            tmp_hist_dummy[0].append(H_Q2_DUMMY.GetBinCenter(i))
+            tmp_hist_dummy[1].append(H_Q2_DUMMY.GetBinContent(i))
+        binned_hist_dummy.append(tmp_hist_dummy)
+    if kin_type == "W":
         for i in range(1, H_W_DUMMY.GetNbinsX() + 1):
-            bin_centers.append(H_W_DUMMY.GetBinCenter(i))
-            bin_contents.append(H_W_DUMMY.GetBinContent(i))
-
-        # Combine bin centers and bin contents into a list
-        binned_hist_dummy = [bin_centers, bin_contents]
+            tmp_hist_dummy = [[],[]]
+            tmp_hist_dummy[0].append(H_W_DUMMY.GetBinCenter(i))
+            tmp_hist_dummy[1].append(H_W_DUMMY.GetBinContent(i))
+        binned_hist_dummy.append(tmp_hist_dummy)        
     if kin_type == "epsilon":                        
-        # Assuming H_epsilon_DUMMY is your TH1D histogram
-        bin_centers = []
-        bin_contents = []
-
         for i in range(1, H_epsilon_DUMMY.GetNbinsX() + 1):
-            bin_centers.append(H_epsilon_DUMMY.GetBinCenter(i))
-            bin_contents.append(H_epsilon_DUMMY.GetBinContent(i))
-
-        # Combine bin centers and bin contents into a list
-        binned_hist_dummy = [bin_centers, bin_contents]        
-                
+            tmp_hist_dummy = [[],[]]
+            tmp_hist_dummy[0].append(H_epsilon_DUMMY.GetBinCenter(i))
+            tmp_hist_dummy[1].append(H_epsilon_DUMMY.GetBinContent(i))
+        binned_hist_dummy.append(tmp_hist_dummy)
+        
     return binned_t_data, binned_hist_data, binned_hist_dummy
 
     
