@@ -100,9 +100,8 @@ POL="+1" # All KaonLT is positive polarity
 # Make sure 3 sig figs (no more)
 # Q2=2p1
 #TMIN=0.001
-#TMAX=0.600
-TMIN=0.150
-TMAX=0.500
+TMIN=0.000
+TMAX=0.800
 # Q2=3p0
 #TMIN=0.001
 #TMAX=0.990
