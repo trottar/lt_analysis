@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 01:51:06 trottar"
+# Time-stamp: "2024-01-17 01:52:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -387,8 +387,9 @@ def ave_per_bin_data(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
+        groups = calculate_ave_data(kinematic_types, hist["InFile_DATA"], hist["InFile_DUMMY"], t_bins, phi_bins, inpDict)
         for kin_type in kinematic_types:
-            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins)
+            aveDict[hist["phi_setting"]][kin_type] = groups[kin_type]            
                 
     return {"binned_DATA" : aveDict}
 
@@ -415,8 +416,7 @@ def ave_per_bin_simc(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        groups = calculate_ave_simc(kinematic_types, hist["InFile_DATA"], hist["InFile_DUMMY"], t_bins, phi_bins, inpDict)
         for kin_type in kinematic_types:
-            aveDict[hist["phi_setting"]][kin_type] = groups[kin_type]
+            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_simc(kin_type, hist["H_{}_SIMC".format(kin_type)],  hist["H_t_SIMC"], t_bins, phi_bins)
 
     return {"binned_SIMC" : aveDict}
