@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 02:02:41 trottar"
+# Time-stamp: "2024-01-17 02:06:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -236,7 +236,8 @@ def calculate_ave_data(kinematic_types, tree_data, tree_dummy, t_bins, phi_bins,
             hist_val_data = len(data)
             bin_val_dummy = dummy
             hist_val_dummy = len(dummy)
-            sub_val = np.subtract(hist_val_data, hist_val_dummy)
+            #sub_val = np.subtract(hist_val_data, hist_val_dummy)
+            sub_val = hist_val_data
             if sub_val.size != 0:
                 # Calculate the weighted sum of frequencies and divide by the total count
                 weighted_sum = np.sum(sub_val * bin_val_data)
