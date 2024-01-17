@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:30:00 trottar"
+# Time-stamp: "2024-01-17 14:32:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -351,10 +351,10 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
         result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
         return result
     
-    binned_t_data = hist_sub(binned_t_data, binned_t_rand)
-    binned_hist_data = hist_sub(binned_hist_data, binned_hist_rand)
-    binned_t_dummy = hist_sub(binned_t_dummy, binned_t_dummy_rand)
-    binned_hist_dummy = hist_sub(binned_hist_dummy, binned_hist_dummy_rand)
+    binned_t_data = hist_sub(binned_t_data, binned_t_rand*hist["nWindows"])
+    binned_hist_data = hist_sub(binned_hist_data, binned_hist_rand*hist["nWindows"])
+    binned_t_dummy = hist_sub(binned_t_dummy, binned_t_dummy_rand*hist["nWindows"])
+    binned_hist_dummy = hist_sub(binned_hist_dummy, binned_hist_dummy_rand*hist["nWindows"])
                 
     return binned_t_data, binned_hist_data, binned_hist_dummy
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 13:15:31 trottar"
+# Time-stamp: "2024-01-17 14:32:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -503,6 +503,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsxptar_DATA.Fill(evt.hsxptar)	
           H_hsyptar_DATA.Fill(evt.hsyptar)
 
+
           # SIMC goes from 0 to 2pi so no need for +pi          
           H_ph_q_DATA.Fill((evt.ph_q+math.pi))
           H_th_q_DATA.Fill(evt.th_q)
@@ -1000,6 +1001,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["phi_setting"] = phi_setting
     histDict["pid_text"] = pid_text
     histDict["runNums"] = runNums.split(' ')
+    histDict["nWindows"] = nWindows
     histDict["H_hsdelta_DUMMY"] =     H_hsdelta_DUMMY
     histDict["H_hsxptar_DUMMY"] =     H_hsxptar_DUMMY
     histDict["H_hsyptar_DUMMY"] =     H_hsyptar_DUMMY
