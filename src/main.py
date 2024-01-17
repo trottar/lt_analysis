@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 03:06:37 trottar"
+# Time-stamp: "2024-01-17 03:12:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,8 +47,8 @@ if len(sys.argv)-1!=37:
 
 ##################################################################################################################################################    
 
-DEBUG = True # Flag for plots
-#DEBUG = False # Flag for plots
+#DEBUG = True # Flag for plots
+DEBUG = False # Flag for plots
 
 # Input params
 kinematics = sys.argv[1].split("_")
