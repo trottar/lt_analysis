@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 02:06:07 trottar"
+# Time-stamp: "2024-01-17 02:11:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,6 +130,7 @@ def calculate_ave_data(kinematic_types, tree_data, tree_dummy, t_bins, phi_bins,
                 ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
             if(ALLCUTS):
+                
                 tmp_t_data = []
                 tmp_Q2_data = []
                 tmp_W_data = []
@@ -194,6 +195,7 @@ def calculate_ave_data(kinematic_types, tree_data, tree_dummy, t_bins, phi_bins,
                 ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
             if(ALLCUTS):
+                
                 tmp_t_dummy = []
                 tmp_Q2_dummy = []
                 tmp_W_dummy = []
@@ -236,26 +238,18 @@ def calculate_ave_data(kinematic_types, tree_data, tree_dummy, t_bins, phi_bins,
             hist_val_data = len(data)
             bin_val_dummy = dummy
             hist_val_dummy = len(dummy)
-            #sub_val = np.subtract(hist_val_data, hist_val_dummy)
-            sub_val = hist_val_data
-            if sub_val.size != 0:
-                # Calculate the weighted sum of frequencies and divide by the total count
-                weighted_sum = np.sum(sub_val * bin_val_data)
-                total_count = np.sum(sub_val)
-                average = weighted_sum / total_count            
-                ave_hist.append(average)
-                #print("Weighted Sum:",weighted_sum)
-                #print("Total Count:",total_count)
-                #print("Average for t-bin {}:".format(i+1),average)
-                binned_sub_data[0].append(bin_val_data)
-                binned_sub_data[1].append(sub_val)
-            else:
-                ave_hist.append(0)
-                #print("Weighted Sum: N/A")
-                #print("Total Count: N/A")
-                #print("Average for t-bin {}: 0.0".format(i+1))
-                binned_sub_data[0].append(bin_val_data)
-                binned_sub_data[1].append([0]*len(bin_val_data))
+            sub_val = np.subtract(hist_val_data, hist_val_dummy)
+            #sub_val = hist_val_data
+            # Calculate the weighted sum of frequencies and divide by the total count
+            weighted_sum = np.sum(sub_val * bin_val_data)
+            total_count = np.sum(sub_val)
+            average = weighted_sum / total_count            
+            ave_hist.append(average)
+            #print("Weighted Sum:",weighted_sum)
+            #print("Total Count:",total_count)
+            #print("Average for t-bin {}:".format(i+1),average)
+            binned_sub_data[0].append(bin_val_data)
+            binned_sub_data[1].append(sub_val)
             i+=1
 
         # Print statements to check sizes
