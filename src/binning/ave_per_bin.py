@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:26:42 trottar"
+# Time-stamp: "2024-01-17 14:30:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,8 +347,8 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
                 binned_hist_dummy_rand.append([tmp_hist_dummy_rand, len(tmp_hist_dummy_rand)])
 
     def hist_sub(hist1, hist2):
-        subtracted_list = [a - b for a, b in zip(hist1[0], hist2[0])]
-        result = [subtracted_list, len(subtracted_list)]
+        print(len(hist1),len(hist2))
+        result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
         return result
     
     binned_t_data = hist_sub(binned_t_data, binned_t_rand)
