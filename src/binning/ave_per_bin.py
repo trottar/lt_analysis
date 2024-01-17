@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 12:54:00 trottar"
+# Time-stamp: "2024-01-17 14:10:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,33 +50,316 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins):
+def bin_data(tree_data, tree_dummy, t_bins, inpDict):
+
+    ParticleType = inpDict["ParticleType"]
+
+    # Define diamond cut parameters
+    a1 = inpDict["a1"]
+    b1 = inpDict["b1"]
+    a2 = inpDict["a2"]
+    b2 = inpDict["b2"]
+    a3 = inpDict["a3"]
+    b3 = inpDict["b3"]
+    a4 = inpDict["a4"]
+    b4 = inpDict["b4"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
     binned_hist_data = []
+    binned_t_rand = []
+    binned_hist_rand = []
+    binned_t_dummy = []
     binned_hist_dummy = []
+    binned_t_dummy_rand = []    
+    binned_hist_dummy_rand = []
+
+    TBRANCH_DATA  = tree_data.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    TBRANCH_RAND  = tree_data.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+    
+    TBRANCH_DUMMY  = tree_dummy.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    TBRANCH_DUMMY_RAND  = tree_dummy.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
-        tmp_t_data = [[],[]]
-        tmp_hist_data = [[],[]]
-        tmp_hist_dummy = [[],[]]
-        for bin_index in range(0, t_data.GetNbinsX()):
-            bin_center = t_data.GetBinCenter(bin_index)
-            if t_bins[j] <= bin_center <= t_bins[j+1]:
-                if hist_data.GetBinContent(bin_index) > 0:                    
-                    #print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
-                    #print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
-                    tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
-                    tmp_t_data[1].append(t_data.GetBinContent(bin_index))
-                    tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
-                    tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
-                    tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(bin_index))
-                    tmp_hist_dummy[1].append(hist_dummy.GetBinContent(bin_index))
-        binned_t_data.append(tmp_t_data)
-        binned_hist_data.append(tmp_hist_data)
-        binned_hist_dummy.append(tmp_hist_dummy)
+        print("\Binning t-bin {} data...".format(j+1))
+        for i,evt in enumerate(TBRANCH_DATA):
+
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
+
+            #CUTs Definations 
+            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+
+            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+
+            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+
+            if ParticleType == "kaon":
+
+                # Defined HGCer Geometric cuts
+                cutg = TCutG("cutg",21)
+                cutg.SetVarX("P_hgcer_yAtCer")
+                cutg.SetVarY("P_hgcer_xAtCer")
+                cutg.SetPoint(0,-25,2)
+                cutg.SetPoint(1,-2,2)
+                cutg.SetPoint(2,-1,2.5)
+                cutg.SetPoint(3,0,3)
+                cutg.SetPoint(4,1,3)
+                cutg.SetPoint(5,2,3.3)
+                cutg.SetPoint(6,3,3.0)
+                cutg.SetPoint(7,4,2.5)
+                cutg.SetPoint(8,5,2)
+                cutg.SetPoint(9,25,2)
+                cutg.SetPoint(10,25,0.5)
+                cutg.SetPoint(11,5,0.5)
+                cutg.SetPoint(12,4,1)
+                cutg.SetPoint(13,3,-1)
+                cutg.SetPoint(14,2,-2)
+                cutg.SetPoint(15,1,-2.3)
+                cutg.SetPoint(16,0,-1.5)
+                cutg.SetPoint(17,-1,-1)
+                cutg.SetPoint(18,-2,0.5)
+                cutg.SetPoint(19,-25,0.5)
+                cutg.SetPoint(20,-25,2)
+
+                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+
+            else:
+
+                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+
+            if(ALLCUTS):
+                
+                tmp_t_data = []
+                tmp_hist_data = []
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    tmp_t_data.append(-evt.MandelT)
+                    if kin_type == "Q2":
+                        tmp_hist_data.append(evt.Q2)
+                    if kin_type == "W":
+                        tmp_hist_data.append(evt.W)
+                    if kin_type == "epsilon":
+                        tmp_hist_data.append(evt.epsilon)
+                binned_t_data.append(tmp_t_data, len(tmp_t_data))
+                binned_hist_data.append(tmp_hist_data, len(tmp_hist_data))
+
+    # Loop through bins in t_rand and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        print("\Binning t-bin {} rand...".format(j+1))
+        for i,evt in enumerate(TBRANCH_RAND):
+
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
+
+            #CUTs Definations 
+            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+
+            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+
+            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+
+            if ParticleType == "kaon":
+
+                # Defined HGCer Geometric cuts
+                cutg = TCutG("cutg",21)
+                cutg.SetVarX("P_hgcer_yAtCer")
+                cutg.SetVarY("P_hgcer_xAtCer")
+                cutg.SetPoint(0,-25,2)
+                cutg.SetPoint(1,-2,2)
+                cutg.SetPoint(2,-1,2.5)
+                cutg.SetPoint(3,0,3)
+                cutg.SetPoint(4,1,3)
+                cutg.SetPoint(5,2,3.3)
+                cutg.SetPoint(6,3,3.0)
+                cutg.SetPoint(7,4,2.5)
+                cutg.SetPoint(8,5,2)
+                cutg.SetPoint(9,25,2)
+                cutg.SetPoint(10,25,0.5)
+                cutg.SetPoint(11,5,0.5)
+                cutg.SetPoint(12,4,1)
+                cutg.SetPoint(13,3,-1)
+                cutg.SetPoint(14,2,-2)
+                cutg.SetPoint(15,1,-2.3)
+                cutg.SetPoint(16,0,-1.5)
+                cutg.SetPoint(17,-1,-1)
+                cutg.SetPoint(18,-2,0.5)
+                cutg.SetPoint(19,-25,0.5)
+                cutg.SetPoint(20,-25,2)
+
+                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+
+            else:
+
+                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+
+            if(ALLCUTS):
+                
+                tmp_t_rand = []
+                tmp_hist_rand = []
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    tmp_t_rand.append(-evt.MandelT)
+                    if kin_type == "Q2":
+                        tmp_hist_rand.append(evt.Q2)
+                    if kin_type == "W":
+                        tmp_hist_rand.append(evt.W)
+                    if kin_type == "epsilon":
+                        tmp_hist_rand.append(evt.epsilon)
+                binned_t_rand.append(tmp_t_rand, len(tmp_t_rand))
+                binned_hist_rand.append(tmp_hist_rand, len(tmp_hist_rand))
+
+    # Loop through bins in t_dummy and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        print("\Binning t-bin {} dummy...".format(j+1))
+        for i,evt in enumerate(TBRANCH_DUMMY):
+
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
+
+            #CUTs Definations 
+            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+
+            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+
+            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+
+            if ParticleType == "kaon":
+
+                # Defined HGCer Geometric cuts
+                cutg = TCutG("cutg",21)
+                cutg.SetVarX("P_hgcer_yAtCer")
+                cutg.SetVarY("P_hgcer_xAtCer")
+                cutg.SetPoint(0,-25,2)
+                cutg.SetPoint(1,-2,2)
+                cutg.SetPoint(2,-1,2.5)
+                cutg.SetPoint(3,0,3)
+                cutg.SetPoint(4,1,3)
+                cutg.SetPoint(5,2,3.3)
+                cutg.SetPoint(6,3,3.0)
+                cutg.SetPoint(7,4,2.5)
+                cutg.SetPoint(8,5,2)
+                cutg.SetPoint(9,25,2)
+                cutg.SetPoint(10,25,0.5)
+                cutg.SetPoint(11,5,0.5)
+                cutg.SetPoint(12,4,1)
+                cutg.SetPoint(13,3,-1)
+                cutg.SetPoint(14,2,-2)
+                cutg.SetPoint(15,1,-2.3)
+                cutg.SetPoint(16,0,-1.5)
+                cutg.SetPoint(17,-1,-1)
+                cutg.SetPoint(18,-2,0.5)
+                cutg.SetPoint(19,-25,0.5)
+                cutg.SetPoint(20,-25,2)
+
+                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+
+            else:
+
+                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+
+            if(ALLCUTS):
+                
+                tmp_t_dummy = []
+                tmp_hist_dummy = []
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    tmp_t_dummy.append(-evt.MandelT)
+                    if kin_type == "Q2":
+                        tmp_hist_dummy.append(evt.Q2)
+                    if kin_type == "W":
+                        tmp_hist_dummy.append(evt.W)
+                    if kin_type == "epsilon":
+                        tmp_hist_dummy.append(evt.epsilon)
+                binned_t_dummy.append(tmp_t_dummy, len(tmp_t_dummy))
+                binned_hist_dummy.append(tmp_hist_dummy, len(tmp_hist_dummy))
+
+    # Loop through bins in t_dummy_rand and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        print("\Binning t-bin {} dummy_rand...".format(j+1))
+        for i,evt in enumerate(TBRANCH_DUMMY_RAND):
+
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
+
+            #CUTs Definations 
+            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+
+            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+
+            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+
+            if ParticleType == "kaon":
+
+                # Defined HGCer Geometric cuts
+                cutg = TCutG("cutg",21)
+                cutg.SetVarX("P_hgcer_yAtCer")
+                cutg.SetVarY("P_hgcer_xAtCer")
+                cutg.SetPoint(0,-25,2)
+                cutg.SetPoint(1,-2,2)
+                cutg.SetPoint(2,-1,2.5)
+                cutg.SetPoint(3,0,3)
+                cutg.SetPoint(4,1,3)
+                cutg.SetPoint(5,2,3.3)
+                cutg.SetPoint(6,3,3.0)
+                cutg.SetPoint(7,4,2.5)
+                cutg.SetPoint(8,5,2)
+                cutg.SetPoint(9,25,2)
+                cutg.SetPoint(10,25,0.5)
+                cutg.SetPoint(11,5,0.5)
+                cutg.SetPoint(12,4,1)
+                cutg.SetPoint(13,3,-1)
+                cutg.SetPoint(14,2,-2)
+                cutg.SetPoint(15,1,-2.3)
+                cutg.SetPoint(16,0,-1.5)
+                cutg.SetPoint(17,-1,-1)
+                cutg.SetPoint(18,-2,0.5)
+                cutg.SetPoint(19,-25,0.5)
+                cutg.SetPoint(20,-25,2)
+
+                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+
+            else:
+
+                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+
+            if(ALLCUTS):
+                
+                tmp_t_dummy_rand = []
+                tmp_hist_dummy_rand = []
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    tmp_t_dummy_rand.append(-evt.MandelT)
+                    if kin_type == "Q2":
+                        tmp_hist_dummy_rand.append(evt.Q2)
+                    if kin_type == "W":
+                        tmp_hist_dummy_rand.append(evt.W)
+                    if kin_type == "epsilon":
+                        tmp_hist_dummy_rand.append(evt.epsilon)
+                binned_t_dummy_rand.append(tmp_t_dummy_rand, len(tmp_t_dummy_rand))
+                binned_hist_dummy_rand.append(tmp_hist_dummy_rand, len(tmp_hist_dummy_rand))
+
+    def hist_sub(hist1, hist2):
+        result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
+        return result
+    
+    binned_t_data = hist_sub(binned_t_data, binned_t_rand)
+    binned_hist_data = hist_sub(binned_hist_data, binned_hist_rand)
+    binned_t_dummy = hist_sub(binned_t_dummy, binned_t_dummy_rand)
+    binned_hist_dummy = hist_sub(binned_hist_dummy, binned_hist_dummy_rand)
+                
+    return binned_t_data, binned_hist_data, binned_hist_dummy
+
+    
+def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins, tree_data, tree_dummy, inpDict):
+    
+    # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
+    binned_t_data, binned_hist_data, binned_hist_dummy = bin_data(tree_data, tree_dummy, t_bins, inpDict)
 
     ave_hist = []
     binned_sub_data = [[],[]]
@@ -242,7 +525,7 @@ def ave_per_bin_data(histlist, inpDict):
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
-            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins)
+            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins, hist["InFile_DATA"], hist["InFile_DUMMY"], inpDict)
                 
     return {"binned_DATA" : aveDict}
 
