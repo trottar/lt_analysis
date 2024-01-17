@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:46:50 trottar"
+# Time-stamp: "2024-01-17 14:56:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -211,8 +211,8 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         tmp_hist_rand.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_rand.append(evt.epsilon)
-        binned_t_rand.append([tmp_t_rand, len(tmp_t_rand)])
-        binned_hist_rand.append([tmp_hist_rand, len(tmp_hist_rand)])
+        binned_t_rand.append([tmp_t_rand, len(tmp_t_rand)*(1/nWindows)])
+        binned_hist_rand.append([tmp_hist_rand, len(tmp_hist_rand)*(1/nWindows)])
 
     # Loop through bins in t_dummy and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -343,13 +343,18 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         tmp_hist_dummy_rand.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_dummy_rand.append(evt.epsilon)
-        binned_t_dummy_rand.append([tmp_t_dummy_rand, len(tmp_t_dummy_rand)])
-        binned_hist_dummy_rand.append([tmp_hist_dummy_rand, len(tmp_hist_dummy_rand)])
+        binned_t_dummy_rand.append([tmp_t_dummy_rand, len(tmp_t_dummy_rand)*(1/nWindows)])
+        binned_hist_dummy_rand.append([tmp_hist_dummy_rand, len(tmp_hist_dummy_rand)*(1/nWindows)])
 
     def hist_sub(hist1, hist2):
         print("\n\n!!!!!!!",len(hist1),len(hist2))
-        result = [[a - b for a, b in zip(hist1[0], hist2[0]*(1/nWindows))], hist1[1]]
-        return result
+        #result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
+        # Subtract the values of hist2 from hist1
+        result_values = np.array(values1) - np.array(values2)
+
+        # Create the resulting histogram
+        result_histogram = [result_values.tolist(), count1]
+        return result_histogram
     
     binned_t_data = hist_sub(binned_t_data, binned_t_rand)
     binned_hist_data = hist_sub(binned_hist_data, binned_hist_rand)
