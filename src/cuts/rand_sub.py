@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 22:53:55 trottar"
+# Time-stamp: "2024-01-17 02:41:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1096,6 +1096,24 @@ def rand_sub(phi_setting, inpDict):
 
     ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+'(')
 
+    ###
+    # Q2 plots    
+    CQ2 = TCanvas()
+
+    histDict["H_Q2_DATA"].SetLineColor(1)
+    histDict["H_Q2_DATA"].Draw("same, E1")
+
+    CQ2.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    ###
+    # W plots    
+    CW = TCanvas()
+
+    histDict["H_W_DATA"].SetLineColor(1)
+    histDict["H_W_DATA"].Draw("same, E1")
+
+    CW.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))    
+    
     ###
     # MM plots    
     CMM = TCanvas()

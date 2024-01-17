@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 23:15:32 trottar"
+# Time-stamp: "2024-01-17 02:42:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -311,13 +311,31 @@ def compare_simc(hist, inpDict):
     #################    
 
     ###
+    # Q2 plots    
+    CQ2 = TCanvas()
+
+    histDict["H_Q2_SIMC"].SetLineColor(1)
+    histDict["H_Q2_SIMC"].Draw("same, E1")
+
+    CQ2.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+'(')
+    
+    ###
+    # W plots    
+    CW = TCanvas()
+
+    histDict["H_W_SIMC"].SetLineColor(1)
+    histDict["H_W_SIMC"].Draw("same, E1")
+
+    CW.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
+
+    ###
     # MM plots    
     CMM = TCanvas()
 
     histDict["H_MM_SIMC"].SetLineColor(1)
     histDict["H_MM_SIMC"].Draw("same, E1")
 
-    CMM.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+'(')
+    CMM.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # t-Phi plots        
