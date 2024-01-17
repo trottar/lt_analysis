@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 01:44:37 trottar"
+# Time-stamp: "2024-01-17 01:51:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def calculate_ave_data(tree_data, tree_dummy, t_bins, phi_bins, inpDict):
+def calculate_ave_data(kinematic_types, tree_data, tree_dummy, t_bins, phi_bins, inpDict):
 
     TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
     TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))    
@@ -204,65 +204,82 @@ def calculate_ave_data(tree_data, tree_dummy, t_bins, phi_bins, inpDict):
             binned_W_dummy.append(tmp_W_dummy)
             binned_epsilon_dummy.append(tmp_epsilon_dummy)
 
-            
-    ave_hist = []
-    binned_sub_data = [[], []]
-    i=0 # iter
-    print("-"*25)
-    # Subtract binned_hist_dummy from binned_hist_data element-wise
-    for data, dummy in zip(binned_Q2_data, binned_Q2_dummy):
-        bin_val_data = data
-        hist_val_data = len(data)
-        bin_val_dummy = dummy
-        hist_val_dummy = len(dummy)
-        sub_val = np.subtract(hist_val_data, hist_val_dummy)
-        if sub_val.size != 0:
-            # Calculate the weighted sum of frequencies and divide by the total count
-            weighted_sum = np.sum(sub_val * bin_val_data)
-            total_count = np.sum(sub_val)
-            average = weighted_sum / total_count            
-            ave_hist.append(average)
-            #print("Weighted Sum:",weighted_sum)
-            #print("Total Count:",total_count)
-            #print("Average for t-bin {}:".format(i+1),average)
-            binned_sub_data[0].append(bin_val_data)
-            binned_sub_data[1].append(sub_val)
-        else:
-            ave_hist.append(0)
-            #print("Weighted Sum: N/A")
-            #print("Total Count: N/A")
-            #print("Average for t-bin {}: 0.0".format(i+1))
-            binned_sub_data[0].append(bin_val_data)
-            binned_sub_data[1].append([0]*len(bin_val_data))
-        i+=1
+
     
-    # Print statements to check sizes
-    #print("Size of binned_t_data:", len(binned_t_data))
-    #print("Size of binned_hist_data:", len(binned_hist_data))
-    #print("Size of binned_hist_dummy:", len(binned_hist_dummy))
-    #print("Size of binned_sub_data:", len(binned_sub_data[1]))
-    #print("Size of ave_hist:", len(ave_hist))
-    #print("Size of t_bins:", len(t_bins))
-    #print("Size of phi_bins:", len(phi_bins), "\n")
+    groups = {}
+    for kin_type in kinematic_types:
 
-    dict_lst = []
-    for j in range(len(t_bins) - 1):
-        tbin_index = j
-        for k in range(len(phi_bins) - 1):
-            phibin_index = k
-            hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
-            ave_val = ave_hist[j]
-            print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))
-            dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
+        if kin_type == "Q2":
+            binned_hist_data = binned_Q2_data
+            binned_hist_dummy = binned_Q2_dummy
+        if kin_type == "W":
+            binned_hist_data = binned_W_data
+            binned_hist_dummy = binned_W_dummy
+        if kin_type == "epsilon":
+            binned_hist_data = binned_epsilon_data
+            binned_hist_dummy = binned_epsilon_dummy
+        if kin_type == "t":
+            binned_hist_data = binned_t_data
+            binned_hist_dummy = binned_t_dummy            
+            
+        ave_hist = []
+        binned_sub_data = [[], []]
+        i=0 # iter
+        print("-"*25)
+        # Subtract binned_hist_dummy from binned_hist_data element-wise
+        for data, dummy in zip(binned_hist_data, binned_hist_dummy):
+            bin_val_data = data
+            hist_val_data = len(data)
+            bin_val_dummy = dummy
+            hist_val_dummy = len(dummy)
+            sub_val = np.subtract(hist_val_data, hist_val_dummy)
+            if sub_val.size != 0:
+                # Calculate the weighted sum of frequencies and divide by the total count
+                weighted_sum = np.sum(sub_val * bin_val_data)
+                total_count = np.sum(sub_val)
+                average = weighted_sum / total_count            
+                ave_hist.append(average)
+                #print("Weighted Sum:",weighted_sum)
+                #print("Total Count:",total_count)
+                #print("Average for t-bin {}:".format(i+1),average)
+                binned_sub_data[0].append(bin_val_data)
+                binned_sub_data[1].append(sub_val)
+            else:
+                ave_hist.append(0)
+                #print("Weighted Sum: N/A")
+                #print("Total Count: N/A")
+                #print("Average for t-bin {}: 0.0".format(i+1))
+                binned_sub_data[0].append(bin_val_data)
+                binned_sub_data[1].append([0]*len(bin_val_data))
+            i+=1
 
-    # Group the tuples by the first two elements using defaultdict
-    groups = defaultdict(list)
-    for tup in dict_lst:
-        key = (tup[0], tup[1])
-        groups[key] = {
-            "{}_arr".format(kin_type) : tup[2],
-            "{}_ave".format(kin_type) : tup[3],
-        }            
+        # Print statements to check sizes
+        #print("Size of binned_t_data:", len(binned_t_data))
+        #print("Size of binned_hist_data:", len(binned_hist_data))
+        #print("Size of binned_hist_dummy:", len(binned_hist_dummy))
+        #print("Size of binned_sub_data:", len(binned_sub_data[1]))
+        #print("Size of ave_hist:", len(ave_hist))
+        #print("Size of t_bins:", len(t_bins))
+        #print("Size of phi_bins:", len(phi_bins), "\n")
+
+        dict_lst = []
+        for j in range(len(t_bins) - 1):
+            tbin_index = j
+            for k in range(len(phi_bins) - 1):
+                phibin_index = k
+                hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
+                ave_val = ave_hist[j]
+                print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))
+                dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
+
+        # Group the tuples by the first two elements using defaultdict
+        groups[kin_type] = defaultdict(list)
+        for tup in dict_lst:
+            key = (tup[0], tup[1])
+            groups[kin_type][key] = {
+                "{}_arr".format(kin_type) : tup[2],
+                "{}_ave".format(kin_type) : tup[3],
+            }            
             
     return groups
 
@@ -398,7 +415,7 @@ def ave_per_bin_simc(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        groups = calculate_ave_simc(hist["InFile_DATA"], hist["InFile_DUMMY"], t_bins, phi_bins, inpDict)
+        groups = calculate_ave_simc(kinematic_types, hist["InFile_DATA"], hist["InFile_DUMMY"], t_bins, phi_bins, inpDict)
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = groups[kin_type]
 
