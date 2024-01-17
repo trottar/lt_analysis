@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 15:29:53 trottar"
+# Time-stamp: "2024-01-17 15:35:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,6 +80,21 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     H_W_DATA  = TH1D("H_W_DATA","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
     H_t_DATA       = TH1D("H_t_DATA","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])
+
+    H_Q2_RAND       = TH1D("H_Q2_RAND","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
+    H_W_RAND  = TH1D("H_W_RAND","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
+    H_t_RAND       = TH1D("H_t_RAND","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])
+
+    H_Q2_DUMMY       = TH1D("H_Q2_DUMMY","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DUMMY  = TH1D("H_W_DUMMY","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DUMMY       = TH1D("H_t_DUMMY","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])
+
+    H_Q2_DUMMY_RAND       = TH1D("H_Q2_DUMMY_RAND","Q2", len(t_bins), inpDict["Q2min"], inpDict["Q2max"])
+    H_W_DUMMY_RAND  = TH1D("H_W_DUMMY_RAND","W ", len(t_bins), inpDict["Wmin"], inpDict["Wmax"])
+    H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", len(t_bins), inpDict["tmin"], inpDict["tmax"])
+    H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", len(t_bins), inpDict["Epsmin"], inpDict["Epsmax"])    
     
     TBRANCH_DATA  = tree_data.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
     TBRANCH_RAND  = tree_data.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
