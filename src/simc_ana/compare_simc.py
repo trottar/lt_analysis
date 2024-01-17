@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 23:11:14 trottar"
+# Time-stamp: "2024-01-16 23:15:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -231,7 +231,7 @@ def compare_simc(hist, inpDict):
           H_t_SIMC.Fill(-evt.t, evt.Weight)
           H_epsilon_SIMC.Fill(evt.epsilon, evt.Weight)
           #H_MM_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
-          H_MM_SIMC.Fill(np.sqrt(abs(evt.MM2)), evt.Weight)
+          H_MM_SIMC.Fill(evt.missmass, evt.Weight)
 
     ################################################################################################################################################
     # Normalize simc by normfactor/nevents
