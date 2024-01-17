@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 15:46:53 trottar"
+# Time-stamp: "2024-01-17 15:51:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -393,10 +393,11 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     if kin_type == "t":
         binned_hist_data.append(tmp_hist_data)
     if kin_type == "Q2":
-        for i in range(1, H_Q2_DATA.GetNbinsX() + 1):
+        for i in range(1, H_Q2_DATA.GetNbinsX() + 1):        
             tmp_hist_data = [[],[]]
             tmp_hist_data[0].append(H_Q2_DATA.GetBinCenter(i))
             tmp_hist_data[1].append(H_Q2_DATA.GetBinContent(i))
+            print("!!!!!!!!!!!!",tmp_hist_data)
         binned_hist_data.append(tmp_hist_data)
     if kin_type == "W":
         for i in range(1, H_W_DATA.GetNbinsX() + 1):
