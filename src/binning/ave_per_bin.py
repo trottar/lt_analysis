@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 01:55:31 trottar"
+# Time-stamp: "2024-01-17 01:58:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,9 +52,8 @@ OUTPATH=lt.OUTPATH
 
 def calculate_ave_data(kinematic_types, tree_data, tree_dummy, t_bins, phi_bins, inpDict):
 
-    TBRANCH_DATA  = tree_data.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
-    TBRANCH_DUMMY  = tree_dummy.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))    
-
+    ParticleType = inpDict["ParticleType"]
+    
     # Define diamond cut parameters
     a1 = inpDict["a1"]
     b1 = inpDict["b1"]
@@ -64,6 +63,9 @@ def calculate_ave_data(kinematic_types, tree_data, tree_dummy, t_bins, phi_bins,
     b3 = inpDict["b3"]
     a4 = inpDict["a4"]
     b4 = inpDict["b4"]
+    
+    TBRANCH_DATA  = tree_data.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    TBRANCH_DUMMY  = tree_dummy.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))    
 
     binned_t_data = []
     binned_Q2_data = []
