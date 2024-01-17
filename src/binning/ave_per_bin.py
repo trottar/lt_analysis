@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 17:14:33 trottar"
+# Time-stamp: "2024-01-17 17:20:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -429,12 +429,15 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     return binned_dict
 
     
-def calculate_ave_data(kinematic_types, hist_data, hist_dummy, t_data, t_bins, phi_bins, tree_data, tree_dummy, nWindows, inpDict):
+def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
+
+    tree_data, tree_dummy, nWindows = hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict)
 
     for kin_type in kinematic_types:
+        hist_data, hist_dummy, t_data = hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"]        
         binned_t_data = binned_dict[kin_type]["binned_t_data"]
         binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
         binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
@@ -590,12 +593,15 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict):
         
     return binned_dict                
 
-def calculate_ave_simc(kinematic_types, hist_simc, t_simc, t_bins, phi_bins, tree_simc, inpDict):
+def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict):
+
+    tree_data, tree_dummy, nWindows = hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"]
     
     # Initialize lists for binned_t_data, binned_hist_data
     binned_dict = bin_simc(kin_type, tree_simc, t_bins, inpDict)
 
-    for kin_type in kinematic_types:    
+    for kin_type in kinematic_types:
+        hist_data, hist_dummy, t_data = hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"]
         binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
         binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
     
@@ -697,7 +703,7 @@ def ave_per_bin_data(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        binned_dict = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins, hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"], inpDict)
+        binned_dict = calculate_ave_data(kin_type, hist, t_bins, phi_bins, inpDict)
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
                 
@@ -726,7 +732,7 @@ def ave_per_bin_simc(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        binned_dict = calculate_ave_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins, hist["InFile_SIMC"], inpDict)
+        binned_dict = calculate_ave_simc(kin_type, hist, t_bins, phi_bins, inpDict)
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
         
