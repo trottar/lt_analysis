@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 15:51:03 trottar"
+# Time-stamp: "2024-01-17 15:54:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,8 +357,6 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         H_W_DUMMY_RAND.SetBinContent(j+1, evt.W)                        
                     if kin_type == "epsilon":
                         H_epsilon_DUMMY_RAND.SetBinContent(j+1, evt.epsilon)
-                else:
-                    continue
                         
     H_Q2_RAND.Scale(1/nWindows)
     H_W_RAND.Scale(1/nWindows)    
