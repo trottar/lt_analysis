@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 00:26:48 trottar"
+# Time-stamp: "2024-01-17 00:33:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,7 +53,9 @@ OUTPATH=lt.OUTPATH
 def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins):
 
     for bin_index in range(0, hist_data.GetNbinsX()):
-        print("index {}: {}->{}".format(bin_index,hist_data.GetBinCenter(bin_index),hist_data.GetBinContent(bin_index)))
+        if kin_type == "W":
+            print("index {}: {:.4f}->{:.4f}".format(bin_index,hist_data.GetBinCenter(bin_index),hist_data.GetBinContent(bin_index)))
+            sys.exit(1)
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
