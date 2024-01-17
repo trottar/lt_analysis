@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:17:13 trottar"
+# Time-stamp: "2024-01-17 14:20:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -145,8 +145,8 @@ def bin_data(tree_data, tree_dummy, t_bins, inpDict):
                         tmp_hist_data.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_data.append(evt.epsilon)
-                binned_t_data.append(tmp_t_data, len(tmp_t_data))
-                binned_hist_data.append(tmp_hist_data, len(tmp_hist_data))
+                binned_t_data.append([tmp_t_data, len(tmp_t_data)])
+                binned_hist_data.append([tmp_hist_data, len(tmp_hist_data)])
 
     # Loop through bins in t_rand and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -211,8 +211,8 @@ def bin_data(tree_data, tree_dummy, t_bins, inpDict):
                         tmp_hist_rand.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_rand.append(evt.epsilon)
-                binned_t_rand.append(tmp_t_rand, len(tmp_t_rand))
-                binned_hist_rand.append(tmp_hist_rand, len(tmp_hist_rand))
+                binned_t_rand.append([tmp_t_rand, len(tmp_t_rand)])
+                binned_hist_rand.append([tmp_hist_rand, len(tmp_hist_rand)])
 
     # Loop through bins in t_dummy and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -277,8 +277,8 @@ def bin_data(tree_data, tree_dummy, t_bins, inpDict):
                         tmp_hist_dummy.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_dummy.append(evt.epsilon)
-                binned_t_dummy.append(tmp_t_dummy, len(tmp_t_dummy))
-                binned_hist_dummy.append(tmp_hist_dummy, len(tmp_hist_dummy))
+                binned_t_dummy.append([tmp_t_dummy, len(tmp_t_dummy)])
+                binned_hist_dummy.append([tmp_hist_dummy, len(tmp_hist_dummy)])
 
     # Loop through bins in t_dummy_rand and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -343,8 +343,8 @@ def bin_data(tree_data, tree_dummy, t_bins, inpDict):
                         tmp_hist_dummy_rand.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_dummy_rand.append(evt.epsilon)
-                binned_t_dummy_rand.append(tmp_t_dummy_rand, len(tmp_t_dummy_rand))
-                binned_hist_dummy_rand.append(tmp_hist_dummy_rand, len(tmp_hist_dummy_rand))
+                binned_t_dummy_rand.append([tmp_t_dummy_rand, len(tmp_t_dummy_rand)])
+                binned_hist_dummy_rand.append([tmp_hist_dummy_rand, len(tmp_hist_dummy_rand)])
 
     def hist_sub(hist1, hist2):
         result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
