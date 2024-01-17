@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 02:32:13 trottar"
+# Time-stamp: "2024-01-17 02:35:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -393,7 +393,7 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
             continue
 
         # Set x-axis range dynamically based on non-empty bins
-        x_axis_min = histogram.GetBinLowEdge(min(non_empty_bins))
+        x_axis_min = histogram.GetBinLowEdge(min(non_empty_bins)) - histogram.GetBinLowEdge(min(non_empty_bins)) * x_axis_range_factor
         x_axis_max = histogram.GetBinLowEdge(max(non_empty_bins) + 1) + histogram.GetBinLowEdge(max(non_empty_bins) + 1) * x_axis_range_factor
 
         min_values.append(x_axis_min)
