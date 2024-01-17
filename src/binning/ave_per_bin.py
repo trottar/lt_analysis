@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 16:07:40 trottar"
+# Time-stamp: "2024-01-17 16:11:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,6 +158,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                     H_t_DATA.SetBinContent(j+1, -evt.MandelT)
                     if kin_type == "Q2":
+                        print("$$$$$$$$",j+1, evt.Q2)
                         H_Q2_DATA.SetBinContent(j+1, evt.Q2)
                     if kin_type == "W":
                         H_W_DATA.SetBinContent(j+1, evt.W)                        
