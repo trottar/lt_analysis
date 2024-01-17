@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 01:16:42 trottar"
+# Time-stamp: "2024-01-17 01:22:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,9 +74,9 @@ def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins
                     tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
                     tmp_t_data[1].append(t_data.GetBinContent(bin_index))
                     tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
-                    tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
+                    tmp_hist_data[1].append(t_data.GetBinContent(bin_index))
                     tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(bin_index))
-                    tmp_hist_dummy[1].append(hist_dummy.GetBinContent(bin_index))
+                    tmp_hist_dummy[1].append(t_data.GetBinContent(bin_index))
         binned_t_data.append(tmp_t_data)
         binned_hist_data.append(tmp_hist_data)
         binned_hist_dummy.append(tmp_hist_dummy)
