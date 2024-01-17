@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:23:02 trottar"
+# Time-stamp: "2024-01-17 14:26:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
-        print("\Binning t-bin {} data...".format(j+1))
+        print("\nBinning t-bin {} data...".format(j+1))
         for i,evt in enumerate(TBRANCH_DATA):
 
             # Progress bar
@@ -150,7 +150,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
 
     # Loop through bins in t_rand and identify events in specified bins
     for j in range(len(t_bins)-1):
-        print("\Binning t-bin {} rand...".format(j+1))
+        print("\nBinning t-bin {} rand...".format(j+1))
         for i,evt in enumerate(TBRANCH_RAND):
 
             # Progress bar
@@ -216,7 +216,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
 
     # Loop through bins in t_dummy and identify events in specified bins
     for j in range(len(t_bins)-1):
-        print("\Binning t-bin {} dummy...".format(j+1))
+        print("\nBinning t-bin {} dummy...".format(j+1))
         for i,evt in enumerate(TBRANCH_DUMMY):
 
             # Progress bar
@@ -282,7 +282,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
 
     # Loop through bins in t_dummy_rand and identify events in specified bins
     for j in range(len(t_bins)-1):
-        print("\Binning t-bin {} dummy_rand...".format(j+1))
+        print("\nBinning t-bin {} dummy_rand...".format(j+1))
         for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
             # Progress bar
@@ -347,7 +347,8 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
                 binned_hist_dummy_rand.append([tmp_hist_dummy_rand, len(tmp_hist_dummy_rand)])
 
     def hist_sub(hist1, hist2):
-        result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
+        subtracted_list = [a - b for a, b in zip(hist1[0], hist2[0])]
+        result = [subtracted_list, len(subtracted_list)]
         return result
     
     binned_t_data = hist_sub(binned_t_data, binned_t_rand)
