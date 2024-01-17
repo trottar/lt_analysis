@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 00:10:41 trottar"
+# Time-stamp: "2024-01-17 02:16:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -355,7 +355,7 @@ import numpy as np
 
 def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type = "DATA"):
     
-    x_axis_range_factor = 0.005
+    x_axis_range_factor = 0.00005
     
     # Check if a custom range factor is provided
     if range_factor != "Default":
