@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 15:25:33 trottar"
+# Time-stamp: "2024-01-17 15:30:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -867,7 +867,7 @@ def rand_sub(phi_setting, inpDict):
     H_ph_recoil_RAND.Scale(1/nWindows)
     H_th_recoil_RAND.Scale(1/nWindows)
     H_Q2_RAND.Scale(1/nWindows)
-    H_W_RAND.Scale(1/nWindows)
+    H_W_RAND.Scale(1/nWindows)    
     H_t_RAND.Scale(1/nWindows)
     H_epsilon_RAND.Scale(1/nWindows)
     H_MM_RAND.Scale(1/nWindows)
@@ -876,7 +876,6 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_RAND.Scale(1/nWindows)
     H_pmy_RAND.Scale(1/nWindows)
     H_pmz_RAND.Scale(1/nWindows)
-    H_W_RAND.Scale(1/nWindows)
 
     # Data Dummy_Random subtraction window
     MM_vs_CoinTime_DUMMY_RAND.Scale(1/nWindows)
@@ -946,6 +945,7 @@ def rand_sub(phi_setting, inpDict):
     H_ph_recoil_DATA.Add(H_ph_recoil_RAND,-1)
     H_th_recoil_DATA.Add(H_th_recoil_RAND,-1)
     H_Q2_DATA.Add(H_Q2_RAND,-1)
+    H_W_DATA.Add(H_W_RAND,-1)
     H_t_DATA.Add(H_t_RAND,-1)
     H_epsilon_DATA.Add(H_epsilon_RAND,-1)
     H_MM_DATA.Add(H_MM_RAND,-1)
@@ -954,7 +954,6 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DATA.Add(H_pmx_RAND,-1)
     H_pmy_DATA.Add(H_pmy_RAND,-1)
     H_pmz_DATA.Add(H_pmz_RAND,-1)
-    H_W_DATA.Add(H_W_RAND,-1)
     H_ct_DATA.Add(H_ct_RAND,-1)
 
     ###
