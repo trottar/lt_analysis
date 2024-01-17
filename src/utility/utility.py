@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 02:16:09 trottar"
+# Time-stamp: "2024-01-17 02:21:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,7 +406,7 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
     for i, hist in enumerate(histlist):    
         # Set the x-axis range for the current histogram
         hist["H_{}_{}".format(inp_str, hist_type)].SetBins(200, avg_min, avg_max)
-    
+        
     return avg_min, avg_max
     
 ################################################################################################################################################    

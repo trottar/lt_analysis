@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 01:28:04 trottar"
+# Time-stamp: "2024-01-17 02:21:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -271,5 +271,5 @@ def ave_per_bin_simc(histlist, inpDict):
         aveDict[hist["phi_setting"]] = {}
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = calculate_ave_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins)
-
+    sys.exit(1)
     return {"binned_SIMC" : aveDict}
