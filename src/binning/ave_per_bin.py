@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 15:00:24 trottar"
+# Time-stamp: "2024-01-17 15:04:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -211,8 +211,8 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         tmp_hist_rand.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_rand.append(evt.epsilon)
-        binned_t_rand.append([tmp_t_rand, len(tmp_t_rand)*(1/nWindows)])
-        binned_hist_rand.append([tmp_hist_rand, len(tmp_hist_rand)*(1/nWindows)])
+        binned_t_rand.append([tmp_t_rand*(1/nWindows), len(tmp_t_rand)])
+        binned_hist_rand.append([tmp_hist_rand*(1/nWindows), len(tmp_hist_rand)])
 
     # Loop through bins in t_dummy and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -343,11 +343,20 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         tmp_hist_dummy_rand.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_dummy_rand.append(evt.epsilon)
-        binned_t_dummy_rand.append([tmp_t_dummy_rand, len(tmp_t_dummy_rand)*(1/nWindows)])
-        binned_hist_dummy_rand.append([tmp_hist_dummy_rand, len(tmp_hist_dummy_rand)*(1/nWindows)])
+        binned_t_dummy_rand.append([tmp_t_dummy_rand*(1/nWindows), len(tmp_t_dummy_rand)])
+        binned_hist_dummy_rand.append([tmp_hist_dummy_rand*(1/nWindows), len(tmp_hist_dummy_rand)])
 
     def hist_sub(hist1, hist2):
         print("\n\n!!!!!!!",len(hist1),len(hist2))
+        
+        # Extract the values and bin count from the histograms
+        values1, count1 = hist1[0], hist1[1]
+        values2, count2 = hist2[0], hist2[1]
+
+        # Check if both histograms have the same number of bins
+        if count1 != count2:
+            raise ValueError("Histograms must have the same number of bins for subtraction.")
+        
         #result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
         # Subtract the values of hist2 from hist1
         result_values = np.array(hist1) - np.array(hist2)
