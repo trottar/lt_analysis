@@ -472,25 +472,25 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         c1_kint.Print(Analysis_Distributions)
     if (highe_input != False):
         c1_kinh = TCanvas("c1_kinh", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
-        Q2vsW_hi_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-        Q2vsW_hi_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
+        Q2vsW_hi_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+        Q2vsW_hi_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)
         Q2vsW_hi_cut.Draw("colz")
         c1_kinh.Print(Analysis_Distributions+end)
     if (mide_input != False):
         c1_kinm = TCanvas("c1_kinm", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
-        Q2vsW_mi_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-        Q2vsW_mi_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
+        Q2vsW_mi_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+        Q2vsW_mi_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)        
         Q2vsW_mi_cut.Draw("colz")
         c1_kinm.Print(Analysis_Distributions+end+endm)
     if (lowe_input != False):
         c1_kinl = TCanvas("c1_kinl", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
-        Q2vsW_lo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-        Q2vsW_lo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
+        Q2vsW_lo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+        Q2vsW_lo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)        
         Q2vsW_lo_cut.Draw("colz")
         c1_kinl.Print(Analysis_Distributions)
         c1_kinll = TCanvas("c1_kinll", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
-        Q2vsW_lolo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-        Q2vsW_lolo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)        
+        Q2vsW_lolo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+        Q2vsW_lolo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)        
         Q2vsW_lolo_cut.Draw("colz")
         #    lol.clear()
         #   lor.clear()
@@ -537,15 +537,15 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         if (mide_input != False):
             c1_kinml = TCanvas("c1_kinml", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
-            Q2vsW_milo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-            Q2vsW_milo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)            
+            Q2vsW_milo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+            Q2vsW_milo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)            
             Q2vsW_milo_cut.Draw("colz")
             c1_kinml.Print(Analysis_Distributions+endc)
 
         if (highe_input != False):
             c1_kinhl = TCanvas("c1_kinhl", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
-            Q2vsW_hilo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.1, Q2max+Q2max*0.1)
-            Q2vsW_hilo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.1, Wmax+Wmax*0.1)
+            Q2vsW_hilo_cut.GetXaxis().SetRangeUser(Q2min-Q2min*0.5, Q2max+Q2max*0.5)
+            Q2vsW_hilo_cut.GetYaxis().SetRangeUser(Wmin-Wmin*0.5, Wmax+Wmax*0.5)
             Q2vsW_hilo_cut.Draw("colz")
             c1_kinhl.Print(Analysis_Distributions+endc+endf)
 	
