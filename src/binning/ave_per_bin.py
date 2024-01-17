@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 16:52:50 trottar"
+# Time-stamp: "2024-01-17 17:05:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
+def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
 
     ParticleType = inpDict["ParticleType"]
 
@@ -157,12 +157,9 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                     H_t_DATA.SetBinContent(j+1, -evt.MandelT)
-                    if kin_type == "Q2":
-                        H_Q2_DATA.SetBinContent(j+1, evt.Q2)
-                    if kin_type == "W":
-                        H_W_DATA.SetBinContent(j+1, evt.W)                        
-                    if kin_type == "epsilon":
-                        H_epsilon_DATA.SetBinContent(j+1, evt.epsilon)
+                    H_Q2_DATA.SetBinContent(j+1, evt.Q2)
+                    H_W_DATA.SetBinContent(j+1, evt.W)                        
+                    H_epsilon_DATA.SetBinContent(j+1, evt.epsilon)
 
     # Loop through bins in t_rand and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -219,12 +216,9 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                     H_t_RAND.SetBinContent(j+1, -evt.MandelT)
-                    if kin_type == "Q2":
-                        H_Q2_RAND.SetBinContent(j+1, evt.Q2)
-                    if kin_type == "W":
-                        H_W_RAND.SetBinContent(j+1, evt.W)                        
-                    if kin_type == "epsilon":
-                        H_epsilon_RAND.SetBinContent(j+1, evt.epsilon)
+                    H_Q2_RAND.SetBinContent(j+1, evt.Q2)
+                    H_W_RAND.SetBinContent(j+1, evt.W)                        
+                    H_epsilon_RAND.SetBinContent(j+1, evt.epsilon)
 
     # Loop through bins in t_dummy and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -281,12 +275,9 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                     H_t_DUMMY.SetBinContent(j+1, -evt.MandelT)
-                    if kin_type == "Q2":
-                        H_Q2_DUMMY.SetBinContent(j+1, evt.Q2)
-                    if kin_type == "W":
-                        H_W_DUMMY.SetBinContent(j+1, evt.W)                        
-                    if kin_type == "epsilon":
-                        H_epsilon_DUMMY.SetBinContent(j+1, evt.epsilon)
+                    H_Q2_DUMMY.SetBinContent(j+1, evt.Q2)
+                    H_W_DUMMY.SetBinContent(j+1, evt.W)                        
+                    H_epsilon_DUMMY.SetBinContent(j+1, evt.epsilon)
 
     # Loop through bins in t_dummy_rand and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -343,12 +334,9 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                     H_t_DUMMY_RAND.SetBinContent(j+1, -evt.MandelT)
-                    if kin_type == "Q2":
-                        H_Q2_DUMMY_RAND.SetBinContent(j+1, evt.Q2)
-                    if kin_type == "W":
-                        H_W_DUMMY_RAND.SetBinContent(j+1, evt.W)                        
-                    if kin_type == "epsilon":
-                        H_epsilon_DUMMY_RAND.SetBinContent(j+1, evt.epsilon)
+                    H_Q2_DUMMY_RAND.SetBinContent(j+1, evt.Q2)
+                    H_W_DUMMY_RAND.SetBinContent(j+1, evt.W)                        
+                    H_epsilon_DUMMY_RAND.SetBinContent(j+1, evt.epsilon)
                         
     H_Q2_RAND.Scale(1/nWindows)
     H_W_RAND.Scale(1/nWindows)    
@@ -369,72 +357,85 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
+
+    binned_dict = {}
     
     binned_t_data = []
     binned_hist_data = []
     binned_hist_dummy = []
-    
-    for i in range(1, H_t_DATA.GetNbinsX() + 1):
-        tmp_hist_data = [[],[]]
-        tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
-        tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))
-        binned_t_data.append(tmp_hist_data)
-    
-        if kin_type == "t":
-            binned_hist_data.append(tmp_hist_data)
-    if kin_type == "Q2":
-        for i in range(1, H_Q2_DATA.GetNbinsX() + 1):        
-            tmp_hist_data = [[],[]]
-            tmp_hist_data[0].append(H_Q2_DATA.GetBinCenter(i))
-            tmp_hist_data[1].append(H_Q2_DATA.GetBinContent(i))
-            binned_hist_data.append(tmp_hist_data)
-    if kin_type == "W":
-        for i in range(1, H_W_DATA.GetNbinsX() + 1):
-            tmp_hist_data = [[],[]]
-            tmp_hist_data[0].append(H_W_DATA.GetBinCenter(i))
-            tmp_hist_data[1].append(H_W_DATA.GetBinContent(i))
-            binned_hist_data.append(tmp_hist_data)        
-    if kin_type == "epsilon":                        
-        for i in range(1, H_epsilon_DATA.GetNbinsX() + 1):
-            tmp_hist_data = [[],[]]
-            tmp_hist_data[0].append(H_epsilon_DATA.GetBinCenter(i))
-            tmp_hist_data[1].append(H_epsilon_DATA.GetBinContent(i))
-            binned_hist_data.append(tmp_hist_data)
 
-    for i in range(1, H_t_DUMMY.GetNbinsX() + 1):
-        tmp_hist_dummy = [[],[]]
-        tmp_hist_dummy[0].append(H_t_DUMMY.GetBinCenter(i))
-        tmp_hist_dummy[1].append(H_t_DUMMY.GetBinContent(i))
-        binned_t_dummy.append(tmp_hist_dummy)
-    
-        if kin_type == "t":
-            binned_hist_dummy.append(tmp_hist_dummy)
-    if kin_type == "Q2":
-        for i in range(1, H_Q2_DUMMY.GetNbinsX() + 1):
-            tmp_hist_dummy = [[],[]]
-            tmp_hist_dummy[0].append(H_Q2_DUMMY.GetBinCenter(i))
-            tmp_hist_dummy[1].append(H_Q2_DUMMY.GetBinContent(i))
-            binned_hist_dummy.append(tmp_hist_dummy)
-    if kin_type == "W":
-        for i in range(1, H_W_DUMMY.GetNbinsX() + 1):
-            tmp_hist_dummy = [[],[]]
-            tmp_hist_dummy[0].append(H_W_DUMMY.GetBinCenter(i))
-            tmp_hist_dummy[1].append(H_W_DUMMY.GetBinContent(i))
-            binned_hist_dummy.append(tmp_hist_dummy)        
-    if kin_type == "epsilon":                        
-        for i in range(1, H_epsilon_DUMMY.GetNbinsX() + 1):
-            tmp_hist_dummy = [[],[]]
-            tmp_hist_dummy[0].append(H_epsilon_DUMMY.GetBinCenter(i))
-            tmp_hist_dummy[1].append(H_epsilon_DUMMY.GetBinContent(i))
-            binned_hist_dummy.append(tmp_hist_dummy)
+    for kin_type in kinematic_types:
+        for j in range(len(t_bins)-1):
+            for i in range(1, H_t_DATA.GetNbinsX() + 1):
+                tmp_hist_data = [[],[]]
+                tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
+                tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))
+            binned_t_data.append(tmp_hist_data)
+
+            if kin_type == "t":
+                binned_hist_data.append(tmp_hist_data)
+            if kin_type == "Q2":
+                for i in range(1, H_Q2_DATA.GetNbinsX() + 1):        
+                    tmp_hist_data = [[],[]]
+                    tmp_hist_data[0].append(H_Q2_DATA.GetBinCenter(i))
+                    tmp_hist_data[1].append(H_Q2_DATA.GetBinContent(i))
+                binned_hist_data.append(tmp_hist_data)
+            if kin_type == "W":
+                for i in range(1, H_W_DATA.GetNbinsX() + 1):
+                    tmp_hist_data = [[],[]]
+                    tmp_hist_data[0].append(H_W_DATA.GetBinCenter(i))
+                    tmp_hist_data[1].append(H_W_DATA.GetBinContent(i))
+                binned_hist_data.append(tmp_hist_data)        
+            if kin_type == "epsilon":                        
+                for i in range(1, H_epsilon_DATA.GetNbinsX() + 1):
+                    tmp_hist_data = [[],[]]
+                    tmp_hist_data[0].append(H_epsilon_DATA.GetBinCenter(i))
+                    tmp_hist_data[1].append(H_epsilon_DATA.GetBinContent(i))
+                binned_hist_data.append(tmp_hist_data)
+
+            for i in range(1, H_t_DUMMY.GetNbinsX() + 1):
+                tmp_hist_dummy = [[],[]]
+                tmp_hist_dummy[0].append(H_t_DUMMY.GetBinCenter(i))
+                tmp_hist_dummy[1].append(H_t_DUMMY.GetBinContent(i))
+            binned_t_dummy.append(tmp_hist_dummy)
+
+            if kin_type == "t":
+                binned_hist_dummy.append(tmp_hist_dummy)
+            if kin_type == "Q2":
+                for i in range(1, H_Q2_DUMMY.GetNbinsX() + 1):
+                    tmp_hist_dummy = [[],[]]
+                    tmp_hist_dummy[0].append(H_Q2_DUMMY.GetBinCenter(i))
+                    tmp_hist_dummy[1].append(H_Q2_DUMMY.GetBinContent(i))
+                binned_hist_dummy.append(tmp_hist_dummy)
+            if kin_type == "W":
+                for i in range(1, H_W_DUMMY.GetNbinsX() + 1):
+                    tmp_hist_dummy = [[],[]]
+                    tmp_hist_dummy[0].append(H_W_DUMMY.GetBinCenter(i))
+                    tmp_hist_dummy[1].append(H_W_DUMMY.GetBinContent(i))
+                binned_hist_dummy.append(tmp_hist_dummy)        
+            if kin_type == "epsilon":                        
+                for i in range(1, H_epsilon_DUMMY.GetNbinsX() + 1):
+                    tmp_hist_dummy = [[],[]]
+                    tmp_hist_dummy[0].append(H_epsilon_DUMMY.GetBinCenter(i))
+                    tmp_hist_dummy[1].append(H_epsilon_DUMMY.GetBinContent(i))
+                binned_hist_dummy.append(tmp_hist_dummy)
+
+        binned_dict[kin_type] = {
+            "binned_t_data" : binned_t_data,
+            "binned_hist_data" : binned_hist_data,
+            "binned_hist_dummy" : binned_hist_dummy
+        }
         
-    return binned_t_data, binned_hist_data, binned_hist_dummy
+    return binned_dict
 
     
 def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins, tree_data, tree_dummy, nWindows, inpDict):
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_t_data, binned_hist_data, binned_hist_dummy = bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict)
+    binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict)[kin_type]
+    binned_t_data = binned_dict["binned_t_data"]
+    binned_hist_data = binned_dict["binned_hist_data"]
+    binned_hist_dummy = binned_dict["binned_hist_dummy"]
 
     ave_hist = []
     binned_sub_data = [[],[]]
@@ -541,49 +542,58 @@ def bin_simc(kin_type, tree_simc, t_bins, inpDict):
                 
                 if t_bins[j] <= -evt.t <= t_bins[j+1]:
                     H_t_SIMC.SetBinContent(j+1, -evt.t)
-                    if kin_type == "Q2":
-                        H_Q2_SIMC.SetBinContent(j+1, evt.Q2)
-                    if kin_type == "W":
-                        H_W_SIMC.SetBinContent(j+1, evt.W)
-                    if kin_type == "epsilon":
-                        H_epsilon_SIMC.SetBinContent(j+1, evt.epsilon)
+                    H_Q2_SIMC.SetBinContent(j+1, evt.Q2)
+                    H_W_SIMC.SetBinContent(j+1, evt.W)
+                    H_epsilon_SIMC.SetBinContent(j+1, evt.epsilon)
 
+    binned_dict = {}
+                    
     binned_t_simc = []
     binned_hist_simc = []
-    
-    for i in range(1, H_t_SIMC.GetNbinsX() + 1):
-        tmp_hist_simc = [[],[]]
-        tmp_hist_simc[0].append(H_t_SIMC.GetBinCenter(i))
-        tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))
-        binned_t_simc.append(tmp_hist_simc)
-    
-        if kin_type == "t":
-            binned_hist_simc.append(tmp_hist_simc)
-    if kin_type == "Q2":
-        for i in range(1, H_Q2_SIMC.GetNbinsX() + 1):        
-            tmp_hist_simc = [[],[]]
-            tmp_hist_simc[0].append(H_Q2_SIMC.GetBinCenter(i))
-            tmp_hist_simc[1].append(H_Q2_SIMC.GetBinContent(i))
-            binned_hist_simc.append(tmp_hist_simc)
-    if kin_type == "W":
-        for i in range(1, H_W_SIMC.GetNbinsX() + 1):
-            tmp_hist_simc = [[],[]]
-            tmp_hist_simc[0].append(H_W_SIMC.GetBinCenter(i))
-            tmp_hist_simc[1].append(H_W_SIMC.GetBinContent(i))
-            binned_hist_simc.append(tmp_hist_simc)        
-    if kin_type == "epsilon":                        
-        for i in range(1, H_epsilon_SIMC.GetNbinsX() + 1):
-            tmp_hist_simc = [[],[]]
-            tmp_hist_simc[0].append(H_epsilon_SIMC.GetBinCenter(i))
-            tmp_hist_simc[1].append(H_epsilon_SIMC.GetBinContent(i))
-            binned_hist_simc.append(tmp_hist_simc)
+
+    for kin_type in kinematic_types:
+        for j in range(len(t_bins)-1):        
+            for i in range(1, H_t_SIMC.GetNbinsX() + 1):
+                tmp_hist_simc = [[],[]]
+                tmp_hist_simc[0].append(H_t_SIMC.GetBinCenter(i))
+                tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))
+            binned_t_simc.append(tmp_hist_simc)
+
+            if kin_type == "t":
+                binned_hist_simc.append(tmp_hist_simc)
+            if kin_type == "Q2":
+                for i in range(1, H_Q2_SIMC.GetNbinsX() + 1):        
+                    tmp_hist_simc = [[],[]]
+                    tmp_hist_simc[0].append(H_Q2_SIMC.GetBinCenter(i))
+                    tmp_hist_simc[1].append(H_Q2_SIMC.GetBinContent(i))
+                binned_hist_simc.append(tmp_hist_simc)
+            if kin_type == "W":
+                for i in range(1, H_W_SIMC.GetNbinsX() + 1):
+                    tmp_hist_simc = [[],[]]
+                    tmp_hist_simc[0].append(H_W_SIMC.GetBinCenter(i))
+                    tmp_hist_simc[1].append(H_W_SIMC.GetBinContent(i))
+                binned_hist_simc.append(tmp_hist_simc)        
+            if kin_type == "epsilon":                        
+                for i in range(1, H_epsilon_SIMC.GetNbinsX() + 1):
+                    tmp_hist_simc = [[],[]]
+                    tmp_hist_simc[0].append(H_epsilon_SIMC.GetBinCenter(i))
+                    tmp_hist_simc[1].append(H_epsilon_SIMC.GetBinContent(i))
+                binned_hist_simc.append(tmp_hist_simc)
+
+        binned_dict[kin_type] = {
+            "binned_t_data" : binned_t_data,
+            "binned_hist_data" : binned_hist_data,
+            "binned_hist_dummy" : binned_hist_dummy
+        }
         
-    return binned_t_simc, binned_hist_simc
+    return binned_dict                
 
 def calculate_ave_simc(kin_type, hist_simc, t_simc, t_bins, phi_bins, tree_simc, inpDict):
     
-    # Initialize lists for binned_t_simc, and binned_hist_simc
-    binned_t_simc, binned_hist_simc = bin_simc(kin_type, tree_simc, t_bins, inpDict)
+    # Initialize lists for binned_t_data, binned_hist_data
+    binned_dict = bin_simc(kin_type, tree_simc, t_bins, inpDict)[kin_type]
+    binned_t_simc = binned_dict["binned_t_simc"]
+    binned_hist_simc = binned_dict["binned_hist_simc"]
     
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -683,8 +693,7 @@ def ave_per_bin_data(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        for kin_type in kinematic_types:
-            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins, hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"], inpDict)
+        aveDict[hist["phi_setting"]][kin_type] = calculate_ave_data(kin_type, hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, phi_bins, hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"], inpDict)[kin_type]
                 
     return {"binned_DATA" : aveDict}
 
@@ -711,7 +720,7 @@ def ave_per_bin_simc(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        for kin_type in kinematic_types:
-            aveDict[hist["phi_setting"]][kin_type] = calculate_ave_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins, hist["InFile_SIMC"], inpDict)
+        aveDict[hist["phi_setting"]][kin_type] = calculate_ave_simc(kin_type, hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, phi_bins, hist["InFile_SIMC"], inpDict)[kin_type]
+        
     sys.exit(1)
     return {"binned_SIMC" : aveDict}
