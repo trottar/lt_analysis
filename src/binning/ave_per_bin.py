@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:39:04 trottar"
+# Time-stamp: "2024-01-17 14:41:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -343,8 +343,8 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         tmp_hist_dummy_rand.append(evt.W)
                     if kin_type == "epsilon":
                         tmp_hist_dummy_rand.append(evt.epsilon)
-                binned_t_dummy_rand.append([tmp_t_dummy_rand, len(tmp_t_dummy_rand)])
-                binned_hist_dummy_rand.append([tmp_hist_dummy_rand, len(tmp_hist_dummy_rand)])
+        binned_t_dummy_rand.append([tmp_t_dummy_rand, len(tmp_t_dummy_rand)])
+        binned_hist_dummy_rand.append([tmp_hist_dummy_rand, len(tmp_hist_dummy_rand)])
 
     def hist_sub(hist1, hist2):
         print(len(hist1),len(hist2))
