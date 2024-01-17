@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:20:34 trottar"
+# Time-stamp: "2024-01-17 14:23:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def bin_data(tree_data, tree_dummy, t_bins, inpDict):
+def bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict):
 
     ParticleType = inpDict["ParticleType"]
 
@@ -361,7 +361,7 @@ def bin_data(tree_data, tree_dummy, t_bins, inpDict):
 def calculate_ave_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_bins, tree_data, tree_dummy, inpDict):
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_t_data, binned_hist_data, binned_hist_dummy = bin_data(tree_data, tree_dummy, t_bins, inpDict)
+    binned_t_data, binned_hist_data, binned_hist_dummy = bin_data(kin_type, tree_data, tree_dummy, t_bins, inpDict)
 
     ave_hist = []
     binned_sub_data = [[],[]]
