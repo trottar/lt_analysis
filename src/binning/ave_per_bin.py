@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:56:41 trottar"
+# Time-stamp: "2024-01-17 15:00:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,7 +350,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, nWindows, inpDict):
         print("\n\n!!!!!!!",len(hist1),len(hist2))
         #result = [[a - b for a, b in zip(hist1[0], hist2[0])], hist1[1]]
         # Subtract the values of hist2 from hist1
-        result_values = np.array(values1) - np.array(values2)
+        result_values = np.array(hist1) - np.array(hist2)
 
         # Create the resulting histogram
         result_histogram = [result_values.tolist(), count1]
