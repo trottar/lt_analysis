@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 17:24:05 trottar"
+# Time-stamp: "2024-01-17 17:29:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -436,6 +436,8 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict)
 
+    group_dict = {}
+    
     for kin_type in kinematic_types:
         hist_data, hist_dummy, t_data = hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"]        
         binned_t_data = binned_dict[kin_type]["binned_t_data"]
@@ -489,17 +491,19 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 ave_val = ave_hist[j]
                 print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))
                 dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
-
+                
         # Group the tuples by the first two elements using defaultdict
-        groups[kin_type] = defaultdict(list)
+        groups = defaultdict(list)
         for tup in dict_lst:
             key = (tup[0], tup[1])
-            groups[kin_type][key] = {
+            groups[key] = {
                 "{}_arr".format(kin_type) : tup[2],
                 "{}_ave".format(kin_type) : tup[3],
             }
+
+        group_dict[kin_type] = groups
             
-    return groups
+    return group_dict
 
 def bin_simc(kinematic_types, tree_simc, t_bins, inpDict):
 
@@ -600,6 +604,8 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict):
     # Initialize lists for binned_t_data, binned_hist_data
     binned_dict = bin_simc(kin_type, tree_simc, t_bins, inpDict)
 
+    group_dict = {}
+    
     for kin_type in kinematic_types:
         hist_data, hist_dummy, t_data = hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"]
         binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
@@ -668,15 +674,17 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
 
         # Group the tuples by the first two elements using defaultdict
-        groups[kin_type] = defaultdict(list)
+        groups = defaultdict(list)
         for tup in dict_lst:
             key = (tup[0], tup[1])
-            groups[kin_type][key] = {
+            groups[key] = {
                 "{}_arr".format(kin_type) : tup[2],
                 "{}_ave".format(kin_type) : tup[3],
             }                    
     
-    return groups
+        group_dict[kin_type] = groups
+            
+    return group_dict
 
 ##################################################################################################################################################
 
