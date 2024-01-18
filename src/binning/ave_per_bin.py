@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 20:49:57 trottar"
+# Time-stamp: "2024-01-17 20:56:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -527,6 +527,8 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
 
 def process_hist_simc(tree_simc, t_bins, inpDict):
 
+    processed_dict = {}
+    
     ParticleType = inpDict["ParticleType"]
 
     # Define diamond cut parameters
