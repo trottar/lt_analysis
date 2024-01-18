@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 23:35:30 trottar"
+# Time-stamp: "2024-01-17 23:39:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,13 +140,12 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
                 if(ALLCUTS):                
-                    print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
+
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:                    
+                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DATA.Fill(-evt.MandelT)
                             H_MM_DATA.Fill(evt.MM)
-                            
-                            print("!!!!!!!!!!!",evt.MM)
 
             print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_RAND):
@@ -161,7 +160,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
                 HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-                Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
                 if ParticleType == "kaon":
 
@@ -197,10 +196,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
                     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
-                if(ALLCUTS):
+                if(ALLCUTS):                
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_RAND.Fill(-evt.MandelT)
                             H_MM_RAND.Fill(evt.MM)
 
@@ -217,7 +217,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
                 HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-                Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
                 if ParticleType == "kaon":
 
@@ -253,13 +253,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
                     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
-                if(ALLCUTS):
+                if(ALLCUTS):                
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DUMMY.Fill(-evt.MandelT)
                             H_MM_DUMMY.Fill(evt.MM)
-                            
+
             print("\nProcessing t-bin {} phi-bin {} dummy_rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
@@ -273,7 +274,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
                 HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-                Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
                 if ParticleType == "kaon":
 
@@ -309,10 +310,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
                     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
-                if(ALLCUTS):
+                if(ALLCUTS):                
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DUMMY_RAND.Fill(-evt.MandelT)
                             H_MM_DUMMY_RAND.Fill(evt.MM)
                             
