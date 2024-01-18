@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 21:50:06 trottar"
+# Time-stamp: "2024-01-17 21:54:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -414,7 +414,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDic
         
     return binned_dict
 
-def calculate_yield_data(kin_type, hist, t_bins, phi_bins, nWindows, inpDict):
+def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     tree_data, tree_dummy, nWindows, normfac_data = hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"], hist["normfac_data"]
     
@@ -473,8 +473,6 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, nWindows, inpDict):
             "{}_arr".format(kin_type) : tup[2],
             "{}".format(kin_type) : tup[3],
         }            
-
-    group_dict[kin_type] = groups
             
     return groups
 
@@ -647,8 +645,6 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
             "{}_arr".format(kin_type) : tup[2],
             "{}".format(kin_type) : tup[3],
         }            
-
-    group_dict[kin_type] = groups            
             
     return groups
 
