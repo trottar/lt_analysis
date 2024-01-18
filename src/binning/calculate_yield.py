@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 23:42:25 trottar"
+# Time-stamp: "2024-01-17 23:51:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -145,7 +145,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DATA.Fill(-evt.MandelT)
-                            H_MM_DATA.Fill(evt.MM)
+                            H_MM_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
             print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_RAND):
@@ -202,7 +202,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_RAND.Fill(-evt.MandelT)
-                            H_MM_RAND.Fill(evt.MM)
+                            H_MM_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
             print("\nProcessing t-bin {} phi-bin {} dummy...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DUMMY):
@@ -259,7 +259,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DUMMY.Fill(-evt.MandelT)
-                            H_MM_DUMMY.Fill(evt.MM)
+                            H_MM_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
             print("\nProcessing t-bin {} phi-bin {} dummy_rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DUMMY_RAND):
@@ -316,7 +316,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DUMMY_RAND.Fill(-evt.MandelT)
-                            H_MM_DUMMY_RAND.Fill(evt.MM)
+                            H_MM_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
                             
             H_MM_RAND.Scale(1/nWindows)
             H_t_RAND.Scale(1/nWindows)
@@ -491,7 +491,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
                 SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
                 HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-                Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
                 #........................................
 
@@ -501,7 +501,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_SIMC.Fill(-evt.t)
-                            H_MM_SIMC.Fill(evt.MM)
+                            H_MM_SIMC.Fill(evt.missmass)
 
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : H_MM_SIMC,
