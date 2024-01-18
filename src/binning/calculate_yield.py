@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 21:35:00 trottar"
+# Time-stamp: "2024-01-17 21:50:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,140 +347,134 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
     
     return processed_dict
 
-def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict):
+def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict):
 
     processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict)
     
     binned_dict = {}
 
-    for kin_type in kinematic_types:
+    # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
+    binned_t_data = []
+    binned_phi_data = []
+    binned_hist_data = []
+    binned_hist_dummy = []
 
-        # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-        binned_t_data = []
-        binned_phi_data = []
-        binned_hist_data = []
-        binned_hist_dummy = []
-        
-        # Loop through bins in t_data and identify events in specified bins
-        for j in range(len(t_bins)-1):
-            for k in range(len(phi_bins)-1):
+    # Loop through bins in t_data and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
 
-                H_MM_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DATA"]
-                H_t_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DATA"]
-                H_phi_DATA = processed_dict["phi_bin{}".format(j+1)]["H_phi_DATA"]
+            H_MM_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DATA"]
+            H_t_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DATA"]
+            H_phi_DATA = processed_dict["phi_bin{}".format(j+1)]["H_phi_DATA"]
 
-                H_MM_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DUMMY"]
-                H_t_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DUMMY"]
-                H_phi_DUMMY = processed_dict["phi_bin{}".format(j+1)]["H_phi_DUMMY"]
+            H_MM_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DUMMY"]
+            H_t_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DUMMY"]
+            H_phi_DUMMY = processed_dict["phi_bin{}".format(j+1)]["H_phi_DUMMY"]
 
-                # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_dummy
-                tmp_binned_t_data = []
-                tmp_binned_phi_data = []
-                tmp_binned_hist_data = []
-                tmp_binned_hist_dummy = []
+            # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_dummy
+            tmp_binned_t_data = []
+            tmp_binned_phi_data = []
+            tmp_binned_hist_data = []
+            tmp_binned_hist_dummy = []
 
-                tmp_hist_data = [[],[]]
-                for i in range(1, H_t_DATA.GetNbinsX() + 1):
-                    tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
-                    tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))                
-                tmp_binned_t_data.append(tmp_hist_data)
+            tmp_hist_data = [[],[]]
+            for i in range(1, H_t_DATA.GetNbinsX() + 1):
+                tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
+                tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))                
+            tmp_binned_t_data.append(tmp_hist_data)
 
-                tmp_hist_data = [[],[]]
-                for i in range(1, H_phi_DATA.GetNbinsX() + 1):
-                    tmp_hist_data[0].append(H_phi_DATA.GetBinCenter(i))
-                    tmp_hist_data[1].append(H_phi_DATA.GetBinContent(i))                
-                tmp_binned_phi_data.append(tmp_hist_data)
-                
-                if kin_type == "MM":
-                    tmp_hist_data = [[],[]]                
-                    for i in range(1, H_MM_DATA.GetNbinsX() + 1):        
-                        tmp_hist_data[0].append(H_MM_DATA.GetBinCenter(i))
-                        tmp_hist_data[1].append(H_MM_DATA.GetBinContent(i))                    
-                    tmp_binned_hist_data.append(tmp_hist_data)
+            tmp_hist_data = [[],[]]
+            for i in range(1, H_phi_DATA.GetNbinsX() + 1):
+                tmp_hist_data[0].append(H_phi_DATA.GetBinCenter(i))
+                tmp_hist_data[1].append(H_phi_DATA.GetBinContent(i))                
+            tmp_binned_phi_data.append(tmp_hist_data)
 
-                if kin_type == "MM":
-                    tmp_hist_dummy = [[],[]]                
-                    for i in range(1, H_MM_DUMMY.GetNbinsX() + 1):
-                        tmp_hist_dummy[0].append(H_MM_DUMMY.GetBinCenter(i))
-                        tmp_hist_dummy[1].append(H_MM_DUMMY.GetBinContent(i))                    
-                    tmp_binned_hist_dummy.append(tmp_hist_dummy)
+            tmp_hist_data = [[],[]]                
+            for i in range(1, H_MM_DATA.GetNbinsX() + 1):        
+                tmp_hist_data[0].append(H_MM_DATA.GetBinCenter(i))
+                tmp_hist_data[1].append(H_MM_DATA.GetBinContent(i))                    
+            tmp_binned_hist_data.append(tmp_hist_data)
 
-                binned_t_data.append(tmp_binned_t_data[0]) # Save a list of hists where each one is a t-bin
-                binned_hist_data.append(tmp_binned_hist_data[0])
-                binned_hist_dummy.append(tmp_binned_hist_dummy[0])
+            tmp_hist_dummy = [[],[]]                
+            for i in range(1, H_MM_DUMMY.GetNbinsX() + 1):
+                tmp_hist_dummy[0].append(H_MM_DUMMY.GetBinCenter(i))
+                tmp_hist_dummy[1].append(H_MM_DUMMY.GetBinContent(i))                    
+            tmp_binned_hist_dummy.append(tmp_hist_dummy)
 
-                if j+1 == len(t_bins)-1:
-                    binned_dict[kin_type] = {
-                        "binned_t_data" : binned_t_data,
-                        "binned_hist_data" : binned_hist_data,
-                        "binned_hist_dummy" : binned_hist_dummy
-                    }
+            binned_t_data.append(tmp_binned_t_data[0]) # Save a list of hists where each one is a t-bin
+            binned_hist_data.append(tmp_binned_hist_data[0])
+            binned_hist_dummy.append(tmp_binned_hist_dummy[0])
+
+            if j+1 == len(t_bins)-1:
+                binned_dict[kin_type] = {
+                    "binned_t_data" : binned_t_data,
+                    "binned_hist_data" : binned_hist_data,
+                    "binned_hist_dummy" : binned_hist_dummy
+                }
         
     return binned_dict
 
-def calculate_yield_data(kin_type, hist_data, hist_dummy, t_data, t_bins, phi_data, phi_bins, normfac_data):
+def calculate_yield_data(kin_type, hist, t_bins, phi_bins, nWindows, inpDict):
 
-    tree_data, tree_dummy, nWindows = hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"]
+    tree_data, tree_dummy, nWindows, normfac_data = hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"], hist["normfac_data"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict)
+    binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict)
 
     group_dict = {}
 
-    for kin_type in kinematic_types:
-        binned_t_data = binned_dict[kin_type]["binned_t_data"]
-        binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
-        binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
+    binned_t_data = binned_dict[kin_type]["binned_t_data"]
+    binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
+    binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
 
-    
-        yield_hist = []
-        binned_sub_data = [[],[]]
-        i=0 # iter
-        print("-"*25)
-        # Subtract binned_hist_dummy from binned_hist_data element-wise
-        for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-            bin_val_data, hist_val_data = data
-            bin_val_dummy, hist_val_dummy = dummy
-            sub_val = np.subtract(hist_val_data, hist_val_dummy)
-            total_count = np.sum(sub_val)
-            yld = total_count*normfac_data
-            yield_hist.append(yld)
-            binned_sub_data[0].append(bin_val_data)
-            binned_sub_data[1].append(sub_val)
+    yield_hist = []
+    binned_sub_data = [[],[]]
+    i=0 # iter
+    print("-"*25)
+    # Subtract binned_hist_dummy from binned_hist_data element-wise
+    for data, dummy in zip(binned_hist_data, binned_hist_dummy):
+        bin_val_data, hist_val_data = data
+        bin_val_dummy, hist_val_dummy = dummy
+        sub_val = np.subtract(hist_val_data, hist_val_dummy)
+        total_count = np.sum(sub_val)
+        yld = total_count*normfac_data
+        yield_hist.append(yld)
+        binned_sub_data[0].append(bin_val_data)
+        binned_sub_data[1].append(sub_val)
+        i+=1
+
+    # Print statements to check sizes
+    #print("Size of binned_t_data:", len(binned_t_data))
+    #print("Size of binned_phi_data:", len(binned_phi_data))
+    #print("Size of binned_hist_data:", len(binned_hist_data))
+    #print("Size of binned_hist_dummy:", len(binned_hist_dummy))
+    #print("Size of binned_sub_data:", len(binned_sub_data[1]))
+    #print("Size of yield_hist:", len(yield_hist))
+    #print("Size of t_bins:", len(t_bins)-1)
+    #print("Size of phi_bins:", len(phi_bins)-1, "\n")
+
+    i = 0
+    dict_lst = []
+    for j in range(len(t_bins) - 1):
+        tbin_index = j
+        for k in range(len(phi_bins) - 1):
+            phibin_index = k
+            hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
+            yield_val = yield_hist[i]
+            print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
+            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
             i+=1
 
-        # Print statements to check sizes
-        #print("Size of binned_t_data:", len(binned_t_data))
-        #print("Size of binned_phi_data:", len(binned_phi_data))
-        #print("Size of binned_hist_data:", len(binned_hist_data))
-        #print("Size of binned_hist_dummy:", len(binned_hist_dummy))
-        #print("Size of binned_sub_data:", len(binned_sub_data[1]))
-        #print("Size of yield_hist:", len(yield_hist))
-        #print("Size of t_bins:", len(t_bins)-1)
-        #print("Size of phi_bins:", len(phi_bins)-1, "\n")
+    # Group the tuples by the first two elements using defaultdict
+    groups = defaultdict(list)
+    for tup in dict_lst:
+        key = (tup[0], tup[1])
+        groups[key] = {
+            "{}_arr".format(kin_type) : tup[2],
+            "{}".format(kin_type) : tup[3],
+        }            
 
-        i = 0
-        dict_lst = []
-        for j in range(len(t_bins) - 1):
-            tbin_index = j
-            for k in range(len(phi_bins) - 1):
-                phibin_index = k
-                hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
-                yield_val = yield_hist[i]
-                print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
-                dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
-                i+=1
-
-        # Group the tuples by the first two elements using defaultdict
-        groups = defaultdict(list)
-        for tup in dict_lst:
-            key = (tup[0], tup[1])
-            groups[key] = {
-                "{}_arr".format(kin_type) : tup[2],
-                "{}".format(kin_type) : tup[3],
-            }            
-
-        group_dict[kin_type] = groups
+    group_dict[kin_type] = groups
             
     return groups
 
@@ -504,14 +498,14 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
     
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
 
-        H_MM_SIMC       = TH1D("H_MM_SIMC","MM", 500, inpDict["MMmin"], inpDict["MMmax"])
-        H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
-        H_phi_SIMC       = TH1D("H_phi_SIMC","-t", 500, 0.0, 360.0)
+            H_MM_SIMC       = TH1D("H_MM_SIMC","MM", 500, inpDict["MMmin"], inpDict["MMmax"])
+            H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            H_phi_SIMC       = TH1D("H_phi_SIMC","-t", 500, 0.0, 360.0)
 
-        print("\nProcessing t-bin {} simc...".format(j+1))
-        for i,evt in enumerate(TBRANCH_SIMC):
-            for k in range(len(phi_bins)-1):
+            print("\nProcessing t-bin {} simc...".format(j+1))
+            for i,evt in enumerate(TBRANCH_SIMC):
             
                 # Progress bar
                 Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
@@ -541,122 +535,120 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
     
     return processed_dict
 
-def bin_simc(kinematic_types, tree_simc, t_bins, phi_bins, inpDict):
+def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict):
 
     processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, inpDict)
     
     binned_dict = {}
-    
-    for kin_type in kinematic_types:
-        
-        # Initialize lists for binned_t_simc, binned_hist_simc, and binned_hist_dummy
-        binned_t_simc = []
-        binned_phi_simc = []
-        binned_hist_simc = []
-    
-        # Loop through bins in t_simc and identify events in specified bins
-        for j in range(len(t_bins)-1):
-            for k in range(len(phi_bins)-1):
 
-                H_MM_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SIMC"]
-                H_t_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SIMC"]
-                H_phi_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_phi_SIMC"]
+    # Initialize lists for binned_t_simc, binned_hist_simc, and binned_hist_dummy
+    binned_t_simc = []
+    binned_phi_simc = []
+    binned_hist_simc = []
 
-                # Initialize lists for tmp_binned_t_simc, tmp_binned_hist_simc, and tmp_binned_hist_dummy
-                tmp_binned_t_simc = []
-                tmp_binned_phi_simc = []
-                tmp_binned_hist_simc = []
+    # Loop through bins in t_simc and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
 
-                tmp_hist_simc = [[],[]]
-                for i in range(1, H_t_SIMC.GetNbinsX() + 1):
-                    tmp_hist_simc[0].append(H_t_SIMC.GetBinCenter(i))
-                    tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))                
-                tmp_binned_t_simc.append(tmp_hist_simc)
+            H_MM_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SIMC"]
+            H_t_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SIMC"]
+            H_phi_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_phi_SIMC"]
 
-                tmp_hist_simc = [[],[]]
-                for i in range(1, H_phi_SIMC.GetNbinsX() + 1):
-                    tmp_hist_simc[0].append(H_phi_SIMC.GetBinCenter(i))
-                    tmp_hist_simc[1].append(H_phi_SIMC.GetBinContent(i))                
-                tmp_binned_phi_simc.append(tmp_hist_simc)
-                
-                if kin_type == "MM":
-                    tmp_hist_simc = [[],[]]                
-                    for i in range(1, H_MM_SIMC.GetNbinsX() + 1):        
-                        tmp_hist_simc[0].append(H_MM_SIMC.GetBinCenter(i))
-                        tmp_hist_simc[1].append(H_MM_SIMC.GetBinContent(i))                    
-                    tmp_binned_hist_simc.append(tmp_hist_simc)
+            # Initialize lists for tmp_binned_t_simc, tmp_binned_hist_simc, and tmp_binned_hist_dummy
+            tmp_binned_t_simc = []
+            tmp_binned_phi_simc = []
+            tmp_binned_hist_simc = []
 
-                binned_t_simc.append(tmp_binned_t_simc[0]) # Save a list of hists where each one is a t-bin
-                binned_phi_simc.append(tmp_binned_phi_simc[0]) # Save a list of hists where each one is a t-bin                
-                binned_hist_simc.append(tmp_binned_hist_simc[0])
+            tmp_hist_simc = [[],[]]
+            for i in range(1, H_t_SIMC.GetNbinsX() + 1):
+                tmp_hist_simc[0].append(H_t_SIMC.GetBinCenter(i))
+                tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))                
+            tmp_binned_t_simc.append(tmp_hist_simc)
 
-                if j+1 == len(t_bins)-1:
-                    binned_dict[kin_type] = {
-                        "binned_t_simc" : binned_t_simc,
-                        "binned_phi_simc" : binned_phi_simc,
-                        "binned_hist_simc" : binned_hist_simc
-                    }
+            tmp_hist_simc = [[],[]]
+            for i in range(1, H_phi_SIMC.GetNbinsX() + 1):
+                tmp_hist_simc[0].append(H_phi_SIMC.GetBinCenter(i))
+                tmp_hist_simc[1].append(H_phi_SIMC.GetBinContent(i))                
+            tmp_binned_phi_simc.append(tmp_hist_simc)
+
+            if kin_type == "MM":
+                tmp_hist_simc = [[],[]]                
+                for i in range(1, H_MM_SIMC.GetNbinsX() + 1):        
+                    tmp_hist_simc[0].append(H_MM_SIMC.GetBinCenter(i))
+                    tmp_hist_simc[1].append(H_MM_SIMC.GetBinContent(i))                    
+                tmp_binned_hist_simc.append(tmp_hist_simc)
+
+            binned_t_simc.append(tmp_binned_t_simc[0]) # Save a list of hists where each one is a t-bin
+            binned_phi_simc.append(tmp_binned_phi_simc[0]) # Save a list of hists where each one is a t-bin                
+            binned_hist_simc.append(tmp_binned_hist_simc[0])
+
+            if j+1 == len(t_bins)-1:
+                binned_dict[kin_type] = {
+                    "binned_t_simc" : binned_t_simc,
+                    "binned_phi_simc" : binned_phi_simc,
+                    "binned_hist_simc" : binned_hist_simc
+                }
         
     return binned_dict                
 
-def calculate_yield_simc(kin_type, hist_simc, t_simc, t_bins, phi_simc, phi_bins, normfac_simc):
+def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
 
-    tree_simc = hist["InFile_SIMC"]
+    tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, inpDict)
+    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict)
 
     group_dict = {}
-    
-    for kin_type in kinematic_types:
-        binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
-        binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
-    
-        yield_hist = []
-        binned_sub_simc = [[],[]]
-        i=0 # iter
-        print("-"*25)
-        for simc in binned_hist_simc:
-            bin_val_simc, hist_val_simc = simc
-            sub_val = np.array(hist_val_simc) # No dummy subtraction for simc
-            total_count = np.sum(sub_val)
-            yld = total_count*normfac_simc
-            yield_hist.append(yld)
-            binned_sub_simc[0].append(bin_val_simc)
-            binned_sub_simc[1].append(sub_val)
+
+    binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
+    binned_phi_simc = binned_dict[kin_type]["binned_phi_simc"]        
+    binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
+
+    yield_hist = []
+    binned_sub_simc = [[],[]]
+    i=0 # iter
+    print("-"*25)
+    for simc in binned_hist_simc:
+        bin_val_simc, hist_val_simc = simc
+        sub_val = np.array(hist_val_simc) # No dummy subtraction for simc
+        total_count = np.sum(sub_val)
+        yld = total_count*normfac_simc
+        yield_hist.append(yld)
+        binned_sub_simc[0].append(bin_val_simc)
+        binned_sub_simc[1].append(sub_val)
+        i+=1
+
+    # Print statements to check sizes
+    #print("Size of binned_t_simc:", len(binned_t_simc))
+    #print("Size of binned_phi_simc:", len(binned_phi_simc))
+    #print("Size of binned_hist_simc:", len(binned_hist_simc))
+    #print("Size of binned_sub_simc:", len(binned_sub_simc[1]))
+    #print("Size of yield_hist:", len(yield_hist))
+    #print("Size of t_bins:", len(t_bins)-1)
+    #print("Size of phi_bins:", len(phi_bins)-1, "\n")
+
+    i = 0
+    dict_lst = []
+    for j in range(len(t_bins) - 1):
+        tbin_index = j
+        for k in range(len(phi_bins) - 1):
+            phibin_index = k
+            hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
+            yield_val = yield_hist[i]
+            print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
+            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
             i+=1
 
-        # Print statements to check sizes
-        #print("Size of binned_t_simc:", len(binned_t_simc))
-        #print("Size of binned_phi_simc:", len(binned_phi_simc))
-        #print("Size of binned_hist_simc:", len(binned_hist_simc))
-        #print("Size of binned_sub_simc:", len(binned_sub_simc[1]))
-        #print("Size of yield_hist:", len(yield_hist))
-        #print("Size of t_bins:", len(t_bins)-1)
-        #print("Size of phi_bins:", len(phi_bins)-1, "\n")
+    # Group the tuples by the first two elements using defaultdict
+    groups = defaultdict(list)
+    for tup in dict_lst:
+        key = (tup[0], tup[1])
+        groups[key] = {
+            "{}_arr".format(kin_type) : tup[2],
+            "{}".format(kin_type) : tup[3],
+        }            
 
-        i = 0
-        dict_lst = []
-        for j in range(len(t_bins) - 1):
-            tbin_index = j
-            for k in range(len(phi_bins) - 1):
-                phibin_index = k
-                hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
-                yield_val = yield_hist[i]
-                print("Yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
-                dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
-                i+=1
-
-        # Group the tuples by the first two elements using defaultdict
-        groups = defaultdict(list)
-        for tup in dict_lst:
-            key = (tup[0], tup[1])
-            groups[key] = {
-                "{}_arr".format(kin_type) : tup[2],
-                "{}".format(kin_type) : tup[3],
-            }            
-
-        group_dict[kin_type] = groups            
+    group_dict[kin_type] = groups            
             
     return groups
 
@@ -671,9 +663,6 @@ def find_yield_data(histlist, inpDict):
         "phi_bins" : phi_bins
     }
         
-    # List of kinematic types
-    kinematic_types = ["MM"]
-
     # Loop through histlist and update yieldDict
     for hist in histlist:
         print("\n\n")
@@ -683,9 +672,8 @@ def find_yield_data(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        for kin_type in kinematic_types:
-            yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_data("yield", hist["H_{}_DATA".format(kin_type)], hist["H_{}_DUMMY".format(kin_type)], hist["H_t_DATA"], t_bins, hist["H_ph_q_DATA"], phi_bins, hist["normfac_data"])
-            
+        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_data("yield", hist, t_bins, phi_bins, inpDict)
+
     return {"binned_DATA" : yieldDict}
 
 def find_yield_simc(histlist, inpDict):
@@ -699,9 +687,6 @@ def find_yield_simc(histlist, inpDict):
         "phi_bins" : phi_bins
     }
         
-    # List of kinematic types
-    kinematic_types = ["MM"]
-
     # Loop through histlist and update yieldDict
     for hist in histlist:
         print("\n\n")
@@ -711,7 +696,6 @@ def find_yield_simc(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        for kin_type in kinematic_types:
-            yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist["H_{}_SIMC".format(kin_type)], hist["H_t_SIMC"], t_bins, hist["H_ph_q_SIMC"], phi_bins, hist["normfac_simc"])
+        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict)
             
     return {"binned_SIMC" : yieldDict}
