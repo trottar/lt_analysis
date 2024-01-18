@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 12:32:25 trottar"
+# Time-stamp: "2024-01-18 12:33:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -299,7 +299,6 @@ for k in range(NumtBins):
 
     C_ratio_phi = TCanvas()
     C_ratio_phi.SetGrid()
-    C_ratio_phi.Divide(1,NumtBins)
     l_ratio_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 
     multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
@@ -327,8 +326,6 @@ for k in range(NumtBins):
     G_ratio_phi_hieps.SetMarkerSize(1)
     G_ratio_phi_hieps.SetMarkerColor(2)
     multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)    
-    
-    C_ratio_phi.cd(k+1)
     
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Ratio".format(t_bin_centers[k]))
@@ -682,7 +679,6 @@ for k in range(NumtBins):
 
     C_xmodreal_phi = TCanvas()
     C_xmodreal_phi.SetGrid()
-    C_xmodreal_phi.Divide(1,NumtBins)
     l_xmodreal_phi = TLegend(0.7, 0.6, 0.9, 0.9)    
     
     multiDict["G_xmodreal_phi_{}".format(k+1)] = TMultiGraph()
@@ -756,8 +752,6 @@ for k in range(NumtBins):
     #print("Fit results:", fit_results_root)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)
     #multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_hieps)
-    
-    C_xmodreal_phi.cd(k+1)
     
     multiDict["G_xmodreal_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_xmodreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xmod".format(t_bin_centers[k]))
