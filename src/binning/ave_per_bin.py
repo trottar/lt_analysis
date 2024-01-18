@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 20:47:15 trottar"
+# Time-stamp: "2024-01-17 20:49:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -549,7 +549,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict):
         H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
         H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-        print("\n{}: Processing t-bin {} simc...".format(kin_type, j+1))
+        print("\nProcessing t-bin {} simc...".format(j+1))
         for i,evt in enumerate(TBRANCH_SIMC):
 
             # Progress bar
