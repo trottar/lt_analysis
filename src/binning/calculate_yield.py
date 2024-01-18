@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 22:33:42 trottar"
+# Time-stamp: "2024-01-17 22:37:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,9 +140,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
                 if(ALLCUTS):
-
+                    print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_DATA.Fill(-evt.MandelT)
                             H_MM_DATA.Fill(evt.MM)
