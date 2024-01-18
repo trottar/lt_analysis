@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 22:28:42 trottar"
+# Time-stamp: "2024-01-17 22:33:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,6 +142,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 if(ALLCUTS):
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_DATA.Fill(-evt.MandelT)
                             H_MM_DATA.Fill(evt.MM)
@@ -401,8 +402,6 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict)
 
-    group_dict = {}
-
     binned_t_data = binned_dict[kin_type]["binned_t_data"]
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
     binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
@@ -560,8 +559,6 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
     
     # Initialize lists for binned_t_data, binned_hist_data
     binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict)
-
-    group_dict = {}
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
