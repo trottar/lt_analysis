@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 19:15:20 trottar"
+# Time-stamp: "2024-01-17 19:18:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,10 +158,10 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 if(ALLCUTS):
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        H_t_DATA.SetBinContent(j+1, -evt.MandelT)
-                        H_Q2_DATA.SetBinContent(j+1, evt.Q2)
-                        H_W_DATA.SetBinContent(j+1, evt.W)                        
-                        H_epsilon_DATA.SetBinContent(j+1, evt.epsilon)
+                        H_t_DATA.Fill(-evt.MandelT)
+                        H_Q2_DATA.Fill(evt.Q2)
+                        H_W_DATA.Fill(evt.W)                        
+                        H_epsilon_DATA.Fill(evt.epsilon)
 
             print("\nBinning t-bin {} rand...".format(j+1))
             for i,evt in enumerate(TBRANCH_RAND):
@@ -215,10 +215,10 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 if(ALLCUTS):
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        H_t_RAND.SetBinContent(j+1, -evt.MandelT)
-                        H_Q2_RAND.SetBinContent(j+1, evt.Q2)
-                        H_W_RAND.SetBinContent(j+1, evt.W)                        
-                        H_epsilon_RAND.SetBinContent(j+1, evt.epsilon)
+                        H_t_RAND.Fill(-evt.MandelT)
+                        H_Q2_RAND.Fill(evt.Q2)
+                        H_W_RAND.Fill(evt.W)                        
+                        H_epsilon_RAND.Fill(evt.epsilon)
 
             print("\nBinning t-bin {} dummy...".format(j+1))
             for i,evt in enumerate(TBRANCH_DUMMY):
@@ -272,10 +272,10 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 if(ALLCUTS):
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        H_t_DUMMY.SetBinContent(j+1, -evt.MandelT)
-                        H_Q2_DUMMY.SetBinContent(j+1, evt.Q2)
-                        H_W_DUMMY.SetBinContent(j+1, evt.W)                        
-                        H_epsilon_DUMMY.SetBinContent(j+1, evt.epsilon)
+                        H_t_DUMMY.Fill(-evt.MandelT)
+                        H_Q2_DUMMY.Fill(evt.Q2)
+                        H_W_DUMMY.Fill(evt.W)                        
+                        H_epsilon_DUMMY.Fill(evt.epsilon)
 
             print("\nBinning t-bin {} dummy_rand...".format(j+1))
             for i,evt in enumerate(TBRANCH_DUMMY_RAND):
@@ -329,10 +329,10 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 if(ALLCUTS):
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        H_t_DUMMY_RAND.SetBinContent(j+1, -evt.MandelT)
-                        H_Q2_DUMMY_RAND.SetBinContent(j+1, evt.Q2)
-                        H_W_DUMMY_RAND.SetBinContent(j+1, evt.W)                        
-                        H_epsilon_DUMMY_RAND.SetBinContent(j+1, evt.epsilon)
+                        H_t_DUMMY_RAND.Fill(-evt.MandelT)
+                        H_Q2_DUMMY_RAND.Fill(evt.Q2)
+                        H_W_DUMMY_RAND.Fill(evt.W)                        
+                        H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
 
             H_Q2_RAND.Scale(1/nWindows)
             H_W_RAND.Scale(1/nWindows)    
@@ -367,7 +367,6 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
             if kin_type == "Q2":
                 hist_data = H_Q2_DATA
                 hist_dummy = H_Q2_DUMMY
-                print("$$$$$$$$$$$$$$",H_Q2_DATA)
             if kin_type == "W":
                 hist_data = H_W_DATA
                 hist_dummy = H_W_DUMMY
@@ -526,10 +525,10 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict):
           if(HMS_Acceptance & SHMS_Acceptance & Diamond):
                 
                 if t_bins[j] <= -evt.t <= t_bins[j+1]:
-                    H_t_SIMC.SetBinContent(j+1, -evt.t)
-                    H_Q2_SIMC.SetBinContent(j+1, evt.Q2)
-                    H_W_SIMC.SetBinContent(j+1, evt.W)
-                    H_epsilon_SIMC.SetBinContent(j+1, evt.epsilon)
+                    H_t_SIMC.Fill(-evt.t)
+                    H_Q2_SIMC.Fill(evt.Q2)
+                    H_W_SIMC.Fill(evt.W)
+                    H_epsilon_SIMC.Fill(evt.epsilon)
 
     binned_dict = {}
                     
