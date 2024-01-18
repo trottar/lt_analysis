@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 23:09:24 trottar"
+# Time-stamp: "2024-01-17 23:15:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,10 +142,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 if(ALLCUTS):
                     print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:                    
                             H_t_DATA.Fill(-evt.MandelT)
                             H_MM_DATA.Fill(evt.MM)
-
+                            
                             print("!!!!!!!!!!!",evt.MM)
 
             print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
@@ -198,7 +198,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
                 if(ALLCUTS):
-                    print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
+
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_RAND.Fill(-evt.MandelT)
@@ -254,7 +254,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
                 if(ALLCUTS):
-                    print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
+
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_DUMMY.Fill(-evt.MandelT)
@@ -653,5 +653,5 @@ def find_yield_simc(histlist, inpDict):
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
         yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict)
-
+            
     return {"binned_SIMC" : yieldDict}
