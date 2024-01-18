@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 21:57:27 trottar"
+# Time-stamp: "2024-01-17 22:00:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,6 +36,8 @@ ltsep package import and pathing definitions
 
 # Import package for cuts
 from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
 
 lt=Root(os.path.realpath(__file__),"Plot_Prod")
 
