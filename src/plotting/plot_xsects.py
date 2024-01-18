@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 10:48:47 trottar"
+# Time-stamp: "2024-01-18 12:31:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -676,6 +676,104 @@ l_xmod_phi.AddEntry(G_xmod_phi_hieps,"hieps")
 l_xmod_phi.Draw()
 C_xmod_phi.Print(outputpdf)
 
+
+multiDict = {}
+for k in range(NumtBins):
+
+    C_xmodreal_phi = TCanvas()
+    C_xmodreal_phi.SetGrid()
+    C_xmodreal_phi.Divide(1,NumtBins)
+    l_xmodreal_phi = TLegend(0.7, 0.6, 0.9, 0.9)    
+    
+    multiDict["G_xmodreal_phi_{}".format(k+1)] = TMultiGraph()
+
+    G_xreal_phi_loeps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+            G_xreal_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
+            j+=1
+    G_xreal_phi_loeps.SetMarkerStyle(21)
+    G_xreal_phi_loeps.SetMarkerSize(1)
+    G_xreal_phi_loeps.SetMarkerColor(1)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xreal_phi_loeps)
+    
+    G_xreal_phi_hieps = TGraphErrors()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
+            G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
+            G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
+            j+=1
+    G_xreal_phi_hieps.SetMarkerStyle(23)
+    G_xreal_phi_hieps.SetMarkerSize(1)
+    G_xreal_phi_hieps.SetMarkerColor(2)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xreal_phi_hieps)    
+    
+    G_xmod_phi_loeps = TGraph()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
+            G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
+            j+=1
+    G_xmod_phi_loeps.SetMarkerStyle(30)
+    G_xmod_phi_loeps.SetMarkerSize(1)
+    G_xmod_phi_loeps.SetMarkerColor(1)
+    # Create a TF1 function with the fit_function
+    #fit_unsep_loeps = TF1("fit_unsep_loeps", fit_function, 0, 360, 17)
+    # Set initial parameter values
+    #fit_unsep_loeps.SetParameters(1.0, 1.0, 1.0, 1.0, 2.115, 0.88669E+03, -0.41000E+03, -0.25327E+02, 0.11100E+02, 0.31423E+02, -0.18000E+02, 0.16685E+02, -0.31000E+02, 0, 0, 0, 0)
+    #fit_unsep_loeps.SetLineColor(1)
+    # Fit the TGraph with the TF1 function
+    #G_xmod_phi_loeps.Fit(fit_unsep_loeps)
+    # Access the fit results
+    #fit_results_root = [fit_unsep_loeps.Eval(phi_bin_centers[i]) for i in range(NumtBins * NumPhiBins)]
+    # Display the fit results or use them for further analysis
+    #print("Fit results:", fit_results_root)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_loeps)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_loeps)
+
+    G_xmod_phi_hieps = TGraph()
+    j=0
+    for i in range(NumtBins*NumPhiBins):
+        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
+            G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
+            j+=1
+    G_xmod_phi_hieps.SetMarkerStyle(27)
+    G_xmod_phi_hieps.SetMarkerSize(1)
+    G_xmod_phi_hieps.SetMarkerColor(2)
+    # Create a TF1 function with the fit_function
+    #fit_unsep_hieps = TF1("fit_unsep_hieps", fit_function, 0, 360, 17)
+    # Set initial parameter values
+    #fit_unsep_hieps.SetParameters(1.0, 1.0, 1.0, 1.0, 2.115, 0.88669E+03, -0.41000E+03, -0.25327E+02, 0.11100E+02, 0.31423E+02, -0.18000E+02, 0.16685E+02, -0.31000E+02, 0, 0, 0, 0)
+    #fit_unsep_hieps.SetLineColor(2)
+    # Fit the TGraph with the TF1 function
+    #G_xmod_phi_hieps.Fit(fit_unsep_hieps)
+    # Access the fit results
+    #fit_results_root = [fit_unsep_hieps.Eval(phi_bin_centers[i]) for i in range(NumtBins * NumPhiBins)]
+    # Display the fit results or use them for further analysis
+    #print("Fit results:", fit_results_root)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_hieps)
+    
+    C_xmodreal_phi.cd(k+1)
+    
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Draw('AP')
+    multiDict["G_xmodreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xmod".format(t_bin_centers[k]))
+    
+    multiDict["G_xmodreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    
+    l_xmodreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
+    l_xmodreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")    
+    l_xmodreal_phi.AddEntry(G_xmod_phi_loeps,"loeps model")
+    l_xmodreal_phi.AddEntry(G_xmod_phi_hieps,"hieps model")
+    l_xmodreal_phi.Draw()
+    C_xmodreal_phi.Print(outputpdf)
+
+
 C_xmodreal_phi = TCanvas()
 C_xmodreal_phi.SetGrid()
 C_xmodreal_phi.Divide(1,NumtBins)
@@ -755,16 +853,16 @@ for k in range(NumtBins):
     G_xmod_phi_loeps.SetMarkerSize(1)
     G_xmod_phi_loeps.SetMarkerColor(1)
     # Create a TF1 function with the fit_function
-    fit_unsep_loeps = TF1("fit_unsep_loeps", fit_function, 0, 360, 17)
+    #fit_unsep_loeps = TF1("fit_unsep_loeps", fit_function, 0, 360, 17)
     # Set initial parameter values
-    fit_unsep_loeps.SetParameters(1.0, 1.0, 1.0, 1.0, 2.115, 0.88669E+03, -0.41000E+03, -0.25327E+02, 0.11100E+02, 0.31423E+02, -0.18000E+02, 0.16685E+02, -0.31000E+02, 0, 0, 0, 0)
-    fit_unsep_loeps.SetLineColor(1)
+    #fit_unsep_loeps.SetParameters(1.0, 1.0, 1.0, 1.0, 2.115, 0.88669E+03, -0.41000E+03, -0.25327E+02, 0.11100E+02, 0.31423E+02, -0.18000E+02, 0.16685E+02, -0.31000E+02, 0, 0, 0, 0)
+    #fit_unsep_loeps.SetLineColor(1)
     # Fit the TGraph with the TF1 function
-    G_xmod_phi_loeps.Fit(fit_unsep_loeps)
+    #G_xmod_phi_loeps.Fit(fit_unsep_loeps)
     # Access the fit results
-    fit_results_root = [fit_unsep_loeps.Eval(phi_bin_centers[i]) for i in range(NumtBins * NumPhiBins)]
+    #fit_results_root = [fit_unsep_loeps.Eval(phi_bin_centers[i]) for i in range(NumtBins * NumPhiBins)]
     # Display the fit results or use them for further analysis
-    print("Fit results:", fit_results_root)
+    #print("Fit results:", fit_results_root)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_loeps)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_loeps)
 
@@ -778,16 +876,16 @@ for k in range(NumtBins):
     G_xmod_phi_hieps.SetMarkerSize(1)
     G_xmod_phi_hieps.SetMarkerColor(2)
     # Create a TF1 function with the fit_function
-    fit_unsep_hieps = TF1("fit_unsep_hieps", fit_function, 0, 360, 17)
+    #fit_unsep_hieps = TF1("fit_unsep_hieps", fit_function, 0, 360, 17)
     # Set initial parameter values
-    fit_unsep_hieps.SetParameters(1.0, 1.0, 1.0, 1.0, 2.115, 0.88669E+03, -0.41000E+03, -0.25327E+02, 0.11100E+02, 0.31423E+02, -0.18000E+02, 0.16685E+02, -0.31000E+02, 0, 0, 0, 0)
-    fit_unsep_hieps.SetLineColor(2)
+    #fit_unsep_hieps.SetParameters(1.0, 1.0, 1.0, 1.0, 2.115, 0.88669E+03, -0.41000E+03, -0.25327E+02, 0.11100E+02, 0.31423E+02, -0.18000E+02, 0.16685E+02, -0.31000E+02, 0, 0, 0, 0)
+    #fit_unsep_hieps.SetLineColor(2)
     # Fit the TGraph with the TF1 function
-    G_xmod_phi_hieps.Fit(fit_unsep_hieps)
+    #G_xmod_phi_hieps.Fit(fit_unsep_hieps)
     # Access the fit results
-    fit_results_root = [fit_unsep_hieps.Eval(phi_bin_centers[i]) for i in range(NumtBins * NumPhiBins)]
+    #fit_results_root = [fit_unsep_hieps.Eval(phi_bin_centers[i]) for i in range(NumtBins * NumPhiBins)]
     # Display the fit results or use them for further analysis
-    print("Fit results:", fit_results_root)
+    #print("Fit results:", fit_results_root)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_hieps)
     
