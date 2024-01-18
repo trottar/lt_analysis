@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 22:00:52 trottar"
+# Time-stamp: "2024-01-17 22:03:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys, math, os, subprocess
 from array import array
-from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
+from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
