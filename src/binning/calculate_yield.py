@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 22:17:50 trottar"
+# Time-stamp: "2024-01-17 22:28:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,19 +80,15 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
             H_MM_DATA       = TH1D("H_MM_DATA","MM", 500, 0.0, 1.5)
             H_t_DATA       = TH1D("H_t_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
-            H_phi_DATA       = TH1D("H_phi_DATA","-t", 500, 0.0, 360.0)
 
             H_MM_RAND       = TH1D("H_MM_RAND","MM", 500, 0.0, 1.5)
             H_t_RAND       = TH1D("H_t_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
-            H_phi_RAND       = TH1D("H_phi_RAND","-t", 500, 0.0, 360.0)            
 
             H_MM_DUMMY       = TH1D("H_MM_DUMMY","MM", 500, 0.0, 1.5)
             H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
-            H_phi_DUMMY       = TH1D("H_phi_DUMMY","-t", 500, 0.0, 360.0)            
 
             H_MM_DUMMY_RAND       = TH1D("H_MM_DUMMY_RAND","MM", 500, 0.0, 1.5)
             H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
-            H_phi_DUMMY_RAND       = TH1D("H_phi_DUMMY_RAND","-t", 500, 0.0, 360.0)            
 
             print("\nProcessing t-bin {} phi-bin {} data...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DATA):
@@ -148,8 +144,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_DATA.Fill(-evt.MandelT)
-                            H_phi_DATA.Fill(evt.ph_q*(180 / math.pi))
                             H_MM_DATA.Fill(evt.MM)
+
+                            print("!!!!!!!!!!!",evt.MM)
 
             print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_RAND):
@@ -205,7 +202,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_RAND.Fill(-evt.MandelT)
-                            H_phi_RAND.Fill(evt.ph_q*(180 / math.pi))
                             H_MM_RAND.Fill(evt.MM)
 
             print("\nProcessing t-bin {} phi-bin {} dummy...".format(j+1, k+1))
@@ -262,7 +258,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_DUMMY.Fill(-evt.MandelT)
-                            H_phi_DUMMY.Fill(evt.ph_q*(180 / math.pi))
                             H_MM_DUMMY.Fill(evt.MM)
                             
             print("\nProcessing t-bin {} phi-bin {} dummy_rand...".format(j+1, k+1))
@@ -319,32 +314,25 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_DUMMY_RAND.Fill(-evt.MandelT)
-                            H_phi_DUMMY_RAND.Fill(evt.ph_q*(180 / math.pi))
                             H_MM_DUMMY_RAND.Fill(evt.MM)
                             
             H_MM_RAND.Scale(1/nWindows)
             H_t_RAND.Scale(1/nWindows)
-            H_phi_RAND.Scale(1/nWindows)            
 
             H_MM_DATA.Add(H_MM_RAND,-1)
-            H_t_DATA.Add(H_t_RAND,-1)
-            H_phi_DATA.Add(H_phi_RAND,-1)            
+            H_t_DATA.Add(H_t_RAND,-1)         
 
             H_MM_DUMMY_RAND.Scale(1/nWindows)
             H_t_DUMMY_RAND.Scale(1/nWindows)
-            H_phi_DUMMY_RAND.Scale(1/nWindows)            
 
             H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
             H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
-            H_phi_DUMMY.Add(H_phi_DUMMY_RAND,-1)            
 
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
                 "H_MM_DATA" : H_MM_DATA,
                 "H_t_DATA" : H_t_DATA,
-                "H_phi_DATA" : H_phi_DATA,
                 "H_MM_DUMMY" : H_MM_DUMMY,
                 "H_t_DUMMY" : H_t_DUMMY,
-                "H_phi_DUMMY" : H_phi_DUMMY,
             }
     
     return processed_dict
@@ -357,7 +345,6 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDic
 
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_t_data = []
-    binned_phi_data = []
     binned_hist_data = []
     binned_hist_dummy = []
 
@@ -367,15 +354,12 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDic
 
             H_MM_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DATA"]
             H_t_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DATA"]
-            H_phi_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_phi_DATA"]
 
             H_MM_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DUMMY"]
             H_t_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DUMMY"]
-            H_phi_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_phi_DUMMY"]
 
             # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_dummy
             tmp_binned_t_data = []
-            tmp_binned_phi_data = []
             tmp_binned_hist_data = []
             tmp_binned_hist_dummy = []
 
@@ -384,12 +368,6 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDic
                 tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
                 tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))                
             tmp_binned_t_data.append(tmp_hist_data)
-
-            tmp_hist_data = [[],[]]
-            for i in range(1, H_phi_DATA.GetNbinsX() + 1):
-                tmp_hist_data[0].append(H_phi_DATA.GetBinCenter(i))
-                tmp_hist_data[1].append(H_phi_DATA.GetBinContent(i))                
-            tmp_binned_phi_data.append(tmp_hist_data)
 
             tmp_hist_data = [[],[]]                
             for i in range(1, H_MM_DATA.GetNbinsX() + 1):        
@@ -502,7 +480,6 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
 
             H_MM_SIMC       = TH1D("H_MM_SIMC","MM", 500, 0.0, 1.5)
             H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
-            H_phi_SIMC       = TH1D("H_phi_SIMC","-t", 500, 0.0, 360.0)
 
             print("\nProcessing t-bin {} phi-bin {} simc...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_SIMC):
@@ -524,13 +501,11 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
                         if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_SIMC.Fill(-evt.t)
-                            H_phi_SIMC.Fill(evt.ph_q*(180 / math.pi))
                             H_MM_SIMC.Fill(evt.MM)
 
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : H_MM_SIMC,
                 "H_t_SIMC" : H_t_SIMC,
-                "H_phi_SIMC" : H_phi_SIMC,            
             }
     
     return processed_dict
@@ -543,7 +518,6 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict):
 
     # Initialize lists for binned_t_simc, binned_hist_simc, and binned_hist_dummy
     binned_t_simc = []
-    binned_phi_simc = []
     binned_hist_simc = []
 
     # Loop through bins in t_simc and identify events in specified bins
@@ -552,11 +526,9 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict):
 
             H_MM_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SIMC"]
             H_t_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SIMC"]
-            H_phi_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_phi_SIMC"]
 
             # Initialize lists for tmp_binned_t_simc, tmp_binned_hist_simc, and tmp_binned_hist_dummy
             tmp_binned_t_simc = []
-            tmp_binned_phi_simc = []
             tmp_binned_hist_simc = []
 
             tmp_hist_simc = [[],[]]
@@ -565,27 +537,18 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict):
                 tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))                
             tmp_binned_t_simc.append(tmp_hist_simc)
 
-            tmp_hist_simc = [[],[]]
-            for i in range(1, H_phi_SIMC.GetNbinsX() + 1):
-                tmp_hist_simc[0].append(H_phi_SIMC.GetBinCenter(i))
-                tmp_hist_simc[1].append(H_phi_SIMC.GetBinContent(i))                
-            tmp_binned_phi_simc.append(tmp_hist_simc)
-
-            if kin_type == "MM":
-                tmp_hist_simc = [[],[]]                
-                for i in range(1, H_MM_SIMC.GetNbinsX() + 1):        
-                    tmp_hist_simc[0].append(H_MM_SIMC.GetBinCenter(i))
-                    tmp_hist_simc[1].append(H_MM_SIMC.GetBinContent(i))                    
-                tmp_binned_hist_simc.append(tmp_hist_simc)
+            tmp_hist_simc = [[],[]]                
+            for i in range(1, H_MM_SIMC.GetNbinsX() + 1):        
+                tmp_hist_simc[0].append(H_MM_SIMC.GetBinCenter(i))
+                tmp_hist_simc[1].append(H_MM_SIMC.GetBinContent(i))                    
+            tmp_binned_hist_simc.append(tmp_hist_simc)
 
             binned_t_simc.append(tmp_binned_t_simc[0]) # Save a list of hists where each one is a t-bin
-            binned_phi_simc.append(tmp_binned_phi_simc[0]) # Save a list of hists where each one is a t-bin                
             binned_hist_simc.append(tmp_binned_hist_simc[0])
 
             if j+1 == len(t_bins)-1:
                 binned_dict[kin_type] = {
                     "binned_t_simc" : binned_t_simc,
-                    "binned_phi_simc" : binned_phi_simc,
                     "binned_hist_simc" : binned_hist_simc
                 }
         
@@ -601,7 +564,6 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
     group_dict = {}
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
-    binned_phi_simc = binned_dict[kin_type]["binned_phi_simc"]        
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
 
     yield_hist = []
