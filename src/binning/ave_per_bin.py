@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 19:31:37 trottar"
+# Time-stamp: "2024-01-17 19:39:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -431,8 +431,6 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
     for kin_type in kinematic_types:
         binned_t_data = binned_dict[kin_type]["binned_t_data"]
         binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
-        if kin_type == "Q2":
-            print("!!!!!!!!!!!",binned_hist_data)
         binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
 
         ave_hist = []
@@ -509,78 +507,86 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict):
     b3 = inpDict["b3"]
     a4 = inpDict["a4"]
     b4 = inpDict["b4"]
-    
-    # Initialize lists for binned_t_simc, binned_hist_simc, and binned_hist_dummy
-    binned_t_simc = []
-    binned_hist_simc = []
 
+    binned_dict = {}
+    
     H_Q2_SIMC       = TH1D("H_Q2_SIMC","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
     H_W_SIMC  = TH1D("H_W_SIMC","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
     H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
     
     TBRANCH_SIMC  = tree_simc.Get("h10")
-    
-    # Loop through bins in t_simc and identify events in specified bins
-    for j in range(len(t_bins)-1):
-        print("\nBinning t-bin {} simc...".format(j+1))
-        for i,evt in enumerate(TBRANCH_SIMC):
-
-          # Progress bar
-          Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
-
-          # Define the acceptance cuts  
-          SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-          HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-          Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-
-          #........................................
-
-          #Fill SIMC events
-          if(HMS_Acceptance & SHMS_Acceptance & Diamond):
-                
-                if t_bins[j] <= -evt.t <= t_bins[j+1]:
-                    H_t_SIMC.Fill(-evt.t)
-                    H_Q2_SIMC.Fill(evt.Q2)
-                    H_W_SIMC.Fill(evt.W)
-                    H_epsilon_SIMC.Fill(evt.epsilon)
-
-    binned_dict = {}
-                    
-    binned_t_simc = []
-    binned_hist_simc = []
 
     for kin_type in kinematic_types:
+        
+        # Initialize lists for binned_t_simc, binned_hist_simc, and binned_hist_dummy
+        binned_t_simc = []
+        binned_hist_simc = []
+    
+        # Loop through bins in t_simc and identify events in specified bins
         for j in range(len(t_bins)-1):
-            tmp_hist_simc = []            
+            print("\nBinning t-bin {} simc...".format(j+1))
+            for i,evt in enumerate(TBRANCH_SIMC):
+
+                # Progress bar
+                Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
+
+                # Define the acceptance cuts  
+                SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+                HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+
+                #........................................
+
+                #Fill SIMC events
+                if(HMS_Acceptance & SHMS_Acceptance & Diamond):
+                  
+                    if t_bins[j] <= -evt.t <= t_bins[j+1]:
+                        H_t_SIMC.Fill(-evt.t)
+                        H_Q2_SIMC.Fill(evt.Q2)
+                        H_W_SIMC.Fill(evt.W)
+                        H_epsilon_SIMC.Fill(evt.epsilon)                    
+
+            # Initialize lists for tmp_binned_t_simc, tmp_binned_hist_simc, and tmp_binned_hist_dummy
+            tmp_binned_t_simc = []
+            tmp_binned_hist_simc = []
+
+            tmp_hist_simc = [[],[]]
             for i in range(1, H_t_SIMC.GetNbinsX() + 1):
-                tmp_hist_simc.append(H_t_SIMC.GetBinCenter(i))
-            binned_t_simc.append([tmp_hist_simc, len(tmp_hist_simc)])
+                tmp_hist_simc[0].append(H_t_SIMC.GetBinCenter(i))
+                tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))                
+            tmp_binned_t_simc.append(tmp_hist_simc)
 
             if kin_type == "t":
-                binned_hist_simc.append([tmp_hist_simc, len(tmp_hist_simc)])
+                tmp_binned_hist_simc.append(tmp_hist_simc)
             if kin_type == "Q2":
-                tmp_hist_simc = []                
+                tmp_hist_simc = [[],[]]                
                 for i in range(1, H_Q2_SIMC.GetNbinsX() + 1):        
-                    tmp_hist_simc.append(H_Q2_SIMC.GetBinCenter(i))
-                binned_hist_simc.append([tmp_hist_simc, len(tmp_hist_simc)])
+                    tmp_hist_simc[0].append(H_Q2_SIMC.GetBinCenter(i))
+                    tmp_hist_simc[1].append(H_Q2_SIMC.GetBinContent(i))                    
+                tmp_binned_hist_simc.append(tmp_hist_simc)
             if kin_type == "W":
-                tmp_hist_simc = []                
+                tmp_hist_simc = [[],[]]                
                 for i in range(1, H_W_SIMC.GetNbinsX() + 1):
-                    tmp_hist_simc.append(H_W_SIMC.GetBinCenter(i))
-                binned_hist_simc.append([tmp_hist_simc, len(tmp_hist_simc)])        
+                    tmp_hist_simc[0].append(H_W_SIMC.GetBinCenter(i))
+                    tmp_hist_simc[1].append(H_W_SIMC.GetBinContent(i))                    
+                tmp_binned_hist_simc.append(tmp_hist_simc)        
             if kin_type == "epsilon":
-                tmp_hist_simc = []                
+                tmp_hist_simc = [[],[]]                
                 for i in range(1, H_epsilon_SIMC.GetNbinsX() + 1):
-                    tmp_hist_simc.append(H_epsilon_SIMC.GetBinCenter(i))
-                binned_hist_simc.append([tmp_hist_simc, len(tmp_hist_simc)])
+                    tmp_hist_simc[0].append(H_epsilon_SIMC.GetBinCenter(i))
+                    tmp_hist_simc[1].append(H_epsilon_SIMC.GetBinContent(i))                    
+                tmp_binned_hist_simc.append(tmp_hist_simc)
 
-        binned_dict[kin_type] = {
-            "binned_t_data" : binned_t_data,
-            "binned_hist_data" : binned_hist_data,
-            "binned_hist_dummy" : binned_hist_dummy
-        }
+            binned_t_simc.append(tmp_binned_t_simc[0]) # Save a list of hists where each one is a t-bin
+            binned_hist_simc.append(tmp_binned_hist_simc[0])
+
+            if j+1 == len(t_bins)-1:
+                binned_dict[kin_type] = {
+                    "binned_t_simc" : binned_t_simc,
+                    "binned_hist_simc" : binned_hist_simc
+                }
         
     return binned_dict                
 
