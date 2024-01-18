@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 22:03:42 trottar"
+# Time-stamp: "2024-01-17 22:08:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -94,7 +94,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
             H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
             H_phi_DUMMY_RAND       = TH1D("H_phi_DUMMY_RAND","-t", 500, 0.0, 360.0)            
 
-            print("\nProcessing t-bin {} data...".format(j+1))
+            print("\nProcessing t-bin {} phi-bin {} data...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DATA):
 
                 # Progress bar
@@ -151,7 +151,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                             H_phi_DATA.Fill(evt.ph_q*(180 / math.pi))
                             H_MM_DATA.Fill(evt.MM)
 
-            print("\nProcessing t-bin {} rand...".format(j+1))
+            print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_RAND):
 
                 # Progress bar
@@ -208,7 +208,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                             H_phi_RAND.Fill(evt.ph_q*(180 / math.pi))
                             H_MM_RAND.Fill(evt.MM)
 
-            print("\nProcessing t-bin {} dummy...".format(j+1))
+            print("\nProcessing t-bin {} phi-bin {} dummy...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DUMMY):
 
                 # Progress bar
@@ -265,7 +265,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                             H_phi_DUMMY.Fill(evt.ph_q*(180 / math.pi))
                             H_MM_DUMMY.Fill(evt.MM)
                             
-            print("\nProcessing t-bin {} dummy_rand...".format(j+1))
+            print("\nProcessing t-bin {} phi-bin {} dummy_rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
                 # Progress bar
@@ -504,7 +504,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
             H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
             H_phi_SIMC       = TH1D("H_phi_SIMC","-t", 500, 0.0, 360.0)
 
-            print("\nProcessing t-bin {} simc...".format(j+1))
+            print("\nProcessing t-bin {} phi-bin {} simc...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_SIMC):
             
                 # Progress bar
