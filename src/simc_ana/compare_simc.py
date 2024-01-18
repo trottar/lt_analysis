@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 00:17:48 trottar"
+# Time-stamp: "2024-01-18 00:30:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -236,8 +236,7 @@ def compare_simc(hist, inpDict):
     ################################################################################################################################################
     # Normalize simc by normfactor/nevents
 
-    #normfac_simc = (simc_normfactor)/(simc_nevents)
-    normfac_simc = 1/(simc_normfactor)/(simc_nevents)
+    normfac_simc = (simc_normfactor)/(simc_nevents)
               
     ################################################################################################################################################    
 
