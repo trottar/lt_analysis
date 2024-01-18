@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 23:31:54 trottar"
+# Time-stamp: "2024-01-17 23:35:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,269 +69,271 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
     b4 = inpDict["b4"]    
         
     TBRANCH_DATA  = tree_data.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
-    TBRANCH_RAND  = tree_data.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+    TBRANCH_RAND  = tree_data.Get("gCut_{}_Events_rand_RF".format(ParticleType.capitalize()))
     
     TBRANCH_DUMMY  = tree_dummy.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
     TBRANCH_DUMMY_RAND  = tree_dummy.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
-    k=0
+
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
 
-        H_MM_DATA       = TH1D("H_MM_DATA","MM", 500, 0.0, 1.5)
-        H_t_DATA       = TH1D("H_t_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            H_MM_DATA       = TH1D("H_MM_DATA","MM", 500, 0.0, 1.5)
+            H_t_DATA       = TH1D("H_t_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
 
-        H_MM_RAND       = TH1D("H_MM_RAND","MM", 500, 0.0, 1.5)
-        H_t_RAND       = TH1D("H_t_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            H_MM_RAND       = TH1D("H_MM_RAND","MM", 500, 0.0, 1.5)
+            H_t_RAND       = TH1D("H_t_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
 
-        H_MM_DUMMY       = TH1D("H_MM_DUMMY","MM", 500, 0.0, 1.5)
-        H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            H_MM_DUMMY       = TH1D("H_MM_DUMMY","MM", 500, 0.0, 1.5)
+            H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
 
-        H_MM_DUMMY_RAND       = TH1D("H_MM_DUMMY_RAND","MM", 500, 0.0, 1.5)
-        H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
-        print("\nProcessing t-bin {} data...".format(j+1))
-        for i,evt in enumerate(TBRANCH_DATA):
+            H_MM_DUMMY_RAND       = TH1D("H_MM_DUMMY_RAND","MM", 500, 0.0, 1.5)
+            H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
 
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
+            print("\nProcessing t-bin {} phi-bin {} data...".format(j+1, k+1))
+            for i,evt in enumerate(TBRANCH_DATA):
 
-            #CUTs Definations 
-            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+                # Progress bar
+                Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
-            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+                #CUTs Definations 
+                SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+                SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+                HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+                HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-            if ParticleType == "kaon":
+                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-                # Defined HGCer Geometric cuts
-                cutg = TCutG("cutg",21)
-                cutg.SetVarX("P_hgcer_yAtCer")
-                cutg.SetVarY("P_hgcer_xAtCer")
-                cutg.SetPoint(0,-25,2)
-                cutg.SetPoint(1,-2,2)
-                cutg.SetPoint(2,-1,2.5)
-                cutg.SetPoint(3,0,3)
-                cutg.SetPoint(4,1,3)
-                cutg.SetPoint(5,2,3.3)
-                cutg.SetPoint(6,3,3.0)
-                cutg.SetPoint(7,4,2.5)
-                cutg.SetPoint(8,5,2)
-                cutg.SetPoint(9,25,2)
-                cutg.SetPoint(10,25,0.5)
-                cutg.SetPoint(11,5,0.5)
-                cutg.SetPoint(12,4,1)
-                cutg.SetPoint(13,3,-1)
-                cutg.SetPoint(14,2,-2)
-                cutg.SetPoint(15,1,-2.3)
-                cutg.SetPoint(16,0,-1.5)
-                cutg.SetPoint(17,-1,-1)
-                cutg.SetPoint(18,-2,0.5)
-                cutg.SetPoint(19,-25,0.5)
-                cutg.SetPoint(20,-25,2)
+                if ParticleType == "kaon":
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+                    # Defined HGCer Geometric cuts
+                    cutg = TCutG("cutg",21)
+                    cutg.SetVarX("P_hgcer_yAtCer")
+                    cutg.SetVarY("P_hgcer_xAtCer")
+                    cutg.SetPoint(0,-25,2)
+                    cutg.SetPoint(1,-2,2)
+                    cutg.SetPoint(2,-1,2.5)
+                    cutg.SetPoint(3,0,3)
+                    cutg.SetPoint(4,1,3)
+                    cutg.SetPoint(5,2,3.3)
+                    cutg.SetPoint(6,3,3.0)
+                    cutg.SetPoint(7,4,2.5)
+                    cutg.SetPoint(8,5,2)
+                    cutg.SetPoint(9,25,2)
+                    cutg.SetPoint(10,25,0.5)
+                    cutg.SetPoint(11,5,0.5)
+                    cutg.SetPoint(12,4,1)
+                    cutg.SetPoint(13,3,-1)
+                    cutg.SetPoint(14,2,-2)
+                    cutg.SetPoint(15,1,-2.3)
+                    cutg.SetPoint(16,0,-1.5)
+                    cutg.SetPoint(17,-1,-1)
+                    cutg.SetPoint(18,-2,0.5)
+                    cutg.SetPoint(19,-25,0.5)
+                    cutg.SetPoint(20,-25,2)
 
-            else:
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+                else:
 
-            if(ALLCUTS):
-                print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:                    
-                        H_t_DATA.Fill(-evt.MandelT)
-                        H_MM_DATA.Fill(evt.MM)
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
-                        print("!!!!!!!!!!!",evt.MM)
+                if(ALLCUTS):                
+                    print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:                    
+                            H_t_DATA.Fill(-evt.MandelT)
+                            H_MM_DATA.Fill(evt.MM)
+                            
+                            print("!!!!!!!!!!!",evt.MM)
 
-        print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
-        for i,evt in enumerate(TBRANCH_RAND):
+            print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
+            for i,evt in enumerate(TBRANCH_RAND):
 
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
+                # Progress bar
+                Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
 
-            #CUTs Definations 
-            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+                #CUTs Definations 
+                SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+                SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+                HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+                HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-            Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
+                Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
 
-            if ParticleType == "kaon":
+                if ParticleType == "kaon":
 
-                # Defined HGCer Geometric cuts
-                cutg = TCutG("cutg",21)
-                cutg.SetVarX("P_hgcer_yAtCer")
-                cutg.SetVarY("P_hgcer_xAtCer")
-                cutg.SetPoint(0,-25,2)
-                cutg.SetPoint(1,-2,2)
-                cutg.SetPoint(2,-1,2.5)
-                cutg.SetPoint(3,0,3)
-                cutg.SetPoint(4,1,3)
-                cutg.SetPoint(5,2,3.3)
-                cutg.SetPoint(6,3,3.0)
-                cutg.SetPoint(7,4,2.5)
-                cutg.SetPoint(8,5,2)
-                cutg.SetPoint(9,25,2)
-                cutg.SetPoint(10,25,0.5)
-                cutg.SetPoint(11,5,0.5)
-                cutg.SetPoint(12,4,1)
-                cutg.SetPoint(13,3,-1)
-                cutg.SetPoint(14,2,-2)
-                cutg.SetPoint(15,1,-2.3)
-                cutg.SetPoint(16,0,-1.5)
-                cutg.SetPoint(17,-1,-1)
-                cutg.SetPoint(18,-2,0.5)
-                cutg.SetPoint(19,-25,0.5)
-                cutg.SetPoint(20,-25,2)
+                    # Defined HGCer Geometric cuts
+                    cutg = TCutG("cutg",21)
+                    cutg.SetVarX("P_hgcer_yAtCer")
+                    cutg.SetVarY("P_hgcer_xAtCer")
+                    cutg.SetPoint(0,-25,2)
+                    cutg.SetPoint(1,-2,2)
+                    cutg.SetPoint(2,-1,2.5)
+                    cutg.SetPoint(3,0,3)
+                    cutg.SetPoint(4,1,3)
+                    cutg.SetPoint(5,2,3.3)
+                    cutg.SetPoint(6,3,3.0)
+                    cutg.SetPoint(7,4,2.5)
+                    cutg.SetPoint(8,5,2)
+                    cutg.SetPoint(9,25,2)
+                    cutg.SetPoint(10,25,0.5)
+                    cutg.SetPoint(11,5,0.5)
+                    cutg.SetPoint(12,4,1)
+                    cutg.SetPoint(13,3,-1)
+                    cutg.SetPoint(14,2,-2)
+                    cutg.SetPoint(15,1,-2.3)
+                    cutg.SetPoint(16,0,-1.5)
+                    cutg.SetPoint(17,-1,-1)
+                    cutg.SetPoint(18,-2,0.5)
+                    cutg.SetPoint(19,-25,0.5)
+                    cutg.SetPoint(20,-25,2)
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 
-            else:
+                else:
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
-            if(ALLCUTS):
+                if(ALLCUTS):
 
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
-                        H_t_RAND.Fill(-evt.MandelT)
-                        H_MM_RAND.Fill(evt.MM)
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
+                            H_t_RAND.Fill(-evt.MandelT)
+                            H_MM_RAND.Fill(evt.MM)
 
-        print("\nProcessing t-bin {} phi-bin {} dummy...".format(j+1, k+1))
-        for i,evt in enumerate(TBRANCH_DUMMY):
+            print("\nProcessing t-bin {} phi-bin {} dummy...".format(j+1, k+1))
+            for i,evt in enumerate(TBRANCH_DUMMY):
 
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
+                # Progress bar
+                Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
 
-            #CUTs Definations 
-            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+                #CUTs Definations 
+                SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+                SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+                HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+                HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-            Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
+                Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
 
-            if ParticleType == "kaon":
+                if ParticleType == "kaon":
 
-                # Defined HGCer Geometric cuts
-                cutg = TCutG("cutg",21)
-                cutg.SetVarX("P_hgcer_yAtCer")
-                cutg.SetVarY("P_hgcer_xAtCer")
-                cutg.SetPoint(0,-25,2)
-                cutg.SetPoint(1,-2,2)
-                cutg.SetPoint(2,-1,2.5)
-                cutg.SetPoint(3,0,3)
-                cutg.SetPoint(4,1,3)
-                cutg.SetPoint(5,2,3.3)
-                cutg.SetPoint(6,3,3.0)
-                cutg.SetPoint(7,4,2.5)
-                cutg.SetPoint(8,5,2)
-                cutg.SetPoint(9,25,2)
-                cutg.SetPoint(10,25,0.5)
-                cutg.SetPoint(11,5,0.5)
-                cutg.SetPoint(12,4,1)
-                cutg.SetPoint(13,3,-1)
-                cutg.SetPoint(14,2,-2)
-                cutg.SetPoint(15,1,-2.3)
-                cutg.SetPoint(16,0,-1.5)
-                cutg.SetPoint(17,-1,-1)
-                cutg.SetPoint(18,-2,0.5)
-                cutg.SetPoint(19,-25,0.5)
-                cutg.SetPoint(20,-25,2)
+                    # Defined HGCer Geometric cuts
+                    cutg = TCutG("cutg",21)
+                    cutg.SetVarX("P_hgcer_yAtCer")
+                    cutg.SetVarY("P_hgcer_xAtCer")
+                    cutg.SetPoint(0,-25,2)
+                    cutg.SetPoint(1,-2,2)
+                    cutg.SetPoint(2,-1,2.5)
+                    cutg.SetPoint(3,0,3)
+                    cutg.SetPoint(4,1,3)
+                    cutg.SetPoint(5,2,3.3)
+                    cutg.SetPoint(6,3,3.0)
+                    cutg.SetPoint(7,4,2.5)
+                    cutg.SetPoint(8,5,2)
+                    cutg.SetPoint(9,25,2)
+                    cutg.SetPoint(10,25,0.5)
+                    cutg.SetPoint(11,5,0.5)
+                    cutg.SetPoint(12,4,1)
+                    cutg.SetPoint(13,3,-1)
+                    cutg.SetPoint(14,2,-2)
+                    cutg.SetPoint(15,1,-2.3)
+                    cutg.SetPoint(16,0,-1.5)
+                    cutg.SetPoint(17,-1,-1)
+                    cutg.SetPoint(18,-2,0.5)
+                    cutg.SetPoint(19,-25,0.5)
+                    cutg.SetPoint(20,-25,2)
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 
-            else:
+                else:
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
-            if(ALLCUTS):
+                if(ALLCUTS):
 
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
-                        H_t_DUMMY.Fill(-evt.MandelT)
-                        H_MM_DUMMY.Fill(evt.MM)
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
+                            H_t_DUMMY.Fill(-evt.MandelT)
+                            H_MM_DUMMY.Fill(evt.MM)
+                            
+            print("\nProcessing t-bin {} phi-bin {} dummy_rand...".format(j+1, k+1))
+            for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
-        print("\nProcessing t-bin {} phi-bin {} dummy_rand...".format(j+1, k+1))
-        for i,evt in enumerate(TBRANCH_DUMMY_RAND):
+                # Progress bar
+                Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
 
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
+                #CUTs Definations 
+                SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+                SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-            #CUTs Definations 
-            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+                HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+                HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+                Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
 
-            Diamond = (evt.W/evt.MM>a1+b1/evt.MM) & (evt.W/evt.MM<a2+b2/evt.MM) & (evt.W/evt.MM>a3+b3/evt.MM) & (evt.W/evt.MM<a4+b4/evt.MM)
+                if ParticleType == "kaon":
 
-            if ParticleType == "kaon":
+                    # Defined HGCer Geometric cuts
+                    cutg = TCutG("cutg",21)
+                    cutg.SetVarX("P_hgcer_yAtCer")
+                    cutg.SetVarY("P_hgcer_xAtCer")
+                    cutg.SetPoint(0,-25,2)
+                    cutg.SetPoint(1,-2,2)
+                    cutg.SetPoint(2,-1,2.5)
+                    cutg.SetPoint(3,0,3)
+                    cutg.SetPoint(4,1,3)
+                    cutg.SetPoint(5,2,3.3)
+                    cutg.SetPoint(6,3,3.0)
+                    cutg.SetPoint(7,4,2.5)
+                    cutg.SetPoint(8,5,2)
+                    cutg.SetPoint(9,25,2)
+                    cutg.SetPoint(10,25,0.5)
+                    cutg.SetPoint(11,5,0.5)
+                    cutg.SetPoint(12,4,1)
+                    cutg.SetPoint(13,3,-1)
+                    cutg.SetPoint(14,2,-2)
+                    cutg.SetPoint(15,1,-2.3)
+                    cutg.SetPoint(16,0,-1.5)
+                    cutg.SetPoint(17,-1,-1)
+                    cutg.SetPoint(18,-2,0.5)
+                    cutg.SetPoint(19,-25,0.5)
+                    cutg.SetPoint(20,-25,2)
 
-                # Defined HGCer Geometric cuts
-                cutg = TCutG("cutg",21)
-                cutg.SetVarX("P_hgcer_yAtCer")
-                cutg.SetVarY("P_hgcer_xAtCer")
-                cutg.SetPoint(0,-25,2)
-                cutg.SetPoint(1,-2,2)
-                cutg.SetPoint(2,-1,2.5)
-                cutg.SetPoint(3,0,3)
-                cutg.SetPoint(4,1,3)
-                cutg.SetPoint(5,2,3.3)
-                cutg.SetPoint(6,3,3.0)
-                cutg.SetPoint(7,4,2.5)
-                cutg.SetPoint(8,5,2)
-                cutg.SetPoint(9,25,2)
-                cutg.SetPoint(10,25,0.5)
-                cutg.SetPoint(11,5,0.5)
-                cutg.SetPoint(12,4,1)
-                cutg.SetPoint(13,3,-1)
-                cutg.SetPoint(14,2,-2)
-                cutg.SetPoint(15,1,-2.3)
-                cutg.SetPoint(16,0,-1.5)
-                cutg.SetPoint(17,-1,-1)
-                cutg.SetPoint(18,-2,0.5)
-                cutg.SetPoint(19,-25,0.5)
-                cutg.SetPoint(20,-25,2)
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+                else:
 
-            else:
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+                if(ALLCUTS):
 
-            if(ALLCUTS):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
+                            H_t_DUMMY_RAND.Fill(-evt.MandelT)
+                            H_MM_DUMMY_RAND.Fill(evt.MM)
+                            
+            H_MM_RAND.Scale(1/nWindows)
+            H_t_RAND.Scale(1/nWindows)
 
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
-                        H_t_DUMMY_RAND.Fill(-evt.MandelT)
-                        H_MM_DUMMY_RAND.Fill(evt.MM)
+            H_MM_DATA.Add(H_MM_RAND,-1)
+            H_t_DATA.Add(H_t_RAND,-1)         
 
-        H_MM_RAND.Scale(1/nWindows)
-        H_t_RAND.Scale(1/nWindows)
+            H_MM_DUMMY_RAND.Scale(1/nWindows)
+            H_t_DUMMY_RAND.Scale(1/nWindows)
 
-        H_MM_DATA.Add(H_MM_RAND,-1)
-        H_t_DATA.Add(H_t_RAND,-1)         
+            H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
+            H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
 
-        H_MM_DUMMY_RAND.Scale(1/nWindows)
-        H_t_DUMMY_RAND.Scale(1/nWindows)
-
-        H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
-        H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
-
-        processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
-            "H_MM_DATA" : H_MM_DATA,
-            "H_t_DATA" : H_t_DATA,
-            "H_MM_DUMMY" : H_MM_DUMMY,
-            "H_t_DUMMY" : H_t_DUMMY,
-        }
+            processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
+                "H_MM_DATA" : H_MM_DATA,
+                "H_t_DATA" : H_t_DATA,
+                "H_MM_DUMMY" : H_MM_DUMMY,
+                "H_t_DUMMY" : H_t_DUMMY,
+            }
     
     return processed_dict
 
