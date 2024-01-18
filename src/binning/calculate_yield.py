@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 22:13:58 trottar"
+# Time-stamp: "2024-01-17 22:17:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -371,7 +371,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDic
 
             H_MM_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DUMMY"]
             H_t_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DUMMY"]
-            H_phi_DUMMY = processed_dict["phi_bin{}".format(j+1)]["H_phi_DUMMY"]
+            H_phi_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_phi_DUMMY"]
 
             # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_dummy
             tmp_binned_t_data = []
