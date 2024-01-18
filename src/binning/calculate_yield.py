@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 21:54:35 trottar"
+# Time-stamp: "2024-01-17 21:57:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,19 +76,19 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
 
-            H_MM_DATA       = TH1D("H_MM_DATA","MM", 500, inpDict["MMmin"], inpDict["MMmax"])
+            H_MM_DATA       = TH1D("H_MM_DATA","MM", 500, 0.0, 1.5)
             H_t_DATA       = TH1D("H_t_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
             H_phi_DATA       = TH1D("H_phi_DATA","-t", 500, 0.0, 360.0)
 
-            H_MM_RAND       = TH1D("H_MM_RAND","MM", 500, inpDict["MMmin"], inpDict["MMmax"])
+            H_MM_RAND       = TH1D("H_MM_RAND","MM", 500, 0.0, 1.5)
             H_t_RAND       = TH1D("H_t_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
             H_phi_RAND       = TH1D("H_phi_RAND","-t", 500, 0.0, 360.0)            
 
-            H_MM_DUMMY       = TH1D("H_MM_DUMMY","MM", 500, inpDict["MMmin"], inpDict["MMmax"])
+            H_MM_DUMMY       = TH1D("H_MM_DUMMY","MM", 500, 0.0, 1.5)
             H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
             H_phi_DUMMY       = TH1D("H_phi_DUMMY","-t", 500, 0.0, 360.0)            
 
-            H_MM_DUMMY_RAND       = TH1D("H_MM_DUMMY_RAND","MM", 500, inpDict["MMmin"], inpDict["MMmax"])
+            H_MM_DUMMY_RAND       = TH1D("H_MM_DUMMY_RAND","MM", 500, 0.0, 1.5)
             H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
             H_phi_DUMMY_RAND       = TH1D("H_phi_DUMMY_RAND","-t", 500, 0.0, 360.0)            
 
@@ -498,7 +498,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
 
-            H_MM_SIMC       = TH1D("H_MM_SIMC","MM", 500, inpDict["MMmin"], inpDict["MMmax"])
+            H_MM_SIMC       = TH1D("H_MM_SIMC","MM", 500, 0.0, 1.5)
             H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
             H_phi_SIMC       = TH1D("H_phi_SIMC","-t", 500, 0.0, 360.0)
 
