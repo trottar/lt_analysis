@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 01:34:11 trottar"
+# Time-stamp: "2024-01-18 03:14:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,9 +65,9 @@ NumPhiBins = int(sys.argv[11])
 runNumRight = sys.argv[12]
 runNumLeft = sys.argv[13]
 runNumCenter = sys.argv[14]
-# Convert from C to uC?????
+# Convert from uC to C?????
 # Divide by 1000 to counter converting to interger (see src/setup/findEffectiveCharge.py),
-# then divide by 1e6 to convert C to uC
+# then divide by 1e6 to convert uC to C
 # ERROR: Need to investigate
 data_charge_right = int(sys.argv[15])/1e9
 data_charge_left = int(sys.argv[16])/1e9
