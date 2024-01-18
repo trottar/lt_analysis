@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 18:56:45 trottar"
+# Time-stamp: "2024-01-17 19:03:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -358,64 +358,41 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
         tmp_binned_hist_dummy = []
             
         for kin_type in kinematic_types:
-            tmp_hist_data = [[],[]]
-            for i in range(1, H_t_DATA.GetNbinsX() + 1):
-                tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
-                tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))                
-            tmp_binned_t_data.append(tmp_hist_data)
-
-            if kin_type == "t":
-                tmp_binned_hist_data.append(tmp_hist_data)
-            if kin_type == "Q2":
-                tmp_hist_data = [[],[]]                
-                for i in range(1, H_Q2_DATA.GetNbinsX() + 1):        
-                    tmp_hist_data[0].append(H_Q2_DATA.GetBinCenter(i))
-                    tmp_hist_data[1].append(H_Q2_DATA.GetBinContent(i))                    
-                tmp_binned_hist_data.append(tmp_hist_data)
-            if kin_type == "W":
-                tmp_hist_data = [[],[]]                
-                for i in range(1, H_W_DATA.GetNbinsX() + 1):
-                    tmp_hist_data[0].append(H_W_DATA.GetBinCenter(i))
-                    tmp_hist_data[1].append(H_W_DATA.GetBinContent(i))                    
-                tmp_binned_hist_data.append(tmp_hist_data)        
-            if kin_type == "epsilon":
-                tmp_hist_data = [[],[]]                
-                for i in range(1, H_epsilon_DATA.GetNbinsX() + 1):
-                    tmp_hist_data[0].append(H_epsilon_DATA.GetBinCenter(i))
-                    tmp_hist_data[1].append(H_epsilon_DATA.GetBinContent(i))                    
-                tmp_binned_hist_data.append(tmp_hist_data)
-
-            tmp_hist_dummy = [[],[]]                
-            for i in range(1, H_t_DUMMY.GetNbinsX() + 1):
-                tmp_hist_dummy[0].append(H_t_DUMMY.GetBinCenter(i))
-                tmp_hist_dummy[1].append(H_t_DUMMY.GetBinContent(i))                
-            tmp_binned_t_dummy.append(tmp_hist_dummy)
-
-            if kin_type == "t":
-                tmp_binned_hist_dummy.append(tmp_hist_dummy)
-            if kin_type == "Q2":
-                tmp_hist_dummy = [[],[]]                
-                for i in range(1, H_Q2_DUMMY.GetNbinsX() + 1):
-                    tmp_hist_dummy[0].append(H_Q2_DUMMY.GetBinCenter(i))
-                    tmp_hist_dummy[1].append(H_Q2_DUMMY.GetBinContent(i))                    
-                tmp_binned_hist_dummy.append(tmp_hist_dummy)
-            if kin_type == "W":
-                tmp_hist_dummy = [[],[]]                
-                for i in range(1, H_W_DUMMY.GetNbinsX() + 1):
-                    tmp_hist_dummy[0].append(H_W_DUMMY.GetBinCenter(i))
-                    tmp_hist_dummy[1].append(H_W_DUMMY.GetBinContent(i))                    
-                tmp_binned_hist_dummy.append(tmp_hist_dummy)        
-            if kin_type == "epsilon":
-                tmp_hist_dummy = [[],[]]                
-                for i in range(1, H_epsilon_DUMMY.GetNbinsX() + 1):
-                    tmp_hist_dummy[0].append(H_epsilon_DUMMY.GetBinCenter(i))
-                    tmp_hist_dummy[1].append(H_epsilon_DUMMY.GetBinContent(i))                    
-                tmp_binned_hist_dummy.append(tmp_hist_dummy)
-
-            binned_t_data.append(tmp_binned_t_data[0]) # Save a list of hists where each one is a t-bin
-            binned_hist_data.append(tmp_binned_hist_data[0])
-            binned_hist_dummy.append(tmp_binned_hist_dummy[0])
             
+            t_data = H_t_DATA
+            
+            if kin_type == "t":
+                hist_data = H_t_DATA
+                hist_dummy = H_t_DUMMY
+            if kin_type == "Q2":
+                hist_data = H_Q2_DATA
+                hist_dummy = H_Q2_DUMMY
+            if kin_type == "W":
+                hist_data = H_W_DATA
+                hist_dummy = H_W_DUMMY
+            if kin_type == "epsilon":
+                hist_data = H_epsilon_DATA
+                hist_dummy = H_epsilon_DUMMY
+                
+            tmp_t_data = [[],[]]
+            tmp_hist_data = [[],[]]
+            tmp_hist_dummy = [[],[]]
+            for bin_index in range(0, t_data.GetNbinsX()):
+                bin_center = t_data.GetBinCenter(bin_index)
+                if t_bins[j] <= bin_center <= t_bins[j+1]:
+                    if hist_data.GetBinContent(bin_index) > 0:                    
+                        #print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+                        #print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                        tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
+                        tmp_t_data[1].append(t_data.GetBinContent(bin_index))
+                        tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
+                        tmp_hist_data[1].append(hist_data.GetBinContent(bin_index))
+                        tmp_hist_dummy[0].append(hist_dummy.GetBinCenter(bin_index))
+                        tmp_hist_dummy[1].append(hist_dummy.GetBinContent(bin_index))
+            binned_t_data.append(tmp_t_data)
+            binned_hist_data.append(tmp_hist_data)
+            binned_hist_dummy.append(tmp_hist_dummy)
+                            
             if j+1 == len(t_bins)-1:
                 binned_dict[kin_type] = {
                     "binned_t_data" : binned_t_data,
