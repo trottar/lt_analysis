@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 19:11:09 trottar"
+# Time-stamp: "2024-01-17 19:15:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -367,13 +367,14 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
             if kin_type == "Q2":
                 hist_data = H_Q2_DATA
                 hist_dummy = H_Q2_DUMMY
+                print("$$$$$$$$$$$$$$",H_Q2_DATA)
             if kin_type == "W":
                 hist_data = H_W_DATA
                 hist_dummy = H_W_DUMMY
             if kin_type == "epsilon":
                 hist_data = H_epsilon_DATA
                 hist_dummy = H_epsilon_DUMMY
-
+                
             tmp_t_data = [[],[]]
             tmp_hist_data = [[],[]]
             tmp_hist_dummy = [[],[]]
