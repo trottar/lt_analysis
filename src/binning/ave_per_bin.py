@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 19:24:53 trottar"
+# Time-stamp: "2024-01-17 19:26:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,10 +76,10 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
 
     for kin_type in kinematic_types:
 
-    # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_t_data = []
-    binned_hist_data = []
-    binned_hist_dummy = []
+        # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
+        binned_t_data = []
+        binned_hist_data = []
+        binned_hist_dummy = []
         
         # Loop through bins in t_data and identify events in specified bins
         for j in range(len(t_bins)-1):
