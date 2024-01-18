@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 20:43:24 trottar"
+# Time-stamp: "2024-01-17 20:47:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -583,7 +583,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict):
         
 def bin_simc(kinematic_types, tree_simc, t_bins, inpDict):
 
-    processed_dict = process_hist_data(tree_simc, t_bins, inpDict)
+    processed_dict = process_hist_simc(tree_simc, t_bins, inpDict)
     
     binned_dict = {}
     
