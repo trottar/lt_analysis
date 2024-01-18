@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 19:26:59 trottar"
+# Time-stamp: "2024-01-17 19:29:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -383,12 +383,6 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                     tmp_hist_data[0].append(H_epsilon_DATA.GetBinCenter(i))
                     tmp_hist_data[1].append(H_epsilon_DATA.GetBinContent(i))                    
                 tmp_binned_hist_data.append(tmp_hist_data)
-
-            tmp_hist_dummy = [[],[]]                
-            for i in range(1, H_t_DUMMY.GetNbinsX() + 1):
-                tmp_hist_dummy[0].append(H_t_DUMMY.GetBinCenter(i))
-                tmp_hist_dummy[1].append(H_t_DUMMY.GetBinContent(i))                
-            tmp_binned_t_dummy.append(tmp_hist_dummy)
 
             if kin_type == "t":
                 tmp_binned_hist_dummy.append(tmp_hist_dummy)
