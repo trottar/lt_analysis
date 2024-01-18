@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 12:34:58 trottar"
+# Time-stamp: "2024-01-18 12:35:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -336,7 +336,7 @@ for k in range(NumtBins):
 
     # Add a gray line at unity
     line_at_y1 = TLine(multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmin(), 1.0, multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmax(), 1.0)
-    line_at_y1.SetLineColor(17)  # 17 corresponds to gray color
+    line_at_y1.SetLineColor(7)  # 17 corresponds to gray color
     line_at_y1.SetLineStyle(2)   # Dashed line style
     line_at_y1.Draw("same")
     
