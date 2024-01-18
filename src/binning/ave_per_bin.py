@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 19:03:10 trottar"
+# Time-stamp: "2024-01-17 19:03:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -381,8 +381,8 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                 bin_center = t_data.GetBinCenter(bin_index)
                 if t_bins[j] <= bin_center <= t_bins[j+1]:
                     if hist_data.GetBinContent(bin_index) > 0:                    
-                        #print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
-                        #print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
+                        print("Checking if {} <= {:.3f} <= {}".format(t_bins[j], bin_center, t_bins[j+1]))
+                        print("Bin {}, Hist bin {:.3f} Passed with content {:.3f}".format(j+1, hist_data.GetBinCenter(bin_index), hist_data.GetBinContent(bin_index)))
                         tmp_t_data[0].append(t_data.GetBinCenter(bin_index))
                         tmp_t_data[1].append(t_data.GetBinContent(bin_index))
                         tmp_hist_data[0].append(hist_data.GetBinCenter(bin_index))
