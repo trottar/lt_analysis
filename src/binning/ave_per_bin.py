@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 19:51:00 trottar"
+# Time-stamp: "2024-01-17 20:24:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,7 +104,7 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
             H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
             H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-            print("\n{}: Binning t-bin {} data...".format(kin_type, j+1))
+            print("\n{}: Processing t-bin {} data...".format(kin_type, j+1))
             for i,evt in enumerate(TBRANCH_DATA):
 
                 # Progress bar
@@ -161,7 +161,7 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         H_W_DATA.Fill(evt.W)                        
                         H_epsilon_DATA.Fill(evt.epsilon)
 
-            print("\n{}: Binning t-bin {} rand...".format(kin_type, j+1))
+            print("\n{}: Processing t-bin {} rand...".format(kin_type, j+1))
             for i,evt in enumerate(TBRANCH_RAND):
 
                 # Progress bar
@@ -218,7 +218,7 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         H_W_RAND.Fill(evt.W)                        
                         H_epsilon_RAND.Fill(evt.epsilon)
 
-            print("\n{}: Binning t-bin {} dummy...".format(kin_type, j+1))
+            print("\n{}: Processing t-bin {} dummy...".format(kin_type, j+1))
             for i,evt in enumerate(TBRANCH_DUMMY):
 
                 # Progress bar
@@ -275,7 +275,7 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
                         H_W_DUMMY.Fill(evt.W)                        
                         H_epsilon_DUMMY.Fill(evt.epsilon)
 
-            print("\n{}: Binning t-bin {} dummy rand...".format(kin_type, j+1))
+            print("\n{}: Processing t-bin {} dummy rand...".format(kin_type, j+1))
             for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
                 # Progress bar
@@ -524,7 +524,7 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict):
     
         # Loop through bins in t_simc and identify events in specified bins
         for j in range(len(t_bins)-1):
-            print("\n{}: Binning t-bin {} simc...".format(kin_type, j+1))
+            print("\n{}: Processing t-bin {} simc...".format(kin_type, j+1))
             for i,evt in enumerate(TBRANCH_SIMC):
 
                 # Progress bar
