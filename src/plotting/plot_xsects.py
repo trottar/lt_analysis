@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 12:31:43 trottar"
+# Time-stamp: "2024-01-18 12:32:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -732,7 +732,7 @@ for k in range(NumtBins):
     # Display the fit results or use them for further analysis
     #print("Fit results:", fit_results_root)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_loeps)
-    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_loeps)
+    #multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_loeps)
 
     G_xmod_phi_hieps = TGraph()
     j=0
@@ -755,7 +755,7 @@ for k in range(NumtBins):
     # Display the fit results or use them for further analysis
     #print("Fit results:", fit_results_root)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)
-    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_hieps)
+    #multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_hieps)
     
     C_xmodreal_phi.cd(k+1)
     
@@ -864,7 +864,7 @@ for k in range(NumtBins):
     # Display the fit results or use them for further analysis
     #print("Fit results:", fit_results_root)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_loeps)
-    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_loeps)
+    #multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_loeps)
 
     G_xmod_phi_hieps = TGraph()
     j=0
@@ -887,7 +887,7 @@ for k in range(NumtBins):
     # Display the fit results or use them for further analysis
     #print("Fit results:", fit_results_root)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)
-    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_hieps)
+    #multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_hieps)
     
     C_xmodreal_phi.cd(k+1)
     
