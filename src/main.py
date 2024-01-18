@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 00:55:53 trottar"
+# Time-stamp: "2024-01-18 01:34:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,12 +65,16 @@ NumPhiBins = int(sys.argv[11])
 runNumRight = sys.argv[12]
 runNumLeft = sys.argv[13]
 runNumCenter = sys.argv[14]
-data_charge_right = int(sys.argv[15])/1e9 # Convert from uC to C
-data_charge_left = int(sys.argv[16])/1e9 # Convert from uC to C
-data_charge_center = int(sys.argv[17])/1e9 # Convert from uC to C
-dummy_charge_right = int(sys.argv[18])/1e9 # Convert from uC to C
-dummy_charge_left = int(sys.argv[19])/1e9 # Convert from uC to C
-dummy_charge_center = int(sys.argv[20])/1e9 # Convert from uC to C
+# Convert from C to uC?????
+# Divide by 1000 to counter converting to interger (see src/setup/findEffectiveCharge.py),
+# then divide by 1e6 to convert C to uC
+# ERROR: Need to investigate
+data_charge_right = int(sys.argv[15])/1e9
+data_charge_left = int(sys.argv[16])/1e9
+data_charge_center = int(sys.argv[17])/1e9
+dummy_charge_right = int(sys.argv[18])/1e9
+dummy_charge_left = int(sys.argv[19])/1e9
+dummy_charge_center = int(sys.argv[20])/1e9
 InData_efficiency_right = sys.argv[21]
 InData_efficiency_left = sys.argv[22]
 InData_efficiency_center = sys.argv[23]

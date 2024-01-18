@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 00:45:20 trottar"
+# Time-stamp: "2024-01-18 02:15:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,8 +142,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 if(ALLCUTS):                
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DATA.Fill(-evt.MandelT)
                             H_MM_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
@@ -199,8 +199,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 if(ALLCUTS):                
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_RAND.Fill(-evt.MandelT)
                             H_MM_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
@@ -256,8 +256,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 if(ALLCUTS):                
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DUMMY.Fill(-evt.MandelT)
                             H_MM_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
@@ -313,8 +313,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                 if(ALLCUTS):                
 
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= evt.ph_q*(180 / math.pi) <= phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",evt.ph_q*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DUMMY_RAND.Fill(-evt.MandelT)
                             H_MM_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
                             
@@ -417,9 +417,6 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         bin_val_dummy, hist_val_dummy = dummy
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
         total_count = np.sum(sub_val)
-        print("!!!!!!!!!!!total_count",total_count)
-        print("!!!!!!!!!!!normfac_data",normfac_data)
-        print("!!!!!!!!!!!total_count*normfac_data",total_count*normfac_data)
         yld = total_count*normfac_data
         yield_hist.append(yld)
         binned_sub_data[0].append(bin_val_data)
@@ -502,7 +499,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
                 if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
-                        if phi_bins[k] <= evt.phipq*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_SIMC.Fill(-evt.t)
                             H_MM_SIMC.Fill(evt.missmass)
 
@@ -575,9 +572,6 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
         bin_val_simc, hist_val_simc = simc
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc
         total_count = np.sum(sub_val)
-        print("!!!!!!!!!!!total_count",total_count)
-        print("!!!!!!!!!!!normfac_simc",normfac_simc)
-        print("!!!!!!!!!!!total_count*normfac_simc",total_count*normfac_simc)        
         yld = total_count*normfac_simc
         yield_hist.append(yld)
         binned_sub_simc[0].append(bin_val_simc)

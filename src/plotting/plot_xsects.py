@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 03:20:05 trottar"
+# Time-stamp: "2024-01-18 02:35:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -269,7 +269,7 @@ for k in range(NumtBins):
             G_ratio_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
             G_ratio_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
             j+=1
-    G_ratio_phi_hieps.SetMarkerStyle(21)
+    G_ratio_phi_hieps.SetMarkerStyle(23)
     G_ratio_phi_hieps.SetMarkerSize(1)
     G_ratio_phi_hieps.SetMarkerColor(2)
     multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)    
@@ -313,7 +313,7 @@ for k in range(NumtBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             G_Q2_t_hieps.SetPoint(j, t_bins[np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
-    G_Q2_t_hieps.SetMarkerStyle(21)
+    G_Q2_t_hieps.SetMarkerStyle(23)
     G_Q2_t_hieps.SetMarkerSize(1)
     G_Q2_t_hieps.SetMarkerColor(2)
     G_Q2_t.Add(G_Q2_t_hieps)    
@@ -357,7 +357,7 @@ for k in range(NumtBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             G_Q2_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
-    G_Q2_phi_hieps.SetMarkerStyle(21)
+    G_Q2_phi_hieps.SetMarkerStyle(23)
     G_Q2_phi_hieps.SetMarkerSize(1)
     G_Q2_phi_hieps.SetMarkerColor(2)
     multiDict["G_Q2_phi_{}".format(k+1)].Add(G_Q2_phi_hieps)    
@@ -403,7 +403,7 @@ for k in range(NumtBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             G_W_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['W'].tolist())[i])
             j+=1
-    G_W_phi_hieps.SetMarkerStyle(21)
+    G_W_phi_hieps.SetMarkerStyle(23)
     G_W_phi_hieps.SetMarkerSize(1)
     G_W_phi_hieps.SetMarkerColor(2)
     multiDict["G_W_phi_{}".format(k+1)].Add(G_W_phi_hieps)    
@@ -451,7 +451,7 @@ for k in range(NumtBins):
             G_xreal_thcm_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
             G_xreal_thcm_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
             j+=1
-    G_xreal_thcm_hieps.SetMarkerStyle(21)
+    G_xreal_thcm_hieps.SetMarkerStyle(23)
     G_xreal_thcm_hieps.SetMarkerSize(1)
     G_xreal_thcm_hieps.SetMarkerColor(2)
     multiDict["G_xreal_thcm_{}".format(k+1)].Add(G_xreal_thcm_hieps)    
@@ -499,7 +499,7 @@ for k in range(NumtBins):
             G_xmod_thcm_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['th_cm'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
             G_xmod_thcm_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
             j+=1
-    G_xmod_thcm_hieps.SetMarkerStyle(21)
+    G_xmod_thcm_hieps.SetMarkerStyle(23)
     G_xmod_thcm_hieps.SetMarkerSize(1)
     G_xmod_thcm_hieps.SetMarkerColor(2)
     multiDict["G_xmod_thcm_{}".format(k+1)].Add(G_xmod_thcm_hieps)    
@@ -552,7 +552,7 @@ for k in range(NumtBins):
             G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
             G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
             j+=1
-    G_xreal_phi_hieps.SetMarkerStyle(21)
+    G_xreal_phi_hieps.SetMarkerStyle(23)
     G_xreal_phi_hieps.SetMarkerSize(1)
     G_xreal_phi_hieps.SetMarkerColor(2)
     multiDict["G_xreal_phi_{}".format(k+1)].Add(G_xreal_phi_hieps)    
@@ -597,7 +597,7 @@ for k in range(NumtBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
             j+=1
-    G_xmod_phi_hieps.SetMarkerStyle(21)
+    G_xmod_phi_hieps.SetMarkerStyle(23)
     G_xmod_phi_hieps.SetMarkerSize(1)
     G_xmod_phi_hieps.SetMarkerColor(2)
     multiDict["G_xmod_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)    
@@ -620,6 +620,41 @@ C_xmodreal_phi = TCanvas()
 C_xmodreal_phi.SetGrid()
 C_xmodreal_phi.Divide(1,NumtBins)
 l_xmodreal_phi = TLegend(0.7, 0.6, 0.9, 0.9)
+
+import numpy as np
+import math
+from ROOT import TGraph, TF1, TCanvas
+
+# Define the function to fit
+def fit_function(x, p):
+    eps_sim = p[0]
+    t_gev = p[1]
+    q2_gev = p[2]
+    thetacm_sim = p[3]
+    q2_set = p[4]
+    p1 = p[5]
+    p2 = p[6]
+    p3 = p[7]
+    p4 = p[8]
+    p5 = p[9]
+    p6 = p[10]
+    p7 = p[11]
+    p8 = p[12]
+    p9 = p[13]
+    p10 = p[14]
+    p11 = p[15]
+    p13 = p[16]
+
+    tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
+    ftav = (abs(t_gev) - tav) / tav
+
+    sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
+    sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
+    siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
+    sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ftav * math.sin(thetacm_sim) ** 2
+
+    return (sigt + eps_sim * sigl + eps_sim * math.cos(2. * thetacm_sim) * sigtt +
+            math.sqrt(2.0 * eps_sim * (1. + eps_sim)) * math.cos(thetacm_sim) * siglt) / 1.0
 
 multiDict = {}
 for k in range(NumtBins):
@@ -645,7 +680,7 @@ for k in range(NumtBins):
             G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
             G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
             j+=1
-    G_xreal_phi_hieps.SetMarkerStyle(21)
+    G_xreal_phi_hieps.SetMarkerStyle(23)
     G_xreal_phi_hieps.SetMarkerSize(1)
     G_xreal_phi_hieps.SetMarkerColor(2)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xreal_phi_hieps)    
@@ -659,7 +694,19 @@ for k in range(NumtBins):
     G_xmod_phi_loeps.SetMarkerStyle(30)
     G_xmod_phi_loeps.SetMarkerSize(1)
     G_xmod_phi_loeps.SetMarkerColor(1)
+    # Create a TF1 function with the fit_function
+    fit_unsep_loeps = TF1("fit_unsep_loeps", fit_function, 0, 360, 17)
+    # Set initial parameter values
+    fit_unsep_loeps.SetParameters(1.0, 1.0, 1.0, 1.0, 2.115, 0.88669E+03, -0.41000E+03, -0.25327E+02, 0.11100E+02, 0.31423E+02, -0.18000E+02, 0.16685E+02, -0.31000E+02, 0, 0, 0, 0)
+    fit_unsep_loeps.SetLineColor(1)
+    # Fit the TGraph with the TF1 function
+    G_xmod_phi_loeps.Fit(fit_unsep_loeps)
+    # Access the fit results
+    fit_results_root = [fit_unsep_loeps.Eval(phi_bin_centers[i]) for i in range(NumtBins * NumPhiBins)]
+    # Display the fit results or use them for further analysis
+    print("Fit results:", fit_results_root)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_loeps)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_loeps)
 
     G_xmod_phi_hieps = TGraph()
     j=0
@@ -667,10 +714,22 @@ for k in range(NumtBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
             G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
             j+=1
-    G_xmod_phi_hieps.SetMarkerStyle(30)
+    G_xmod_phi_hieps.SetMarkerStyle(27)
     G_xmod_phi_hieps.SetMarkerSize(1)
     G_xmod_phi_hieps.SetMarkerColor(2)
-    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)    
+    # Create a TF1 function with the fit_function
+    fit_unsep_hieps = TF1("fit_unsep_hieps", fit_function, 0, 360, 17)
+    # Set initial parameter values
+    fit_unsep_hieps.SetParameters(1.0, 1.0, 1.0, 1.0, 2.115, 0.88669E+03, -0.41000E+03, -0.25327E+02, 0.11100E+02, 0.31423E+02, -0.18000E+02, 0.16685E+02, -0.31000E+02, 0, 0, 0, 0)
+    fit_unsep_hieps.SetLineColor(2)
+    # Fit the TGraph with the TF1 function
+    G_xmod_phi_hieps.Fit(fit_unsep_hieps)
+    # Access the fit results
+    fit_results_root = [fit_unsep_hieps.Eval(phi_bin_centers[i]) for i in range(NumtBins * NumPhiBins)]
+    # Display the fit results or use them for further analysis
+    print("Fit results:", fit_results_root)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].Add(fit_unsep_hieps)
     
     C_xmodreal_phi.cd(k+1)
     
@@ -680,10 +739,10 @@ for k in range(NumtBins):
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
-
+    
 l_xmodreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
 l_xmodreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")    
-l_xmodreal_phi.AddEntry(G_xmod_phi_loeps,"loeps")
-l_xmodreal_phi.AddEntry(G_xmod_phi_hieps,"hieps")
+l_xmodreal_phi.AddEntry(G_xmod_phi_loeps,"loeps model")
+l_xmodreal_phi.AddEntry(G_xmod_phi_hieps,"hieps model")
 l_xmodreal_phi.Draw()
 C_xmodreal_phi.Print(outputpdf+')')
