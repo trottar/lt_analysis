@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 00:37:27 trottar"
+# Time-stamp: "2024-01-18 00:41:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -418,7 +418,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         sub_val = np.subtract(hist_val_data, hist_val_dummy)
         total_count = np.sum(sub_val)
         print("!!!!!!!!!!!total_count",total_count)
-        print("!!!!!!!!!!!normfac_data",normfac_data)
+        print("!!!!!!!!!!!1/normfac_data",1/normfac_data)
         print("!!!!!!!!!!!total_count*normfac_data",total_count*normfac_data)
         yld = total_count*normfac_data
         yield_hist.append(yld)
