@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 23:57:34 trottar"
+# Time-stamp: "2024-01-18 00:03:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -552,7 +552,7 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict):
                     "binned_hist_simc" : binned_hist_simc
                 }
         
-    return binned_dict                
+    return binned_dict
 
 def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
 
