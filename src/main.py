@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 14:12:18 trottar"
+# Time-stamp: "2024-01-18 00:45:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,12 +65,12 @@ NumPhiBins = int(sys.argv[11])
 runNumRight = sys.argv[12]
 runNumLeft = sys.argv[13]
 runNumCenter = sys.argv[14]
-data_charge_right = int(sys.argv[15])/1000 # Convert from uC to C
-data_charge_left = int(sys.argv[16])/1000 # Convert from uC to C
-data_charge_center = int(sys.argv[17])/1000 # Convert from uC to C
-dummy_charge_right = int(sys.argv[18])/1000 # Convert from uC to C
-dummy_charge_left = int(sys.argv[19])/1000 # Convert from uC to C
-dummy_charge_center = int(sys.argv[20])/1000 # Convert from uC to C
+data_charge_right = int(sys.argv[15])/1e6 # Convert from uC to C
+data_charge_left = int(sys.argv[16])/1e6 # Convert from uC to C
+data_charge_center = int(sys.argv[17])/1e6 # Convert from uC to C
+dummy_charge_right = int(sys.argv[18])/1e6 # Convert from uC to C
+dummy_charge_left = int(sys.argv[19])/1e6 # Convert from uC to C
+dummy_charge_center = int(sys.argv[20])/1e6 # Convert from uC to C
 InData_efficiency_right = sys.argv[21]
 InData_efficiency_left = sys.argv[22]
 InData_efficiency_center = sys.argv[23]
