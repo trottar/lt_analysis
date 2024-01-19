@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-19 15:54:32 trottar"
+# Time-stamp: "2024-01-19 16:31:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,6 +154,7 @@ echo
 
 # Replace p with '.'
 Q2=${Q2//p/.}
+W=${W//p/.}
 
 cd "${LTANAPATH}/src/"
 echo
@@ -188,6 +189,7 @@ echo "Running calc_xsect..."
 
 # Replace p with '.'
 Q2=${Q2//./p}
+W=${W//./p}
 
 KIN="Q${Q2}W${W}"
 

@@ -25,7 +25,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       character*4 inp_pid
       integer inp_pol
-      real inp_Q2, inp_loeps, inp_hieps      
+      real inp_Q2, inp_Q2, inp_loeps, inp_hieps      
       
       write(*,*) "Inputing particle, polarity, Q2, W and both epsilons:"
       read(*,*) inp_pid, inp_pol, inp_Q2, inp_W, inp_loeps, inp_hieps
