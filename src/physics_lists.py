@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-19 15:02:23 trottar"
+# Time-stamp: "2024-01-19 15:37:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,7 +45,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     Ws = inpDict["W"]
     Qs = inpDict["Q2"]
     Q2 = float(Qs.replace("p","."))
-    W = float(W.replace("p","."))
+    W = float(Ws.replace("p","."))
     EPSVAL = float(inpDict["EPSVAL"] )
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
