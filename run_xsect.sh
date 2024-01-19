@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 12:13:23 trottar"
+# Time-stamp: "2024-01-19 15:54:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -169,7 +169,7 @@ if [ $? -ne 0 ]; then
 fi
 echo
 echo "Running average_kinematics..."
-./average_kinematics.expect ${ParticleType} ${POL} ${Q2} ${LOEPS} ${HIEPS}
+./average_kinematics.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
@@ -184,7 +184,7 @@ if [ $? -ne 0 ]; then
 fi
 echo
 echo "Running calc_xsect..."
-./calc_xsect.expect ${ParticleType} ${POL} ${Q2} ${LOEPS} ${HIEPS}
+./calc_xsect.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 
 # Replace p with '.'
 Q2=${Q2//./p}
