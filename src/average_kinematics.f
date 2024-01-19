@@ -27,7 +27,8 @@ c     Output: averages/averages.*.dat
       end
 
 *-----------------------------------------------------------------------
-      subroutine average_k(pid,pol_set,q2_set,w_set,eps_lo_set,eps_hi_set)
+      subroutine average_k(pid,pol_set,q2_set,w_set,
+     *     eps_lo_set,eps_hi_set)
 
 c     Average W and Q2 over theta_pq settings, then over low and high epsilon
 c     settings, then over neg. and pos. settings,
