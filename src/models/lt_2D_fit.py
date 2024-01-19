@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 14:07:36 trottar"
+# Time-stamp: "2024-01-19 18:08:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -652,8 +652,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c3
         del cc4
 
-fn_lo =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(LOEPS)*100)
-fn_hi =  "{}/src/{}/xsects/x_unsep.{}_{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), float(HIEPS)*100)
+fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
+fn_hi =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
 
 g_sig_l_total = TGraphErrors()
 g_sig_t_total = TGraphErrors()
