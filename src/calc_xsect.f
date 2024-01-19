@@ -127,7 +127,7 @@ c     construct ratio data file name.
 
       write(r_fn,10) pid,pol,nint(q2*10),nint(w*10),nint(eps*100)
  10   format(a4,'/averages/aver.'
-     *     ,a2,'_Q',i2.2,'W',i3.2,'_',i2,'.dat')
+     *     ,a2,'_Q',i2.2,'W',i3.3,'_',i2,'.dat')
       print*,'       r_fn=',r_fn
 
       open(51,file=r_fn)
@@ -135,7 +135,7 @@ c     construct ratio data file name.
 c     construct kinematics data file name.
 
       write(kin_fn,20) pid,nint(q2*10),nint(w*10)
- 20   format(a4,'/averages/avek.Q',i2.2,'W',i3.2,'.dat')
+ 20   format(a4,'/averages/avek.Q',i2.2,'W',i3.3,'.dat')
       print*,'       kin_fn=',kin_fn
 
       open(52,file=kin_fn)
@@ -144,7 +144,7 @@ c     construct kinematics data file name.
       write(xunsep_fn,30) pid,pol,nint(q2_set*10),nint(w_set*10),
      *     nint(eps_set*100)
  30   format(a4,'/xsects/x_unsep.',a2,'_Q',
-     *     i2.2,'W',i3.2,'_',i2,'.dat')
+     *     i2.2,'W',i3.3,'_',i2,'.dat')
       print*,'       xunsep_fn=',xunsep_fn
 c      pause
       
