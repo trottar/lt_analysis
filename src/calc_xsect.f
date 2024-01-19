@@ -111,7 +111,7 @@ c 2       format(i5,5f10.5,2i5)
       Eb=0.
       open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
-         read(55,*) Eb,q2,eps
+         read(55,*) Eb,q2,w,eps
 c         write(*,*) Eb,q2,eps
          if(q2.eq.q2_set.and.w.eq.w_set.and.
      *     eps.eq.eps_set) go to 5         
