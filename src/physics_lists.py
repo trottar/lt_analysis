@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-19 15:37:25 trottar"
+# Time-stamp: "2024-01-19 17:24:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -366,7 +366,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 processed_Q2vals.add(Q2val)
 
     if float(runNumLeft[0]) != 0:
-        f_list = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
+        f_list = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
         output_file_lst.append(f_list.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
@@ -382,7 +382,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 processed_Q2vals.add(Q2val)
 
     if float(runNumCenter[0]) != 0:
-        f_list = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_center*1000))
+        f_list = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
         output_file_lst.append(f_list.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
