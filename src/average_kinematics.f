@@ -144,7 +144,7 @@ c     Get low, high eps. and neg., pos. polarity data.
                   write(fn,'(a4,''/kindata/kindata.'',a2,''_Q'',i2.2,
      *                 ''W'',i3.3,''_'',i2.2,''_'',SP,i5.4,S,
      *                 ''.dat'')') pid, pol, nint(q2_set*10.),
-     *                 nint(w_set*10.), nint(eps_set(lh)*100.),
+     *                 nint(w_set*100.), nint(eps_set(lh)*100.),
      *                 nint(th_pq*1000.)
                   print*,'fn=',fn
 c                 pause
@@ -314,7 +314,7 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
 c     Save data.
 
       write(fn,'(a4,''/averages/avek.Q'',i2.2,''W'',i3.3,
-     *     ''.dat'')') pid,nint(q2_set*10.),nint(w_set*10.)
+     *     ''.dat'')') pid,nint(q2_set*10.),nint(w_set*100.)
       print*,'fn=',fn
       print*
 
