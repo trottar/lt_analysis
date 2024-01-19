@@ -27,14 +27,15 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer inp_pol
       real inp_Q2, inp_loeps, inp_hieps      
       
-      write(*,*) "Inputing particle, polarity, Q2 and both epsilons:"
-      read(*,*) inp_pid, inp_pol, inp_Q2, inp_loeps, inp_hieps
+      write(*,*) "Inputing particle, polarity, Q2, W and both epsilons:"
+      read(*,*) inp_pid, inp_pol, inp_Q2, inp_W, inp_loeps, inp_hieps
 
-      write(*,*) "PID = ",inp_pid,"POL = ",inp_pol,"Q2 = ",inp_Q2,
+      write(*,*) "PID = ",inp_pid,"POL = ",inp_pol,
+     *           "Q2 = ",inp_Q2,"W = ",inp_W,
      *           "low_eps = ",inp_loeps,"high_eps = ",inp_hieps
 
-      call xsect(inp_pid, inp_pol, inp_Q2, inp_loeps)
-      call xsect(inp_pid, inp_pol, inp_Q2, inp_hieps)
+      call xsect(inp_pid, inp_pol, inp_Q2, inp_W, inp_loeps)
+      call xsect(inp_pid, inp_pol, inp_Q2, inp_W, inp_hieps)
       
       print*,  "-------------------------------------------------"
       
@@ -43,12 +44,12 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
 *=======================================================================
 
-      subroutine xsect(pid,npol_set,q2_set,eps_set)
+      subroutine xsect(pid,npol_set,q2_set,w_set,eps_set)
 
       implicit none
 
       integer npol_set
-      real q2_set,eps_set
+      real q2_set,eps_set,w_set
 
       character*80 r_fn, kin_fn, mod_fn
       character*80 xunsep_fn, xsep_fn
@@ -58,7 +59,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer it,ip
       real Eb,eps
 
-      real q2_bin
+      real q2_bin, w_bin
       integer t_bin, phi_bin
       
       integer nt,nphi
@@ -75,7 +76,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       open (unit = 22, file =trim(pid) // "/t_bin_interval", 
      *     action='read')
-      read (22,*) q2_bin, t_bin, phi_bin
+      read (22,*) q2_bin, w_bin, t_bin, phi_bin
 
       nt = t_bin
       nphi = phi_bin
@@ -88,8 +89,9 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       tmn=0.
       tmx=0.
       open(55,file=trim(pid) // '/list.settings')
-      do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.eps.ne.eps_set)
-         read(55,*) ipol,q2,eps,th_pq,tmn,tmx
+      do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.
+     *     w.ne.w_set.or.eps.ne.eps_set)
+         read(55,*) ipol,q2,w,eps,th_pq,tmn,tmx
 *         write(6,2)ipol,q2,eps,th_pq,tmn,tmx
 c 2       format(i5,5f10.5,2i5)
       end do
@@ -111,35 +113,38 @@ c 2       format(i5,5f10.5,2i5)
       do while(.true.)
          read(55,*) Eb,q2,eps
 c         write(*,*) Eb,q2,eps
-         if(q2.eq.q2_set.and.eps.eq.eps_set) go to 5         
+         if(q2.eq.q2_set.and.w.eq.w_set.and.
+     *     eps.eq.eps_set) go to 5         
       end do
  5    close(55)
       
-      write(6,4)Eb,q2,eps,pol
- 4    format(' xsect: Eb=',f8.5,'   at Q2=',f7.4,
+      write(6,4)Eb,q2,w,eps,pol
+ 4    format(' xsect: Eb=',f8.5,
+     *     '   at Q2=',f7.4,'   at W=',f7.4,
      *     '  eps=',f6.4,'  pol=',a2)
 
 c     construct ratio data file name.
 
-      write(r_fn,10) pid,pol,nint(q2*10),nint(eps*100)
+      write(r_fn,10) pid,pol,nint(q2*10),nint(w*10),nint(eps*100)
  10   format(a4,'/averages/aver.'
-     *     ,a2,'_',i2.2,'_',i2,'.dat')
+     *     ,a2,'_Q',i2.2,'W',i3.2,'_',i2,'.dat')
       print*,'       r_fn=',r_fn
 
       open(51,file=r_fn)
 
 c     construct kinematics data file name.
 
-      write(kin_fn,20) pid,nint(q2*10)
- 20   format(a4,'/averages/avek.',i2.2,'.dat')
+      write(kin_fn,20) pid,nint(q2*10),nint(w*10)
+ 20   format(a4,'/averages/avek.Q',i2.2,'W',i3.2,'.dat')
       print*,'       kin_fn=',kin_fn
 
       open(52,file=kin_fn)
 
 *     construct output file name.
-      write(xunsep_fn,30) pid,pol,nint(q2_set*10),nint(eps_set*100)
- 30   format(a4,'/xsects/x_unsep.',a2,'_',
-     *     i2.2,'_',i2,'.dat')
+      write(xunsep_fn,30) pid,pol,nint(q2_set*10),nint(w_set*10),
+     *     nint(eps_set*100)
+ 30   format(a4,'/xsects/x_unsep.',a2,'_Q',
+     *     i2.2,'W',i3.2,'_',i2,'.dat')
       print*,'       xunsep_fn=',xunsep_fn
 c      pause
       

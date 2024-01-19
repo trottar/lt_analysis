@@ -11,21 +11,23 @@ c     Output: averages/averages.*.dat
 
       character*4 inp_pid
       integer inp_pol
-      real inp_Q2, inp_loeps, inp_hieps
-      write(*,*) "Inputing particle, polarity, Q2 and both epsilons:"
-      read(*,*) inp_pid, inp_pol, inp_Q2, inp_loeps, inp_hieps
+      real inp_Q2, inp_W, inp_loeps, inp_hieps
+      write(*,*) "Inputing particle, polarity, Q2, W and both epsilons:"
+      read(*,*) inp_pid, inp_pol, inp_Q2, inp_W, inp_loeps, inp_hieps
 
-      write(*,*) "PID = ",inp_pid,"POL = ",inp_pol,"Q2 = ",inp_Q2,
-     *           "low_eps = ",inp_loeps,"high_eps = ",inp_hieps
+      write(*,*) "PID = ",inp_pid,"POL = ",inp_pol,
+     *     "Q2 = ",inp_Q2,"W = ",inp_W,
+     *     "low_eps = ",inp_loeps,"high_eps = ",inp_hieps
       
-      call average_k(inp_pid, inp_pol, inp_Q2, inp_loeps, inp_hieps)
+      call average_k(inp_pid, inp_pol, inp_Q2, inp_W,
+     *     inp_loeps, inp_hieps)
       print*,  "-------------------------------------------------"
       
       stop
       end
 
 *-----------------------------------------------------------------------
-      subroutine average_k(pid,pol_set,q2_set,eps_lo_set,eps_hi_set)
+      subroutine average_k(pid,pol_set,q2_set,w_set,eps_lo_set,eps_hi_set)
 
 c     Average W and Q2 over theta_pq settings, then over low and high epsilon
 c     settings, then over neg. and pos. settings,
@@ -49,9 +51,9 @@ c     enough space for the sets
       real, dimension(nbin) :: eps_lo,eps_hi
       
       integer pol_set
-      real q2_set
+      real q2_set, w_set
 
-      real q2_bin
+      real q2_bin, w_bin
       integer t_bin, phi_bin
 
       integer nt,nphi
@@ -66,7 +68,7 @@ c     enough space for the sets
 
       open (unit = 22, file =trim(pid) // "/t_bin_interval", 
      *     action='read')
-      read (22,*) q2_bin, t_bin, phi_bin
+      read (22,*) q2_bin, w_bin, t_bin, phi_bin
 
       close(22)
 
@@ -117,9 +119,9 @@ c     Get low, high eps. and neg., pos. polarity data.
             open(55, file=trim(pid) // '/list.settings')
             do while(.true.)
 
-               read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx
+               read(55,*,end=9) ipol,q2,w,eps,th_pq,tmn,tmx
                if(ipol.eq.pol_set.and.q2.eq.q2_set.and.
-     &              eps.eq.eps_set(lh)) then
+     &              w.eq.w_set.and.eps.eq.eps_set(lh)) then
 
                   if(ipol.eq.-1) then
                      pol='mn'
@@ -138,9 +140,10 @@ c     Get low, high eps. and neg., pos. polarity data.
 *                  WRITE(*,*) 'th_pq = ', th_pq
 *                  WRITE(*,*) 'tmn = ', tmn
 *                  WRITE(*,*) 'tmx = ', tmx
-                  write(fn,'(a4,''/kindata/kindata.'',a2,''_'',i2.2,
-     *                 ''_'',i2.2,''_'',SP,i5.4,S,''.dat'')') pid, pol,
-     *                 nint(q2_set*10.), nint(eps_set(lh)*100.),
+                  write(fn,'(a4,''/kindata/kindata.'',a2,''_Q'',i2.2,
+     *                 ''W'',i3.2,''_'',i2.2,''_'',SP,i5.4,S,
+     *                 ''.dat'')') pid, pol, nint(q2_set*10.),
+     *                 nint(w_set*10.), nint(eps_set(lh)*100.),
      *                 nint(th_pq*1000.)
                   print*,'fn=',fn
 c                 pause
@@ -290,13 +293,15 @@ c     Get Beam energy at first.
       Eb=0.
       open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
-         read(55,*) Eb,q2,eps
-         write(*,*) Eb,q2,eps
-         if(q2.eq.q2_set.and.eps.eq.eps_hi_set) go to 5
+         read(55,*) Eb,q2,w,eps
+         write(*,*) Eb,q2,w,eps
+         if(q2.eq.q2_set.and.w.eq.w_set.and.
+     *     eps.eq.eps_hi_set) go to 5
       end do
  5    close(55)
 c      Eb=Eb/1000.               !Mev -> Gev units.
-      print*,'xsect: Eb=',Eb,'   at Q2=',q2,'  eps=',eps,'  pol=',pol
+      print*,'xsect: Eb=',Eb,'   at Q2=',q2,'   at W=',w,
+     *     '  eps=',eps,'  pol=',pol
 
       do it=1,ntbins
          tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
@@ -307,8 +312,8 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
 
 c     Save data.
 
-      write(fn,'(a4,''/averages/avek.'',i2.2,
-     *     ''.dat'')') pid,nint(q2_set*10.)
+      write(fn,'(a4,''/averages/avek.Q'',i2.2,''W'',i3.2,
+     *     ''.dat'')') pid,nint(q2_set*10.),nint(w_set*10.)
       print*,'fn=',fn
       print*
 

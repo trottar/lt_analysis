@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 01:56:08 trottar"
+# Time-stamp: "2024-01-19 15:02:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,9 +42,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     ################################################################################################################################################
 
     kinematics = inpDict["kinematics"] 
-    W = inpDict["W"]
+    Ws = inpDict["W"]
     Qs = inpDict["Q2"]
     Q2 = float(Qs.replace("p","."))
+    W = float(W.replace("p","."))
     EPSVAL = float(inpDict["EPSVAL"] )
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
@@ -250,36 +251,36 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
             try:
-                check_line = "{:.3f} {} {:.4f}\n".format(ebeam_right, Q2, EPSVAL)
+                check_line = "{:.3f} {} {} {:.4f}\n".format(ebeam_right, Q2, W, EPSVAL)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list_settings,check_line)
             except ValueError:
-                print("Error: Value not float...",type(ebeam_right), type(Q2), type(EPSVAL))
+                print("Error: Value not float...",type(ebeam_right), type(Q2), type(W), type(EPSVAL))
 
     if float(runNumLeft[0]) != 0:
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
             try:
-                check_line = "{:.3f} {} {:.4f}\n".format(ebeam_left, Q2, EPSVAL)
+                check_line = "{:.3f} {} {} {:.4f}\n".format(ebeam_left, Q2, W, EPSVAL)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list_settings,check_line)
             except ValueError:
-                print("Error: Value not float...",type(ebeam_left), type(Q2), type(EPSVAL))
+                print("Error: Value not float...",type(ebeam_left), type(Q2), type(W), type(EPSVAL))
 
     if float(runNumCenter[0]) != 0:
         # First check if line exists
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
             try:
-                check_line = "{:.3f} {} {:.4f}\n".format(ebeam_center, Q2, EPSVAL)
+                check_line = "{:.3f} {} {} {:.4f}\n".format(ebeam_center, Q2, W, EPSVAL)
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list_settings,check_line)
             except ValueError:
-                print("Error: Value not float...",type(ebeam_center), type(Q2), type(EPSVAL))
+                print("Error: Value not float...",type(ebeam_center), type(Q2), type(W), type(EPSVAL))
                 
     ################################################################################################################################################
 
@@ -290,7 +291,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         open(f_list_settings, "w").close()
 
     if float(runNumRight[0]) != 0:    
-        check_line = "{:d} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_right, tmin, tmax, NumtBins)
+        check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
         check_kin = ' '.join(check_line.split()[:4])
         inLine = False
         # Save lines in the file
@@ -309,7 +310,26 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             write_to_file(f_list_settings,check_line)
 
     if float(runNumLeft[0]) != 0:    
-        check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+        check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+        check_kin = ' '.join(check_line.split()[:4])
+        inLine = False
+        # Save lines in the file
+        with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
+        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
+        with open(f_list_settings, 'w') as f:
+            for line in lines:
+                if check_kin in line:
+                    inLine = True
+                    f.write(check_line)
+                else:
+                    f.write(line)                    
+        # Append file if line not in file already
+        if not inLine:
+            write_to_file(f_list_settings,check_line)
+
+    if float(runNumCenter[0]) != 0:    
+        check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
         check_kin = ' '.join(check_line.split()[:4])
         inLine = False
         # Save lines in the file
@@ -327,29 +347,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         if not inLine:
             write_to_file(f_list_settings,check_line)
             
-    if float(runNumCenter[0]) != 0:    
-        check_line = "{:d} {} {:.4f} +{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, EPSVAL, thpq_center, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
-        # Save lines in the file
-        with open(f_list_settings, 'r') as f:
-            lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
-            for line in lines:
-                if check_kin in line:
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
-                
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
-        f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
+        f_list = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
         output_file_lst.append(f_list.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
@@ -365,11 +366,11 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 processed_Q2vals.add(Q2val)
 
     if float(runNumLeft[0]) != 0:
-        f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
+        f_list = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
         output_file_lst.append(f_list.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
-            
+
         processed_Q2vals = set()
         # Open a file in read mode
         with open(f_list, 'r') as f:
@@ -381,11 +382,11 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 processed_Q2vals.add(Q2val)
 
     if float(runNumCenter[0]) != 0:
-        f_list = '{}/src/{}/kindata/kindata.{}_{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100)
+        f_list = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_center*1000))
         output_file_lst.append(f_list.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_list, "w").close()
-            
+
         processed_Q2vals = set()
         # Open a file in read mode
         with open(f_list, 'r') as f:
@@ -395,10 +396,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 0.001, averW_center_data[i], 0.001, avert_center_data[i], 0.001)
                 write_to_file(f_list,check_line)
                 processed_Q2vals.add(Q2val)
-            
+                
     ################################################################################################################################################
 
-    f_list = '{}/src/{}/averages/aver.{}_{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), float(EPSVAL)*100)
+    f_list = '{}/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
     output_file_lst.append(f_list.split('/src/')[1])
     # Open the file in write mode, which creates a new empty file or overwrites the existing one
     open(f_list, "w").close()
@@ -413,26 +414,36 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
 
-    if float(runNumLeft[0]) != 0:                    
+    f_list = '{}/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
+    output_file_lst.append(f_list.split('/src/')[1])
+    # Open the file in write mode, which creates a new empty file or overwrites the existing one
+    open(f_list, "w").close()
+
+    if float(runNumLeft[0]) != 0:        
         # Open a file in read mode
         with open(f_list, 'r') as f:
-            lines = f.readlines()                    
+            lines = f.readlines()
             for i, ratio in enumerate(ratio_left):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.001, int(phibin_left[i]), int(tbin_left[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
 
-    if float(runNumCenter[0]) != 0:                    
+    f_list = '{}/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
+    output_file_lst.append(f_list.split('/src/')[1])
+    # Open the file in write mode, which creates a new empty file or overwrites the existing one
+    open(f_list, "w").close()
+
+    if float(runNumCenter[0]) != 0:        
         # Open a file in read mode
         with open(f_list, 'r') as f:
-            lines = f.readlines()                    
+            lines = f.readlines()
             for i, ratio in enumerate(ratio_center):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.001, int(phibin_center[i]), int(tbin_center[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_list,check_line)
-
+                    
     # Check if the last character is a newline and remove if so
     with open(f_list, "rb") as f:
         f.seek(-1, os.SEEK_END)

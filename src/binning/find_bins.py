@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 14:49:16 trottar"
+# Time-stamp: "2024-01-19 15:16:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,7 +122,7 @@ def find_bins(histlist, inpDict):
         # Write phibin_interval for lt_analysis scripts
         lines = []
         with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "w") as file:
-            file.write("{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
+            file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))            
             for i,phi in enumerate(bins):
                 lines.append("\t{}".format(float(phi)))
             file.writelines(lines)
@@ -161,7 +161,7 @@ def find_bins(histlist, inpDict):
         # Write t_bin_interval for lt_analysis scripts
         lines = []
         with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "w") as file:
-            file.write("{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
+            file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
             for i,t in enumerate(bins):
                 lines.append("\t{:.2f}".format(float(t)))
             file.writelines(lines)

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-15 17:03:23 trottar"
+# Time-stamp: "2024-01-19 15:06:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,7 +141,7 @@ if EPSSET == "low":
 
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
-new_param_file = '{}/src/{}/parameters/par.{}_{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""))
+new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 output_file_lst.append(new_param_file) 
 
 inpDict = prev_iter_combineDict["inpDict"]
@@ -378,7 +378,7 @@ create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Redefinition from above, but should be the same! This is just to stay consistent with main.py
 # ***Parameter files from last and this iteration!***
-old_param_file = '{}/{}/parameters/par.{}_{}.dat'.format(CACHEPATH, closest_date, ParticleType, pol_str, Q2.replace("p",""))
+old_param_file = '{}/{}/parameters/par.{}_Q{}W{}.dat'.format(CACHEPATH, closest_date, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 try:
     cut_summary_lst += "\nUnsep Parameterization for {}...".format(closest_date)
     with open(old_param_file, 'r') as file:
@@ -442,10 +442,10 @@ if EPSSET == "high":
     output_file_lst.append('models/lt_2D_fit.py')
     
     # Save sep and unsep values from current iteration
-    sep_file = '{}/xsects/x_sep.{}_{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""))
+    sep_file = '{}/xsects/x_sep.{}_Q{}W{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
     output_file_lst.append(sep_file)
 # Save for high and low eps
-unsep_file = '{}/xsects/x_unsep.{}_{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), float(EPSVAL)*100)
+unsep_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSVAL)*100)
 output_file_lst.append(unsep_file)    
 
 ##############################
