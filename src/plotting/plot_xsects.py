@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-20 18:00:38 trottar"
+# Time-stamp: "2024-01-20 18:14:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -185,7 +185,9 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['aver_loeps'] = file_to_df( \
                                                      LTANAPATH+"/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat" \
                                                      .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100) \
-                                                     , ['ratio', 'dratio', 'phibin', 'tbin'])            
+                                                     , ['ratio', 'dratio', 'phibin', 'tbin'])
+            # Exclude events where 'ratio' is zero from the DataFrame
+            file_df_dict['aver_loeps'] = file_df_dict['aver_loeps'][file_df_dict['aver_loeps']['ratio'] != 0]
             if row['thpq'] < 0.0:
                 file_df_dict['kindata_loeps_{}'.format('right')] = file_to_df( \
                                                                                LTANAPATH+"/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_{}.dat" \
@@ -213,7 +215,9 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['aver_hieps'] = file_to_df( \
                                                      LTANAPATH+"/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat" \
                                                      .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100) \
-                                                     , ['ratio', 'dratio', 'phibin', 'tbin'])            
+                                                     , ['ratio', 'dratio', 'phibin', 'tbin'])
+            # Exclude events where 'ratio' is zero from the DataFrame
+            file_df_dict['aver_hieps'] = file_df_dict['aver_hieps'][file_df_dict['aver_hieps']['ratio'] != 0]            
             if row['thpq'] < 0.0:
                 file_df_dict['kindata_hieps_{}'.format('right')] = file_to_df( \
                                                                                LTANAPATH+"/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_{}.dat" \
