@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-19 18:08:05 trottar"
+# Time-stamp: "2024-01-20 01:41:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -525,7 +525,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
               "t: ", t_list[i], "W: ", w_list[i], "Q2:", q2_list[i], \
               "eps_lo: ", lo_eps_list[i], "eps_hi: ", hi_eps_list[i])
 
-        fn_sep = "{}/src/{}/xsects/x_sep.{}_{}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""))
+        fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""))
         try:
             mode = 'w' if i == 0 else 'a'
             with open(fn_sep, mode) as f:
