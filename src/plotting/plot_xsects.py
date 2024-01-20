@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-19 18:45:27 trottar"
+# Time-stamp: "2024-01-20 18:00:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -177,7 +177,7 @@ phi_bin_centers = phi_bins
     
 for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
-        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat".format(ParticleType), ['ebeam', 'Q2', 'EPSVAL'])
+        file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat".format(ParticleType), ['ebeam', 'Q2', 'W', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/{}/averages/avek.Q{}W{}.dat".format(ParticleType, Q2.replace("p",""), W.replace("p","")) \
                                                , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])        
         
