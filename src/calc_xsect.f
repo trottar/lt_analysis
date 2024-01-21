@@ -74,8 +74,8 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       real phi
 
-      open (unit = 22, file =trim(pid) // "/t_bin_interval", 
-     *     action='read')
+      open (unit = 22, file = trim(pid) // "/t_bin_interval_Q" // 
+     *     nint(q2_set*10) // "W" // nint(w_set*100), action='read')
       read (22,*) q2_bin, w_bin, t_bin, phi_bin
 
       nt = t_bin

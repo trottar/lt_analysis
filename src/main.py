@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-19 15:05:47 trottar"
+# Time-stamp: "2024-01-21 13:42:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,8 +47,8 @@ if len(sys.argv)-1!=37:
 
 ##################################################################################################################################################    
 
-#DEBUG = True # Flag for plots
-DEBUG = False # Flag for plots
+#DEBUG = True # Flag for plot splash
+DEBUG = False # Flag for no plot splash
 
 # Input params
 kinematics = sys.argv[1].split("_")
@@ -349,7 +349,7 @@ if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
 
 try:
-    with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+    with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -359,12 +359,12 @@ try:
             del t_bins[0]
             t_bins = np.array([float(element) for element in t_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
+    print("{} not found...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
 except IOError:
-    print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
+    print("Error reading {}...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
 
 try:
-    with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+    with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -374,9 +374,9 @@ try:
             del phi_bins[0]
             phi_bins = np.array([float(element) for element in phi_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
+    print("{} not found...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
 except IOError:
-    print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
+    print("Error reading {}...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
     
 for hist in histlist:
     hist["t_bins"] = t_bins

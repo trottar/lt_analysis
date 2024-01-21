@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-20 18:18:34 trottar"
+# Time-stamp: "2024-01-21 13:44:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,7 +141,7 @@ setting_file = LTANAPATH+"/src/{}/list.settings".format(ParticleType)
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'W', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins'])
 
 try:
-    with open("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+    with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -151,14 +151,14 @@ try:
             del t_bins[0]
             t_bins = np.array([float(element) for element in t_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))
+    print("{} not found...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
 except IOError:
-    print("Error reading {}...".format("{}/src/{}/t_bin_interval".format(LTANAPATH, ParticleType)))    
+    print("Error reading {}...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
 
 t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
 
 try:
-    with open("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType), "r") as file:
+    with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
         # Check if the file has at least two lines
@@ -168,9 +168,9 @@ try:
             del phi_bins[0]
             phi_bins = np.array([float(element) for element in phi_bins])
 except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))
+    print("{} not found...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
 except IOError:
-    print("Error reading {}...".format("{}/src/{}/phi_bin_interval".format(LTANAPATH, ParticleType)))    
+    print("Error reading {}...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
 
 #phi_bin_centers = (phi_bins[:-1] + phi_bins[1:]) / 2
 phi_bin_centers = phi_bins
