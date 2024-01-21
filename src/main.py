@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-21 14:16:27 trottar"
+# Time-stamp: "2024-01-21 14:29:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,12 +76,12 @@ runNumCenter = sys.argv[14]
 #dummy_charge_left = int(sys.argv[19])/1e9
 #dummy_charge_center = int(sys.argv[20])/1e9
 # Convert from uC to C?????
-data_charge_right = int(sys.argv[15])/1e6
-data_charge_left = int(sys.argv[16])/1e6
-data_charge_center = int(sys.argv[17])/1e6
-dummy_charge_right = int(sys.argv[18])/1e6
-dummy_charge_left = int(sys.argv[19])/1e6
-dummy_charge_center = int(sys.argv[20])/1e6
+data_charge_right = int(sys.argv[15])/1000
+data_charge_left = int(sys.argv[16])/1000
+data_charge_center = int(sys.argv[17])/1000
+dummy_charge_right = int(sys.argv[18])/1000
+dummy_charge_left = int(sys.argv[19])/1000
+dummy_charge_center = int(sys.argv[20])/1000
 InData_efficiency_right = sys.argv[21]
 InData_efficiency_left = sys.argv[22]
 InData_efficiency_center = sys.argv[23]
