@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 02:35:33 trottar"
+# Time-stamp: "2024-01-21 13:51:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -87,6 +87,7 @@ def write_to_file(f_out,line,write_mode='a'):
     # Open a file in append mode
     with open(f_out, write_mode) as f:
         # Write the value of the variable to the file
+        print("Writing {} to {}...".format(line, f_out))
         f.write(line)        
 
 ################################################################################################################################################
