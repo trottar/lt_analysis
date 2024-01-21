@@ -233,8 +233,8 @@ do
 		    file_right="Q5p5W3p02right_${EPSILON}e"
 		    echo "Reading in run numbers for right file ${file_right_dummy}..."
 		    # Converts python output to bash array
-		    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=5p5, W=3p02
-		    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+		    IFS=', ' read -r -a dummy_right_tmp <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+		    echo "Dummy Run Numbers: [${dummy_right_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for right file ${file_right}..."
 		    IFS=', ' read -r -a data_right_tmp <<< "$( grab_runs ${file_right} )"             # RIGHT, Q2=5p5, W=3p02
@@ -244,8 +244,8 @@ do
 		    file_left_dummy="Q5p5W3p02left_${EPSILON}e_dummy"
 		    file_left="Q5p5W3p02left_${EPSILON}e"
 		    echo "Reading in run numbers for left file ${file_left_dummy}..."
-		    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=5p5, W=3p02
-		    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+		    IFS=', ' read -r -a dummy_left_tmp <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=5p5, W=3p02
+		    echo "Dummy Run Numbers: [${dummy_left_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for left file ${file_left}..."
 		    IFS=', ' read -r -a data_left_tmp <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=5p5, W=3p02
@@ -255,8 +255,8 @@ do
 		    file_center_dummy="Q5p5W3p02center_${EPSILON}e_dummy"
 		    file_center="Q5p5W3p02center_${EPSILON}e"
 		    echo "Reading in run numbers for center file ${file_center_dummy}..."
-		    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=5p5, W=3p02
-		    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+		    IFS=', ' read -r -a dummy_center_tmp <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=5p5, W=3p02
+		    echo "Dummy Run Numbers: [${dummy_center_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for center file ${file_center}..."
 		    IFS=', ' read -r -a data_center_tmp <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=5p5, W=3p02
@@ -276,8 +276,8 @@ do
 		    file_right_dummy="Q4p4W2p74right_${EPSILON}e_dummy"
 		    file_right="Q4p4W2p74right_${EPSILON}e"
 		    echo "Reading in run numbers for right file ${file_right_dummy}..."
-		    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=4p4, W=2p74
-		    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+		    IFS=', ' read -r -a dummy_right_tmp <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=4p4, W=2p74
+		    echo "Dummy Run Numbers: [${dummy_right_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for right file ${file_right}..."
 		    IFS=', ' read -r -a data_right_tmp <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=4p4, W=2p74
@@ -287,8 +287,8 @@ do
 		    file_left_dummy="Q4p4W2p74left_${EPSILON}e_dummy"
 		    file_left="Q4p4W2p74left_${EPSILON}e"
 		    echo "Reading in run numbers for left file ${file_left_dummy}..."
-		    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=4p4, W=2p74
-		    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+		    IFS=', ' read -r -a dummy_left_tmp <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=4p4, W=2p74
+		    echo "Dummy Run Numbers: [${dummy_left_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for left file ${file_left}..."
 		    IFS=', ' read -r -a data_left_tmp <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=4p4, W=2p74
@@ -298,8 +298,8 @@ do
 		    file_center_dummy="Q4p4W2p74center_${EPSILON}e_dummy"
 		    file_center="Q4p4W2p74center_${EPSILON}e"
 		    echo "Reading in run numbers for center file ${file_center_dummy}..."
-		    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=4p4, W=2p74
-		    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+		    IFS=', ' read -r -a dummy_center_tmp <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=4p4, W=2p74
+		    echo "Dummy Run Numbers: [${dummy_center_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for center file ${file_center}..."
 		    IFS=', ' read -r -a data_center_tmp <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=4p4, W=2p74
@@ -319,8 +319,8 @@ do
 		    file_right_dummy="Q3p0W3p14right_${EPSILON}e_dummy"
 		    file_right="Q3p0W3p14right_${EPSILON}e"
 		    echo "Reading in run numbers for right file ${file_right_dummy}..."
-		    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=3p0, W=3p14
-		    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+		    IFS=', ' read -r -a dummy_right_tmp <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=3p0, W=3p14
+		    echo "Dummy Run Numbers: [${dummy_right_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for right file ${file_right}..."
 		    IFS=', ' read -r -a data_right_tmp <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=3p0, W=3p14
@@ -330,8 +330,8 @@ do
 		    file_left_dummy="Q3p0W3p14left_${EPSILON}e_dummy"
 		    file_left="Q3p0W3p14left_${EPSILON}e"
 		    echo "Reading in run numbers for left file ${file_left_dummy}..."
-		    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=3p0, W=3p14
-		    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+		    IFS=', ' read -r -a dummy_left_tmp <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=3p0, W=3p14
+		    echo "Dummy Run Numbers: [${dummy_left_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for left file ${file_left}..."
 		    IFS=', ' read -r -a data_left_tmp <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=3p0, W=3p14
@@ -341,8 +341,8 @@ do
 		    file_center_dummy="Q3p0W3p14center_${EPSILON}e_dummy"
 		    file_center="Q3p0W3p14center_${EPSILON}e"
 		    echo "Reading in run numbers for center file ${file_center_dummy}..."
-		    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=3p0, W=3p14
-		    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+		    IFS=', ' read -r -a dummy_center_tmp <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=3p0, W=3p14
+		    echo "Dummy Run Numbers: [${dummy_center_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for center file ${file_center}..."
 		    IFS=', ' read -r -a data_center_tmp <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=3p0, W=3p14
@@ -362,8 +362,8 @@ do
 		    file_right_dummy="Q3p0W2p32right_${EPSILON}e_dummy"
 		    file_right="Q3p0W2p32right_${EPSILON}e"
 		    echo "Reading in run numbers for right file ${file_right_dummy}..."
-		    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=3p0, W=2p32
-		    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+		    IFS=', ' read -r -a dummy_right_tmp <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=3p0, W=2p32
+		    echo "Dummy Run Numbers: [${dummy_right_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for right file ${file_right}..."
 		    IFS=', ' read -r -a data_right_tmp <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=3p0, W=2p32
@@ -373,8 +373,8 @@ do
 		    file_left_dummy="Q3p0W2p32left_${EPSILON}e_dummy"
 		    file_left="Q3p0W2p32left_${EPSILON}e"
 		    echo "Reading in run numbers for left file ${file_left_dummy}..."
-		    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=3p0, W=2p32
-		    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+		    IFS=', ' read -r -a dummy_left_tmp <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=3p0, W=2p32
+		    echo "Dummy Run Numbers: [${dummy_left_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for left file ${file_left}..."
 		    IFS=', ' read -r -a data_left_tmp <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=3p0, W=2p32
@@ -384,8 +384,8 @@ do
 		    file_center_dummy="Q3p0W2p32center_${EPSILON}e_dummy"
 		    file_center="Q3p0W2p32center_${EPSILON}e"
 		    echo "Reading in run numbers for center file ${file_center_dummy}..."
-		    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=3p0, W=2p32
-		    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+		    IFS=', ' read -r -a dummy_center_tmp <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=3p0, W=2p32
+		    echo "Dummy Run Numbers: [${dummy_center_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for center file ${file_center}..."
 		    IFS=', ' read -r -a data_center_tmp <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=3p0, W=2p32
@@ -405,8 +405,8 @@ do
 		    file_right_dummy="Q2p1W2p95right_${EPSILON}e_dummy"
 		    file_right="Q2p1W2p95right_${EPSILON}e"
 		    echo "Reading in run numbers for right file ${file_right_dummy}..."
-		    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=2p1, W=2p95
-		    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+		    IFS=', ' read -r -a dummy_right_tmp <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=2p1, W=2p95
+		    echo "Dummy Run Numbers: [${dummy_right_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for right file ${file_right}..."
 		    IFS=', ' read -r -a data_right_tmp <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=2p1, W=2p95
@@ -416,8 +416,8 @@ do
 		    file_left_dummy="Q2p1W2p95left_${EPSILON}e_dummy"
 		    file_left="Q2p1W2p95left_${EPSILON}e"
 		    echo "Reading in run numbers for left file ${file_left_dummy}..."
-		    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=2p1, W=2p95
-		    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+		    IFS=', ' read -r -a dummy_left_tmp <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=2p1, W=2p95
+		    echo "Dummy Run Numbers: [${dummy_left_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for left file ${file_left}..."
 		    IFS=', ' read -r -a data_left_tmp <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=2p1, W=2p95
@@ -427,8 +427,8 @@ do
 		    file_center_dummy="Q2p1W2p95center_${EPSILON}e_dummy"
 		    file_center="Q2p1W2p95center_${EPSILON}e"
 		    echo "Reading in run numbers for center file ${file_center_dummy}..."
-		    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=2p1, W=2p95
-		    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+		    IFS=', ' read -r -a dummy_center_tmp <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=2p1, W=2p95
+		    echo "Dummy Run Numbers: [${dummy_center_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for center file ${file_center}..."
 		    IFS=', ' read -r -a data_center_tmp <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=2p1, W=2p95
@@ -448,8 +448,8 @@ do
 		    file_right_dummy="Q0p5W2p40right_${EPSILON}e_dummy"
 		    file_right="Q0p5W2p40right_${EPSILON}e"
 		    echo "Reading in run numbers for right file ${file_right_dummy}..."
-		    IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=0p5, W=2p40
-		    echo "Dummy Run Numbers: [${dummy_right[@]}]"
+		    IFS=', ' read -r -a dummy_right_tmp <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=0p5, W=2p40
+		    echo "Dummy Run Numbers: [${dummy_right_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for right file ${file_right}..."
 		    IFS=', ' read -r -a data_right_tmp <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=0p5, W=2p40
@@ -459,8 +459,8 @@ do
 		    file_left_dummy="Q0p5W2p40left_${EPSILON}e_dummy"
 		    file_left="Q0p5W2p40left_${EPSILON}e"
 		    echo "Reading in run numbers for left file ${file_left_dummy}..."
-		    IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=0p5, W=2p40
-		    echo "Dummy Run Numbers: [${dummy_left[@]}]"
+		    IFS=', ' read -r -a dummy_left_tmp <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=0p5, W=2p40
+		    echo "Dummy Run Numbers: [${dummy_left_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for left file ${file_left}..."
 		    IFS=', ' read -r -a data_left_tmp <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=0p5, W=2p40
@@ -470,8 +470,8 @@ do
 		    file_center_dummy="Q0p5W2p40center_${EPSILON}e_dummy"
 		    file_center="Q0p5W2p40center_${EPSILON}e"
 		    echo "Reading in run numbers for center file ${file_center_dummy}..."
-		    IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=0p5, W=2p40
-		    echo "Dummy Run Numbers: [${dummy_center[@]}]"
+		    IFS=', ' read -r -a dummy_center_tmp <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=0p5, W=2p40
+		    echo "Dummy Run Numbers: [${dummy_center_tmp[@]}]"
 		    echo
 		    echo "Reading in run numbers for center file ${file_center}..."
 		    IFS=', ' read -r -a data_center_tmp <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=0p5, W=2p40
