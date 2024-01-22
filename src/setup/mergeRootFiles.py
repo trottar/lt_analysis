@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:22:43 trottar"
+# Time-stamp: "2024-01-22 13:24:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,12 +66,12 @@ for tree in inp_tree_names.split():
         if not os.path.isfile(inp_root_file):
             warning = "WARNING: File {} not found. Removing...".format(inp_root_file)
             log_bad_runs(inp_root_file, err_fout, warning)
-            break
+            continue
         tempfile = ROOT.TFile.Open(inp_root_file)
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
             warning = "WARNING: File {} not found or not opened or corrupted. Removing...".format(inp_root_file)
             log_bad_runs(inp_root_file, err_fout, warning)
-            break
+            continue
         # Get the tree from the temporary file using the tree_name
         tree_temp = tempfile.Get(tree)
         # Check if the tree exists
@@ -81,7 +81,7 @@ for tree in inp_tree_names.split():
             if num_entries == 0:
                 warning = "WARNING: Tree {} in file {} is empty. Removing...".format(tree, inp_root_file)
                 log_bad_runs(inp_root_file, err_fout, warning)
-                break
+                continue
         #print("Adding {}...".format(inp_root_file))
         chain.Add(inp_root_file)
 
@@ -90,12 +90,12 @@ for tree in inp_tree_names.split():
         if chain.GetEntries() == 0:
             warning = "WARNING: No entries found for tree {}.  Removing...".format(tree)        
             log_bad_runs(inp_root_file, err_fout, warning)
-            break
+            continue
 
         outfile.cd()
         chain.Write(tree, ROOT.TObject.kWriteDelete)
         print("\n\tTree {} added to {}.root".format(tree,output_file_name))
     else:
-        break
+        continue
     
 outfile.Close()
