@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:24:20 trottar"
+# Time-stamp: "2024-01-22 16:03:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,8 +40,6 @@ def log_bad_runs(inp_root_file, err_fout, warning):
     print(warning)
     with open(err_fout, 'a') as f:
         f.write(warning+'\n')
-    if os.path.exists(inp_root_file):        
-        os.remove(inp_root_file)
 
 out_root_file = root_path + output_file_name + ".root"
 
@@ -71,6 +69,8 @@ for tree in inp_tree_names.split():
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
             warning = "WARNING: File {} not found or not opened or corrupted. Removing...".format(inp_root_file)
             log_bad_runs(inp_root_file, err_fout, warning)
+            if os.path.exists(inp_root_file):        
+                os.remove(inp_root_file)            
             continue
         # Get the tree from the temporary file using the tree_name
         tree_temp = tempfile.Get(tree)

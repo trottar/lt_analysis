@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 14:53:17 trottar"
+# Time-stamp: "2024-01-22 14:57:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -284,7 +284,7 @@ def main():
             continue
             # Uncomment the line below if you want .csv file output, WARNING the files can be very large and take a long time to process!                                                                      
             #pd.DataFrame(data.get(data_keys[i])).to_csv("%s/%s_%s.csv" % (OUTPATH, data_keys[i], runNum), header=DFHeader, index=False) # Convert array to panda dataframe and write to csv with correct header
-        # Old way
+        # Old way changed 1/22/2023
         #if (i == 0):
         #    pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i])
         #elif (i != 0):
@@ -294,12 +294,12 @@ def main():
 
         # Check if numeric_data is not empty
         if len(numeric_data) == 0:
-            print("Skipping {} because the data is empty.".format(data_keys[i]))
+            print("WARNING: Skipping {} because the data is empty.".format(data_keys[i]))
             continue
 
         # Check if DFHeader is not empty and has the correct number of columns
         if not DFHeader or len(DFHeader) != numeric_data.shape[1]:
-            print("Skipping {} due to issues with column names.".format(data_keys[i]))
+            print("WARNING: Skipping {} due to issues with column names.".format(data_keys[i]))
             continue
 
         # Create a structured array with column names
