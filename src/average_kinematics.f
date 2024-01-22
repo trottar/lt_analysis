@@ -68,7 +68,8 @@ c     enough space for the sets
       character*4 pid
 
       open (unit = 22, file = trim(pid) // "/t_bin_interval_Q" // 
-     *     nint(q2_set*10) // "W" // nint(w_set*100), action='read')
+     *     trim(adjustl(nint(q2_set*10))) // "W" //
+     *     trim(adjustl(nint(w_set*100))), action='read')
       read (22,*) q2_bin, w_bin, t_bin, phi_bin
 
       close(22)
