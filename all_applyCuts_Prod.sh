@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-21 14:01:35 trottar"
+# Time-stamp: "2024-01-22 18:46:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,28 +53,28 @@ grab_runs () {
     fi
 }
 
-TARGET="LH2"
-#TARGET="dummy"
+#TARGET="LH2"
+TARGET="dummy"
 
-KIN="Q3p0W3p14"
+KIN="Q3p0W2p32"
 
-EPS="high"
-#EPS="low"
+#EPS="high"
+EPS="low"
 
 #PHISET="center"
-#PHISET="left"
-PHISET="right"
+PHISET="left"
+#PHISET="right"
 
-# Q3p0W3p14center_highe # DONE
-# Q3p0W3p14left_highe # DONE
-# Q3p0W3p14right_highe # DONE
-# Q3p0W3p14center_lowe # DONE
-# Q3p0W3p14left_lowe # DONE
-# Q3p0W3p14center_highe_dummy # DONE
-# Q3p0W3p14left_highe_dummy # DONE
-# Q3p0W3p14right_highe_dummy # DONE
-# Q3p0W3p14center_lowe_dummy # DONE
-# Q3p0W3p14left_lowe_dummy # DONE
+# Q3p0W2p32center_highe
+# Q3p0W2p32left_highe
+# Q3p0W2p32right_highe
+# Q3p0W2p32center_lowe
+# Q3p0W2p32left_lowe
+# Q3p0W2p32center_highe_dummy
+# Q3p0W2p32left_highe_dummy
+# Q3p0W2p32right_highe_dummy
+# Q3p0W2p32center_lowe_dummy
+# Q3p0W2p32left_lowe_dummy
 
 if [ $TARGET = "dummy" ]; then
     file_name="${KIN}${PHISET}_${EPS}e_dummy"
