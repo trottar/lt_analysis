@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:06:08 trottar"
+# Time-stamp: "2024-01-22 13:07:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,7 +38,7 @@ with open(err_fout, 'w') as f:
 
 def log_bad_runs(root_file, err_fout, warning):
     print(warning)
-    with open(err_fout, 'a') as f:
+    with open(err_fout, 'w') as f:
         f.write(warning+'\n')
     os.remove(root_file)
 
