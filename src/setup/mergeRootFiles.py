@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:07:26 trottar"
+# Time-stamp: "2024-01-22 13:09:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,7 +38,7 @@ with open(err_fout, 'w') as f:
 
 def log_bad_runs(root_file, err_fout, warning):
     print(warning)
-    with open(err_fout, 'w') as f:
+    with open(err_fout, 'a') as f:
         f.write(warning+'\n')
     os.remove(root_file)
 
@@ -92,7 +92,6 @@ for tree in input_tree_names.split():
     if os.path.exists(root_file):
         outfile.cd()
         chain.Write(tree, ROOT.TObject.kWriteDelete)
-        os.remove(err_fout)
         print("\n\tTree {} added to {}.root".format(tree,output_file_name))
     
 outfile.Close()
