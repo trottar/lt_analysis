@@ -1021,7 +1021,7 @@ if [[ $i_flag != "true" ]]; then
 		echo "Removing bad right data runs..."
 		for run in "${data_right_tmp[@]}"; do
 		    if [[ ! " ${data_right[@]} " =~ " $run " ]]; then
-			echo "Removing run: $run"
+			echo "        Removing run: $run"
 		    fi
 		done
 	    fi
@@ -1071,7 +1071,7 @@ if [[ $i_flag != "true" ]]; then
 		echo "Removing bad right dummy runs..."
 		for run in "${dummy_right_tmp[@]}"; do
 		    if [[ ! " ${dummy_right[@]} " =~ " $run " ]]; then
-			echo "Removing run: $run"
+			echo "        Removing run: $run"
 		    fi
 		done
 	    fi
@@ -1121,7 +1121,7 @@ if [[ $i_flag != "true" ]]; then
 		echo "Removing bad left data runs..."
 		for run in "${data_left_tmp[@]}"; do
 		    if [[ ! " ${data_left[@]} " =~ " $run " ]]; then
-			echo "Removing run: $run"
+			echo "        Removing run: $run"
 		    fi
 		done
 	    fi
@@ -1171,7 +1171,7 @@ if [[ $i_flag != "true" ]]; then
 		echo "Removing bad left dummy runs..."
 		for run in "${dummy_left_tmp[@]}"; do
 		    if [[ ! " ${dummy_left[@]} " =~ " $run " ]]; then
-			echo "Removing run: $run"
+			echo "        Removing run: $run"
 		    fi
 		done
 	    fi
@@ -1221,7 +1221,7 @@ if [[ $i_flag != "true" ]]; then
 		echo "Removing bad center data runs..."	
 		for run in "${data_center_tmp[@]}"; do
 		    if [[ ! " ${data_center[@]} " =~ " $run " ]]; then
-			echo "Removing run: $run"
+			echo "        Removing run: $run"
 		    fi
 		done
 	    fi
@@ -1271,7 +1271,7 @@ if [[ $i_flag != "true" ]]; then
 		echo "Removing bad center dummy runs..."
 		for run in "${dummy_center_tmp[@]}"; do
 		    if [[ ! " ${dummy_center[@]} " =~ " $run " ]]; then
-			echo "Removing run: $run"
+			echo "        Removing run: $run"
 		    fi
 		done
 	    fi
