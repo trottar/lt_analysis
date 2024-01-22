@@ -79,8 +79,8 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
 ! Construct the filename
       filename = trim(pid) // "/t_bin_interval_Q" //
-     *     adjustl(int_to_str(nint(q2_set*10))) // "W" //
-     *     adjustl(int_to_str(nint(w_set*100))) // "_SP_i5.4_S.dat"
+     *     trim(int_to_str(nint(q2_set*10))) // "W" //
+     *     trim(int_to_str(nint(w_set*100))) // "_SP_i5.4_S.dat"
 
 ! Open the file
       open(unit=22, file=trim(filename), action='read')
