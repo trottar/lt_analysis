@@ -1016,7 +1016,13 @@ if [[ $i_flag != "true" ]]; then
 	    DataEffErrRight=("${arr4[@]}")
 	    DatapThetaValRight=("${arr5[@]}")
 	    DataEbeamValRight=("${arr6[@]}")
-	    data_right=("${arr7[@]}")	    
+	    data_right=("${arr7[@]}")
+	    echo "Removing bad right data runs..."
+	    for run in "${data_right_tmp[@]}"; do
+		if [[ ! " ${data_right[@]} " =~ " $run " ]]; then
+		    echo "Removing run: $run"
+		fi
+	    done
 	    #echo ${DataChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
@@ -1058,7 +1064,13 @@ if [[ $i_flag != "true" ]]; then
 	    DummyEffErrRight=("${arr4[@]}")
 	    DummypThetaValRight=("${arr5[@]}")
 	    DummyEbeamValRight=("${arr6[@]}")
-	    dummy_right=("${arr7[@]}")	    
+	    dummy_right=("${arr7[@]}")
+	    echo "Removing bad right dummy runs..."
+	    for run in "${dummy_right_tmp[@]}"; do
+		if [[ ! " ${dummy_right[@]} " =~ " $run " ]]; then
+		    echo "Removing run: $run"
+		fi
+	    done
 	    #echo ${DummyChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
@@ -1100,7 +1112,13 @@ if [[ $i_flag != "true" ]]; then
 	    DataEffErrLeft=("${arr4[@]}")
 	    DatapThetaValLeft=("${arr5[@]}")
 	    DataEbeamValLeft=("${arr6[@]}")
-	    data_left=("${arr7[@]}")	    
+	    data_left=("${arr7[@]}")
+	    echo "Removing bad left data runs..."
+	    for run in "${data_left_tmp[@]}"; do
+		if [[ ! " ${data_left[@]} " =~ " $run " ]]; then
+		    echo "Removing run: $run"
+		fi
+	    done	    
 	    #echo ${DataChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
@@ -1142,7 +1160,13 @@ if [[ $i_flag != "true" ]]; then
 	    DummyEffErrLeft=("${arr4[@]}")
 	    DummypThetaValLeft=("${arr5[@]}")
 	    DummyEbeamValLeft=("${arr6[@]}")
-	    dummy_left=("${arr7[@]}")	    
+	    dummy_left=("${arr7[@]}")
+	    echo "Removing bad left dummy runs..."
+	    for run in "${dummy_left_tmp[@]}"; do
+		if [[ ! " ${dummy_left[@]} " =~ " $run " ]]; then
+		    echo "Removing run: $run"
+		fi
+	    done
 	    #echo ${DummyChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
@@ -1184,7 +1208,13 @@ if [[ $i_flag != "true" ]]; then
 	    DataEffErrCenter=("${arr4[@]}")
 	    DatapThetaValCenter=("${arr5[@]}")
 	    DataEbeamValCenter=("${arr6[@]}")
-	    data_center=("${arr7[@]}")	    
+	    data_center=("${arr7[@]}")
+	    echo "Removing bad center data runs..."
+	    for run in "${data_center_tmp[@]}"; do
+		if [[ ! " ${data_center[@]} " =~ " $run " ]]; then
+		    echo "Removing run: $run"
+		fi
+	    done
 	    #echo ${DataChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
@@ -1226,7 +1256,13 @@ if [[ $i_flag != "true" ]]; then
 	    DummyEffErrCenter=("${arr4[@]}")
 	    DummypThetaValCenter=("${arr5[@]}")
 	    DummyEbeamValCenter=("${arr6[@]}")
-	    dummy_center=("${arr7[@]}")	    
+	    dummy_center=("${arr7[@]}")
+	    echo "Removing bad center dummy runs..."
+	    for run in "${dummy_center_tmp[@]}"; do
+		if [[ ! " ${dummy_center[@]} " =~ " $run " ]]; then
+		    echo "Removing run: $run"
+		fi
+	    done
 	    #echo ${DummyChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
