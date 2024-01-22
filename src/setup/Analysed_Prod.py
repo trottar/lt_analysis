@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 14:04:16 trottar"
+# Time-stamp: "2024-01-22 14:08:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -285,13 +285,19 @@ def main():
             # Uncomment the line below if you want .csv file output, WARNING the files can be very large and take a long time to process!                                                                      
             #pd.DataFrame(data.get(data_keys[i])).to_csv("%s/%s_%s.csv" % (OUTPATH, data_keys[i], runNum), header=DFHeader, index=False) # Convert array to panda dataframe and write to csv with correct header                                                                                                      
 
-        if (i == 0):
-            # Convert object dtype to a numeric type (e.g., float)
-            numeric_data = np.array(data.get(data_keys[i])).astype(float)
+        # Check if numeric_data is not empty
+        if len(numeric_data) == 0:
+            print(f"Skipping {data_keys[i]} because the data is empty.")
+            continue
+
+        # Check if DFHeader is not empty and has the correct number of columns
+        if not DFHeader or len(DFHeader) != numeric_data.shape[1]:
+            print(f"Skipping {data_keys[i]} due to issues with column names.")
+            continue
+
+        if i == 0:
             pd.DataFrame(numeric_data, columns=DFHeader, index=None).to_root(out_f_file, key="%s" % data_keys[i])
-        elif (i != 0):
-            # Convert object dtype to a numeric type (e.g., float)
-            numeric_data = np.array(data.get(data_keys[i])).astype(float)
+        elif i != 0:
             pd.DataFrame(numeric_data, columns=DFHeader, index=None).to_root(out_f_file, key="%s" % data_keys[i], mode='a')
             
 if __name__ == '__main__':
