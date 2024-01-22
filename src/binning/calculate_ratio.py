@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2023-09-21 16:46:41 trottar"
+# Time-stamp: "2024-01-22 17:01:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,10 +62,11 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
             simc_nested_dict = yieldDict["binned_SIMC"][phiset]
             i = data_key_tuple[0] # t bin
             j = data_key_tuple[1] # phi bin
-            #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]), data_nested_dict[kin_type][data_key_tuple][kin_type]))
             # Fill histogram
             yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]
             yield_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}".format(kin_type)]
+            print("\nYield_data: {}".format(yield_data))
+            print("Yield_simc: {}".format(yield_simc))
             try:
                 ratio = yield_data/yield_simc
             except ZeroDivisionError:
@@ -73,7 +74,7 @@ def calculate_ratio(kin_type, phisetlist, yieldDict):
             if math.isnan(ratio):
                 ratio = 0.0
             if math.isinf(ratio):
-                ratio = 0.0                
+                ratio = 0.0
             print("Ratio for t-bin {} phi-bin {}: {:.3f}".format(i+1, j+1, ratio))
             dict_lst.append((i, j, ratio))
     
@@ -98,9 +99,6 @@ def find_ratio(histlist, inpDict, phisetlist, yieldDict):
         "phi_bins" : phi_bins
     }
 
-    # List of kinematic types
-    kinematic_types = ["yield"]    
-
     # Loop through histlist and update yieldDict
     for hist in histlist:
         print("\n\n")
@@ -110,7 +108,6 @@ def find_ratio(histlist, inpDict, phisetlist, yieldDict):
         print("-"*25)
         print("-"*25)
         ratioDict[hist["phi_setting"]] = {}
-        for kin_type in kinematic_types:
-            ratioDict[hist["phi_setting"]]["ratio"] = calculate_ratio(kin_type, phisetlist, yieldDict)
+        ratioDict[hist["phi_setting"]]["ratio"] = calculate_ratio("yield", phisetlist, yieldDict)
             
     return {"binned" : ratioDict}
