@@ -67,11 +67,16 @@ c     enough space for the sets
       character*2 pol
       character*4 pid
 
-      open (unit = 22, file = trim(pid // "/t_bin_interval_Q" // &
-     *     trim(adjustl(int_to_str(nint(q2_set*10)))) // "W" // &
-     *     trim(adjustl(int_to_str(nint(w_set*100))))), action='read')
-      read (22,*) q2_bin, w_bin, t_bin, phi_bin
+      character(len=100) :: file_path
 
+!     Construct the file path using a format string
+      write(file_path, '(a, a, i2.2, a, i3.3, a)') trim(pid),
+     *     '/t_bin_interval_Q', nint(q2_set*10), 'W', nint(w_set*100)
+
+!     Open the file
+      open (unit=22, file=file_path, action='read')
+      read (22, *) q2_bin, w_bin, t_bin, phi_bin
+      
       close(22)
 
       nt = t_bin
