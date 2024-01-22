@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:55:37 trottar"
+# Time-stamp: "2024-01-22 14:04:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -287,13 +287,12 @@ def main():
 
         if (i == 0):
             # Convert object dtype to a numeric type (e.g., float)
-            numeric_data = data.get(data_keys[i]).astype(float)
+            numeric_data = np.array(data.get(data_keys[i])).astype(float)
             pd.DataFrame(numeric_data, columns=DFHeader, index=None).to_root(out_f_file, key="%s" % data_keys[i])
         elif (i != 0):
             # Convert object dtype to a numeric type (e.g., float)
-            numeric_data = data.get(data_keys[i]).astype(float)
+            numeric_data = np.array(data.get(data_keys[i])).astype(float)
             pd.DataFrame(numeric_data, columns=DFHeader, index=None).to_root(out_f_file, key="%s" % data_keys[i], mode='a')
-
             
 if __name__ == '__main__':
     main()
