@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:19:07 trottar"
+# Time-stamp: "2024-01-22 13:22:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,5 +95,7 @@ for tree in inp_tree_names.split():
         outfile.cd()
         chain.Write(tree, ROOT.TObject.kWriteDelete)
         print("\n\tTree {} added to {}.root".format(tree,output_file_name))
+    else:
+        break
     
 outfile.Close()
