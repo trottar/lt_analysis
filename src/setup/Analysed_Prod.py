@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 14:16:39 trottar"
+# Time-stamp: "2024-01-22 14:17:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -297,11 +297,22 @@ def main():
             print(f"Skipping {data_keys[i]} due to issues with column names.")
             continue
 
-        if i == 0:
-            pd.DataFrame(numeric_data, columns=DFHeader, index=None).to_root(out_f_file, key="%s" % data_keys[i])
-        elif i != 0:
-            pd.DataFrame(numeric_data, columns=DFHeader, index=None).to_root(out_f_file, key="%s" % data_keys[i], mode='a')
+        # Create a TTree and fill it with data
+        root_tree = ROOT.TTree(data_keys[i], data_keys[i])
+        for col_idx, col_name in enumerate(DFHeader):
+            root_tree.Branch(col_name, np.zeros(1, dtype=float), col_name + '/D')
 
+        for row in numeric_data:
+            for col_idx, value in enumerate(row):
+                ROOT.SetOwnership(root_tree, False)
+                root_tree.SetBranchAddress(DFHeader[col_idx], value)
+
+            root_tree.Fill()
+
+        # Write the tree to the ROOT file
+        root_file = ROOT.TFile(out_f_file, 'UPDATE' if i != 0 else 'RECREATE')
+        root_tree.Write()
+        root_file.Close()
             
 if __name__ == '__main__':
     main()
