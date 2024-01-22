@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:14:57 trottar"
+# Time-stamp: "2024-01-22 13:19:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,7 +40,8 @@ def log_bad_runs(inp_root_file, err_fout, warning):
     print(warning)
     with open(err_fout, 'a') as f:
         f.write(warning+'\n')
-    os.remove(inp_root_file)
+    if os.path.exists(inp_root_file):        
+        os.remove(inp_root_file)
 
 out_root_file = root_path + output_file_name + ".root"
 
@@ -84,7 +85,7 @@ for tree in inp_tree_names.split():
         #print("Adding {}...".format(inp_root_file))
         chain.Add(inp_root_file)
 
-    if os.path.exists(out_root_file):
+    if os.path.exists(inp_root_file):
         
         if chain.GetEntries() == 0:
             warning = "WARNING: No entries found for tree {}.  Removing...".format(tree)        
