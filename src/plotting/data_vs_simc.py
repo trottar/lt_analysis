@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-21 15:12:13 trottar"
+# Time-stamp: "2024-01-22 16:13:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,6 +114,9 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
     for hist in histlist_copy:
         
+        ##############
+        # HARD CODED #
+        ##############
         hist["H_hsdelta_SIMC"].Scale(hist["normfac_simc"]*1e6)
         hist["H_hsxptar_SIMC"].Scale(hist["normfac_simc"]*1e6)
         hist["H_hsyptar_SIMC"].Scale(hist["normfac_simc"]*1e6)
@@ -145,7 +148,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmy_SIMC"].Scale(hist["normfac_simc"]*1e6)
         hist["H_pmz_SIMC"].Scale(hist["normfac_simc"]*1e6)
         hist["H_W_SIMC"].Scale(hist["normfac_simc"]*1e6)
-
+        ##############
+        ##############
+        ##############
+        
         hist["H_hsdelta_DUMMY"].Scale(hist["normfac_dummy"])
         hist["H_hsxptar_DUMMY"].Scale(hist["normfac_dummy"])
         hist["H_hsyptar_DUMMY"].Scale(hist["normfac_dummy"])

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 15:30:19 trottar"
+# Time-stamp: "2024-01-22 16:13:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -129,8 +129,15 @@ def rand_sub(phi_setting, inpDict):
 
     InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
 
-    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
-
+    ##############
+    # HARD CODED #
+    ##############
+    #TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_all_noRF".format(ParticleType.capitalize()))
+    ##############
+    ##############
+    ##############
+    
     TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
     ################################################################################################################################################
