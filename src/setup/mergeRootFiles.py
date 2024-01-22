@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 12:55:16 trottar"
+# Time-stamp: "2024-01-22 13:03:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,11 +36,11 @@ from ltsep import Misc
 with open(err_fout, 'w') as f:
     f.write("Bad runs for {}...\n\n".format(output_file_name))
 
-def log_bad_runs(err_fout, bad_run):
+def log_bad_runs(output_file_name, err_fout, warning):
+    print(warning)
     with open(err_fout, 'a') as f:
-        f.write(bad_run+'\n')
-    print("!!!!!!!!!!",err_fout)
-    os.remove(err_fout)
+        f.write(warning+'\n')
+    os.remove(output_file_name)
 
 outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
 if not outfile.IsOpen():
@@ -61,16 +61,14 @@ for tree in input_tree_names.split():
             Misc.progressBar(len(arr_run_nums), len(arr_run_nums),bar_length=25)
         filepath = root_path + particle + "_" + str(n) + input_file_name + ".root"
         if not os.path.isfile(filepath):
-            warning = "WARNING: File {} not found.".format(filepath)
-            print(warning)
-            log_bad_runs(err_fout, warning)
-            continue
+            warning = "WARNING: File {} not found. Removing...".format(filepath)
+            log_bad_runs(output_file_name, err_fout, warning)
+            break
         tempfile = ROOT.TFile.Open(filepath)
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
-            warning = "WARNING: File {} not found or not opened or corrupted.".format(filepath)
-            print(warning)
-            log_bad_runs(err_fout, warning)
-            continue
+            warning = "WARNING: File {} not found or not opened or corrupted. Removing...".format(filepath)
+            log_bad_runs(output_file_name, err_fout, warning)
+            break
         # Get the tree from the temporary file using the tree_name
         tree_temp = tempfile.Get(tree)
         # Check if the tree exists
@@ -78,22 +76,21 @@ for tree in input_tree_names.split():
             # Get the number of entries in the tree
             num_entries = tree_temp.GetEntries()
             if num_entries == 0:
-                warning = "WARNING: Tree {} in file {} is empty.".format(tree, filepath)
-                print(warning)
-                log_bad_runs(err_fout, warning)
-                continue
+                warning = "WARNING: Tree {} in file {} is empty. Removing...".format(tree, filepath)
+                log_bad_runs(output_file_name, err_fout, warning)
+                break
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
 
     if chain.GetEntries() == 0:
-        warning = "WARNING: No entries found for tree {}. Skipping.".format(tree)
-        print(warning)
-        log_bad_runs(err_fout, warning)
-        continue
-        
-    outfile.cd()
-    chain.Write(tree, ROOT.TObject.kWriteDelete)
-    
-    print("\n\tTree {} added to {}.root".format(tree,output_file_name))
+        warning = "WARNING: No entries found for tree {}.  Removing...".format(tree)        
+        log_bad_runs(output_file_name, err_fout, warning)
+        break
+
+    if os.path.exists(output_file_name):
+        outfile.cd()
+        chain.Write(tree, ROOT.TObject.kWriteDelete)
+        os.remove(err_fout)
+        print("\n\tTree {} added to {}.root".format(tree,output_file_name))
     
 outfile.Close()
