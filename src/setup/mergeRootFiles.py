@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 12:51:52 trottar"
+# Time-stamp: "2024-01-22 12:55:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -39,6 +39,7 @@ with open(err_fout, 'w') as f:
 def log_bad_runs(err_fout, bad_run):
     with open(err_fout, 'a') as f:
         f.write(bad_run+'\n')
+    print("!!!!!!!!!!",err_fout)
     os.remove(err_fout)
 
 outfile = ROOT.TFile(root_path + output_file_name + ".root", "RECREATE")
