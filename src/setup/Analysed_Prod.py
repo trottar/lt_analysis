@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:45:19 trottar"
+# Time-stamp: "2024-01-22 13:48:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -288,14 +288,18 @@ def main():
             pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i])
         elif (i != 0):
             #pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i], mode ='a') # OG
-            # Convert object dtype columns to numpy string type 'S'
+            # Convert object dtype columns to numpy string type 'S' or handle bytes columns separately
             df = pd.DataFrame()
             for name, column in pd.DataFrame(data.get(data_keys[i]), columns=DFHeader, index=None).items():
                 if column.dtype == object:
-                    df[name] = column.astype('S')
+                    if column.apply(type).eq(bytes).any():
+                        df[name] = column.astype('str')
+                    else:
+                        df[name] = column.astype('S')
                 else:
-                    df[name] = column
+                    df[name] = column        
             pd.DataFrame(df).to_root(out_f_file, key="%s" % data_keys[i], mode='a')
+            
         Misc.progressBar(i, len(data_keys)-1,bar_length=25)
 
 if __name__ == '__main__':
