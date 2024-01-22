@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 14:17:17 trottar"
+# Time-stamp: "2024-01-22 14:25:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -289,30 +289,19 @@ def main():
 
         # Check if numeric_data is not empty
         if len(numeric_data) == 0:
-            print(f"Skipping {data_keys[i]} because the data is empty.")
+            print("Skipping {} because the data is empty.".format(data_keys[i]))
             continue
 
         # Check if DFHeader is not empty and has the correct number of columns
         if not DFHeader or len(DFHeader) != numeric_data.shape[1]:
-            print(f"Skipping {data_keys[i]} due to issues with column names.")
+            print("Skipping {} due to issues with column names.".format(data_keys[i]))
             continue
 
-        # Create a TTree and fill it with data
-        root_tree = ROOT.TTree(data_keys[i], data_keys[i])
-        for col_idx, col_name in enumerate(DFHeader):
-            root_tree.Branch(col_name, np.zeros(1, dtype=float), col_name + '/D')
+        # Create a structured array with column names
+        structured_array = np.core.records.fromarrays(numeric_data.T, names=DFHeader)
 
-        for row in numeric_data:
-            for col_idx, value in enumerate(row):
-                ROOT.SetOwnership(root_tree, False)
-                root_tree.SetBranchAddress(DFHeader[col_idx], value)
-
-            root_tree.Fill()
-
-        # Write the tree to the ROOT file
-        root_file = ROOT.TFile(out_f_file, 'UPDATE' if i != 0 else 'RECREATE')
-        root_tree.Write()
-        root_file.Close()
+        # Save the structured array to ROOT file
+        rnp.array2root(structured_array, out_f_file, mode='recreate' if i == 0 else 'update', treename=data_keys[i])
             
 if __name__ == '__main__':
     main()
