@@ -67,14 +67,14 @@ c     enough space for the sets
       character*2 pol
       character*4 pid
 
-      character(len=100) :: file_path
+      character(len=100) :: fn_t_bins
 
 !     Construct the file path using a format string
-      write(file_path, '(a, a, i2.2, a, i3.3, a)') trim(pid),
+      write(fn_t_bins, '(a, a, i2.2, a, i3.3, a)') trim(pid),
      *     '/t_bin_interval_Q', nint(q2_set*10), 'W', nint(w_set*100)
 
 !     Open the file
-      open (unit=22, file=file_path, action='read')
+      open (unit=22, file=fn_t_bins, action='read')
       read (22, *) q2_bin, w_bin, t_bin, phi_bin
       
       close(22)
