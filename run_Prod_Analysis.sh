@@ -88,8 +88,11 @@ else
 fi
 
 # Q2=2p1
-NumtBins=3
-NumPhiBins=10
+#NumtBins=3
+#NumPhiBins=10
+# Q2=3p0, W=3p14
+NumtBins=4
+NumPhiBins=12
 # Q2=5p5
 #NumtBins=2
 #NumPhiBins=8
@@ -101,7 +104,7 @@ POL="+1" # All KaonLT is positive polarity
 # Q2=2p1
 #TMIN=0.001
 #TMAX=0.600
-# Q2=3p0
+# Q2=3p0, W=3p14
 TMIN=0.001
 TMAX=0.990
 # Q2=5p5
