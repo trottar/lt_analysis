@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:13:05 trottar"
+# Time-stamp: "2024-01-22 13:14:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,8 +15,8 @@ import sys, os
 import ROOT
 
 root_path = sys.argv[1]
-input_file_name = sys.argv[2]
-input_tree_names = sys.argv[3]
+inp_file_name = sys.argv[2]
+inp_tree_names = sys.argv[3]
 output_file_name = sys.argv[4]
 string_run_nums = sys.argv[5]
 particle = sys.argv[6]
@@ -36,11 +36,11 @@ from ltsep import Misc
 with open(err_fout, 'w') as f:
     f.write("Bad runs for {}...\n\n".format(output_file_name))
 
-def log_bad_runs(err_fout, warning):
+def log_bad_runs(inp_root_file, err_fout, warning):
     print(warning)
     with open(err_fout, 'a') as f:
         f.write(warning+'\n')
-    os.remove(filepath)
+    os.remove(inp_root_file)
 
 out_root_file = root_path + output_file_name + ".root"
 
@@ -51,7 +51,7 @@ if not outfile.IsOpen():
 
 arr_run_nums = [int(x) for x in string_run_nums.split()]
 
-for tree in input_tree_names.split():
+for tree in inp_tree_names.split():
 
     chain = ROOT.TChain(tree)
 
@@ -61,15 +61,15 @@ for tree in input_tree_names.split():
             Misc.progressBar(i, len(arr_run_nums)-1,bar_length=25)
         else:
             Misc.progressBar(len(arr_run_nums), len(arr_run_nums),bar_length=25)
-        filepath = root_path + particle + "_" + str(n) + input_file_name + ".root"
-        if not os.path.isfile(filepath):
-            warning = "WARNING: File {} not found. Removing...".format(filepath)
-            log_bad_runs(err_fout, warning)
+        inp_root_file = root_path + particle + "_" + str(n) + inp_file_name + ".root"
+        if not os.path.isfile(inp_root_file):
+            warning = "WARNING: File {} not found. Removing...".format(inp_root_file)
+            log_bad_runs(inp_root_file, err_fout, warning)
             break
-        tempfile = ROOT.TFile.Open(filepath)
+        tempfile = ROOT.TFile.Open(inp_root_file)
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
-            warning = "WARNING: File {} not found or not opened or corrupted. Removing...".format(filepath)
-            log_bad_runs(err_fout, warning)
+            warning = "WARNING: File {} not found or not opened or corrupted. Removing...".format(inp_root_file)
+            log_bad_runs(inp_root_file, err_fout, warning)
             break
         # Get the tree from the temporary file using the tree_name
         tree_temp = tempfile.Get(tree)
@@ -78,17 +78,17 @@ for tree in input_tree_names.split():
             # Get the number of entries in the tree
             num_entries = tree_temp.GetEntries()
             if num_entries == 0:
-                warning = "WARNING: Tree {} in file {} is empty. Removing...".format(tree, filepath)
-                log_bad_runs(err_fout, warning)
+                warning = "WARNING: Tree {} in file {} is empty. Removing...".format(tree, inp_root_file)
+                log_bad_runs(inp_root_file, err_fout, warning)
                 break
-        #print("Adding {}...".format(filepath))
-        chain.Add(filepath)
+        #print("Adding {}...".format(inp_root_file))
+        chain.Add(inp_root_file)
 
-    if os.path.exists(filepath):
+    if os.path.exists(out_root_file):
         
         if chain.GetEntries() == 0:
             warning = "WARNING: No entries found for tree {}.  Removing...".format(tree)        
-            log_bad_runs(err_fout, warning)
+            log_bad_runs(inp_root_file, err_fout, warning)
             break
 
         outfile.cd()
