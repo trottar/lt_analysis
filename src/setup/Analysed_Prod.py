@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:37:48 trottar"
+# Time-stamp: "2024-01-22 13:43:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -288,10 +288,10 @@ def main():
             pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i])
         elif (i != 0):
             #pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i], mode ='a') # OG
-            # Convert object dtype columns to supported dtype (e.g., float64)
+            # Convert object dtype columns to numeric, replacing non-numeric elements with NaN
             df = pd.DataFrame(data.get(data_keys[i]), columns=DFHeader, index=None)
-            df = df.apply(lambda col: pd.to_numeric(col, errors='ignore'))
-            pd.DataFrame(df).to_root(out_f_file, key="%s" % data_keys[i], mode='a')            
+            df = df.apply(lambda col: pd.to_numeric(col, errors='coerce'))
+            pd.DataFrame(df).to_root(out_f_file, key="%s" % data_keys[i], mode='a')
         Misc.progressBar(i, len(data_keys)-1,bar_length=25)
 
 if __name__ == '__main__':
