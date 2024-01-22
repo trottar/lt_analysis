@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:10:04 trottar"
+# Time-stamp: "2024-01-22 13:13:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,15 +36,15 @@ from ltsep import Misc
 with open(err_fout, 'w') as f:
     f.write("Bad runs for {}...\n\n".format(output_file_name))
 
-def log_bad_runs(root_file, err_fout, warning):
+def log_bad_runs(err_fout, warning):
     print(warning)
     with open(err_fout, 'a') as f:
         f.write(warning+'\n')
-    os.remove(root_file)
+    os.remove(filepath)
 
-root_file = root_path + output_file_name + ".root"
+out_root_file = root_path + output_file_name + ".root"
 
-outfile = ROOT.TFile(root_file, "RECREATE")
+outfile = ROOT.TFile(out_root_file, "RECREATE")
 if not outfile.IsOpen():
     print("ERROR: Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
     sys.exit(1)
@@ -64,12 +64,12 @@ for tree in input_tree_names.split():
         filepath = root_path + particle + "_" + str(n) + input_file_name + ".root"
         if not os.path.isfile(filepath):
             warning = "WARNING: File {} not found. Removing...".format(filepath)
-            log_bad_runs(root_file, err_fout, warning)
+            log_bad_runs(err_fout, warning)
             break
         tempfile = ROOT.TFile.Open(filepath)
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
             warning = "WARNING: File {} not found or not opened or corrupted. Removing...".format(filepath)
-            log_bad_runs(root_file, err_fout, warning)
+            log_bad_runs(err_fout, warning)
             break
         # Get the tree from the temporary file using the tree_name
         tree_temp = tempfile.Get(tree)
@@ -79,16 +79,16 @@ for tree in input_tree_names.split():
             num_entries = tree_temp.GetEntries()
             if num_entries == 0:
                 warning = "WARNING: Tree {} in file {} is empty. Removing...".format(tree, filepath)
-                log_bad_runs(root_file, err_fout, warning)
+                log_bad_runs(err_fout, warning)
                 break
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
 
-    if os.path.exists(root_file):
+    if os.path.exists(filepath):
         
         if chain.GetEntries() == 0:
             warning = "WARNING: No entries found for tree {}.  Removing...".format(tree)        
-            log_bad_runs(root_file, err_fout, warning)
+            log_bad_runs(err_fout, warning)
             break
 
         outfile.cd()
