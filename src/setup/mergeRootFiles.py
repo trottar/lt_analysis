@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 13:09:15 trottar"
+# Time-stamp: "2024-01-22 13:10:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,12 +84,13 @@ for tree in input_tree_names.split():
         #print("Adding {}...".format(filepath))
         chain.Add(filepath)
 
-    if chain.GetEntries() == 0:
-        warning = "WARNING: No entries found for tree {}.  Removing...".format(tree)        
-        log_bad_runs(root_file, err_fout, warning)
-        break
-
     if os.path.exists(root_file):
+        
+        if chain.GetEntries() == 0:
+            warning = "WARNING: No entries found for tree {}.  Removing...".format(tree)        
+            log_bad_runs(root_file, err_fout, warning)
+            break
+
         outfile.cd()
         chain.Write(tree, ROOT.TObject.kWriteDelete)
         print("\n\tTree {} added to {}.root".format(tree,output_file_name))
