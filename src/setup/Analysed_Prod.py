@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 14:25:26 trottar"
+# Time-stamp: "2024-01-22 14:53:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -283,8 +283,13 @@ def main():
         else:
             continue
             # Uncomment the line below if you want .csv file output, WARNING the files can be very large and take a long time to process!                                                                      
-            #pd.DataFrame(data.get(data_keys[i])).to_csv("%s/%s_%s.csv" % (OUTPATH, data_keys[i], runNum), header=DFHeader, index=False) # Convert array to panda dataframe and write to csv with correct header                                                                                                      
-    
+            #pd.DataFrame(data.get(data_keys[i])).to_csv("%s/%s_%s.csv" % (OUTPATH, data_keys[i], runNum), header=DFHeader, index=False) # Convert array to panda dataframe and write to csv with correct header
+        # Old way
+        #if (i == 0):
+        #    pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i])
+        #elif (i != 0):
+        #    pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i], mode ='a')
+        
         numeric_data = np.array(data.get(data_keys[i])).astype(float)
 
         # Check if numeric_data is not empty
@@ -302,7 +307,9 @@ def main():
 
         # Save the structured array to ROOT file
         rnp.array2root(structured_array, out_f_file, mode='recreate' if i == 0 else 'update', treename=data_keys[i])
-            
+        
+        Misc.progressBar(i, len(data_keys)-1,bar_length=25)
+
 if __name__ == '__main__':
     main()
 print ("Processing Complete")
