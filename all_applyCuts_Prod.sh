@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 12:46:16 trottar"
+# Time-stamp: "2024-01-23 12:48:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,17 +53,17 @@ grab_runs () {
     fi
 }
 
-TARGET="LH2"
-#TARGET="dummy"
+#TARGET="LH2"
+TARGET="dummy"
 
 KIN="Q2p1W2p95"
 #KIN="Q0p5W2p40"
 
-EPS="high"
-#EPS="low"
+#EPS="high"
+EPS="low"
 
-PHISET="center"
-#PHISET="left"
+#PHISET="center"
+PHISET="left"
 #PHISET="right"
 
 # center_highe # DONE
@@ -75,7 +75,7 @@ PHISET="center"
 # left_highe_dummy
 # right_highe_dummy
 # center_lowe_dummy
-# left_lowe_dummy
+# left_lowe_dummy # DONE
 
 if [ $TARGET = "dummy" ]; then
     file_name="${KIN}${PHISET}_${EPS}e_dummy"
