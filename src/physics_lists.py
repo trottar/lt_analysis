@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 20:15:02 trottar"
+# Time-stamp: "2024-01-22 23:16:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -284,68 +284,38 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 
     ################################################################################################################################################
 
-    f_list_settings = '{}/src/{}/list.settings'.format(LTANAPATH, ParticleType)
-    output_file_lst.append(f_list_settings.split('/src/')[1])
-    # Checks if file exists and creates if not
-    if not os.path.exists(f_list_settings):
-        open(f_list_settings, "w").close()
+    def update_file(check_line, f_list_settings):
+        check_kin = ' '.join(check_line.split()[:4])
+        inLine = False
 
-    if float(runNumRight[0]) != 0:    
+        # Read the file and check if the line exists
+        with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
+
+        # Modify the lines accordingly
+        with open(f_list_settings, 'w') as f:
+            for line in lines:
+                if check_kin in line:
+                    inLine = True
+                    f.write(check_line + '\n')
+                else:
+                    f.write(line)
+
+        # Append the line if it doesn't exist
+        if not inLine:
+            write_to_file(f_list_settings, check_line)
+
+    if float(runNumRight[0]) != 0:
         check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
-        # Save lines in the file
-        with open(f_list_settings, 'r') as f:
-            lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'a') as f:
-            for line in lines:
-                if check_kin in line:
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
+        update_file(check_line, f_list_settings)
 
-    if float(runNumLeft[0]) != 0:    
+    if float(runNumLeft[0]) != 0:
         check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
-        # Save lines in the file
-        with open(f_list_settings, 'r') as f:
-            lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'a') as f:
-            for line in lines:
-                if check_kin in line:
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
+        update_file(check_line, f_list_settings)
 
-    if float(runNumCenter[0]) != 0:    
+    if float(runNumCenter[0]) != 0:
         check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
-        # Save lines in the file
-        with open(f_list_settings, 'r') as f:
-            lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'a') as f:
-            for line in lines:
-                if check_kin in line:
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
+        update_file(check_line, f_list_settings)
             
     ################################################################################################################################################
 
