@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 02:02:12 trottar"
+# Time-stamp: "2024-01-23 09:47:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -291,65 +291,29 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         open(f_list_settings, "w").close()
 
     if float(runNumRight[0]) != 0:    
-        check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
-            for line in lines:
-                if check_kin in line:
-                    print("!!!!!!!!!!!",line, lines)
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
+            check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
+            if check_line in lines:
+                write_to_file(f_list_settings,check_line)
 
     if float(runNumLeft[0]) != 0:    
-        check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
-            for line in lines:
-                if check_kin in line:
-                    print("!!!!!!!!!!!",line, lines)
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
+            check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+            if check_line in lines:
+                write_to_file(f_list_settings,check_line)
 
     if float(runNumCenter[0]) != 0:    
-        check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
-            for line in lines:
-                if check_kin in line:
-                    print("!!!!!!!!!!!",line, lines)
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
-            
+            check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
+            if check_line in lines:
+                write_to_file(f_list_settings,check_line)
+                
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
