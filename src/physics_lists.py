@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 10:16:36 trottar"
+# Time-stamp: "2024-01-23 11:30:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,7 +33,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("../utility")
-from utility import write_to_file
+from utility import write_to_file, replace_line
 
 ###############################################################################################################################################
 

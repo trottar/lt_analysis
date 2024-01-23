@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 16:13:00 trottar"
+# Time-stamp: "2024-01-23 11:28:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -280,7 +280,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DATA  = TH1D("H_pmz_DATA","pmz", 100, -10.0, 10.0)
     H_ct_DATA = TH1D("H_ct_DATA", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
     H_cal_etottracknorm_DATA = TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 100, 0.2, 1.8)
-    H_cer_npeSum_DATA = TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 100, 0, 30)
+    H_cer_npeSum_DATA = TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 100, 0, 30xo)
     P_cal_etottracknorm_DATA = TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 100, 0, 1)
     P_hgcer_npeSum_DATA = TH1D("P_hgcer_npeSum_DATA", "SHMS HGCer Npe Sum", 100, 0, 50)
     P_aero_npeSum_DATA = TH1D("P_aero_npeSum_DATA", "SHMS Aero Npe Sum", 100, 0, 50)
@@ -390,6 +390,10 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_DATA = TH2D("MM_vs_CoinTime_DATA","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_DATA = TH2D("CoinTime_vs_beta_DATA", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
     MM_vs_beta_DATA = TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
+    MM_vs_H_cer_DATA = TH2D("MM_vs_H_cer_DATA", "Missing Mass vs HMS Cerenkov; MM; HMS Cerenkov", 50, 0, 2, 50, 0, 30)
+    MM_vs_H_cal_DATA = TH2D("MM_vs_H_cal_DATA", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)
+    MM_vs_P_hgcer_DATA = TH2D("MM_vs_P_hgcer_DATA", "Missing Mass vs SHMS HGCer; MM; SHMS HGCer", 50, 0, 2, 50, 0, 50)
+    MM_vs_P_aero_DATA = TH2D("MM_vs_P_aero_DATA", "Missing Mass vs SHMS Aerogel; MM; SHMS Aerogel", 50, 0, 2, 50, 0, 50)
     phiq_vs_t_DATA = TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
     polar_phiq_vs_t_DATA = TGraphPolar()
     polar_phiq_vs_t_DATA.SetName("polar_phiq_vs_t_DATA")
@@ -401,6 +405,10 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_DUMMY = TH2D("MM_vs_CoinTime_DUMMY","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_DUMMY = TH2D("CoinTime_vs_beta_DUMMY", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
     MM_vs_beta_DUMMY = TH2D("MM_vs_beta_DUMMY", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
+    MM_vs_H_cer_DUMMY = TH2D("MM_vs_H_cer_DUMMY", "Missing Mass vs HMS Cerenkov; MM; HMS Cerenkov", 50, 0, 2, 50, 0, 30)
+    MM_vs_H_cal_DUMMY = TH2D("MM_vs_H_cal_DUMMY", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)
+    MM_vs_P_hgcer_DUMMY = TH2D("MM_vs_P_hgcer_DUMMY", "Missing Mass vs SHMS HGCer; MM; SHMS HGCer", 50, 0, 2, 50, 0, 50)
+    MM_vs_P_aero_DUMMY = TH2D("MM_vs_P_aero_DUMMY", "Missing Mass vs SHMS Aerogel; MM; SHMS Aerogel", 50, 0, 2, 50, 0, 50)    
     phiq_vs_t_DUMMY = TH2D("phiq_vs_t_DUMMY","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
     polar_phiq_vs_t_DUMMY = TGraphPolar()
     polar_phiq_vs_t_DUMMY.SetName("polar_phiq_vs_t_DUMMY")
@@ -412,6 +420,10 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_RAND = TH2D("MM_vs_CoinTime_RAND","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_RAND = TH2D("CoinTime_vs_beta_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
     MM_vs_beta_RAND = TH2D("MM_vs_beta_RAND", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
+    MM_vs_H_cer_RAND = TH2D("MM_vs_H_cer_RAND", "Missing Mass vs HMS Cerenkov; MM; HMS Cerenkov", 50, 0, 2, 50, 0, 30)
+    MM_vs_H_cal_RAND = TH2D("MM_vs_H_cal_RAND", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)
+    MM_vs_P_hgcer_RAND = TH2D("MM_vs_P_hgcer_RAND", "Missing Mass vs SHMS HGCer; MM; SHMS HGCer", 50, 0, 2, 50, 0, 50)
+    MM_vs_P_aero_RAND = TH2D("MM_vs_P_aero_RAND", "Missing Mass vs SHMS Aerogel; MM; SHMS Aerogel", 50, 0, 2, 50, 0, 50)    
     phiq_vs_t_RAND = TH2D("phiq_vs_t_RAND","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
     Q2_vs_W_RAND = TH2D("Q2_vs_W_RAND", "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
     Q2_vs_t_RAND = TH2D("Q2_vs_t_RAND", "Q^{2} vs t; Q^{2}; t", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["tmin"], inpDict["tmax"])
@@ -421,6 +433,10 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_DUMMY_RAND = TH2D("MM_vs_CoinTime_DUMMY_RAND","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_DUMMY_RAND = TH2D("CoinTime_vs_beta_DUMMY_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
     MM_vs_beta_DUMMY_RAND = TH2D("MM_vs_beta_DUMMY_RAND", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
+    MM_vs_H_cer_DUMMY_RAND = TH2D("MM_vs_H_cer_DUMMY_RAND", "Missing Mass vs HMS Cerenkov; MM; HMS Cerenkov", 50, 0, 2, 50, 0, 30)
+    MM_vs_H_cal_DUMMY_RAND = TH2D("MM_vs_H_cal_DUMMY_RAND", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)
+    MM_vs_P_hgcer_DUMMY_RAND = TH2D("MM_vs_P_hgcer_DUMMY_RAND", "Missing Mass vs SHMS HGCer; MM; SHMS HGCer", 50, 0, 2, 50, 0, 50)
+    MM_vs_P_aero_DUMMY_RAND = TH2D("MM_vs_P_aero_DUMMY_RAND", "Missing Mass vs SHMS Aerogel; MM; SHMS Aerogel", 50, 0, 2, 50, 0, 50)    
     phiq_vs_t_DUMMY_RAND = TH2D("phiq_vs_t_DUMMY_RAND","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
     Q2_vs_W_DUMMY_RAND = TH2D("Q2_vs_W_DUMMY_RAND", "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
     Q2_vs_t_DUMMY_RAND = TH2D("Q2_vs_t_DUMMY_RAND", "Q^{2} vs t; Q^{2}; t", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["tmin"], inpDict["tmax"])
@@ -484,6 +500,10 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DATA.Fill(evt.MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DATA.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_hgcer_DATA.Fill(evt.MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DATA.Fill(evt.MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DATA.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
@@ -536,7 +556,7 @@ def rand_sub(phi_setting, inpDict):
 
           P_cal_etottracknorm_DATA.Fill(evt.P_cal_etottracknorm)
           P_hgcer_npeSum_DATA.Fill(evt.P_hgcer_npeSum)
-          P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)          
+          P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)
 
     ################################################################################################################################################
     # Fill dummy histograms for various trees called above
@@ -595,6 +615,10 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY.Fill(evt.MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DUMMY.Fill(evt.MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DUMMY.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_hgcer_DUMMY.Fill(evt.MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DUMMY.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
@@ -698,6 +722,10 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_RAND.Fill(evt.MM,evt.P_gtr_beta)
+          MM_vs_H_cer_RAND.Fill(evt.MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_RAND.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_hgcer_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_RAND.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
@@ -798,6 +826,10 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY_RAND.Fill(evt.MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DUMMY_RAND.Fill(evt.MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DUMMY_RAND.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_hgcer_DUMMY_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DUMMY_RAND.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
@@ -849,6 +881,10 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_RAND.Scale(1/nWindows)
     CoinTime_vs_beta_RAND.Scale(1/nWindows)
     MM_vs_beta_RAND.Scale(1/nWindows)
+    MM_vs_H_cer_RAND.Scale(1/nWindows)
+    MM_vs_H_cal_RAND.Scale(1/nWindows)
+    MM_vs_P_hgcer_RAND.Scale(1/nWindows)
+    MM_vs_P_aero_RAND.Scale(1/nWindows)
     phiq_vs_t_RAND.Scale(1/nWindows)
     Q2_vs_W_RAND.Scale(1/nWindows)
     Q2_vs_t_RAND.Scale(1/nWindows)
@@ -888,6 +924,10 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_DUMMY_RAND.Scale(1/nWindows)
     CoinTime_vs_beta_DUMMY_RAND.Scale(1/nWindows)
     MM_vs_beta_DUMMY_RAND.Scale(1/nWindows)
+    MM_vs_H_cer_DUMMY_RAND.Scale(1/nWindows)
+    MM_vs_H_cal_DUMMY_RAND.Scale(1/nWindows)
+    MM_vs_P_hgcer_DUMMY_RAND.Scale(1/nWindows)
+    MM_vs_P_aero_DUMMY_RAND.Scale(1/nWindows)    
     phiq_vs_t_DUMMY_RAND.Scale(1/nWindows)
     Q2_vs_W_DUMMY_RAND.Scale(1/nWindows)
     Q2_vs_t_DUMMY_RAND.Scale(1/nWindows)
@@ -928,6 +968,10 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_DATA.Add(MM_vs_CoinTime_RAND,-1)
     CoinTime_vs_beta_DATA.Add(CoinTime_vs_beta_RAND,-1)
     MM_vs_beta_DATA.Add(MM_vs_beta_RAND,-1)
+    MM_vs_H_cer_DATA.Add(MM_vs_H_cer_RAND,-1)
+    MM_vs_H_cal_DATA.Add(MM_vs_H_cal_RAND,-1)
+    MM_vs_P_hgcer_DATA.Add(MM_vs_P_hgcer_RAND,-1)
+    MM_vs_P_aero_DATA.Add(MM_vs_P_aero_RAND,-1)
     phiq_vs_t_DATA.Add(phiq_vs_t_RAND,-1)
     Q2_vs_W_DATA.Add(Q2_vs_W_RAND,-1)
     Q2_vs_t_DATA.Add(Q2_vs_t_RAND,-1)
@@ -968,6 +1012,10 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_CoinTime_DUMMY.Add(MM_vs_CoinTime_DUMMY_RAND,-1)
     CoinTime_vs_beta_DUMMY.Add(CoinTime_vs_beta_DUMMY_RAND,-1)
     MM_vs_beta_DUMMY.Add(MM_vs_beta_DUMMY_RAND,-1)
+    MM_vs_H_cer_DUMMY.Add(MM_vs_H_cer_DUMMY_RAND,-1)
+    MM_vs_H_cal_DUMMY.Add(MM_vs_H_cal_DUMMY_RAND,-1)
+    MM_vs_P_hgcer_DUMMY.Add(MM_vs_P_hgcer_DUMMY_RAND,-1)
+    MM_vs_P_aero_DUMMY.Add(MM_vs_P_aero_DUMMY_RAND,-1)    
     phiq_vs_t_DUMMY.Add(phiq_vs_t_DUMMY_RAND,-1)
     Q2_vs_W_DUMMY.Add(Q2_vs_W_DUMMY_RAND,-1)
     Q2_vs_t_DUMMY.Add(Q2_vs_t_DUMMY_RAND,-1)
@@ -1092,6 +1140,10 @@ def rand_sub(phi_setting, inpDict):
     histDict["Q2_vs_t_DATA"] = Q2_vs_t_DATA
     histDict["W_vs_t_DATA"] = W_vs_t_DATA
     histDict["EPS_vs_t_DATA"] = EPS_vs_t_DATA
+    histDict["MM_vs_H_cer_DATA"] = MM_vs_H_cer_DATA
+    histDict["MM_vs_H_cal_DATA"] = MM_vs_H_cal_DATA
+    histDict["MM_vs_P_hgcer_DATA"] = MM_vs_P_hgcer_DATA
+    histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
 
     ###
     # CT plots

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 16:13:26 trottar"
+# Time-stamp: "2024-01-23 11:30:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -718,6 +718,81 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cmmbeta.Print(outputpdf)
 
+    CmmH_cer = TCanvas()
+
+    CmmH_cer.Divide(2,2)
+
+    for i,hist in enumerate(histlist_copy):
+        CmmH_cer.cd(i+1)
+
+        # Set color representing zero events to transparent (alpha = 0)
+        hist["MM_vs_H_cer_DATA"].SetMinimum(1)
+        hist["MM_vs_H_cer_DATA"].SetLineColor(i+1)
+        hist["MM_vs_H_cer_DATA"].Draw("same, COLZ")
+        hist["MM_vs_H_cer_DATA"].SetTitle(phisetlist[i])
+
+    CmmH_cer.Print(outputpdf)
+
+    CmmH_cal = TCanvas()
+
+    CmmH_cal.Divide(2,2)
+
+    for i,hist in enumerate(histlist_copy):
+        CmmH_cal.cd(i+1)
+
+        # Set color representing zero events to transparent (alpha = 0)
+        hist["MM_vs_H_cal_DATA"].SetMinimum(1)
+        hist["MM_vs_H_cal_DATA"].SetLineColor(i+1)
+        hist["MM_vs_H_cal_DATA"].Draw("same, COLZ")
+        hist["MM_vs_H_cal_DATA"].SetTitle(phisetlist[i])
+
+    CmmH_cal.Print(outputpdf)    
+
+    CmmP_cal = TCanvas()
+
+    CmmP_cal.Divide(2,2)
+
+    for i,hist in enumerate(histlist_copy):
+        CmmP_cal.cd(i+1)
+
+        # Set color representing zero events to transparent (alpha = 0)
+        hist["MM_vs_P_cal_DATA"].SetMinimum(1)
+        hist["MM_vs_P_cal_DATA"].SetLineColor(i+1)
+        hist["MM_vs_P_cal_DATA"].Draw("same, COLZ")
+        hist["MM_vs_P_cal_DATA"].SetTitle(phisetlist[i])
+
+    CmmP_cal.Print(outputpdf)
+    
+    CmmP_hgcer = TCanvas()
+
+    CmmP_hgcer.Divide(2,2)
+
+    for i,hist in enumerate(histlist_copy):
+        CmmP_hgcer.cd(i+1)
+
+        # Set color representing zero events to transparent (alpha = 0)
+        hist["MM_vs_P_hgcer_DATA"].SetMinimum(1)
+        hist["MM_vs_P_hgcer_DATA"].SetLineColor(i+1)
+        hist["MM_vs_P_hgcer_DATA"].Draw("same, COLZ")
+        hist["MM_vs_P_hgcer_DATA"].SetTitle(phisetlist[i])
+
+    CmmP_hgcer.Print(outputpdf)
+
+    CmmP_aero = TCanvas()
+
+    CmmP_aero.Divide(2,2)
+
+    for i,hist in enumerate(histlist_copy):
+        CmmP_aero.cd(i+1)
+
+        # Set color representing zero events to transparent (alpha = 0)
+        hist["MM_vs_P_aero_DATA"].SetMinimum(1)
+        hist["MM_vs_P_aero_DATA"].SetLineColor(i+1)
+        hist["MM_vs_P_aero_DATA"].Draw("same, COLZ")
+        hist["MM_vs_P_aero_DATA"].SetTitle(phisetlist[i])
+
+    CmmP_aero.Print(outputpdf)
+    
     Cqw = TCanvas()
 
     Cqw.Divide(2,2)
