@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 11:32:19 trottar"
+# Time-stamp: "2024-01-23 11:38:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -392,6 +392,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DATA = TH2D("MM_vs_beta_DATA", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
     MM_vs_H_cer_DATA = TH2D("MM_vs_H_cer_DATA", "Missing Mass vs HMS Cerenkov; MM; HMS Cerenkov", 50, 0, 2, 50, 0, 30)
     MM_vs_H_cal_DATA = TH2D("MM_vs_H_cal_DATA", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)
+    MM_vs_P_cal_DATA = TH2D("MM_vs_P_cal_DATA", "Missing Mass vs SHMS Cal eTrackNorm; MM; SHMS Cal eTrackNorm", 50, 0, 2, 50, 0, 1)
     MM_vs_P_hgcer_DATA = TH2D("MM_vs_P_hgcer_DATA", "Missing Mass vs SHMS HGCer; MM; SHMS HGCer", 50, 0, 2, 50, 0, 50)
     MM_vs_P_aero_DATA = TH2D("MM_vs_P_aero_DATA", "Missing Mass vs SHMS Aerogel; MM; SHMS Aerogel", 50, 0, 2, 50, 0, 50)
     phiq_vs_t_DATA = TH2D("phiq_vs_t_DATA","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
@@ -406,7 +407,8 @@ def rand_sub(phi_setting, inpDict):
     CoinTime_vs_beta_DUMMY = TH2D("CoinTime_vs_beta_DUMMY", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
     MM_vs_beta_DUMMY = TH2D("MM_vs_beta_DUMMY", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
     MM_vs_H_cer_DUMMY = TH2D("MM_vs_H_cer_DUMMY", "Missing Mass vs HMS Cerenkov; MM; HMS Cerenkov", 50, 0, 2, 50, 0, 30)
-    MM_vs_H_cal_DUMMY = TH2D("MM_vs_H_cal_DUMMY", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)
+    MM_vs_P_cal_DUMMY = TH2D("MM_vs_P_cal_DUMMY", "Missing Mass vs SHMS Cal eTrackNorm; MM; SHMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)    
+    MM_vs_H_cal_DUMMY = TH2D("MM_vs_H_cal_DUMMY", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0, 1)
     MM_vs_P_hgcer_DUMMY = TH2D("MM_vs_P_hgcer_DUMMY", "Missing Mass vs SHMS HGCer; MM; SHMS HGCer", 50, 0, 2, 50, 0, 50)
     MM_vs_P_aero_DUMMY = TH2D("MM_vs_P_aero_DUMMY", "Missing Mass vs SHMS Aerogel; MM; SHMS Aerogel", 50, 0, 2, 50, 0, 50)    
     phiq_vs_t_DUMMY = TH2D("phiq_vs_t_DUMMY","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
@@ -422,6 +424,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_RAND = TH2D("MM_vs_beta_RAND", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
     MM_vs_H_cer_RAND = TH2D("MM_vs_H_cer_RAND", "Missing Mass vs HMS Cerenkov; MM; HMS Cerenkov", 50, 0, 2, 50, 0, 30)
     MM_vs_H_cal_RAND = TH2D("MM_vs_H_cal_RAND", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)
+    MM_vs_P_cal_RAND = TH2D("MM_vs_P_cal_RAND", "Missing Mass vs SHMS Cal eTrackNorm; MM; SHMS Cal eTrackNorm", 50, 0, 2, 50, 0, 1)    
     MM_vs_P_hgcer_RAND = TH2D("MM_vs_P_hgcer_RAND", "Missing Mass vs SHMS HGCer; MM; SHMS HGCer", 50, 0, 2, 50, 0, 50)
     MM_vs_P_aero_RAND = TH2D("MM_vs_P_aero_RAND", "Missing Mass vs SHMS Aerogel; MM; SHMS Aerogel", 50, 0, 2, 50, 0, 50)    
     phiq_vs_t_RAND = TH2D("phiq_vs_t_RAND","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
@@ -435,6 +438,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DUMMY_RAND = TH2D("MM_vs_beta_DUMMY_RAND", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
     MM_vs_H_cer_DUMMY_RAND = TH2D("MM_vs_H_cer_DUMMY_RAND", "Missing Mass vs HMS Cerenkov; MM; HMS Cerenkov", 50, 0, 2, 50, 0, 30)
     MM_vs_H_cal_DUMMY_RAND = TH2D("MM_vs_H_cal_DUMMY_RAND", "Missing Mass vs HMS Cal eTrackNorm; MM; HMS Cal eTrackNorm", 50, 0, 2, 50, 0.2, 1.8)
+    MM_vs_P_cal_DUMMY_RAND = TH2D("MM_vs_P_cal_DUMMY_RAND", "Missing Mass vs SHMS Cal eTrackNorm; MM; SHMS Cal eTrackNorm", 50, 0, 2, 50, 0, 1)    
     MM_vs_P_hgcer_DUMMY_RAND = TH2D("MM_vs_P_hgcer_DUMMY_RAND", "Missing Mass vs SHMS HGCer; MM; SHMS HGCer", 50, 0, 2, 50, 0, 50)
     MM_vs_P_aero_DUMMY_RAND = TH2D("MM_vs_P_aero_DUMMY_RAND", "Missing Mass vs SHMS Aerogel; MM; SHMS Aerogel", 50, 0, 2, 50, 0, 50)    
     phiq_vs_t_DUMMY_RAND = TH2D("phiq_vs_t_DUMMY_RAND","; #phi ;t", 12, -3.14, 3.14, 24, inpDict["tmin"], inpDict["tmax"])
@@ -502,6 +506,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
           MM_vs_H_cer_DATA.Fill(evt.MM,evt.H_cer_npeSum)
           MM_vs_H_cal_DATA.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DATA.Fill(evt.MM,evt.P_cal_etottracknorm)
           MM_vs_P_hgcer_DATA.Fill(evt.MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DATA.Fill(evt.MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
@@ -617,6 +622,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_beta_DUMMY.Fill(evt.MM,evt.P_gtr_beta)
           MM_vs_H_cer_DUMMY.Fill(evt.MM,evt.H_cer_npeSum)
           MM_vs_H_cal_DUMMY.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DUMMY.Fill(evt.MM,evt.P_cal_etottracknorm)
           MM_vs_P_hgcer_DUMMY.Fill(evt.MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DUMMY.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
@@ -724,6 +730,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_beta_RAND.Fill(evt.MM,evt.P_gtr_beta)
           MM_vs_H_cer_RAND.Fill(evt.MM,evt.H_cer_npeSum)
           MM_vs_H_cal_RAND.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_RAND.Fill(evt.MM,evt.P_cal_etottracknorm)
           MM_vs_P_hgcer_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_RAND.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
@@ -828,6 +835,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_beta_DUMMY_RAND.Fill(evt.MM,evt.P_gtr_beta)
           MM_vs_H_cer_DUMMY_RAND.Fill(evt.MM,evt.H_cer_npeSum)
           MM_vs_H_cal_DUMMY_RAND.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DUMMY_RAND.Fill(evt.MM,evt.P_cal_etottracknorm)
           MM_vs_P_hgcer_DUMMY_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DUMMY_RAND.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
@@ -883,6 +891,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_RAND.Scale(1/nWindows)
     MM_vs_H_cer_RAND.Scale(1/nWindows)
     MM_vs_H_cal_RAND.Scale(1/nWindows)
+    MM_vs_P_cal_RAND.Scale(1/nWindows)
     MM_vs_P_hgcer_RAND.Scale(1/nWindows)
     MM_vs_P_aero_RAND.Scale(1/nWindows)
     phiq_vs_t_RAND.Scale(1/nWindows)
@@ -926,6 +935,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DUMMY_RAND.Scale(1/nWindows)
     MM_vs_H_cer_DUMMY_RAND.Scale(1/nWindows)
     MM_vs_H_cal_DUMMY_RAND.Scale(1/nWindows)
+    MM_vs_P_cal_DUMMY_RAND.Scale(1/nWindows)    
     MM_vs_P_hgcer_DUMMY_RAND.Scale(1/nWindows)
     MM_vs_P_aero_DUMMY_RAND.Scale(1/nWindows)    
     phiq_vs_t_DUMMY_RAND.Scale(1/nWindows)
@@ -970,6 +980,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DATA.Add(MM_vs_beta_RAND,-1)
     MM_vs_H_cer_DATA.Add(MM_vs_H_cer_RAND,-1)
     MM_vs_H_cal_DATA.Add(MM_vs_H_cal_RAND,-1)
+    MM_vs_P_cal_DATA.Add(MM_vs_P_cal_RAND,-1)    
     MM_vs_P_hgcer_DATA.Add(MM_vs_P_hgcer_RAND,-1)
     MM_vs_P_aero_DATA.Add(MM_vs_P_aero_RAND,-1)
     phiq_vs_t_DATA.Add(phiq_vs_t_RAND,-1)
@@ -1014,6 +1025,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DUMMY.Add(MM_vs_beta_DUMMY_RAND,-1)
     MM_vs_H_cer_DUMMY.Add(MM_vs_H_cer_DUMMY_RAND,-1)
     MM_vs_H_cal_DUMMY.Add(MM_vs_H_cal_DUMMY_RAND,-1)
+    MM_vs_P_cal_DATA.Add(MM_vs_P_cal_RAND,-1)    
     MM_vs_P_hgcer_DUMMY.Add(MM_vs_P_hgcer_DUMMY_RAND,-1)
     MM_vs_P_aero_DUMMY.Add(MM_vs_P_aero_DUMMY_RAND,-1)    
     phiq_vs_t_DUMMY.Add(phiq_vs_t_DUMMY_RAND,-1)
@@ -1142,6 +1154,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["EPS_vs_t_DATA"] = EPS_vs_t_DATA
     histDict["MM_vs_H_cer_DATA"] = MM_vs_H_cer_DATA
     histDict["MM_vs_H_cal_DATA"] = MM_vs_H_cal_DATA
+    histDict["MM_vs_P_cal_DATA"] = MM_vs_P_cal_DATA    
     histDict["MM_vs_P_hgcer_DATA"] = MM_vs_P_hgcer_DATA
     histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
 
