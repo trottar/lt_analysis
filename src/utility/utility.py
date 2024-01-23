@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 11:00:06 trottar"
+# Time-stamp: "2024-01-23 12:21:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,7 +106,7 @@ def replace_line(file_path, line_number, new_line):
         with open(file_path, 'w') as file:
             file.writelines(lines)
     else:
-        print("ERROR: Invalid line number {} in file {}.".format(line_number, file_path))
+        print("ERROR: Invalid line number {} in file {}".format(line_number, file_path))
         sys.exit(2)
 
 ################################################################################################################################################
