@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 18:55:16 trottar"
+# Time-stamp: "2024-01-22 19:00:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,11 +62,11 @@ EPS="high"
 #EPS="low"
 
 #PHISET="center"
-#PHISET="left"
-PHISET="right"
+PHISET="left"
+#PHISET="right"
 
 # Q3p0W2p32center_highe
-# Q3p0W2p32left_highe
+# Q3p0W2p32left_highe # DONE
 # Q3p0W2p32right_highe # DONE
 # Q3p0W2p32center_lowe # DONE
 # Q3p0W2p32left_lowe # DONE
