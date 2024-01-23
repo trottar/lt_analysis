@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-21 13:51:44 trottar"
+# Time-stamp: "2024-01-23 11:00:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,7 +88,26 @@ def write_to_file(f_out,line,write_mode='a'):
     with open(f_out, write_mode) as f:
         # Write the value of the variable to the file
         print("Writing {} to {}...".format(line, f_out))
-        f.write(line)        
+        f.write(line)
+
+################################################################################################################################################
+
+def replace_line(file_path, line_number, new_line):
+    # Read the file and store its lines in a list
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    # Check if the line number is valid
+    if 1 <= line_number <= len(lines):
+        # Replace the specified line
+        lines[line_number - 1] = new_line
+
+        # Write the modified lines back to the file
+        with open(file_path, 'w') as file:
+            file.writelines(lines)
+    else:
+        print("ERROR: Invalid line number {} in file {}.".format(line_number, file_path))
+        sys.exit(2)
 
 ################################################################################################################################################
 

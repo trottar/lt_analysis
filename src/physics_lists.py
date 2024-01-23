@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 09:47:36 trottar"
+# Time-stamp: "2024-01-23 10:16:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -290,19 +290,80 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
 
+    '''
     if float(runNumRight[0]) != 0:    
+        check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
+        check_kin = ' '.join(check_line.split()[:4])
+        inLine = False
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
-            check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
-            if check_line in lines:
-                write_to_file(f_list_settings,check_line)
+            if check_kin in line:
+                    inLine = True
+                    f.write(check_line)
+                else:
+                    f.write(line)                    
+        # Append file if line not in file already
+        if not inLine:
+            write_to_file(f_list_settings,check_line)
+
+    if float(runNumLeft[0]) != 0:    
+        check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+        check_kin = ' '.join(check_line.split()[:4])
+        inLine = False
+        # Save lines in the file
+        with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
+        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
+        with open(f_list_settings, 'w') as f:
+            for line in lines:
+                if check_kin in line:
+                    inLine = True
+                    f.write(check_line)
+                else:
+                    f.write(line)                    
+        # Append file if line not in file already
+        if not inLine:
+            write_to_file(f_list_settings,check_line)
+
+    if float(runNumCenter[0]) != 0:    
+        check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
+        check_kin = ' '.join(check_line.split()[:4])
+        inLine = False
+        # Save lines in the file
+        with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
+        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
+        with open(f_list_settings, 'w') as f:
+            for line in lines:
+                if check_kin in line:
+                    inLine = True
+                    f.write(check_line)
+                else:
+                    f.write(line)                    
+        # Append file if line not in file already
+        if not inLine:
+            write_to_file(f_list_settings,check_line)
+    '''
+
+    if float(runNumRight[0]) != 0:    
+        # Save lines in the file
+        with open(f_list_settings, 'r') as f:
+            for i, line in enumerate(lines):
+                check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
+                check_kin = ' '.join(check_line.split()[:4])
+                if check_kin in line:
+                    if check_line in line:
+                        write_to_file(f_list_settings, check_line)
+                    else:
+                        replace_line(f_list_settings, i, check_line)
 
     if float(runNumLeft[0]) != 0:    
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
             check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+            check_kin = ' '.join(check_line.split()[:4])
             if check_line in lines:
                 write_to_file(f_list_settings,check_line)
 
@@ -311,9 +372,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
             check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
+            check_kin = ' '.join(check_line.split()[:4])
             if check_line in lines:
                 write_to_file(f_list_settings,check_line)
-                
+    
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
