@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 13:17:30 trottar"
+# Time-stamp: "2024-01-23 13:17:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,12 +59,12 @@ TARGET="dummy"
 KIN="Q2p1W2p95"
 #KIN="Q0p5W2p40"
 
-#EPS="high"
-EPS="low"
+EPS="high"
+#EPS="low"
 
-PHISET="center"
+#PHISET="center"
 #PHISET="left"
-#PHISET="right"
+PHISET="right"
 
 # center_highe # DONE
 # left_highe # DONE
@@ -73,7 +73,7 @@ PHISET="center"
 # left_lowe # DONE
 # center_highe_dummy
 # left_highe_dummy
-# right_highe_dummy
+# right_highe_dummy # DONE
 # center_lowe_dummy # DONE
 # left_lowe_dummy # DONE
 
