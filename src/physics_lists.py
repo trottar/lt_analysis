@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-21 13:51:49 trottar"
+# Time-stamp: "2024-01-22 20:15:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -298,7 +298,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
         # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
+        with open(f_list_settings, 'a') as f:
             for line in lines:
                 if check_kin in line:
                     inLine = True
@@ -317,7 +317,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
         # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
+        with open(f_list_settings, 'a') as f:
             for line in lines:
                 if check_kin in line:
                     inLine = True
@@ -336,7 +336,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
         # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
+        with open(f_list_settings, 'a') as f:
             for line in lines:
                 if check_kin in line:
                     inLine = True
