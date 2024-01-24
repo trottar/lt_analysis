@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 22:08:48 trottar"
+# Time-stamp: "2024-01-23 22:41:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,18 +53,18 @@ grab_runs () {
     fi
 }
 
-TARGET="LH2"
-#TARGET="dummy"
+#TARGET="LH2"
+TARGET="dummy"
 
 #KIN="Q2p1W2p95"
 KIN="Q3p0W3p14"
 #KIN="Q0p5W2p40"
 
-#EPS="high"
-EPS="low"
+EPS="high"
+#EPS="low"
 
-#PHISET="center"
-PHISET="left"
+PHISET="center"
+#PHISET="left"
 #PHISET="right"
 
 # center_highe # DONE
