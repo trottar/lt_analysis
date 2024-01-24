@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-24 09:56:59 trottar"
+# Time-stamp: "2024-01-24 11:30:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,71 +53,65 @@ grab_runs () {
     fi
 }
 
-TARGET="LH2"
-#TARGET="dummy"
-
+KIN="Q0p5W2p40"
 #KIN="Q2p1W2p95"
 #KIN="Q3p0W3p14"
 #KIN="Q3p0W2p32"
-KIN="Q0p5W2p40"
+#KIN="Q4p4W2p74"
+#KIN="Q5p5W3p02"
 
-#EPS="high"
-EPS="low"
+for t in "${TARGET[@]}"; do
+    for e in "${EPS[@]}"; do
+        for p in "${PHISET[@]}"; do
 
-PHISET="center"
-#PHISET="left"
-#PHISET="right"
+	    if [ $t = "dummy" ]; then
+		file_name="${KIN}${p}_${e}e_dummy"
+	    else
+		file_name="${KIN}${p}_${e}e"
+	    fi
 
-# center_highe # DONE
-# left_highe # DONE
-# right_highe # DONE
-# center_lowe # DONE
-# left_lowe
-# center_highe_dummy
-# left_highe_dummy
-# right_highe_dummy
-# center_lowe_dummy
-# left_lowe_dummy
+	    numbers_to_match=()
+	    IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"
+	    echo
+	    echo "${file_name}"
+	    echo "Run Numbers: [${numbers_to_match[@]}]"
 
-if [ $TARGET = "dummy" ]; then
-    file_name="${KIN}${PHISET}_${EPS}e_dummy"
-else
-    file_name="${KIN}${PHISET}_${EPS}e"
-fi
+            # Check if numbers_to_match is empty and break the loop
+            if [ ${#numbers_to_match[@]} -eq 0 ]; then
+                echo "No run numbers to process. Exiting loop."
+                break
+            fi
+	    
+	    inpFile="${UTILPATH}/run_list/${ANATYPE}LT/${file_name}"
 
-numbers_to_match=()
-IFS=', ' read -r -a numbers_to_match <<< "$( grab_runs ${file_name} )"
-echo
-echo "${file_name}"
-echo "Run Numbers: [${numbers_to_match[@]}]"
+	    replay_root_path="${ROOTPATH}/${ANATYPE}LT"
+	    while true; do
+		# Prompt for confirmation before proceeding
+		read -p "Are you sure you want to remove files with specified numbers in the filename? (yes/no): " answer
 
-inpFile="${UTILPATH}/run_list/${ANATYPE}LT/${file_name}"
-
-replay_root_path="${ROOTPATH}/${ANATYPE}LT"
-while true; do
-    # Prompt for confirmation before proceeding
-    read -p "Are you sure you want to remove files with specified numbers in the filename? (yes/no): " answer
-
-    case "$answer" in
-        [Yy]* )
-            # Finds number of lines of inpFile
-            numlines=$(eval "wc -l < ${inpFile}")
-	    i=0
-            # Loop through each number in the list
-            for number in "${numbers_to_match[@]}"
-            do
-		echo
-		echo "Run $(( ${i} + 1 ))/$(( ${numlines} + 1 ))"
-                echo "Running ${number}"
-                cd $kaonlt/../lt_analysis
-		./applyCuts_Prod.sh -p ${EPS} ${PHISET} 2p1 2p95 ${TARGET} ${number} kaon
-		i+=1
-            done
-            break ;;
-        [Nn]* ) 
-            echo "Operation aborted."
-            exit ;;
-        * ) 
-            echo "Please answer yes or no." ;;
-    esac
+		case "$answer" in
+		    [Yy]* )
+			# Finds number of lines of inpFile
+			numlines=$(eval "wc -l < ${inpFile}")
+			i=0
+			# Loop through each number in the list
+			for number in "${numbers_to_match[@]}"
+			do
+			    echo
+			    echo "Run $(( ${i} + 1 ))/$(( ${numlines} + 1 ))"
+			    echo "Running ${number}"
+			    cd $kaonlt/../lt_analysis
+			    ./applyCuts_Prod.sh -p ${EPS} ${PHISET} 2p1 2p95 ${TARGET} ${number} kaon
+			    i+=1
+			done
+			break ;;
+		    [Nn]* ) 
+			echo "Operation aborted."
+			exit ;;
+		    * ) 
+			echo "Please answer yes or no." ;;
+		esac
+	    done
+	done
+    done
 done
