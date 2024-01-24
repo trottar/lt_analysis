@@ -505,7 +505,8 @@ if [[ $p_flag = "true" ]]; then
 	    echo
 	    echo
 	    rm "$out_f_file"
-	fi	
+	fi
+	rm -f ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
 	echo
     fi
@@ -528,7 +529,8 @@ if [[ $p_flag = "true" ]]; then
 	    echo
 	    echo
 	    rm "$out_f_file"
-	fi	
+	fi
+	rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
     fi
 
@@ -550,7 +552,8 @@ if [[ $p_flag = "true" ]]; then
 	    echo
 	    echo
 	    rm "$out_f_file"
-	fi	
+	fi
+	rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
     fi
 
@@ -582,7 +585,8 @@ else
 		echo
 		echo
 		rm "$out_f_file"
-	    fi	    
+	    fi
+	    rm -f ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log
 	    echo
 	fi
@@ -605,7 +609,8 @@ else
 		echo
 		echo
 		rm "$out_f_file"
-	    fi	    
+	    fi
+	    rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
 	fi
 
@@ -627,7 +632,8 @@ else
 		echo
 		echo
 		rm "$out_f_file"
-	    fi	    
+	    fi
+	    rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log
 	    
 	fi
