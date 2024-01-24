@@ -31,8 +31,6 @@ ltsep package import and pathing definitions
 
 # Import package for cuts
 from ltsep import Root
-# Import package for progress bar
-from ltsep import Misc
 
 lt=Root(os.path.realpath(__file__),"Plot_Prod")
 
@@ -236,7 +234,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             #print (minQ, minQ/400*(Q2max-Q2min)+Q2min,maxQ,maxQ/400*(Q2max-Q2min)+Q2min,fitrange)
             print("Q2Val Bin Val: ",Q2vsW_lowe_cut.FindBin(Q2Val))
             fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange*2
-            fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
+            fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange*2
             #fitl = 200-fitrange*2
             #fitr = 200+fitrange
             while (badfit == True):
@@ -329,10 +327,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     a4 = inpDict["a4"]
                     b4 = inpDict["b4"]                    
 	            
-                for i, event in enumerate(Cut_Events_all_RF_tree):
-                    # Progress bar
-                    sys.stdout.write(" \r{0}\r".format(Misc.progressBar(i, Cut_Events_all_RF_tree.GetEntries(),bar_length=25)))
-                    sys.stdout.flush()
+                for event in Cut_Events_all_RF_tree:                    
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                         countA +=1
