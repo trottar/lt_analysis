@@ -287,7 +287,6 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             break
                     if (badfile == True):
                         break
-                    print("Bins",b,"good")
                     #for i in range (fbl,lbl):
                     #print(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).GetBinContent(i))
                     minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
@@ -327,7 +326,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     a4 = inpDict["a4"]
                     b4 = inpDict["b4"]                    
 	            
-                for event in Cut_Events_all_RF_tree:                    
+                for event in Cut_Events_all_RF_tree:
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                         countA +=1
@@ -335,9 +334,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     badfit=False
                     print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
                 else:
-                    #print ("\n!!!!! Bad Diamond Fit!! Try Reducing fitrange or Increasing minbin and Retrying !!!!!\n")
+                    print ("\n!!!!! Bad Diamond Fit!! Try Reducing fitrange or Increasing minbin and Retrying !!!!!\n")
                     fitrange -= 5
-                    #minbin -= 1
+                    minbin -= 1
                 #badfit=False
         
         
