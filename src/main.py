@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 23:27:26 trottar"
+# Time-stamp: "2024-01-24 12:44:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,8 +47,8 @@ if len(sys.argv)-1!=37:
 
 ##################################################################################################################################################    
 
-#DEBUG = True # Flag for plot splash
-DEBUG = False # Flag for no plot splash
+DEBUG = True # Flag for plot splash
+#DEBUG = False # Flag for no plot splash
 
 # Input params
 kinematics = sys.argv[1].split("_")
