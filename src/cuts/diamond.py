@@ -267,7 +267,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             check1 = True 
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
                             GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(0,1,fbl,lbl)-1)==0):
-                            lbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(1,1,fbl,lbl)-1 # ERROR!
+                            lbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(1,1,fbl,lbl)-1
                         else:
                             check2 = True
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
@@ -281,7 +281,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         else:
                             check4 = True
                         if (fbl > lbl or fbr > lbr):                     
-                            print("!!!!! ERROR !!!!!\n Bad Fit! Check lowe file or change Q2min/Q2max range! \n!!!!! ERROR !!!!!")
+                            print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n")
                             lowe_input = False
                             badfile = True
                             break
