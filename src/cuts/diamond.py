@@ -129,23 +129,23 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
 
     Title = ""
-    Q2vsW_cut = TH2D("Q2vsW_cut", labelh, 500, Q2min, Q2max, 500, Wmin, Wmax)
-    Q2vsW_mide_cut = TH2D("Q2vsW_mide_cut",labelm, 500, Q2min, Q2max, 500, Wmin, Wmax)
-    Q2vsW_lowe_cut = TH2D("Q2vsW_lowe_cut", labell, 500, Q2min, Q2max, 500, Wmin, Wmax)    
+    Q2vsW_cut = TH2D("Q2vsW_cut", labelh, 200, Q2min, Q2max, 200, Wmin, Wmax)
+    Q2vsW_mide_cut = TH2D("Q2vsW_mide_cut",labelm, 200, Q2min, Q2max, 200, Wmin, Wmax)
+    Q2vsW_lowe_cut = TH2D("Q2vsW_lowe_cut", labell, 200, Q2min, Q2max, 200, Wmin, Wmax)    
 
-    Q2vsW_hi_cut = TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 500, Q2min, Q2max, 500, Wmin, Wmax)
-    Q2vsW_mi_cut = TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 500, Q2min, Q2max, 500, Wmin, Wmax)
-    Q2vsW_lo_cut = TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 500, Q2min, Q2max, 500, Wmin, Wmax)
+    Q2vsW_hi_cut = TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
+    Q2vsW_mi_cut = TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
+    Q2vsW_lo_cut = TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
-    W_cut = TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", 500, Wmin, Wmax)
-    Q2_cut = TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", 500, Q2min, Q2max)
-    t_cut = TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 500, tmin, tmax)
-    t_mi_cut = TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 500, tmin, tmax)
+    W_cut = TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", 200, Wmin, Wmax)
+    Q2_cut = TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", 200, Q2min, Q2max)
+    t_cut = TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 200, tmin, tmax)
+    t_mi_cut = TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 200, tmin, tmax)
 
-    Q2vsW_lolo_cut = TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 500, Q2min, Q2max, 500, Wmin, Wmax)
-    Q2vsW_hilo_cut = TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 500, Q2min, Q2max, 500, Wmin, Wmax)
-    Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 500, Q2min, Q2max, 500, Wmin, Wmax)
-    Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 500, Q2min, Q2max, 500, Wmin, Wmax)
+    Q2vsW_lolo_cut = TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
+    Q2vsW_hilo_cut = TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
+    Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
+    Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 200, Q2min, Q2max, 200, Wmin, Wmax)
 
     a1 = 0
     b1 = 0
@@ -224,14 +224,14 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 countB +=1
 
             ##############################################################################################################################################
-            #Does assume 500 bins for Q2 and W, centered at kinematic values with ranges of +/-2 and +/-0.5 respectively
+            #Does assume 200 bins for Q2 and W, centered at kinematic values with ranges of +/-2 and +/-0.5 respectively
             minQ = Q2_cut.FindFirstBinAbove(0)
             maxQ = Q2_cut.FindLastBinAbove(0)
             fitrange = int((maxQ-minQ)/8)
             #print("fitrange: ",fitrange)
             minbin = 1
             badfile = False
-            #print (minQ, minQ/500*(Q2max-Q2min)+Q2min,maxQ,maxQ/500*(Q2max-Q2min)+Q2min,fitrange)
+            #print (minQ, minQ/200*(Q2max-Q2min)+Q2min,maxQ,maxQ/200*(Q2max-Q2min)+Q2min,fitrange)
             print("Q2Val Bin Val: ",Q2vsW_lowe_cut.FindBin(Q2Val))
             fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange*2
             fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
@@ -247,9 +247,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 for b in range (0,fitrange):
         
                     fbl = 1
-                    lbl = 500
+                    lbl = 200
                     fbr = 1
-                    lbr = 500
+                    lbr = 200
                     check1 = False
                     check2 = False
                     check3 = False
@@ -290,16 +290,16 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     #print("Bins",b,"good")
                     #for i in range (fbl,lbl):
                     #print(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).GetBinContent(i))
-                    minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/500*(Wmax-Wmin)+Wmin
+                    minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/200*(Wmax-Wmin)+Wmin
                     lol.append(minYl)
-                    maxYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(minbin,1,fbl,lbl)/500*(Wmax-Wmin)+Wmin
+                    maxYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(minbin,1,fbl,lbl)/200*(Wmax-Wmin)+Wmin
                     hil.append(maxYl)
-                    minYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(minbin,1,fbr,lbr)/500*(Wmax-Wmin)+Wmin
+                    minYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(minbin,1,fbr,lbr)/200*(Wmax-Wmin)+Wmin
                     lor.append(minYr)
-                    maxYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(minbin,1,fbr,lbr)/500*(Wmax-Wmin)+Wmin
+                    maxYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(minbin,1,fbr,lbr)/200*(Wmax-Wmin)+Wmin
                     hir.append(maxYr)
-                    xl = 1.0*(b+fitl)/500*(Q2max-Q2min)+Q2min
-                    xr = 1.0*(b+fitr)/500*(Q2max-Q2min)+Q2min
+                    xl = 1.0*(b+fitl)/200*(Q2max-Q2min)+Q2min
+                    xr = 1.0*(b+fitr)/200*(Q2max-Q2min)+Q2min
                     xvl.append(xl)
                     xvr.append(xr)
                 if (badfile == True):
@@ -510,8 +510,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         line2.Draw()
         line3.Draw()
         line4.Draw()
-        x1 = 100/500*(Q2max-Q2min)+Q2min
-        x2 = 300/500*(Q2max-Q2min)+Q2min
+        x1 = 100/200*(Q2max-Q2min)+Q2min
+        x2 = 300/200*(Q2max-Q2min)+Q2min
         line1f = TLine(x1,a1*x1+b1,x2,a1*x2+b1)   
         line2f = TLine(x1,a2*x1+b2,x2,a2*x2+b2) 
         line3f = TLine(x1,a3*x1+b3,x2,a3*x2+b3) 
