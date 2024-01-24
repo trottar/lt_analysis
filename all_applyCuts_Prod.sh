@@ -3,14 +3,13 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-24 11:30:30 trottar"
+# Time-stamp: "2024-01-24 16:05:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
-#!/bin/tcsh
 
 
 # Runs script in the ltsep python package that grabs current path enviroment
