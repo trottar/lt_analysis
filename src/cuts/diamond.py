@@ -332,7 +332,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 for i, event in enumerate(Cut_Events_all_RF_tree):
                     # Progress bar
                     sys.stdout.write(" \r{0}\r".format(Misc.progressBar(i, Cut_Events_all_RF_tree.GetEntries(),bar_length=25)))
-        sys.stdout.flush()
+                    sys.stdout.flush()
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                         countA +=1
