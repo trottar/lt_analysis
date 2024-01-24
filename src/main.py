@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-24 12:53:15 trottar"
+# Time-stamp: "2024-01-24 13:45:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -239,6 +239,11 @@ elif Q2Val == 5.5:
     inpDict["Q2max"] = Q2Val + (3/8)*Q2Val
     inpDict["Wmin"] = WVal - (3/8)*WVal
     inpDict["Wmax"] = WVal + (3/8)*WVal
+elif Q2Val == 2.1:
+    inpDict["Q2min"] = Q2Val - (3/6)*Q2Val
+    inpDict["Q2max"] = Q2Val + (3/6)*Q2Val
+    inpDict["Wmin"] = WVal - (3/6)*WVal
+    inpDict["Wmax"] = WVal + (3/6)*WVal
 else:
     inpDict["Q2min"] = Q2Val - (2/7)*Q2Val
     inpDict["Q2max"] = Q2Val + (2/7)*Q2Val
