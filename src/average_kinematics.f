@@ -329,7 +329,7 @@ c     Save data.
      *        aveW(it),errW(it),aveQ2(it),errQ2(it),
      *        avett(it), errtt(it), thetacm_only(it),it
 
-c         write(*,'(4f8.5,i3)') aveW(it),errW(it),aveQ2(it),errQ2(it),it
+         write(*,'(4f8.5,i3)') aveW(it),errW(it),aveQ2(it),errQ2(it),it
       end do
       close(77)
 
