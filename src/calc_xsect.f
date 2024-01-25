@@ -74,6 +74,9 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       real phi
 
+      real par(16)
+      real p,e
+      
       character(len=100) :: fn_t_bins
 
 !     Construct the file path using a format string
