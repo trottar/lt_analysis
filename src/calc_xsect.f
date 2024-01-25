@@ -161,7 +161,9 @@ c      pause
 
       do it=1,nt
 
+         WRITE(*,*) 'tmin: ', tmn
          tm=tmn+(it-0.5)*(tmx-tmn)/nt
+         WRITE(*,*) 'tmin bin center: ', tm
          read(52,*) w,dw,q2,dq2,tt,dtt,th_cm
          write(6,32) w,dw,q2,dq2,tt,dtt,th_cm
          WRITE(*,*) '------------'
