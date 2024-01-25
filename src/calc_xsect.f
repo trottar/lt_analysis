@@ -118,13 +118,13 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       print*,'polarity: ',pol
       
       Eb=0.
-      open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
+      open(56, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
-         read(55,*) Eb,q2,w,eps
+         read(56,*) Eb,q2,w,eps
          if(q2.eq.q2_set.and.w.eq.w_set.and.
      *     eps.eq.eps_set) go to 5         
       end do
- 5    close(55)
+ 5    close(56)
       
       write(6,4)Eb,q2,w,eps,pol
  4    format(' xsect: Eb=',f8.5,
@@ -167,19 +167,19 @@ c      pause
  50   format(a4,'/parameters/par.',a2,'_Q',i2.2,'W',i3.3,'.dat')
       print*, 'param: par_fn=',par_fn
 
-      open(56, file=par_fn)
+      open(57, file=par_fn)
       do while (.true.)
-         read(56, *, end=9) p, e, i
+         read(57, *, end=9) p, e, i
          par(i) = p
 !     Print Statements
          print *,"param number: ", i
          print *,"param: ", p
          print *,"param err: ", e
 ! You can customize the format as needed
-      end do
-      
- 9    close(56)
+      end do      
+      close(57)
 
+      print *,"!!!!!!!!: ", par(i)
       
       do it=1,nt
 
