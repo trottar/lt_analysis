@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 04:25:03 trottar"
+# Time-stamp: "2024-01-25 05:13:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,7 +161,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c1 =  TCanvas("c1", "c1", 600, 600)
         c2 =  TCanvas("c2", "c2", 600, 600)
         
-        c1.cd()
+        #c1.cd()
 
         tpp = ""
 
@@ -413,10 +413,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
 
         # Update c2
-        c2.Update()
+        #c2.Update()
 
         # Go to the c2 canvas
-        c2.cd()
+        #c2.cd()
 
         # Set properties for glo
         glo.SetMarkerStyle(5)
@@ -596,7 +596,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_TT_g.SetPointError(i, 0.0, sig_tt_err)
 
         # Create TCanvas
-        cc4 = ROOT.TCanvas()
+        c4 = ROOT.TCanvas()
 
         # Form file paths using TString
         sig_check_str = "sigL_change_tbin_" + str(i)
@@ -604,13 +604,14 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots
         sigL_change.Draw("a*")
-        cc4.Print(outputpdf+'(')
+        #c4.Print(outputpdf+'(')
 
         sigT_change.Draw("a*")
-        cc4.Print(outputpdf)
+        #c4.Print(outputpdf)
+        c4.Print(outputpdf+'(')
 
         # Clear canvas
-        cc4.Clear()
+        c4.Clear()
 
         # Form filename using TString
         filename = "_t_" + str(i)
@@ -632,13 +633,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.Draw("a*")
-        c3.Print(outputpdf)
+        #c3.Print(outputpdf)
 
         sig_T_g.Draw("a*")
-        c3.Print(outputpdf)
+        #c3.Print(outputpdf)
 
         sig_LT_g.Draw("a*")
-        c3.Print(outputpdf)
+        #c3.Print(outputpdf)
 
         sig_TT_g.Draw("a*")
         c3.Print(outputpdf)
@@ -647,7 +648,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c1
         del c2
         del c3
-        del cc4
+        del c4
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
 fn_hi =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
