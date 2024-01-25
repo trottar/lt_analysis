@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:30:43 trottar"
+# Time-stamp: "2024-01-25 06:34:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,7 +186,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Use SetPoint and SetPointError to fill the graph
         for j in range(nlo.GetSelectedRows()):
             glo_tmp.SetPoint(j, nlo.GetV2()[j], nlo.GetV1()[j])
-            print("glo_tmp",j, nlo.GetV2()[j], nlo.GetV1()[j])
             glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
 
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)  # 4 is the number of input params
@@ -207,7 +206,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Use SetPoint and SetPointError to fill the graph
         for j in range(nhi.GetSelectedRows()):
             ghi_tmp.SetPoint(j, nhi.GetV2()[j], nhi.GetV1()[j])
-            print("ghi_tmp",j, nhi.GetV2()[j], nhi.GetV1()[j])
             ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
 
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)  # 4 is the number of input params
