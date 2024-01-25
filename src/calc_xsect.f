@@ -165,6 +165,7 @@ c      pause
          WRITE(*,*) 'tbin: ', it
          WRITE(*,*) 'tmin: ', tmn
          WRITE(*,*) 'tmax: ', tmx
+         WRITE(*,*) 't: ', tt
 *         tm=tmn+(it-0.5)*(tmx-tmn)/nt
          tm = tt         
          WRITE(*,*) 'aver t per bin: ', (tmx-tmn)/nt
