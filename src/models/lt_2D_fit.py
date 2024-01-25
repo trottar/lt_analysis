@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:59:16 trottar"
+# Time-stamp: "2024-01-25 07:03:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -163,7 +163,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         print("\n/*--------------------------------------------------*/\n\n")
         
         c1 =  TCanvas("c1", "c1", 600, 600)
-        c2 =  TCanvas("c2", "c2", 600, 600)
         
         c1.cd()
 
@@ -406,6 +405,14 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2)
 
+        # Print plots for c1 canvases
+        g_plot_err.Draw("same")
+        g_plot_err.SetTitle("{}".format(i))
+        c1.Print(outputpdf+'(')        
+        c1.Clear()
+
+        c2 =  TCanvas("c2", "c2", 600, 600)
+        
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
@@ -536,12 +543,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         except IOError:
             print("Error writing to file {}.".format(fn_sep))
-
-
-        # Print plots for c1 canvases
-        g_plot_err.Draw("same")
-        c1.Print(outputpdf+'(')
-            
+        
         # Delete g_plot_err
         del g_plot_err
 
@@ -559,7 +561,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_sig_tt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_tt_total.GetYaxis().SetTitle("#it{#sigma}_{TT} [#mub/GeV^{2}]")
-        g_sig_tt_total.SetTitle("{}".format(i))        
+        g_sig_tt_total.SetTitle("{}".format(i))
         
         # Set points and errors for g_sig_l_total, g_sig_t_total, g_sig_lt_total, and g_sig_tt_total
         g_sig_l_total.SetPoint(g_sig_l_total.GetN(), t_list[i], sig_l)
@@ -604,10 +606,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Create TCanvas
         c4 = ROOT.TCanvas()
 
-        # Form file paths using TString
-        sig_check_str = "sigL_change_tbin_" + str(i)
-        sig_check_str2 = "sigT_change_tbin_" + str(i)
-
         # Draw and save plots
         sigL_change.Draw("a*")
         c4.Print(outputpdf)
@@ -626,7 +624,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.Print(outputpdf)
 
         # Clear c1 and c2 canvases
-        c1.Clear()
         c2.Clear()
             
         # Create TCanvas
