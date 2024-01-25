@@ -56,7 +56,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       character*2 pol
       character*4 pid
 
-      integer it,ip
+      integer it,ip, test
       real Eb,eps
 
       real q2_bin, w_bin
@@ -179,8 +179,8 @@ c      pause
       end do      
  9    close(57)
 
-      do i, 16
-         print *,"!!!!!!!!: ", par(i)
+      do test=1,16
+         print *,"!!!!!!!!: ", par(test)
       end do
       
       do it=1,nt
