@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:06:08 trottar"
+# Time-stamp: "2024-01-25 06:08:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -174,6 +174,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
+
+        print("lo_eps: ", lo_eps)
+        print("hi_eps: ", hi_eps)
 
         nlo.Draw("x:phi:dx", tpp, "goff")
 
