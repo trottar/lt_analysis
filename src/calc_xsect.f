@@ -216,7 +216,9 @@ c angle check
             print *,'ratio',r
             print *,'dratio',dr
             print *,""
-            print *,"xmodel inputs:"
+            print *,"--------------"            
+            print *,"xmodel inputs"
+            print *,"--------------"
             print *,"pid: ", pid
             print *,"npol_set: ", npol_set
             print *,"Eb: ", Eb

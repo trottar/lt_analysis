@@ -63,10 +63,13 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       do while (.true.)
          read(56, *, end=9) p, e, i
          par(i) = p
-! Print Statements
-         write(6, '(3F11.4, I4)') par(i), e, i
+!     Print Statements
+         print *,"param number: ", i
+         print *,"param: ", p
+         print *,"param err: ", e
 ! You can customize the format as needed
-      end do      
+      end do
+      
 
  9    close(56)
 
