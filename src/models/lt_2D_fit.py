@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:13:16 trottar"
+# Time-stamp: "2024-01-25 05:15:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -604,11 +604,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots
         sigL_change.Draw("a*")
-        #c4.Print(outputpdf+'(')
+        c4.Print(outputpdf+'(')
 
         sigT_change.Draw("a*")
-        #c4.Print(outputpdf)
-        c4.Print(outputpdf+'(')
+        c4.Print(outputpdf)
 
         # Clear canvas
         c4.Clear()
@@ -621,8 +620,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetRightMargin(0.03)
 
         # Print plots for c1 and c2 canvases
-        c1.Print(outputpdf)
-        c2.Print(outputpdf)
+        #c1.Print(outputpdf)
+        #c2.Print(outputpdf)
 
         # Clear c1 and c2 canvases
         c1.Clear()
@@ -633,13 +632,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.Draw("a*")
-        #c3.Print(outputpdf)
+        c3.Print(outputpdf)
 
         sig_T_g.Draw("a*")
-        #c3.Print(outputpdf)
+        c3.Print(outputpdf)
 
         sig_LT_g.Draw("a*")
-        #c3.Print(outputpdf)
+        c3.Print(outputpdf)
 
         sig_TT_g.Draw("a*")
         c3.Print(outputpdf)
