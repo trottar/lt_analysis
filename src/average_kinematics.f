@@ -331,8 +331,8 @@ c     Save data.
 
          write(*,*) '------------'
          write(*,*) 't-bin: ','(i3)', it
-         write(*,*) 'averQ2: ','(2f8.5)', aveQ2(it),errQ2(it)
-         write(*,*) 'averW: ','(2f8.5)', aveW(it),errW(it)
+         write(*,*) 'averQ2: ', aveQ2(it),errQ2(it)
+         write(*,*) 'averW: ', aveW(it),errW(it)
       end do
       close(77)
 
