@@ -221,12 +221,6 @@ c      pause
                end if               
 c               write(*,'(4f8.5,2i3)') aW(it,lh,ip),eW(it,lh,ip),
 c     aQ2(it,lh,ip),eQ2(it,lh,ip),it,lh
-               write(*,*) '^ 6 ^ ip: ', ip
-               write(*,*) '^ 6 ^ lh: ', lh
-               write(*,*) '^ 6 ^ t-bin: ', it
-               write(*,*) '^ 6 ^ at: ', att(it,lh,ip), ett(it,lh,ip)
-               write(*,*) '^ 6 ^ a Q2: ', aQ2(it,lh,ip),eQ2(it,lh,ip)
-               write(*,*) '^ 6 ^ a W: ', aW(it,lh,ip),eW(it,lh,ip)
             end do
          end do
       end do
@@ -249,12 +243,6 @@ c     Average over low and high epsilon.
                   avtt(it,ip)=avtt(it,ip)+att(it,lh,ip)/ett(it,lh,ip)**2
                   ertt(it,ip)=ertt(it,ip)+1./ett(it,lh,ip)**2
                end if
-               write(*,*) '^ 5 ^ ip: ', ip
-               write(*,*) '^ 5 ^ lh: ', lh
-               write(*,*) '^ 5 ^ t-bin: ', it
-               write(*,*) '^ 5 ^ avt: ', avtt(it,ip), ertt(it,ip)
-               write(*,*) '^ 5 ^ av Q2: ', avQ2(it,ip),erQ2(it,ip)
-               write(*,*) '^ 5 ^ av W: ', avW(it,ip),erW(it,ip)
             end do
          end do
       end do
@@ -273,11 +261,6 @@ c     Average over low and high epsilon.
                avtt(it,ip)=avtt(it,ip)/ertt(it,ip)
                ertt(it,ip)=1./sqrt(ertt(it,ip))
             end if
-            write(*,*) '^ 4 ^ ip: ', ip
-            write(*,*) '^ 4 ^ t-bin: ', it
-            write(*,*) '^ 4 ^ avt: ', avtt(it,ip), ertt(it,ip)
-            write(*,*) '^ 4 ^ av Q2: ', avQ2(it,ip),erQ2(it,ip)
-            write(*,*) '^ 4 ^ av W: ', avW(it,ip),erW(it,ip)
          end do
       end do
 
@@ -296,10 +279,6 @@ c     Average over neg. and pos. settings.
                avett(it)=avett(it)+avtt(it,ip)/ertt(it,ip)**2
                errtt(it)=errtt(it)+1./ertt(it,ip)**2
             end if
-            write(*,*) '^ 3 ^ t-bin: ', it
-            write(*,*) '^ 3 ^ avet: ', avett(it), errtt(it)
-            write(*,*) '^ 3 ^ ave Q2: ', aveQ2(it),errQ2(it)
-            write(*,*) '^ 3 ^ ave W: ', aveW(it),errW(it)
          end do
       end do
 
@@ -310,10 +289,6 @@ c     Average over neg. and pos. settings.
          errQ2(it)=1./sqrt(errQ2(it))
          avett(it)=avett(it)/errtt(it)
          errtt(it)=1./sqrt(errtt(it))
-         write(*,*) '^ 2 ^ t-bin: ', it
-         write(*,*) '^ 2 ^ avet: ', avett(it), errtt(it)
-         write(*,*) '^ 2 ^ ave Q2: ', aveQ2(it),errQ2(it)
-         write(*,*) '^ 2 ^ ave W: ', aveW(it),errW(it)
       end do
 
 c     Thetacm for neg. and pos. settings. It's turned out the same for
@@ -339,14 +314,6 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
      &         th_mod,eps_mod)
          thetacm_only(it)=th_mod*180./3.14159
-         write(*,*) '^ 1 ^ tmin: ', tmin
-         write(*,*) '^ 1 ^ tmax: ', tmax
-         write(*,*) '^ 1 ^ t-bin: ', it
-         write(*,*) '^ 1 ^ tm: ', tm
-         write(*,*) '^ 1 ^ avet: ', avett(it), errtt(it)
-         write(*,*) '^ 1 ^ ave Q2: ', aveQ2(it),errQ2(it)
-         write(*,*) '^ 1 ^ ave W: ', aveW(it),errW(it)
-         write(*,*) '^ 1 ^ thetacm: ', thetacm_only(it)         
       end do
 
 c     Save data.

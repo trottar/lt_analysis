@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-24 19:10:40 trottar"
+# Time-stamp: "2024-01-25 00:41:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -163,6 +163,37 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                         phibin_center.append(k+1)                        
                 ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
 
+    ################################################################################################################################################
+    '''
+    Need to sort data properly from least to greatest so that the fortran binning stays consistent (ie the lowest tbin corresponds to the first iteration)
+    '''
+                
+    # Combine data from different lists into tuples
+    data_tuples = list(zip(avert_right_data, averQ2_right_data, averW_right_data))
+    data_tuples += list(zip(avert_left_data, averQ2_left_data, averW_left_data))
+    data_tuples += list(zip(avert_center_data, averQ2_center_data, averW_center_data))
+
+    # Sort based on avert data
+    sorted_data_tuples = sorted(data_tuples, key=lambda x: x[0])
+
+    # Extract sorted values back into separate lists
+    avert_right_data, averQ2_right_data, averW_right_data = zip(*sorted_data_tuples[:len(avert_right_data)])
+    avert_left_data, averQ2_left_data, averW_left_data = zip(*sorted_data_tuples[len(avert_right_data):len(avert_right_data) + len(avert_left_data)])
+    avert_center_data, averQ2_center_data, averW_center_data = zip(*sorted_data_tuples[len(avert_right_data) + len(avert_left_data):])
+
+    # Combine data from different lists into tuples
+    data_tuples = list(zip(tbin_right, phibin_right, ratio_right))
+    data_tuples += list(zip(tbin_left, phibin_left, ratio_left))
+    data_tuples += list(zip(tbin_center, phibin_center, ratio_center))
+
+    # Sort based on tbin and phibin
+    sorted_data_tuples = sorted(data_tuples, key=lambda x: (x[0], x[1]))
+
+    # Extract sorted values back into separate lists
+    tbin_right, phibin_right, ratio_right = zip(*sorted_data_tuples[:len(tbin_right)])
+    tbin_left, phibin_left, ratio_left = zip(*sorted_data_tuples[len(tbin_right):len(tbin_right) + len(tbin_left)])
+    tbin_center, phibin_center, ratio_center = zip(*sorted_data_tuples[len(tbin_right) + len(tbin_left):])
+    
     ################################################################################################################################################
 
     # Define thpq vector relative to middle setting
