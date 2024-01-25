@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:41:18 trottar"
+# Time-stamp: "2024-01-25 05:45:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -413,7 +413,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
         
         # Update c2
-        c2.Update()
+        #c2.Update()
 
         # Go to the c2 canvas
         #c2.cd()
@@ -447,7 +447,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g.GetXaxis().SetLimits(0, 360)
 
         # Update canvas c2
-        c2.Update()
+        #c2.Update()
 
         # Fix parameters for flo, flo_unsep, fhi, and fhi_unsep
         flo.FixParameter(0, fff2.GetParameter(0))
