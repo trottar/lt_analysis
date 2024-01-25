@@ -98,8 +98,6 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.
      *     w.ne.w_set.or.eps.ne.eps_set)
          read(55,*) ipol,q2,w,eps,th_pq,tmn,tmx
-*         write(6,2)ipol,q2,eps,th_pq,tmn,tmx
-c 2       format(i5,5f10.5,2i5)
       end do
       close(55)
       write(6,3)tmn,tmx
@@ -118,7 +116,6 @@ c 2       format(i5,5f10.5,2i5)
       open(55, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
          read(55,*) Eb,q2,w,eps
-c         write(*,*) Eb,q2,eps
          if(q2.eq.q2_set.and.w.eq.w_set.and.
      *     eps.eq.eps_set) go to 5         
       end do
@@ -161,6 +158,7 @@ c      pause
 
       do it=1,nt
 
+         read(52,*) w,dw,q2,dq2,tt,dtt,th_cm
          WRITE(*,*) 'Numtbins: ', nt
          WRITE(*,*) 'tbin: ', it
          WRITE(*,*) 'tmin: ', tmn
@@ -173,7 +171,6 @@ c      pause
          WRITE(*,*) '------------'
          WRITE(*,*) 'Values read:'
          WRITE(*,*) '------------'
-         read(52,*) w,dw,q2,dq2,tt,dtt,th_cm         
 
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
