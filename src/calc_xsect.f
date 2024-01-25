@@ -74,6 +74,8 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       real phi
 
+      integer i
+      
       real par(16)
       real p,e
       
