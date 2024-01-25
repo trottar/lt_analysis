@@ -289,10 +289,7 @@ c     Average over neg. and pos. settings.
          errQ2(it)=1./sqrt(errQ2(it))
          avett(it)=avett(it)/errtt(it)
          errtt(it)=1./sqrt(errtt(it))
-         write(*,*) '^ 2 ^ tmin: ', tmin
-         write(*,*) '^ 2 ^ tmax: ', tmax
          write(*,*) '^ 2 ^ t-bin: ', it
-         write(*,*) '^ 2 ^ tm: ', tm
          write(*,*) '^ 2 ^ avet: ', avett(it), errtt(it)
          write(*,*) '^ 2 ^ ave Q2: ', aveQ2(it),errQ2(it)
          write(*,*) '^ 2 ^ ave W: ', aveW(it),errW(it)
