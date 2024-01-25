@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:14:00 trottar"
+# Time-stamp: "2024-01-25 06:16:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,9 +154,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
     for i in range(t_bin_num-1):
 
-        if float(t_list[i]) == float(t_list[i+1]):
-            continue
-        
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
