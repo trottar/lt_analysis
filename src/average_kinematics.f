@@ -157,14 +157,14 @@ c                 pause
                   open(66,file=fn)
                   do it=1,nt
                      read(66,*) Q2,dQ2,W,dW,tt,dtt
-                     WRITE(*,*) 'it = ', it
-                     WRITE(*,*) 'nt = ', nt
-                     WRITE(*,*) 'W = ', W
-                     WRITE(*,*) 'dW = ', dW
-                     WRITE(*,*) 'Q2 = ', Q2
-                     WRITE(*,*) 'dQ2 = ', dQ2
-                     WRITE(*,*) 'tt = ', tt
-                     WRITE(*,*) 'dtt = ', dtt                     
+*                     WRITE(*,*) 'it = ', it
+*                     WRITE(*,*) 'nt = ', nt
+*                     WRITE(*,*) 'W = ', W
+*                     WRITE(*,*) 'dW = ', dW
+*                     WRITE(*,*) 'Q2 = ', Q2
+*                     WRITE(*,*) 'dQ2 = ', dQ2
+*                     WRITE(*,*) 'tt = ', tt
+*                     WRITE(*,*) 'dtt = ', dtt                     
                      if(dW.gt.0.) then
                         aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
                         eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
