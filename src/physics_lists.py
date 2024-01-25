@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-23 12:23:04 trottar"
+# Time-stamp: "2024-01-24 19:10:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -364,7 +364,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             for i, line in enumerate(lines):
-                check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
+                check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
                 check_kin = ' '.join(check_line.split()[:4])
                 if check_kin in line:
                     if check_line in line:
@@ -378,7 +378,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             for i, line in enumerate(lines):
-                check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
+                check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
                 check_kin = ' '.join(check_line.split()[:4])
                 if check_kin in line:
                     if check_line in line:
