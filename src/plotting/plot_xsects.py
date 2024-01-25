@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 20:22:15 trottar"
+# Time-stamp: "2024-01-24 22:00:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -897,9 +897,6 @@ for k in range(NumtBins):
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
 
-    # Set y-axis to logarithmic scale
-    C_xmodreal_phi.GetPad(k + 1).SetLogy()
-    
 l_xmodreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
 l_xmodreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")    
 l_xmodreal_phi.AddEntry(G_xmod_phi_loeps,"loeps model")
