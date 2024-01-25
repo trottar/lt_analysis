@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:34:08 trottar"
+# Time-stamp: "2024-01-25 06:53:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -536,7 +536,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
             print("Error writing to file {}.".format(fn_sep))
 
         # Delete g_plot_err
-        del g_plot_err
+        #del g_plot_err
 
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [#mub/GeV^{2}]")
@@ -616,7 +616,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetRightMargin(0.03)
 
         # Print plots for c1 and c2 canvases
-        #c1.Print(outputpdf)
+        c1.Print(outputpdf)
+        g_plot_err.Draw("A*")
         c2.Print(outputpdf)
 
         # Clear c1 and c2 canvases
