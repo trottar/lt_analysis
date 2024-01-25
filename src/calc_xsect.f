@@ -196,8 +196,6 @@ c      pause
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
                write(6,*)' Angle error ',th_mod,th_cm
-*     RLT (9/25/2023): Removing to check outputs
-*     RLT (1/16/2024): Reintroducing to test
                stop
             endif
 

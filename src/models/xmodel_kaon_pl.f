@@ -92,10 +92,10 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       
 ** !! MODEL DEP STUDY !!
 c      sigL=sigL*0.90-0.1
-
+      
       sig=sigT+eps_mod*sigL+eps_mod*cos(2.*phi)*sigTT
      >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sigLT
-
+      
 c     Correct for W.
 
       g_W=1./(W**2-targ**2)**2       ! W factor
@@ -108,9 +108,15 @@ c     Correct for W.
 
       sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 
-      x_mod=sig      
+      print *,"!!!!sig: ", sig
+      
+      x_mod=sig
       
       th_mod=thetacm
+
+      print *,"    phi: ", phi
+      print *,"    th_mod: ", th_mod
+      print *,"    x_mod: ", x_mod      
       
       end
 
