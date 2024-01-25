@@ -59,16 +59,14 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
  10   format(a4,'/parameters/par.',a2,'_',i2.2,'.dat')
 *      print*, 'param: fn=',fn
 
-      open(56,file=fn)
-      do while(.true.)
-         read(56,*,end=9) p,e,i
-         par(i)=p
-c     Print Statements         
-         write(6,101)par(i),e,i 
- 101     format(' xmodel: '2f11.4,i4)
-c         pause
-      end do
-      
+      open(56, file=fn)
+      do while (.true.)
+         read(56, *, end=9) p, e, i
+         par(i) = p
+! Print Statements
+         write(6, '(3F11.4, I4)') par(i), e, i
+! You can customize the format as needed
+      end do      
 
  9    close(56)
 
