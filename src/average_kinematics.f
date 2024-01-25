@@ -181,7 +181,7 @@ c     Get low, high eps. and neg., pos. polarity data.
             end if           !ipol=pol_set & q2=q2_set & eps=eps_set
          end do              !while not eof.
 
-      9 continue
+ 9       continue
          close(55)
          WRITE(*,*) '------------'
          print*,'nset=',nset
