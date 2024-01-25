@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:28:35 trottar"
+# Time-stamp: "2024-01-25 06:29:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,7 +156,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
     lo_cross_sec_err = np.zeros(t_bin_num, dtype=float)
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
-    for i in range(0, t_bin_num+1):
+    for i in range(0, t_bin_num):
 
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i, float(t_list[i])))
