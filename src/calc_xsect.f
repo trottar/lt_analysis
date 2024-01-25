@@ -51,7 +51,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer npol_set
       real q2_set,eps_set,w_set
 
-      character*80 r_fn, kin_fn, mod_fn
+      character*80 r_fn, kin_fn, mod_fn, par_fn
       character*80 xunsep_fn, xsep_fn
       character*2 pol
       character*4 pid
@@ -156,6 +156,26 @@ c      pause
       mod_fn='models/xmodel_' // trim(pid) // '_' // trim(pol) // '.f'
       print*,'xmodel: file=',mod_fn
 
+*     Model fit parameters.
+
+      write(par_fn,10) pid,pol,nint(q2_set*10),nint(q2_set*100)
+ 10   format(a4,'/parameters/par.',a2,'_Q',i2.2,'W',i3.3,'.dat')
+      print*, 'param: par_fn=',par_fn
+
+      open(56, file=par_fn)
+      do while (.true.)
+         read(56, *, end=9) p, e, i
+         par(i) = p
+!     Print Statements
+         print *,"param number: ", i
+         print *,"param: ", p
+         print *,"param err: ", e
+! You can customize the format as needed
+      end do
+      
+ 9    close(56)
+
+      
       do it=1,nt
 
          WRITE(*,*) '============'
