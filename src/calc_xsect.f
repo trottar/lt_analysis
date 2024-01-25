@@ -166,18 +166,6 @@ c      pause
       write(par_fn,50) pid,pol,nint(q2_set*10),nint(w_set*100)
  50   format(a4,'/parameters/par.',a2,'_Q',i2.2,'W',i3.3,'.dat')
       print*, 'param: par_fn=',par_fn
-
-      open(57, file=par_fn)
-      do while (.true.)
-         read(57, *, end=9) p, e, i
-         par(i) = p
-!     Print Statements
-         print *,"param number: ", i
-         print *,"param: ", p
-         print *,"param err: ", e
-! You can customize the format as needed
-      end do      
- 9    close(57)
       
       do it=1,nt
 
@@ -203,7 +191,7 @@ c      pause
             read(51,*) r,dr
             
             call xmodel(pid,npol_set,Eb,q2_set,w_set,
-     *           eps_set,w,q2,tm,phi,eps_mod,th_mod,x_mod)
+     *           eps_set,w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
 
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then

@@ -2,7 +2,7 @@
 * xmodel for K^+ for KaonLT 2018-19
 *=======================================================================      
       subroutine xmodel(pid,npol_set,Eb,q2_set,w_set,
-     *     eps_set,w,q2,tm,phi,eps_mod,th_mod,x_mod)
+     *     eps_set,w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
 
 c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
@@ -32,7 +32,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       real sig,sigT,sigL,sigLT,sigTT
       real dsig,dsigT,dsigL,dsigLT,dsigTT
 
-      character*80 fn
+      character*80 par_fn
       character*2 pol
       character*4 pid
 
@@ -50,9 +50,17 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
          targ=mp
       end if
 
-      do test=1,16
-         print *,"!!!!!!!!: ", par(test)
-      end do
+      open(57, file=par_fn)
+      do while (.true.)
+         read(57, *, end=9) p, e, i
+         par(i) = p
+!     Print Statements
+         print *,"param number: ", i
+         print *,"param: ", p
+         print *,"param err: ", e
+! You can customize the format as needed
+      end do      
+ 9    close(57)      
       
 *     Calculate model thetacm and epsilon at first.
       call eps_n_theta(pid,npol_set,Eb,w,q2,tm,thetacm,eps_mod)
