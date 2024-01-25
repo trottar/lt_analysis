@@ -27,7 +27,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       real wfactor
       real thetacm
 
-      integer i
+      integer i, test
 
       real sig,sigT,sigL,sigLT,sigTT
       real dsig,dsigT,dsigL,dsigLT,dsigTT
@@ -50,6 +50,10 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
          targ=mp
       end if
 
+      do test=1,16
+         print *,"!!!!!!!!: ", par(test)
+      end do
+      
 *     Calculate model thetacm and epsilon at first.
       call eps_n_theta(pid,npol_set,Eb,w,q2,tm,thetacm,eps_mod)
 
