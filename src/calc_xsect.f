@@ -158,6 +158,9 @@ c      pause
 
       do it=1,nt
 
+         WRITE(*,*) '------------'
+         WRITE(*,*) 'Values read:'
+         WRITE(*,*) '------------'         
          read(52,*) w,dw,q2,dq2,tt,dtt,th_cm
          WRITE(*,*) 'Numtbins: ', nt
          WRITE(*,*) 'tbin: ', it
@@ -169,14 +172,12 @@ c      pause
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0         
          WRITE(*,*) 'aver t per bin: ', (tmx-tmn)/nt
-         WRITE(*,*) 'tmin bin center: ', tm
+         WRITE(*,*) 't per bin: ', tm
          WRITE(*,*) 'th_cm: ', th_cm
-         WRITE(*,*) '------------'
-         WRITE(*,*) 'Values read:'
-         WRITE(*,*) '------------'
          
          do ip=1,nphi
 
+            WRITE(*,*) 'phi: ', phi*180./3.14159
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
             
