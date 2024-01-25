@@ -204,8 +204,8 @@ c      pause
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
             
-            call xmodel(pid,npol_set,Eb,q2_set,eps_set,w,q2,tm,phi,
-     *           eps_mod,th_mod,x_mod)
+            call xmodel(pid,npol_set,Eb,q2_set,w_set,
+     *           eps_set,w,q2,tm,phi,eps_mod,th_mod,x_mod)
 
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
