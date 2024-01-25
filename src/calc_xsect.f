@@ -187,7 +187,8 @@ c      pause
          
          do ip=1,nphi
 
-            phi=(ip-0.5)*2.*3.14159/nphi
+*            phi=(ip-0.5)*2.*3.14159/nphi
+            phi=(ip-0.5)*3.14159/nphi
             read(51,*) r,dr
             
             call xmodel(pid,npol_set,Eb,q2_set,w_set,
