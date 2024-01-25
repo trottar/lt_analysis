@@ -118,7 +118,8 @@ c     enough space for the sets
 
 c     Get low, high eps. and neg., pos. polarity data.
 
-      do lh=1,2
+      do ip=1,1
+         do lh=1,2
 
             nset=0
             open(55, file=trim(pid) // '/list.settings')
