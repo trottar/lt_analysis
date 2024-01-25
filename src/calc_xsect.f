@@ -167,12 +167,12 @@ c      pause
          WRITE(*,*) 'tmin: ', tmn
          WRITE(*,*) 'tmax: ', tmx
          WRITE(*,*) 't: ', tt
-*         tm=tmn+(it-0.5)*(tmx-tmn)/nt
-         tm = tt
+         tm=tmn+(it-0.5)*(tmx-tmn)/nt
+*         tm = tt
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
          WRITE(*,*) 't per bin: ', tm
-         WRITE(*,*) 'th_cm: ', th_cm
+         WRITE(*,*) 'th_cm (deg): ', th_cm*180./3.14159
          
          do ip=1,nphi
 
