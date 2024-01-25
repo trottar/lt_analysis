@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:57:25 trottar"
+# Time-stamp: "2024-01-25 06:59:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,6 +167,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         
         c1.cd()
 
+        c1.Update()
+
         tpp = ""
 
         if i == 0:
@@ -246,10 +248,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetMarkerColor(ROOT.kRed)
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
-
-        # Print plots for c1 canvases
-        g_plot_err.Draw("same")
-        c1.Print(outputpdf+'(')
         
         # x->phi, y->eps, PI/180 = 0.017453
         fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]", 0, 360, 0.0, 1.0)
@@ -539,6 +537,11 @@ def single_setting(q2_set, fn_lo, fn_hi):
         except IOError:
             print("Error writing to file {}.".format(fn_sep))
 
+
+        # Print plots for c1 canvases
+        g_plot_err.Draw("same")
+        c1.Print(outputpdf+'(')
+            
         # Delete g_plot_err
         del g_plot_err
 
