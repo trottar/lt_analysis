@@ -330,9 +330,10 @@ c     Save data.
      *        avett(it), errtt(it), thetacm_only(it),it
 
          write(*,*) '------------'
-         write(*,*) 't-bin: ','(i3)', it
+         write(*,*) 't-bin: ', it
          write(*,*) 'averQ2: ', aveQ2(it),errQ2(it)
          write(*,*) 'averW: ', aveW(it),errW(it)
+         write(*,*) 'thetacm: ', thetacm_only(it)
       end do
       close(77)
 
