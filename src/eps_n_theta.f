@@ -72,7 +72,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       eps=1.+2.*(q2+omega**2)/(4.*Eb*(Eb-omega)-q2)
       eps=1./eps
 
-c      write(*,'(a13,7(F8.5,1x))')
-c     *     'eps_n_theta: ',w,q2,t,tmin,thetacm,eps,omega
+      write(*,'(a13,7(F8.5,1x))')
+     *     'eps_n_theta: ',w,q2,t,tmin,thetacm,eps,omega
 
       end
