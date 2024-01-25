@@ -315,6 +315,7 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
      &         eps_mod)
          thetacm_only(it)=th_mod*180./3.14159
          write(*,*) '^ 1 ^t-bin: ', it
+         write(*,*) '^ 1 ^tm: ', tm
          write(*,*) '^ 1 ^avet: ', avett(it), errtt(it)
          write(*,*) '^ 1 ^ave Q2: ', aveQ2(it),errQ2(it)
          write(*,*) '^ 1 ^ave W: ', aveW(it),errW(it)
