@@ -189,7 +189,7 @@ c                 pause
 
          end do              !while not eof.
 
-9          continue
+ 9       continue
          close(55)
          WRITE(*,*) '------------'
          print*,'nset=',nset
