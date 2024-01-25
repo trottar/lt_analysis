@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:08:32 trottar"
+# Time-stamp: "2024-01-25 06:14:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,6 +153,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
     for i in range(t_bin_num-1):
+
+        if float(t_list[i]) == float(t_list[i+1]):
+            continue
         
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i, float(t_list[i])))
@@ -174,9 +177,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
-
-        print("lo_eps: ", lo_eps)
-        print("hi_eps: ", hi_eps)
 
         nlo.Draw("x:phi:dx", tpp, "goff")
 
