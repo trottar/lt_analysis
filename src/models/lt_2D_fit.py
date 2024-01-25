@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:27:46 trottar"
+# Time-stamp: "2024-01-25 05:33:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -418,6 +418,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Go to the c2 canvas
         c2.cd()
 
+        glo.Draw("A*")
+        glo.Fit("lo_eps_fit", "R")
+
         # Set properties for glo
         glo.SetMarkerStyle(5)
         glo.GetXaxis().SetLimits(0, 360)
@@ -426,6 +429,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         ghi.SetMarkerColor(2)
         ghi.SetLineColor(2)
         ghi.SetMarkerStyle(4)
+        ghi.Draw("*")
 
         # Create TMultiGraph and add glo, ghi
         g = ROOT.TMultiGraph()
