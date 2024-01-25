@@ -177,7 +177,6 @@ c      pause
          
          do ip=1,nphi
 
-            WRITE(*,*) 'phi: ', phi*180./3.14159
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
             
@@ -212,6 +211,7 @@ c angle check
  40         format(3G15.5,f8.5,2f7.2,4f8.5)
 
             print *,"=============="
+            WRITE(*,*) 'phi (deg): ', phi*180./3.14159
             print *,'it',it
             print *,'nt',nt            
             print *,'ip',ip
