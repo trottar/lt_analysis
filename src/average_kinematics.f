@@ -118,25 +118,23 @@ c     enough space for the sets
 
 c     Get low, high eps. and neg., pos. polarity data.
 
-      do ip=1,1
+      do lh=1,2
 
-         do lh=1,2
+         nset=0
+         open(55, file=trim(pid) // '/list.settings')
+         do while(.true.)
 
-            nset=0
-            open(55, file=trim(pid) // '/list.settings')
-            do while(.true.)
+            read(55,*,end=9) ipol,q2,w,eps,th_pq,tmn,tmx
+            if(ipol.eq.pol_set.and.q2.eq.q2_set.and.
+  &              w.eq.w_set.and.eps.eq.eps_set(lh)) then
 
-               read(55,*,end=9) ipol,q2,w,eps,th_pq,tmn,tmx
-               if(ipol.eq.pol_set.and.q2.eq.q2_set.and.
-     &              w.eq.w_set.and.eps.eq.eps_set(lh)) then
-
-                  if(ipol.eq.-1) then
-                     pol='mn'
-                  elseif(ipol.eq.+1) then
-                     pol='pl'
-                  else
-                     stop '*** aver: wrong pol ***'
-                  endif
+               if(ipol.eq.-1) then
+                  pol='mn'
+               elseif(ipol.eq.+1) then
+                  pol='pl'
+               else
+                  stop '*** aver: wrong pol ***'
+               endif
 *                  WRITE(*,*) '------------'
 *                  WRITE(*,*) 'Values read:'
 *                  WRITE(*,*) '------------'
@@ -147,17 +145,17 @@ c     Get low, high eps. and neg., pos. polarity data.
 *                  WRITE(*,*) 'th_pq = ', th_pq
 *                  WRITE(*,*) 'tmn = ', tmn
 *                  WRITE(*,*) 'tmx = ', tmx
-                  write(fn,'(a4,''/kindata/kindata.'',a2,''_Q'',i2.2,
-     *                 ''W'',i3.3,''_'',i2.2,''_'',SP,i5.4,S,
-     *                 ''.dat'')') pid, pol, nint(q2_set*10.),
-     *                 nint(w_set*100.), nint(eps_set(lh)*100.),
-     *                 nint(th_pq*1000.)
-                  print*,'fn=',fn
+               write(fn,'(a4,''/kindata/kindata.'',a2,''_Q'',i2.2,
+  *                 ''W'',i3.3,''_'',i2.2,''_'',SP,i5.4,S,
+  *                 ''.dat'')') pid, pol, nint(q2_set*10.),
+  *                 nint(w_set*100.), nint(eps_set(lh)*100.),
+  *                 nint(th_pq*1000.)
+               print*,'fn=',fn
 c                 pause
 
-                  open(66,file=fn)
-                  do it=1,nt
-                     read(66,*) Q2,dQ2,W,dW,tt,dtt
+               open(66,file=fn)
+               do it=1,nt
+                  read(66,*) Q2,dQ2,W,dW,tt,dtt
 *                     WRITE(*,*) 'it = ', it
 *                     WRITE(*,*) 'nt = ', nt
 *                     WRITE(*,*) 'W = ', W
@@ -166,39 +164,37 @@ c                 pause
 *                     WRITE(*,*) 'dQ2 = ', dQ2
 *                     WRITE(*,*) 'tt = ', tt
 *                     WRITE(*,*) 'dtt = ', dtt                     
-                     if(dW.gt.0.) then
-                        aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
-                        eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
-                     end if
-                     if(dQ2.gt.0.) then
-                        aQ2(it,lh,ip)=aQ2(it,lh,ip)+Q2/dQ2**2
-                        eQ2(it,lh,ip)=eQ2(it,lh,ip)+1./dQ2**2
-                     end if
-                     if(dtt.gt.0.) then
-                        att(it,lh,ip)=att(it,lh,ip)+tt/dtt**2
-                        ett(it,lh,ip)=ett(it,lh,ip)+1./dtt**2
-                     end if                     
-                  end do
-                  close(66)
+                  if(dW.gt.0.) then
+                     aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
+                     eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
+                  end if
+                  if(dQ2.gt.0.) then
+                     aQ2(it,lh,ip)=aQ2(it,lh,ip)+Q2/dQ2**2
+                     eQ2(it,lh,ip)=eQ2(it,lh,ip)+1./dQ2**2
+                  end if
+                  if(dtt.gt.0.) then
+                     att(it,lh,ip)=att(it,lh,ip)+tt/dtt**2
+                     ett(it,lh,ip)=ett(it,lh,ip)+1./dtt**2
+                  end if                     
+               end do
+               close(66)
 
-                  tmin=tmn
-                  tmax=tmx
-                  ntbins=nt
+               tmin=tmn
+               tmax=tmx
+               ntbins=nt
 
-                  nset=nset+1
+               nset=nset+1
 
-               end if           !ipol=pol_set & q2=q2_set & eps=eps_set
+            end if           !ipol=pol_set & q2=q2_set & eps=eps_set
 
-            end do              !while not eof.
+         end do              !while not eof.
 
- 9          continue
-            close(55)
-            WRITE(*,*) '------------'
-            print*,'nset=',nset
+9          continue
+         close(55)
+         WRITE(*,*) '------------'
+         print*,'nset=',nset
 
-         end do                 !lh=1,2
-
-      end do                    !ip=1,2
+      end do                 !lh=1,2
 
 c      pause
 
