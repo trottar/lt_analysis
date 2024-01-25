@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:49:49 trottar"
+# Time-stamp: "2024-01-25 05:50:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -625,7 +625,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Print plots for c1 and c2 canvases
         #glo.Draw("A*")
         #glo.Fit("lo_eps_fit", "R")
-        #c1.Print(outputpdf)
+        c1.Print(outputpdf)
         #ghi.Draw("A*")
         #ghi.Fit("hi_eps_fit", "R")
         #c2.Print(outputpdf)
