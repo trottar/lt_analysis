@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:23:34 trottar"
+# Time-stamp: "2024-01-25 05:26:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -598,6 +598,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Create TCanvas
         c4 = ROOT.TCanvas()
 
+        # Form file paths using TString
+        sig_check_str = "sigL_change_tbin_" + str(i)
+        sig_check_str2 = "sigT_change_tbin_" + str(i)
+
         # Draw and save plots
         sigL_change.Draw("a*")
         c4.Print(outputpdf+'(')
@@ -608,18 +612,19 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sigTT_change.Draw("a*")
         c4.Print(outputpdf)
 
-        sigT_change.Draw("a*")
+        sigLT_change.Draw("a*")
         c4.Print(outputpdf)        
-
+        
         # Clear canvas
         c4.Clear()
-
-        # Form filename using TString
-        filename = "_t_" + str(i)
 
         # Adjust top and right margins for c2 canvas
         c2.SetTopMargin(0.03)
         c2.SetRightMargin(0.03)
+
+        # Print plots for c1 and c2 canvases
+        c1.Print(outputpdf)
+        c2.Print(outputpdf)
 
         # Clear c1 and c2 canvases
         c1.Clear()
