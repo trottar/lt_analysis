@@ -108,12 +108,15 @@ c     Correct for W.
 
       sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 
-      print *,"!!!!sig: ", sig
-      
       x_mod=sig
       
       th_mod=thetacm
 
+      print *,"!!!!sig: ", sig
+      print *,"    sigL: ", sigL
+      print *,"    sigT: ", sigT
+      print *,"    sigLT: ", sigLT
+      print *,"    sigTT: ", sigTT
       print *,"    phi: ", phi
       print *,"    th_mod: ", th_mod
       print *,"    x_mod: ", x_mod      
