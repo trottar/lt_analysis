@@ -281,7 +281,7 @@ c     Average over neg. and pos. settings.
             end if
             write(*,*) '^ 3 ^ t-bin: ', it
             write(*,*) '^ 3 ^ avet: ', avett(it), errtt(it)
-            write(*,*) '^ 3 ^ ave Q3: ', aveQ3(it),errQ3(it)
+            write(*,*) '^ 3 ^ ave Q2: ', aveQ2(it),errQ2(it)
             write(*,*) '^ 3 ^ ave W: ', aveW(it),errW(it)
          end do
       end do
