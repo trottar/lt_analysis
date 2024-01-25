@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:51:05 trottar"
+# Time-stamp: "2024-01-25 05:51:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -608,12 +608,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sigT_change.Draw("a*")
         c4.Print(outputpdf)
-
-        sigTT_change.Draw("a*")
-        c4.Print(outputpdf)
-
-        sigLT_change.Draw("a*")
-        c4.Print(outputpdf)        
         
         # Clear canvas
         c4.Clear()
