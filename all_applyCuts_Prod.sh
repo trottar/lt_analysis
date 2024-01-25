@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-24 21:40:02 trottar"
+# Time-stamp: "2024-01-24 21:49:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,12 +52,26 @@ grab_runs () {
     fi
 }
 
-#KIN="Q0p5W2p40" # DONE
-#KIN="Q2p1W2p95" # DONE
-#KIN="Q3p0W3p14" # DONE
-#KIN="Q3p0W2p32" # DONE
-KIN="Q4p4W2p74"
-#KIN="Q5p5W3p02"
+#
+Q2="0p5"
+W="2p40"
+#
+#Q2="2p1"
+#W="2p95"
+#
+#Q2="3p0"
+#W="3p14"
+#
+#Q2="3p0"
+#W="2p32"
+#
+#Q2="4p4"
+#W="2p74"
+#
+#Q2="5p5"
+#W="3p02"
+
+KIN="Q${Q2}W${W}"
 
 TARGET=("LH2" "dummy")
 EPS=("high" "low")
@@ -104,7 +118,7 @@ for t in "${TARGET[@]}"; do
 			    echo "Run $(( ${i} + 1 ))/$(( ${numlines} + 1 ))"
 			    echo "Running ${number}"
 			    cd $kaonlt/../lt_analysis
-			    ./applyCuts_Prod.sh -p ${EPS} ${PHISET} 2p1 2p95 ${TARGET} ${number} kaon
+			    ./applyCuts_Prod.sh -p ${EPS} ${PHISET} ${Q2} ${W} ${TARGET} ${number} kaon
 			    i+=1
 			done
 			break ;;
