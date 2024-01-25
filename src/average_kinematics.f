@@ -278,7 +278,11 @@ c     Average over neg. and pos. settings.
             if(ertt(it,ip).gt.0.) then
                avett(it)=avett(it)+avtt(it,ip)/ertt(it,ip)**2
                errtt(it)=errtt(it)+1./ertt(it,ip)**2
-            end if            
+            end if
+            write(*,*) '^ 3 ^ t-bin: ', it
+            write(*,*) '^ 3 ^ avet: ', avett(it), errtt(it)
+            write(*,*) '^ 3 ^ ave Q3: ', aveQ3(it),errQ3(it)
+            write(*,*) '^ 3 ^ ave W: ', aveW(it),errW(it)
          end do
       end do
 
@@ -293,7 +297,6 @@ c     Average over neg. and pos. settings.
          write(*,*) '^ 2 ^ avet: ', avett(it), errtt(it)
          write(*,*) '^ 2 ^ ave Q2: ', aveQ2(it),errQ2(it)
          write(*,*) '^ 2 ^ ave W: ', aveW(it),errW(it)
-         write(*,*) '^ 2 ^ thetacm: ', thetacm_only(it)
       end do
 
 c     Thetacm for neg. and pos. settings. It's turned out the same for
