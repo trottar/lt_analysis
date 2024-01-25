@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:55:27 trottar"
+# Time-stamp: "2024-01-25 06:57:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -247,6 +247,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
 
+        # Print plots for c1 canvases
+        g_plot_err.Draw("same")
+        c1.Print(outputpdf+'(')
+        
         # x->phi, y->eps, PI/180 = 0.017453
         fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]", 0, 360, 0.0, 1.0)
 
@@ -416,10 +420,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Go to the c2 canvas
         c2.cd()
-
-        # Print plots for c1 canvases
-        g_plot_err.Draw("same")
-        c1.Print(outputpdf+'(')
         
         # Set properties for glo
         glo.SetMarkerStyle(5)
@@ -540,7 +540,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
             print("Error writing to file {}.".format(fn_sep))
 
         # Delete g_plot_err
-        #del g_plot_err
+        del g_plot_err
 
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [#mub/GeV^{2}]")
