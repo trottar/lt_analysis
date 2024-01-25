@@ -234,7 +234,6 @@ c angle check
             print *,"x_mod: ", x_mod
             print *,"x_real: ", x_real
             print *,"--------------"
-
             
          end do                 !phi
 

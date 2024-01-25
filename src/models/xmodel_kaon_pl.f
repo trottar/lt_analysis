@@ -1,8 +1,8 @@
 *=======================================================================
 * xmodel for K^+ for KaonLT 2018-19
 *=======================================================================      
-      subroutine xmodel(pid,npol_set,Eb,q2_set,eps_set,w,q2,tm,phi,
-     *     eps_mod,th_mod,x_mod)
+      subroutine xmodel(pid,npol_set,Eb,q2_set,w_set,
+     *     eps_set,w,q2,tm,phi,eps_mod,th_mod,x_mod)
 
 c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
@@ -55,9 +55,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
 *     Model fit parameters.
 
-      write(fn,10) pid,pol,nint(q2_set*10)
- 10   format(a4,'/parameters/par.',a2,'_',i2.2,'.dat')
-*      print*, 'param: fn=',fn
+      write(fn,10) pid,pol,nint(q2_set*10),nint(q2_set*100)
+ 10   format(a4,'/parameters/par.',a2,'_Q',i2.2,'W',i3.3,'.dat')
+      print*, 'param: fn=',fn
 
       open(56, file=fn)
       do while (.true.)
@@ -70,7 +70,6 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 ! You can customize the format as needed
       end do
       
-
  9    close(56)
 
 *     Model sigL, sigT, sigTT, sigLT.
