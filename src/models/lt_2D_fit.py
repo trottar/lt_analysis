@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:59:06 trottar"
+# Time-stamp: "2024-01-25 06:03:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,14 +187,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)  # 4 is the number of input params
         flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4) # 4 is the number of input params
 
-        #glo = TGraphErrors(glo_tmp.GetN(), glo_tmp.GetY(), glo_tmp.GetX(), [0]*glo_tmp.GetN(), glo_tmp.GetEY())
-        glo = TGraphErrors()
-        # Use SetPoint and SetPointError to fill the graph
-        for j in range(glo_tmp.GetN()):
-            glo.SetPoint(j, glo_tmp.GetY()[j], glo_tmp.GetX()[j])
-            print("glo",j, glo_tmp.GetY()[j], glo_tmp.GetX()[j])
-            glo.SetPointError(j, 0, glo_tmp.GetEY()[j])
-
+        glo = glo_tmp.Clone("glo")
+            
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
 
@@ -213,14 +207,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)  # 4 is the number of input params
         fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)  # 4 is the number of input params
             
-        #ghi = TGraphErrors(ghi_tmp.GetN(), ghi_tmp.GetY(), ghi_tmp.GetX(), [0]*ghi_tmp.GetN(), ghi_tmp.GetEY())
-        ghi = TGraphErrors()
-        # Use SetPoint and SetPointError to fill the graph
-        for j in range(ghi_tmp.GetN()):
-            ghi.SetPoint(j, ghi_tmp.GetY()[j], ghi_tmp.GetX()[j])
-            print("ghi",j, ghi_tmp.GetY()[j], ghi_tmp.GetX()[j])
-            ghi.SetPointError(j, 0, ghi_tmp.GetEY()[j])
-            
+        ghi = ghi_tmp.Clone("ghi")
+
         ave_sig_hi = ghi.GetMean(2)
         err_sig_hi = ghi.GetRMS(2)
 
