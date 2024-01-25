@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:53:03 trottar"
+# Time-stamp: "2024-01-25 06:55:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -417,6 +417,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Go to the c2 canvas
         c2.cd()
 
+        # Print plots for c1 canvases
+        g_plot_err.Draw("same")
+        c1.Print(outputpdf+'(')
+        
         # Set properties for glo
         glo.SetMarkerStyle(5)
         glo.GetXaxis().SetLimits(0, 360)
@@ -603,7 +607,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Draw and save plots
         sigL_change.Draw("a*")
-        c4.Print(outputpdf+'(')
+        c4.Print(outputpdf)
 
         sigT_change.Draw("a*")
         c4.Print(outputpdf)
@@ -615,9 +619,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetTopMargin(0.03)
         c2.SetRightMargin(0.03)
 
-        # Print plots for c1 and c2 canvases
-        c1.Print(outputpdf)
-        g_plot_err.Draw("A*")
+        # Print plots for c2 canvases
         c2.Print(outputpdf)
 
         # Clear c1 and c2 canvases
