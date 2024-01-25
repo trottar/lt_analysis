@@ -177,7 +177,7 @@ c      pause
          print *,"param err: ", e
 ! You can customize the format as needed
       end do      
-      close(57)
+ 9    close(57)
 
       print *,"!!!!!!!!: ", par(i)
       
