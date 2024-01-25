@@ -165,7 +165,8 @@ c      pause
          WRITE(*,*) 'tbin: ', it
          WRITE(*,*) 'tmin: ', tmn
          WRITE(*,*) 'tmax: ', tmx
-         tm=tmn+(it-0.5)*(tmx-tmn)/nt
+*         tm=tmn+(it-0.5)*(tmx-tmn)/nt
+         tm = tt         
          WRITE(*,*) 'aver t per bin: ', (tmx-tmn)/nt
          WRITE(*,*) 'tmin bin center: ', tm
          WRITE(*,*) '------------'
@@ -173,8 +174,7 @@ c      pause
          WRITE(*,*) '------------'
          read(52,*) w,dw,q2,dq2,tt,dtt,th_cm         
 
-*         tm = tt
-         
+*     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
          
          do ip=1,nphi
