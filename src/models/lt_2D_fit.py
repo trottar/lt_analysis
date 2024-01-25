@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:40:24 trottar"
+# Time-stamp: "2024-01-25 05:41:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,7 +161,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c1 =  TCanvas("c1", "c1", 600, 600)
         c2 =  TCanvas("c2", "c2", 600, 600)
         
-        c1.cd()
+        #c1.cd()
 
         tpp = ""
 
@@ -411,19 +411,12 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
-
-        # Update sigLT_change and sigTT_change
-        sigLT_change.SetPoint(sigLT_change.GetN(), sigLT_change.GetN() + 1, fff2.GetParameter(2))
-        sigLT_change.SetPointError(sigLT_change.GetN() - 1, 0, fff2.GetParError(2))
-
-        sigTT_change.SetPoint(sigTT_change.GetN(), sigTT_change.GetN() + 1, fff2.GetParameter(3))
-        sigTT_change.SetPointError(sigTT_change.GetN() - 1, 0, fff2.GetParError(3))
         
         # Update c2
         c2.Update()
 
         # Go to the c2 canvas
-        c2.cd()
+        #c2.cd()
 
         # Set properties for glo
         glo.SetMarkerStyle(5)
