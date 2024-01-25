@@ -288,7 +288,15 @@ c     Average over neg. and pos. settings.
          aveQ2(it)=aveQ2(it)/errQ2(it)
          errQ2(it)=1./sqrt(errQ2(it))
          avett(it)=avett(it)/errtt(it)
-         errtt(it)=1./sqrt(errtt(it))         
+         errtt(it)=1./sqrt(errtt(it))
+         write(*,*) '^ 2 ^ tmin: ', tmin
+         write(*,*) '^ 2 ^ tmax: ', tmax
+         write(*,*) '^ 2 ^ t-bin: ', it
+         write(*,*) '^ 2 ^ tm: ', tm
+         write(*,*) '^ 2 ^ avet: ', avett(it), errtt(it)
+         write(*,*) '^ 2 ^ ave Q2: ', aveQ2(it),errQ2(it)
+         write(*,*) '^ 2 ^ ave W: ', aveW(it),errW(it)
+         write(*,*) '^ 2 ^ thetacm: ', thetacm_only(it)
       end do
 
 c     Thetacm for neg. and pos. settings. It's turned out the same for
@@ -311,7 +319,7 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
 
       do it=1,ntbins
          tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
-         call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),avett(it),
+         call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
      &         th_mod,eps_mod)
          thetacm_only(it)=th_mod*180./3.14159
          write(*,*) '^ 1 ^ tmin: ', tmin
