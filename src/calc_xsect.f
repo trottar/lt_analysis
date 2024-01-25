@@ -158,9 +158,9 @@ c      pause
 
       do it=1,nt
 
-         WRITE(*,*) '------------'
+         WRITE(*,*) '============'
          WRITE(*,*) 'Values read:'
-         WRITE(*,*) '------------'         
+         WRITE(*,*) '============'         
          read(52,*) w,dw,q2,dq2,tt,dtt,th_cm
          WRITE(*,*) 'Numtbins: ', nt
          WRITE(*,*) 'tbin: ', it
@@ -209,8 +209,8 @@ c angle check
             write(61,40) x_real,dx_real,x_mod,eps_mod,
      *           th_mod*180./3.14159,phi*180./3.14159,tt,tm,w,q2
  40         format(3G15.5,f8.5,2f7.2,4f8.5)
-
-            print *,"=============="
+            
+            print *,"--------------"
             WRITE(*,*) 'phi (deg): ', phi*180./3.14159
             print *,'it',it
             print *,'nt',nt            
@@ -234,7 +234,7 @@ c angle check
             print *,"th_mod: ", th_mod
             print *,"x_mod: ", x_mod
             print *,"x_real: ", x_real
-            print *,"=============="
+            print *,"--------------"
 
             
          end do                 !phi
