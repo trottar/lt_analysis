@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:16:28 trottar"
+# Time-stamp: "2024-01-25 06:25:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,16 +114,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
     # Print values for nlo
     print("Values for nlo:")
-    for entry in nlo:
+    for evt in nlo:
         print("x: {}, dx: {}, x_mod: {}, eps: {}, theta: {}, phi: {}, t: {}, t_min: {}, w: {}, Q2: {}".format(
-            entry.x, entry.dx, entry.x_mod, entry.eps, entry.theta, entry.phi, entry.t, entry.t_min, entry.w, entry.Q2
+            evt.x, evt.dx, evt.x_mod, evt.eps, evt.theta, evt.phi, evt.t, evt.t_min, evt.w, evt.Q2
         ))
 
     # Print values for nhi
     print("\nValues for nhi:")
-    for entry in nhi:
+    for evt in nhi:
         print("x: {}, dx: {}, x_mod: {}, eps: {}, theta: {}, phi: {}, t: {}, t_min: {}, w: {}, Q2: {}".format(
-            entry.x, entry.dx, entry.x_mod, entry.eps, entry.theta, entry.phi, entry.t, entry.t_min, entry.w, entry.Q2
+            evt.x, evt.dx, evt.x_mod, evt.eps, evt.theta, evt.phi, evt.t, evt.t_min, evt.w, evt.Q2
         ))
     
     q2_list = []
@@ -134,16 +134,20 @@ def single_setting(q2_set, fn_lo, fn_hi):
     lo_eps_list = []
     hi_eps_list = []
 
-    for entry in nlo:        
-        q2_list.append(entry.Q2)
-        w_list.append(entry.w)
-        theta_list.append(entry.theta)
-        t_list.append(entry.t)
-        t_min_list.append(entry.t_min)
-        lo_eps_list.append(entry.eps)
-        
-    for entry in nhi:
-        hi_eps_list.append(entry.eps)
+    for evt in nlo:
+        if evt.t not in t_list:
+            q2_list.append(evt.Q2)
+            w_list.append(evt.w)
+            theta_list.append(evt.theta)
+            t_list.append(evt.t)
+            t_min_list.append(evt.t_min)
+            lo_eps_list.append(evt.eps)
+
+    tmp_t_list = []
+    for evt in nhi:
+        if evt.t not in tmp_t_list:
+            tmp_t_list.append(evt.t)
+            hi_eps_list.append(evt.eps)
         
     t_bin_num = len(t_list)
 
