@@ -126,7 +126,7 @@ c     Get low, high eps. and neg., pos. polarity data.
 
             read(55,*,end=9) ipol,q2,w,eps,th_pq,tmn,tmx
             if(ipol.eq.pol_set.and.q2.eq.q2_set.and.
-  &              w.eq.w_set.and.eps.eq.eps_set(lh)) then
+  *              w.eq.w_set.and.eps.eq.eps_set(lh)) then
 
                if(ipol.eq.-1) then
                   pol='mn'
