@@ -220,7 +220,13 @@ c      pause
 *****                  ett(it,lh,ip)=0.001
                end if               
 c               write(*,'(4f8.5,2i3)') aW(it,lh,ip),eW(it,lh,ip),
-c               aQ2(it,lh,ip),eQ2(it,lh,ip),it,lh
+c     aQ2(it,lh,ip),eQ2(it,lh,ip),it,lh
+               write(*,*) '^ 6 ^ ip: ', ip
+               write(*,*) '^ 6 ^ lh: ', lh
+               write(*,*) '^ 6 ^ t-bin: ', it
+               write(*,*) '^ 6 ^ at: ', att(it,lh,ip), ett(it,lh,ip)
+               write(*,*) '^ 6 ^ a Q2: ', aQ2(it,lh,ip),eQ2(it,lh,ip)
+               write(*,*) '^ 6 ^ a W: ', aW(it,lh,ip),eW(it,lh,ip)
             end do
          end do
       end do
