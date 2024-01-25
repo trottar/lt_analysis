@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 05:45:10 trottar"
+# Time-stamp: "2024-01-25 05:48:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,7 +161,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c1 =  TCanvas("c1", "c1", 600, 600)
         c2 =  TCanvas("c2", "c2", 600, 600)
         
-        #c1.cd()
+        c1.cd()
 
         tpp = ""
 
@@ -413,10 +413,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
         
         # Update c2
-        #c2.Update()
+        c2.Update()
 
         # Go to the c2 canvas
-        #c2.cd()
+        c2.cd()
 
         # Set properties for glo
         glo.SetMarkerStyle(5)
@@ -447,7 +447,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g.GetXaxis().SetLimits(0, 360)
 
         # Update canvas c2
-        #c2.Update()
+        c2.Update()
 
         # Fix parameters for flo, flo_unsep, fhi, and fhi_unsep
         flo.FixParameter(0, fff2.GetParameter(0))
@@ -623,7 +623,11 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.SetRightMargin(0.03)
 
         # Print plots for c1 and c2 canvases
+        glo.Draw("A*")
+        glo.Fit("lo_eps_fit", "R")
         c1.Print(outputpdf)
+        ghi.Draw("A*")
+        ghi.Fit("hi_eps_fit", "R")
         c2.Print(outputpdf)
 
         # Clear c1 and c2 canvases
