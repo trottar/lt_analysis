@@ -331,8 +331,9 @@ c     Save data.
 
          write(*,*) '------------'
          write(*,*) 't-bin: ', it
-         write(*,*) 'averQ2: ', aveQ2(it),errQ2(it)
-         write(*,*) 'averW: ', aveW(it),errW(it)
+         write(*,*) 'ave t: ', avett(it), errtt(it)
+         write(*,*) 'ave Q2: ', aveQ2(it),errQ2(it)
+         write(*,*) 'ave W: ', aveW(it),errW(it)
          write(*,*) 'thetacm: ', thetacm_only(it)
       end do
       close(77)
