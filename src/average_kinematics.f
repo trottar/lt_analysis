@@ -242,7 +242,12 @@ c     Average over low and high epsilon.
                if(ett(it,lh,ip).gt.0.) then
                   avtt(it,ip)=avtt(it,ip)+att(it,lh,ip)/ett(it,lh,ip)**2
                   ertt(it,ip)=ertt(it,ip)+1./ett(it,lh,ip)**2
-               end if               
+               end if
+               write(*,*) '^ 5 ^ ip: ', ip
+               write(*,*) '^ 5 ^ t-bin: ', it
+               write(*,*) '^ 5 ^ avt: ', avtt(it,ip), ertt(it,ip)
+               write(*,*) '^ 5 ^ av Q2: ', avQ2(it,ip),erQ2(it,ip)
+               write(*,*) '^ 5 ^ av W: ', avW(it,ip),erW(it,ip)
             end do
          end do
       end do
