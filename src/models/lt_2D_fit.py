@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 07:13:36 trottar"
+# Time-stamp: "2024-01-25 07:17:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -402,10 +402,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c1 =  TCanvas()
 
         c1.Update()        
-        c1.cd()
+        c1.cd(i+1)
         
         # Print plots for c1 canvases
-        g_plot_err.Draw("AP")
+        g_plot_err.Draw("perr")
         g_plot_err.SetTitle("{}".format(i))
         c1.Print(outputpdf+'(')        
         c1.Clear()
