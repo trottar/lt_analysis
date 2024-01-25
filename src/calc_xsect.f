@@ -179,7 +179,9 @@ c      pause
       end do      
  9    close(57)
 
-      print *,"!!!!!!!!: ", par(i)
+      do i, 16
+         print *,"!!!!!!!!: ", par(i)
+      end do
       
       do it=1,nt
 
