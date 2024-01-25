@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 07:03:10 trottar"
+# Time-stamp: "2024-01-25 07:08:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -162,7 +162,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         print(" Starting t-bin {0} (t={1:.4f})...".format(i, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
         
-        c1 =  TCanvas("c1", "c1", 600, 600)
+        c1 =  TCanvas()
         
         c1.cd()
 
@@ -406,12 +406,12 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2)
 
         # Print plots for c1 canvases
-        g_plot_err.Draw("same")
+        g_plot_err.Draw("A*")
         g_plot_err.SetTitle("{}".format(i))
         c1.Print(outputpdf+'(')        
         c1.Clear()
 
-        c2 =  TCanvas("c2", "c2", 600, 600)
+        c2 =  TCanvas()
         
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
