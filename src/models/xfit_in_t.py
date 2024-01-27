@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 02:03:18 trottar"
+# Time-stamp: "2024-01-27 15:58:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -128,7 +128,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
         ))
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/{}/{}/parameters/par.{}_{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, pol_str, q2_set.replace("p",""))
+    para_file_in =  "{}/{}/{}/{}/parameters/par.{}_Q{}W{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, pol_str, q2_set.replace("p",""),w_set.replace("p",""))
     print("Reading {}...".format(para_file_in))
     try:
         with open(para_file_in, 'r') as f:
