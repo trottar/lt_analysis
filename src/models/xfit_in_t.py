@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 15:58:56 trottar"
+# Time-stamp: "2024-01-27 16:00:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,7 +117,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
 
     fit_status = TText()
 
-    fn_sep = "{}/src/{}/xsects/x_sep.{}_{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""))
+    fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
 
@@ -128,7 +128,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
         ))
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/{}/{}/parameters/par.{}_Q{}W{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, pol_str, q2_set.replace("p",""),w_set.replace("p",""))
+    para_file_in =  "{}/{}/{}/{}/parameters/par.{}_Q{}W{}.dat".format(CACHEPATH, USER, ParticleType, dir_iter, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     print("Reading {}...".format(para_file_in))
     try:
         with open(para_file_in, 'r') as f:
@@ -142,7 +142,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
         
     t0, t1, t2, t3, l0, l1, l2, l3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     
-    ave_file_in = "{}/src/{}/averages/avek.{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""))
+    ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     with open(ave_file_in, 'r') as f:
         for line in f:
             w, w_e, q2, q2_e, tt, tt_e, thetacm, it = map(float, line.strip().split())
