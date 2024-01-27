@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 16:06:30 trottar"
+# Time-stamp: "2024-01-27 16:08:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -148,7 +148,8 @@ inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
 
 for key, val in inpDict.items():
-    print("!!!!!!!!!!", key)
+    if key == "InData_efficiency_right":
+        print("!!!!!!!!!!", key, val)
 
 root_file = TFile.Open(prev_iter_root, "READ")
 # Grab weight from previous iteration
