@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 16:42:16 trottar"
+# Time-stamp: "2024-01-27 16:44:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,8 +13,8 @@
 import shutil
 import os, sys
 
-Q2 = sys.argv[1]
-W = sys.argv[2]
+Q2 = sys.argv[1].replace("p", "")
+W = sys.argv[2].replace("p", "")
     
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
