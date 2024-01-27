@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 16:12:16 trottar"
+# Time-stamp: "2024-01-27 16:13:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -87,6 +87,11 @@ def compare_simc(rootFileSimc, hist, inpDict):
             print("!!!!!!!!!!", key, val)
     
     InData_efficiency_right = inpDict["InData_efficiency_right"]
+
+    for key, val in inpDict.items():
+        if key == "InData_efficiency_right":
+            print("!!!!!!!!!!", key, val)    
+    
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
     InData_efficiency_center = inpDict["InData_efficiency_center"]
     InData_error_efficiency_right = inpDict["InData_error_efficiency_right"] 
