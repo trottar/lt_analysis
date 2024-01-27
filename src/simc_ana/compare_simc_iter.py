@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-24 15:16:44 trottar"
+# Time-stamp: "2024-01-27 16:08:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,6 +55,10 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 
 def compare_simc(rootFileSimc, hist, inpDict):
 
+    for key, val in inpDict.items():
+        if key == "InData_efficiency_right":
+            print("!!!!!!!!!!", key, val)
+    
     phi_setting = hist["phi_setting"]
     
     kinematics = inpDict["kinematics"] 
