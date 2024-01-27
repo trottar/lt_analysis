@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 16:01:50 trottar"
+# Time-stamp: "2024-01-27 16:05:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -146,6 +146,9 @@ output_file_lst.append(new_param_file)
 
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
+
+for val, key in inpDict.items():
+    print("!!!!!!!!!!", key)
 
 root_file = TFile.Open(prev_iter_root, "READ")
 # Grab weight from previous iteration
