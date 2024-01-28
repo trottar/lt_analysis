@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:51:33 trottar"
+# Time-stamp: "2024-01-27 23:57:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,24 +224,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
     
-    g_max = g_sigt.GetYaxis().GetXmax()
-    #gp_max = max(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
-    g_min = g_sigt.GetYaxis().GetXmin()
-    #gp_min = min(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
-    gp_max = ROOT.TMath.MaxElement(g_sigt_prv.GetN(), g_sigt_prv.GetY())
-    gp_min = ROOT.TMath.MinElement(g_sigt_prv.GetN(), g_sigt_prv.GetY())
-
-    print("!!!!!!!!!!g_t",g_min,g_max)
-    print("!!!!!!!!!!gp_t",gp_min,gp_max)
-
-    difff = (g_max - g_min) / 5
-
-    if g_max < gp_max:
-        g_sigt.SetMaximum(gp_max + difff)
-
-    if g_min > gp_min:
-        g_sigt.SetMinimum(gp_min - difff)
-
     g_sigt.SetTitle("Sig T")
 
     g_sigt.SetMarkerStyle(5)
@@ -338,22 +320,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
-
-    g_max = g_sigl.GetYaxis().GetXmax()
-    gp_max = max(range(g_sigl_prv.GetN()), key=lambda i: g_sigl_prv.GetY()[i])
-    g_min = g_sigl.GetYaxis().GetXmin()
-    gp_min = min(range(g_sigl_prv.GetN()), key=lambda i: g_sigl_prv.GetY()[i])
-
-    print("!!!!!!!!!!g_l",g_min,g_max)
-    print("!!!!!!!!!!gp_l",gp_min,gp_max)
-    
-    difff = (g_max - g_min) / 5
-
-    if g_max < gp_max:
-        g_sigl.SetMaximum(gp_max + difff)
-
-    if g_min > gp_min:
-        g_sigl.SetMinimum(gp_min - difff)
         
     g_sigl.SetTitle("Sig L")
 
@@ -450,22 +416,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
-
-    g_max = g_siglt.GetYaxis().GetXmax()
-    gp_max = max(range(g_siglt_prv.GetN()), key=lambda i: g_siglt_prv.GetY()[i])
-    g_min = g_siglt.GetYaxis().GetXmin()
-    gp_min = min(range(g_siglt_prv.GetN()), key=lambda i: g_siglt_prv.GetY()[i])
-
-    print("!!!!!!!!!!g_lt",g_min,g_max)
-    print("!!!!!!!!!!gp_lt",gp_min,gp_max)
-    
-    difff = (g_max - g_min) / 5
-
-    if g_max < gp_max:
-        g_siglt.SetMaximum(gp_max + difff)
-
-    if g_min > gp_min:
-        g_siglt.SetMinimum(gp_min - difff)
         
     g_siglt.SetTitle("Sig LT")
 
@@ -566,22 +516,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
     
-    g_max = g_sigtt.GetYaxis().GetXmax()
-    gp_max = max(range(g_sigtt_prv.GetN()), key=lambda i: g_sigtt_prv.GetY()[i])
-    g_min = g_sigtt.GetYaxis().GetXmin()
-    gp_min = min(range(g_sigtt_prv.GetN()), key=lambda i: g_sigtt_prv.GetY()[i])
-
-    print("!!!!!!!!!!g_tt",g_min,g_max)
-    print("!!!!!!!!!!gp_tt",gp_min,gp_max)
-    
-    difff = (g_max - g_min) / 5
-
-    if g_max < gp_max:
-        g_sigtt.SetMaximum(gp_max + difff)
-
-    if g_min > gp_min:
-        g_sigtt.SetMinimum(gp_min - difff)
-
     g_sigtt.SetTitle("Sig TT")
 
     g_sigtt.SetMarkerStyle(5)
