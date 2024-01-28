@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 03:06:50 trottar"
+# Time-stamp: "2024-01-28 05:30:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,8 +47,8 @@ if len(sys.argv)-1!=11:
 
 ##################################################################################################################################################    
 
-DEBUG = True # Flag for plot splash
-#DEBUG = False # Flag for no plot splash
+#DEBUG = True # Flag for plot splash
+DEBUG = False # Flag for no plot splash
 
 # Input params
 kinematics = sys.argv[1].split("_")
@@ -336,7 +336,8 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
-if not os.path.exists(foutroot):
+#if not os.path.exists(foutroot):
+if os.path.exists(foutroot):    
     for hist in histlist:
         print("\nUpdating simc {} histograms in {}".format(hist["phi_setting"],foutroot))
         # Loop through all keys,values of dictionary
@@ -385,7 +386,8 @@ combineDict.update({ "histlist" : tmp_lst})
 
 # Save combined dictionary to json file
 # Check that root file doesnt already exist    
-if not os.path.exists(foutjson):
+#if not os.path.exists(foutjson):
+if os.path.exists(foutjson):
     # Open the file in write mode and use json.dump() to save the dictionary to JSON
     with open(foutjson, 'w') as f_json:
         json.dump(combineDict, f_json, default=custom_encoder)
