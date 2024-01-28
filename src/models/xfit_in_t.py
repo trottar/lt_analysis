@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 00:01:48 trottar"
+# Time-stamp: "2024-01-28 00:05:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
 def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range):
 
     # xsects range
-    lo_bound = -0.1
-    hi_bound =  0.7 
+    lo_bound = -2.0e-6
+    hi_bound =  2.0e-6
 
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
 
@@ -229,8 +229,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt.SetMarkerStyle(5)
     g_sigt.Draw("AP")
 
-    #g_sigt.SetMaximum(hi_bound)
-    #g_sigt.SetMinimum(lo_bound)
+    g_sigt.SetMaximum(hi_bound)
+    g_sigt.SetMinimum(lo_bound)
     
     g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigt.GetXaxis().CenterTitle()
@@ -256,7 +256,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
-
+        print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
+        
     gMinuit = ROOT.TMinuit()
         
     fit_status = TText()
@@ -326,8 +327,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl.SetMarkerStyle(5)
     g_sigl.Draw("AP")
 
-    #g_sigl.SetMaximum(hi_bound)
-    #g_sigl.SetMinimum(lo_bound)
+    g_sigl.SetMaximum(hi_bound)
+    g_sigl.SetMinimum(lo_bound)
 
     g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigl.GetXaxis().CenterTitle()
@@ -352,6 +353,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
+        print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
 
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
     
@@ -429,8 +431,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt.GetYaxis().SetTitleSize(0.035)
     g_siglt.GetYaxis().CenterTitle()
 
-    #g_siglt.SetMaximum(hi_bound)
-    #g_siglt.SetMinimum(lo_bound)
+    g_siglt.SetMaximum(hi_bound)
+    g_siglt.SetMinimum(lo_bound)
     
     g_siglt_prv.SetMarkerColor(4)
     g_siglt_prv.SetMarkerStyle(21)
@@ -449,6 +451,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * g_vec[i]
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
+        print("$$$$$$$$$$$",i, g_siglt.GetX()[i], siglt_X)
 
 
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
@@ -528,8 +531,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt.GetYaxis().SetTitleSize(0.035)
     g_sigtt.GetYaxis().CenterTitle()
 
-    #g_sigtt.SetMaximum(hi_bound)
-    #g_sigtt.SetMinimum(lo_bound)
+    g_sigtt.SetMaximum(hi_bound)
+    g_sigtt.SetMinimum(lo_bound)
     
     g_sigtt_prv.SetMarkerColor(4)
     g_sigtt_prv.SetMarkerStyle(21)
@@ -548,6 +551,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * g_vec[i]
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
+        print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
         
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
 
