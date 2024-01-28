@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 02:05:38 trottar"
+# Time-stamp: "2024-01-28 02:08:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -118,8 +118,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     l0, l1, l2, l3 = 0, 0, 0, 0
     lt0, lt1, lt2, lt3 = 0, 0, 0, 0
     tt0, tt1, tt2, tt3 = 0, 0, 0, 0
-
-    fit_status = TText()
 
     fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
@@ -252,7 +250,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigT.SetParameters(t0, t1, t2, t3)
 
-    fit_t_result = g_sigt_fit.Fit(f_sigT, "MR")
+    g_sigt_fit.Fit(f_sigT, "MR")
 
     for i in range(len(w_vec)):
 
@@ -355,7 +353,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigL.SetParameters(l0, l1, l2, l3)
 
-    fit_l_result = g_sigl_fit.Fit(f_sigL, "MR")
+    g_sigl_fit.Fit(f_sigL, "MR")
 
     for i in range(len(w_vec)):
         
@@ -462,7 +460,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
 
-    fit_lt_result = g_siglt_fit.Fit(f_sigLT, "MR")
+    g_siglt_fit.Fit(f_sigLT, "MR")
     
     for i in range(len(w_vec)):        
         
@@ -571,7 +569,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
     
-    fit_tt_result = g_sigtt_fit.Fit(f_sigTT, "MR")
+    g_sigtt_fit.Fit(f_sigTT, "MR")
         
     for i in range(len(w_vec)):
         
