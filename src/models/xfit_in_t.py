@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:03:38 trottar"
+# Time-stamp: "2024-01-28 01:58:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,12 +259,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
         print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
-        
-    gMinuit = ROOT.TMinuit()
+
+    # Check the fit status for 'flo'
+    f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+    f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
         
     fit_status = TText()
     fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + gMinuit.fCstatu)
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigT_status_message)
 
     c1.cd(1)
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:55:46 trottar"
+# Time-stamp: "2024-01-28 01:57:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -509,15 +509,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         leg.AddEntry(flo, "Low #it{#font[120]{e}} fit", "l")
         leg.AddEntry(fhi, "High #it{#font[120]{e}} fit", "l")
         leg.Draw()
-
-        '''
-        gMinuit = ROOT.TMinuit()
-        # Create TText for fit status
-        fit_status = ROOT.TText()
-        fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
-        fit_status.DrawTextNDC(0.15, 0.80, "Fit Status: " + gMinuit.fCstatu)
-        '''
 
         # Check the fit status for 'flo'
         flo_status = flo.GetNDF()  # GetNDF() returns the number of degrees of freedom
