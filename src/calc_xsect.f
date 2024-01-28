@@ -237,6 +237,7 @@ c angle check
             print *,"w: ", w
             print *,"q2: ", q2
             print *,"tm: ", tm
+            print *,"tm_min: ", tm_min
             print *,"phi: ", phi
             print *,"eps_mod: ", eps_mod
             print *,"th_mod: ", th_mod
