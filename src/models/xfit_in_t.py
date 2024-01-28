@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 00:35:43 trottar"
+# Time-stamp: "2024-01-28 00:40:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,7 +71,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tt = abs(x[0])
         qq = abs(x[1])
         ftav = (abs(tt)-tav)/tav
-        print("Calculating params for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
         return f
 
@@ -79,7 +79,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     def fun_Sig_L(x, par):
         tt = abs(x[0])
         qq = abs(x[1])
-        print("Calculating params for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
         return f
 
@@ -88,7 +88,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     def fun_Sig_LT(x, par):
         tt = abs(x[0])
         qq = abs(x[1])
-        print("Calculating params for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
         return f
 
@@ -99,7 +99,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         qq = abs(x[1])
         if pol_str == "pl":
             f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-        print("Calculating params for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]*qq*math.exp(-qq))*f_tt
         return f
     
@@ -272,16 +272,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit_tot.SetMarkerColor(2)
     g_sigt_fit_tot.SetLineColor(2)
     g_sigt_fit_tot.Draw("LP")
-
-    t0 = f_sigT.GetParameter(0)
-    t1 = f_sigT.GetParameter(1)
-    t2 = f_sigT.GetParameter(2)
-    t3 = f_sigT.GetParameter(3)
     
-    par_vec.append(t0)
-    par_vec.append(t1)
-    par_vec.append(t2)
-    par_vec.append(t3)
+    par_vec.append(f_sigT.GetParameter(0))
+    par_vec.append(f_sigT.GetParameter(1))
+    par_vec.append(f_sigT.GetParameter(2))
+    par_vec.append(f_sigT.GetParameter(3))
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
@@ -367,15 +362,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    l0 = f_sigL.GetParameter(0)
-    l1 = f_sigL.GetParameter(1)
-    l2 = f_sigL.GetParameter(2)
-    l3 = f_sigL.GetParameter(3)
-
-    par_vec.append(l0)
-    par_vec.append(l1)
-    par_vec.append(l2)
-    par_vec.append(l3)
+    par_vec.append(f_sigL.GetParameter(0))
+    par_vec.append(f_sigL.GetParameter(1))
+    par_vec.append(f_sigL.GetParameter(2))
+    par_vec.append(f_sigL.GetParameter(3))
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
@@ -466,16 +456,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit_tot.SetMarkerColor(2)
     g_siglt_fit_tot.SetLineColor(2)
     g_siglt_fit_tot.Draw("LP")
-
-    lt0 = f_sigLT.GetParameter(0)
-    lt1 = f_sigLT.GetParameter(1)
-    lt2 = f_sigLT.GetParameter(2)
-    lt3 = f_sigLT.GetParameter(3)
         
-    par_vec.append(lt0)
-    par_vec.append(lt1)
-    par_vec.append(lt2)
-    par_vec.append(lt3)
+    par_vec.append(f_sigLT.GetParameter(0))
+    par_vec.append(f_sigLT.GetParameter(1))
+    par_vec.append(f_sigLT.GetParameter(2))
+    par_vec.append(f_sigLT.GetParameter(3))
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
@@ -566,16 +551,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit_tot.SetMarkerColor(2)
     g_sigtt_fit_tot.SetLineColor(2)
     g_sigtt_fit_tot.Draw("LP")
-
-    tt0 = f_sigTT.GetParameter(0)
-    tt1 = f_sigTT.GetParameter(1)
-    tt2 = f_sigTT.GetParameter(2)
-    tt3 = f_sigTT.GetParameter(3)
     
-    par_vec.append(tt0)
-    par_vec.append(tt1)
-    par_vec.append(tt2)
-    par_vec.append(tt3)
+    par_vec.append(f_sigTT.GetParameter(0))
+    par_vec.append(f_sigTT.GetParameter(1))
+    par_vec.append(f_sigTT.GetParameter(2))
+    par_vec.append(f_sigTT.GetParameter(3))
 
     par_err_vec.append(f_sigTT.GetParError(0))
     par_err_vec.append(f_sigTT.GetParError(1))
