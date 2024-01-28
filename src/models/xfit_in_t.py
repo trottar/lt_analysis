@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 00:22:03 trottar"
+# Time-stamp: "2024-01-28 00:24:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -240,7 +240,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt.GetYaxis().CenterTitle()
 
     g_sigt_prv.SetMarkerColor(4)
-    g_sigt_prv.SetMarkerStyle(21)
+    g_sigt_prv.SetMarkerStyle(25)
     g_sigt_prv.Draw("P")
         
     c2.cd(1)
@@ -338,7 +338,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl.GetYaxis().CenterTitle()
 
     g_sigl_prv.SetMarkerColor(4)
-    g_sigl_prv.SetMarkerStyle(21)
+    g_sigl_prv.SetMarkerStyle(25)
     g_sigl_prv.Draw("P")
 
     c2.cd(2)
@@ -435,7 +435,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt.SetMinimum(lo_bound)
     
     g_siglt_prv.SetMarkerColor(4)
-    g_siglt_prv.SetMarkerStyle(21)
+    g_siglt_prv.SetMarkerStyle(25)
     g_siglt_prv.Draw("P")
 
     c2.cd(3)
@@ -535,7 +535,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt.SetMinimum(lo_bound)
     
     g_sigtt_prv.SetMarkerColor(4)
-    g_sigtt_prv.SetMarkerStyle(21)
+    g_sigtt_prv.SetMarkerStyle(25)
     g_sigtt_prv.Draw("P")
 
     c2.cd(4)
