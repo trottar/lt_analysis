@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:22:53 trottar"
+# Time-stamp: "2024-01-27 23:25:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -637,4 +637,5 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
         for i in range(len(par_vec)):
             #sys.stdout.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
             f.write(format_specifier.format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]) + "\n")
-            print("  {} {} {} {}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
+            print("OLD:  {} {} {} {}".format(par, par_err, indx, chi2))
+            print("NEW:  {} {} {} {}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
