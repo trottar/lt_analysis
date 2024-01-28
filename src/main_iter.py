@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 22:43:37 trottar"
+# Time-stamp: "2024-01-27 22:44:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,14 +150,14 @@ histlist = prev_iter_combineDict["histlist"]
 # Grab combined root files for data and dummy.
 # Then save to dictionary
 for hist in histlist:
-    rootFileData = OUTPATH + "/" + "{}".format(ParticleType) + "_" + inpDict["InDATAFilename"] + "_%s.root" % (inpDict["phi_setting"])
+    rootFileData = OUTPATH + "/" + "{}".format(ParticleType) + "_" + inpDict["InDATAFilename"] + "_%s.root" % (hist["phi_setting"])
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
     InFile_DATA = TFile.Open(rootFileData, "OPEN")
     hist["InFile_DATA"]  = InFile_DATA
     
-    rootFileDummy = OUTPATH + "/" + "{}".format(ParticleType) + "_" + inpDict["InDUMMYFilename"] + "_%s.root" % (inpDict["phi_setting"])
+    rootFileDummy = OUTPATH + "/" + "{}".format(ParticleType) + "_" + inpDict["InDUMMYFilename"] + "_%s.root" % (hist["phi_setting"])
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
