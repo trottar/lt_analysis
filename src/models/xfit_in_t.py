@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 00:11:14 trottar"
+# Time-stamp: "2024-01-28 00:13:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,9 +224,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
         
-    # Set the y-axis to log scale
-    ROOT.gPad.SetLogy()
-        
+    # Set the y-axis to symlog scale
+    ROOT.gPad.SetLogy(0)
+    ROOT.gPad.SetLogy(1)
+
     g_sigt.SetTitle("Sig T")
 
     g_sigt.SetMarkerStyle(5)
