@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:44:08 trottar"
+# Time-stamp: "2024-01-28 01:45:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -516,15 +516,28 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fit_status.DrawTextNDC(0.15, 0.80, "Fit Status: " + gMinuit.fCstatu)
         '''
         
-        flo_status = flo.GetFitStatus().IsValid()
-        fhi_status = fhi.GetFitStatus().IsValid()
+        # Check the fit status for 'flo'
+        flo_status = ROOT.TFitResultPtr()
+        flo_fit_result = flo.FitResult()
+        if flo_fit_result:
+            flo_status = flo_fit_result.Status()
+
+        flo_status_message = "Valid" if flo_status == 0 else "Not Valid"
+
+        # Check the fit status for 'fhi'
+        fhi_status = ROOT.TFitResultPtr()
+        fhi_fit_result = fhi.FitResult()
+        if fhi_fit_result:
+            fhi_status = fhi_fit_result.Status()
+
+        fhi_status_message = "Valid" if fhi_status == 0 else "Not Valid"
+        
         # Create TText for fit status
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
         fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
-        fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status)
-        fit_status.DrawTextNDC(0.15, 0.80, "High Fit Status: " + fhi_status)
-
+        fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
+        fit_status.DrawTextNDC(0.15, 0.80, "High Fit Status: " + fhi_status_message)
 
         '''
         # Adjust the maximum and minimum of glo based on ghi values
