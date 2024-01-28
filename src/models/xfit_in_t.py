@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 02:08:00 trottar"
+# Time-stamp: "2024-01-28 02:13:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -258,6 +258,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
         print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
 
+    c1.cd(1)
+
     # Set line properties for f_sigT
     f_sigT.SetLineColor(1)
     f_sigT.SetLineWidth(2)
@@ -272,9 +274,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     fit_status = TText()
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigT_status_message)
-
-    c1.cd(1)
-
+    
     g_sigt_fit_tot.SetMarkerStyle(26)
     g_sigt_fit_tot.SetMarkerColor(2)
     g_sigt_fit_tot.SetLineColor(2)
@@ -361,6 +361,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
 
+    c1.cd(2)
+
     # Set line properties for f_sigL
     f_sigL.SetLineColor(1)
     f_sigL.SetLineWidth(2)
@@ -374,10 +376,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
     fit_status = TText()
     fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigL_status_message)
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigL_status_message)    
     
-    c1.cd(2)
-
     g_sigl_fit_tot.SetMarkerStyle(26)
     g_sigl_fit_tot.SetMarkerColor(2)
     g_sigl_fit_tot.SetLineColor(2)
@@ -468,6 +468,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
         print("$$$$$$$$$$$",i, g_siglt.GetX()[i], siglt_X)
 
+    c1.cd(3)
+
     # Set line properties for f_sigLT
     f_sigLT.SetLineColor(1)
     f_sigLT.SetLineWidth(2)
@@ -482,9 +484,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     fit_status = TText()
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigLT_status_message)
-
-    c1.cd(3)
-
+    
     g_siglt_fit_tot.SetMarkerStyle(26)
     g_siglt_fit_tot.SetMarkerColor(2)
     g_siglt_fit_tot.SetLineColor(2)
@@ -576,6 +576,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * g_vec[i]
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
+    c1.cd(4)
 
     # Set line properties for f_sigTT
     f_sigTT.SetLineColor(1)
@@ -592,8 +593,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigTT_status_message)
         
-    c1.cd(4)
-
     g_sigtt_fit_tot.SetMarkerStyle(26)
     g_sigtt_fit_tot.SetMarkerColor(2)
     g_sigtt_fit_tot.SetLineColor(2)
