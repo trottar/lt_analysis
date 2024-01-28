@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 00:24:33 trottar"
+# Time-stamp: "2024-01-28 00:28:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -223,6 +223,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
+        print("!!!!!!!!!!sigt_fit",i, g_sigt.GetX()[i], sigt_X_fit)
         
     g_sigt.SetTitle("Sig T")
 
@@ -321,6 +322,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
+        print("!!!!!!!!!!sigl_fit",i, g_sigl.GetX()[i], sigl_X_fit)
         
     g_sigl.SetTitle("Sig L")
 
@@ -418,6 +420,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
+        print("!!!!!!!!!!siglt_fit",i, g_siglt.GetX()[i], siglt_X_fit)
         
     g_siglt.SetTitle("Sig LT")
 
@@ -518,7 +521,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
-    
+        print("!!!!!!!!!!sigtt_fit",i, g_sigtt.GetX()[i], sigtt_X_fit)
+        
     g_sigtt.SetTitle("Sig TT")
 
     g_sigtt.SetMarkerStyle(5)
