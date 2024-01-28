@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 00:28:54 trottar"
+# Time-stamp: "2024-01-28 00:31:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -203,15 +203,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     c1.cd(1).SetLeftMargin(0.12)
     nsep.Draw("sigt:t:sigt_e", "", "goff")
+
+    f_sigT_pre = TF2("sig_T_pre", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
+    f_sigT_pre.SetParameters(t0, t1, t2, t3)
+    
     #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
     g_sigt = TGraphErrors()
     for i in range(nsep.GetSelectedRows()):
         g_sigt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigt.SetPointError(i, 0, nsep.GetV3()[i])
         print("!!!!!!!!!!sigt",i, nsep.GetV2()[i], nsep.GetV1()[i])
-
-    f_sigT_pre = TF2("sig_T_pre", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
-    f_sigT_pre.SetParameters(t0, t1, t2, t3)
 
     for i in range(len(w_vec)):
 
