@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 02:52:59 trottar"
+# Time-stamp: "2024-01-28 02:59:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -358,8 +358,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigL.SetParameters(l0, l1, l2, l3)
 
-    g_sigl_fit.Fit(f_sigL, "S")
-
+    g_q2_sigl_fit = ROOT.TGraph2DErrors()
+    for i in range(g_sigl_fit.GetN()):
+        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i])
+        g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, 0.0, g_sigl_fit.GetEX()[i], g_sigl_fit.GetEY()[i])
+    
+    g_q2_sigl_fit.Fit(f_sigl, "S")
+    
     for i in range(len(w_vec)):
         
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
@@ -465,7 +470,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
 
-    g_siglt_fit.Fit(f_sigLT, "S")
+    g_q2_siglt_fit = ROOT.TGraph2DErrors()
+    for i in range(g_siglt_fit.GetN()):
+        g_q2_siglt_fit.SetPoint(g_q2_siglt_fit.GetN(), q2_vec[i], g_siglt_fit.GetX()[i], g_siglt_fit.GetY()[i])
+        g_q2_siglt_fit.SetPointError(g_q2_siglt_fit.GetN()-1, 0.0, g_siglt_fit.GetEX()[i], g_siglt_fit.GetEY()[i])
+    
+    g_q2_sigtt_fit = ROOT.TGraph2DErrors()
+    for i in range(g_sigtt_fit.GetN()):
+        g_q2_sigtt_fit.SetPoint(g_q2_sigtt_fit.GetN(), q2_vec[i], g_sigtt_fit.GetX()[i], g_sigtt_fit.GetY()[i])
+        g_q2_sigtt_fit.SetPointError(g_q2_sigtt_fit.GetN()-1, 0.0, g_sigtt_fit.GetEX()[i], g_sigtt_fit.GetEY()[i])
+    
+    g_q2_sigtt_fit.Fit(f_sigtt, "S")
     
     for i in range(len(w_vec)):        
         
