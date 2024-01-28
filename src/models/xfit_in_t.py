@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 02:59:47 trottar"
+# Time-stamp: "2024-01-28 03:01:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -363,7 +363,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i])
         g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, 0.0, g_sigl_fit.GetEX()[i], g_sigl_fit.GetEY()[i])
     
-    g_q2_sigl_fit.Fit(f_sigl, "S")
+    g_q2_sigl_fit.Fit(f_sigL, "S")
     
     for i in range(len(w_vec)):
         
@@ -475,12 +475,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_q2_siglt_fit.SetPoint(g_q2_siglt_fit.GetN(), q2_vec[i], g_siglt_fit.GetX()[i], g_siglt_fit.GetY()[i])
         g_q2_siglt_fit.SetPointError(g_q2_siglt_fit.GetN()-1, 0.0, g_siglt_fit.GetEX()[i], g_siglt_fit.GetEY()[i])
     
-    g_q2_sigtt_fit = ROOT.TGraph2DErrors()
-    for i in range(g_sigtt_fit.GetN()):
-        g_q2_sigtt_fit.SetPoint(g_q2_sigtt_fit.GetN(), q2_vec[i], g_sigtt_fit.GetX()[i], g_sigtt_fit.GetY()[i])
-        g_q2_sigtt_fit.SetPointError(g_q2_sigtt_fit.GetN()-1, 0.0, g_sigtt_fit.GetEX()[i], g_sigtt_fit.GetEY()[i])
+    g_q2_siglt_fit = ROOT.TGraph2DErrors()
+    for i in range(g_siglt_fit.GetN()):
+        g_q2_siglt_fit.SetPoint(g_q2_siglt_fit.GetN(), q2_vec[i], g_siglt_fit.GetX()[i], g_siglt_fit.GetY()[i])
+        g_q2_siglt_fit.SetPointError(g_q2_siglt_fit.GetN()-1, 0.0, g_siglt_fit.GetEX()[i], g_siglt_fit.GetEY()[i])
     
-    g_q2_sigtt_fit.Fit(f_sigtt, "S")
+    g_q2_siglt_fit.Fit(f_sigLT, "S")
     
     for i in range(len(w_vec)):        
         
