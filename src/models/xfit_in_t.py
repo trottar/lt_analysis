@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:25:22 trottar"
+# Time-stamp: "2024-01-27 23:27:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -629,6 +629,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
 
+    for old, new in zip(prv_par_vec, par_vec):
+        print(old, " - ", new)
+    
     para_file_out = "{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""))
     print("\nWriting {}...".format(para_file_out))
     with open(para_file_out, 'w') as f:
@@ -637,5 +640,4 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
         for i in range(len(par_vec)):
             #sys.stdout.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
             f.write(format_specifier.format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]) + "\n")
-            print("OLD:  {} {} {} {}".format(par, par_err, indx, chi2))
-            print("NEW:  {} {} {} {}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
+            print("  {} {} {} {}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
