@@ -210,8 +210,7 @@ c angle check
 *     dx_real=x_mod*dr/r
             x_real=x_mod
             dx_real=x_mod*dr/r
-            
-            
+                        
 *     Check for NaN values
             if (isnan(x_real)) x_real = -1000.0
             if (isnan(dx_real)) dx_real = 0.0

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:31:33 trottar"
+# Time-stamp: "2024-01-28 01:36:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,7 +13,7 @@
 import numpy as np
 import ROOT
 from ROOT import TGraphErrors, TF1, TF2, TGraph2DErrors, TCanvas
-from ROOT import TString, TNtuple
+from ROOT import TString, TNtuple, TMinuit
 from array import array
 import math
 import os, sys
@@ -61,6 +61,8 @@ outputpdf  = "{}/{}_lt_fit_Q{}W{}.pdf".format(OUTPATH, ParticleType, Q2, W)
 # Suppressing the terminal splash of Print()
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
+# Check fit status
+#gMinuit = ROOT.TMinuit()        
 ###############################################################################################################################################
 
 # Constants
@@ -506,8 +508,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         leg.AddEntry(flo, "Low #it{#font[120]{e}} fit", "l")
         leg.AddEntry(fhi, "High #it{#font[120]{e}} fit", "l")
         leg.Draw()
-
-        gMinuit = ROOT.TMinuit()
         
         # Create TText for fit status
         fit_status = ROOT.TText()
