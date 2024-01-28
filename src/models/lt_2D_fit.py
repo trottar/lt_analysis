@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:28:58 trottar"
+# Time-stamp: "2024-01-28 01:31:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -484,7 +484,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fhi.SetLineColor(2)
         flo.SetLineWidth(2)
         fhi.SetLineWidth(2)
-        fhi.SetLineStyle(9)
+        fhi.SetLineStyle(2)
 
         # Set line color for ghi
         ghi.SetLineColor(2)
