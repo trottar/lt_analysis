@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 02:18:10 trottar"
+# Time-stamp: "2024-01-28 02:29:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,7 +71,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tt = abs(x[0])
         qq = abs(x[1])
         ftav = (abs(tt)-tav)/tav
-        print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
         return f
 
@@ -79,7 +79,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     def fun_Sig_L(x, par):
         tt = abs(x[0])
         qq = abs(x[1])
-        print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
         return f
 
@@ -88,7 +88,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     def fun_Sig_LT(x, par):
         tt = abs(x[0])
         qq = abs(x[1])
-        print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
         return f
 
@@ -99,7 +99,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         qq = abs(x[1])
         if pol_str == "pl":
             f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-        print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]*qq*math.exp(-qq))*f_tt
         return f
     
@@ -250,7 +250,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigT.SetParameters(t0, t1, t2, t3)
 
-    g_sigt.Fit(f_sigT, "MR")
+    g_sigt_fit.Fit(f_sigT, "S")
 
     for i in range(len(w_vec)):
 
@@ -353,7 +353,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigL.SetParameters(l0, l1, l2, l3)
 
-    g_sigl.Fit(f_sigL, "MR")
+    g_sigl_fit.Fit(f_sigL, "S")
 
     for i in range(len(w_vec)):
         
@@ -460,7 +460,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
 
-    g_siglt.Fit(f_sigLT, "MR")
+    g_siglt_fit.Fit(f_sigLT, "S")
     
     for i in range(len(w_vec)):        
         
@@ -569,7 +569,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
     
-    g_sigtt.Fit(f_sigTT, "MR")
+    g_sigtt_fit.Fit(f_sigTT, "S")
         
     for i in range(len(w_vec)):
         
