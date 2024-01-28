@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 02:29:02 trottar"
+# Time-stamp: "2024-01-28 02:52:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,7 +250,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigT.SetParameters(t0, t1, t2, t3)
 
-    g_sigt_fit.Fit(f_sigT, "S")
+    g_q2_sigt_fit = ROOT.TGraph2DErrors()
+    for i in range(g_sigt_fit.GetN()):
+        g_q2_sigt_fit.SetPoint(g_q2_sigt_fit.GetN(), q2_vec[i], g_sigt_fit.GetX()[i], g_sigt_fit.GetY()[i])
+        g_q2_sigt_fit.SetPointError(g_q2_sigt_fit.GetN()-1, 0.0, g_sigt_fit.GetEX()[i], g_sigt_fit.GetEY()[i])
+    
+    g_q2_sigt_fit.Fit(f_sigT, "S")
 
     for i in range(len(w_vec)):
 
