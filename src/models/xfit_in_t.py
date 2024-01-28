@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 22:51:11 trottar"
+# Time-stamp: "2024-01-27 23:22:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,8 +182,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     t_tmin_map = TGraph()
     # Use SetPoint to fill the graph
     for i in range(nsep.GetSelectedRows()):
+        if nsep.GetV1()[i] < nsep.GetV2()[i]:
+            print("ERROR: t < tmin!\n\tt={} < tmin={}".format(nsep.GetV1()[i], nsep.GetV2()[i]))
+            sys.exit(2)
         t_tmin_map.SetPoint(i, nsep.GetV1()[i], nsep.GetV2()[i])
-        print("!!!!!!!!!!", i, nsep.GetV1()[i], nsep.GetV2()[i])
 
     t_list = t_tmin_map.GetX()
     t_min_list = t_tmin_map.GetY()
@@ -202,14 +204,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     for i in range(nsep.GetSelectedRows()):
         g_sigt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigt.SetPointError(i, 0, nsep.GetV3()[i])
+        print("!!!!!!!!!!sigt",i, nsep.GetV2()[i], nsep.GetV1()[i])
 
     f_sigT_pre = TF2("sig_T_pre", fun_Sig_T, 0, 0.5, 0.0, 2.0, 4)
     f_sigT_pre.SetParameters(t0, t1, t2, t3)
 
     for i in range(0, len(w_vec)-1):
-
-        if q2_vec[i] == 0.0:
-            continue
 
         sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
@@ -262,9 +262,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     fit_t_result = g_sigt_fit.Fit(f_sigT, "S")
 
     for i in range(0, len(w_vec)-1):
-
-        if q2_vec[i] == 0.0:
-            continue        
 
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
@@ -320,11 +317,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     for i in range(nsep.GetSelectedRows()):
         g_sigl.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigl.SetPointError(i, 0, nsep.GetV3()[i])
+        print("!!!!!!!!!!sigl",i, nsep.GetV2()[i], nsep.GetV1()[i])
 
     for i in range(0, len(w_vec)-1):
-
-        if q2_vec[i] == 0.0:
-            continue
         
         sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
@@ -376,9 +371,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     g_sigl_fit.Fit(f_sigL)
 
     for i in range(0, len(w_vec)-1):
-
-        if q2_vec[i] == 0.0:
-            continue
         
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
@@ -430,11 +422,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     for i in range(nsep.GetSelectedRows()):
         g_siglt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_siglt.SetPointError(i, 0, nsep.GetV3()[i])
+        print("!!!!!!!!!!siglt",i, nsep.GetV2()[i], nsep.GetV1()[i])
 
     for i in range(0, len(w_vec)-1):
-
-        if q2_vec[i] == 0.0:
-            continue
         
         siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * g_vec[i]
         g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
@@ -491,9 +481,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     g_siglt_fit.Fit(f_sigLT)
     
     for i in range(0, len(w_vec)-1):        
-
-        if q2_vec[i] == 0.0:
-            continue
         
         siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * g_vec[i]
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
@@ -546,11 +533,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     for i in range(nsep.GetSelectedRows()):
         g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
+        print("!!!!!!!!!!sigtt",i, nsep.GetV2()[i], nsep.GetV1()[i])
 
     for i in range(0, len(w_vec)-1):
-
-        if q2_vec[i] == 0.0:
-            continue
         
         sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * g_vec[i]
 
@@ -608,9 +593,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     g_sigtt_fit.Fit(f_sigTT)
         
     for i in range(0, len(w_vec)-1):
-
-        if q2_vec[i] == 0.0:
-            continue
         
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * g_vec[i]
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
