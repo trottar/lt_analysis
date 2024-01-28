@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 00:15:27 trottar"
+# Time-stamp: "2024-01-28 00:18:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -590,6 +590,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("par{} changed from {} to {}".format(i+1, old, new))
     
     para_file_out = "{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""))
+    #para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     print("\nWriting {}...".format(para_file_out))
     with open(para_file_out, 'w') as f:
         format_specifier = "{:>13.5E} {:>13.5E} {:>3} {:>12.1f}"
