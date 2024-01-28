@@ -65,7 +65,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer nt,nphi
 
       real r,dr,w,dw,q2,dq2,tt,dtt,th_cm
-      real tm,tmn,tmx
+      real tm,tmn,tmx,tm_min
       real eps_mod,th_mod,x_mod
       real x_real,dx_real
 
@@ -190,8 +190,8 @@ c      pause
             phi=(ip-0.5)*2.*3.14159/nphi
             read(51,*) r,dr
             
-            call xmodel(pid,npol_set,Eb,q2_set,w_set,
-     *           eps_set,w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
+            call xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
+     *           w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn,tm_min)
 
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
@@ -215,7 +215,7 @@ c angle check
             if (isnan(q2)) q2 = 0.0
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
-     *           th_mod*180./3.14159,phi*180./3.14159,tt,tm,w,q2
+     *           th_mod*180./3.14159,phi*180./3.14159,tm,tm_min,w,q2
  40         format(3G15.5,f8.5,2f7.2,4f8.5)
             
             print *,"--------------"
