@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:35:21 trottar"
+# Time-stamp: "2024-01-27 23:39:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -129,6 +129,9 @@ prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
 with open(prev_iter_json, 'r') as f:
     prev_iter_combineDict = json.load(f)
 
+inpDict = prev_iter_combineDict["inpDict"]
+histlist = prev_iter_combineDict["histlist"]
+
 if EPSSET == "low":
     # Run weight iteration script for optimizing parameterization
     sys.path.append("models")
@@ -143,9 +146,6 @@ if EPSSET == "low":
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
 new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 output_file_lst.append(new_param_file)
-
-inpDict = prev_iter_combineDict["inpDict"]
-histlist = prev_iter_combineDict["histlist"]
 
 # Grab combined root files for data and dummy.
 # Then save to dictionary
