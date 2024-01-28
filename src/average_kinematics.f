@@ -57,6 +57,8 @@ c     enough space for the sets
       real q2_bin, w_bin
       integer t_bin, phi_bin
 
+      real t_min
+
       integer nt,nphi
       
       real eps_set(2)
@@ -312,7 +314,7 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
       do it=1,ntbins
          tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
-     &         th_mod,eps_mod)
+     &         t_min,th_mod,eps_mod,)
          thetacm_only(it)=th_mod*180./3.14159
       end do
 
