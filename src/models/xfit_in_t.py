@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 03:58:13 trottar"
+# Time-stamp: "2024-01-28 04:02:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,18 +251,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT.SetParameters(t0, t1, t2, t3)
 
     g_q2_sigt_fit = ROOT.TGraph2DErrors()
-    for i in range(g_sigt_fit.GetN()):
-        g_q2_sigt_fit.SetPoint(g_q2_sigt_fit.GetN(), g_sigt_fit.GetX()[i], q2_vec[i], g_sigt_fit.GetY()[i])
-        g_q2_sigt_fit.SetPointError(g_q2_sigt_fit.GetN()-1, g_sigt_fit.GetEX()[i], 0.0, g_sigt_fit.GetEY()[i])
-    
-    g_q2_sigt_fit.Fit(f_sigT, "MR")
-
     for i in range(len(w_vec)):
-
+        g_q2_sigt_fit.SetPoint(g_q2_sigt_fit.GetN(), g_sigt_fit.GetX()[i], q2_vec[i], g_sigt_fit.GetY()[i])
+        g_q2_sigt_fit.SetPointError(g_q2_sigt_fit.GetN()-1, g_sigt_fit.GetEX()[i], 0.0, g_sigt_fit.GetEY()[i])    
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
         print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
-
+    g_q2_sigt_fit.Fit(f_sigT, "S")
+    
     # Set line properties for f_sigT
     f_sigT.SetLineColor(1)
     f_sigT.SetLineWidth(2)
@@ -359,18 +355,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL.SetParameters(l0, l1, l2, l3)
 
     g_q2_sigl_fit = ROOT.TGraph2DErrors()
-    for i in range(g_sigl_fit.GetN()):
-        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], q2_vec[i], g_sigl_fit.GetY()[i])
-        g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, g_sigl_fit.GetEX()[i], 0.0, g_sigl_fit.GetEY()[i])
-    
-    g_q2_sigl_fit.Fit(f_sigL, "MR")
-    
     for i in range(len(w_vec)):
-        
-        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
+        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], q2_vec[i], g_sigl_fit.GetY()[i])
+        g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, g_sigl_fit.GetEX()[i], 0.0, g_sigl_fit.GetEY()[i])    
+        sigl_X = (f_sigl.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
-
+    g_q2_sigl_fit.Fit(f_sigL, "S")
+    
     # Set line properties for f_sigL
     f_sigL.SetLineColor(1)
     f_sigL.SetLineWidth(2)
@@ -471,18 +463,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
 
     g_q2_siglt_fit = ROOT.TGraph2DErrors()
-    for i in range(g_siglt_fit.GetN()):
+    for i in range(len(w_vec)):
         g_q2_siglt_fit.SetPoint(g_q2_siglt_fit.GetN(), g_siglt_fit.GetX()[i], q2_vec[i], g_siglt_fit.GetY()[i])
-        g_q2_siglt_fit.SetPointError(g_q2_siglt_fit.GetN()-1, g_siglt_fit.GetEX()[i], 0.0, g_siglt_fit.GetEY()[i])
-    
-    g_q2_siglt_fit.Fit(f_sigLT, "MR")
-    
-    for i in range(len(w_vec)):        
-        
-        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * g_vec[i]
+        g_q2_siglt_fit.SetPointError(g_q2_siglt_fit.GetN()-1, g_siglt_fit.GetEX()[i], 0.0, g_siglt_fit.GetEY()[i])    
+        siglt_X = (f_siglt.Eval(g_siglt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
         print("$$$$$$$$$$$",i, g_siglt.GetX()[i], siglt_X)
-
+    g_q2_siglt_fit.Fit(f_sigLT, "S")
+    
     # Set line properties for f_sigLT
     f_sigLT.SetLineColor(1)
     f_sigLT.SetLineWidth(2)
@@ -585,18 +573,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
     
     g_q2_sigtt_fit = ROOT.TGraph2DErrors()
-    for i in range(g_sigtt_fit.GetN()):
-        g_q2_sigtt_fit.SetPoint(g_q2_sigtt_fit.GetN(), g_sigtt_fit.GetX()[i], q2_vec[i], g_sigtt_fit.GetY()[i])
-        g_q2_sigtt_fit.SetPointError(g_q2_sigtt_fit.GetN()-1, g_sigtt_fit.GetEX()[i], 0.0, g_sigtt_fit.GetEY()[i])
-    
-    g_q2_sigtt_fit.Fit(f_sigTT, "MR")
-        
     for i in range(len(w_vec)):
-        
-        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * g_vec[i]
+        g_q2_sigtt_fit.SetPoint(g_q2_sigtt_fit.GetN(), g_sigtt_fit.GetX()[i], q2_vec[i], g_sigtt_fit.GetY()[i])
+        g_q2_sigtt_fit.SetPointError(g_q2_sigtt_fit.GetN()-1, g_sigtt_fit.GetEX()[i], 0.0, g_sigtt_fit.GetEY()[i])    
+        sigtt_X = (f_sigtt.Eval(g_sigtt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
-
+    g_q2_sigtt_fit.Fit(f_sigTT, "S")
+    
     # Set line properties for f_sigTT
     f_sigTT.SetLineColor(1)
     f_sigTT.SetLineWidth(2)
