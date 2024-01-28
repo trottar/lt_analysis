@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 05:13:25 trottar"
+# Time-stamp: "2024-01-28 05:14:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -361,7 +361,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("&&&&",g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i] * g_vec[i])
         recalc_sigl = (l0+l1*math.log(q2_vec[i])) * math.exp((l2+l3*math.log(q2_vec[i])) * (abs(g_sigl_fit.GetX()[i])))
         #print(recalc_sigl / g_sigl_fit.GetY()[i], g_vec[i], recalc_sigl*g_vec[i] / g_sigl_fit.GetY()[i])
-        print(recalc_sigl, " =!= ", g_sigl_fit.GetY()[i] * g_vec[i]* 1700)
+        print(recalc_sigl, " =!= ", g_sigl_fit.GetY()[i] / (g_vec[i]* 1700))
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
