@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:47:34 trottar"
+# Time-stamp: "2024-01-28 01:55:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -479,6 +479,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
+        glo.Fit(flo, "MR")
+        ghi.Fit(fhi, "MR")
+        
         # Set line properties for flo and fhi
         flo.SetLineColor(1)
         fhi.SetLineColor(2)
@@ -531,14 +534,12 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
         fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
 
-        '''
         # Adjust the maximum and minimum of glo based on ghi values
         if ghi.GetMaximum() > glo.GetMaximum():
             glo.SetMaximum(ghi.GetMaximum() * 1.1)
 
         if ghi.GetMinimum() < glo.GetMinimum():
             glo.SetMinimum(ghi.GetMinimum() * 0.9)
-        '''
 
         # Define variables for cross sections and errors
         sig_l, sig_t, sig_lt, sig_tt = fff2.GetParameter(1), fff2.GetParameter(0), fff2.GetParameter(2), fff2.GetParameter(3)
