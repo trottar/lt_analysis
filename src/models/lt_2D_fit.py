@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:13:34 trottar"
+# Time-stamp: "2024-01-28 01:15:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -243,7 +243,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetLineWidth(2)
         
         # x->phi, y->eps, PI/180 = 0.017453
-        fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]", 0, 360, 0.0, 1.0)
+        #fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]", 0, 360, 0.0, 1.0)
+        # x->phi, y->eps
+        fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x)*[3] + sqrt(2*y*(1+y))*cos(x)*[2]", 0, 360, 0.0, 1.0)
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
@@ -478,18 +480,18 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
         # Set line properties for flo and fhi
-        flo_unsep.SetLineColor(1)
-        fhi_unsep.SetLineColor(2)
-        flo_unsep.SetLineWidth(2)
-        fhi_unsep.SetLineWidth(2)
-        fhi_unsep.SetLineStyle(9)
+        flo.SetLineColor(1)
+        fhi.SetLineColor(2)
+        flo.SetLineWidth(2)
+        fhi.SetLineWidth(2)
+        fhi.SetLineStyle(9)
 
         # Set line color for ghi
         ghi.SetLineColor(2)
 
         # Draw flo and fhi on the same canvas
-        flo_unsep.Draw("same")
-        fhi_unsep.Draw("same")
+        flo.Draw("same")
+        fhi.Draw("same")
 
         # Calculate integrated cross sections
         lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
