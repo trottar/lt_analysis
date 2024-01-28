@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 04:11:20 trottar"
+# Time-stamp: "2024-01-28 04:16:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -360,10 +360,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], q2_vec[i], g_sigl_fit.GetY()[i])
         g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, g_sigl_fit.GetEX()[i], 0.0, g_sigl_fit.GetEY()[i])
         print("&&&&&&&&",g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], q2_vec[i], g_sigl_fit.GetY()[i])
+        print((l0+l1*math.log(q2_vec[i])) * math.exp((l2+l3*math.log(q2_vec[i])) * (abs(g_sigl_fit.GetX()[i]))))
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "S")
+    for i in range(len(w_vec)):
+        print("----------",i, f_sigL[i])
     
     # Set line properties for f_sigL
     f_sigL.SetLineColor(1)
