@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:46:00 trottar"
+# Time-stamp: "2024-01-27 23:51:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -225,9 +225,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
     
     g_max = g_sigt.GetYaxis().GetXmax()
-    gp_max = max(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
+    #gp_max = max(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
     g_min = g_sigt.GetYaxis().GetXmin()
-    gp_min = min(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
+    #gp_min = min(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
+    gp_max = ROOT.TMath.MaxElement(g_sigt_prv.GetN(), g_sigt_prv.GetY())
+    gp_min = ROOT.TMath.MinElement(g_sigt_prv.GetN(), g_sigt_prv.GetY())
 
     print("!!!!!!!!!!g_t",g_min,g_max)
     print("!!!!!!!!!!gp_t",gp_min,gp_max)
