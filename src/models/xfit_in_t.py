@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 03:09:52 trottar"
+# Time-stamp: "2024-01-28 03:25:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -362,8 +362,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(g_sigl_fit.GetN()):
         #g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i])
         #g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, 0.0, g_sigl_fit.GetEX()[i], g_sigl_fit.GetEY()[i])
-        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], q2_vec[i], g_sigl_fit.GetY()[i])
-        g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, g_sigl_fit.GetEX()[i], 0.0, g_sigl_fit.GetEY()[i])        
+        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i], q2_vec[i])
+        g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, g_sigl_fit.GetEX()[i], g_sigl_fit.GetEY()[i], 0.0)
     
     g_q2_sigl_fit.Fit(f_sigL, "S")
     
