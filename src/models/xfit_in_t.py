@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 02:02:39 trottar"
+# Time-stamp: "2024-01-28 02:05:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -260,6 +260,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
         print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
 
+    # Set line properties for f_sigT
+    f_sigT.SetLineColor(1)
+    f_sigT.SetLineWidth(2)
+
+    # Draw f_sigT
+    f_sigT.Draw("same")
+        
     # Check the fit status for 'f_sigT'
     f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
@@ -356,6 +363,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
 
+    # Set line properties for f_sigL
+    f_sigL.SetLineColor(1)
+    f_sigL.SetLineWidth(2)
+
+    # Draw f_sigL
+    f_sigL.Draw("same")
+        
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
@@ -456,6 +470,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
         print("$$$$$$$$$$$",i, g_siglt.GetX()[i], siglt_X)
 
+    # Set line properties for f_sigLT
+    f_sigLT.SetLineColor(1)
+    f_sigLT.SetLineWidth(2)
+
+    # Draw f_sigLT
+    f_sigLT.Draw("same")
+        
     # Check the fit status for 'f_sigLT'
     f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
@@ -558,6 +579,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
 
+    # Set line properties for f_sigTT
+    f_sigTT.SetLineColor(1)
+    f_sigTT.SetLineWidth(2)
+
+    # Draw f_sigTT
+    f_sigTT.Draw("same")
+        
     # Check the fit status for 'f_sigTT'
     f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
