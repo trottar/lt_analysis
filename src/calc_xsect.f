@@ -188,6 +188,13 @@ c      pause
          do ip=1,nphi
 
             phi=(ip-0.5)*2.*3.14159/nphi
+
+            if (phi.le.0.0) then
+               phi=phi+2.*3.14159
+            else if (phi.gt.2.*3.14159) then
+               phi=phi-2.*3.14159
+            end if
+            
             read(51,*) r,dr
             
             call xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
@@ -200,9 +207,9 @@ c angle check
             endif
 
 *     x_real=x_mod*r
-*     dx_real=x_mod*dr
+*     dx_real=x_mod*dr/r
             x_real=x_mod
-            dx_real=x_mod*dr
+            dx_real=x_mod*dr/r
             
             
 *     Check for NaN values
