@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 04:20:27 trottar"
+# Time-stamp: "2024-01-28 04:22:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -328,25 +328,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
         print("!!!!!!!!!!sigl_fit",i, g_sigl.GetX()[i], sigl_X_fit)
         
-    g_sigl.SetTitle("Sig L")
-
-    g_sigl.SetMarkerStyle(5)
-    g_sigl.Draw("AP")
-
-    g_sigl.SetMaximum(hi_bound)
-    g_sigl.SetMinimum(lo_bound)
-
-    g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-    g_sigl.GetXaxis().CenterTitle()
-    g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [#mub/GeV^{2}]")
-    g_sigl.GetYaxis().SetTitleOffset(1.5)
-    g_sigl.GetYaxis().SetTitleSize(0.035)
-    g_sigl.GetYaxis().CenterTitle()
-
-    g_sigl_prv.SetMarkerColor(4)
-    g_sigl_prv.SetMarkerStyle(25)
-    g_sigl_prv.Draw("P")
-
     c2.cd(2)
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
@@ -380,6 +361,25 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     c1.cd(2)
 
+    g_sigl.SetTitle("Sig L")
+
+    g_sigl.SetMarkerStyle(5)
+    g_sigl.Draw("AP")
+
+    g_sigl.SetMaximum(hi_bound)
+    g_sigl.SetMinimum(lo_bound)
+
+    g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+    g_sigl.GetXaxis().CenterTitle()
+    g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [#mub/GeV^{2}]")
+    g_sigl.GetYaxis().SetTitleOffset(1.5)
+    g_sigl.GetYaxis().SetTitleSize(0.035)
+    g_sigl.GetYaxis().CenterTitle()
+
+    g_sigl_prv.SetMarkerColor(4)
+    g_sigl_prv.SetMarkerStyle(25)
+    g_sigl_prv.Draw("P")
+    
     g_sigl_fit_tot.SetMarkerStyle(26)
     g_sigl_fit_tot.SetMarkerColor(2)
     g_sigl_fit_tot.SetLineColor(2)
