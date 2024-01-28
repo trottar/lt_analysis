@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:36:49 trottar"
+# Time-stamp: "2024-01-28 01:44:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,6 @@ outputpdf  = "{}/{}_lt_fit_Q{}W{}.pdf".format(OUTPATH, ParticleType, Q2, W)
 # Suppressing the terminal splash of Print()
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
-# Check fit status
-#gMinuit = ROOT.TMinuit()        
 ###############################################################################################################################################
 
 # Constants
@@ -508,12 +506,25 @@ def single_setting(q2_set, fn_lo, fn_hi):
         leg.AddEntry(flo, "Low #it{#font[120]{e}} fit", "l")
         leg.AddEntry(fhi, "High #it{#font[120]{e}} fit", "l")
         leg.Draw()
-        
+
+        '''
+        gMinuit = ROOT.TMinuit()
         # Create TText for fit status
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
         fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
         fit_status.DrawTextNDC(0.15, 0.80, "Fit Status: " + gMinuit.fCstatu)
+        '''
+        
+        flo_status = flo.GetFitStatus().IsValid()
+        fhi_status = fhi.GetFitStatus().IsValid()
+        # Create TText for fit status
+        fit_status = ROOT.TText()
+        fit_status.SetTextSize(0.04)
+        fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
+        fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status)
+        fit_status.DrawTextNDC(0.15, 0.80, "High Fit Status: " + fhi_status)
+
 
         '''
         # Adjust the maximum and minimum of glo based on ghi values
