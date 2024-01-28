@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:32:27 trottar"
+# Time-stamp: "2024-01-27 23:32:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,7 +182,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     t_tmin_map = TGraph()
     # Use SetPoint to fill the graph
     for i in range(nsep.GetSelectedRows()):
-        if nsep.GetV1()[i] < nsep.GetV2()[i]:
+        if nsep.GetV1()[i] > nsep.GetV2()[i]:
             print("ERROR: t_bin {}: t < tmin!\n\tt={} < tmin={}".format(i+1, nsep.GetV1()[i], nsep.GetV2()[i]))
             sys.exit(2)
         t_tmin_map.SetPoint(i, nsep.GetV1()[i], nsep.GetV2()[i])
