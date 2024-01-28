@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 16:17:51 trottar"
+# Time-stamp: "2024-01-27 22:41:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,17 +142,29 @@ if EPSSET == "low":
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
 new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
-output_file_lst.append(new_param_file) 
+output_file_lst.append(new_param_file)
 
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
 
-for key, val in inpDict.items():
-    if key == "InData_error_efficiency_right":
-        print("!!!!!!!!!!", key, val)
-
-
-root_file = TFile.Open(prev_iter_root, "READ")
+# Grab combined root files for data and dummy.
+# Then save to dictionary
+for hist in histlist:
+    rootFileData = OUTPATH + "/" + "{}".format(ParticleType) + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+    if not os.path.isfile(rootFileData):
+        print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
+        sys.exit(2)
+    InFile_DATA = TFile.Open(rootFileData, "OPEN")
+    hist["InFile_DATA"]  = InFile_DATA
+    
+    rootFileDummy = OUTPATH + "/" + "{}".format(ParticleType) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+    if not os.path.isfile(rootFileDummy):
+        print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
+        sys.exit(2)
+    InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")
+    hist["InFile_DUMMY"]  = InFile_DUMMY
+    
+root_file = TFile.Open(prev_iter_root, "READ")    
 # Grab weight from previous iteration
 for hist in histlist:
     hist.update(hist_in_dir(root_file, "{}/data".format(hist["phi_setting"])))
