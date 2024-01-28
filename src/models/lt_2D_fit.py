@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:46:47 trottar"
+# Time-stamp: "2024-01-28 01:47:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -529,7 +529,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fit_status.SetTextSize(0.04)
         fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
         fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
-        fit_status.DrawTextNDC(0.15, 0.80, "High Fit Status: " + fhi_status_message)
+        fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
 
         '''
         # Adjust the maximum and minimum of glo based on ghi values
