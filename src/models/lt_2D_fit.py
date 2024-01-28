@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 07:17:07 trottar"
+# Time-stamp: "2024-01-28 01:07:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -512,13 +512,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fit_status.SetTextSize(0.04)
         fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
         fit_status.DrawTextNDC(0.15, 0.80, "Fit Status: " + gMinuit.fCstatu)
-
-        # Adjust the maximum and minimum of glo based on ghi values
-        if ghi.GetMaximum() > glo.GetMaximum():
-            glo.SetMaximum(ghi.GetMaximum() * 1.1)
-
-        if ghi.GetMinimum() < glo.GetMinimum():
-            glo.SetMinimum(ghi.GetMinimum() * 0.9)
 
         # Define variables for cross sections and errors
         sig_l, sig_t, sig_lt, sig_tt = fff2.GetParameter(1), fff2.GetParameter(0), fff2.GetParameter(2), fff2.GetParameter(3)
