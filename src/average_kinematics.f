@@ -314,7 +314,7 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
       do it=1,ntbins
          tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
-     &         t_min,th_mod,eps_mod,)
+     &         t_min,th_mod,eps_mod)
          thetacm_only(it)=th_mod*180./3.14159
       end do
 
