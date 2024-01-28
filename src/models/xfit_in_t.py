@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 22:35:49 trottar"
+# Time-stamp: "2024-01-27 22:51:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,6 +183,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     # Use SetPoint to fill the graph
     for i in range(nsep.GetSelectedRows()):
         t_tmin_map.SetPoint(i, nsep.GetV1()[i], nsep.GetV2()[i])
+        print("!!!!!!!!!!", i, nsep.GetV1()[i], nsep.GetV2()[i])
 
     t_list = t_tmin_map.GetX()
     t_min_list = t_tmin_map.GetY()
@@ -654,4 +655,4 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
         for i in range(len(par_vec)):
             #sys.stdout.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
             f.write(format_specifier.format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]) + "\n")
-            print("  {}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
+            print("  {} {} {} {}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
