@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:28:53 trottar"
+# Time-stamp: "2024-01-27 23:29:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -630,7 +630,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set):
     c2.Print(outputpdf+')')
 
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
-        if old != new:
+        if old == new:
             print("par{} changed from {} to {}".format(i, old, new))
     
     para_file_out = "{}/src/{}/parameters/par.{}_{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""))
