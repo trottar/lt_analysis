@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:38:26 trottar"
+# Time-stamp: "2024-01-27 23:46:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,6 +229,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_min = g_sigt.GetYaxis().GetXmin()
     gp_min = min(range(g_sigt_prv.GetN()), key=lambda i: g_sigt_prv.GetY()[i])
 
+    print("!!!!!!!!!!g_t",g_min,g_max)
+    print("!!!!!!!!!!gp_t",gp_min,gp_max)
+
     difff = (g_max - g_min) / 5
 
     if g_max < gp_max:
@@ -338,6 +341,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     gp_max = max(range(g_sigl_prv.GetN()), key=lambda i: g_sigl_prv.GetY()[i])
     g_min = g_sigl.GetYaxis().GetXmin()
     gp_min = min(range(g_sigl_prv.GetN()), key=lambda i: g_sigl_prv.GetY()[i])
+
+    print("!!!!!!!!!!g_l",g_min,g_max)
+    print("!!!!!!!!!!gp_l",gp_min,gp_max)
     
     difff = (g_max - g_min) / 5
 
@@ -447,6 +453,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     gp_max = max(range(g_siglt_prv.GetN()), key=lambda i: g_siglt_prv.GetY()[i])
     g_min = g_siglt.GetYaxis().GetXmin()
     gp_min = min(range(g_siglt_prv.GetN()), key=lambda i: g_siglt_prv.GetY()[i])
+
+    print("!!!!!!!!!!g_lt",g_min,g_max)
+    print("!!!!!!!!!!gp_lt",gp_min,gp_max)
     
     difff = (g_max - g_min) / 5
 
@@ -560,6 +569,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_min = g_sigtt.GetYaxis().GetXmin()
     gp_min = min(range(g_sigtt_prv.GetN()), key=lambda i: g_sigtt_prv.GetY()[i])
 
+    print("!!!!!!!!!!g_tt",g_min,g_max)
+    print("!!!!!!!!!!gp_tt",gp_min,gp_max)
+    
     difff = (g_max - g_min) / 5
 
     if g_max < gp_max:
