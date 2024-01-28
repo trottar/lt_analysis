@@ -199,8 +199,11 @@ c angle check
                stop
             endif
 
-            x_real=x_mod*r
+*     x_real=x_mod*r
+*     dx_real=x_mod*dr
+            x_real=x_mod
             dx_real=x_mod*dr
+            
             
 *     Check for NaN values
             if (isnan(x_real)) x_real = -1000.0
