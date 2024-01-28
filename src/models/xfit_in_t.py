@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 23:57:13 trottar"
+# Time-stamp: "2024-01-28 00:01:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,8 +229,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt.SetMarkerStyle(5)
     g_sigt.Draw("AP")
 
-    g_sigt.SetMaximum(hi_bound)
-    g_sigt.SetMinimum(lo_bound)
+    #g_sigt.SetMaximum(hi_bound)
+    #g_sigt.SetMinimum(lo_bound)
     
     g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigt.GetXaxis().CenterTitle()
@@ -326,8 +326,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl.SetMarkerStyle(5)
     g_sigl.Draw("AP")
 
-    g_sigl.SetMaximum(hi_bound)
-    g_sigl.SetMinimum(lo_bound)
+    #g_sigl.SetMaximum(hi_bound)
+    #g_sigl.SetMinimum(lo_bound)
 
     g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigl.GetXaxis().CenterTitle()
@@ -429,8 +429,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt.GetYaxis().SetTitleSize(0.035)
     g_siglt.GetYaxis().CenterTitle()
 
-    g_siglt.SetMaximum(hi_bound)
-    g_siglt.SetMinimum(lo_bound)
+    #g_siglt.SetMaximum(hi_bound)
+    #g_siglt.SetMinimum(lo_bound)
     
     g_siglt_prv.SetMarkerColor(4)
     g_siglt_prv.SetMarkerStyle(21)
@@ -528,8 +528,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt.GetYaxis().SetTitleSize(0.035)
     g_sigtt.GetYaxis().CenterTitle()
 
-    g_sigtt.SetMaximum(hi_bound)
-    g_sigtt.SetMinimum(lo_bound)
+    #g_sigtt.SetMaximum(hi_bound)
+    #g_sigtt.SetMinimum(lo_bound)
     
     g_sigtt_prv.SetMarkerColor(4)
     g_sigtt_prv.SetMarkerStyle(21)
