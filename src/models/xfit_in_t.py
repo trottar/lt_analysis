@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 00:13:11 trottar"
+# Time-stamp: "2024-01-28 00:15:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
 def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range):
 
     # xsects range
-    lo_bound = -1.0
-    hi_bound =  5.0
+    lo_bound = -0.1
+    hi_bound =  0.1
 
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
 
@@ -224,10 +224,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
         
-    # Set the y-axis to symlog scale
-    ROOT.gPad.SetLogy(0)
-    ROOT.gPad.SetLogy(1)
-
     g_sigt.SetTitle("Sig T")
 
     g_sigt.SetMarkerStyle(5)
