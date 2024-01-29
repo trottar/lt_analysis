@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 20:31:43 trottar"
+# Time-stamp: "2024-01-29 00:45:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -316,7 +316,7 @@ def hist_in_dir(root_file, directory_name):
     
     if not root_file or root_file.IsZombie():
         print("Error: Unable to open file {}.".format(root_file))
-        return None
+        return {}
 
     # Split the directory names
     directories = directory_name.split('/')
@@ -325,17 +325,17 @@ def hist_in_dir(root_file, directory_name):
     current_dir = root_file
     
     for directory in directories:
+        print("!!!!!!!!!!",directory)
         # Check if the directory exists
         dir_exists = bool(current_dir.GetDirectory(directory))
         if not dir_exists:
             print("Error: Unable to find directory {}.".format(directory))
-            root_file.Close()
-            return None
+            return {}
         current_dir.cd(directory)
         current_dir = ROOT.gDirectory
         histograms_in_dir = current_dir.GetListOfKeys()
         for hist_key in histograms_in_dir:
-
+            print("$$$$$$$$$$",hist_key)
             # Get the TObject associated with the key
             obj = hist_key.ReadObj()
 
@@ -344,7 +344,6 @@ def hist_in_dir(root_file, directory_name):
 
             if not histogram:
                 print("Error: Unable to find histogram {}.".format(hist_key.GetName()))
-                root_file.Close()
                 return {}
 
             # Clone the histogram to avoid ownership issues
