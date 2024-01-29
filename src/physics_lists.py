@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 14:15:17 trottar"
+# Time-stamp: "2024-01-29 14:22:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -402,6 +402,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if float(runNumRight[0]) != 0:    
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
             inLine = False
             check_line = "{:d} {:.1f} {:.2f} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
             check_kin = ' '.join(check_line.split()[:4])
@@ -418,6 +419,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if float(runNumLeft[0]) != 0:    
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
             inLine = False
             check_line = "{:d} {:.1f} {:.2f} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
             check_kin = ' '.join(check_line.split()[:4])
@@ -440,6 +442,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if float(runNumCenter[0]) != 0:    
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
+            lines = f.readlines()
             inLine = False
             check_line = "{:d} {:.1f} {:.2f} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
             check_kin = ' '.join(check_line.split()[:4])
