@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 15:54:15 trottar"
+# Time-stamp: "2024-01-29 16:03:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,10 +187,10 @@ for hist in histlist:
     phisetlist.append(hist["phi_setting"])
 
 for phiset in phisetlist:
-    output_file_lst.append(OUTPATH+"/{}_{}_Diamond_{}.pdf".format(phiset, ParticleType, 'Q'+Q2+'W'+W))
+    output_file_lst.append(OUTPATH+"/{}_{}_diamond_{}.pdf".format(phiset, ParticleType, 'Q'+Q2+'W'+W))
         
 for hist in histlist:
-    output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
 
 '''
 EXAMPLE: How to get histograms from previous iteration

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-24 16:11:00 trottar"
+# Time-stamp: "2024-01-29 16:03:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1292,6 +1292,6 @@ def rand_sub(phi_setting, inpDict):
 
     c_pid.Draw()
 
-    c_pid.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')
+    c_pid.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')
 
     return histDict
