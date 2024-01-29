@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 21:57:22 trottar"
+# Time-stamp: "2024-01-28 22:45:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -386,7 +386,7 @@ if os.path.exists(foutjson):
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if not is_root_obj(val):
                 tmp_dict[key] = val
-                print(tmp_dict[key], val)
+                print(key, val)
         tmp_lst.append(tmp_dict)
     combineDict.update({ "histlist" : tmp_lst})
 
