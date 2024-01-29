@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 01:38:50 trottar"
+# Time-stamp: "2024-01-29 01:40:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -171,7 +171,7 @@ for hist in histlist:
     hist.update(hist_in_dir(prev_root_file, "{}/data".format(hist["phi_setting"])))
     hist.update(hist_in_dir(prev_root_file, "{}/simc".format(hist["phi_setting"])))
     hist.update(hist_in_dir(prev_root_file, "{}/dummy".format(hist["phi_setting"])))
-sys.exit(2)
+    
 # t/phi bins are the same for all settings
 # so arbitrarily grabbing from first setting of list
 t_bins = np.array(histlist[0]["t_bins"])
