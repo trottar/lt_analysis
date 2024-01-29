@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 16:34:35 trottar"
+# Time-stamp: "2024-01-29 17:29:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,6 +37,10 @@ import shutil
 
 sys.path.append("utility")
 from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges
+
+from auto_mail import mail
+
+mail()
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
