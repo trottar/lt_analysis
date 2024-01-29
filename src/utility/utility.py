@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 15:28:19 trottar"
+# Time-stamp: "2024-01-29 17:03:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,6 +80,9 @@ def show_pdf_with_evince(file_path):
         print("Evince not found. Please make sure it is installed.")
     except Exception as e:
         print("An error occurred: {}".format(e))
+
+    scratch_path  = file_path.replace(OUTPATH+"/", "/scratch/"+USER+"/")
+    shutil.copy(file_path,scratch_path)
         
 ################################################################################################################################################
 
