@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 22:45:32 trottar"
+# Time-stamp: "2024-01-28 23:58:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,12 +165,12 @@ for hist in histlist:
     InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")
     hist["InFile_DUMMY"]  = InFile_DUMMY
     
-root_file = TFile.Open(prev_iter_root, "READ")    
+prev_root_file = TFile.Open(prev_iter_root, "READ")
 # Grab weight from previous iteration
 for hist in histlist:
-    hist.update(hist_in_dir(root_file, "{}/data".format(hist["phi_setting"])))
-    hist.update(hist_in_dir(root_file, "{}/simc".format(hist["phi_setting"])))
-    hist.update(hist_in_dir(root_file, "{}/dummy".format(hist["phi_setting"])))
+    hist.update(hist_in_dir(prev_root_file, "{}/data".format(hist["phi_setting"])))
+    hist.update(hist_in_dir(prev_root_file, "{}/simc".format(hist["phi_setting"])))
+    hist.update(hist_in_dir(prev_root_file, "{}/dummy".format(hist["phi_setting"])))
     
 # t/phi bins are the same for all settings
 # so arbitrarily grabbing from first setting of list
@@ -194,9 +194,9 @@ for hist in histlist:
 EXAMPLE: How to get histograms from previous iteration
 
 # Open the ROOT file, must pass open root file so object exists here and in function
-root_file = TFile.Open(prev_iter_root, "READ")
+prev_root_file = TFile.Open(prev_iter_root, "READ")
 # Grab weight from previous iteration
-iter_weight = get_histogram(root_file, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
+iter_weight = get_histogram(prev_root_file, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
 '''
     
 ##############################
@@ -386,7 +386,7 @@ if os.path.exists(foutjson):
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if not is_root_obj(val):
                 tmp_dict[key] = val
-                print(key, val)
+                print(hist["phi_setting"],key, val, type(val))
         tmp_lst.append(tmp_dict)
     combineDict.update({ "histlist" : tmp_lst})
 
