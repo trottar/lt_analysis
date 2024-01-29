@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 14:58:05 trottar"
+# Time-stamp: "2024-01-29 15:22:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -409,7 +409,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
-                    replace_line(f_list_settings, i+1, check_line)
+                    if check_line in line:
+                        replace_line(f_list_settings, i+1, check_line)
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
 
@@ -422,9 +423,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             check_kin = ' '.join(check_line.split()[:4])
             for i, line in enumerate(lines):
                 if check_kin in line:
-                    print("\n\n!!!!!!!!!",check_line)
                     inLine = True
-                    replace_line(f_list_settings, i+1, check_line)
+                    if check_line in line:
+                        print("\n\n!!!!!!!!!",check_line)
+                        replace_line(f_list_settings, i+1, check_line)
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
 
@@ -438,7 +440,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
-                    replace_line(f_list_settings, i+1, check_line)
+                    if check_line in line:
+                        replace_line(f_list_settings, i+1, check_line)
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
                 
