@@ -62,7 +62,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     if (target == '0'):
         Analysis_Distributions = OUTPATH+"/{}_{}_Diamond_Cut.pdf".format(ParticleType, FilenameOverride)
     elif (target != '0'):
-        Analysis_Distributions = OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, FilenameOverride, target)
+        Analysis_Distributions = OUTPATH+"/{}_{}_Diamond_{}.pdf".format(target, ParticleType, FilenameOverride)
 
     #sys.exit(1)
 
