@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 16:28:57 trottar"
+# Time-stamp: "2024-01-29 17:59:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder
+from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -338,6 +338,7 @@ sys.path.append("plotting")
 from binned import plot_binned
 
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
+notify_email()
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
