@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:33:09 trottar"
+# Time-stamp: "2024-01-29 17:39:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,7 +91,9 @@ def mail():
     
     # initialize connection to our email server,
     # we will use gmail here
-    smtp = smtplib.SMTP('smtp.gmail.com', 587)
+    #smtp = smtplib.SMTP('smtp.gmail.com', 587)
+    smtp = smtplib.SMTP('smtp.gmail.com', 465)
+    
     smtp.ehlo()
     smtp.starttls()
       
