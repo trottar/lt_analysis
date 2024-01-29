@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:31:20 trottar"
+# Time-stamp: "2024-01-29 17:33:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,6 +18,8 @@ from email.mime.multipart import MIMEMultipart
 import smtplib
 import os, sys
 
+# These are setup from enviroment variables
+# This 
 my_email_addr = os.environ.get('PY_EMAIL')
 my_email_pass = os.environ.get('PY_EMAIL_PASS')
 

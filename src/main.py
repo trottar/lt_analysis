@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:29:22 trottar"
+# Time-stamp: "2024-01-29 17:34:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,7 +40,9 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist
 
 from auto_mail import mail
 
+print("Email")
 mail()
+print("End Email")
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
