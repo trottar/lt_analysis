@@ -3,14 +3,13 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:30:48 trottar"
+# Time-stamp: "2024-01-29 17:31:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
-import schedule
 import time
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
@@ -80,7 +79,6 @@ def message(subject="Python Notification",
                 )
                 file['Content-Disposition'] = 'attachment; \
                 filename="{}"'.format(os.path.basename(one_attachment))
-
               
             # At last, Add the attachment to our message object
             msg.attach(file)
