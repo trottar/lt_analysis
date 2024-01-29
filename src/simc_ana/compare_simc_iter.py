@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 16:15:06 trottar"
+# Time-stamp: "2024-01-29 16:28:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -306,5 +306,77 @@ def compare_simc(rootFileSimc, hist, inpDict):
     #################
     #################
     #################    
+
+    ###
+    # Q2 plots    
+    CQ2 = TCanvas()
+
+    histDict["H_Q2_SIMC"].SetLineColor(1)
+    histDict["H_Q2_SIMC"].Draw("same, E1")
+
+    CQ2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType))+'(')
+    
+    ###
+    # W plots    
+    CW = TCanvas()
+
+    histDict["H_W_SIMC"].SetLineColor(1)
+    histDict["H_W_SIMC"].Draw("same, E1")
+
+    CW.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
+
+    ###
+    # MM plots    
+    CMM = TCanvas()
+
+    histDict["H_MM_SIMC"].SetLineColor(1)
+    histDict["H_MM_SIMC"].Draw("same, E1")
+
+    CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
+
+    ###
+    # t-Phi plots        
+    Cpht_data = TCanvas()
+
+    # Create a list to store all polar plots
+    polar_plots = []
+
+    polar_plot = TGraphPolar(histDict["polar_phiq_vs_t_SIMC"].GetN(), histDict["polar_phiq_vs_t_SIMC"].GetX(), histDict["polar_phiq_vs_t_SIMC"].GetY())
+    polar_plot.SetMarkerColor(1)
+    polar_plot.SetMarkerSize(0.5)
+    polar_plot.SetMarkerStyle(20)
+    polar_plots.append(polar_plot)  # Store the plot in the list
+    polar_plot.Draw("AP same")
+
+    # Set titles and axes for the last plot
+    polar_plots[-1].GetXaxis().SetName("#Phi")
+    polar_plots[-1].GetYaxis().SetName("-t")
+    polar_plots[-1].SetTitle("")
+    
+    Cpht_data.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
+
+    ###
+    # t plots            
+    Ct = TCanvas()
+    l_t = TLegend(0.115,0.45,0.33,0.95)
+    l_t.SetTextSize(0.0135)
+
+    histDict["H_t_SIMC"].SetLineColor(1)
+    l_t.AddEntry(histDict["H_t_SIMC"],phi_setting)
+    histDict["H_t_SIMC"].Draw("same, E1")
+
+    Ct.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
+
+    ###
+    # phi plots            
+    Cphi = TCanvas()
+    l_phi = TLegend(0.115,0.45,0.33,0.95)
+    l_phi.SetTextSize(0.0135)
+    
+    histDict["H_ph_q_SIMC"].SetLineColor(1)
+    l_phi.AddEntry(histDict["H_ph_q_SIMC"],phi_setting)
+    histDict["H_ph_q_SIMC"].Draw("same, E1")    
+
+    Cphi.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType))+')')
     
     return histDict
