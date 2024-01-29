@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 00:45:38 trottar"
+# Time-stamp: "2024-01-29 01:35:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -319,37 +319,37 @@ def hist_in_dir(root_file, directory_name):
         return {}
 
     # Split the directory names
-    directories = directory_name.split('/')
+    #directories = directory_name.split('/')
 
     # Initialize current_dir to the root of the file
     current_dir = root_file
     
-    for directory in directories:
-        print("!!!!!!!!!!",directory)
-        # Check if the directory exists
-        dir_exists = bool(current_dir.GetDirectory(directory))
-        if not dir_exists:
-            print("Error: Unable to find directory {}.".format(directory))
+    #for directory in directories:
+    #print("!!!!!!!!!!",directory)
+    # Check if the directory exists
+    dir_exists = bool(current_dir.GetDirectory(directory))
+    if not dir_exists:
+        print("Error: Unable to find directory {}.".format(directory))
+        return {}
+    current_dir.cd(directory)
+    current_dir = ROOT.gDirectory
+    histograms_in_dir = current_dir.GetListOfKeys()
+    for hist_key in histograms_in_dir:
+        print("$$$$$$$$$$",hist_key)
+        # Get the TObject associated with the key
+        obj = hist_key.ReadObj()
+
+        # Get the histogram
+        histogram = current_dir.Get(hist_key.GetName())
+
+        if not histogram:
+            print("Error: Unable to find histogram {}.".format(hist_key.GetName()))
             return {}
-        current_dir.cd(directory)
-        current_dir = ROOT.gDirectory
-        histograms_in_dir = current_dir.GetListOfKeys()
-        for hist_key in histograms_in_dir:
-            print("$$$$$$$$$$",hist_key)
-            # Get the TObject associated with the key
-            obj = hist_key.ReadObj()
 
-            # Get the histogram
-            histogram = current_dir.Get(hist_key.GetName())
+        # Clone the histogram to avoid ownership issues
+        cloned_histogram = histogram.Clone()
 
-            if not histogram:
-                print("Error: Unable to find histogram {}.".format(hist_key.GetName()))
-                return {}
-
-            # Clone the histogram to avoid ownership issues
-            cloned_histogram = histogram.Clone()
-
-            histDict["{}".format(histogram.GetName())] = cloned_histogram
+        histDict["{}".format(histogram.GetName())] = cloned_histogram
 
     return histDict
 

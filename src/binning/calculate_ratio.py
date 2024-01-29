@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 17:34:12 trottar"
+# Time-stamp: "2024-01-29 01:34:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,8 +64,8 @@ def calculate_ratio(kin_type, phiset, yieldDict):
         # Fill histogram
         yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]
         yield_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}".format(kin_type)]
-        print("\nYield_data: {}".format(yield_data))
-        print("Yield_simc: {}".format(yield_simc))
+        #print("\nYield_data: {}".format(yield_data))
+        #print("Yield_simc: {}".format(yield_simc))
         try:
             ratio = yield_data/yield_simc
         except ZeroDivisionError:
