@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 16:03:29 trottar"
+# Time-stamp: "2024-01-29 16:05:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -513,8 +513,8 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
-if not os.path.exists(foutroot):
-#if os.path.exists(foutroot):
+#if not os.path.exists(foutroot):
+if os.path.exists(foutroot):
     for hist in histlist:
         print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
         # Loop through all keggys,values of dictionary
@@ -560,8 +560,8 @@ if not os.path.exists(foutroot):
 output_file_lst.append(foutroot)
 
 # Check that root file doesnt already exist
-if not os.path.exists(foutjson):
-#if os.path.exists(foutjson):
+#if not os.path.exists(foutjson):
+if os.path.exists(foutjson):
     # Create combined dictionary of all non-histogram information        
     combineDict = {}
     combineDict.update({"inpDict" : inpDict})
