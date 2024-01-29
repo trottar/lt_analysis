@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 01:35:33 trottar"
+# Time-stamp: "2024-01-29 01:37:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -324,15 +324,15 @@ def hist_in_dir(root_file, directory_name):
     # Initialize current_dir to the root of the file
     current_dir = root_file
     
-    #for directory in directories:
-    #print("!!!!!!!!!!",directory)
-    # Check if the directory exists
-    dir_exists = bool(current_dir.GetDirectory(directory))
+    #for directory_name in directories:
+    print("!!!!!!!!!!",directory_name)
+    # Check if the directory_name exists
+    dir_exists = bool(current_dir.GetDirectory_Name(directory_name))
     if not dir_exists:
-        print("Error: Unable to find directory {}.".format(directory))
+        print("Error: Unable to find directory_name {}.".format(directory_name))
         return {}
-    current_dir.cd(directory)
-    current_dir = ROOT.gDirectory
+    current_dir.cd(directory_name)
+    current_dir = ROOT.gDirectory_Name
     histograms_in_dir = current_dir.GetListOfKeys()
     for hist_key in histograms_in_dir:
         print("$$$$$$$$$$",hist_key)
