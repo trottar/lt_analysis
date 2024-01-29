@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:55:05 trottar"
+# Time-stamp: "2024-01-29 17:57:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -454,7 +454,8 @@ def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type
 def notify_email():
 
     # Email notification
-    email_notify = "swif2 notify LTSep_$USER -when done -email trotta@cua.edu"
+    #email_notify = "swif2 notify LTSep_$USER -when done -email trotta@cua.edu"
+    email_notify = "swif2 notify LTSep_$USER -when done"
     
     # Run the bash command
     subprocess.call(email_notify, shell=True)
