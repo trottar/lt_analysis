@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:03:14 trottar"
+# Time-stamp: "2024-01-29 17:05:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,6 +15,27 @@ from array import array
 import numpy as np
 from datetime import datetime
 import sys, os, subprocess
+
+################################################################################################################################################
+'''
+ltsep package import and pathing definitions
+'''
+
+# Import package for cuts
+from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
+
+lt=Root(os.path.realpath(__file__),"Plot_Prod")
+
+# Add this to all files for more dynamic pathing
+USER=lt.USER # Grab user info for file finding
+HOST=lt.HOST
+REPLAYPATH=lt.REPLAYPATH
+UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH
+ANATYPE=lt.ANATYPE
+OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
