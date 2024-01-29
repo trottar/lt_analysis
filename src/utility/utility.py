@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 01:39:29 trottar"
+# Time-stamp: "2024-01-29 04:26:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -318,14 +318,9 @@ def hist_in_dir(root_file, directory_name):
         print("Error: Unable to open file {}.".format(root_file))
         return {}
 
-    # Split the directory names
-    #directories = directory_name.split('/')
-
     # Initialize current_dir to the root of the file
     current_dir = root_file
     
-    #for directory in directories:
-    print("!!!!!!!!!!",directory_name)
     # Check if the directory exists
     dir_exists = bool(current_dir.GetDirectory(directory_name))
     if not dir_exists:
