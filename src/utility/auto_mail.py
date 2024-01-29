@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:29:01 trottar"
+# Time-stamp: "2024-01-29 17:30:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,8 +78,9 @@ def message(subject="Python Notification",
                     f.read(),
                     name=os.path.basename(one_attachment)
                 )
-            file['Content-Disposition'] = f'attachment;\
-            filename="{os.path.basename(one_attachment)}"'
+                file['Content-Disposition'] = 'attachment; \
+                filename="{}"'.format(os.path.basename(one_attachment))
+
               
             # At last, Add the attachment to our message object
             msg.attach(file)
