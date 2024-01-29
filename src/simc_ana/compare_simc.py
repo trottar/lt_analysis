@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-24 15:16:40 trottar"
+# Time-stamp: "2024-01-29 16:12:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,7 +317,7 @@ def compare_simc(hist, inpDict):
     histDict["H_Q2_SIMC"].SetLineColor(1)
     histDict["H_Q2_SIMC"].Draw("same, E1")
 
-    CQ2.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+'(')
+    CQ2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+'(')
     
     ###
     # W plots    
@@ -326,7 +326,7 @@ def compare_simc(hist, inpDict):
     histDict["H_W_SIMC"].SetLineColor(1)
     histDict["H_W_SIMC"].Draw("same, E1")
 
-    CW.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
+    CW.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # MM plots    
@@ -335,7 +335,7 @@ def compare_simc(hist, inpDict):
     histDict["H_MM_SIMC"].SetLineColor(1)
     histDict["H_MM_SIMC"].Draw("same, E1")
 
-    CMM.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
+    CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # t-Phi plots        
@@ -356,7 +356,7 @@ def compare_simc(hist, inpDict):
     polar_plots[-1].GetYaxis().SetName("-t")
     polar_plots[-1].SetTitle("")
     
-    Cpht_data.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
+    Cpht_data.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # t plots            
@@ -368,7 +368,7 @@ def compare_simc(hist, inpDict):
     l_t.AddEntry(histDict["H_t_SIMC"],phi_setting)
     histDict["H_t_SIMC"].Draw("same, E1")
 
-    Ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
+    Ct.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # phi plots            
@@ -380,6 +380,6 @@ def compare_simc(hist, inpDict):
     l_phi.AddEntry(histDict["H_ph_q_SIMC"],phi_setting)
     histDict["H_ph_q_SIMC"].Draw("same, E1")    
 
-    Cphi.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+')')
+    Cphi.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_rand_sub_".format(phi_setting,ParticleType))+')')
     
     return histDict
