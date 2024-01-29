@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 22:47:16 trottar"
+# Time-stamp: "2024-01-29 13:02:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -257,7 +257,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
         print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
-    g_q2_sigt_fit.Fit(f_sigT, "S")
+    g_q2_sigt_fit.Fit(f_sigT, "SQ")
 
     # Draw f_sigT
     #f_sigT.Draw("same")
@@ -357,7 +357,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
-    g_q2_sigl_fit.Fit(f_sigL, "S")
+    g_q2_sigl_fit.Fit(f_sigL, "SQ")
     
     # Set line properties for f_sigL
     f_sigL.SetLineColor(1)
@@ -465,7 +465,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
         print("$$$$$$$$$$$",i, g_siglt.GetX()[i], siglt_X)
-    g_q2_siglt_fit.Fit(f_sigLT, "S")
+    g_q2_siglt_fit.Fit(f_sigLT, "SQ")
     
     # Set line properties for f_sigLT
     f_sigLT.SetLineColor(1)
@@ -575,7 +575,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
-    g_q2_sigtt_fit.Fit(f_sigTT, "S")
+    g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
     
     # Set line properties for f_sigTT
     f_sigTT.SetLineColor(1)

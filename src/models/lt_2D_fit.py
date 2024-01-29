@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 01:57:35 trottar"
+# Time-stamp: "2024-01-29 13:02:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -271,7 +271,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.FixParameter(2, 0.0)
         fff2.FixParameter(3, 0.0)
 
-        g_plot_err.Fit(fff2, "MR")
+        g_plot_err.Fit(fff2, "MRQ")
 
         sigL_change.SetTitle("sigL_change {}".format(i))
         sigL_change.GetXaxis().SetTitle("Index")
@@ -309,7 +309,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.SetParameter(2, 0.0)
         fff2.SetParLimits(2, -0.1, 0.1)
 
-        g_plot_err.Fit(fff2, "MR")
+        g_plot_err.Fit(fff2, "MRQ")
 
         #########
         # Fit 3 #
@@ -331,7 +331,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.FixParameter(2, fff2.GetParameter(2))
         fff2.FixParameter(3, fff2.GetParameter(3))
 
-        g_plot_err.Fit(fff2, "MR")
+        g_plot_err.Fit(fff2, "MRQ")
 
         # sigL_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -361,7 +361,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.SetParameter(3, 0.0)
         fff2.SetParLimits(3, -0.1, 0.1)
 
-        g_plot_err.Fit(fff2, "MR")
+        g_plot_err.Fit(fff2, "MRQ")
 
         #########
         # Fit 5 #
@@ -383,7 +383,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.FixParameter(2, fff2.GetParameter(2))
         fff2.FixParameter(3, fff2.GetParameter(3))
 
-        g_plot_err.Fit(fff2, "MR")
+        g_plot_err.Fit(fff2, "MRQ")
 
         #############
         # Last Step #
@@ -479,8 +479,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
-        glo.Fit(flo, "MR")
-        ghi.Fit(fhi, "MR")
+        glo.Fit(flo, "MRQ")
+        ghi.Fit(fhi, "MRQ")
         
         # Set line properties for flo and fhi
         flo.SetLineColor(1)

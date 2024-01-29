@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 04:26:03 trottar"
+# Time-stamp: "2024-01-29 13:05:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -326,11 +326,12 @@ def hist_in_dir(root_file, directory_name):
     if not dir_exists:
         print("Error: Unable to find directory {}.".format(directory_name))
         return {}
+    
     current_dir.cd(directory_name)
     current_dir = ROOT.gDirectory
     histograms_in_dir = current_dir.GetListOfKeys()
+    
     for hist_key in histograms_in_dir:
-        print("$$$$$$$$$$",hist_key)
         # Get the TObject associated with the key
         obj = hist_key.ReadObj()
 
