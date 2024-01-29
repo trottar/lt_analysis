@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:54:00 trottar"
+# Time-stamp: "2024-01-29 17:55:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -457,4 +457,6 @@ def notify_email():
     email_notify = "swif2 notify LTSep_$USER -when done -email trotta@cua.edu"
     
     # Run the bash command
-    subprocess.run(email_notify, shell=True)
+    subprocess.call(email_notify, shell=True)
+
+################################################################################################################################################        
