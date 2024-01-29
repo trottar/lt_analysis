@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 16:42:55 trottar"
+# Time-stamp: "2024-01-28 19:43:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -258,18 +258,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
         print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
     g_q2_sigt_fit.Fit(f_sigT, "S")
-
-    for i in range(len(w_vec)):
-        
-        # Create a TF1 function with the fixed x value
-        func1D = ROOT.TF1("func1D", "{}:{}".format(f_sigT.GetName(), q2_vec[i]), tmin_range, tmax_range)
-
-        # Plot the TF1 function
-        func1D.Draw()
-
-        # Set line properties for f_sigT
-        func1D.SetLineColor(i+1)
-        func1D.SetLineWidth(2)        
 
     # Draw f_sigT
     #f_sigT.Draw("same")
