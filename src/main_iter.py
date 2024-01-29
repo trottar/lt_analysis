@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 15:30:44 trottar"
+# Time-stamp: "2024-01-29 15:49:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,7 +187,7 @@ for hist in histlist:
     phisetlist.append(hist["phi_setting"])
 
 for phiset in phisetlist:
-    output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
+    output_file_lst.append(OUTPATH+"/{}_Diamond_{}_{}.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
         
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))

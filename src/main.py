@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 15:36:58 trottar"
+# Time-stamp: "2024-01-29 15:48:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -276,9 +276,9 @@ for p in [1,2,3,4]:
 if DEBUG:
     # Show plot pdf for each setting
     for phiset in phisetlist:
-        show_pdf_with_evince(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
+        show_pdf_with_evince(OUTPATH+"/{}_Diamond_{}_{}.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
 for phiset in phisetlist:
-    output_file_lst.append(OUTPATH+"/{}_{}_{}_Diamond_Cut.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
+    output_file_lst.append(OUTPATH+"/{}_Diamond_{}_{}.pdf".format(ParticleType, 'Q'+Q2+'W'+W, phiset))
         
 ##############################
 # Step 3 of the lt_analysis: # DONE
