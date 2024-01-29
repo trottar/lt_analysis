@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 14:01:41 trottar"
+# Time-stamp: "2024-01-29 14:05:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,7 +406,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             check_line = "{:d} {:.1f} {:.2f} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
             check_kin = ' '.join(check_line.split()[:4])
             for i, line in enumerate(lines):
-                if check_kin in line[:4]:
+                if check_kin in line:
                     inLine = True
                     if check_line in line:
                         replace_line(f_list_settings, i, check_line)                    
@@ -422,7 +422,9 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             check_line = "{:d} {:.1f} {:.2f} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
             check_kin = ' '.join(check_line.split()[:4])
             for i, line in enumerate(lines):
-                if check_kin in line:
+                print("!!!!!",line)
+                print("!!!!!",line[:4])
+                if check_kin in line[:4]:
                     print("\n\n!!!!!",check_kin)
                     inLine = True
                     if check_line in line:
