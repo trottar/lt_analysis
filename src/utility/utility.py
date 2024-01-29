@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 13:05:01 trottar"
+# Time-stamp: "2024-01-29 14:59:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,9 +99,10 @@ def replace_line(file_path, line_number, new_line):
 
     # Check if the line number is valid
     if 1 <= line_number <= len(lines):
+        print(lines[line_number - 1], "\n",new_line)
         # Replace the specified line
         lines[line_number - 1] = new_line
-
+        sys.exit(2)
         # Write the modified lines back to the file
         with open(file_path, 'w') as file:
             file.writelines(lines)
