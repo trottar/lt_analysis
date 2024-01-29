@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 15:40:26 trottar"
+# Time-stamp: "2024-01-28 19:42:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,8 +47,8 @@ if len(sys.argv)-1!=11:
 
 ##################################################################################################################################################    
 
-#DEBUG = True # Flag for plot splash
-DEBUG = False # Flag for no plot splash
+DEBUG = True # Flag for plot splash
+#DEBUG = False # Flag for no plot splash
 
 # Input params
 kinematics = sys.argv[1].split("_")
@@ -371,23 +371,25 @@ if os.path.exists(foutroot):
         print("\nError: Unable to close the root file {}.".format(foutroot))
 output_file_lst.append(foutroot)
 
-# Create combined dictionary of all non-histogram information        
-combineDict = {}
-combineDict.update({"inpDict" : inpDict})
-tmp_lst = []
-for hist in histlist:
-    print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
-    for i, (key, val) in enumerate(hist.items()):
-        # Progress bar
-        Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-        if not is_root_obj(val):
-            tmp_lst.append({key : val})
-combineDict.update({ "histlist" : tmp_lst})
-
-# Save combined dictionary to json file
-# Check that root file doesnt already exist    
+# Create combined dictionary of all non-histogram information
 #if not os.path.exists(foutjson):
 if os.path.exists(foutjson):
+    # Create combined dictionary of all non-histogram information        
+    combineDict = {}
+    combineDict.update({"inpDict" : inpDict})
+    tmp_lst = []
+    for hist in histlist:
+        print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
+        tmp_dict = {}
+        for i, (key, val) in enumerate(hist.items()):
+            # Progress bar
+            Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+            if not is_root_obj(val):
+                tmp_dict[key] = val
+        tmp_lst.append(tmp_dict)
+    combineDict.update({ "histlist" : tmp_lst})
+
+    # Save combined dictionary to json file
     # Open the file in write mode and use json.dump() to save the dictionary to JSON
     with open(foutjson, 'w') as f_json:
         json.dump(combineDict, f_json, default=custom_encoder)
