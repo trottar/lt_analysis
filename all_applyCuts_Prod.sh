@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 04:36:19 trottar"
+# Time-stamp: "2024-01-29 04:37:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,7 +124,7 @@ for t in "${TARGET[@]}"; do
 			break ;;
 		    [Nn]* ) 
 			echo "Operation aborted."
-			#exit ;;
+			break ;;
 		    * ) 
 			echo "Please answer yes or no." ;;
 		esac
