@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 16:03:28 trottar"
+# Time-stamp: "2024-01-29 16:07:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1181,7 +1181,7 @@ def rand_sub(phi_setting, inpDict):
     l_ct.AddEntry(H_ct_DATA,"{}".format(ParticleType.capitalize()))
     l_ct.Draw()
 
-    ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+'(')
+    ct.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+'(')
 
     ###
     # Q2 plots    
@@ -1190,7 +1190,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_Q2_DATA"].SetLineColor(1)
     histDict["H_Q2_DATA"].Draw("same, E1")
 
-    CQ2.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    CQ2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # W plots    
@@ -1199,7 +1199,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_W_DATA"].SetLineColor(1)
     histDict["H_W_DATA"].Draw("same, E1")
 
-    CW.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))    
+    CW.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))    
     
     ###
     # MM plots    
@@ -1208,7 +1208,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_DATA"].SetLineColor(1)
     histDict["H_MM_DATA"].Draw("same, E1")
 
-    CMM.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # t-Phi plots        
@@ -1229,7 +1229,7 @@ def rand_sub(phi_setting, inpDict):
     polar_plots[-1].GetYaxis().SetName("-t")
     polar_plots[-1].SetTitle("")
     
-    Cpht_data.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    Cpht_data.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # t plots            
@@ -1241,7 +1241,7 @@ def rand_sub(phi_setting, inpDict):
     l_t.AddEntry(histDict["H_t_DATA"],histDict["phi_setting"])
     histDict["H_t_DATA"].Draw("same, E1")
 
-    Ct.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    Ct.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
     # phi plots            
@@ -1252,7 +1252,7 @@ def rand_sub(phi_setting, inpDict):
     l_phi.AddEntry(histDict["H_ph_q_DATA"],histDict["phi_setting"])
     histDict["H_ph_q_DATA"].Draw("same, E1")    
 
-    Cphi.Print(outputpdf.replace("{}_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    Cphi.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
     ###
     # PID Plots
