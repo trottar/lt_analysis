@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 15:11:35 trottar"
+# Time-stamp: "2024-01-29 15:30:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,14 +41,11 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=37:
-    print("!!!!! ERROR !!!!!\n Expected 37 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InData_error_efficiency_right InData_error_efficiency_left InData_error_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=38:
+    print("!!!!! ERROR !!!!!\n Expected 38 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InData_error_efficiency_right InData_error_efficiency_left InData_error_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date inp_debug\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
-
-#DEBUG = True # Flag for plot splash
-DEBUG = False # Flag for no plot splash
 
 # Input params
 kinematics = sys.argv[1].split("_")
@@ -105,6 +102,12 @@ EbeamValLeft = list(sys.argv[34].split(" "))
 EbeamValCenter = list(sys.argv[35].split(" "))
 POL = sys.argv[36]
 formatted_date = sys.argv[37]
+inp_debug =  sys.argv[38]
+
+if inp_debug == "False":
+    DEBUG = False # Flag for no plot splash
+else:
+    DEBUG = True # Flag for plot splash
 
 if int(POL) == 1:
     pol_str = "pl"
@@ -582,7 +585,7 @@ output_file_lst.append(foutjson)
 
 from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
-sys.exit(2)
+
 # Copy initial parameterization to specific particle type directory
 shutil.copy('{}/src/simc_ana/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")), '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")))
 

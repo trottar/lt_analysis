@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 13:04:04 trottar"
+# Time-stamp: "2024-01-29 15:30:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,14 +41,11 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=11:
-    print("!!!!! ERROR !!!!!\n Expected 11 arguments\n Usage is with - KIN W Q2 EPSVAL ParticleType EPSSET POL OutFilename formatted_date NumtBins NumPhiBins\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=12:
+    print("!!!!! ERROR !!!!!\n Expected 12 arguments\n Usage is with - KIN W Q2 EPSVAL ParticleType EPSSET POL OutFilename formatted_date NumtBins NumPhiBins inp_debug\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
-
-#DEBUG = True # Flag for plot splash
-DEBUG = False # Flag for no plot splash
 
 # Input params
 kinematics = sys.argv[1].split("_")
@@ -62,7 +59,12 @@ OutFilename = sys.argv[8]
 formatted_date = sys.argv[9]
 NumtBins = sys.argv[10]
 NumPhiBins = sys.argv[11]
+inp_debug =  sys.argv[12]
 
+if inp_debug == "False":
+    DEBUG = False # Flag for no plot splash
+else:
+    DEBUG = True # Flag for plot splash
 
 if int(POL) == 1:
     pol_str = "pl"

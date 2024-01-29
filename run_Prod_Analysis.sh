@@ -72,6 +72,10 @@ formatted_date=$(date +H%HM%MS%S_%Y%B%d)
 ##############
 # HARD CODED #
 ##############
+
+#DEBUG="False" # Flag for no plot splash
+DEBUG="True" # Flag for plot splash
+
 if [[ $p_flag != "true" ]]; then
     ParticleType="kaon"
     #ParticleType="pion"
@@ -87,11 +91,11 @@ else
     done
 fi
 
-NumtBins=1
-NumPhiBins=1
+#NumtBins=1
+#NumPhiBins=1
 # Q2=2p1
-#NumtBins=3
-#NumPhiBins=10
+NumtBins=3
+NumPhiBins=10
 # Q2=3p0, W=3p14
 #NumtBins=4
 #NumPhiBins=12
@@ -1306,7 +1310,7 @@ if [[ $i_flag != "true" ]]; then
 	fi
 	
 	if [ ${#data_right[@]} -eq 0 ]; then
-	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date}
+	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
 		echo
@@ -1316,7 +1320,7 @@ if [[ $i_flag != "true" ]]; then
 		exit 1
 	    fi
 	else
-	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date}
+	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
 		echo
@@ -1668,7 +1672,7 @@ else
 	    echo "Finding new simc weight for for high epsilon..."
 	fi
 
-	python3 main_iter.py ${KIN} ${W} ${Q2} ${EPSVAL} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${NumtBins} ${NumPhiBins}
+	python3 main_iter.py ${KIN} ${W} ${Q2} ${EPSVAL} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${NumtBins} ${NumPhiBins} ${DEBUG}
 
 	# Check the exit status of the Python script
 	if [ $? -ne 0 ]; then

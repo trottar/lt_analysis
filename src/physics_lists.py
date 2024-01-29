@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 15:22:28 trottar"
+# Time-stamp: "2024-01-29 15:28:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -425,7 +425,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if check_kin in line:
                     inLine = True
                     if check_line in line:
-                        print("\n\n!!!!!!!!!",check_line)
                         replace_line(f_list_settings, i+1, check_line)
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
