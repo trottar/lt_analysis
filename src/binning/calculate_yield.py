@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 22:24:53 trottar"
+# Time-stamp: "2024-01-29 22:40:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -434,14 +434,16 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
-        sub_val = np.subtract(hist_val_data*normfac_data, hist_val_dummy*normfac_dummy)
+        # Scale the lists before subtraction
+        scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
+        scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]        
+        sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
         yld = total_count
         yield_hist.append(yld)
         binned_sub_data[0].append(bin_val_data)
         binned_sub_data[1].append(sub_val)
-        i+=1
-    
+        i+=1    
 
     # Print statements to check sizes
     #print("Size of binned_t_data:", len(binned_t_data))
