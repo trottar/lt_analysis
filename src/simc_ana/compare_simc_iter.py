@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 16:28:49 trottar"
+# Time-stamp: "2024-01-30 17:39:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -126,7 +126,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     f_simc = open(simc_hist)
     for line in f_simc:
         #print(line)
-        if "Ngen" in line:
+        if "Ncontribute" in line:
             val = line.split("=")
             simc_nevents = int(val[1])
         if "normfac" in line:
