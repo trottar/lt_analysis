@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 02:15:08 trottar"
+# Time-stamp: "2024-01-29 22:24:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -398,7 +398,8 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDic
 
 def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
-    tree_data, tree_dummy, nWindows, normfac_data = hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"], hist["normfac_data"]
+    tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
+    nWindows, normfac_data, normfac_dummy = hist["nWindows"], hist["normfac_data"], hist["normfac_dummy"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict)
@@ -407,6 +408,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
     binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
 
+    '''
     yield_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
@@ -422,6 +424,24 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         binned_sub_data[0].append(bin_val_data)
         binned_sub_data[1].append(sub_val)
         i+=1
+    '''
+
+    yield_hist = []
+    binned_sub_data = [[],[]]
+    i=0 # iter
+    print("-"*25)
+    # Subtract binned_hist_dummy from binned_hist_data element-wise
+    for data, dummy in zip(binned_hist_data, binned_hist_dummy):
+        bin_val_data, hist_val_data = data
+        bin_val_dummy, hist_val_dummy = dummy
+        sub_val = np.subtract(hist_val_data*normfac_data, hist_val_dummy*normfac_dummy)
+        total_count = np.sum(sub_val)
+        yld = total_count
+        yield_hist.append(yld)
+        binned_sub_data[0].append(bin_val_data)
+        binned_sub_data[1].append(sub_val)
+        i+=1
+    
 
     # Print statements to check sizes
     #print("Size of binned_t_data:", len(binned_t_data))

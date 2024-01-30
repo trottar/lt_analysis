@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-28 23:46:38 trottar"
+# Time-stamp: "2024-01-29 22:18:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,7 +110,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     print("\n\nData normalization: ", hist["normfac_data"])
     print("Dummy normalization: ", hist["normfac_dummy"])
-    print("Simc normalization: ", hist["normfac_simc"])    
+    print("Simc normalization: ", hist["normfac_simc"])
     
     for hist in histlist_copy:
         
