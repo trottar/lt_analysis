@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 13:02:45 trottar"
+# Time-stamp: "2024-01-30 02:14:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,19 +114,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_err_vec = []
     par_chi2_vec = []
 
-    t0, t1, t2, t3 = 0, 0, 0, 0
     l0, l1, l2, l3 = 0, 0, 0, 0
+    t0, t1, t2, t3 = 0, 0, 0, 0
     lt0, lt1, lt2, lt3 = 0, 0, 0, 0
     tt0, tt1, tt2, tt3 = 0, 0, 0, 0
 
     fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
-    nsep = TNtuple("nsep", "nsep", "sigt:sigt_e:sigl:sigl_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
+    nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2")
     nsep.ReadFile(fn_sep)
 
     print("Reading {}...".format(fn_sep))
     for entry in nsep:
-        print("sigt: {}, sigt_e: {}, sigl: {}, sigl_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, t_min: {}, w: {}, q2: {}".format(
-            entry.sigt, entry.sigt_e, entry.sigl, entry.sigl_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.t_min, entry.w, entry.q2
+        print("sigl: {}, sigl_e: {}, sigt: {}, sigt_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, t_min: {}, w: {}, q2: {}".format(
+            entry.sigl, entry.sigl_e, entry.sigt, entry.sigt_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.t_min, entry.w, entry.q2
         ))
 
     prv_par_vec = []
@@ -191,106 +191,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     t_list = t_tmin_map.GetX()
     t_min_list = t_tmin_map.GetY()
-
-    ########
-    # SigT #
-    ########
-
-    print("/*--------------------------------------------------*/")
-    print("Fit for Sig T")
-    
-    c1.cd(1).SetLeftMargin(0.12)
-    nsep.Draw("sigt:t:sigt_e", "", "goff")
-
-    f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
-    f_sigT_pre.SetParameters(t0, t1, t2, t3)
-    
-    #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
-    g_sigt = TGraphErrors()
-    for i in range(nsep.GetSelectedRows()):
-        g_sigt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-        g_sigt.SetPointError(i, 0, nsep.GetV3()[i])
-        print("!!!!!!!!!!sigt",i, nsep.GetV2()[i], nsep.GetV1()[i])
-
-    for i in range(len(w_vec)):
-
-        sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
-        g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
-
-        sigt_X_fit = (g_sigt.GetY()[i]) / g_vec[i]
-        sigt_X_fit_err = g_sigt.GetEY()[i] / g_vec[i]
-
-        g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
-        g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
-        print("!!!!!!!!!!sigt_fit",i, g_sigt.GetX()[i], sigt_X_fit)
-        
-    g_sigt.SetTitle("Sig T")
-
-    g_sigt.SetMarkerStyle(5)
-    g_sigt.Draw("AP")
-
-    g_sigt.SetMaximum(hi_bound)
-    g_sigt.SetMinimum(lo_bound)
-    
-    g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-    g_sigt.GetXaxis().CenterTitle()
-    g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [#mub/GeV^{2}]")
-    g_sigt.GetYaxis().SetTitleOffset(1.5)
-    g_sigt.GetYaxis().SetTitleSize(0.035)
-    g_sigt.GetYaxis().CenterTitle()
-
-    g_sigt_prv.SetMarkerColor(4)
-    g_sigt_prv.SetMarkerStyle(25)
-    g_sigt_prv.Draw("P")
-        
-    c2.cd(1)
-    g_sigt_fit.SetTitle("Sigma T Model Fit")
-    g_sigt_fit.Draw("A*")
-
-    f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
-    f_sigT.SetParameters(t0, t1, t2, t3)
-
-    g_q2_sigt_fit = ROOT.TGraph2DErrors()
-    for i in range(len(w_vec)):
-        g_q2_sigt_fit.SetPoint(g_q2_sigt_fit.GetN(), q2_vec[i], g_sigt_fit.GetX()[i], g_sigt_fit.GetY()[i] * g_vec[i])
-        g_q2_sigt_fit.SetPointError(g_q2_sigt_fit.GetN()-1, 0.0, 0.0, g_sigt_fit.GetEY()[i] * g_vec[i])
-        sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
-        g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
-        print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
-    g_q2_sigt_fit.Fit(f_sigT, "SQ")
-
-    # Draw f_sigT
-    #f_sigT.Draw("same")
-        
-    # Check the fit status for 'f_sigT'
-    f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-    f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
-        
-    fit_status = TText()
-    fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigT_status_message)
-
-    c1.cd(1)
-
-    g_sigt_fit_tot.SetMarkerStyle(26)
-    g_sigt_fit_tot.SetMarkerColor(2)
-    g_sigt_fit_tot.SetLineColor(2)
-    g_sigt_fit_tot.Draw("LP")
-    
-    par_vec.append(f_sigT.GetParameter(0))
-    par_vec.append(f_sigT.GetParameter(1))
-    par_vec.append(f_sigT.GetParameter(2))
-    par_vec.append(f_sigT.GetParameter(3))
-
-    par_err_vec.append(f_sigT.GetParError(0))
-    par_err_vec.append(f_sigT.GetParError(1))
-    par_err_vec.append(f_sigT.GetParError(2))
-    par_err_vec.append(f_sigT.GetParError(3))
-
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
     
     ########
     # SigL #
@@ -395,6 +295,106 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
+
+    ########
+    # SigT #
+    ########
+
+    print("/*--------------------------------------------------*/")
+    print("Fit for Sig T")
+    
+    c1.cd(1).SetLeftMargin(0.12)
+    nsep.Draw("sigt:t:sigt_e", "", "goff")
+
+    f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
+    f_sigT_pre.SetParameters(t0, t1, t2, t3)
+    
+    #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
+    g_sigt = TGraphErrors()
+    for i in range(nsep.GetSelectedRows()):
+        g_sigt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+        g_sigt.SetPointError(i, 0, nsep.GetV3()[i])
+        print("!!!!!!!!!!sigt",i, nsep.GetV2()[i], nsep.GetV1()[i])
+
+    for i in range(len(w_vec)):
+
+        sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
+        g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
+
+        sigt_X_fit = (g_sigt.GetY()[i]) / g_vec[i]
+        sigt_X_fit_err = g_sigt.GetEY()[i] / g_vec[i]
+
+        g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
+        g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
+        print("!!!!!!!!!!sigt_fit",i, g_sigt.GetX()[i], sigt_X_fit)
+        
+    g_sigt.SetTitle("Sig T")
+
+    g_sigt.SetMarkerStyle(5)
+    g_sigt.Draw("AP")
+
+    g_sigt.SetMaximum(hi_bound)
+    g_sigt.SetMinimum(lo_bound)
+    
+    g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+    g_sigt.GetXaxis().CenterTitle()
+    g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [#mub/GeV^{2}]")
+    g_sigt.GetYaxis().SetTitleOffset(1.5)
+    g_sigt.GetYaxis().SetTitleSize(0.035)
+    g_sigt.GetYaxis().CenterTitle()
+
+    g_sigt_prv.SetMarkerColor(4)
+    g_sigt_prv.SetMarkerStyle(25)
+    g_sigt_prv.Draw("P")
+        
+    c2.cd(1)
+    g_sigt_fit.SetTitle("Sigma T Model Fit")
+    g_sigt_fit.Draw("A*")
+
+    f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
+    f_sigT.SetParameters(t0, t1, t2, t3)
+
+    g_q2_sigt_fit = ROOT.TGraph2DErrors()
+    for i in range(len(w_vec)):
+        g_q2_sigt_fit.SetPoint(g_q2_sigt_fit.GetN(), q2_vec[i], g_sigt_fit.GetX()[i], g_sigt_fit.GetY()[i] * g_vec[i])
+        g_q2_sigt_fit.SetPointError(g_q2_sigt_fit.GetN()-1, 0.0, 0.0, g_sigt_fit.GetEY()[i] * g_vec[i])
+        sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]
+        g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
+        print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
+    g_q2_sigt_fit.Fit(f_sigT, "SQ")
+
+    # Draw f_sigT
+    #f_sigT.Draw("same")
+        
+    # Check the fit status for 'f_sigT'
+    f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+    f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
+        
+    fit_status = TText()
+    fit_status.SetTextSize(0.04)
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigT_status_message)
+
+    c1.cd(1)
+
+    g_sigt_fit_tot.SetMarkerStyle(26)
+    g_sigt_fit_tot.SetMarkerColor(2)
+    g_sigt_fit_tot.SetLineColor(2)
+    g_sigt_fit_tot.Draw("LP")
+    
+    par_vec.append(f_sigT.GetParameter(0))
+    par_vec.append(f_sigT.GetParameter(1))
+    par_vec.append(f_sigT.GetParameter(2))
+    par_vec.append(f_sigT.GetParameter(3))
+
+    par_err_vec.append(f_sigT.GetParError(0))
+    par_err_vec.append(f_sigT.GetParError(1))
+    par_err_vec.append(f_sigT.GetParError(2))
+    par_err_vec.append(f_sigT.GetParError(3))
+
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
     
     #########
     # SigLT #
