@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-18 00:38:36 trottar"
+# Time-stamp: "2024-01-29 22:51:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,6 +187,7 @@ def get_eff_charge(hist, inpDict):
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
     # Normalize data by effective charge
+    # SIMC normalize is defined in src/simc_ana/compare_simc.py because of iteration version
     
     dummy_target_corr = 4.8579
     if phi_setting == "Right":

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:58:48 trottar"
+# Time-stamp: "2024-01-29 22:53:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,7 +75,7 @@ runNumCenter = sys.argv[14]
 #dummy_charge_right = int(sys.argv[18])/1e9
 #dummy_charge_left = int(sys.argv[19])/1e9
 #dummy_charge_center = int(sys.argv[20])/1e9
-# Convert from uC to C?????
+# Convert from uC to mC?????
 data_charge_right = int(sys.argv[15])/1000
 data_charge_left = int(sys.argv[16])/1000
 data_charge_center = int(sys.argv[17])/1000

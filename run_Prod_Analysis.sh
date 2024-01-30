@@ -1037,7 +1037,7 @@ if [[ $i_flag != "true" ]]; then
 	    #echo ${DataChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to C
+	    #       and later converted to mC
 	    DataChargeSumRight=$(IFS=+; echo "$((${DataChargeValRight[*]}))") # Only works for integers
 	    echo "Total Charge Right: ${DataChargeSumRight} uC"
 	    echo "Run numbers: [${data_right[@]}]"
@@ -1087,7 +1087,7 @@ if [[ $i_flag != "true" ]]; then
 	    #echo ${DummyChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to C
+	    #       and later converted to mC
 	    DummyChargeSumRight=$(IFS=+; echo "$((${DummyChargeValRight[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Right: ${DummyChargeSumRight} uC"
 	    echo "Run numbers: [${dummy_right[@]}]"
@@ -1137,7 +1137,7 @@ if [[ $i_flag != "true" ]]; then
 	    #echo ${DataChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to C
+	    #       and later converted to mC
 	    DataChargeSumLeft=$(IFS=+; echo "$((${DataChargeValLeft[*]}))") # Only works for integers
 	    echo "Total Charge Left: ${DataChargeSumLeft} uC"
 	    echo "Run numbers: [${data_left[@]}]"
@@ -1187,7 +1187,7 @@ if [[ $i_flag != "true" ]]; then
 	    #echo ${DummyChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to C
+	    #       and later converted to mC
 	    DummyChargeSumLeft=$(IFS=+; echo "$((${DummyChargeValLeft[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Left: ${DummyChargeSumLeft} uC"
 	    echo "Run numbers: [${dummy_left[@]}]"
@@ -1237,7 +1237,7 @@ if [[ $i_flag != "true" ]]; then
 	    #echo ${DataChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to C
+	    #       and later converted to mC
 	    DataChargeSumCenter=$(IFS=+; echo "$((${DataChargeValCenter[*]}))") # Only works for integers
 	    echo "Total Charge Center: ${DataChargeSumCenter} uC"
 	    echo "Run numbers: [${data_center[@]}]"
@@ -1287,7 +1287,7 @@ if [[ $i_flag != "true" ]]; then
 	    #echo ${DummyChargeVal[*]}
 	    # Sums the array to get the total effective charge
 	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to C
+	    #       and later converted to mC
 	    DummyChargeSumCenter=$(IFS=+; echo "$((${DummyChargeValCenter[*]}))") # Only works for integers
 	    echo "Total Dummy Charge Center: ${DummyChargeSumCenter} uC"
 	    echo "Run numbers: [${dummy_center[@]}]"
