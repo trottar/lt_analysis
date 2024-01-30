@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 17:59:28 trottar"
+# Time-stamp: "2024-01-30 12:22:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -346,8 +346,8 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
-#if not os.path.exists(foutroot):
-if os.path.exists(foutroot):    
+if not os.path.exists(foutroot):
+#if os.path.exists(foutroot):    
     for hist in histlist:
         print("\nUpdating simc {} histograms in {}".format(hist["phi_setting"],foutroot))
         # Loop through all keys,values of dictionary
@@ -382,8 +382,8 @@ if os.path.exists(foutroot):
 output_file_lst.append(foutroot)
 
 # Create combined dictionary of all non-histogram information
-#if not os.path.exists(foutjson):
-if os.path.exists(foutjson):
+if not os.path.exists(foutjson):
+#if os.path.exists(foutjson):
     # Create combined dictionary of all non-histogram information        
     combineDict = {}
     combineDict.update({"inpDict" : inpDict})

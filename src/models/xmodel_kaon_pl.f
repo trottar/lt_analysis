@@ -56,7 +56,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
          read(57, *, end=9) p, e, i
          par(i) = p
 !     Print Statements
-         print *,"param: ", i, p, e
+         if(i.eq.1) then
+            print *,"param: ", i, p, e
+         end if
 ! You can customize the format as needed
       end do      
  9    close(57)      
@@ -110,7 +112,9 @@ c     Correct for W.
       sigTT=sigTT*wfactor
       sigLT=sigLT*wfactor
 
-      sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
+*     RLT (1/30/2024): Removed 1.d+06 because
+*                      units are GeV**2 not MeV**2
+      sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad
 
       x_mod=sig
       

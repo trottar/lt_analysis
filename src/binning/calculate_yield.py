@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 03:07:40 trottar"
+# Time-stamp: "2024-01-30 10:57:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -374,7 +374,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDic
             tmp_hist_data = [[],[]]                
             for i in range(1, H_MM_DATA.GetNbinsX() + 1):        
                 tmp_hist_data[0].append(H_MM_DATA.GetBinCenter(i))
-                tmp_hist_data[1].append(H_MM_DATA.GetBinContent(i))                    
+                tmp_hist_data[1].append(H_MM_DATA.GetBinContent(i))
             tmp_binned_hist_data.append(tmp_hist_data)
 
             tmp_hist_dummy = [[],[]]                
@@ -418,7 +418,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         bin_val_dummy, hist_val_dummy = dummy
         # Scale the lists before subtraction
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
-        scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]        
+        scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
         yld = total_count # Normalization applied above

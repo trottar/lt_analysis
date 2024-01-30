@@ -5,9 +5,10 @@
 * frame, calculates some of the kinematical variables (s,t, and CM quantities
 * in the 'main' structure), and returns the kaon cross section.
 *
-* RLT: (9/15/2023) Updated for kaon cross section
+*       RLT: (9/15/2023) Updated for kaon cross section
+*       RLT (1/30/2024): Updated comments of units (GeV**2 to MeV**2)
 *   output:
-*	peek		!d5sigma/dEe'dOmegae'Omegak	(microbarn/MeV/sr^2)
+*	peek		!d5sigma/dEe'dOmegae'Omegak	(microbarn/GeV/sr^2)
 
 	implicit none
 	include 'simulate.inc'
@@ -58,7 +59,8 @@ c	real*8 pbeamcmx,pbeamcmy,pbeamcmz,ebeamcm,pbeamcm
 
 	real*8 dEcmdcos,dEcmdphi,dcoscmdcos,dcoscmdphi
 c	real*8 tmp
-	real*8 q2_set,tav,ftav,ft
+	real*8 q2_set,w_set
+	real*8 tav,ftav,ft
 
 	logical first
 
@@ -75,7 +77,9 @@ c Variables calculated in transformation to gamma-NUCLEON center of mass.
 *=====================================================================
 c       Fit parameters.
 	integer npar,ipar
-	parameter (npar=12)	!number of fit parameters for H, k+ and D, k-
+*       RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
+*                       the xfit_in_t.py script to work. LT/TT are zeros	
+	parameter (npar=16)	!number of fit parameters for H, k+ and D, k-
 	real*8 fitpar(npar),par,par_er
 	save fitpar
 	logical first_call
@@ -369,8 +373,9 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 
 ***
 *       Parameterization revised for IT26, 12.11.09
-*       q2_set is dynamically changed with the set_ProdInput.sh script
+*       q2_set/w_set are dynamically changed with the set_ProdInput.sh script
 	   q2_set=2.45
+	   w_set=2.45
 ***
 *       RLT (9/25/2023):
 *       tav is meant to be a simple equation to give roughly
@@ -391,14 +396,21 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *       RLT (9/21/2023): t_gev should be abs(t_gev)
 	   ft=abs(t_gev)/(abs(t_gev)+mkpl**2)**2
 
+*	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
+*       1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)-0.2))
+*       RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for
+*                         initial start parameterization
 	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
-     1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)-0.2))
+     1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)))
 	   sigt=fitpar(5)+fitpar(6)*log(Q2_g)
      1           +(fitpar(7)+fitpar(8)*log(Q2_g))*ftav
 
 	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
      1           +fitpar(11)/abs(t_gev))*sin(thetacm)
-	   sigtt=(fitpar(12)*Q2_g*exp(-Q2_g))*ft*sin(thetacm)**2
+*       RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
+*                       the xfit_in_t.py script to work. LT/TT are zeros
+*                       Therefore param 12 was also changed to 13      	   
+	   sigtt=(fitpar(13)*Q2_g*exp(-Q2_g))*ft*sin(thetacm)**2
 
 *       RLT (9/25/2023): There are two tav parameterizations in here.
 *                        I am only using the one above, for now.	   
@@ -429,8 +441,13 @@ c 	  write(*,*) 'sigTT =',sigTT
 c 	  write(*,*) '-----------------------------------------------------'
 C--->Debug
 
-	  sig=sig/2./pi/1.d+06   !dsig/dtdphicm in microbarns/MeV**2/rad
+*       RLT (1/30/2024): Removed 1.d+06 because
+*                        units are GeV**2 not MeV**2	  
+	  sig=sig/2./pi   !dsig/dtdphicm in microbarns/GeV**2/rad
 
+c       RLT (10/30/2023): Testing this sig with the flux corrected one below
+	  ntup%sigcm = sig
+	  
 c     RLT (9/15/2023): Removed dsigdt because it is not defined in SIMC
 c                      and not used anywhere else in this script          
 c	  ntup%dsigdt = sig
@@ -441,10 +458,10 @@ c	  write(*,*) '====================================================='
 C--->Debug
 
 *******************************************************************************
-* sigma_eek is two-fold C.M. cross section: d2sigma/dt/dphi_cm [ub/MeV**2/rad]
+* sigma_eek is two-fold C.M. cross section: d2sigma/dt/dphi_cm [ub/GeV**2/rad]
 * Convert from dt dphi_cm --> dOmega_lab using 'jacobian' [ub/sr]
-* Convert to 5-fold by multiplying by flux factor, gtpr [1/MeV]
-* to give d5sigma/dOmega_k/dOmega_e/dE_e [ub/Mev/sr].
+* Convert to 5-fold by multiplying by flux factor, gtpr [1/GeV]
+* to give d5sigma/dOmega_k/dOmega_e/dE_e [ub/Gev/sr].
 *******************************************************************************
 *******************************************************************************
 c NEW VERSION WHERE TARGET NUCLEON IS AT REST (AS IN EXPERIMENTAL REPLAY)
@@ -500,7 +517,7 @@ c	write(6,*)' jac ',davejac_fer,jacobian
 	sigma_eek = davesig
 	peek = sigma_eek
 
-	ntup%sigcm = sigma_eek		!sig_cm
+c	ntup%sigcm = sigma_eek		!sig_cm
 
 c	write(6,*)' 1 ',jacobian,thetacm,phicm,pkcm
 c	write(6,*)'   ',efer,pfer
