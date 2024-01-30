@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 23:42:06 trottar"
+# Time-stamp: "2024-01-30 03:02:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -408,24 +408,6 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
     binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
 
-    '''
-    yield_hist = []
-    binned_sub_data = [[],[]]
-    i=0 # iter
-    print("-"*25)
-    # Subtract binned_hist_dummy from binned_hist_data element-wise
-    for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-        bin_val_data, hist_val_data = data
-        bin_val_dummy, hist_val_dummy = dummy
-        sub_val = np.subtract(hist_val_data, hist_val_dummy)
-        total_count = np.sum(sub_val)
-        yld = total_count*normfac_data
-        yield_hist.append(yld)
-        binned_sub_data[0].append(bin_val_data)
-        binned_sub_data[1].append(sub_val)
-        i+=1
-    '''
-
     yield_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
@@ -440,6 +422,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
         yld = total_count
+        if yld < 0.0:
+            yld = 0.0
         yield_hist.append(yld)
         binned_sub_data[0].append(bin_val_data)
         binned_sub_data[1].append(sub_val)
