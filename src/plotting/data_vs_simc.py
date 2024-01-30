@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 00:44:46 trottar"
+# Time-stamp: "2024-01-30 00:53:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -386,6 +386,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_Q2_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_Q2_SIMC"].Draw("same, E1")
         hist["H_Q2_SIMC"].Draw("same, HIST")
+        l_Q2.AddEntry(hist["H_Q2_DATA"],hist["phi_setting"])
+        l_Q2.AddEntry(hist["H_Q2_SIMC"],hist["phi_setting"])
 
     l_Q2.Draw()
     CQ2.Print(outputpdf)
