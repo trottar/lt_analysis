@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 03:02:09 trottar"
+# Time-stamp: "2024-01-30 03:07:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -421,7 +421,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]        
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
-        yld = total_count
+        yld = total_count # Normalization applied above
         if yld < 0.0:
             yld = 0.0
         yield_hist.append(yld)
@@ -576,7 +576,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
     print("-"*25)
     for simc in binned_hist_simc:
         bin_val_simc, hist_val_simc = simc
-        sub_val = np.array(hist_val_simc) # No dummy subtraction for simc
+        sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         total_count = np.sum(sub_val)
         yld = total_count*normfac_simc
         yield_hist.append(yld)
