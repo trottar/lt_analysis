@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 22:53:19 trottar"
+# Time-stamp: "2024-01-30 02:28:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -433,13 +433,6 @@ if EPSSET == "high":
 
 '''
 
-sys.path.append("normalize")
-from get_eff_charge import get_eff_charge
-
-# Upate hist dictionary with effective charge
-for hist in histlist:
-    hist.update(get_eff_charge(hist, inpDict))
-
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
 
@@ -453,6 +446,13 @@ if DEBUG:
         show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
+
+sys.path.append("normalize")
+from get_eff_charge import get_eff_charge
+
+# Upate hist dictionary with effective charge
+for hist in histlist:
+    hist.update(get_eff_charge(hist, inpDict))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 13:02:31 trottar"
+# Time-stamp: "2024-01-30 02:18:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -537,7 +537,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
 
         # Print values to console
-        print("\nBin {}: Outputting...  ".format(i), "sig_t: ", sig_t, "sig_l: ", sig_l, \
+        print("\nBin {}: Outputting...  ".format(i), "sig_l: ", sig_l, "sig_t: ", sig_t, \
+              "sig_lt: ", sig_lt, "sig_tt: ", sig_tt, \
               "t: ", t_list[i], "W: ", w_list[i], "Q2:", q2_list[i], \
               "eps_lo: ", lo_eps_list[i], "eps_hi: ", hi_eps_list[i])
 
@@ -547,7 +548,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
             with open(fn_sep, mode) as f:
                 # Write values to output file
                 f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
-                    sig_t, sig_t_err, sig_l, sig_l_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
+                    sig_l, sig_l_err, sig_t, sig_t_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
 
                     fff2.GetChisquare(), t_list[i], t_min_list[i], w_list[i], q2_list[i]
                 ))

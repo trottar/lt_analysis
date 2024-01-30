@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 02:14:05 trottar"
+# Time-stamp: "2024-01-30 02:20:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,6 +66,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
 
+    # Function for SigL
+    def fun_Sig_L(x, par):
+        tt = abs(x[0])
+        qq = abs(x[1])
+        #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
+        return f
+    
     # Function for SigT
     def fun_Sig_T(x, par):
         tt = abs(x[0])
@@ -73,14 +81,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         ftav = (abs(tt)-tav)/tav
         #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
-        return f
-
-    # Function for SigL
-    def fun_Sig_L(x, par):
-        tt = abs(x[0])
-        qq = abs(x[1])
-        #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-        f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
         return f
 
     # Function for SigLT
@@ -158,18 +158,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             q2_vec.append(q2)
             th_vec.append(thetacm)
 
+    g_sigl_prv = TGraph()            
     g_sigt_prv = TGraph()
-    g_sigl_prv = TGraph()
     g_siglt_prv = TGraph()
     g_sigtt_prv = TGraph()
 
-    g_sigt_fit = TGraphErrors()
     g_sigl_fit = TGraphErrors()
+    g_sigt_fit = TGraphErrors()
     g_siglt_fit = TGraphErrors()
     g_sigtt_fit = TGraphErrors()
 
+    g_sigl_fit_tot = TGraph()    
     g_sigt_fit_tot = TGraph()
-    g_sigl_fit_tot = TGraph()
     g_siglt_fit_tot = TGraph()
     g_sigtt_fit_tot = TGraph()
 

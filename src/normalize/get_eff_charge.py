@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 02:06:32 trottar"
+# Time-stamp: "2024-01-30 02:32:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,6 +53,8 @@ OUTPATH=lt.OUTPATH
 def get_eff_charge(hist, inpDict):    
 
     phi_setting = hist["phi_setting"]
+    simc_normfactor = hist["simc_normfactor"]
+    simc_nevents = hist["simc_nevents"]
     
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
@@ -180,25 +182,26 @@ def get_eff_charge(hist, inpDict):
                               InData_efficiency, \
                               np.array([0]*len(InData_error_efficiency)), \
                               InData_error_efficiency*InData_efficiency)
-    G_data_eff.SetName("G_data_eff")
+    G_data_eff.SetName("G_data_eff")    
     
-    ################################################################################################################################################    
-
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
     # Normalize data by effective charge
-    # SIMC normalize is defined in src/simc_ana/compare_simc.py because of iteration version
+    # Normalize simc by normfactor/nevents
     
     dummy_target_corr = 4.8579
     if phi_setting == "Right":
-        normfac_dummy = 1/(dummy_charge_right*dummy_target_corr*1000)
-        normfac_data = 1/(data_charge_right*1000)
+        normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
+        normfac_data = 1/(data_charge_right)
+        normfac_simc = (simc_normfactor)/(simc_nevents*1000)
     if phi_setting == "Left":
-        normfac_dummy = 1/(dummy_charge_left*dummy_target_corr*1000)
-        normfac_data = 1/(data_charge_left*1000)
+        normfac_dummy = 1/(dummy_charge_left*dummy_target_corr)
+        normfac_data = 1/(data_charge_left)
+        normfac_simc = (simc_normfactor)/(simc_nevents*1000)
     if phi_setting == "Center":
-        normfac_dummy = 1/(dummy_charge_center*dummy_target_corr*1000)
-        normfac_data = 1/(data_charge_center*1000)
+        normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
+        normfac_data = 1/(data_charge_center)
+        normfac_simc = (simc_normfactor)/(simc_nevents*1000)
           
     ################################################################################################################################################        
 
@@ -207,5 +210,6 @@ def get_eff_charge(hist, inpDict):
     histDict["G_data_eff"] = G_data_eff
     histDict["normfac_data"] = normfac_data
     histDict["normfac_dummy"] = normfac_dummy
+    histDict["normfac_simc"] = normfac_simc
 
     return histDict

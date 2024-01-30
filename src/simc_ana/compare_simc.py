@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 23:38:23 trottar"
+# Time-stamp: "2024-01-30 02:29:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -233,15 +233,11 @@ def compare_simc(hist, inpDict):
           #H_MM_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
           H_MM_SIMC.Fill(evt.missmass, evt.Weight)
 
-    ################################################################################################################################################
-    # Normalize simc by normfactor/nevents
-
-    normfac_simc = (simc_normfactor)/(simc_nevents)
-
     ################################################################################################################################################    
 
     histDict["InFile_SIMC"] = InFile_SIMC
-    histDict["normfac_simc"] = normfac_simc
+    histDict["simc_normfactor"] = simc_normfactor
+    histDict["simc_nevents"] = simc_nevents
     histDict["H_Weight_SIMC"] =     H_Weight_SIMC
     histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
     histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC
