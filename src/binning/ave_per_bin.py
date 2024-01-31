@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-17 20:56:17 trottar"
+# Time-stamp: "2024-01-31 18:01:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,6 +74,59 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
     TBRANCH_DUMMY  = tree_dummy.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
     TBRANCH_DUMMY_RAND  = tree_dummy.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
+    ##############
+    # HARD CODED #
+    ##############
+
+    # Adjusted HMS delta to fix hsxfp correlation
+    # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
+    # Note: these momenta are from Dave's slides and may not reflect what is used here
+    h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
+    c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
+
+    c0_dict = {}
+
+    for c0, p in zip(h_momentum_list):
+        # Q0p5W2p40
+        if p == 0.968:
+            c0_dict["Q0p5W2p40_lowe"] = c0
+        #elif p == 2.066: # Proper value
+        elif p == 2.185:
+            c0_dict["Q0p5W2p40_highe"] = c0
+        # Q2p1W2p95
+        #elif p == 0.888: # Proper value
+        elif p == 0.889:
+            c0_dict["Q2p1W2p95_lowe"] = c0
+        elif p == 5.292:
+            c0_dict["Q2p1W2p95_highe"] = c0
+        # Q3p0W2p32
+        elif p == 2.185:
+            c0_dict["Q3p0W2p32_lowe"] = c0
+        elif p == 6.59:
+            c0_dict["Q3p0W2p32_highe"] = c0
+        # Q3p0W3p14            
+        #elif p == 1.821: # Proper value
+        elif p == 0.968:        
+            c0_dict["Q3p0W3p14_lowe"] = c0
+        #elif p == 4.204: # Proper value
+        elif p == 4.2:
+            c0_dict["Q3p0W3p14_highe"] = c0
+        # Q4p4W2p74
+        elif p == 2.328:
+            c0_dict["Q4p4W2p74_lowe"] = c0
+        elif p == 4.712:
+            c0_dict["Q4p4W2p74_highe"] = c0
+        # Q5p5W3p02            
+        #elif p == 0.962: # Proper value
+        elif p == 0.968:
+            c0_dict["Q5p5W3p02_lowe"] = c0
+        elif p == 3.266:
+            c0_dict["Q5p5W3p02_highe"] = c0
+            
+    ##############
+    ##############        
+    ##############
+    
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
 
@@ -103,12 +156,22 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             # Progress bar
             Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
+            ##############
+            # HARD CODED #
+            ##############
+
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+
+            ##############
+            ##############        
+            ##############
+            
             #CUTs Definations 
             SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
             SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
             HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+            HMS_Acceptance = (adj_delta>=-8.0) & (adj_delta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
@@ -160,12 +223,22 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             # Progress bar
             Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
 
+            ##############
+            # HARD CODED #
+            ##############
+
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+
+            ##############
+            ##############        
+            ##############
+            
             #CUTs Definations 
             SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
             SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
             HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+            HMS_Acceptance = (adj_delta>=-8.0) & (adj_delta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
@@ -217,12 +290,22 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             # Progress bar
             Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
 
+            ##############
+            # HARD CODED #
+            ##############
+
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+
+            ##############
+            ##############        
+            ##############
+            
             #CUTs Definations 
             SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
             SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
             HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+            HMS_Acceptance = (adj_delta>=-8.0) & (adj_delta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
@@ -274,12 +357,22 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             # Progress bar
             Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
 
+            ##############
+            # HARD CODED #
+            ##############
+
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+
+            ##############
+            ##############        
+            ##############
+            
             #CUTs Definations 
             SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
             SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
             HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+            HMS_Acceptance = (adj_delta>=-8.0) & (adj_delta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
