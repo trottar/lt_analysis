@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 06:21:54 trottar"
+# Time-stamp: "2024-01-31 13:44:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -419,7 +419,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Scale the lists before subtraction
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
-        sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
+        #sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
+        sub_val = scaled_hist_val_data
         total_count = np.sum(sub_val)
         yld = total_count # Normalization applied above
         if yld < 0.0:
