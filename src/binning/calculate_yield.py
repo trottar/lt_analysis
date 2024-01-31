@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 18:01:32 trottar"
+# Time-stamp: "2024-01-31 18:07:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,7 +86,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
     c0_dict = {}
 
-    for c0, p in zip(h_momentum_list):
+    for c0, p in zip(c0_list, h_momentum_list):
         # Q0p5W2p40
         if p == 0.968:
             c0_dict["Q0p5W2p40_lowe"] = c0

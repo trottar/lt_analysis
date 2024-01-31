@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 18:01:04 trottar"
+# Time-stamp: "2024-01-31 18:07:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -466,7 +466,7 @@ def rand_sub(phi_setting, inpDict):
 
     c0_dict = {}
 
-    for c0, p in zip(h_momentum_list):
+    for c0, p in zip(c0_list, h_momentum_list):
         # Q0p5W2p40
         if p == 0.968:
             c0_dict["Q0p5W2p40_lowe"] = c0
