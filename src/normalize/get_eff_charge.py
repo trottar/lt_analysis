@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 23:01:46 trottar"
+# Time-stamp: "2024-01-31 03:38:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -193,15 +193,15 @@ def get_eff_charge(hist, inpDict):
     if phi_setting == "Right":
         normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
         normfac_data = 1/(data_charge_right)
-        normfac_simc = (simc_normfactor)/(simc_nevents)
+        normfac_simc = (simc_normfactor)/(simc_nevents*1e6)
     if phi_setting == "Left":
         normfac_dummy = 1/(dummy_charge_left*dummy_target_corr)
         normfac_data = 1/(data_charge_left)
-        normfac_simc = (simc_normfactor)/(simc_nevents)
+        normfac_simc = (simc_normfactor)/(simc_nevents*1e6)
     if phi_setting == "Center":
         normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
         normfac_data = 1/(data_charge_center)
-        normfac_simc = (simc_normfactor)/(simc_nevents)
+        normfac_simc = (simc_normfactor)/(simc_nevents*1e6)
           
     ################################################################################################################################################        
 
