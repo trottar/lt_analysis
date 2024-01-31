@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 06:22:23 trottar"
+# Time-stamp: "2024-01-31 17:57:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,7 +81,8 @@ def rand_sub(phi_setting, inpDict):
     InData_error_efficiency_right = inpDict["InData_error_efficiency_right"] 
     InData_error_efficiency_left = inpDict["InData_error_efficiency_left"] 
     InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]    
-    efficiency_table = inpDict["efficiency_table"] 
+    efficiency_table = inpDict["efficiency_table"]
+    pThetaVal = inpDict["pThetaVal{}".format(phi_setting)]
     ParticleType = inpDict["ParticleType"]
 
     # Define diamond cut parameters
@@ -450,6 +451,60 @@ def rand_sub(phi_setting, inpDict):
     W_vs_t_DUMMY_RAND = TH2D("W_vs_t_DUMMY_RAND", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
     EPS_vs_t_DUMMY_RAND = TH2D("EPS_vs_t_DUMMY_RAND", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
     MM_vs_t_DUMMY_RAND = TH2D("MM_vs_t_DUMMY_RAND", "Missing Mass vs t; MM; t", 50, 0, 2, 50, inpDict["tmin"], inpDict["tmax"])
+
+    ################################################################################################################################################
+    ##############
+    # HARD CODED #
+    ##############
+
+    # Adjusted HMS delta to fix hsxfp correlation
+    # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
+    # Note: these momenta are from Dave's slides and may not reflect what is used here
+    h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
+    c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
+
+    c0_dict = {}
+
+    for c0, p in zip(h_momentum_list):
+        # Q0p5W2p40
+        if p == 0.968:
+            c0_dict["Q0p5W2p40_lowe"] = c0
+        #elif p == 2.066: # Proper value
+        elif p == 2.185:
+            c0_dict["Q0p5W2p40_highe"] = c0
+        # Q2p1W2p95
+        #elif p == 0.888: # Proper value
+        elif p == 0.889:
+            c0_dict["Q2p1W2p95_lowe"] = c0
+        elif p == 5.292:
+            c0_dict["Q2p1W2p95_highe"] = c0
+        # Q3p0W2p32
+        elif p == 2.185:
+            c0_dict["Q3p0W2p32_lowe"] = c0
+        elif p == 6.59:
+            c0_dict["Q3p0W2p32_highe"] = c0
+        # Q3p0W3p14            
+        #elif p == 1.821: # Proper value
+        elif p == 0.968:        
+            c0_dict["Q3p0W3p14_lowe"] = c0
+        #elif p == 4.204: # Proper value
+        elif p == 4.2:
+            c0_dict["Q3p0W3p14_highe"] = c0
+        # Q4p4W2p74
+        elif p == 2.328:
+            c0_dict["Q4p4W2p74_lowe"] = c0
+        elif p == 4.712:
+            c0_dict["Q4p4W2p74_highe"] = c0
+        # Q5p5W3p02            
+        #elif p == 0.962: # Proper value
+        elif p == 0.968:
+            c0_dict["Q5p5W3p02_lowe"] = c0
+        elif p == 3.266:
+            c0_dict["Q5p5W3p02_highe"] = c0
+            
+    ##############
+    ##############        
+    ##############
     
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -459,6 +514,16 @@ def rand_sub(phi_setting, inpDict):
 
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
+        
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
 
         #CUTs Definations 
         SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
