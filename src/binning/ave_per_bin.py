@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 18:07:48 trottar"
+# Time-stamp: "2024-01-31 18:48:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,7 +57,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
     processed_dict = {}
     
     ParticleType = inpDict["ParticleType"]
-
+    EPSSET = inpDict["EPSSET"]
+    
     # Define diamond cut parameters
     a1 = inpDict["a1"]
     b1 = inpDict["b1"]
@@ -160,7 +161,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             # HARD CODED #
             ##############
 
-            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
             ##############
             ##############        
@@ -227,7 +228,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             # HARD CODED #
             ##############
 
-            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
             ##############
             ##############        
@@ -294,7 +295,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             # HARD CODED #
             ##############
 
-            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
             ##############
             ##############        
@@ -361,7 +362,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             # HARD CODED #
             ##############
 
-            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
             ##############
             ##############        

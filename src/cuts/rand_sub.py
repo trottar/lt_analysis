@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 18:07:32 trottar"
+# Time-stamp: "2024-01-31 18:48:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,7 +82,7 @@ def rand_sub(phi_setting, inpDict):
     InData_error_efficiency_left = inpDict["InData_error_efficiency_left"] 
     InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]    
     efficiency_table = inpDict["efficiency_table"]
-    pThetaVal = inpDict["pThetaVal{}".format(phi_setting)]
+    EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
 
     # Define diamond cut parameters
@@ -520,7 +520,7 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
         ##############
         ##############        
@@ -646,7 +646,7 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
         ##############
         ##############        
@@ -765,7 +765,7 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
         ##############
         ##############        
@@ -881,7 +881,7 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,phi_setting.lower())]*evt.hsxpfp
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
         ##############
         ##############        
