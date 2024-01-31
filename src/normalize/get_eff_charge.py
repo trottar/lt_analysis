@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 03:38:58 trottar"
+# Time-stamp: "2024-01-31 06:05:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -202,7 +202,12 @@ def get_eff_charge(hist, inpDict):
         normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
         normfac_data = 1/(data_charge_center)
         normfac_simc = (simc_normfactor)/(simc_nevents*1e6)
-          
+
+
+    print("\n\n{} data normalization: {}".format(phi_setting, normfac_data))
+    print("{} dummy normalization: {}".format(phi_setting, normfac_dummy))
+    print("{} simc normalization: {}".format(phi_setting, normfac_simc))
+        
     ################################################################################################################################################        
 
     histDict["InData_efficiency"] = InData_efficiency

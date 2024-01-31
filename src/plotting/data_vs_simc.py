@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 01:39:33 trottar"
+# Time-stamp: "2024-01-31 06:03:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,11 +106,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
     ################################################################################################################################################
-
-
-    print("\n\nData normalization: ", hist["normfac_data"])
-    print("Dummy normalization: ", hist["normfac_dummy"])
-    print("Simc normalization: ", hist["normfac_simc"])
     
     for hist in histlist_copy:
         

@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2023-11-08 18:55:09 trottar"
+# Time-stamp: "2024-01-31 06:01:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -28,7 +28,7 @@ from utility import run_fortran
 # Importing param model for weight iteration
 
 sys.path.append("models")
-from param_active import iterWeight    
+from param_active import iterWeight
 
 ################################################################################################################################################
 '''
