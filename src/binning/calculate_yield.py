@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 06:07:27 trottar"
+# Time-stamp: "2024-01-31 06:17:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -505,7 +505,8 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
                 if(HMS_Acceptance & SHMS_Acceptance & Diamond):
 
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
-                        if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                        #if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (evt.phipq)*(180 / math.pi) <= phi_bins[k+1]:
                             H_t_SIMC.Fill(-evt.t)
                             H_MM_SIMC.Fill(evt.missmass)
 
