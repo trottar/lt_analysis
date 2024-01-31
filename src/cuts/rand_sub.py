@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 16:07:33 trottar"
+# Time-stamp: "2024-01-31 06:22:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -539,7 +539,6 @@ def rand_sub(phi_setting, inpDict):
           H_hsdelta_DATA.Fill(evt.hsdelta)
           H_hsxptar_DATA.Fill(evt.hsxptar)	
           H_hsyptar_DATA.Fill(evt.hsyptar)
-
 
           # SIMC goes from 0 to 2pi so no need for +pi          
           H_ph_q_DATA.Fill((evt.ph_q+math.pi))
