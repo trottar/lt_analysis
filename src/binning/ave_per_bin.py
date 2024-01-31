@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 18:48:26 trottar"
+# Time-stamp: "2024-01-31 18:51:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,6 +57,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
     processed_dict = {}
     
     ParticleType = inpDict["ParticleType"]
+    
+    Q2 = inpDict["Q2"]
+    W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]
     
     # Define diamond cut parameters
