@@ -94,11 +94,11 @@ fi
 #NumtBins=1
 #NumPhiBins=1
 # Q2=2p1
-NumtBins=3
-NumPhiBins=10
+#NumtBins=3
+#NumPhiBins=10
 # Q2=3p0, W=3p14
-#NumtBins=4
-#NumPhiBins=12
+NumtBins=4
+NumPhiBins=12
 # Q2=5p5
 #NumtBins=2
 #NumPhiBins=8
@@ -108,11 +108,11 @@ POL="+1" # All KaonLT is positive polarity
 # TMIN should not equal zero (unless calc_xsect.f is adapted)
 # Make sure 3 sig figs (no more)
 # Q2=2p1
-TMIN=0.001
-TMAX=0.600
-# Q2=3p0, W=3p14
 #TMIN=0.001
-#TMAX=0.990
+#TMAX=0.600
+# Q2=3p0, W=3p14
+TMIN=0.001
+TMAX=0.990
 # Q2=5p5
 #TMIN=0.001
 #TMAX=1.300
