@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 12:22:03 trottar"
+# Time-stamp: "2024-02-01 04:45:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -234,15 +234,13 @@ print("\n\n")
 
 # Create a new directory for each iteration in cache
 # ***Moved up in procedure vs main.py since required for weight iteration***
-new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
+new_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
-# ***Also must create new root directory in iter directory***
-create_dir(new_dir+"/root")
 
 # ***Moved from main.py location below because needed for weight iteration***
 # Save fortran scripts that contain iteration functional form of parameterization
 py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
-output_file_lst.append(py_param) 
+output_file_lst.append(py_param)
 
 # Active scripts to make file selection dynamic
 # Needs to be done this way because of fortran compiler limitations
@@ -410,7 +408,7 @@ create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Redefinition from above, but should be the same! This is just to stay consistent with main.py
 # ***Parameter files from last and this iteration!***
-old_param_file = '{}/{}/parameters/par.{}_Q{}W{}.dat'.format(CACHEPATH, closest_date, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
+old_param_file = '{}/{}/{}/parameters/par.{}_Q{}W{}.dat'.format(CACHEPATH, USER, closest_date, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 try:
     cut_summary_lst += "\nUnsep Parameterization for {}...".format(closest_date)
     with open(old_param_file, 'r') as file:
@@ -515,7 +513,7 @@ if EPSSET == "high":
     with open(f_path, 'r') as file:
         total_lines = len(file.readlines())
 
-    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines))
+    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
     shutil.copy(f_path,f_path_new)
 
     for f in output_file_lst:
@@ -547,8 +545,8 @@ if EPSSET == "high":
                 if "{}".format(ParticleType) not in f_dir:
                     create_dir(new_dir+"/"+f_dir)
                     f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("Copying {} to {}".format(f,f_new))
-                    shutil.copy(f, f_new)
+                    print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
         else:
             f_new = new_dir
             print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))

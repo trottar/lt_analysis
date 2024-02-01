@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-27 16:44:15 trottar"
+# Time-stamp: "2024-02-01 04:21:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -39,7 +39,7 @@ CACHEPATH=lt.CACHEPATH
 
 ###############################################################################################################################################
 
-lt_param_file = "{}/src/simc_ana/par_pl_Q{}W{}".format(LTANAPATH, Q2, W)
+lt_param_file = "{}/src/models/par_pl_Q{}W{}".format(LTANAPATH, Q2, W)
 simc_param_file = "{}/par.pl".format(SIMCPATH)
 
 print("\n\nUpdating {} with {}...".format(simc_param_file, lt_param_file))

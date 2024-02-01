@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-30 12:21:23 trottar"
+# Time-stamp: "2024-02-01 04:41:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -588,7 +588,7 @@ from physics_lists import create_lists
 create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Copy initial parameterization to specific particle type directory
-shutil.copy('{}/src/simc_ana/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")), '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")))
+shutil.copy('{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")), '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")))
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
@@ -673,7 +673,7 @@ output_file_lst.append(unsep_file)
 '''
 
 # Create a new directory for each iteration in cache
-new_dir = CACHEPATH+"/"+USER+"/"+ParticleType.lower()+"/"+formatted_date
+new_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
 
 if EPSSET == "high":
@@ -712,7 +712,7 @@ if EPSSET == "high":
     with open(f_path, 'r') as file:
         total_lines = len(file.readlines())
 
-    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines))
+    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
     print("Copying {} to {}".format(f_path,f_path_new))
     shutil.copy(f_path,f_path_new)
 
