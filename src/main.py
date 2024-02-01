@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-01 14:58:31 trottar"
+# Time-stamp: "2024-02-01 15:01:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -196,6 +196,8 @@ if os.path.exists(f_path):
 
 
 # Create a new directory for each iteration in cache
+new_dir = "{}/{}/{}/Q{}W{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W)
+create_dir(new_dir)
 new_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
     
