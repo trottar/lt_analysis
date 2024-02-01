@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-01 15:01:00 trottar"
+# Time-stamp: "2024-02-01 15:02:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -193,7 +193,6 @@ f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 # Check if the file exists
 if os.path.exists(f_path):
     os.remove(f_path)
-
 
 # Create a new directory for each iteration in cache
 new_dir = "{}/{}/{}/Q{}W{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W)
