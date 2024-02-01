@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 06:21:03 trottar"
+# Time-stamp: "2024-01-31 21:02:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,33 +57,33 @@ def compare_simc(rootFileSimc, hist, inpDict):
     
     phi_setting = hist["phi_setting"]
     
-    kinematics = inpDict["kinematics"] 
-    W = inpDict["W"] 
-    Q2 = inpDict["Q2"] 
-    EPSVAL = inpDict["EPSVAL"] 
-    InDATAFilename = inpDict["InDATAFilename"] 
-    InDUMMYFilename = inpDict["InDUMMYFilename"] 
-    OutFilename = inpDict["OutFilename"] 
-    tmin = inpDict["tmin"] 
-    tmax = inpDict["tmax"] 
-    NumtBins = inpDict["NumtBins"] 
-    NumPhiBins = inpDict["NumPhiBins"] 
-    runNumRight = inpDict["runNumRight"] 
-    runNumLeft = inpDict["runNumLeft"] 
+    kinematics = inpDict["kinematics"]
+    W = inpDict["W"]
+    Q2 = inpDict["Q2"]
+    EPSVAL = inpDict["EPSVAL"]
+    InDATAFilename = inpDict["InDATAFilename"]
+    InDUMMYFilename = inpDict["InDUMMYFilename"]
+    OutFilename = inpDict["OutFilename"]
+    tmin = inpDict["tmin"]
+    tmax = inpDict["tmax"]
+    NumtBins = inpDict["NumtBins"]
+    NumPhiBins = inpDict["NumPhiBins"]
+    runNumRight = inpDict["runNumRight"]
+    runNumLeft = inpDict["runNumLeft"]
     runNumCenter = inpDict["runNumCenter"]
-    data_charge_right = inpDict["data_charge_right"] 
-    data_charge_left = inpDict["data_charge_left"] 
-    data_charge_center = inpDict["data_charge_center"] 
-    dummy_charge_right = inpDict["dummy_charge_right"] 
-    dummy_charge_left = inpDict["dummy_charge_left"] 
+    data_charge_right = inpDict["data_charge_right"]
+    data_charge_left = inpDict["data_charge_left"]
+    data_charge_center = inpDict["data_charge_center"]
+    dummy_charge_right = inpDict["dummy_charge_right"]
+    dummy_charge_left = inpDict["dummy_charge_left"]
     dummy_charge_center = inpDict["dummy_charge_center"]
-    InData_efficiency_right = inpDict["InData_efficiency_right"]    
-    InData_efficiency_left = inpDict["InData_efficiency_left"] 
+    InData_efficiency_right = inpDict["InData_efficiency_right"]   
+    InData_efficiency_left = inpDict["InData_efficiency_left"]
     InData_efficiency_center = inpDict["InData_efficiency_center"]
-    InData_error_efficiency_right = inpDict["InData_error_efficiency_right"] 
-    InData_error_efficiency_left = inpDict["InData_error_efficiency_left"] 
+    InData_error_efficiency_right = inpDict["InData_error_efficiency_right"]
+    InData_error_efficiency_left = inpDict["InData_error_efficiency_left"]
     InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]
-    efficiency_table = inpDict["efficiency_table"] 
+    efficiency_table = inpDict["efficiency_table"]
     ParticleType = inpDict["ParticleType"]
 
     # Define diamond cut parameters
@@ -158,7 +158,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     H_q_SIMC        = TH1D("H_q_SIMC","q", 100, 0.0, 10.0)
     H_Q2_SIMC       = TH1D("H_Q2_SIMC","Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
     H_W_SIMC  = TH1D("H_W_SIMC","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
-    H_t_SIMC       = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])  
+    H_t_SIMC       = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_SIMC  = TH1D("H_MM_SIMC","MM_{K}", 100, 0.7, 1.5)
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
@@ -228,17 +228,13 @@ def compare_simc(rootFileSimc, hist, inpDict):
           H_t_SIMC.Fill(-evt.t, evt.iter_weight)
           H_epsilon_SIMC.Fill(evt.epsilon, evt.iter_weight)
           #H_MM_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.iter_weight)
-          H_MM_SIMC.Fill(evt.missmass, evt.Weight)
-
-    ################################################################################################################################################
-    # Normalize simc by normfactor/nevents
-
-    normfac_simc = (simc_normfactor)/(simc_nevents)
+          H_MM_SIMC.Fill(evt.missmass, evt.iter_weight)
               
     ################################################################################################################################################    
 
     histDict["InFile_SIMC"] = InFile_SIMC
-    histDict["normfac_simc"] = normfac_simc
+    histDict["simc_normfactor"] = simc_normfactor
+    histDict["simc_nevents"] = simc_neventsx
     histDict["H_Weight_SIMC"] =     H_Weight_SIMC
     histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
     histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC

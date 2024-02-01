@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 19:05:58 trottar"
+# Time-stamp: "2024-01-31 21:07:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -500,7 +500,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
         # Scale the lists before subtraction
-        print("Y_data = {}*{}".format(np.sum(hist_val_data), normfac_data))
+        print("Y_data = {:.5e}*{:.5e}".format(np.sum(hist_val_data), normfac_data))
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
@@ -660,7 +660,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
     print("-"*25)
     for simc in binned_hist_simc:
         bin_val_simc, hist_val_simc = simc
-        print("Y_simc = {}*{}".format(np.sum(hist_val_simc), normfac_simc))
+        print("Y_simc = {:.5e}*{:.5e}".format(np.sum(hist_val_simc), normfac_simc))
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         total_count = np.sum(sub_val)
         yld = total_count*normfac_simc

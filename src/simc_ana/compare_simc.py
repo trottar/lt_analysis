@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 06:21:07 trottar"
+# Time-stamp: "2024-01-31 20:55:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,33 +57,33 @@ def compare_simc(hist, inpDict):
 
     phi_setting = hist["phi_setting"]
     
-    kinematics = inpDict["kinematics"] 
-    W = inpDict["W"] 
-    Q2 = inpDict["Q2"] 
-    EPSVAL = inpDict["EPSVAL"] 
-    InDATAFilename = inpDict["InDATAFilename"] 
-    InDUMMYFilename = inpDict["InDUMMYFilename"] 
-    OutFilename = inpDict["OutFilename"] 
-    tmin = inpDict["tmin"] 
-    tmax = inpDict["tmax"] 
-    NumtBins = inpDict["NumtBins"] 
-    NumPhiBins = inpDict["NumPhiBins"] 
-    runNumRight = inpDict["runNumRight"] 
-    runNumLeft = inpDict["runNumLeft"] 
+    kinematics = inpDict["kinematics"]
+    W = inpDict["W"]
+    Q2 = inpDict["Q2"]
+    EPSVAL = inpDict["EPSVAL"]
+    InDATAFilename = inpDict["InDATAFilename"]
+    InDUMMYFilename = inpDict["InDUMMYFilename"]
+    OutFilename = inpDict["OutFilename"]
+    tmin = inpDict["tmin"]
+    tmax = inpDict["tmax"]
+    NumtBins = inpDict["NumtBins"]
+    NumPhiBins = inpDict["NumPhiBins"]
+    runNumRight = inpDict["runNumRight"]
+    runNumLeft = inpDict["runNumLeft"]
     runNumCenter = inpDict["runNumCenter"]
-    data_charge_right = inpDict["data_charge_right"] 
-    data_charge_left = inpDict["data_charge_left"] 
-    data_charge_center = inpDict["data_charge_center"] 
-    dummy_charge_right = inpDict["dummy_charge_right"] 
-    dummy_charge_left = inpDict["dummy_charge_left"] 
-    dummy_charge_center = inpDict["dummy_charge_center"] 
-    InData_efficiency_right = inpDict["InData_efficiency_right"] 
-    InData_efficiency_left = inpDict["InData_efficiency_left"] 
+    data_charge_right = inpDict["data_charge_right"]
+    data_charge_left = inpDict["data_charge_left"]
+    data_charge_center = inpDict["data_charge_center"]
+    dummy_charge_right = inpDict["dummy_charge_right"]
+    dummy_charge_left = inpDict["dummy_charge_left"]
+    dummy_charge_center = inpDict["dummy_charge_center"]
+    InData_efficiency_right = inpDict["InData_efficiency_right"]
+    InData_efficiency_left = inpDict["InData_efficiency_left"]
     InData_efficiency_center = inpDict["InData_efficiency_center"]
-    InData_error_efficiency_right = inpDict["InData_error_efficiency_right"] 
-    InData_error_efficiency_left = inpDict["InData_error_efficiency_left"] 
-    InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]     
-    efficiency_table = inpDict["efficiency_table"] 
+    InData_error_efficiency_right = inpDict["InData_error_efficiency_right"]
+    InData_error_efficiency_left = inpDict["InData_error_efficiency_left"]
+    InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]    
+    efficiency_table = inpDict["efficiency_table"]
     ParticleType = inpDict["ParticleType"]
 
     # Define diamond cut parameters
