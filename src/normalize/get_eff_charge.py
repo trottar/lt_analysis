@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-02 12:39:40 trottar"
+# Time-stamp: "2024-02-02 13:03:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,8 +55,8 @@ def get_eff_charge(hist, inpDict):
     phi_setting = hist["phi_setting"]
     simc_normfactor = hist["simc_normfactor"]
     simc_nevents = hist["simc_nevents"]
-    NumEvts_MM_DATA = histDict["NumEvts_MM_DATA"]
-    NumEvts_MM_DUMMY = histDict["NumEvts_MM_DUMMY"]
+    NumEvts_MM_DATA = hist["NumEvts_MM_DATA"]
+    NumEvts_MM_DUMMY = hist["NumEvts_MM_DUMMY"]
     
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
