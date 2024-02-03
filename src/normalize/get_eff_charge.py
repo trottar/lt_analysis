@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-03 12:18:15 trottar"
+# Time-stamp: "2024-02-03 12:19:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,6 +57,7 @@ def get_eff_charge(hist, inpDict):
     simc_nevents = hist["simc_nevents"]
     NumEvts_MM_DATA = hist["NumEvts_MM_DATA"]
     NumEvts_MM_DUMMY = hist["NumEvts_MM_DUMMY"]
+    NumEvts_MM_SIMC = hist["NumEvts_MM_SIMC"]        
     
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
@@ -207,6 +208,7 @@ def get_eff_charge(hist, inpDict):
 
     print("\n\n{} data total number of events: {}".format(phi_setting, NumEvts_MM_DATA))
     print("{} dummy total number of events: {}".format(phi_setting, NumEvts_MM_DUMMY))
+    print("{} simc total number of events: {}".format(phi_setting, NumEvts_MM_SIMC))
     print("\n\n{} data normalization: {}".format(phi_setting, normfac_data))
     print("{} dummy normalization: {}".format(phi_setting, normfac_dummy))
     print("{} simc normalization: {}".format(phi_setting, normfac_simc))
