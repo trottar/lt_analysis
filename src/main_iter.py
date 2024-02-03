@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-03 18:09:30 trottar"
+# Time-stamp: "2024-02-03 18:19:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -260,6 +260,8 @@ for hist in histlist:
     old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
     new_simc_root = old_simc_root.replace(closest_date, formatted_date)
     new_simc_hist = old_simc_hist.replace(closest_date, formatted_date)
+    # ***Create root directory here since it is used for weight iteration***
+    create_dir(new_dir+"/root")
     # Make sure old simc root file exists
     if os.path.exists(old_simc_root):
         # Copy to new iteration so and then edit the weight
