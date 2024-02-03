@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-16 02:03:50 trottar"
+# Time-stamp: "2024-02-03 14:14:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -407,7 +407,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             C_yieldvsphi_data_plt.cd(i+1)
 
             multiDict["G_yieldvsphi_plt_{}".format(i)].Draw("AP")
-            multiDict["G_yieldvsphi_plt_{}".format(i)].SetTitle("{} t = {};#phi; Yield".format(phiset,val))
+            multiDict["G_yieldvsphi_plt_{}".format(i)].SetTitle("{} t = {:.4f};#phi; Yield".format(phiset,val))
 
             multiDict["G_yieldvsphi_plt_{}".format(i)].GetYaxis().SetTitleOffset(1.5)
             multiDict["G_yieldvsphi_plt_{}".format(i)].GetXaxis().SetTitleOffset(1.5)
@@ -446,7 +446,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         ratio = match_to_bin(ratio)
         phibins = match_to_bin(phibins)
 
-        multiDict = {}
+        multiDict = {:.4f}
         for i, val in enumerate(t_bin_centers):
 
             multiDict["G_ratiovsphi_plt_{}".format(i)] = TMultiGraph()
@@ -461,7 +461,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             C_ratiovsphi_plt.cd(i+1)
 
             multiDict["G_ratiovsphi_plt_{}".format(i)].Draw("AP")
-            multiDict["G_ratiovsphi_plt_{}".format(i)].SetTitle("{} t = {};#phi; Ratio".format(phiset,val))
+            multiDict["G_ratiovsphi_plt_{}".format(i)].SetTitle("{} t = {:.4f};#phi; Ratio".format(phiset,val))
 
             multiDict["G_ratiovsphi_plt_{}".format(i)].GetYaxis().SetTitleOffset(1.5)
             multiDict["G_ratiovsphi_plt_{}".format(i)].GetXaxis().SetTitleOffset(1.5)

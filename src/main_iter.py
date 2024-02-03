@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-01 15:02:48 trottar"
+# Time-stamp: "2024-02-03 18:09:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -123,7 +123,7 @@ closest_date = last_iter(f_iter, formatted_date)
 print("\n\nThe last iteration was ",closest_date)
 
 # Save this as the directory to grab further information
-prev_iter_dir = "{}/{}/{}/{}".format(CACHEPATH,USER,ParticleType.lower(),closest_date)
+prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
 
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")

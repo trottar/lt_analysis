@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-03 12:44:57 trottar"
+# Time-stamp: "2024-02-03 13:34:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -208,8 +208,7 @@ def get_eff_charge(hist, inpDict):
 
     print("\n\n{} data total number of events: {}".format(phi_setting, NumEvts_MM_DATA))
     print("{} dummy total number of events: {}".format(phi_setting, NumEvts_MM_DUMMY))
-    print("{} simc weighted events: {}".format(phi_setting, NumEvts_MM_SIMC))
-    print("{} simc total number of events: {}".format(phi_setting, NumEvts_MM_SIMC*normfac_simc))
+    print("{} simc weighted total number of events: {}".format(phi_setting, NumEvts_MM_SIMC))
     print("\n\n{} data normalization: {}".format(phi_setting, normfac_data))
     print("{} dummy normalization: {}".format(phi_setting, normfac_dummy))
     print("{} simc normalization: {}".format(phi_setting, normfac_simc))
