@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-03 14:14:29 trottar"
+# Time-stamp: "2024-02-03 18:33:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -446,7 +446,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         ratio = match_to_bin(ratio)
         phibins = match_to_bin(phibins)
 
-        multiDict = {:.4f}
+        multiDict = {}
         for i, val in enumerate(t_bin_centers):
 
             multiDict["G_ratiovsphi_plt_{}".format(i)] = TMultiGraph()
