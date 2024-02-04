@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 15:20:38 trottar"
+# Time-stamp: "2024-02-04 15:23:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,7 +81,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 def show_pdf_with_evince(file_path):
 
     def signal_handler(sig, frame):
-        print("\n\n\tExiting analysis!")        
+        print("\n\n\tCTRL+C detected...Exiting analysis!")
         sys.exit(2)
         
     # Set up the signal handler
@@ -115,7 +115,7 @@ def show_pdf_with_evince(file_path):
         print("An error occurred: {}".format(e))
     except KeyboardInterrupt:
         # Handle Ctrl+C gracefully
-        print("\n\n\tExiting analysis!")
+        print("\n\n\tCTRL+C detected...Exiting analysis!")
         process.terminate()
         sys.exit(2)        
 
