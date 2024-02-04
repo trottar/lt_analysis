@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 16:39:30 trottar"
+# Time-stamp: "2024-02-04 16:42:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,12 +107,9 @@ def plot_iteration(histlist, phisetlist, inpDict):
                     Misc.progressBar(i, HistNumEvts + 1,bar_length=25)
                     weight = hist["H_Weight_SIMC"].GetBinContent(binIndex)
                     iter_weight = hist["H_iWeight_SIMC"].GetBinContent(binIndex)
-                    if iter_weight == 0.0:
-                        hist_copy["{}_OLD".format(key)].Fill(0.0)
-                    else:
-                        #hist_copy["{}_OLD".format(key)].Fill(val.GetBinCenter(binIndex), weight/iter_weight)
-                        hist_copy["{}_OLD".format(key)].Fill(val.GetBinCenter(binIndex))
-                        print("!!!!!!!!!",val.GetBinCenter(binIndex),key,weight,iter_weight,weight/iter_weight)
+                    hist_copy["{}_OLD".format(key)].Fill(val.GetBinCenter(binIndex), weight)
+                    hist_copy["{}".format(key)].Fill(val.GetBinCenter(binIndex), iter_weight)
+                    print("!!!!!!!!!",val.GetBinCenter(binIndex),key,weight,iter_weight)
         hist.update(hist_copy)
 
     CWeight = TCanvas()
