@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 14:41:01 trottar"
+# Time-stamp: "2024-02-04 15:01:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,6 +108,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist.update(hist_copy)
 
     CWeight = TCanvas()
+    CWeight.Divide(2,2)
     l_Weight = TLegend(0.1, 0.75, 0.35, 0.95)
     
     for i,hist in enumerate(histlist_copy):
@@ -124,6 +125,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+'(')
                 
     CQ2 = TCanvas()
+    CQ2.Divide(2,2)
     
     for i,hist in enumerate(histlist_copy):
         CQ2.cd(i)
@@ -136,6 +138,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     CQ2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 
     CW = TCanvas()
+    CW.Divide(2,2)
     
     for i,hist in enumerate(histlist_copy):
         CW.cd(i)
@@ -148,6 +151,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     CW.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 
     Ct = TCanvas()
+    Ct.Divide(2,2)
     
     for i,hist in enumerate(histlist_copy):
         Ct.cd(i)
@@ -160,6 +164,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     Ct.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 
     Cepsilon = TCanvas()
+    Cepsilon.Divide(2,2)
     
     for i,hist in enumerate(histlist_copy):
         Cepsilon.cd(i)
@@ -172,6 +177,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     Cepsilon.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 
     CMM = TCanvas()
+    CMM.Divide(2,2)
     
     for i,hist in enumerate(histlist_copy):
         CMM.cd(i)
@@ -184,6 +190,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
     
     Cph_q = TCanvas()
+    Cph_q.Divide(2,2)
     
     for i,hist in enumerate(histlist_copy):
         Cph_q.cd(i)
