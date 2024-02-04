@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 17:52:12 trottar"
+# Time-stamp: "2024-02-04 18:07:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,22 +66,15 @@ def plot_iteration(histlist, phisetlist, inpDict):
     closest_date = inpDict["closest_date"]
     formatted_date = inpDict["formatted_date"]
 
-    # Create an empty list to store copied histograms
-    histlist_copy = []
-
-    # Check if the value of the dictionary is a TObject that can use .Clone()
-    for hist in histlist:
-        hist_copy = {}
-        for key, val in hist.items():
-            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "SIMC" in key:
-                # Clone the TObject if it has the 'Clone' method
-                hist_copy[key] = val.Clone()
-            else:
-                if "SIMC" in key or "phi_setting" in key:
-                    # Otherwise, just copy the value
-                    hist_copy[key] = val
-        # Append the copied histogram dictionary to the new list
-        histlist_copy.append(hist_copy)
+    # Define diamond cut parameters
+    a1 = inpDict["a1"]
+    b1 = inpDict["b1"]
+    a2 = inpDict["a2"]
+    b2 = inpDict["b2"]
+    a3 = inpDict["a3"]
+    b3 = inpDict["b3"]
+    a4 = inpDict["a4"]
+    b4 = inpDict["b4"]
 
     ################################################################################################################################################
 
@@ -91,26 +84,169 @@ def plot_iteration(histlist, phisetlist, inpDict):
 
     ################################################################################################################################################
 
+
+    # Create an empty list to store copied histograms
+    histlist_copy = []
+    
+    for hist in histlist:
+        hist_copy = {}
+        hist_copy["InFile_SIMC"] = hist["InFile_SIMC"].Clone()
+        # Append the copied histogram dictionary to the new list
+        histlist_copy.append(hist_copy)
+    
     for hist in histlist_copy:
 
-        hist_copy = hist.copy()
+        tree_simc = hist["InFile_SIMC"]
+
+        TBRANCH_SIMC  = tree_simc.Get("h10")
+
+        hist["H_Weight_SIMC"] = TH1D("H_Weight_SIMC", "Simc Weight", 100, 0, 1e-6)
+        hist["H_hsdelta_SIMC"] = TH1D("H_hsdelta_SIMC","HMS Delta", 100, -20.0, 20.0)
+        hist["H_hsxptar_SIMC"] = TH1D("H_hsxptar_SIMC","HMS xptar", 100, -0.1, 0.1)
+        hist["H_hsyptar_SIMC"] = TH1D("H_hsyptar_SIMC","HMS yptar", 100, -0.1, 0.1)
+        hist["H_ssxfp_SIMC"] = TH1D("H_ssxfp_SIMC","SHMS xfp", 100, -25.0, 25.0)
+        hist["H_ssyfp_SIMC"] = TH1D("H_ssyfp_SIMC","SHMS yfp", 100, -25.0, 25.0)
+        hist["H_ssxpfp_SIMC"] = TH1D("H_ssxpfp_SIMC","SHMS xpfp", 100, -0.09, 0.09)
+        hist["H_ssypfp_SIMC"] = TH1D("H_ssypfp_SIMC","SHMS ypfp", 100, -0.05, 0.04)
+        hist["H_hsxfp_SIMC"] = TH1D("H_hsxfp_SIMC","HMS xfp", 100, -40.0, 40.0)
+        hist["H_hsyfp_SIMC"] = TH1D("H_hsyfp_SIMC","HMS yfp", 100, -20.0, 20.0)
+        hist["H_hsxpfp_SIMC"] = TH1D("H_hsxpfp_SIMC","HMS xpfp", 100, -0.09, 0.05)
+        hist["H_hsypfp_SIMC"] = TH1D("H_hsypfp_SIMC","HMS ypfp", 100, -0.05, 0.04)
+        hist["H_ssdelta_SIMC"] = TH1D("H_ssdelta_SIMC","SHMS delta", 100, -20.0, 20.0)
+        hist["H_ssxptar_SIMC"] = TH1D("H_ssxptar_SIMC","SHMS xptar", 100, -0.1, 0.1)
+        hist["H_ssyptar_SIMC"] = TH1D("H_ssyptar_SIMC","SHMS yptar", 100, -0.04, 0.04)
+        hist["H_q_SIMC"] = TH1D("H_q_SIMC","q", 100, 0.0, 10.0)
+        hist["H_Q2_SIMC"] = TH1D("H_Q2_SIMC","Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
+        hist["H_W_SIMC"] = TH1D("H_W_SIMC","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
+        hist["H_t_SIMC"] = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])
+        hist["H_epsilon_SIMC"] = TH1D("H_epsilon_SIMC","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
+        hist["H_MM_SIMC"] = TH1D("H_MM_SIMC","MM_{K}", 100, 0.7, 1.5)
+        hist["H_th_SIMC"] = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
+        hist["H_ph_SIMC"] = TH1D("H_ph_SIMC","Y' tar", 100, -0.1, 0.1)
+        hist["H_ph_q_SIMC"] = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
+        hist["H_th_q_SIMC"] = TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        hist["H_ph_recoil_SIMC"] = TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        hist["H_th_recoil_SIMC"] = TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        hist["H_pmiss_SIMC"] = TH1D("H_pmiss_SIMC","pmiss", 100, 0.0, 10.0)
+        hist["H_emiss_SIMC"] = TH1D("H_emiss_SIMC","emiss", 100, 0.0, 10.0)
+        hist["H_pmx_SIMC"] = TH1D("H_pmx_SIMC","pmx", 100, -10.0, 10.0)
+        hist["H_pmy_SIMC"] = TH1D("H_pmy_SIMC","pmy ", 100, -10.0, 10.0)
+        hist["H_pmz_SIMC"] = TH1D("H_pmz_SIMC","pmz", 100, -10.0, 10.0)
+
+        hist["H_Weight_SIMC_OLD"] = TH1D("H_Weight_SIMC_OLD", "Simc Weight", 100, 0, 1e-6)
+        hist["H_hsdelta_SIMC_OLD"] = TH1D("H_hsdelta_SIMC_OLD","HMS Delta", 100, -20.0, 20.0)
+        hist["H_hsxptar_SIMC_OLD"] = TH1D("H_hsxptar_SIMC_OLD","HMS xptar", 100, -0.1, 0.1)
+        hist["H_hsyptar_SIMC_OLD"] = TH1D("H_hsyptar_SIMC_OLD","HMS yptar", 100, -0.1, 0.1)
+        hist["H_ssxfp_SIMC_OLD"] = TH1D("H_ssxfp_SIMC_OLD","SHMS xfp", 100, -25.0, 25.0)
+        hist["H_ssyfp_SIMC_OLD"] = TH1D("H_ssyfp_SIMC_OLD","SHMS yfp", 100, -25.0, 25.0)
+        hist["H_ssxpfp_SIMC_OLD"] = TH1D("H_ssxpfp_SIMC_OLD","SHMS xpfp", 100, -0.09, 0.09)
+        hist["H_ssypfp_SIMC_OLD"] = TH1D("H_ssypfp_SIMC_OLD","SHMS ypfp", 100, -0.05, 0.04)
+        hist["H_hsxfp_SIMC_OLD"] = TH1D("H_hsxfp_SIMC_OLD","HMS xfp", 100, -40.0, 40.0)
+        hist["H_hsyfp_SIMC_OLD"] = TH1D("H_hsyfp_SIMC_OLD","HMS yfp", 100, -20.0, 20.0)
+        hist["H_hsxpfp_SIMC_OLD"] = TH1D("H_hsxpfp_SIMC_OLD","HMS xpfp", 100, -0.09, 0.05)
+        hist["H_hsypfp_SIMC_OLD"] = TH1D("H_hsypfp_SIMC_OLD","HMS ypfp", 100, -0.05, 0.04)
+        hist["H_ssdelta_SIMC_OLD"] = TH1D("H_ssdelta_SIMC_OLD","SHMS delta", 100, -20.0, 20.0)
+        hist["H_ssxptar_SIMC_OLD"] = TH1D("H_ssxptar_SIMC_OLD","SHMS xptar", 100, -0.1, 0.1)
+        hist["H_ssyptar_SIMC_OLD"] = TH1D("H_ssyptar_SIMC_OLD","SHMS yptar", 100, -0.04, 0.04)
+        hist["H_q_SIMC_OLD"] = TH1D("H_q_SIMC_OLD","q", 100, 0.0, 10.0)
+        hist["H_Q2_SIMC_OLD"] = TH1D("H_Q2_SIMC_OLD","Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
+        hist["H_W_SIMC_OLD"] = TH1D("H_W_SIMC_OLD","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
+        hist["H_t_SIMC_OLD"] = TH1D("H_t_SIMC_OLD","-t", 100, inpDict["tmin"], inpDict["tmax"])
+        hist["H_epsilon_SIMC_OLD"] = TH1D("H_epsilon_SIMC_OLD","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
+        hist["H_MM_SIMC_OLD"] = TH1D("H_MM_SIMC_OLD","MM_{K}", 100, 0.7, 1.5)
+        hist["H_th_SIMC_OLD"] = TH1D("H_th_SIMC_OLD","X' tar", 100, -0.1, 0.1)
+        hist["H_ph_SIMC_OLD"] = TH1D("H_ph_SIMC_OLD","Y' tar", 100, -0.1, 0.1)
+        hist["H_ph_q_SIMC_OLD"] = TH1D("H_ph_q_SIMC_OLD","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
+        hist["H_th_q_SIMC_OLD"] = TH1D("H_th_q_SIMC_OLD","Theta Detected (th_xq)", 100, -0.2, 0.2)
+        hist["H_ph_recoil_SIMC_OLD"] = TH1D("H_ph_recoil_SIMC_OLD","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
+        hist["H_th_recoil_SIMC_OLD"] = TH1D("H_th_recoil_SIMC_OLD","Theta Recoil (th_bq)", 100, -10.0, 10.0)
+        hist["H_pmiss_SIMC_OLD"] = TH1D("H_pmiss_SIMC_OLD","pmiss", 100, 0.0, 10.0)
+        hist["H_emiss_SIMC_OLD"] = TH1D("H_emiss_SIMC_OLD","emiss", 100, 0.0, 10.0)
+        hist["H_pmx_SIMC_OLD"] = TH1D("H_pmx_SIMC_OLD","pmx", 100, -10.0, 10.0)
+        hist["H_pmy_SIMC_OLD"] = TH1D("H_pmy_SIMC_OLD","pmy ", 100, -10.0, 10.0)
+        hist["H_pmz_SIMC_OLD"] = TH1D("H_pmz_SIMC_OLD","pmz", 100, -10.0, 10.0)        
         
         print("\n\nReweighing {} histograms for comparison...".format(hist["phi_setting"].lower()))
-        for key, val in hist.items():
-            #if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "Weight" not in key and \
-            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and \
-               not isinstance(val, TGraphPolar) and not isinstance(val, TFile) and not isinstance(val, TGraphErrors):
-                hist_copy["{}_OLD".format(key)] = val.Clone()
-                HistNumEvts = hist_copy["{}_OLD".format(key)].GetNbinsX()
-                for i, binIndex in enumerate(range(1, HistNumEvts + 1)):
-                    # Progress bar
-                    Misc.progressBar(i, HistNumEvts + 1,bar_length=25)
-                    weight = hist["H_Weight_SIMC"].GetBinContent(binIndex)
-                    iter_weight = hist["H_iWeight_SIMC"].GetBinContent(binIndex)
-                    hist_copy["{}_OLD".format(key)].Fill(val.GetBinContent(binIndex), weight)
-                    hist_copy["{}".format(key)].Fill(val.GetBinContent(binIndex), weight)
-        hist.update(hist_copy)
+        for i,evt in enumerate(TBRANCH_SIMC):
 
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
+
+            # Define the acceptance cuts  
+            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+
+            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+
+            #........................................
+
+            #Fill SIMC events
+            if(HMS_Acceptance & SHMS_Acceptance & Diamond):
+
+                hist["H_Weight_SIMC"].Fill(evt.iter_weight)
+
+                hist["H_ssxfp_SIMC"].Fill(evt.ssxfp, evt.iter_weight)
+                hist["H_ssyfp_SIMC"].Fill(evt.ssyfp, evt.iter_weight)
+                hist["H_ssxpfp_SIMC"].Fill(evt.ssxpfp, evt.iter_weight)
+                hist["H_ssypfp_SIMC"].Fill(evt.ssypfp, evt.iter_weight)
+                hist["H_hsxfp_SIMC"].Fill(evt.hsxfp, evt.iter_weight)
+                hist["H_hsyfp_SIMC"].Fill(evt.hsyfp, evt.iter_weight)
+                hist["H_hsxpfp_SIMC"].Fill(evt.hsxpfp, evt.iter_weight)
+                hist["H_hsypfp_SIMC"].Fill(evt.hsypfp, evt.iter_weight)
+                hist["H_ssdelta_SIMC"].Fill(evt.ssdelta, evt.iter_weight) 
+                hist["H_hsdelta_SIMC"].Fill(evt.hsdelta, evt.iter_weight)	
+                hist["H_ssxptar_SIMC"].Fill(evt.ssxptar, evt.iter_weight)
+                hist["H_ssyptar_SIMC"].Fill(evt.ssyptar, evt.iter_weight)
+                hist["H_hsxptar_SIMC"].Fill(evt.hsxptar, evt.iter_weight)	
+                hist["H_hsyptar_SIMC"].Fill(evt.hsyptar, evt.iter_weight)
+
+                hist["H_ph_q_SIMC"].Fill((evt.phipq+math.pi), evt.iter_weight)
+                hist["H_th_q_SIMC"].Fill(evt.thetapq, evt.iter_weight)
+
+                hist["H_pmiss_SIMC"].Fill(evt.Pm, evt.iter_weight)	
+                hist["H_emiss_SIMC"].Fill(evt.Em, evt.iter_weight)	
+                #hist["H_pmx_SIMC"].Fill(evt.Pmx, evt.iter_weight)
+                #hist["H_pmy_SIMC"].Fill(evt.Pmy, evt.iter_weight)
+                #hist["H_pmz_SIMC"].Fill(evt.Pmz, evt.iter_weight)
+                hist["H_Q2_SIMC"].Fill(evt.Q2, evt.iter_weight)
+                hist["H_W_SIMC"].Fill(evt.W, evt.iter_weight)
+                hist["H_t_SIMC"].Fill(-evt.t, evt.iter_weight)
+                hist["H_epsilon_SIMC"].Fill(evt.epsilon, evt.iter_weight)
+                #hist["H_MM_SIMC"].Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.iter_weight)
+                hist["H_MM_SIMC"].Fill(evt.missmass, evt.iter_weight)
+
+                hist["H_Weight_SIMC_OLD"].Fill(evt.Weight)
+
+                hist["H_ssxfp_SIMC_OLD"].Fill(evt.ssxfp, evt.Weight)
+                hist["H_ssyfp_SIMC_OLD"].Fill(evt.ssyfp, evt.Weight)
+                hist["H_ssxpfp_SIMC_OLD"].Fill(evt.ssxpfp, evt.Weight)
+                hist["H_ssypfp_SIMC_OLD"].Fill(evt.ssypfp, evt.Weight)
+                hist["H_hsxfp_SIMC_OLD"].Fill(evt.hsxfp, evt.Weight)
+                hist["H_hsyfp_SIMC_OLD"].Fill(evt.hsyfp, evt.Weight)
+                hist["H_hsxpfp_SIMC_OLD"].Fill(evt.hsxpfp, evt.Weight)
+                hist["H_hsypfp_SIMC_OLD"].Fill(evt.hsypfp, evt.Weight)
+                hist["H_ssdelta_SIMC_OLD"].Fill(evt.ssdelta, evt.Weight) 
+                hist["H_hsdelta_SIMC_OLD"].Fill(evt.hsdelta, evt.Weight)	
+                hist["H_ssxptar_SIMC_OLD"].Fill(evt.ssxptar, evt.Weight)
+                hist["H_ssyptar_SIMC_OLD"].Fill(evt.ssyptar, evt.Weight)
+                hist["H_hsxptar_SIMC_OLD"].Fill(evt.hsxptar, evt.Weight)	
+                hist["H_hsyptar_SIMC_OLD"].Fill(evt.hsyptar, evt.Weight)
+
+                hist["H_ph_q_SIMC_OLD"].Fill((evt.phipq+math.pi), evt.Weight)
+                hist["H_th_q_SIMC_OLD"].Fill(evt.thetapq, evt.Weight)
+
+                hist["H_pmiss_SIMC_OLD"].Fill(evt.Pm, evt.Weight)	
+                hist["H_emiss_SIMC_OLD"].Fill(evt.Em, evt.Weight)	
+                #hist["H_pmx_SIMC_OLD"].Fill(evt.Pmx, evt.Weight)
+                #hist["H_pmy_SIMC_OLD"].Fill(evt.Pmy, evt.Weight)
+                #hist["H_pmz_SIMC_OLD"].Fill(evt.Pmz, evt.Weight)
+                hist["H_Q2_SIMC_OLD"].Fill(evt.Q2, evt.Weight)
+                hist["H_W_SIMC_OLD"].Fill(evt.W, evt.Weight)
+                hist["H_t_SIMC_OLD"].Fill(-evt.t, evt.Weight)
+                hist["H_epsilon_SIMC_OLD"].Fill(evt.epsilon, evt.Weight)
+                #hist["H_MM_SIMC_OLD"].Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
+                hist["H_MM_SIMC_OLD"].Fill(evt.missmass, evt.Weight)
+                
     CWeight = TCanvas()
     CWeight.Divide(2,2)
     l_Weight = TLegend(0.1, 0.75, 0.35, 0.95)
