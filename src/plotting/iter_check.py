@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 18:18:13 trottar"
+# Time-stamp: "2024-02-04 18:22:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -257,28 +257,15 @@ def plot_iteration(histlist, phisetlist, inpDict):
     
     for i,hist in enumerate(histlist_copy):
         CWeight.cd(i+1)
-        hist["H_Weight_SIMC"].SetLineColor(i+1)
+        hist["H_Weight_SIMC_OLD"].SetLineColor(i+1)
+        hist["H_Weight_SIMC_OLD"].Draw("same, HIST")
+        hist["H_Weight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_Weight_SIMC"].Draw("same, HIST")
-        hist["H_iWeight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
-        hist["H_iWeight_SIMC"].Draw("same, HIST")
-        l_Weight.AddEntry(hist["H_Weight_SIMC"],hist["phi_setting"]+" Simc Old")
-        l_Weight.AddEntry(hist["H_iWeight_SIMC"],hist["phi_setting"]+" Simc New")
+        l_Weight.AddEntry(hist["H_Weight_SIMC_OLD"],hist["phi_setting"]+" Simc Old")
+        l_Weight.AddEntry(hist["H_Weight_SIMC"],hist["phi_setting"]+" Simc New")
     l_Weight.Draw()
         
-    CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+'(')
-
-    CWeight = TCanvas()
-    CWeight.Divide(2,2)
-    
-    for i,hist in enumerate(histlist_copy):
-        CWeight.cd(i+1)
-        hist["H_iWeight_SIMC_OLD"].SetLineColor(i+1)
-        hist["H_iWeight_SIMC_OLD"].Draw("same, HIST")
-        hist["H_iWeight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
-        hist["H_iWeight_SIMC"].Draw("same, HIST")
-
-    CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
-    
+    CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+'(')    
     CQ2 = TCanvas()
     CQ2.Divide(2,2)
     
