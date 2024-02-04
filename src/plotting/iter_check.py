@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 17:13:55 trottar"
+# Time-stamp: "2024-02-04 17:17:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,7 +100,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
             #if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "Weight" not in key and \
             if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and \
                not isinstance(val, TGraphPolar) and not isinstance(val, TFile) and not isinstance(val, TGraphErrors):
-                hist_copy["{}_OLD".format(key)] = val
+                hist_copy["{}_OLD".format(key)] = val.Clone()
                 HistNumEvts = hist_copy["{}_OLD".format(key)].GetNbinsX()
                 for i, binIndex in enumerate(range(1, HistNumEvts + 1)):
                     # Progress bar
@@ -123,7 +123,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_iWeight_SIMC"].Draw("same, HIST")
         l_Weight.AddEntry(hist["H_Weight_SIMC"],hist["phi_setting"]+" Simc Old")
         l_Weight.AddEntry(hist["H_iWeight_SIMC"],hist["phi_setting"]+" Simc New")
-        l_Weight.Draw("same")
+        l_Weight.Draw()
         
     CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+'(')
 
