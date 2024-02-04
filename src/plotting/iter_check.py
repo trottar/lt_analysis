@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 13:56:23 trottar"
+# Time-stamp: "2024-02-04 14:03:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,16 +92,19 @@ def plot_iteration(histlist, phisetlist, inpDict):
 
     for hist in histlist_copy:
 
+        hist_copy = hist.copy()
+        
         print("\n\nReweighing {} histograms for comparison...".format(hist["phi_setting"].lower()))
         for key, val in hist.items():
-            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
-                hist["{}_OLD".format(key)] = val
-                HistNumEvts = hist["{}_OLD".format(key)].GetNbinsX()
+            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "Weight" not in key:
+                hist_copy["{}_OLD".format(key)] = val
+                HistNumEvts = hist_copy["{}_OLD".format(key)].GetNbinsX()
                 for i, binIndex in enumerate(range(1, HistNumEvts + 1)):
                     # Progress bar
                     Misc.progressBar(i, HistNumEvts + 1,bar_length=25)
                     weight = hist["H_Weight_SIMC"].GetBinContent(binIndex)
-                    hist["{}_OLD".format(key)].SetBinContent(binIndex, weight)
+                    hist_copy["{}_OLD".format(key)].SetBinContent(binIndex, weight)
+        hist.update(hist_copy)
 
     CWeight = TCanvas()
     l_Weight = TLegend(0.1, 0.75, 0.35, 0.95)
