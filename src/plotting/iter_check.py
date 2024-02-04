@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 18:09:40 trottar"
+# Time-stamp: "2024-02-04 18:15:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -87,7 +87,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
 
     # Create an empty list to store copied histograms
     histlist_copy = []
-    
+
+    # Copy root tree and phi_setting strings to cloned dictionary
     for hist in histlist:
         hist_copy = {}
         hist_copy["InFile_SIMC"] = hist["InFile_SIMC"].Clone()
@@ -100,6 +101,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         tree_simc = hist["InFile_SIMC"]
 
         TBRANCH_SIMC  = tree_simc.Get("h10")
+
+        print("!!!!!!!!!!",TBRANCH_SIMC)
 
         hist["H_Weight_SIMC"] = TH1D("H_Weight_SIMC", "Simc Weight", 100, 0, 1e-6)
         hist["H_hsdelta_SIMC"] = TH1D("H_hsdelta_SIMC","HMS Delta", 100, -20.0, 20.0)
