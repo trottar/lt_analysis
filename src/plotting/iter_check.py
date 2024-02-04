@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 18:15:57 trottar"
+# Time-stamp: "2024-02-04 18:18:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,7 +91,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     # Copy root tree and phi_setting strings to cloned dictionary
     for hist in histlist:
         hist_copy = {}
-        hist_copy["InFile_SIMC"] = hist["InFile_SIMC"].Clone()
+        hist_copy["InFile_SIMC"] = hist["InFile_SIMC"]
         hist_copy["phi_setting"] = hist["phi_setting"]
         # Append the copied histogram dictionary to the new list
         histlist_copy.append(hist_copy)
