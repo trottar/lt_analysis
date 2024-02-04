@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 14:14:01 trottar"
+# Time-stamp: "2024-02-04 14:16:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,7 +96,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         
         print("\n\nReweighing {} histograms for comparison...".format(hist["phi_setting"].lower()))
         for key, val in hist.items():
-            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "Weight" not in key and not isinstance(val, TGraphPolar) and not isinstance(val, TFile):
+            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "Weight" not in key and \
+               not isinstance(val, TGraphPolar) and not isinstance(val, TFile) and not isinstance(val, TGraphErrors):
                 hist_copy["{}_OLD".format(key)] = val
                 HistNumEvts = hist_copy["{}_OLD".format(key)].GetNbinsX()
                 for i, binIndex in enumerate(range(1, HistNumEvts + 1)):
