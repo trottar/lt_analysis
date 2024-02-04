@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 15:42:25 trottar"
+# Time-stamp: "2024-02-04 15:49:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,12 +73,13 @@ def plot_iteration(histlist, phisetlist, inpDict):
     for hist in histlist:
         hist_copy = {}
         for key, val in hist.items():
-            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
+            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "SIMC" in key:
                 # Clone the TObject if it has the 'Clone' method
                 hist_copy[key] = val.Clone()
             else:
-                # Otherwise, just copy the value
-                hist_copy[key] = val
+                if "SIMC" in key:
+                    # Otherwise, just copy the value
+                    hist_copy[key] = val
         # Append the copied histogram dictionary to the new list
         histlist_copy.append(hist_copy)
 
