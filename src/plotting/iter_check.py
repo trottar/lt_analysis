@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 17:23:53 trottar"
+# Time-stamp: "2024-02-04 17:28:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,11 +108,12 @@ def plot_iteration(histlist, phisetlist, inpDict):
                     weight = hist["H_Weight_SIMC"].GetBinContent(binIndex)
                     iter_weight = hist["H_iWeight_SIMC"].GetBinContent(binIndex)
                     hist_copy["{}_OLD".format(key)].Fill(val.GetBinContent(binIndex), weight)
-                    hist_copy["{}".format(key)].Fill(val.GetBinContent(binIndex), iter_weight)
+                    #hist_copy["{}".format(key)].Fill(val.GetBinContent(binIndex), iter_weight)
         hist.update(hist_copy)
 
     CWeight = TCanvas()
     CWeight.Divide(2,2)
+    l_Weight = TLegend(0.1, 0.75, 0.35, 0.95)
     
     for i,hist in enumerate(histlist_copy):
         CWeight.cd(i+1)
@@ -120,10 +121,9 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_Weight_SIMC"].Draw("same, HIST")
         hist["H_iWeight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_iWeight_SIMC"].Draw("same, HIST")
-        l_Weight = TLegend(0.1, 0.75, 0.35, 0.95)
         l_Weight.AddEntry(hist["H_Weight_SIMC"],hist["phi_setting"]+" Simc Old")
         l_Weight.AddEntry(hist["H_iWeight_SIMC"],hist["phi_setting"]+" Simc New")
-        l_Weight.Draw()
+    l_Weight.Draw()
         
     CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+'(')
 
