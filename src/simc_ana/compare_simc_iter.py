@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-31 23:30:13 trottar"
+# Time-stamp: "2024-02-04 13:29:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,6 +141,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     # Plot definitions
 
     H_Weight_SIMC = TH1D("H_Weight_SIMC", "Simc Weight", 100, 0, 1e-8)
+    H_iWeight_SIMC = TH1D("H_iWeight_SIMC", "Simc iWeight", 100, 0, 1e-8)
     H_hsdelta_SIMC  = TH1D("H_hsdelta_SIMC","HMS Delta", 100, -20.0, 20.0)
     H_hsxptar_SIMC  = TH1D("H_hsxptar_SIMC","HMS xptar", 100, -0.1, 0.1)
     H_hsyptar_SIMC  = TH1D("H_hsyptar_SIMC","HMS yptar", 100, -0.1, 0.1)
@@ -198,7 +199,8 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
           polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (evt.phipq+math.pi)*(180/math.pi), -evt.t)
           
-          H_Weight_SIMC.Fill(evt.iter_weight)
+          H_Weight_SIMC.Fill(evt.Weight)
+          H_iWeight_SIMC.Fill(evt.iter_weight)
 
           H_ssxfp_SIMC.Fill(evt.ssxfp, evt.iter_weight)
           H_ssyfp_SIMC.Fill(evt.ssyfp, evt.iter_weight)
@@ -236,6 +238,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["simc_normfactor"] = simc_normfactor
     histDict["simc_nevents"] = simc_nevents
     histDict["H_Weight_SIMC"] =     H_Weight_SIMC
+    histDict["H_iWeight_SIMC"] =     H_iWeight_SIMC
     histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
     histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC
     histDict["H_hsyptar_SIMC"] =     H_hsyptar_SIMC

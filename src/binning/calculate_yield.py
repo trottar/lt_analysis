@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-03 19:06:41 trottar"
+# Time-stamp: "2024-02-04 13:03:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,7 +92,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
     for c0, p in zip(c0_list, h_momentum_list):
         if p == 0.889:
-            c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888        
+            c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888
         elif p == 0.968:
             c0_dict["Q0p5W2p40_lowe"] = c0
             c0_dict["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
@@ -546,7 +546,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             
     return groups
 
-def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
+def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
     processed_dict = {}
     
@@ -590,8 +590,12 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
 
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
                         if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
-                            H_t_SIMC.Fill(-evt.t, evt.Weight)
-                            H_MM_SIMC.Fill(evt.missmass, evt.Weight)
+                            if iteration:
+                                H_t_SIMC.Fill(-evt.t, evt.iter_weight)
+                                H_MM_SIMC.Fill(evt.missmass, evt.iter_weight)
+                            else:
+                                H_t_SIMC.Fill(-evt.t, evt.Weight)
+                                H_MM_SIMC.Fill(evt.missmass, evt.Weight)
 
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : H_MM_SIMC,
@@ -600,9 +604,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict):
     
     return processed_dict
 
-def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict):
+def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
-    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, inpDict)
+    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=iteration)
     
     binned_dict = {}
 
@@ -644,12 +648,12 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict):
         
     return binned_dict
 
-def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict):
+def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=False):
 
     tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict)
+    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=iteration)
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
@@ -725,7 +729,7 @@ def find_yield_data(histlist, inpDict):
 
     return {"binned_DATA" : yieldDict}
 
-def find_yield_simc(histlist, inpDict):
+def find_yield_simc(histlist, inpDict, iteration=False):
     
     for hist in histlist:
         t_bins = hist["t_bins"]
@@ -745,6 +749,6 @@ def find_yield_simc(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict)
+        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict, iteration=iteration)
             
     return {"binned_SIMC" : yieldDict}

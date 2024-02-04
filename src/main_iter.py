@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-03 19:43:41 trottar"
+# Time-stamp: "2024-02-04 13:43:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,6 +134,10 @@ with open(prev_iter_json, 'r') as f:
 
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
+
+# Add closest and formatted dates to inpDict (used in plot comparison)
+inpDict["closest_date"] = closest_date
+inpDict["formatted_date"] = formatted_date
 
 if EPSSET == "low":
     # Run weight iteration script for optimizing parameterization
@@ -287,6 +291,15 @@ for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
             
 sys.path.append("plotting")
+from iter_check import plot_iteration
+
+# Comparison plots of 0th to current iteration
+plot_iteration(histlist, phisetlist, inpDict)
+
+if DEBUG:
+    show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
+show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))    
+
 from data_vs_simc import plot_data_vs_simc
 
 # Variable defines string of cuts applied during analysis
@@ -319,7 +332,7 @@ from calculate_yield import find_yield_data, find_yield_simc
 
 yieldDict = {}
 yieldDict.update(find_yield_data(histlist, inpDict))
-yieldDict.update(find_yield_simc(histlist, inpDict))
+yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
 
 sys.path.append("binning")
 from calculate_ratio import find_ratio
@@ -332,7 +345,7 @@ from ave_per_bin import ave_per_bin_data, ave_per_bin_simc
 
 aveDict = {}
 aveDict.update(ave_per_bin_data(histlist, inpDict))
-aveDict.update(ave_per_bin_simc(histlist, inpDict))
+aveDict.update(ave_per_bin_simc(histlist, inpDict, iteration=True))
 
 sys.path.append("plotting")
 from binned import plot_binned
