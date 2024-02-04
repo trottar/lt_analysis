@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 15:15:53 trottar"
+# Time-stamp: "2024-02-04 15:18:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,7 +81,8 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 def show_pdf_with_evince(file_path):
 
     def signal_handler(sig, frame):
-        sys.exit(0)
+        
+        sys.exit(2)
         
     # Set up the signal handler
     signal.signal(signal.SIGINT, signal_handler)
@@ -114,8 +115,9 @@ def show_pdf_with_evince(file_path):
         print("An error occurred: {}".format(e))
     except KeyboardInterrupt:
         # Handle Ctrl+C gracefully
+        print("\n\n\tExiting analysis!")
         process.terminate()
-        sys.exit(0)        
+        sys.exit(2)        
 
     scratch_path  = file_path.replace(OUTPATH+"/", "/scratch/"+USER+"/")
     shutil.copy(file_path,scratch_path)
