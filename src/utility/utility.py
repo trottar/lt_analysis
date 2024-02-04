@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 15:05:48 trottar"
+# Time-stamp: "2024-02-04 15:15:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,6 +15,7 @@ from array import array
 import numpy as np
 from datetime import datetime
 import shutil
+import signal
 import sys, os, subprocess
 
 ################################################################################################################################################
@@ -78,6 +79,13 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 ################################################################################################################################################
 
 def show_pdf_with_evince(file_path):
+
+    def signal_handler(sig, frame):
+        sys.exit(0)
+        
+    # Set up the signal handler
+    signal.signal(signal.SIGINT, signal_handler)
+    
     try:
         while True:            
             user_input = input("\nDo you want to open {}? (y/n): ".format(file_path))
@@ -86,6 +94,7 @@ def show_pdf_with_evince(file_path):
                 process = subprocess.Popen(['evince', file_path])
                 print("Press CTRL+C to exit or close window to continue...")
                 process.wait()  # Pauses the script until Evince is closed
+
                 break
             elif user_input.lower() == 'c':
                 print("File closed...")
@@ -103,6 +112,10 @@ def show_pdf_with_evince(file_path):
         print("Evince not found. Please make sure it is installed.")
     except Exception as e:
         print("An error occurred: {}".format(e))
+    except KeyboardInterrupt:
+        # Handle Ctrl+C gracefully
+        process.terminate()
+        sys.exit(0)        
 
     scratch_path  = file_path.replace(OUTPATH+"/", "/scratch/"+USER+"/")
     shutil.copy(file_path,scratch_path)
