@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 14:16:13 trottar"
+# Time-stamp: "2024-02-04 14:18:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,8 +116,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_iWeight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_iWeight_SIMC"].Draw("same, E1")
         hist["H_iWeight_SIMC"].Draw("same, HIST")
-        l_iWeight.AddEntry(hist["H_Weight_SIMC"],hist["phi_setting"]+"Data")
-        l_iWeight.AddEntry(hist["H_iWeight_SIMC"],hist["phi_setting"]+"Simc")
+        l_Weight.AddEntry(hist["H_Weight_SIMC"],hist["phi_setting"]+"Data")
+        l_Weight.AddEntry(hist["H_iWeight_SIMC"],hist["phi_setting"]+"Simc")
 
     l_Weight.Draw()
     CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+'(')
