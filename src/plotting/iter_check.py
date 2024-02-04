@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 16:01:01 trottar"
+# Time-stamp: "2024-02-04 16:03:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,7 +110,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
                         hist_copy["{}_OLD".format(key)].Fill(0.0)
                     else:
                         hist_copy["{}_OLD".format(key)].Fill(val.GetBinCenter(binIndex), weight/iter_weight)
-                    print("!!!!!!!!!",val.GetBinCenter(binIndex),key,weight,iter_weight,weight/iter_weight)
+                        print("!!!!!!!!!",val.GetBinCenter(binIndex),key,weight,iter_weight,weight/iter_weight)
         hist.update(hist_copy)
 
     CWeight = TCanvas()
