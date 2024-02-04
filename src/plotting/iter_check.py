@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 13:53:00 trottar"
+# Time-stamp: "2024-02-04 13:56:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,7 +97,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
             if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
                 hist["{}_OLD".format(key)] = val
                 HistNumEvts = hist["{}_OLD".format(key)].GetNbinsX()
-                for binIndex in range(1, HistNumEvts + 1):
+                for i, binIndex in enumerate(range(1, HistNumEvts + 1)):
                     # Progress bar
                     Misc.progressBar(i, HistNumEvts + 1,bar_length=25)
                     weight = hist["H_Weight_SIMC"].GetBinContent(binIndex)
