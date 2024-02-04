@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 16:59:06 trottar"
+# Time-stamp: "2024-02-04 17:03:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,6 +124,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
         l_Weight.AddEntry(hist["H_Weight_SIMC"],hist["phi_setting"]+" Simc Old")
         l_Weight.AddEntry(hist["H_iWeight_SIMC"],hist["phi_setting"]+" Simc New")
         l_Weight.Draw()
+        CWeight.Update()
         
     CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+'(')
 
@@ -136,7 +137,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_iWeight_SIMC_OLD"].Draw("same, HIST")
         hist["H_iWeight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_iWeight_SIMC"].Draw("same, HIST")
-
+        CWeight.Update()
+        
     CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
     
     CQ2 = TCanvas()
@@ -148,7 +150,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_Q2_SIMC_OLD"].Draw("same, HIST")
         hist["H_Q2_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_Q2_SIMC"].Draw("same, HIST")
-
+        CQ2.Update()
+        
     CQ2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 
     CW = TCanvas()
@@ -160,7 +163,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_W_SIMC_OLD"].Draw("same, HIST")
         hist["H_W_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_W_SIMC"].Draw("same, HIST")
-
+        CW.Update()
+        
     CW.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 
     Ct = TCanvas()
@@ -172,7 +176,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_t_SIMC_OLD"].Draw("same, HIST")
         hist["H_t_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_t_SIMC"].Draw("same, HIST")
-
+        Ct.Update()
+        
     Ct.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 
     Cepsilon = TCanvas()
@@ -184,7 +189,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_epsilon_SIMC_OLD"].Draw("same, HIST")
         hist["H_epsilon_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_epsilon_SIMC"].Draw("same, HIST")
-
+        Cepsilon.Update()
+        
     Cepsilon.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 
     CMM = TCanvas()
@@ -196,7 +202,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_MM_SIMC_OLD"].Draw("same, HIST")
         hist["H_MM_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_MM_SIMC"].Draw("same, HIST")
-
+        CMM.Update()
+        
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
     
     Cph_q = TCanvas()
@@ -208,5 +215,6 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_ph_q_SIMC_OLD"].Draw("same, HIST")
         hist["H_ph_q_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_ph_q_SIMC"].Draw("same, HIST")
-
+        Cph_q.Update()
+        
     Cph_q.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+')')
