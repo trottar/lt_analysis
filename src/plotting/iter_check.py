@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 16:03:23 trottar"
+# Time-stamp: "2024-02-04 16:08:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,7 +97,8 @@ def plot_iteration(histlist, phisetlist, inpDict):
         
         print("\n\nReweighing {} histograms for comparison...".format(hist["phi_setting"].lower()))
         for key, val in hist.items():
-            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "Weight" not in key and \
+            #if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and "Weight" not in key and \
+            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')) and \                
                not isinstance(val, TGraphPolar) and not isinstance(val, TFile) and not isinstance(val, TGraphErrors):
                 hist_copy["{}_OLD".format(key)] = val
                 HistNumEvts = hist_copy["{}_OLD".format(key)].GetNbinsX()
@@ -128,7 +129,19 @@ def plot_iteration(histlist, phisetlist, inpDict):
         l_Weight.Draw()
         
     CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date))+'(')
-                
+
+    CWeight = TCanvas()
+    CWeight.Divide(2,2)
+    
+    for i,hist in enumerate(histlist_copy):
+        CWeight.cd(i+1)
+        hist["H_iWeight_SIMC_OLD"].SetLineColor(i+1)
+        hist["H_iWeight_SIMC_OLD"].Draw("HIST")
+        hist["H_iWeight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
+        hist["H_iWeight_SIMC"].Draw("same, HIST")
+
+    CWeight.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
+    
     CQ2 = TCanvas()
     CQ2.Divide(2,2)
     
