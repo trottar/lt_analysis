@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 14:36:13 trottar"
+# Time-stamp: "2024-02-04 14:41:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -111,6 +111,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     l_Weight = TLegend(0.1, 0.75, 0.35, 0.95)
     
     for i,hist in enumerate(histlist_copy):
+        CWeight.cd(i)
         hist["H_Weight_SIMC"].SetLineColor(i+1)
         hist["H_Weight_SIMC"].Draw("same, E1")
         hist["H_iWeight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
@@ -125,6 +126,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     CQ2 = TCanvas()
     
     for i,hist in enumerate(histlist_copy):
+        CQ2.cd(i)
         hist["H_Q2_SIMC_OLD"].SetLineColor(i+1)
         hist["H_Q2_SIMC_OLD"].Draw("same, E1")
         hist["H_Q2_SIMC"].SetLineColor(i+(len(phisetlist)+1))
@@ -136,6 +138,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     CW = TCanvas()
     
     for i,hist in enumerate(histlist_copy):
+        CW.cd(i)
         hist["H_W_SIMC_OLD"].SetLineColor(i+1)
         hist["H_W_SIMC_OLD"].Draw("same, E1")
         hist["H_W_SIMC"].SetLineColor(i+(len(phisetlist)+1))
@@ -147,6 +150,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     Ct = TCanvas()
     
     for i,hist in enumerate(histlist_copy):
+        Ct.cd(i)
         hist["H_t_SIMC_OLD"].SetLineColor(i+1)
         hist["H_t_SIMC_OLD"].Draw("same, E1")
         hist["H_t_SIMC"].SetLineColor(i+(len(phisetlist)+1))
@@ -158,6 +162,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     Cepsilon = TCanvas()
     
     for i,hist in enumerate(histlist_copy):
+        Cepsilon.cd(i)
         hist["H_epsilon_SIMC_OLD"].SetLineColor(i+1)
         hist["H_epsilon_SIMC_OLD"].Draw("same, E1")
         hist["H_epsilon_SIMC"].SetLineColor(i+(len(phisetlist)+1))
@@ -169,6 +174,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     CMM = TCanvas()
     
     for i,hist in enumerate(histlist_copy):
+        CMM.cd(i)
         hist["H_MM_SIMC_OLD"].SetLineColor(i+1)
         hist["H_MM_SIMC_OLD"].Draw("same, E1")
         hist["H_MM_SIMC"].SetLineColor(i+(len(phisetlist)+1))
@@ -180,6 +186,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     Cph_q = TCanvas()
     
     for i,hist in enumerate(histlist_copy):
+        Cph_q.cd(i)
         hist["H_ph_q_SIMC_OLD"].SetLineColor(i+1)
         hist["H_ph_q_SIMC_OLD"].Draw("same, E1")
         hist["H_ph_q_SIMC"].SetLineColor(i+(len(phisetlist)+1))
