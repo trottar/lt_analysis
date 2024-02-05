@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:32:10 trottar"
+# Time-stamp: "2024-02-05 13:35:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -273,7 +273,13 @@ for k in range(NumtBins):
     G_ratio_phi_hieps.SetMarkerStyle(23)
     G_ratio_phi_hieps.SetMarkerSize(1)
     G_ratio_phi_hieps.SetMarkerColor(2)
-    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)    
+    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)
+
+    # Add a gray line at unity
+    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
+    line_at_unity.SetLineColor(7)
+    line_at_unity.SetLineStyle(2)   # Dashed line style
+    multiDict["G_ratio_phi_{}".format(k+1)].Add(line_at_unity)    
     
     C_ratio_phi.cd(k+1)
     
@@ -284,13 +290,7 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetRangeUser(0, 360)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)
-    
-    # Add a gray line at unity
-    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
-    line_at_unity.SetLineColor(7)
-    line_at_unity.SetLineStyle(2)   # Dashed line style
-    line_at_unity.Draw("same")
+    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)    
     
 l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
@@ -337,7 +337,7 @@ for k in range(NumtBins):
     
     # Add a gray line at unity
     line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
-    line_at_unity.SetLineColor(7)  # 17 corresponds to gray color
+    line_at_unity.SetLineColor(7)  # 7 corresponds to light blue
     line_at_unity.SetLineStyle(2)   # Dashed line style
     line_at_unity.Draw("same")
     
