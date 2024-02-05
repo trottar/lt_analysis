@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 18:36:33 trottar"
+# Time-stamp: "2024-02-05 18:38:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -258,7 +258,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
-    g_q2_sigl_fit.Fit(f_sigL, "SQ")
+    #g_q2_sigl_fit.Fit(f_sigL, "SQ")
+    sigl_X.Fit(f_sigL, "SQ")
     
     # Set line properties for f_sigL
     f_sigL.SetLineColor(1)
