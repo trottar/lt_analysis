@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:52:25 trottar"
+# Time-stamp: "2024-02-05 15:53:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,6 +17,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import re
 import sys, os
+
+# Import the dynamic script
+import importlib.util
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
