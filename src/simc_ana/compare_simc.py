@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 14:22:56 trottar"
+# Time-stamp: "2024-02-04 18:38:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,7 +141,7 @@ def compare_simc(hist, inpDict):
     ################################################################################################################################################
     # Plot definitions
 
-    H_Weight_SIMC = TH1D("H_Weight_SIMC", "Simc Weight", 100, 0, 1e-6)
+    H_Weight_SIMC = TH1D("H_Weight_SIMC", "Simc Weight", 100, 0, 1e-5)
     H_hsdelta_SIMC  = TH1D("H_hsdelta_SIMC","HMS Delta", 100, -20.0, 20.0)
     H_hsxptar_SIMC  = TH1D("H_hsxptar_SIMC","HMS xptar", 100, -0.1, 0.1)
     H_hsyptar_SIMC  = TH1D("H_hsyptar_SIMC","HMS yptar", 100, -0.1, 0.1)

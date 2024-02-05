@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 15:23:33 trottar"
+# Time-stamp: "2024-02-04 18:39:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,7 +93,7 @@ def show_pdf_with_evince(file_path):
             
             if user_input.lower() == 'y':
                 process = subprocess.Popen(['evince', file_path])
-                print("Press CTRL+C to exit or close window to continue...")
+                print("\n\n\nPress CTRL+C to exit or close window to continue...")
                 process.wait()  # Pauses the script until Evince is closed
 
                 break

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 13:43:56 trottar"
+# Time-stamp: "2024-02-04 18:27:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -298,7 +298,6 @@ plot_iteration(histlist, phisetlist, inpDict)
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
-show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))    
 
 from data_vs_simc import plot_data_vs_simc
 

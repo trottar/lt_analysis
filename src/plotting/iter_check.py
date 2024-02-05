@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 18:22:13 trottar"
+# Time-stamp: "2024-02-04 18:38:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,9 +102,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
 
         TBRANCH_SIMC  = tree_simc.Get("h10")
 
-        print("!!!!!!!!!!",TBRANCH_SIMC)
-
-        hist["H_Weight_SIMC"] = TH1D("H_Weight_SIMC", "Simc Weight", 100, 0, 1e-6)
+        hist["H_Weight_SIMC"] = TH1D("H_Weight_SIMC", "Simc Weight", 100, 0, 1e-5)
         hist["H_hsdelta_SIMC"] = TH1D("H_hsdelta_SIMC","HMS Delta", 100, -20.0, 20.0)
         hist["H_hsxptar_SIMC"] = TH1D("H_hsxptar_SIMC","HMS xptar", 100, -0.1, 0.1)
         hist["H_hsyptar_SIMC"] = TH1D("H_hsyptar_SIMC","HMS yptar", 100, -0.1, 0.1)
@@ -137,7 +135,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_pmy_SIMC"] = TH1D("H_pmy_SIMC","pmy ", 100, -10.0, 10.0)
         hist["H_pmz_SIMC"] = TH1D("H_pmz_SIMC","pmz", 100, -10.0, 10.0)
 
-        hist["H_Weight_SIMC_OLD"] = TH1D("H_Weight_SIMC_OLD", "Simc Weight", 100, 0, 1e-6)
+        hist["H_Weight_SIMC_OLD"] = TH1D("H_Weight_SIMC_OLD", "Simc Weight", 100, 0, 1e-5)
         hist["H_hsdelta_SIMC_OLD"] = TH1D("H_hsdelta_SIMC_OLD","HMS Delta", 100, -20.0, 20.0)
         hist["H_hsxptar_SIMC_OLD"] = TH1D("H_hsxptar_SIMC_OLD","HMS xptar", 100, -0.1, 0.1)
         hist["H_hsyptar_SIMC_OLD"] = TH1D("H_hsyptar_SIMC_OLD","HMS yptar", 100, -0.1, 0.1)
