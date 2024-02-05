@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 19:03:03 trottar"
+# Time-stamp: "2024-02-04 19:07:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -279,8 +279,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c1.cd(i+1)
         
         # Print plots for c1 canvases
-        g_plot_err.Draw("perr")
-        g_plot_err.SetTitle("t-bin {}: Fit 1".format(i))
+        g_plot_err.Clone().Draw("perr")
+        g_plot_err.Clone().SetTitle("t-bin {}: Fit 1".format(i))
         if i == 0:
             c1.Print(outputpdf+'(')
         else:
@@ -331,8 +331,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.cd(i+1)
         
         # Print plots for c2 canvases
-        g_plot_err.Draw("perr")
-        g_plot_err.SetTitle("t-bin {}: Fit 2".format(i))
+        g_plot_err.Clone().Draw("perr")
+        g_plot_err.Clone().SetTitle("t-bin {}: Fit 2".format(i))
         c2.Print(outputpdf)
         c2.Clear()
         
@@ -364,8 +364,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c3.cd(i+1)
         
         # Print plots for c3 canvases
-        g_plot_err.Draw("perr")
-        g_plot_err.SetTitle("t-bin {}: Fit 3".format(i))
+        g_plot_err.Clone().Draw("perr")
+        g_plot_err.Clone().SetTitle("t-bin {}: Fit 3".format(i))
         c3.Print(outputpdf)
         c3.Clear()
         
@@ -405,8 +405,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c4.cd(i+1)
         
         # Print plots for c4 canvases
-        g_plot_err.Draw("perr")
-        g_plot_err.SetTitle("t-bin {}: Fit 4".format(i))
+        g_plot_err.Clone().Draw("perr")
+        g_plot_err.Clone().SetTitle("t-bin {}: Fit 4".format(i))
         c4.Print(outputpdf)
         c4.Clear()
         
@@ -438,8 +438,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c5.cd(i+1)
         
         # Print plots for c5 canvases
-        g_plot_err.Draw("perr")
-        g_plot_err.SetTitle("t-bin {}: Fit 5".format(i))
+        g_plot_err.Clone().Draw("perr")
+        g_plot_err.Clone().SetTitle("t-bin {}: Fit 5".format(i))
         c5.Print(outputpdf)
         c5.Clear()
         
@@ -465,8 +465,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c6.cd(i+1)
         
         # Print plots for c6 canvases
-        g_plot_err.Draw("perr")
-        g_plot_err.SetTitle("t-bin {}: Fit All".format(i))
+        g_plot_err.Clone().Draw("perr")
+        g_plot_err.Clone().SetTitle("t-bin {}: Fit All".format(i))
         c6.Print(outputpdf)
         c6.Clear()
 
