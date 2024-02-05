@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 11:37:02 trottar"
+# Time-stamp: "2024-02-05 11:41:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -260,7 +260,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_ratio_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
+            G_ratio_phi_loeps.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
             G_ratio_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
             j+=1
     G_ratio_phi_loeps.SetMarkerStyle(21)
@@ -272,7 +272,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_ratio_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
+            G_ratio_phi_hieps.SetPoint(j, np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
             G_ratio_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
             j+=1
     G_ratio_phi_hieps.SetMarkerStyle(23)
@@ -313,7 +313,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_ratio_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
+            G_ratio_phi_loeps.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
             G_ratio_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
             j+=1
     G_ratio_phi_loeps.SetMarkerStyle(21)
@@ -325,7 +325,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_ratio_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
+            G_ratio_phi_hieps.SetPoint(j, np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
             G_ratio_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
             j+=1
     G_ratio_phi_hieps.SetMarkerStyle(23)
@@ -362,7 +362,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i+1]:
-            G_Q2_t_loeps.SetPoint(j, t_bins[np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
+            G_Q2_t_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
             j+=1
     G_Q2_t_loeps.SetMarkerStyle(21)
     G_Q2_t_loeps.SetMarkerSize(1)
@@ -373,7 +373,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_Q2_t_hieps.SetPoint(j, t_bins[np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
+            G_Q2_t_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
     G_Q2_t_hieps.SetMarkerStyle(23)
     G_Q2_t_hieps.SetMarkerSize(1)
@@ -406,7 +406,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_aver_loeps']['t'].tolist())[i] == (k+1):
-            G_Q2_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
+            G_Q2_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
             j+=1
     G_Q2_phi_loeps.SetMarkerStyle(21)
     G_Q2_phi_loeps.SetMarkerSize(1)
@@ -417,7 +417,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_Q2_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
+            G_Q2_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
             j+=1
     G_Q2_phi_hieps.SetMarkerStyle(23)
     G_Q2_phi_hieps.SetMarkerSize(1)
@@ -452,7 +452,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i+1]:
-            G_W_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
+            G_W_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['W'].tolist())[i])
             j+=1
     G_W_phi_loeps.SetMarkerStyle(21)
     G_W_phi_loeps.SetMarkerSize(1)
@@ -463,7 +463,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_W_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['W'].tolist())[i])
+            G_W_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['W'].tolist())[i])
             j+=1
     G_W_phi_hieps.SetMarkerStyle(23)
     G_W_phi_hieps.SetMarkerSize(1)
@@ -599,7 +599,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i+1]:
-            G_xreal_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+            G_xreal_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
             G_xreal_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
             j+=1
     G_xreal_phi_loeps.SetMarkerStyle(21)
@@ -611,7 +611,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
+            G_xreal_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
             G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
             j+=1
     G_xreal_phi_hieps.SetMarkerStyle(23)
@@ -646,7 +646,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i+1]:
-            G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
+            G_xmod_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
             j+=1
     G_xmod_phi_loeps.SetMarkerStyle(21)
     G_xmod_phi_loeps.SetMarkerSize(1)
@@ -657,7 +657,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
+            G_xmod_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
             j+=1
     G_xmod_phi_hieps.SetMarkerStyle(23)
     G_xmod_phi_hieps.SetMarkerSize(1)
@@ -692,7 +692,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i+1]:
-            G_xreal_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+            G_xreal_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
             G_xreal_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
             j+=1
     G_xreal_phi_loeps.SetMarkerStyle(21)
@@ -704,7 +704,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
+            G_xreal_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
             G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
             j+=1
     G_xreal_phi_hieps.SetMarkerStyle(23)
@@ -716,7 +716,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
+            G_xmod_phi_loeps.SetPoint(j, np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
             j+=1
     G_xmod_phi_loeps.SetMarkerStyle(30)
     G_xmod_phi_loeps.SetMarkerSize(1)
@@ -727,7 +727,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
+            G_xmod_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
             j+=1
     G_xmod_phi_hieps.SetMarkerStyle(27)
     G_xmod_phi_hieps.SetMarkerSize(1)
@@ -762,7 +762,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i+1]:
-            G_xreal_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+            G_xreal_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
             G_xreal_phi_loeps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
             j+=1
     G_xreal_phi_loeps.SetMarkerStyle(21)
@@ -774,7 +774,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_xreal_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
+            G_xreal_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
             G_xreal_phi_hieps.SetPointError(j, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
             j+=1
     G_xreal_phi_hieps.SetMarkerStyle(23)
@@ -786,7 +786,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i+1]:
-            G_xmod_phi_loeps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
+            G_xmod_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
             j+=1
     G_xmod_phi_loeps.SetMarkerStyle(30)
     G_xmod_phi_loeps.SetMarkerSize(1)
@@ -797,7 +797,7 @@ for k in range(NumtBins):
     j=0
     for i in range(NumtBins*NumPhiBins):
         if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i+1]:
-            G_xmod_phi_hieps.SetPoint(j, phi_bin_centers[np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i]], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
+            G_xmod_phi_hieps.SetPoint(j, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
             j+=1
     G_xmod_phi_hieps.SetMarkerStyle(27)
     G_xmod_phi_hieps.SetMarkerSize(1)
