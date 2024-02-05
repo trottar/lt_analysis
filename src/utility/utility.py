@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 18:39:02 trottar"
+# Time-stamp: "2024-02-05 12:11:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,8 +406,6 @@ def run_fortran(fort_script, inp_val=""):
     return completed_process.communicate()
 
 ################################################################################################################################################
-
-import numpy as np
 
 def set_dynamic_axis_ranges(inp_str, histlist, range_factor="Default", hist_type = "DATA"):
     

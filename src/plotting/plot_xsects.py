@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 12:10:28 trottar"
+# Time-stamp: "2024-02-05 12:14:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,7 +207,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['unsep_file_loeps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 't_min', 'W', 'Q2'])
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 't_min', 'W', 'Q2']).sort_values(by='t')
 
         if row['EPSVAL'] == float(HIEPS):
             file_df_dict['aver_hieps'] = file_to_df( \
@@ -235,7 +235,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['unsep_file_hieps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 't_min', 'W', 'Q2'])
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 't_min', 'W', 'Q2']).sort_values(by='t')
         file_df_dict['sep_file'] = file_to_df( \
                                                LTANAPATH+"/src/{}/xsects/x_sep.{}_Q{}W{}.dat" \
                                                .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")) \
