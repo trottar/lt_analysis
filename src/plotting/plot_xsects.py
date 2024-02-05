@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 17:25:11 trottar"
+# Time-stamp: "2024-02-05 17:26:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -524,7 +524,7 @@ with PdfPages(outputpdf) as pdf:
                 print("Data {} = {:.4e}".format(sig, row[sig]))
                 inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
                 model.append(import_model(sig, inp_param))
-                print("-"*50)
+            print("-"*50)
             # Check that model sig is not all zeros
             if not all(element == 0 for element in model):
                 ax.plot(model, linestyle='-.', color='red', label='Model Fit')
