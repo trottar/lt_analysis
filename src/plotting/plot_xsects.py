@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:02:26 trottar"
+# Time-stamp: "2024-02-05 15:07:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -472,3 +472,20 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+
+    # Loop through t bins and plot data
+    for k in range(NumtBins):
+        ax = axes[k]
+        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+
+        for i, df_key in enumerate(['sep_file']):
+            df = file_df_dict[df_key]
+            ax.errorbar(df['phi'], df['sigL'], yerr=df['dsigL'], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
+
+        ax.set_xlabel('$\phi$')
+        ax.set_ylabel('$\sigma_{L}$')
+        ax.legend()
+
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    pdf.savefig(fig, bbox_inches='tight')
