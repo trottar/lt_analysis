@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 17:35:59 trottar"
+# Time-stamp: "2024-02-05 17:36:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -529,13 +529,13 @@ with PdfPages(outputpdf) as pdf:
             if not all(element == 0 for element in model):
                 ax.plot(model, linestyle='-.', color='red', label='Model Fit')
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i])
-        print("="*50)
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.set_xlim(tmin, tmax)
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
+    print("="*50)
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
