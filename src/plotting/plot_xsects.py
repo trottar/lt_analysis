@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:54:31 trottar"
+# Time-stamp: "2024-02-05 13:55:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -796,9 +796,9 @@ for k in range(NumtBins):
     for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
         df = file_df_dict[df_key]
         mask = (df['tbin'] == (k+1))
-        ax.errorbar(df['phibin'][mask], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key)
+        ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key)
 
-    ax.axhline(1.0, color='gray', linestyle='--', label='Unity')
+    ax.axhline(1.0, color='gray', linestyle='--')
 
     ax.set_xlabel('Phi')
     ax.set_ylabel('Ratio')
