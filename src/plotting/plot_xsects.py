@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:24:20 trottar"
+# Time-stamp: "2024-02-05 13:26:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -277,14 +277,14 @@ for k in range(NumtBins):
     
     C_ratio_phi.cd(k+1)
     
-    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)    
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Ratio".format(t_bin_centers[k]))
     
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
-
+    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
+    
     # Add a gray line at unity
     line_at_y1 = TLine(multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmin(), 1.0, multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmax(), 1.0)
     line_at_y1.SetLineColor(7)
@@ -325,14 +325,14 @@ for k in range(NumtBins):
     G_ratio_phi_hieps.SetMarkerColor(2)
     multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)
     
-    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Ratio".format(t_bin_centers[k]))
     
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
-
+    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
+    
     # Add a gray line at unity
     line_at_y1 = TLine(multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmin(), 1.0, multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmax(), 1.0)
     line_at_y1.SetLineColor(7)  # 17 corresponds to gray color
@@ -411,13 +411,13 @@ for k in range(NumtBins):
     
     C_Q2_phi.cd(k+1)
 
-    multiDict["G_Q2_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     multiDict["G_Q2_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_Q2_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Q2".format(t_bin_centers[k]))
     
     multiDict["G_Q2_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_Q2_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_Q2_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    multiDict["G_Q2_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     
 l_Q2_phi.AddEntry(G_Q2_phi_loeps,"loeps")
 l_Q2_phi.AddEntry(G_Q2_phi_hieps,"hieps")
@@ -454,13 +454,13 @@ for k in range(NumtBins):
     
     C_W_phi.cd(k+1)
 
-    multiDict["G_W_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     multiDict["G_W_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_W_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; W".format(t_bin_centers[k]))
     
     multiDict["G_W_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_W_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_W_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    multiDict["G_W_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     
 l_W_phi.AddEntry(G_W_phi_loeps,"loeps")
 l_W_phi.AddEntry(G_W_phi_hieps,"hieps")
@@ -592,13 +592,13 @@ for k in range(NumtBins):
     
     C_xreal_phi.cd(k+1)
 
-    multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     multiDict["G_xreal_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_xreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xreal".format(t_bin_centers[k]))
     
     multiDict["G_xreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     
 l_xreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")
 #l_xreal_phi.Draw()
@@ -634,13 +634,13 @@ for k in range(NumtBins):
     
     C_xmod_phi.cd(k+1)
 
-    multiDict["G_xmod_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)    
     multiDict["G_xmod_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_xmod_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xmod".format(t_bin_centers[k]))
     
     multiDict["G_xmod_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xmod_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_xmod_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    multiDict["G_xmod_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     
 l_xmod_phi.AddEntry(G_xmod_phi_loeps,"loeps")
 l_xmod_phi.AddEntry(G_xmod_phi_hieps,"hieps")
@@ -695,13 +695,13 @@ for k in range(NumtBins):
     G_xmod_phi_hieps.SetMarkerColor(2)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Add(G_xmod_phi_hieps)
 
-    multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     multiDict["G_xmodreal_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_xmodreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xsect".format(t_bin_centers[k]))
     
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
+    multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
     
     l_xmodreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
     l_xmodreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")    
@@ -760,14 +760,14 @@ for k in range(NumtBins):
     
     C_xmodreal_phi.cd(k+1)
 
-    multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)    
     multiDict["G_xmodreal_phi_{}".format(k+1)].Draw('AP')
     multiDict["G_xmodreal_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; xsect".format(t_bin_centers[k]))
     
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
-
+    multiDict["G_xmodreal_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
+    
 l_xmodreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
 l_xmodreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")    
 l_xmodreal_phi.AddEntry(G_xmod_phi_loeps,"loeps model")
