@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 19:13:21 trottar"
+# Time-stamp: "2024-02-04 19:21:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -273,20 +273,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
-        c1 =  TCanvas()
-
-        c1.Update()        
-        c1.cd(i+1)
-        
-        # Print plots for c1 canvases
-        g_plot_err.Draw("colz")
-        g_plot_err.SetTitle("t-bin {}: Fit 1".format(i))
-        if i == 0:
-            c1.Print(outputpdf+'(')
-        else:
-            c1.Print(outputpdf)
-        c1.Clear()
-        
         sigL_change.SetTitle("sigL_change {}".format(i))
         sigL_change.GetXaxis().SetTitle("Index")
         sigL_change.GetYaxis().SetTitle("Parameter Value")
@@ -325,17 +311,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
-        c2 =  TCanvas()
-
-        c2.Update()        
-        c2.cd(i+1)
-        
-        # Print plots for c2 canvases
-        g_plot_err.Draw("colz")
-        g_plot_err.SetTitle("t-bin {}: Fit 2".format(i))
-        c2.Print(outputpdf)
-        c2.Clear()
-        
         #########
         # Fit 3 #
         #########
@@ -358,17 +333,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
-        c3 =  TCanvas()
-
-        c3.Update()        
-        c3.cd(i+1)
-        
-        # Print plots for c3 canvases
-        g_plot_err.Draw("colz")
-        g_plot_err.SetTitle("t-bin {}: Fit 3".format(i))
-        c3.Print(outputpdf)
-        c3.Clear()
-        
         # sigL_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
@@ -399,17 +363,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
-        c4 =  TCanvas()
-
-        c4.Update()        
-        c4.cd(i+1)
-        
-        # Print plots for c4 canvases
-        g_plot_err.Draw("colz")
-        g_plot_err.SetTitle("t-bin {}: Fit 4".format(i))
-        c4.Print(outputpdf)
-        c4.Clear()
-        
         #########
         # Fit 5 #
         #########
@@ -432,17 +385,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
-        c5 =  TCanvas()
-
-        c5.Update()        
-        c5.cd(i+1)
-        
-        # Print plots for c5 canvases
-        g_plot_err.Draw("colz")
-        g_plot_err.SetTitle("t-bin {}: Fit 5".format(i))
-        c5.Print(outputpdf)
-        c5.Clear()
-        
         #############
         # Last Step #
         #############
@@ -459,18 +401,22 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2)
 
-        c6 =  TCanvas()
+        c1 =  TCanvas()
+        c1.Divide(int(t_bin_num/2),int(t_bin_num/2))
 
-        c6.Update()        
-        c6.cd(i+1)
+        c1.Update()
+        c1.cd(i+1)
         
-        # Print plots for c6 canvases
+        # Print plots for c1 canvases
         g_plot_err.Draw("colz")
-        g_plot_err.SetTitle("t-bin {}: Fit All".format(i))
-        c6.Print(outputpdf)
-        c6.Clear()
+        g_plot_err.SetTitle("{}".format(i))
+        g_plot_err.SetXTitle("#it{#phi} [degree]")
+        g_plot_err.SetYTitle("#it{#epsilon}")
+        g_plot_err.SetZTitle("#it{#sigma}")
+        c1.Print(outputpdf+'(')        
+        c1.Clear()
 
-        cChange =  TCanvas()
+        c2 =  TCanvas()
         
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -479,11 +425,11 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
         
-        # Update cChange
-        cChange.Update()
+        # Update c2
+        c2.Update()
 
-        # Go to the cChange canvas
-        cChange.cd()
+        # Go to the c2 canvas
+        c2.cd()
         
         # Set properties for glo
         glo.SetMarkerStyle(5)
@@ -513,8 +459,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g.GetXaxis().CenterTitle()
         g.GetXaxis().SetLimits(0, 360)
 
-        # Update canvas cChange
-        cChange.Update()
+        # Update canvas c2
+        c2.Update()
 
         # Fix parameters for flo, flo_unsep, fhi, and fhi_unsep
         flo.FixParameter(0, fff2.GetParameter(0))
@@ -674,54 +620,49 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_TT_g.SetPointError(i, 0.0, sig_tt_err)
 
         # Create TCanvas
-        cChange2 = ROOT.TCanvas()
+        c4 = ROOT.TCanvas()
 
         # Draw and save plots
         sigL_change.Draw("a*")
-        cChange2.Print(outputpdf)
+        c4.Print(outputpdf)
 
         sigT_change.Draw("a*")
-        cChange2.Print(outputpdf)
+        c4.Print(outputpdf)
         
         # Clear canvas
-        cChange2.Clear()
+        c4.Clear()
 
-        # Adjust top and right margins for cChange canvas
-        cChange.SetTopMargin(0.03)
-        cChange.SetRightMargin(0.03)
+        # Adjust top and right margins for c2 canvas
+        c2.SetTopMargin(0.03)
+        c2.SetRightMargin(0.03)
 
-        # Print plots for cChange canvases
-        cChange.Print(outputpdf)
+        # Print plots for c2 canvases
+        c2.Print(outputpdf)
 
-        # Clear c1 and cChange canvases
-        cChange.Clear()
+        # Clear c1 and c2 canvases
+        c2.Clear()
             
         # Create TCanvas
-        cSig = ROOT.TCanvas()
+        c3 = ROOT.TCanvas()
 
         # Draw and save plots for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.Draw("a*")
-        cSig.Print(outputpdf)
+        c3.Print(outputpdf)
 
         sig_T_g.Draw("a*")
-        cSig.Print(outputpdf)
+        c3.Print(outputpdf)
 
         sig_LT_g.Draw("a*")
-        cSig.Print(outputpdf)
+        c3.Print(outputpdf)
 
         sig_TT_g.Draw("a*")
-        cSig.Print(outputpdf)
+        c3.Print(outputpdf)
 
         # Delete canvases
         del c1
         del c2
         del c3
         del c4
-        del c5
-        del c6
-        del cChange
-        del cSig
-        del cChange2
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
 fn_hi =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
