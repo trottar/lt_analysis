@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 18:12:35 trottar"
+# Time-stamp: "2024-02-05 18:14:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,11 +217,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i], q2_vec[i]))
+        sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]
         g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
-        sigl_X_fit = g_sigl.GetY()[i]
-        sigl_X_fit_err = g_sigl.GetEY()[i]
+        sigl_X_fit = g_sigl.GetY()[i] / g_vec[i]
+        sigl_X_fit_err = g_sigl.GetEY()[i] / g_vec[i]
 
         g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
@@ -246,7 +246,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_prv.SetMarkerStyle(25)
     g_sigl_prv.Draw("P")
 
-    c2.cd(2)
+    c2.cd(1)
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
@@ -350,7 +350,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_prv.SetMarkerStyle(25)
     g_sigt_prv.Draw("P")
         
-    c2.cd(1)
+    c2.cd(2)
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
