@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:06:54 trottar"
+# Time-stamp: "2024-02-05 16:08:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,6 +20,8 @@ mkpl = 0.493677
 
 def import_model(inp_model, arg_str):
 
+    print("!!!!!!!!",inp_model)
+    print("$$$$$$$$",arg_str)
     # Split and convert the input string into a list of floats
     args = list(map(float, arg_str.split()))
 
