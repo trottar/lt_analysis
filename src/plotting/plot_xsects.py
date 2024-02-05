@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 11:59:47 trottar"
+# Time-stamp: "2024-02-05 12:01:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -718,6 +718,8 @@ for k in range(NumtBins):
         if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i-1] != np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i]:
             G_xreal_phi_loeps.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
             G_xreal_phi_loeps.SetPointError(i, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
+            print(i, "$$$$$$$$$$$$$$$$", np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
+        print(i, "!!!!!!!!!!!!!!!!", np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
     G_xreal_phi_loeps.SetMarkerStyle(21)
     G_xreal_phi_loeps.SetMarkerSize(1)
     G_xreal_phi_loeps.SetMarkerColor(1)
