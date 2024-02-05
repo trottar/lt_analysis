@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:55:50 trottar"
+# Time-stamp: "2024-02-05 13:56:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -800,7 +800,7 @@ for k in range(NumtBins):
 
     ax.axhline(1.0, color='gray', linestyle='--')
 
-    ax.set_xlabel('Phi')
+    ax.set_xlabel('$\phi$')
     ax.set_ylabel('Ratio')
     ax.set_ylim(0.0, 2.0)
     ax.set_xlim(0, 360)
