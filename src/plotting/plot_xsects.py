@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:42:03 trottar"
+# Time-stamp: "2024-02-05 14:42:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,7 +77,7 @@ outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
-ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
+#ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ################################################################################################################################################
 
 def are_within_tolerance(num1, num2, tolerance=0.1):
