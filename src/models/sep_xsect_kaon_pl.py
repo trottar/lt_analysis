@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:22:30 trottar"
+# Time-stamp: "2024-02-05 16:23:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -39,7 +39,7 @@ def import_model(inp_model, arg_str):
     # Function for SigT
     def sig_T(*par):
         g = 1 / ((ww**2) - (m_p**2))**2
-        tav = (0.1112 + 0.0066*math.log(float(Q2.replace("p","."))))*float(Q2.replace("p","."))
+        tav = (0.1112 + 0.0066*math.log(Q2))*Q2
         ftav = (abs(tt)-tav)/tav
         print("Calculating function for sigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
