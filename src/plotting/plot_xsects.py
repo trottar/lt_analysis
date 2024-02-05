@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:42:48 trottar"
+# Time-stamp: "2024-02-05 14:45:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,9 +76,6 @@ foutname = OUTPATH+"/" + OutFilename + ".root"
 fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
 outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 
-################################################################################################################################################
-# Suppressing the terminal splash of Print()
-#ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ################################################################################################################################################
 
 def are_within_tolerance(num1, num2, tolerance=0.1):
@@ -420,7 +417,9 @@ with PdfPages(outputpdf) as pdf:
     
     # Loop through t bins and plot data
     for k in range(NumtBins):
-        fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+
+        # Create a figure and axis objects
+        fig, axes = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
 
         ax = axes
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
