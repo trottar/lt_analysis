@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:40:19 trottar"
+# Time-stamp: "2024-02-05 16:46:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -424,6 +424,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
+        ax.set_xlim(0, 360)
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
@@ -445,6 +446,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_mod')
+        ax.set_xlim(0, 360)
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
@@ -469,6 +471,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
+        ax.set_xlim(0, 360)
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
@@ -493,6 +496,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
+        ax.set_xlim(0, 360)
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
@@ -521,6 +525,7 @@ with PdfPages(outputpdf) as pdf:
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i])
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
+        ax.set_xlim(file_df_dict['setting_df']['TMIN'], file_df_dict['setting_df']['TMAX'])
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
