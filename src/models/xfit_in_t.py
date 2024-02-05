@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 18:47:54 trottar"
+# Time-stamp: "2024-02-05 18:54:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,7 +265,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL.SetLineWidth(2)
 
     # Draw f_sigL
-    #f_sigL.Draw("same")
+    f_sigL.Draw("same")
         
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -359,7 +359,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigt_fit.SetPoint(g_q2_sigt_fit.GetN(), q2_vec[i], g_sigt_fit.GetX()[i], g_sigt_fit.GetY()[i])
         g_q2_sigt_fit.SetPointError(g_q2_sigt_fit.GetN()-1, 0.0, 0.0, g_sigt_fit.GetEY()[i])
-        sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i]))
+        sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI/1e6
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
         print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
     g_q2_sigt_fit.Fit(f_sigT, "SQ")
@@ -459,7 +459,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_siglt_fit.SetPoint(g_q2_siglt_fit.GetN(), q2_vec[i], g_siglt_fit.GetX()[i], g_siglt_fit.GetY()[i])
         g_q2_siglt_fit.SetPointError(g_q2_siglt_fit.GetN()-1, 0.0, 0.0, g_siglt_fit.GetEY()[i])
-        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i]))
+        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI/1e6
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
         print("$$$$$$$$$$$",i, g_siglt.GetX()[i], siglt_X)
     g_q2_siglt_fit.Fit(f_sigLT, "SQ")
@@ -565,7 +565,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigtt_fit.SetPoint(g_q2_sigtt_fit.GetN(), q2_vec[i], g_sigtt_fit.GetX()[i], g_sigtt_fit.GetY()[i])
         g_q2_sigtt_fit.SetPointError(g_q2_sigtt_fit.GetN()-1, 0.0, 0.0, g_sigtt_fit.GetEY()[i])
-        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]))
+        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI/1e6
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
     g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
