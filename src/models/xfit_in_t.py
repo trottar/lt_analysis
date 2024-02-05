@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-03 18:14:33 trottar"
+# Time-stamp: "2024-02-04 19:36:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -473,7 +473,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigLT.SetLineWidth(2)
 
     # Draw f_sigLT
-    #f_sigLT.Draw("same")
+    f_sigLT.Draw("same")
         
     # Check the fit status for 'f_sigLT'
     f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom

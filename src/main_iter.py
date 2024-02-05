@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 18:27:39 trottar"
+# Time-stamp: "2024-02-04 19:36:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -146,6 +146,7 @@ if EPSSET == "low":
     x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict)
     if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append('models/xfit_in_t.py')
 
