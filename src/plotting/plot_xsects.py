@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:14:04 trottar"
+# Time-stamp: "2024-02-05 16:14:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -511,7 +511,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['sep_file']):
             df = file_df_dict[df_key]
             model = []
-            for row in df:
+            for j, row in df.iteritems():
                 inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
                 model.append(import_model(sig, inp_param))
             ax.plot(model)
