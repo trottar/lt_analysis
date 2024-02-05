@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:44:57 trottar"
+# Time-stamp: "2024-02-05 13:46:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -253,12 +253,6 @@ l_ratio_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 multiDict = {}
 for k in range(NumtBins):
 
-    # Add a gray line at unity
-    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
-    line_at_unity.SetLineColor(7)
-    line_at_unity.SetLineStyle(2)   # Dashed line style
-    line_at_unity.Draw()
-    
     multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
     
     G_ratio_phi_loeps = TGraphErrors()
@@ -290,7 +284,13 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetRangeUser(0, 360)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)    
+    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)
+    
+    # Add a gray line at unity
+    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
+    line_at_unity.SetLineColor(7)
+    line_at_unity.SetLineStyle(2)   # Dashed line style
+    line_at_unity.Draw()
     
 l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
@@ -776,3 +776,43 @@ l_xmodreal_phi.AddEntry(G_xmod_phi_loeps,"loeps model")
 l_xmodreal_phi.AddEntry(G_xmod_phi_hieps,"hieps model")
 #l_xmodreal_phi.Draw()
 C_xmodreal_phi.Print(outputpdf+')')
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Assuming phi_bin_centers, t_bin_centers, NumtBins, NumPhiBins are defined
+
+fig, axs = plt.subplots(NumtBins, 1, figsize=(8, 6*NumtBins), sharex=True)
+plt.subplots_adjust(hspace=0.5)
+
+legend = plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1.0))
+legend.set_title('Legend')
+
+for k in range(NumtBins):
+    axs[k].set_title(f"t = {t_bin_centers[k]:.2f}")
+    
+    for i in range(NumtBins * NumPhiBins):
+        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
+            axs[k].errorbar(
+                phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]],
+                np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i],
+                yerr=np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i],
+                marker='o', linestyle='', label='loeps'
+            )
+
+        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
+            axs[k].errorbar(
+                phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]],
+                np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i],
+                yerr=np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i],
+                marker='s', linestyle='', label='hieps'
+            )
+
+    axs[k].axhline(y=1.0, color='gray', linestyle='--', label='Unity Line')
+    axs[k].set_xlim(0, 360)
+    axs[k].set_ylim(0.0, 2.0)
+    axs[k].set_xlabel('phi')
+    axs[k].set_ylabel('Ratio')
+    axs[k].legend()
+
+plt.savefig(outputpdf + '.pdf', bbox_inches='tight')
