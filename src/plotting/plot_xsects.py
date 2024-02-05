@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:09:09 trottar"
+# Time-stamp: "2024-02-05 14:10:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -727,61 +727,61 @@ C_xmodreal_phi.Print(outputpdf+')')
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
-# Create a figure and axis objects
-fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
-
-# Define markers and colors
-markers = ['o', 's']
-colors = ['blue', 'green']
-
-# Loop through t bins and plot data
-for k in range(NumtBins):
-    ax = axes[k]
-    ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
-
-    for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
-        df = file_df_dict[df_key]
-        mask = (df['tbin'] == (k+1))
-        ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key)
-
-    ax.axhline(1.0, color='gray', linestyle='--')
-
-    ax.set_xlabel('$\phi$')
-    ax.set_ylabel('Ratio')
-    ax.set_ylim(0.0, 2.0)
-    ax.set_xlim(0, 360)
-
-    ax.legend()
-
-plt.tight_layout(rect=[0, 0, 1, 0.96])
-plt.savefig(outputpdf)
-
-# Loop through t bins and plot data
-for k in range(NumtBins):
-
+# Create a PdfPages object to manage the PDF file
+with PdfPages('output_plots.pdf') as pdf:
     # Create a figure and axis objects
-    fig, axes = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
-    
-    ax = axes
-    ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
 
-    for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
-        df = file_df_dict[df_key]
-        mask = (df['tbin'] == (k+1))
-        ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key)
+    # Define markers and colors
+    markers = ['o', 's']
+    colors = ['blue', 'green']
 
-    ax.axhline(1.0, color='gray', linestyle='--')
+    # Loop through t bins and plot data
+    for k in range(NumtBins):
+        ax = axes[k]
+        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
-    ax.set_xlabel('$\phi$')
-    ax.set_ylabel('Ratio')
-    ax.set_ylim(0.0, 2.0)
-    ax.set_xlim(0, 360)
+        for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
+            df = file_df_dict[df_key]
+            mask = (df['tbin'] == (k+1))
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key)
 
-    ax.legend()
+        ax.axhline(1.0, color='gray', linestyle='--')
+
+        ax.set_xlabel('$\phi$')
+        ax.set_ylabel('Ratio')
+        ax.set_ylim(0.0, 2.0)
+        ax.set_xlim(0, 360)
+
+        ax.legend()
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    # Save the second plot to the same PDF (appends as a new page)
-    with open(outputpdf, 'ab') as f:
-        fig2.savefig(f, format='pdf', bbox_inches='tight')
+    pdf.savefig(outputpdf, bbox_inches='tight')
 
+    # Loop through t bins and plot data
+    for k in range(NumtBins):
+
+        # Create a figure and axis objects
+        fig, axes = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
+
+        ax = axes
+        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+
+        for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
+            df = file_df_dict[df_key]
+            mask = (df['tbin'] == (k+1))
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key)
+
+        ax.axhline(1.0, color='gray', linestyle='--')
+
+        ax.set_xlabel('$\phi$')
+        ax.set_ylabel('Ratio')
+        ax.set_ylim(0.0, 2.0)
+        ax.set_xlim(0, 360)
+
+        ax.legend()
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        pdf.savefig(outputpdf, bbox_inches='tight')
