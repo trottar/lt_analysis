@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:57:29 trottar"
+# Time-stamp: "2024-02-05 16:58:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -243,7 +243,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetLineWidth(2)
         
         # x->phi, y->eps, PI/180 = 0.017453
-        fff2 = TF2("fff2", "([0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2])/2./PI/1e6", 0, 360, 0.0, 1.0)
+        fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x*0.017453)*[3] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]", 0, 360, 0.0, 1.0)
         # x->phi, y->eps
         #fff2 = TF2("fff2", "[0] + y*[1] + + y*cos(2*x)*[3] + sqrt(2*y*(1+y))*cos(x)*[2]", 0, 2*PI, 0.0, 1.0)
 
