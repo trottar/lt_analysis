@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 17:17:13 trottar"
+# Time-stamp: "2024-02-05 17:21:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,28 +72,28 @@ def LT_sep_x_lo_fun(x, par):
     eps = float(LOEPS)
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
-    return xs/2./PI/1e6
+    return xs
 
 # High epsilon drawing function
 def LT_sep_x_hi_fun(x, par):
     eps = float(HIEPS)
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
-    return xs/2./PI/1e6
+    return xs
 
 # Low epsilon calculating unseparated cross section
 def LT_sep_x_lo_fun_unsep(x, par):
     eps = float(LOEPS)
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
-    return xs/2./PI/1e6
+    return xs
 
 # High epsilon calculating unseparated cross section
 def LT_sep_x_hi_fun_unsep(x, par):
     eps = float(HIEPS)
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
-    return xs/2./PI/1e6
+    return xs
 
 def single_setting(q2_set, fn_lo, fn_hi):
 
@@ -467,25 +467,25 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.Update()
 
         # Fix parameters for flo, flo_unsep, fhi, and fhi_unsep
-        flo.FixParameter(0, fff2.GetParameter(0))
-        flo.FixParameter(1, fff2.GetParameter(1))
-        flo.FixParameter(2, fff2.GetParameter(2))
-        flo.FixParameter(3, fff2.GetParameter(3))
+        flo.FixParameter(0, fff2.GetParameter(0)) # sigT
+        flo.FixParameter(1, fff2.GetParameter(1)) # sigL
+        flo.FixParameter(2, fff2.GetParameter(2)) # sigLT
+        flo.FixParameter(3, fff2.GetParameter(3)) # sigTT
 
-        flo_unsep.FixParameter(0, fff2.GetParameter(0))
-        flo_unsep.FixParameter(1, fff2.GetParameter(1))
-        flo_unsep.FixParameter(2, fff2.GetParameter(2))
-        flo_unsep.FixParameter(3, fff2.GetParameter(3))
+        flo_unsep.FixParameter(0, fff2.GetParameter(0)) # sigT
+        flo_unsep.FixParameter(1, fff2.GetParameter(1)) # sigL
+        flo_unsep.FixParameter(2, fff2.GetParameter(2)) # sigLT
+        flo_unsep.FixParameter(3, fff2.GetParameter(3)) # sigTT
 
-        fhi.FixParameter(0, fff2.GetParameter(0))
-        fhi.FixParameter(1, fff2.GetParameter(1))
-        fhi.FixParameter(2, fff2.GetParameter(2))
-        fhi.FixParameter(3, fff2.GetParameter(3))
+        fhi.FixParameter(0, fff2.GetParameter(0)) # sigT
+        fhi.FixParameter(1, fff2.GetParameter(1)) # sigL
+        fhi.FixParameter(2, fff2.GetParameter(2)) # sigLT
+        fhi.FixParameter(3, fff2.GetParameter(3)) # sigTT
 
-        fhi_unsep.FixParameter(0, fff2.GetParameter(0))
-        fhi_unsep.FixParameter(1, fff2.GetParameter(1))
-        fhi_unsep.FixParameter(2, fff2.GetParameter(2))
-        fhi_unsep.FixParameter(3, fff2.GetParameter(3))
+        fhi_unsep.FixParameter(0, fff2.GetParameter(0)) # sigT
+        fhi_unsep.FixParameter(1, fff2.GetParameter(1)) # sigL
+        fhi_unsep.FixParameter(2, fff2.GetParameter(2)) # sigLT
+        fhi_unsep.FixParameter(3, fff2.GetParameter(3)) # sigTT
 
         glo.Fit(flo, "MRQ")
         ghi.Fit(fhi, "MRQ")
