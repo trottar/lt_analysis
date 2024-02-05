@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:53:48 trottar"
+# Time-stamp: "2024-02-05 13:54:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -791,7 +791,7 @@ colors = ['blue', 'green']
 # Loop through t bins and plot data
 for k in range(NumtBins):
     ax = axes[k]
-    ax.set_title(f"t = {t_bin_centers[k]:.2f}")
+    ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
     for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
         df = file_df_dict[df_key]
