@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:27:38 trottar"
+# Time-stamp: "2024-02-05 16:31:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -515,6 +515,8 @@ with PdfPages(outputpdf) as pdf:
                 print("£££££££££",row)
                 inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
                 model.append(import_model(sig, inp_param))
+
+            print("%%%%%%%",model)
             ax.plot(model)
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
         ax.set_xlabel('t')
