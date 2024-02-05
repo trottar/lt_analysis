@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:15:38 trottar"
+# Time-stamp: "2024-02-05 14:21:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -739,7 +739,7 @@ with PdfPages(outputpdf) as pdf:
         pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure and axis objects
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
 
     # Define markers and colors
     markers = ['o', 's']
@@ -747,33 +747,19 @@ with PdfPages(outputpdf) as pdf:
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
-        G_Q2_t_loeps_x = []
-        G_Q2_t_loeps_y = []
+        ax = axes[k]
+        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
-        G_Q2_t_hieps_x = []
-        G_Q2_t_hieps_y = []
+        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+            df = file_df_dict[df_key]
+            mask = (df['t'] == (k+1))
+            mask =  (df['t'][k*NumPhiBins+int(i/NumtBins)] == df['t'])
+            ax.scatter(df['t'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key)
 
-        for i in range(NumtBins * NumPhiBins):
-            if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[k * NumPhiBins + int(i / NumtBins)] == np.array(
-                    file_df_dict['unsep_file_loeps']['t'].tolist())[i]:
-                G_Q2_t_loeps_x.append(np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i])
-                G_Q2_t_loeps_y.append(np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
+        ax.set_xlabel('$\phi$')
+        ax.set_ylabel('$Q^2$')
+        ax.legend()
 
-            if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[k * NumPhiBins + int(i / NumtBins)] == np.array(
-                    file_df_dict['unsep_file_hieps']['t'].tolist())[i]:
-                G_Q2_t_hieps_x.append(np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i])
-                G_Q2_t_hieps_y.append(np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
-
-        # Plot data for each t bin
-        ax.scatter(G_Q2_t_loeps_x, G_Q2_t_loeps_y, marker=markers[0], color=colors[0], label='loeps')
-        ax.scatter(G_Q2_t_hieps_x, G_Q2_t_hieps_y, marker=markers[1], color=colors[1], label='hieps')
-
-    # Set plot properties
-    ax.set_title("Q2 vs. t")
-    ax.set_xlabel('t')
-    ax.set_ylabel('Q2')
-    ax.legend()
-    ax.grid(True)
-
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
         
