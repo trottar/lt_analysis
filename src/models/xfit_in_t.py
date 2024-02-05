@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 17:55:50 trottar"
+# Time-stamp: "2024-02-05 17:57:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
 def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range):
 
     # xsects range
-    lo_bound = -1
-    hi_bound =  1
+    lo_bound = -1e-5
+    hi_bound =  1e-5
 
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
 
