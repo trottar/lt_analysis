@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:22:58 trottar"
+# Time-stamp: "2024-02-05 15:26:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -267,7 +267,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.legend()
         # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -295,7 +295,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.legend()
         # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
@@ -318,7 +318,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlim(0, 360)
         ax.legend()
         # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -341,7 +341,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlim(0, 360)
         ax.legend()
         # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -363,7 +363,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('x_real')
         ax.legend()
         # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -384,7 +384,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('x_mod')
         ax.legend()
         # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -404,6 +404,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
         ax.legend()
+        # Add grid to subplot
+        ax.grid(True, linestyle='--', linewidth=0.5)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -423,7 +425,9 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_mod')
         ax.legend()
-
+        # Add grid to subplot
+        ax.grid(True, linestyle='--', linewidth=0.5)
+        
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
@@ -445,7 +449,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
         ax.legend()
-
+        # Add grid to subplot
+        ax.grid(True, linestyle='--', linewidth=0.5)
         # Set y-axis to logarithmic scale
         ax.set_yscale('log')
 
@@ -468,7 +473,9 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
         ax.legend()
-
+        # Add grid to subplot
+        ax.grid(True, linestyle='--', linewidth=0.5)
+        
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
@@ -485,6 +492,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.legend()
-    
+        # Add grid to subplot
+        ax.grid(True, linestyle='--', linewidth=0.5)
+        
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
