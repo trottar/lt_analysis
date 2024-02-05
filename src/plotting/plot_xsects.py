@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 11:44:34 trottar"
+# Time-stamp: "2024-02-05 11:46:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -348,7 +348,7 @@ for k in range(NumtBins):
     
     l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
     l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
-    l_ratio_phi.Draw()
+    #l_ratio_phi.Draw()
     C_ratio_phi.Print(outputpdf)
 
 C_Q2_t = TCanvas()
@@ -389,7 +389,7 @@ for k in range(NumtBins):
     
 l_Q2_t.AddEntry(G_Q2_t_loeps,"loeps")
 l_Q2_t.AddEntry(G_Q2_t_hieps,"hieps")
-l_Q2_t.Draw()
+#l_Q2_t.Draw()
 C_Q2_t.Print(outputpdf)
 
 C_Q2_phi = TCanvas()
@@ -435,7 +435,7 @@ for k in range(NumtBins):
     
 l_Q2_phi.AddEntry(G_Q2_phi_loeps,"loeps")
 l_Q2_phi.AddEntry(G_Q2_phi_hieps,"hieps")
-l_Q2_phi.Draw()
+#l_Q2_phi.Draw()
 C_Q2_phi.Print(outputpdf)
 
 C_W_phi = TCanvas()
@@ -481,7 +481,7 @@ for k in range(NumtBins):
     
 l_W_phi.AddEntry(G_W_phi_loeps,"loeps")
 l_W_phi.AddEntry(G_W_phi_hieps,"hieps")
-l_W_phi.Draw()
+#l_W_phi.Draw()
 C_W_phi.Print(outputpdf)
 
 C_xreal_thcm = TCanvas()
@@ -529,7 +529,7 @@ for k in range(NumtBins):
     
 l_xreal_thcm.AddEntry(G_xreal_thcm_loeps,"loeps")
 l_xreal_thcm.AddEntry(G_xreal_thcm_hieps,"hieps")
-l_xreal_thcm.Draw()
+#l_xreal_thcm.Draw()
 C_xreal_thcm.Print(outputpdf)
 
 C_xmod_thcm = TCanvas()
@@ -577,7 +577,7 @@ for k in range(NumtBins):
     
 l_xmod_thcm.AddEntry(G_xmod_thcm_loeps,"loeps")
 l_xmod_thcm.AddEntry(G_xmod_thcm_hieps,"hieps")
-l_xmod_thcm.Draw()
+#l_xmod_thcm.Draw()
 C_xmod_thcm.Print(outputpdf)
 
 C_xreal_phi = TCanvas()
@@ -629,7 +629,7 @@ for k in range(NumtBins):
     multiDict["G_xreal_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     
 l_xreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")
-l_xreal_phi.Draw()
+#l_xreal_phi.Draw()
 C_xreal_phi.Print(outputpdf)
 
 C_xmod_phi = TCanvas()
@@ -675,7 +675,7 @@ for k in range(NumtBins):
     
 l_xmod_phi.AddEntry(G_xmod_phi_loeps,"loeps")
 l_xmod_phi.AddEntry(G_xmod_phi_hieps,"hieps")
-l_xmod_phi.Draw()
+#l_xmod_phi.Draw()
 C_xmod_phi.Print(outputpdf)
 
 
@@ -745,7 +745,7 @@ for k in range(NumtBins):
     l_xmodreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")    
     l_xmodreal_phi.AddEntry(G_xmod_phi_loeps,"loeps model")
     l_xmodreal_phi.AddEntry(G_xmod_phi_hieps,"hieps model")
-    l_xmodreal_phi.Draw()
+    #l_xmodreal_phi.Draw()
     C_xmodreal_phi.Print(outputpdf)
 
 C_xmodreal_phi = TCanvas()
@@ -817,5 +817,5 @@ l_xmodreal_phi.AddEntry(G_xreal_phi_loeps,"loeps")
 l_xmodreal_phi.AddEntry(G_xreal_phi_hieps,"hieps")    
 l_xmodreal_phi.AddEntry(G_xmod_phi_loeps,"loeps model")
 l_xmodreal_phi.AddEntry(G_xmod_phi_hieps,"hieps model")
-l_xmodreal_phi.Draw()
+#l_xmodreal_phi.Draw()
 C_xmodreal_phi.Print(outputpdf+')')
