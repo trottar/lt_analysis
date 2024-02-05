@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:26:06 trottar"
+# Time-stamp: "2024-02-05 15:51:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,6 @@ else:
     sys.exit(2)
     
 ###############################################################################################################################################
-
 '''
 ltsep package import and pathing definitions
 '''
@@ -77,6 +76,27 @@ fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
 outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 
 ################################################################################################################################################
+'''
+Import separated xsects model
+'''
+
+if pol_str == "pl" and ParticleType == "kaon":
+    from sep_xsect_kaon_pl import import_model
+
+###############################################################################################################################################
+'''
+Import model parameterization
+'''
+
+param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
+
+param_arr = []
+with open(param_file, 'r') as f:
+    for i, line in enumerate(f):
+        columns = line.split()
+        param_arr.append(str(columns[0]))    
+
+###############################################################################################################################################
 
 def are_within_tolerance(num1, num2, tolerance=0.1):
     return abs(num1 - num2) <= tolerance
@@ -234,7 +254,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
         file_df_dict['sep_file'] = file_to_df( \
                                                LTANAPATH+"/src/{}/xsects/x_sep.{}_Q{}W{}.dat" \
                                                .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")) \
-                                               , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'tm', 'W', 'Q2'])
+                                               , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'tm', 'W', 'Q2', 'th_cm'])
             
 ################################################################################################################################################
 
@@ -482,12 +502,15 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(2, 2, figsize=(8, 6), sharex=True)
 
     for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
+        
         # Use integer division to get the correct subplot position
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig))
         for i, df_key in enumerate(['sep_file']):
             df = file_df_dict[df_key]
+            model  = import_model(sig, Q2.replace("p","."), df['th_cm'], df['t'], df['Q2'], df['W'], param_arr)
+            ax.plot(model)
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
