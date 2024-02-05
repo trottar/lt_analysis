@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:11:41 trottar"
+# Time-stamp: "2024-02-05 15:15:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -474,41 +474,15 @@ with PdfPages(outputpdf) as pdf:
     
     fig, axes = plt.subplots(2, 2, figsize=(8, 6), sharex=True)
 
-    ax = axes[0]
-    ax.set_title("$\sigma_{L}$".format(t_bin_centers[k]))
-    for i, df_key in enumerate(['sep_file']):
-        df = file_df_dict[df_key]
-        ax.errorbar(df['t'], df['sigL'], yerr=df['dsigL'], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
-    ax.set_xlabel('t')
-    ax.set_ylabel('$\sigma_{L}$')
-    ax.legend()
-
-    ax = axes[1]
-    ax.set_title("$\sigma_{T}$".format(t_bin_centers[k]))
-    for i, df_key in enumerate(['sep_file']):
-        df = file_df_dict[df_key]
-        ax.errorbar(df['t'], df['sigT'], yerr=df['dsigT'], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
-    ax.set_xlabel('t')
-    ax.set_ylabel('$\sigma_{T}$')
-    ax.legend()
-
-    ax = axes[2]
-    ax.set_title("$\sigma_{LT}$".format(t_bin_centers[k]))
-    for i, df_key in enumerate(['sep_file']):
-        df = file_df_dict[df_key]
-        ax.errorbar(df['t'], df['sigLT'], yerr=df['dsigLT'], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
-    ax.set_xlabel('t')
-    ax.set_ylabel('$\sigma_{LT}$')
-    ax.legend()
-
-    ax = axes[3]
-    ax.set_title("$\sigma_{TT}$".format(t_bin_centers[k]))
-    for i, df_key in enumerate(['sep_file']):
-        df = file_df_dict[df_key]
-        ax.errorbar(df['t'], df['sigTT'], yerr=df['dsigTT'], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
-    ax.set_xlabel('t')
-    ax.set_ylabel('$\sigma_{TT}$')
-    ax.legend()    
+    for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
+        ax = axes[k]
+        ax.set_title("$\sigma_{L}$".format(t_bin_centers[k]))
+        for i, df_key in enumerate(['sep_file']):
+            df = file_df_dict[df_key]
+            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
+        ax.set_xlabel('t')
+        ax.set_ylabel('$\sigma_{}$'.format(sig.replace("sig","")))
+        ax.legend()
     
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
