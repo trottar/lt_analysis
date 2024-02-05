@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:37:20 trottar"
+# Time-stamp: "2024-02-05 16:43:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -26,10 +26,11 @@ def import_model(inp_model, arg_str):
     Q2, theta_cm, tt, qq, ww, *params = args
 
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
+
+    g = 1 / ((ww**2) - (m_p**2))**2
     
     # Function for SigL
     def sig_L(*par):
-        g = 1 / ((ww**2) - (m_p**2))**2
         print("\n\nCalculating function for sigL...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
         f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
         print("sigL = {:.4e}".format(f))
@@ -37,7 +38,6 @@ def import_model(inp_model, arg_str):
 
     # Function for SigT
     def sig_T(*par):
-        g = 1 / ((ww**2) - (m_p**2))**2
         tav = (0.1112 + 0.0066*math.log(Q2))*Q2
         ftav = (abs(tt)-tav)/tav
         print("\n\nCalculating function for sigT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
@@ -48,7 +48,6 @@ def import_model(inp_model, arg_str):
     # Function for SigLT
     # thetacm term is defined on function calling
     def sig_LT(*par):
-        g = 1 / ((ww**2) - (m_p**2))**2
         print("\n\nCalculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
         f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
         print("sigLT = {:.4e}".format(f))
@@ -57,7 +56,6 @@ def import_model(inp_model, arg_str):
     # Function for SigTT
     # thetacm term is defined on function calling
     def sig_TT(*par):
-        g = 1 / ((ww**2) - (m_p**2))**2
         f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
         print("\n\nCalculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
         f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
@@ -71,4 +69,7 @@ def import_model(inp_model, arg_str):
         "sigTT" : sig_TT(p13, p14, p15, p16),
     }
 
-    return modelDict[inp_model]*2*PI*1e-6
+    sig = modelDict[inp_model]
+    sig = sig*g
+    
+    return sig/2./PI/1e6
