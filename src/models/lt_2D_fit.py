@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 19:02:19 trottar"
+# Time-stamp: "2024-02-04 19:03:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -281,7 +281,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Print plots for c1 canvases
         g_plot_err.Draw("perr")
         g_plot_err.SetTitle("t-bin {}: Fit 1".format(i))
-        c1.Print(outputpdf+'(')
+        if i == 0:
+            c1.Print(outputpdf+'(')
+        else:
+            c1.Print(outputpdf)
         c1.Clear()
         
         sigL_change.SetTitle("sigL_change {}".format(i))
