@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:49:02 trottar"
+# Time-stamp: "2024-02-05 16:51:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -155,6 +155,9 @@ file_df_dict = {}
 
 setting_file = LTANAPATH+"/src/{}/list.settings".format(ParticleType)
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'W', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins'])
+
+tmin = file_df_dict['setting_df'].loc[0, 'TMIN']
+tmax = file_df_dict['setting_df'].loc[0, 'TMAX']
 
 try:
     with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
@@ -525,9 +528,7 @@ with PdfPages(outputpdf) as pdf:
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i])
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
-        ax.set_xlim(0, 1.0)
-        print("!!!!!!!!",file_df_dict['setting_df']['TMIN'], file_df_dict['setting_df']['TMAX'])
-        #ax.set_xlim(file_df_dict['setting_df']['TMIN'], file_df_dict['setting_df']['TMAX'])
+        ax.set_xlim(tmin, tmax)
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
