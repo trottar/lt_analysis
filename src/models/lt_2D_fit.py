@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 19:29:50 trottar"
+# Time-stamp: "2024-02-04 19:31:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,11 +406,11 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c1.Update()
                 
         # Print plots for c1 canvases
-        g_plot_err.Draw("perr")
+        g_plot_err.ProjectionXY().Draw("perr")
         g_plot_err.SetTitle("{}".format(i))
         g_plot_err.GetXaxis().SetTitle("#it{#phi} [degree]")
         g_plot_err.GetXaxis().CenterTitle()
-        g_plot_err.GetYaxis().SetTitle("#it{#epsilon}")
+        g_plot_err.GetYaxis().SetTitle("Epsilon")
         g_plot_err.GetYaxis().CenterTitle()
         g_plot_err.GetZaxis().SetTitle("#it{#sigma}")
         g_plot_err.GetZaxis().CenterTitle()
