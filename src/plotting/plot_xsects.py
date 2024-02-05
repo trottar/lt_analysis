@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:21:40 trottar"
+# Time-stamp: "2024-02-05 14:23:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -741,10 +741,6 @@ with PdfPages(outputpdf) as pdf:
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
 
-    # Define markers and colors
-    markers = ['o', 's']
-    colors = ['blue', 'green']
-
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
@@ -752,7 +748,6 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
-            mask = (df['t'] == (k+1))
             mask =  (df['t'][k*NumPhiBins+int(i/NumtBins)] == df['t'])
             ax.scatter(df['t'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key)
 
