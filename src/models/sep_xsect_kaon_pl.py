@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 17:34:19 trottar"
+# Time-stamp: "2024-02-05 18:42:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,8 +70,8 @@ def import_model(inp_model, arg_str):
     }
 
     sig = modelDict[inp_model]
-    sig = sig*g
-    sig = sig/2./PI/1e6
+    #sig = sig*g
+    #sig = sig/2./PI/1e6
 
     print("Model {} = {:.4e}".format(inp_model, sig))
     
