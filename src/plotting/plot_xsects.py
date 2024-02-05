@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:44:14 trottar"
+# Time-stamp: "2024-02-05 13:44:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -253,6 +253,12 @@ l_ratio_phi = TLegend(0.7, 0.6, 0.9, 0.9)
 multiDict = {}
 for k in range(NumtBins):
 
+    # Add a gray line at unity
+    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
+    line_at_unity.SetLineColor(7)
+    line_at_unity.SetLineStyle(2)   # Dashed line style
+    line_at_unity.Draw()
+    
     multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
     
     G_ratio_phi_loeps = TGraphErrors()
@@ -284,15 +290,7 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetRangeUser(0, 360)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)
-    
-    # Add a gray line at unity
-    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
-    line_at_unity.SetLineColor(7)
-    line_at_unity.SetLineStyle(2)   # Dashed line style
-    line_at_unity.Draw()
-
-    C_ratio_phi.Update()
+    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)    
     
 l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
