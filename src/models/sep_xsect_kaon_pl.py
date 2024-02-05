@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:43:01 trottar"
+# Time-stamp: "2024-02-05 16:55:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,7 +49,7 @@ def import_model(inp_model, arg_str):
     # thetacm term is defined on function calling
     def sig_LT(*par):
         print("\n\nCalculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
-        f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
+        f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm*PI/180)
         print("sigLT = {:.4e}".format(f))
         return f
 
@@ -58,7 +58,7 @@ def import_model(inp_model, arg_str):
     def sig_TT(*par):
         f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
         print("\n\nCalculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
-        f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
+        f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm*PI/180)**2)
         print("sigTT = {:.4e}".format(f))
         return f
 
