@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:02:55 trottar"
+# Time-stamp: "2024-02-05 16:14:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -510,8 +510,10 @@ with PdfPages(outputpdf) as pdf:
         ax.set_title("${}$".format(formatted_sig))
         for i, df_key in enumerate(['sep_file']):
             df = file_df_dict[df_key]
-            inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), df['th_cm'], df['t'], df['Q2'], df['W'])+' '.join(param_arr)
-            model  = import_model(sig, inp_param)
+            model = []
+            for row in df:
+                inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
+                model.append(import_model(sig, inp_param))
             ax.plot(model)
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
         ax.set_xlabel('t')
