@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:10:45 trottar"
+# Time-stamp: "2024-02-05 14:11:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -730,7 +730,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 # Create a PdfPages object to manage the PDF file
-with PdfPages('output_plots.pdf') as pdf:
+with PdfPages(outputpdf) as pdf:
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
 
@@ -758,7 +758,7 @@ with PdfPages('output_plots.pdf') as pdf:
         ax.legend()
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    pdf.savefig(outputpdf, bbox_inches='tight')
+    pdf.savefig(plt, bbox_inches='tight')
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -784,4 +784,4 @@ with PdfPages('output_plots.pdf') as pdf:
         ax.legend()
 
         plt.tight_layout(rect=[0, 0, 1, 0.96])
-        pdf.savefig(outputpdf, bbox_inches='tight')
+        pdf.savefig(plt, bbox_inches='tight')
