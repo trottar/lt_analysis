@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-25 06:16:21 trottar"
+# Time-stamp: "2024-02-05 16:58:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -205,6 +205,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo
+echo
+echo "Generating xsect plots..."
 # Define input and output file names
 OutUnsepxsectsFilename="${ParticleType}_xsects_${KIN}"
 cd "${LTANAPATH}/src/plotting/"
