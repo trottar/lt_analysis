@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:23:47 trottar"
+# Time-stamp: "2024-02-05 16:26:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,8 +20,6 @@ mkpl = 0.493677
 
 def import_model(inp_model, arg_str):
 
-    print("!!!!!!!!",inp_model)
-    print("$$$$$$$$",arg_str)
     # Split and convert the input string into a list of floats
     args = list(map(float, arg_str.split()))
 
@@ -32,7 +30,7 @@ def import_model(inp_model, arg_str):
     # Function for SigL
     def sig_L(*par):
         g = 1 / ((ww**2) - (m_p**2))**2
-        print("Calculating function for sigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        print("Calculating function for sigL...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})\n\n".format(qq, tt, *par))
         f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
         return f
 
@@ -41,7 +39,7 @@ def import_model(inp_model, arg_str):
         g = 1 / ((ww**2) - (m_p**2))**2
         tav = (0.1112 + 0.0066*math.log(Q2))*Q2
         ftav = (abs(tt)-tav)/tav
-        print("Calculating function for sigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        print("Calculating function for sigT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
         return f
 
@@ -49,7 +47,7 @@ def import_model(inp_model, arg_str):
     # thetacm term is defined on function calling
     def sig_LT(*par):
         g = 1 / ((ww**2) - (m_p**2))**2
-        print("Calculating function for sigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        print("Calculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})\n\n".format(qq, tt, *par))
         f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
         return f
 
@@ -58,7 +56,7 @@ def import_model(inp_model, arg_str):
     def sig_TT(*par):
         g = 1 / ((ww**2) - (m_p**2))**2
         f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-        print("Calculating function for sigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+        print("Calculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})\n\n".format(qq, tt, *par))
         f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
         return f
 
