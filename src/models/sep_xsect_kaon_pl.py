@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:32:17 trottar"
+# Time-stamp: "2024-02-05 16:33:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,4 +71,4 @@ def import_model(inp_model, arg_str):
         "sigTT" : sig_TT(p13, p14, p15, p16),
     }
 
-    return modelDict[inp_model]
+    return modelDict[inp_model]*1e-6
