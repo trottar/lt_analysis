@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:46:53 trottar"
+# Time-stamp: "2024-02-05 13:47:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -789,7 +789,7 @@ legend = plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1.0))
 legend.set_title('Legend')
 
 for k in range(NumtBins):
-    axs[k].set_title(f"t = {t_bin_centers[k]:.2f}")
+    axs[k].set_title("t = {:.2f}".format(t_bin_centers[k]))
     
     for i in range(NumtBins * NumPhiBins):
         if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
@@ -815,4 +815,4 @@ for k in range(NumtBins):
     axs[k].set_ylabel('Ratio')
     axs[k].legend()
 
-plt.savefig(outputpdf + '.pdf', bbox_inches='tight')
+plt.savefig(outputpdf, bbox_inches='tight')
