@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:51:03 trottar"
+# Time-stamp: "2024-02-05 15:56:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,7 +13,7 @@
 import math
 
 # Define constants
-PI = ROOT.TMath.Pi()
+PI = math.pi
 m_p = 0.93827231
 m_n = 0.93956541
 mkpl = 0.493677
