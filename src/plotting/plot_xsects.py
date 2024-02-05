@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:11:41 trottar"
+# Time-stamp: "2024-02-05 14:13:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -758,7 +758,7 @@ with PdfPages(outputpdf) as pdf:
         ax.legend()
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    pdf.savefig(plt, bbox_inches='tight')
+    pdf.savefig(fig, bbox_inches='tight')
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -784,4 +784,4 @@ with PdfPages(outputpdf) as pdf:
         ax.legend()
 
         plt.tight_layout(rect=[0, 0, 1, 0.96])
-        pdf.savefig(plt, bbox_inches='tight')
+        pdf.savefig(fig, bbox_inches='tight')
