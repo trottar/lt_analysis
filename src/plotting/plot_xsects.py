@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:39:13 trottar"
+# Time-stamp: "2024-02-05 13:44:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -291,6 +291,8 @@ for k in range(NumtBins):
     line_at_unity.SetLineColor(7)
     line_at_unity.SetLineStyle(2)   # Dashed line style
     line_at_unity.Draw()
+
+    C_ratio_phi.Update()
     
 l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
