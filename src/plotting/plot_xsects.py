@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:02:37 trottar"
+# Time-stamp: "2024-02-05 14:04:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -781,5 +781,5 @@ for k in range(NumtBins):
     ax.legend()
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    plt.savefig(outputpdf)
+    plt.savefig(outputpdf, append=True)
 
