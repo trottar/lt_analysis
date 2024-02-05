@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:17:18 trottar"
+# Time-stamp: "2024-02-05 15:18:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -477,7 +477,7 @@ with PdfPages(outputpdf) as pdf:
     for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
         # Use integer division to get the correct subplot position
         ax = axes[k // 2, k % 2]
-        ax.set_title("$\sigma_{L}$".format(t_bin_centers[k]))
+        ax.set_title("$\sigma_{}$".format(sig.replace("sig","")))
         for i, df_key in enumerate(['sep_file']):
             df = file_df_dict[df_key]
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
