@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:51:14 trottar"
+# Time-stamp: "2024-02-05 14:53:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -440,7 +440,7 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key)
-            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key)
+            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key+" Model")
 
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
@@ -463,7 +463,7 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key)
-            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key)
+            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key+" Model")
 
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
