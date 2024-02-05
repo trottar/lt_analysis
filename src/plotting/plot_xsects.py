@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:13:02 trottar"
+# Time-stamp: "2024-02-05 14:15:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,55 +245,6 @@ for i,row in file_df_dict['setting_df'].iterrows():
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ################################################################################################################################################
 
-multiDict = {}
-for k in range(NumtBins):
-
-    C_ratio_phi = TCanvas()
-    C_ratio_phi.SetGrid()
-    l_ratio_phi = TLegend(0.7, 0.6, 0.9, 0.9)
-
-    multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
-    
-    G_ratio_phi_loeps = TGraphErrors()
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_ratio_phi_loeps.SetPoint(i, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
-            G_ratio_phi_loeps.SetPointError(i, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
-    G_ratio_phi_loeps.SetMarkerStyle(21)
-    G_ratio_phi_loeps.SetMarkerSize(1)
-    G_ratio_phi_loeps.SetMarkerColor(1)
-    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_loeps)
-
-    G_ratio_phi_hieps = TGraphErrors()
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_ratio_phi_hieps.SetPoint(i, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
-            G_ratio_phi_hieps.SetPointError(i, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
-    G_ratio_phi_hieps.SetMarkerStyle(23)
-    G_ratio_phi_hieps.SetMarkerSize(1)
-    G_ratio_phi_hieps.SetMarkerColor(2)
-    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)
-    
-    multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Ratio".format(t_bin_centers[k]))
-    
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetRangeUser(0, 360)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)
-    
-    # Add a gray line at unity
-    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
-    line_at_unity.SetLineColor(7)  # 7 corresponds to light blue
-    line_at_unity.SetLineStyle(2)   # Dashed line style
-    line_at_unity.Draw("same")
-    
-    l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
-    l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
-    #l_ratio_phi.Draw()
-    C_ratio_phi.Print(outputpdf+'(')
-
 C_Q2_t = TCanvas()
 C_Q2_t.SetGrid()
 l_Q2_t = TLegend(0.7, 0.6, 0.9, 0.9)
@@ -329,7 +280,7 @@ for k in range(NumtBins):
 l_Q2_t.AddEntry(G_Q2_t_loeps,"loeps")
 l_Q2_t.AddEntry(G_Q2_t_hieps,"hieps")
 #l_Q2_t.Draw()
-C_Q2_t.Print(outputpdf)
+C_Q2_t.Print(outputpdf+'(')
 
 C_Q2_phi = TCanvas()
 C_Q2_phi.SetGrid()
@@ -731,6 +682,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 # Create a PdfPages object to manage the PDF file
 with PdfPages(outputpdf) as pdf:
+    
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
 
@@ -785,3 +737,43 @@ with PdfPages(outputpdf) as pdf:
 
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
+
+    # Create a figure and axis objects
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Define markers and colors
+    markers = ['o', 's']
+    colors = ['blue', 'green']
+
+    # Loop through t bins and plot data
+    for k in range(NumtBins):
+        G_Q2_t_loeps_x = []
+        G_Q2_t_loeps_y = []
+
+        G_Q2_t_hieps_x = []
+        G_Q2_t_hieps_y = []
+
+        for i in range(NumtBins * NumPhiBins):
+            if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[k * NumPhiBins + int(i / NumtBins)] == np.array(
+                    file_df_dict['unsep_file_loeps']['t'].tolist())[i]:
+                G_Q2_t_loeps_x.append(np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i])
+                G_Q2_t_loeps_y.append(np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
+
+            if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[k * NumPhiBins + int(i / NumtBins)] == np.array(
+                    file_df_dict['unsep_file_hieps']['t'].tolist())[i]:
+                G_Q2_t_hieps_x.append(np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i])
+                G_Q2_t_hieps_y.append(np.array(file_df_dict['unsep_file_hieps']['Q2'].tolist())[i])
+
+        # Plot data for each t bin
+        ax.scatter(G_Q2_t_loeps_x, G_Q2_t_loeps_y, marker=markers[0], color=colors[0], label='loeps')
+        ax.scatter(G_Q2_t_hieps_x, G_Q2_t_hieps_y, marker=markers[1], color=colors[1], label='hieps')
+
+    # Set plot properties
+    ax.set_title("Q2 vs. t")
+    ax.set_xlabel('t')
+    ax.set_ylabel('Q2')
+    ax.legend()
+    ax.grid(True)
+
+    pdf.savefig(fig, bbox_inches='tight')
+        
