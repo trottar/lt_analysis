@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:47:42 trottar"
+# Time-stamp: "2024-02-05 13:50:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -785,7 +785,7 @@ import numpy as np
 fig, axs = plt.subplots(NumtBins, 1, figsize=(8, 6*NumtBins), sharex=True)
 plt.subplots_adjust(hspace=0.5)
 
-legend = plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1.0))
+legend = axs[0].legend(loc='upper right', bbox_to_anchor=(1.1, 1.0))
 legend.set_title('Legend')
 
 for k in range(NumtBins):
