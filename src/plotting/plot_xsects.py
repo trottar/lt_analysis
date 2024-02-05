@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:36:19 trottar"
+# Time-stamp: "2024-02-05 13:38:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -185,7 +185,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['aver_loeps'] = file_to_df( \
                                                      LTANAPATH+"/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat" \
                                                      .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100) \
-                                                     , ['ratio', 'dratio', 'phibin', 'tbin'])            
+                                                     , ['ratio', 'dratio', 'phibin', 'tbin']).sort_values(by='tbin')
             if row['thpq'] < 0.0:
                 file_df_dict['kindata_loeps_{}'.format('right')] = file_to_df( \
                                                                                LTANAPATH+"/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_{}.dat" \
@@ -213,7 +213,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['aver_hieps'] = file_to_df( \
                                                      LTANAPATH+"/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat" \
                                                      .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100) \
-                                                     , ['ratio', 'dratio', 'phibin', 'tbin'])            
+                                                     , ['ratio', 'dratio', 'phibin', 'tbin']).sort_values(by='tbin')
             if row['thpq'] < 0.0:
                 file_df_dict['kindata_hieps_{}'.format('right')] = file_to_df( \
                                                                                LTANAPATH+"/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_{}.dat" \
@@ -273,13 +273,7 @@ for k in range(NumtBins):
     G_ratio_phi_hieps.SetMarkerStyle(23)
     G_ratio_phi_hieps.SetMarkerSize(1)
     G_ratio_phi_hieps.SetMarkerColor(2)
-    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)
-
-    # Add a gray line at unity
-    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
-    line_at_unity.SetLineColor(7)
-    line_at_unity.SetLineStyle(2)   # Dashed line style
-    line_at_unity.Draw("same")
+    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)    
     
     C_ratio_phi.cd(k+1)
     
@@ -290,7 +284,13 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetRangeUser(0, 360)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)    
+    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)
+    
+    # Add a gray line at unity
+    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
+    line_at_unity.SetLineColor(7)
+    line_at_unity.SetLineStyle(2)   # Dashed line style
+    multiDict["G_ratio_phi_{}".format(k+1)].Add(line_at_unity)
     
 l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
