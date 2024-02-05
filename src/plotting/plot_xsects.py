@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:31:27 trottar"
+# Time-stamp: "2024-02-05 16:37:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -512,12 +512,11 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
             model = []
             for j, row in df.iterrows():
-                print("£££££££££",row)
                 inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
                 model.append(import_model(sig, inp_param))
-
-            print("%%%%%%%",model)
-            ax.plot(model)
+            # Check that model sig is not all zeros
+            if not all(element == 0 for element in model):
+                ax.plot(model, , linestyle='-', color='red')
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
