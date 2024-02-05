@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 18:00:54 trottar"
+# Time-stamp: "2024-02-05 18:04:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,11 +151,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             w, w_e, q2, q2_e, tt, tt_e, thetacm, it = map(float, line.strip().split())
 
             if pol_str == "pl":
-                #g = (1 / ((w**2) - (m_p**2))**2)/2/PI/1e6
-                g = (1 / ((w**2) - (m_p**2))**2)
+                g = (1 / ((w**2) - (m_p**2))**2)/2/PI/1e6
+                #g = (1 / ((w**2) - (m_p**2))**2)
             else:
-                #g = (1 / ((w**2) - (m_n**2))**2)/2/PI/1e6
-                g = (1 / ((w**2) - (m_n**2))**2)
+                g = (1 / ((w**2) - (m_n**2))**2)/2/PI/1e6
+                #g = (1 / ((w**2) - (m_n**2))**2)
             g_vec.append(g)
             w_vec.append(w)
             q2_vec.append(q2)
@@ -202,7 +202,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     print("Fit for Sig L")
 
-    c1.cd(2).SetLeftMargin(0.12)
+    c1.cd(1).SetLeftMargin(0.12)
     nsep.Draw("sigl:t:sigl_e", "", "goff")
 
     f_sigL_pre = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, lo_bound, hi_bound, 4)
@@ -277,7 +277,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigL_status_message)
     
-    c1.cd(2)
+    c1.cd(1)
 
     g_sigl_fit_tot.SetMarkerStyle(26)
     g_sigl_fit_tot.SetMarkerColor(2)
@@ -306,7 +306,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     print("Fit for Sig T")
     
-    c1.cd(1).SetLeftMargin(0.12)
+    c1.cd(2).SetLeftMargin(0.12)
     nsep.Draw("sigt:t:sigt_e", "", "goff")
 
     f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, lo_bound, hi_bound, 4)
@@ -377,7 +377,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigT_status_message)
 
-    c1.cd(1)
+    c1.cd(2)
 
     g_sigt_fit_tot.SetMarkerStyle(26)
     g_sigt_fit_tot.SetMarkerColor(2)
