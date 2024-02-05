@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 16:37:31 trottar"
+# Time-stamp: "2024-02-05 16:39:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -516,8 +516,8 @@ with PdfPages(outputpdf) as pdf:
                 model.append(import_model(sig, inp_param))
             # Check that model sig is not all zeros
             if not all(element == 0 for element in model):
-                ax.plot(model, linestyle='-', color='red')
-            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
+                ax.plot(model, linestyle='-.', color='red', label='Model Fit')
+            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i])
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.legend()
