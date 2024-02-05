@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 11:43:54 trottar"
+# Time-stamp: "2024-02-05 11:44:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -405,7 +405,7 @@ for k in range(NumtBins):
     G_Q2_phi_loeps = TGraph()
     j=0
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['unsep_file_aver_loeps']['t'].tolist())[i] == (k+1):
+        if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i-1] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i]:
             G_Q2_phi_loeps.SetPoint(j, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['Q2'].tolist())[i])
             j+=1
     G_Q2_phi_loeps.SetMarkerStyle(21)
