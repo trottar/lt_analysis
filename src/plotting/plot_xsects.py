@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:41:29 trottar"
+# Time-stamp: "2024-02-05 14:42:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -238,8 +238,6 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")) \
                                                , ['sigT', 'dsigT', 'sigL', 'dsigL', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'tm', 'W', 'Q2'])
             
-################################################################################################################################################
-ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ################################################################################################################################################
 
 # Create a PdfPages object to manage the PDF file
