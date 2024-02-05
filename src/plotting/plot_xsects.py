@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:53:55 trottar"
+# Time-stamp: "2024-02-05 15:55:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,7 +80,7 @@ outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 Import separated xsects model
 '''
 
-sys.path.append(LTANAPATH+"src/models")
+sys.path.append("../models")
 if pol_str == "pl" and ParticleType == "kaon":
     from sep_xsect_kaon_pl import import_model
 
