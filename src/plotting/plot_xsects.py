@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 12:27:09 trottar"
+# Time-stamp: "2024-02-05 12:27:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -715,7 +715,7 @@ for k in range(NumtBins):
 
     G_xreal_phi_loeps = TGraphErrors()
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[k*NumPhiBins+int(i/NumtBins)] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i]:
+        if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[k*NumPhiBins+int(i/NumPhiBins)] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i]:
             G_xreal_phi_loeps.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
             G_xreal_phi_loeps.SetPointError(i, 0, np.array(file_df_dict['unsep_file_loeps']['dx_real'].tolist())[i])
             print(i, "$$$$$$$$$$$$$$$$", np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_real'].tolist())[i])
@@ -727,7 +727,7 @@ for k in range(NumtBins):
     
     G_xreal_phi_hieps = TGraphErrors()
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[k*NumPhiBins+int(i/NumtBins)] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i]:
+        if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[k*NumPhiBins+int(i/NumPhiBins)] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i]:
             G_xreal_phi_hieps.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_real'].tolist())[i])
             G_xreal_phi_hieps.SetPointError(i, 0, np.array(file_df_dict['unsep_file_hieps']['dx_real'].tolist())[i])
     G_xreal_phi_hieps.SetMarkerStyle(23)
@@ -737,7 +737,7 @@ for k in range(NumtBins):
     
     G_xmod_phi_loeps = TGraph()
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[k*NumPhiBins+int(i/NumtBins)] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i]:
+        if np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[k*NumPhiBins+int(i/NumPhiBins)] == np.array(file_df_dict['unsep_file_loeps']['t'].tolist())[i]:
             G_xmod_phi_loeps.SetPoint(i, np.array(file_df_dict['unsep_file_loeps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_loeps']['x_mod'].tolist())[i])
     G_xmod_phi_loeps.SetMarkerStyle(30)
     G_xmod_phi_loeps.SetMarkerSize(1)
@@ -746,7 +746,7 @@ for k in range(NumtBins):
 
     G_xmod_phi_hieps = TGraph()
     for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[k*NumPhiBins+int(i/NumtBins)] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i]:
+        if np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[k*NumPhiBins+int(i/NumPhiBins)] == np.array(file_df_dict['unsep_file_hieps']['t'].tolist())[i]:
             G_xmod_phi_hieps.SetPoint(i, np.array(file_df_dict['unsep_file_hieps']['phi'].tolist())[i], np.array(file_df_dict['unsep_file_hieps']['x_mod'].tolist())[i])
     G_xmod_phi_hieps.SetMarkerStyle(27)
     G_xmod_phi_hieps.SetMarkerSize(1)
