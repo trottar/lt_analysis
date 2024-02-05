@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:53:17 trottar"
+# Time-stamp: "2024-02-05 15:53:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,9 +17,6 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import re
 import sys, os
-
-# Import the dynamic script
-import importlib.util
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -83,7 +80,7 @@ outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 Import separated xsects model
 '''
 
-sys.path.append("models")
+sys.path.append(LTANAPATH+"src/models")
 if pol_str == "pl" and ParticleType == "kaon":
     from sep_xsect_kaon_pl import import_model
 
