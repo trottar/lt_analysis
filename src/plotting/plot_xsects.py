@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:30:18 trottar"
+# Time-stamp: "2024-02-05 13:32:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -287,10 +287,10 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)
     
     # Add a gray line at unity
-    line_at_y1 = TLine(multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmin(), 1.0, multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmax(), 1.0)
-    line_at_y1.SetLineColor(7)
-    line_at_y1.SetLineStyle(2)   # Dashed line style
-    line_at_y1.Draw("same")
+    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
+    line_at_unity.SetLineColor(7)
+    line_at_unity.SetLineStyle(2)   # Dashed line style
+    line_at_unity.Draw("same")
     
 l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
@@ -336,10 +336,10 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)
     
     # Add a gray line at unity
-    line_at_y1 = TLine(multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmin(), 1.0, multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmax(), 1.0)
-    line_at_y1.SetLineColor(7)  # 17 corresponds to gray color
-    line_at_y1.SetLineStyle(2)   # Dashed line style
-    line_at_y1.Draw("same")
+    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
+    line_at_unity.SetLineColor(7)  # 17 corresponds to gray color
+    line_at_unity.SetLineStyle(2)   # Dashed line style
+    line_at_unity.Draw("same")
     
     l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
     l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
