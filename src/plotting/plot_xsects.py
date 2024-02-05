@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:04:10 trottar"
+# Time-stamp: "2024-02-05 14:06:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -727,6 +727,7 @@ C_xmodreal_phi.Print(outputpdf+')')
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 # Create a figure and axis objects
 fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
@@ -755,7 +756,10 @@ for k in range(NumtBins):
     ax.legend()
 
 plt.tight_layout(rect=[0, 0, 1, 0.96])
-plt.savefig(outputpdf)
+# Save the plot to a PDF file
+with PdfPages(outputpdf) as pdf:
+    pdf.savefig()
+    plt.close()
 
 # Loop through t bins and plot data
 for k in range(NumtBins):
@@ -782,4 +786,8 @@ for k in range(NumtBins):
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.savefig(outputpdf, append=True)
-
+    
+    # Save the plot to a PDF file
+    with PdfPages(outputpdf) as pdf:
+        pdf.savefig()
+        plt.close()
