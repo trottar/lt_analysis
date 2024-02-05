@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:50:44 trottar"
+# Time-stamp: "2024-02-05 13:52:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -777,42 +777,42 @@ l_xmodreal_phi.AddEntry(G_xmod_phi_hieps,"hieps model")
 #l_xmodreal_phi.Draw()
 C_xmodreal_phi.Print(outputpdf+')')
 
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Assuming phi_bin_centers, t_bin_centers, NumtBins, NumPhiBins are defined
+# Assuming phi_bin_centers, t_bin_centers, NumtBins, and NumPhiBins are defined
 
 fig, axs = plt.subplots(NumtBins, 1, figsize=(8, 6*NumtBins), sharex=True)
-plt.subplots_adjust(hspace=0.5)
-
-legend = axs[0].legend(loc='upper right', bbox_to_anchor=(1.1, 1.0))
-legend.set_title('Legend')
 
 for k in range(NumtBins):
-    axs[k].set_title("t = {:.2f}".format(t_bin_centers[k]))
-    
-    for i in range(NumtBins * NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            axs[k].errorbar(
-                phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]],
-                np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i],
-                yerr=np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i],
-                marker='o', linestyle='', label='loeps'
-            )
-
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            axs[k].errorbar(
-                phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]],
-                np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i],
-                yerr=np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i],
-                marker='s', linestyle='', label='hieps'
-            )
-
-    axs[k].axhline(y=1.0, color='gray', linestyle='--', label='Unity Line')
+    axs[k].set_title(f"t = {t_bin_centers[k]:.2f}")
+    axs[k].set_xlabel("#phi")
+    axs[k].set_ylabel("Ratio")
     axs[k].set_xlim(0, 360)
     axs[k].set_ylim(0.0, 2.0)
-    axs[k].set_xlabel('phi')
-    axs[k].set_ylabel('Ratio')
+
+    # Plotting loeps
+    loeps_mask = np.array(file_df_dict['aver_loeps']['tbin'].tolist()) == (k+1)
+    axs[k].errorbar(
+        phi_bin_centers[loeps_mask],
+        np.array(file_df_dict['aver_loeps']['ratio'].tolist())[loeps_mask],
+        yerr=np.array(file_df_dict['aver_loeps']['dratio'].tolist())[loeps_mask],
+        marker='o', linestyle='', label='loeps', markersize=5, color='blue'
+    )
+
+    # Plotting hieps
+    hieps_mask = np.array(file_df_dict['aver_hieps']['tbin'].tolist()) == (k+1)
+    axs[k].errorbar(
+        phi_bin_centers[hieps_mask],
+        np.array(file_df_dict['aver_hieps']['ratio'].tolist())[hieps_mask],
+        yerr=np.array(file_df_dict['aver_hieps']['dratio'].tolist())[hieps_mask],
+        marker='s', linestyle='', label='hieps', markersize=5, color='green'
+    )
+
+    # Add a gray dashed line at unity
+    axs[k].axhline(y=1.0, color='gray', linestyle='--')
+
     axs[k].legend()
 
-plt.savefig(outputpdf, bbox_inches='tight')
+plt.tight_layout()
+plt.savefig(outputpdf, format='pdf')
