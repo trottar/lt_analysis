@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:45:23 trottar"
+# Time-stamp: "2024-02-05 14:51:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,6 +266,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlim(0, 360)
 
         ax.legend()
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -292,6 +294,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlim(0, 360)
 
         ax.legend()
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
 
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
@@ -313,6 +317,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('$Q^2$')
         ax.set_xlim(0, 360)
         ax.legend()
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -334,6 +340,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('W')
         ax.set_xlim(0, 360)
         ax.legend()
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -354,6 +362,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_real')
         ax.legend()
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -373,6 +383,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_mod')
         ax.legend()
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)        
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -433,6 +445,9 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('x_real')
         ax.legend()
+
+        # Set y-axis to logarithmic scale
+        ax.set_yscale('log')
 
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
