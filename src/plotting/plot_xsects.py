@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:26:41 trottar"
+# Time-stamp: "2024-02-05 13:28:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -284,6 +284,7 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
+    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetLimits(0.0, 2.0)
     
     # Add a gray line at unity
     line_at_y1 = TLine(multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmin(), 1.0, multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmax(), 1.0)
@@ -332,6 +333,7 @@ for k in range(NumtBins):
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
     multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLimits(0, 360)
+    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetLimits(0.0, 2.0)
     
     # Add a gray line at unity
     line_at_y1 = TLine(multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmin(), 1.0, multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().GetXmax(), 1.0)
