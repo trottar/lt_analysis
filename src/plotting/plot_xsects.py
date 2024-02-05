@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:38:21 trottar"
+# Time-stamp: "2024-02-05 13:39:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -290,7 +290,7 @@ for k in range(NumtBins):
     line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
     line_at_unity.SetLineColor(7)
     line_at_unity.SetLineStyle(2)   # Dashed line style
-    multiDict["G_ratio_phi_{}".format(k+1)].Add(line_at_unity)
+    line_at_unity.Draw()
     
 l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
 l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
