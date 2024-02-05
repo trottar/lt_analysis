@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 19:21:52 trottar"
+# Time-stamp: "2024-02-04 19:23:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -410,9 +410,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Print plots for c1 canvases
         g_plot_err.Draw("colz")
         g_plot_err.SetTitle("{}".format(i))
-        g_plot_err.SetXTitle("#it{#phi} [degree]")
-        g_plot_err.SetYTitle("#it{#epsilon}")
-        g_plot_err.SetZTitle("#it{#sigma}")
+        g_plot_err.GetXaxis().SetTitle("#it{#phi} [degree]")
+        g_plot_err.GetYaxis().SetTitle("#it{#epsilon}")
+        g_plot_err.GetZaxis().SetTitle("#it{#sigma}")
         c1.Print(outputpdf+'(')        
         c1.Clear()
 
