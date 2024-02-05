@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:01:12 trottar"
+# Time-stamp: "2024-02-05 14:02:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -763,7 +763,7 @@ for k in range(NumtBins):
     # Create a figure and axis objects
     fig, axes = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
     
-    ax = axes[k]
+    ax = axes
     ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
     for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
