@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 15:18:21 trottar"
+# Time-stamp: "2024-02-05 15:20:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -234,7 +234,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
         file_df_dict['sep_file'] = file_to_df( \
                                                LTANAPATH+"/src/{}/xsects/x_sep.{}_Q{}W{}.dat" \
                                                .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")) \
-                                               , ['sigT', 'dsigT', 'sigL', 'dsigL', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'tm', 'W', 'Q2'])
+                                               , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'tm', 'W', 'Q2'])
             
 ################################################################################################################################################
 
