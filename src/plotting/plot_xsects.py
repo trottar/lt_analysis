@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 14:28:22 trottar"
+# Time-stamp: "2024-02-05 14:30:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -739,17 +739,17 @@ with PdfPages(outputpdf) as pdf:
         pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure and axis objects
-    fig, axes = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
-        ax = axes
+        ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['t'][mask], df['Q2'][mask], marker=markers[int(i/NumPhiBins)], linestyle='None', label=df_key)
+            ax.scatter(df['t'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key)
 
         ax.set_xlabel('t')
         ax.set_ylabel('$Q^2$')
