@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 13:56:58 trottar"
+# Time-stamp: "2024-02-05 14:01:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,58 +245,6 @@ for i,row in file_df_dict['setting_df'].iterrows():
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ################################################################################################################################################
 
-C_ratio_phi = TCanvas()
-C_ratio_phi.SetGrid()
-C_ratio_phi.Divide(1,NumtBins)
-l_ratio_phi = TLegend(0.7, 0.6, 0.9, 0.9)
-
-multiDict = {}
-for k in range(NumtBins):
-
-    multiDict["G_ratio_phi_{}".format(k+1)] = TMultiGraph()
-    
-    G_ratio_phi_loeps = TGraphErrors()
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_loeps']['tbin'].tolist())[i] == (k+1):
-            G_ratio_phi_loeps.SetPoint(i, phi_bin_centers[np.array(file_df_dict['aver_loeps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_loeps']['ratio'].tolist())[i])
-            G_ratio_phi_loeps.SetPointError(i, 0, np.array(file_df_dict['aver_loeps']['dratio'].tolist())[i])
-    G_ratio_phi_loeps.SetMarkerStyle(21)
-    G_ratio_phi_loeps.SetMarkerSize(1)
-    G_ratio_phi_loeps.SetMarkerColor(1)
-    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_loeps)
-
-    G_ratio_phi_hieps = TGraphErrors()
-    for i in range(NumtBins*NumPhiBins):
-        if np.array(file_df_dict['aver_hieps']['tbin'].tolist())[i] == (k+1):
-            G_ratio_phi_hieps.SetPoint(i, phi_bin_centers[np.array(file_df_dict['aver_hieps']['phibin'].tolist())[i]], np.array(file_df_dict['aver_hieps']['ratio'].tolist())[i])
-            G_ratio_phi_hieps.SetPointError(i, 0, np.array(file_df_dict['aver_hieps']['dratio'].tolist())[i])
-    G_ratio_phi_hieps.SetMarkerStyle(23)
-    G_ratio_phi_hieps.SetMarkerSize(1)
-    G_ratio_phi_hieps.SetMarkerColor(2)
-    multiDict["G_ratio_phi_{}".format(k+1)].Add(G_ratio_phi_hieps)    
-    
-    C_ratio_phi.cd(k+1)
-    
-    multiDict["G_ratio_phi_{}".format(k+1)].Draw('AP')
-    multiDict["G_ratio_phi_{}".format(k+1)].SetTitle("t = {:.2f} ; #phi; Ratio".format(t_bin_centers[k]))
-    
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetTitleOffset(1.5)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetTitleOffset(1.5)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetLabelSize(0.04)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetXaxis().SetRangeUser(0, 360)
-    multiDict["G_ratio_phi_{}".format(k+1)].GetYaxis().SetRangeUser(0.0, 2.0)
-    
-    # Add a gray line at unity
-    line_at_unity = TLine(0.0, 1.0, 360.0, 1.0)
-    line_at_unity.SetLineColor(7)
-    line_at_unity.SetLineStyle(2)   # Dashed line style
-    line_at_unity.Draw()
-    
-l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
-l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
-l_ratio_phi.Draw()
-C_ratio_phi.Print(outputpdf + '(')
-
 multiDict = {}
 for k in range(NumtBins):
 
@@ -344,7 +292,7 @@ for k in range(NumtBins):
     l_ratio_phi.AddEntry(G_ratio_phi_loeps,"loeps")
     l_ratio_phi.AddEntry(G_ratio_phi_hieps,"hieps")
     #l_ratio_phi.Draw()
-    C_ratio_phi.Print(outputpdf)
+    C_ratio_phi.Print(outputpdf+'(')
 
 C_Q2_t = TCanvas()
 C_Q2_t.SetGrid()
@@ -782,7 +730,6 @@ import matplotlib.pyplot as plt
 
 # Create a figure and axis objects
 fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
-fig.suptitle("Ratio vs. Phi for Different t Bins")
 
 # Define markers and colors
 markers = ['o', 's']
@@ -809,3 +756,30 @@ for k in range(NumtBins):
 
 plt.tight_layout(rect=[0, 0, 1, 0.96])
 plt.savefig(outputpdf)
+
+# Loop through t bins and plot data
+for k in range(NumtBins):
+
+    # Create a figure and axis objects
+    fig, axes = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
+    
+    ax = axes[k]
+    ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+
+    for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
+        df = file_df_dict[df_key]
+        mask = (df['tbin'] == (k+1))
+        ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key)
+
+    ax.axhline(1.0, color='gray', linestyle='--')
+
+    ax.set_xlabel('$\phi$')
+    ax.set_ylabel('Ratio')
+    ax.set_ylim(0.0, 2.0)
+    ax.set_xlim(0, 360)
+
+    ax.legend()
+
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.savefig(outputpdf)
+
