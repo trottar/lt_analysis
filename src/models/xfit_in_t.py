@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 22:34:57 trottar"
+# Time-stamp: "2024-02-05 22:37:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -277,7 +277,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " Fit Status: " + f_sigL_status_message)
+        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " {} Fit Status: {}".format(q2_vec[i], f_sigL_status_message))
         
     c1.cd(1)
 
@@ -385,7 +385,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " Fit Status: " + f_sigT_status_message)
+        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " {} Fit Status: {}".format(q2_vec[i], f_sigT_status_message))
         
     c1.cd(2)
 
@@ -493,23 +493,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " Fit Status: " + f_sigLT_status_message)
+        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " {} Fit Status: {}".format(q2_vec[i], f_sigLT_status_message))
         
-    # Set line properties for f_sigLT
-    f_sigLT.SetLineColor(1)
-    f_sigLT.SetLineWidth(2)
-
-    # Draw f_sigLT
-    #f_sigLT.Draw("same")
-        
-    # Check the fit status for 'f_sigLT'
-    f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-    f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
-        
-    fit_status = TText()
-    fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigLT_status_message)
-
     c1.cd(3)
 
     g_siglt_fit_tot.SetMarkerStyle(26)
@@ -618,22 +603,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " Fit Status: " + f_sigTT_status_message)
-        
-    # Set line properties for f_sigTT
-    f_sigTT.SetLineColor(1)
-    f_sigTT.SetLineWidth(2)
-
-    # Draw f_sigTT
-    #f_sigTT.Draw("same")
-        
-    # Check the fit status for 'f_sigTT'
-    f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-    f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
-        
-    fit_status = TText()
-    fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigTT_status_message)
+        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " {} Fit Status: {}".format(q2_vec[i], f_sigTT_status_message))
         
     c1.cd(4)
 
