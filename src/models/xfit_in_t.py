@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 18:54:50 trottar"
+# Time-stamp: "2024-02-05 19:11:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,13 +259,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
+
+    # Create a TF1 representing the projection onto the X-axis after the fit
+    f_sigL2 = f_sigL.ProjectionX()
     
     # Set line properties for f_sigL
-    f_sigL.SetLineColor(1)
-    f_sigL.SetLineWidth(2)
+    f_sigL2.SetLineColor(1)
+    f_sigL2.SetLineWidth(2)
 
     # Draw f_sigL
-    f_sigL.Draw("same")
+    f_sigL2.Draw("same")
         
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
