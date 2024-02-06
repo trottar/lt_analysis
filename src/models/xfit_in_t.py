@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 20:10:04 trottar"
+# Time-stamp: "2024-02-05 20:13:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,6 +259,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
+
+    #f12 = ROOT.TF12("f12",f_sigL,2.115,"x")
+    
+    # Set line properties for f_sigL
+    f_sigL.SetLineColor(1)
+    f_sigL.SetLineWidth(2)
+
+    # Draw f_sigL
+    f_sigL.Draw()
         
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -455,7 +464,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI/1e6
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
         print("$$$$$$$$$$$",i, g_siglt.GetX()[i], siglt_X)
-    #g_q2_siglt_fit.Fit(f_sigLT, "SQ")
+    g_q2_siglt_fit.Fit(f_sigLT, "SQ")
     
     # Set line properties for f_sigLT
     f_sigLT.SetLineColor(1)
