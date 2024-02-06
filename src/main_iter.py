@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 23:51:06 trottar"
+# Time-stamp: "2024-02-06 01:41:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -143,7 +143,7 @@ if EPSSET == "low":
     # Run weight iteration script for optimizing parameterization
     sys.path.append("models")
     from xfit_in_t import x_fit_in_t
-    x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict)
+    #x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict)
     if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
     show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
