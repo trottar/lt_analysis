@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 22:25:05 trottar"
+# Time-stamp: "2024-02-05 22:27:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -270,7 +270,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigL_xproj.SetLineWidth(2)
         # Draw f_sigL_xproj
         f_sigL_xproj.Draw("same")
-    
+        g_sigl_fit.Fit(f_sigL_xproj)
+
+    # Check the fit status for 'f_sigL'
+    f_sigL_status = f_sigL_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
+    f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
+        
+    fit_status = TText()
+    fit_status.SetTextSize(0.04)
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigL_status_message)
+        
     c1.cd(1)
 
     g_sigl_fit_tot.SetMarkerStyle(26)
