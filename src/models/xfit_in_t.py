@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-06 02:11:31 trottar"
+# Time-stamp: "2024-02-06 02:18:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,29 +256,29 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], q2_vec[i], g_sigl_fit.GetY()[i])
         g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, 0.0, 0.0, g_sigl_fit.GetEY()[i])
-        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
+        sigl_X = (f_sigL_pre.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], q2_vec[i], sigl_X)
-    g_q2_sigl_fit.Fit(f_sigL, "SQ")
+    g_q2_sigl_fit.Fit(f_sigL_pre, "SQ")
     
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
-        # Set line properties for f_sigL_xproj
-        f_sigL_xproj.SetLineColor(i+1)
-        f_sigL_xproj.SetLineWidth(2)
-        # Draw f_sigL_xproj
-        f_sigL_xproj.Draw("same")
+        f_sigL_pre_xproj = ROOT.TF12("f_sigL_pre_xproj",f_sigL_pre,q2_vec[i],"x")
+        # Set line properties for f_sigL_pre_xproj
+        f_sigL_pre_xproj.SetLineColor(i+1)
+        f_sigL_pre_xproj.SetLineWidth(2)
+        # Draw f_sigL_pre_xproj
+        f_sigL_pre_xproj.Draw("same")
         
-        g_sigl_fit.Fit(f_sigL_xproj)
+        g_sigl_fit.Fit(f_sigL_pre_xproj)
 
-        # Check the fit status for 'f_sigL'
-        f_sigL_status = f_sigL_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
-        f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
+        # Check the fit status for 'f_sigL_pre'
+        f_sigL_pre_status = f_sigL_pre_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
+        f_sigL_pre_status_message = "Not Fitted" if f_sigL_pre_status == 0 else "Fit Successful"
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigL_status_message))
+        fit_status.DrawTextNDC(0.35, 0.85-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigL_pre_status_message))
         
     c1.cd(1)
 
@@ -287,20 +287,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    par_vec.append(f_sigL.GetParameter(0))
-    par_vec.append(f_sigL.GetParameter(1))
-    par_vec.append(f_sigL.GetParameter(2))
-    par_vec.append(f_sigL.GetParameter(3))
+    par_vec.append(f_sigL_pre.GetParameter(0))
+    par_vec.append(f_sigL_pre.GetParameter(1))
+    par_vec.append(f_sigL_pre.GetParameter(2))
+    par_vec.append(f_sigL_pre.GetParameter(3))
 
-    par_err_vec.append(f_sigL.GetParError(0))
-    par_err_vec.append(f_sigL.GetParError(1))
-    par_err_vec.append(f_sigL.GetParError(2))
-    par_err_vec.append(f_sigL.GetParError(3))
+    par_err_vec.append(f_sigL_pre.GetParError(0))
+    par_err_vec.append(f_sigL_pre.GetParError(1))
+    par_err_vec.append(f_sigL_pre.GetParError(2))
+    par_err_vec.append(f_sigL_pre.GetParError(3))
 
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL_pre.GetChisquare())
+    par_chi2_vec.append(f_sigL_pre.GetChisquare())
+    par_chi2_vec.append(f_sigL_pre.GetChisquare())
+    par_chi2_vec.append(f_sigL_pre.GetChisquare())
 
     ########
     # SigT #
