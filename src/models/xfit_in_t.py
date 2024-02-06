@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 22:37:16 trottar"
+# Time-stamp: "2024-02-05 22:37:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -603,7 +603,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " {} Fit Status: {}".format(q2_vec[i], f_sigTT_status_message))
+        fit_status.DrawTextNDC(0.35, 0.85-(0.05*i), " {} Fit Status: {}".format(q2_vec[i], f_sigTT_status_message))
         
     c1.cd(4)
 
