@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-06 01:24:33 trottar"
+# Time-stamp: "2024-02-06 01:30:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -287,10 +287,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    par_vec.append(f_sigL.GetParameter(0))
-    par_vec.append(f_sigL.GetParameter(1))
-    par_vec.append(f_sigL.GetParameter(2))
-    par_vec.append(f_sigL.GetParameter(3))
+    par_vec.append(f_sigL.GetParameter(0)/1e6)
+    par_vec.append(f_sigL.GetParameter(1)/1e6)
+    par_vec.append(f_sigL.GetParameter(2)/1e6)
+    par_vec.append(f_sigL.GetParameter(3)/1e6)
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
