@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:20:54 trottar"
+# Time-stamp: "2024-02-05 19:23:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -258,14 +258,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI/1e6
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
-    g_q2_sigl_fit.Fit(f_sigL, "SQ")
-    
-    # Set line properties for f_sigL
-    f_sigL.SetLineColor(1)
-    f_sigL.SetLineWidth(2)
+        f12 = new TF12("f12",f_sigL,q2_vec[i],"x");
+            
+        # Set line properties for f_sigL
+        f12.SetLineColor(1)
+        f12.SetLineWidth(2)
 
-    # Draw f_sigL
-    f_sigL.Draw("colz")
+        # Draw f_sigL
+        f12.Draw()
+
+    g_q2_sigl_fit.Fit(f_sigL, "SQ")
+
         
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
