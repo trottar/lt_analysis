@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 22:15:02 trottar"
+# Time-stamp: "2024-02-05 22:16:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -369,7 +369,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         #f_sigT_xproj.SetLineWidth(2)
         f_sigT_xproj.SetLineWidth(2)
         # Draw f_sigT_xproj
-        f_sigT_xproj.Draw("same")
+        f_sigT_xproj.Draw()
     
     # Draw f_sigT
     #f_sigT.Draw("same")
