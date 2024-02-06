@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 22:05:16 trottar"
+# Time-stamp: "2024-02-05 22:06:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -244,8 +244,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_prv.Draw("P")
 
     c2.cd(1)
-    g_sigl_fit.SetTitle("Sigma L Model Fit")
-    g_sigl_fit.Draw("A*")
+    #g_sigl_fit.SetTitle("Sigma L Model Fit")
+    #g_sigl_fit.Draw("A*")
 
     f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, 2.0, 2.5, 4)
     f_sigL.SetParameters(l0, l1, l2, l3)
@@ -268,7 +268,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigL_xproj.SetLineWidth(len(w_vec)-i)
 
         # Draw f_sigL_xproj
-        f_sigL_xproj.Draw()
+        f_sigL_xproj.Draw("same")
 
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
 
