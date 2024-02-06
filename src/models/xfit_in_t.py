@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 20:15:35 trottar"
+# Time-stamp: "2024-02-05 20:16:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,8 +245,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_prv.Draw("P")
 
     c2.cd(1)
-    #g_sigl_fit.SetTitle("Sigma L Model Fit")
-    #g_sigl_fit.Draw("A*")
+    g_sigl_fit.SetTitle("Sigma L Model Fit")
+    g_sigl_fit.Draw("A*")
 
     f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigL.SetParameters(l0, l1, l2, l3)
@@ -267,7 +267,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL.SetLineWidth(2)
 
     # Draw f_sigL
-    f_sigL.Draw()
+    #f_sigL.Draw()
         
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
