@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 20:23:39 trottar"
+# Time-stamp: "2024-02-05 20:27:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,7 +242,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     g_sigl_prv.SetMarkerColor(4)
     g_sigl_prv.SetMarkerStyle(25)
-    g_sigl_prv.Draw("AP")
+    g_sigl_prv.Draw("P")
 
     c2.cd(1)
     g_sigl_fit.SetTitle("Sigma L Model Fit")
@@ -321,7 +321,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
 
-        sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i], q2_vec[i]))
+        sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI/1e6
         g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
 
         sigt_X_fit = (g_sigt.GetY()[i])
@@ -421,7 +421,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180))
+        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * g_vec[i]/2/PI/1e6
         g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
 
         siglt_X_fit = g_siglt.GetY()[i]
@@ -525,7 +525,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
+        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * g_vec[i]/2/PI/1e6
 
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
