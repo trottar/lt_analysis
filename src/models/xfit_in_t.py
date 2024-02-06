@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:18:10 trottar"
+# Time-stamp: "2024-02-05 19:18:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -610,6 +610,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigTT.GetChisquare())
     
     c1.Print(outputpdf+'(')
+    c3..Print(outputpdf)
     c2.Print(outputpdf+')')
 
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
