@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:48:11 trottar"
+# Time-stamp: "2024-02-05 19:51:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,30 +245,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_prv.Draw("P")
 
     c2.cd(1)
-    g_sigl_fit.SetTitle("Sigma L Model Fit")
-    g_sigl_fit.Draw("A*")
+    #g_sigl_fit.SetTitle("Sigma L Model Fit")
+    #g_sigl_fit.Draw("A*")
 
     f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, lo_bound, hi_bound, 4)
     f_sigL.SetParameters(l0, l1, l2, l3)
 
-    f12 = ROOT.TF12("f12",f_sigL,2.115,"x");
-    g_sigl_fit.Fit(f12, "MRQ")
-    
-    # Set line properties for f_sigL
-    f12.SetLineColor(1)
-    f12.SetLineWidth(2)
-
-    # Draw f_sigL
-    f12.Draw("same")
-        
-    # Check the fit status for 'f_sigL'
-    f_sigL_status = f12.GetNDF()  # GetNDF() returns the number of degrees of freedom
-    f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
-        
-    fit_status = TText()
-    fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigL_status_message)
-    
     g_q2_sigl_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
         g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i])
@@ -278,6 +260,23 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
 
+    f12 = ROOT.TF12("f12",f_sigL,2.115,"x")
+    g_sigl_fit.Fit(f12, "SQ")
+    
+    # Set line properties for f_sigL
+    f12.SetLineColor(1)
+    f12.SetLineWidth(2)
+
+    # Draw f_sigL
+    f12.Draw()
+        
+    # Check the fit status for 'f_sigL'
+    f_sigL_status = f12.GetNDF()  # GetNDF() returns the number of degrees of freedom
+    f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
+        
+    fit_status = TText()
+    fit_status.SetTextSize(0.04)
+    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigL_status_message)
     
     c1.cd(1)
 
