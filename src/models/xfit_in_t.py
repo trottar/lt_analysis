@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 22:29:50 trottar"
+# Time-stamp: "2024-02-05 22:32:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -378,18 +378,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigT_xproj.SetLineWidth(2)
         # Draw f_sigT_xproj
         f_sigT_xproj.Draw("same")
-    
-    # Draw f_sigT
-    #f_sigT.Draw("same")
-        
-    # Check the fit status for 'f_sigT'
-    f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-    f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
-        
-    fit_status = TText()
-    fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigT_status_message)
 
+        g_sigt_fit.Fit(f_sigT_xproj)
+
+        # Check the fit status for 'f_sigT'
+        f_sigT_status = f_sigT_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
+        f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
+        
+        fit_status = TText()
+        fit_status.SetTextSize(0.04)
+        fit_status.DrawTextNDC(0.35, 0.8+(0.1*i*5), " Fit Status: " + f_sigT_status_message)
+        
     c1.cd(2)
 
     g_sigt_fit_tot.SetMarkerStyle(26)
@@ -488,7 +487,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigLT_xproj.SetLineWidth(2)
         # Draw f_sigLT_xproj
         f_sigLT_xproj.Draw("same")
-    
+
+        g_siglt_fit.Fit(f_sigLT_xproj)
+
+        # Check the fit status for 'f_sigLT'
+        f_sigLT_status = f_sigLT_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
+        f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
+        
+        fit_status = TText()
+        fit_status.SetTextSize(0.04)
+        fit_status.DrawTextNDC(0.35, 0.8+(0.1*i*5), " Fit Status: " + f_sigLT_status_message)
+        
     # Set line properties for f_sigLT
     f_sigLT.SetLineColor(1)
     f_sigLT.SetLineWidth(2)
@@ -604,7 +613,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigTT_xproj.SetLineWidth(2)
         # Draw f_sigTT_xproj
         f_sigTT_xproj.Draw("same")
-    
+
+        g_sigtt_fit.Fit(f_sigTT_xproj)
+
+        # Check the fit status for 'f_sigTT'
+        f_sigTT_status = f_sigTT_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
+        f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
+        
+        fit_status = TText()
+        fit_status.SetTextSize(0.04)
+        fit_status.DrawTextNDC(0.35, 0.8+(0.1*i*5), " Fit Status: " + f_sigTT_status_message)
+        
     # Set line properties for f_sigTT
     f_sigTT.SetLineColor(1)
     f_sigTT.SetLineWidth(2)
