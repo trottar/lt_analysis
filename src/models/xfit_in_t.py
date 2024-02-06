@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-06 01:41:30 trottar"
+# Time-stamp: "2024-02-06 01:48:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -650,7 +650,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         format_specifier = "{:>13.5E} {:>13.5E} {:>3} {:>12.1f}"
 
         for i in range(len(par_vec)):
-            #sys.stdout.write(format_specifier.format(par_vec[i], par_err_vec[i], par_chi2_vec[i], i) + "\n")
-            #f.write("{:.5e} {:.5e} {} {:.1e}\n".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
-            f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
-            print("  {:.3f} {:.3f} {:.1f} {:.1f}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
+            #f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
+            #print("  {:.3f} {:.3f} {:.1f} {:.1f}".format(par_vec[i], par_err_vec[i], i, par_chi2_vec[i]))
+            f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(prv_par_vec[i], prv_par_err_vec[i], i, prv_par_chi2_vec[i]))
+            print("  {:.3f} {:.3f} {:.1f} {:.1f}".format(prv_par_vec[i], prv_par_err_vec[i], i, prv_par_chi2_vec[i]))
