@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 23:47:56 trottar"
+# Time-stamp: "2024-02-06 00:48:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,7 +78,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     def fun_Sig_T(x, par):
         tt = abs(x[0])
         qq = abs(x[1])
-        tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))            
+        #tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p",".")) # SIMC
+        tav = (0.06723 + 0.03362*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
         ftav = (abs(tt)-tav)/tav
         #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
@@ -269,6 +270,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigL_xproj.SetLineWidth(2)
         # Draw f_sigL_xproj
         f_sigL_xproj.Draw("same")
+        
         g_sigl_fit.Fit(f_sigL_xproj)
 
         # Check the fit status for 'f_sigL'

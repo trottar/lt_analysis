@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 17:21:06 trottar"
+# Time-stamp: "2024-02-06 00:02:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -159,7 +159,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
     for i in range(0, t_bin_num):
 
         print("\n/*--------------------------------------------------*/")
-        print(" Starting t-bin {0} (t={1:.4f})...".format(i, float(t_list[i])))
+        print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
         
         tpp = ""
@@ -545,7 +545,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
 
         # Print values to console
-        print("\nBin {}: Outputting...  ".format(i), "sig_l: ", sig_l, "sig_t: ", sig_t, \
+        print("\nBin {}: Outputting...  ".format(i+1), "sig_l: ", sig_l, "sig_t: ", sig_t, \
               "sig_lt: ", sig_lt, "sig_tt: ", sig_tt, \
               "t: ", t_list[i], "W: ", w_list[i], "Q2:", q2_list[i], \
               "eps_lo: ", lo_eps_list[i], "eps_hi: ", hi_eps_list[i])
