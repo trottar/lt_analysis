@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-06 01:07:42 trottar"
+# Time-stamp: "2024-02-06 01:10:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -268,7 +268,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigL_xproj.SetLineColor(i+1)
         f_sigL_xproj.SetLineWidth(2)
         # Draw f_sigL_xproj
-        f_sigL_xproj.Draw()
+        f_sigL_xproj.Draw("same")
         
         g_sigl_fit.Fit(f_sigL_xproj)
 
@@ -376,7 +376,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigT_xproj.SetLineColor(i+1)
         f_sigT_xproj.SetLineWidth(2)
         # Draw f_sigT_xproj
-        f_sigT_xproj.Draw()
+        f_sigT_xproj.Draw("same")
 
         g_sigt_fit.Fit(f_sigT_xproj)
 
@@ -488,7 +488,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigLT_xproj.SetLineColor(i+1)
         f_sigLT_xproj.SetLineWidth(2)
         # Draw f_sigLT_xproj
-        f_sigLT_xproj.Draw()
+        f_sigLT_xproj.Draw("same")
 
         g_siglt_fit.Fit(f_sigLT_xproj)
 
@@ -602,7 +602,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigTT_xproj.SetLineColor(i+1)
         f_sigTT_xproj.SetLineWidth(2)
         # Draw f_sigTT_xproj
-        f_sigTT_xproj.Draw()
+        f_sigTT_xproj.Draw("same")
 
         g_sigtt_fit.Fit(f_sigTT_xproj)
 
