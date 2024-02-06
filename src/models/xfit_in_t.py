@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:46:25 trottar"
+# Time-stamp: "2024-02-05 19:47:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -252,18 +252,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL.SetParameters(l0, l1, l2, l3)
 
     f12 = ROOT.TF12("f12",f_sigL,2.115,"x");
-
     g_sigl_fit.Fit(f12, "SQ")
-
-    
-    g_q2_sigl_fit = ROOT.TGraph2DErrors()
-    for i in range(len(w_vec)):
-        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i])
-        g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, 0.0, 0.0, g_sigl_fit.GetEY()[i])
-        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI/1e6
-        g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
-        print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
-    g_q2_sigl_fit.Fit(f_sigL, "SQ")
     
     # Set line properties for f_sigL
     f12.SetLineColor(1)
@@ -279,6 +268,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     fit_status = TText()
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigL_status_message)
+    
+    g_q2_sigl_fit = ROOT.TGraph2DErrors()
+    for i in range(len(w_vec)):
+        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i])
+        g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, 0.0, 0.0, g_sigl_fit.GetEY()[i])
+        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * g_vec[i]/2/PI/1e6
+        g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
+        print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
+    g_q2_sigl_fit.Fit(f_sigL, "SQ")
+
     
     c1.cd(1)
 
