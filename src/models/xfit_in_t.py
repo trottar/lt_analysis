@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:52:38 trottar"
+# Time-stamp: "2024-02-05 19:53:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,7 +72,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         qq = abs(x[1])
         #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
-        return f/2/PI/1e6
+        return f
     
     # Function for SigT
     def fun_Sig_T(x, par):
@@ -81,7 +81,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         ftav = (abs(tt)-tav)/tav
         #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
-        return f/2/PI/1e6
+        return f
 
     # Function for SigLT
     # thetacm term is defined on function calling
@@ -90,7 +90,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         qq = abs(x[1])
         #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
-        return f/2/PI/1e6
+        return f
 
     # Function for SigTT
     # thetacm term is defined on function calling
@@ -101,7 +101,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
         #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]*qq*math.exp(-qq))*f_tt
-        return f/2/PI/1e6
+        return f
     
     outputpdf  = "{}/{}_xfit_in_t_Q{}W{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
     
@@ -261,7 +261,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
 
     f12 = ROOT.TF12("f12",f_sigL,2.115,"x")
-    g_sigl_fit.Fit(f12, "SQ")
+    #g_sigl_fit.Fit(f12, "SQ")
     
     # Set line properties for f_sigL
     f12.SetLineColor(1)
