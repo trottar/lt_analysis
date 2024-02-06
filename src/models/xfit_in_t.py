@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 21:19:43 trottar"
+# Time-stamp: "2024-02-05 21:34:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -268,7 +268,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f12.SetLineWidth(2)
 
     # Draw f12
-    f12.Draw("same")
+    f12.Draw()
 
     # Check the fit status for 'f12'
     f12_status = f12.GetNDF()  # GetNDF() returns the number of degrees of freedom
