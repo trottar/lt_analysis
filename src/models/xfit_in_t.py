@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 21:59:35 trottar"
+# Time-stamp: "2024-02-05 22:01:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -258,18 +258,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i]/2/PI/1e6)
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
-    g_q2_sigl_fit.Fit(f_sigL, "SQ")
+        # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
+        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
+        #f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL_pre,2.115,"x")
 
-    # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-    f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,2.115,"x")
-    #f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL_pre,2.115,"x")
+        # Set line properties for f_sigL_xproj
+        f_sigL_xproj.SetLineColor(i+1)
+        f_sigL_xproj.SetLineWidth(2)
 
-    # Set line properties for f_sigL_xproj
-    f_sigL_xproj.SetLineColor(1)
-    f_sigL_xproj.SetLineWidth(2)
+        # Draw f_sigL_xproj
+        f_sigL_xproj.Draw("same")
 
-    # Draw f_sigL_xproj
-    f_sigL_xproj.Draw("same")
+        g_q2_sigl_fit.Fit(f_sigL, "SQ")
+
     
     c1.cd(1)
 
