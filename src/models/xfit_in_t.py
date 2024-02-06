@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 20:21:41 trottar"
+# Time-stamp: "2024-02-05 20:23:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,7 +242,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     g_sigl_prv.SetMarkerColor(4)
     g_sigl_prv.SetMarkerStyle(25)
-    g_sigl_prv.Draw("P")
+    g_sigl_prv.Draw("AP")
 
     c2.cd(1)
     g_sigl_fit.SetTitle("Sigma L Model Fit")
