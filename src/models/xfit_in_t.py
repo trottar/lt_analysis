@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 21:40:36 trottar"
+# Time-stamp: "2024-02-05 21:40:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,7 +259,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
 
-    f12 = ROOT.TF12("f12",f_sigL_pre,2.115,"x")
+    f12 = ROOT.TF12("f12",f_sigL_pre,0.115,"x")
 
     g_sigl_fit.Fit(f12)
 
