@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 21:18:27 trottar"
+# Time-stamp: "2024-02-05 21:19:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -261,7 +261,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f12 = ROOT.TF12("f12",f_sigL,2.115,"x")
 
-    g_sigl_fit.Fit(f12)
+    #g_sigl_fit.Fit(f12)
 
     # Set line properties for f12
     f12.SetLineColor(1)
