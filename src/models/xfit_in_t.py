@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 21:41:25 trottar"
+# Time-stamp: "2024-02-05 21:46:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,41 +259,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
 
-    f12 = ROOT.TF12("f12",f_sigL_pre,2.115,"x")
+    # TF2 projected to 1D along x-axis (ie only t-dependence)
+    #f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,2.115,"x")
+    f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,0.1,"y")
 
-    g_sigl_fit.Fit(f12)
+    # Set line properties for f_sigL_xproj
+    f_sigL_xproj.SetLineColor(1)
+    f_sigL_xproj.SetLineWidth(2)
 
-    # Set line properties for f12
-    f12.SetLineColor(1)
-    f12.SetLineWidth(2)
-
-    # Draw f12
-    f12.Draw("same")
-
-    # Check the fit status for 'f12'
-    f12_status = f12.GetNDF()  # GetNDF() returns the number of degrees of freedom
-    f12_status_message = "Not Fitted" if f12_status == 0 else "Fit Successful"
-        
-    fit_status = TText()
-    fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f12_status_message)
-
-    '''
-    # Set line properties for f_sigL
-    f_sigL.SetLineColor(1)
-    f_sigL.SetLineWidth(2)
-
-    # Draw f_sigL
-    #f_sigL.Draw()
-        
-    # Check the fit status for 'f_sigL'
-    f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
-    f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
-        
-    fit_status = TText()
-    fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.8, " Fit Status: " + f_sigL_status_message)
-    '''
+    # Draw f_sigL_xproj
+    f_sigL_xproj.Draw()
     
     c1.cd(1)
 
