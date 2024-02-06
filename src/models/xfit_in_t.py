@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:54:35 trottar"
+# Time-stamp: "2024-02-05 19:57:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,6 +65,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     hi_bound =  1e-5
 
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
+    g_norm = (1 / ((w_set.replace("p",".")**2) - (m_p**2))**2)
 
     # Function for SigL
     def fun_Sig_L(x, par):
@@ -72,7 +73,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         qq = abs(x[1])
         #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
-        return f
+        return f*g_norm/2/PI/1e6
     
     # Function for SigT
     def fun_Sig_T(x, par):
@@ -81,7 +82,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         ftav = (abs(tt)-tav)/tav
         #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
-        return f
+        return f*g_norm/2/PI/1e6
 
     # Function for SigLT
     # thetacm term is defined on function calling
@@ -90,7 +91,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         qq = abs(x[1])
         #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
-        return f
+        return f*g_norm/2/PI/1e6
 
     # Function for SigTT
     # thetacm term is defined on function calling
@@ -101,7 +102,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
         #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = (par[0]*qq*math.exp(-qq))*f_tt
-        return f
+        return f*g_norm/2/PI/1e6
     
     outputpdf  = "{}/{}_xfit_in_t_Q{}W{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
     
@@ -260,7 +261,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
 
-    f12 = ROOT.TF12("f12",f_sigL,2.115,"x")/2/PI/1e6
+    f12 = ROOT.TF12("f12",f_sigL,2.115,"x")
     #g_sigl_fit.Fit(f12, "SQ")
     
     # Set line properties for f_sigL
