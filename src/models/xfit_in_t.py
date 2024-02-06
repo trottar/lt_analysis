@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 22:02:03 trottar"
+# Time-stamp: "2024-02-05 22:03:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -264,7 +264,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Set line properties for f_sigL_xproj
         f_sigL_xproj.SetLineColor(i+1)
-        f_sigL_xproj.SetLineWidth(2)
+        #f_sigL_xproj.SetLineWidth(2)
+        f_sigL_xproj.SetLineWidth(len(w_vec)-1)
 
         # Draw f_sigL_xproj
         f_sigL_xproj.Draw("same")
