@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 22:32:30 trottar"
+# Time-stamp: "2024-02-05 22:34:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -266,7 +266,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
         # Set line properties for f_sigL_xproj
         f_sigL_xproj.SetLineColor(i+1)
-        #f_sigL_xproj.SetLineWidth(2)
         f_sigL_xproj.SetLineWidth(2)
         # Draw f_sigL_xproj
         f_sigL_xproj.Draw("same")
@@ -278,7 +277,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.8+(0.1*i*5), " Fit Status: " + f_sigL_status_message)
+        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " Fit Status: " + f_sigL_status_message)
         
     c1.cd(1)
 
@@ -374,7 +373,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigT_xproj = ROOT.TF12("f_sigT_xproj",f_sigT,q2_vec[i],"x")
         # Set line properties for f_sigT_xproj
         f_sigT_xproj.SetLineColor(i+1)
-        #f_sigT_xproj.SetLineWidth(2)
         f_sigT_xproj.SetLineWidth(2)
         # Draw f_sigT_xproj
         f_sigT_xproj.Draw("same")
@@ -387,7 +385,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.8+(0.1*i*5), " Fit Status: " + f_sigT_status_message)
+        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " Fit Status: " + f_sigT_status_message)
         
     c1.cd(2)
 
@@ -483,7 +481,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigLT_xproj = ROOT.TF12("f_sigLT_xproj",f_sigLT,q2_vec[i],"x")
         # Set line properties for f_sigLT_xproj
         f_sigLT_xproj.SetLineColor(i+1)
-        #f_sigLT_xproj.SetLineWidth(2)
         f_sigLT_xproj.SetLineWidth(2)
         # Draw f_sigLT_xproj
         f_sigLT_xproj.Draw("same")
@@ -496,7 +493,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.8+(0.1*i*5), " Fit Status: " + f_sigLT_status_message)
+        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " Fit Status: " + f_sigLT_status_message)
         
     # Set line properties for f_sigLT
     f_sigLT.SetLineColor(1)
@@ -609,7 +606,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigTT_xproj = ROOT.TF12("f_sigTT_xproj",f_sigTT,q2_vec[i],"x")
         # Set line properties for f_sigTT_xproj
         f_sigTT_xproj.SetLineColor(i+1)
-        #f_sigTT_xproj.SetLineWidth(2)
         f_sigTT_xproj.SetLineWidth(2)
         # Draw f_sigTT_xproj
         f_sigTT_xproj.Draw("same")
@@ -622,7 +618,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.8+(0.1*i*5), " Fit Status: " + f_sigTT_status_message)
+        fit_status.DrawTextNDC(0.35, 0.85-(0.1*i*5), " Fit Status: " + f_sigTT_status_message)
         
     # Set line properties for f_sigTT
     f_sigTT.SetLineColor(1)
