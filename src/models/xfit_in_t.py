@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-06 10:10:13 trottar"
+# Time-stamp: "2024-02-06 10:14:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -261,7 +261,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], q2_vec[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
     
-    for i in range(len(w_vec)):        
+    for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
         f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
         # Set line properties for f_sigL_xproj
