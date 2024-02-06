@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:57:43 trottar"
+# Time-stamp: "2024-02-05 19:58:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     hi_bound =  1e-5
 
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
-    g_norm = (1 / ((w_set.replace("p",".")**2) - (m_p**2))**2)
+    g_norm = (1 / ((float(w_set.replace("p","."))**2) - (m_p**2))**2)
 
     # Function for SigL
     def fun_Sig_L(x, par):
