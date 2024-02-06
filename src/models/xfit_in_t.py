@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:19:27 trottar"
+# Time-stamp: "2024-02-05 19:20:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,12 +259,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], sigl_X)
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
-
-    c3 = TCanvas("c3", "c3", 800, 800)
     
     # Set line properties for f_sigL
-    #f_sigL.SetLineColor(1)
-    #f_sigL.SetLineWidth(2)
+    f_sigL.SetLineColor(1)
+    f_sigL.SetLineWidth(2)
 
     # Draw f_sigL
     f_sigL.Draw("colz")
@@ -610,7 +608,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigTT.GetChisquare())
     
     c1.Print(outputpdf+'(')
-    c3.Print(outputpdf)
     c2.Print(outputpdf+')')
 
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
