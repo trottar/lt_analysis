@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-06 00:48:55 trottar"
+# Time-stamp: "2024-02-06 00:59:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,8 +78,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     def fun_Sig_T(x, par):
         tt = abs(x[0])
         qq = abs(x[1])
-        #tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p",".")) # SIMC
-        tav = (0.06723 + 0.03362*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
+        tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
         ftav = (abs(tt)-tav)/tav
         #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
@@ -264,7 +263,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
+        #f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
+        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,g_sigl_fit.GetX()[i],"y")
         # Set line properties for f_sigL_xproj
         f_sigL_xproj.SetLineColor(i+1)
         f_sigL_xproj.SetLineWidth(2)
