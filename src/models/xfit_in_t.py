@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 21:53:10 trottar"
+# Time-stamp: "2024-02-05 21:55:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -252,7 +252,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     g_q2_sigl_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
-        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i])
+        #g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), q2_vec[i], g_sigl_fit.GetX()[i], g_sigl_fit.GetY()[i])
+        g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], q2_vec[i], g_sigl_fit.GetY()[i])
         g_q2_sigl_fit.SetPointError(g_q2_sigl_fit.GetN()-1, 0.0, 0.0, g_sigl_fit.GetEY()[i])
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i]/2/PI/1e6)
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
