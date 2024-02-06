@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 19:29:05 trottar"
+# Time-stamp: "2024-02-05 19:30:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -262,14 +262,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f12 = ROOT.TF12("f12",f_sigL,2.115,"x");
 
-    g_sigl_fit_tot.Fit(f12, "SQ")
+    g_sigl_fit_tot.Fit(f12, "MRQ")
     
     # Set line properties for f_sigL
     f12.SetLineColor(1)
     f12.SetLineWidth(2)
 
     # Draw f_sigL
-    f12.Draw()
+    f12.Draw("same")
         
     # Check the fit status for 'f_sigL'
     f_sigL_status = f12.GetNDF()  # GetNDF() returns the number of degrees of freedom
