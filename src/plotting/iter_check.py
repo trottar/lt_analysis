@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-06 01:59:18 trottar"
+# Time-stamp: "2024-02-06 02:03:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,7 +256,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
     for i,hist in enumerate(histlist_copy):
         CWeight.cd(i+1)
         hist["H_Weight_SIMC_OLD"].SetLineColor(i+1)
-        #hist["H_Weight_SIMC_OLD"].Draw("same, HIST")
+        hist["H_Weight_SIMC_OLD"].Draw("same, HIST")
         hist["H_Weight_SIMC"].SetLineColor(i+(len(phisetlist)+1))
         hist["H_Weight_SIMC"].Draw("same, HIST")
         l_Weight.AddEntry(hist["H_Weight_SIMC_OLD"],hist["phi_setting"]+" Simc Old")
