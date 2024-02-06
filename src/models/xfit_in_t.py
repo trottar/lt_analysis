@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-05 23:45:27 trottar"
+# Time-stamp: "2024-02-05 23:46:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,8 +63,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
 def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range, Q2min_range, Q2max_range):
 
     # xsects range
-    lo_bound = -1.0
-    hi_bound =  5e-5
+    lo_bound = -5e-5
+    hi_bound =  1.0
     
     # Function for SigL
     def fun_Sig_L(x, par):
