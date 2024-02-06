@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-06 01:10:06 trottar"
+# Time-stamp: "2024-02-06 01:14:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -263,7 +263,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
+        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"y")
         # Set line properties for f_sigL_xproj
         f_sigL_xproj.SetLineColor(i+1)
         f_sigL_xproj.SetLineWidth(2)
@@ -371,7 +371,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigT_xproj = ROOT.TF12("f_sigT_xproj",f_sigT,q2_vec[i],"x")
+        f_sigT_xproj = ROOT.TF12("f_sigT_xproj",f_sigT,q2_vec[i],"y")
         # Set line properties for f_sigT_xproj
         f_sigT_xproj.SetLineColor(i+1)
         f_sigT_xproj.SetLineWidth(2)
@@ -483,7 +483,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigLT_xproj = ROOT.TF12("f_sigLT_xproj",f_sigLT,q2_vec[i],"x")
+        f_sigLT_xproj = ROOT.TF12("f_sigLT_xproj",f_sigLT,q2_vec[i],"y")
         # Set line properties for f_sigLT_xproj
         f_sigLT_xproj.SetLineColor(i+1)
         f_sigLT_xproj.SetLineWidth(2)
@@ -597,7 +597,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigTT_xproj = ROOT.TF12("f_sigTT_xproj",f_sigTT,q2_vec[i],"x")
+        f_sigTT_xproj = ROOT.TF12("f_sigTT_xproj",f_sigTT,q2_vec[i],"y")
         # Set line properties for f_sigTT_xproj
         f_sigTT_xproj.SetLineColor(i+1)
         f_sigTT_xproj.SetLineWidth(2)
