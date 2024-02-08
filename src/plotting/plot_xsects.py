@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 16:36:25 trottar"
+# Time-stamp: "2024-02-08 16:37:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -519,7 +519,7 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
             print("="*50)
             model = []
-            t_lst = [random.uniform(tmin_range, tmax_range) for _ in range(100)]
+            t_lst = np.linspace(tmin_range, tmax_range, num=100)
             # Generate model for comparison
             for j, row in df.iterrows():
                 for t in t_lst:
