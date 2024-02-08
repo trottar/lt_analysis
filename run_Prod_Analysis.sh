@@ -129,7 +129,7 @@ EffData="coin_production_Prod_efficiency_data_2024_01_14.csv"
 ##############
 ##############
 
-declare -a EPS=("high")
+declare -a EPS=("low" "high")
 for j in "${EPS[@]}"
 do
     # When any flag is used then the user input changes argument order
@@ -682,7 +682,7 @@ done
 
 if [[ $i_flag != "true" ]]; then
     # Need to rerun loop separately so that the combined files for high and low epsilon exists for diamond cut script
-    declare -a EPS=("high")
+    declare -a EPS=("low" "high")
     for j in "${EPS[@]}"
     do
 
@@ -1347,7 +1347,7 @@ if [[ $i_flag != "true" ]]; then
     done
 else
     # Need to rerun loop separately so that the combined files for high and low epsilon exists for diamond cut script
-    declare -a EPS=("high")
+    declare -a EPS=("low" "high")
     for j in "${EPS[@]}"
     do
 
