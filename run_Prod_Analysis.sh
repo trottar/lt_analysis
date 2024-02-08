@@ -682,7 +682,7 @@ done
 
 if [[ $i_flag != "true" ]]; then
     # Need to rerun loop separately so that the combined files for high and low epsilon exists for diamond cut script
-    declare -a EPS=("low" "high")
+    declare -a EPS=("high")
     for j in "${EPS[@]}"
     do
 
@@ -1347,7 +1347,7 @@ if [[ $i_flag != "true" ]]; then
     done
 else
     # Need to rerun loop separately so that the combined files for high and low epsilon exists for diamond cut script
-    declare -a EPS=("low" "high")
+    declare -a EPS=("high")
     for j in "${EPS[@]}"
     do
 
