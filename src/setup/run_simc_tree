@@ -34,6 +34,7 @@ make
 $1
 endofinput
 cd ${SIMCPATH}/util/root_tree
+make clean
 make
 ./make_root_tree << endofinput
 $1
