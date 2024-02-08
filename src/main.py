@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-07 23:16:22 trottar"
+# Time-stamp: "2024-02-07 23:18:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,8 +317,7 @@ for i,hist in enumerate(histlist):
 if DEBUG:
     # Show plot pdf for each setting
     for hist in histlist:        
-        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))        
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))        
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
 
@@ -469,6 +468,7 @@ cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpD
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
+show_pdf_with_evince(outputpdf)    
 output_file_lst.append(outputpdf)
 
 ##############################
