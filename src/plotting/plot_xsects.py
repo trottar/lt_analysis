@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 16:48:31 trottar"
+# Time-stamp: "2024-02-08 16:50:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -531,7 +531,7 @@ with PdfPages(outputpdf) as pdf:
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i])
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
-        #ax.set_xlim(tmin, tmax)
+        ax.set_xlim(tmin, tmax)
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
