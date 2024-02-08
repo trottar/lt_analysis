@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-01 15:02:32 trottar"
+# Time-stamp: "2024-02-07 20:52:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -695,68 +695,61 @@ if EPSSET == "high":
                 output_file_lst.append(f_simc_root)
             if os.path.exists(f_simc_hist):
                 output_file_lst.append(f_simc_hist)                
-        
-    # Grab low eps versions as well
-    for f in output_file_lst:
-        if OutFilename in f:
-            f_lowe = f.replace("highe","lowe")
-            if os.path.exists(f_lowe):
-                output_file_lst.append(f_lowe)
-                
-    f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-    # Check if the file exists
-    if os.path.exists(f_path):
-        # If it exists, update it with the string
-        with open(f_path, 'a') as file:
-            file.write('\n'+formatted_date)
+
+f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+# Check if the file exists
+if os.path.exists(f_path):
+    # If it exists, update it with the string
+    with open(f_path, 'a') as file:
+        file.write('\n'+formatted_date)
+else:
+    # If not, create it and fill it with the string
+    with open(f_path, 'x') as file:
+        file.write(formatted_date)
+
+# Get the total number of lines in the file
+with open(f_path, 'r') as file:
+    total_lines = len(file.readlines())
+
+f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
+print("Copying {} to {}".format(f_path,f_path_new))
+shutil.copy(f_path,f_path_new)
+
+for f in output_file_lst:
+    if OUTPATH in f:
+        if ".pdf" in f:
+            create_dir(new_dir+"/plots")
+            f_new = f.replace(OUTPATH,new_dir+"/plots")
+            print("Copying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)
+        if ".json" in f:
+            create_dir(new_dir+"/json")
+            f_new = f.replace(OUTPATH,new_dir+"/json")
+            print("Copying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)                
+        if ".root" in f:
+            create_dir(new_dir+"/root")
+            f_new = f.replace(OUTPATH,new_dir+"/root")
+            print("Copying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)
+        if ".hist" in f:
+            create_dir(new_dir+"/root")
+            f_new = f.replace(OUTPATH,new_dir+"/root")
+            print("Copying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)
+    elif "{}/".format(ParticleType) in f:
+        f_arr = f.split("/")
+        f_tmp = f_arr.pop()
+        for f_dir in f_arr:
+            if "{}".format(ParticleType) not in f_dir:
+                create_dir(new_dir+"/"+f_dir)
+                f_new = new_dir+"/"+f_dir+"/"+f_tmp    
+                print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+                shutil.copy(LTANAPATH+"/src/"+f, f_new)
     else:
-        # If not, create it and fill it with the string
-        with open(f_path, 'x') as file:
-            file.write(formatted_date)
-
-    # Get the total number of lines in the file
-    with open(f_path, 'r') as file:
-        total_lines = len(file.readlines())
-
-    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
-    print("Copying {} to {}".format(f_path,f_path_new))
-    shutil.copy(f_path,f_path_new)
-
-    for f in output_file_lst:
-        if OUTPATH in f:
-            if ".pdf" in f:
-                create_dir(new_dir+"/plots")
-                f_new = f.replace(OUTPATH,new_dir+"/plots")
-                print("Copying {} to {}".format(f,f_new))
-                shutil.copy(f, f_new)
-            if ".json" in f:
-                create_dir(new_dir+"/json")
-                f_new = f.replace(OUTPATH,new_dir+"/json")
-                print("Copying {} to {}".format(f,f_new))
-                shutil.copy(f, f_new)                
-            if ".root" in f:
-                create_dir(new_dir+"/root")
-                f_new = f.replace(OUTPATH,new_dir+"/root")
-                print("Copying {} to {}".format(f,f_new))
-                shutil.copy(f, f_new)
-            if ".hist" in f:
-                create_dir(new_dir+"/root")
-                f_new = f.replace(OUTPATH,new_dir+"/root")
-                print("Copying {} to {}".format(f,f_new))
-                shutil.copy(f, f_new)
-        elif "{}/".format(ParticleType) in f:
-            f_arr = f.split("/")
-            f_tmp = f_arr.pop()
-            for f_dir in f_arr:
-                if "{}".format(ParticleType) not in f_dir:
-                    create_dir(new_dir+"/"+f_dir)
-                    f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
-        else:
-            f_new = new_dir
-            print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-            shutil.copy(LTANAPATH+"/src/"+f, f_new)
+        f_new = new_dir
+        print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+        shutil.copy(LTANAPATH+"/src/"+f, f_new)
                
 # Need summary for both high and low eps.
 # All others should be saved once both are complete
