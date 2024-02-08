@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 18:12:27 trottar"
+# Time-stamp: "2024-02-08 18:13:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -263,7 +263,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
+        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,2.115,"x")
         # Set line properties for f_sigL_xproj
         f_sigL_xproj.SetLineColor(i+1)
         f_sigL_xproj.SetLineWidth(2)
@@ -273,7 +273,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit.Fit(f_sigL_xproj)
 
         # Check the fit status for 'f_sigL'
-        f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
+        f_sigL_status = f_sigL_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
         f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
         
         fit_status = TText()
@@ -371,7 +371,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigT_xproj = ROOT.TF12("f_sigT_xproj",f_sigT,q2_vec[i],"x")
+        f_sigT_xproj = ROOT.TF12("f_sigT_xproj",f_sigT,2.115,"x")
         # Set line properties for f_sigT_xproj
         f_sigT_xproj.SetLineColor(i+1)
         f_sigT_xproj.SetLineWidth(2)
@@ -381,7 +381,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit.Fit(f_sigT_xproj)
 
         # Check the fit status for 'f_sigT'
-        f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+        f_sigT_status = f_sigT_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
         f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
         
         fit_status = TText()
@@ -483,7 +483,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigLT_xproj = ROOT.TF12("f_sigLT_xproj",f_sigLT,q2_vec[i],"x")
+        f_sigLT_xproj = ROOT.TF12("f_sigLT_xproj",f_sigLT,2.115,"x")
         # Set line properties for f_sigLT_xproj
         f_sigLT_xproj.SetLineColor(i+1)
         f_sigLT_xproj.SetLineWidth(2)
@@ -493,7 +493,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_siglt_fit.Fit(f_sigLT_xproj)
 
         # Check the fit status for 'f_sigLT'
-        f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+        f_sigLT_status = f_sigLT_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
         f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
         
         fit_status = TText()
@@ -597,7 +597,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigTT_xproj = ROOT.TF12("f_sigTT_xproj",f_sigTT,q2_vec[i],"x")
+        f_sigTT_xproj = ROOT.TF12("f_sigTT_xproj",f_sigTT,2.115,"x")
         # Set line properties for f_sigTT_xproj
         f_sigTT_xproj.SetLineColor(i+1)
         f_sigTT_xproj.SetLineWidth(2)
@@ -607,7 +607,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigtt_fit.Fit(f_sigTT_xproj)
 
         # Check the fit status for 'f_sigTT'
-        f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+        f_sigTT_status = f_sigTT_xproj.GetNDF()  # GetNDF() returns the number of degrees of freedom
         f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
         
         fit_status = TText()
