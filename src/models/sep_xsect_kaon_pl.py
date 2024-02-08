@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 16:29:15 trottar"
+# Time-stamp: "2024-02-08 16:30:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,14 +32,14 @@ def import_model(inp_model, arg_str):
     # Function for SigL
     def sig_L(*par):
         if inp_model == "sigL":
-            print("Calculating function for sigL...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
+            #print("Calculating function for sigL...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
             return f
 
     # Function for SigT
     def sig_T(*par):
         if inp_model == "sigT":
-            print("Calculating function for sigT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
+            #print("Calculating function for sigT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             tav = (0.1112 + 0.0066*math.log(Q2))*Q2
             ftav = (abs(tt)-tav)/tav
             f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
@@ -49,7 +49,7 @@ def import_model(inp_model, arg_str):
     # thetacm term is defined on function calling
     def sig_LT(*par):
         if inp_model == "sigLT":
-            print("Calculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
+            #print("Calculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm*PI/180)
             return f
 
@@ -57,7 +57,7 @@ def import_model(inp_model, arg_str):
     # thetacm term is defined on function calling
     def sig_TT(*par):
         if inp_model == "sigTT":
-            print("Calculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
+            #print("Calculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
             f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm*PI/180)**2)
             return f
@@ -70,7 +70,7 @@ def import_model(inp_model, arg_str):
     }
 
     sig = modelDict[inp_model]
-    sig = sig*g
+    #sig = sig*g
     #sig = sig/2./PI # ub/GeV^2
     #sig = sig/2./PI/1e6 # ub/MeV^2
 

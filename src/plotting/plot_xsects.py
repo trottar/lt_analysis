@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 16:25:08 trottar"
+# Time-stamp: "2024-02-08 16:36:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -519,19 +519,29 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
             print("="*50)
             model = []
+            t_lst = [random.uniform(tmin_range, tmax_range) for _ in range(100)]
+            # Generate model for comparison
+            for j, row in df.iterrows():
+                for t in t_lst:
+                    print("-"*50)
+                    print("Data {} = {:.4e}".format(sig, row[sig]))
+                    inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], t, row['Q2'], row['W'])+' '.join(param_arr)
+                    model.append(import_model(sig, inp_param))
+            '''
             # Generate model for comparison
             for j, row in df.iterrows():
                 print("-"*50)
                 print("Data {} = {:.4e}".format(sig, row[sig]))
                 inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
                 model.append(import_model(sig, inp_param))
+            '''
             # Check that model sig is not all zeros
             if not all(element == 0 for element in model):
                 ax.plot(model, linestyle='-.', color='red', label='Model Fit')
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i])
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
-        #ax.set_xlim(tmin, tmax)
+        ax.set_xlim(tmin, tmax)
         ax.legend()
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
