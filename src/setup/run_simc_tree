@@ -28,6 +28,7 @@ LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
 cd $SIMCPATH
 source /apps/root/6.22.06/setroot_CUE.bash
+make clean
 make
 ./simc << endofinput 2> "${LTANAPATH}/log/$1.log"
 $1

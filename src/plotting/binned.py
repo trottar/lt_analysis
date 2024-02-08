@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-03 18:33:58 trottar"
+# Time-stamp: "2024-02-08 11:33:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -469,9 +469,9 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
 
         C_ratiovsphi_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
-    C_yield_DATA = TCanvas()
     # Loop over each tuple key in the dictionary
     for it,phiset in enumerate(phisetlist):
+        C_yield_DATA = TCanvas()
         data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
         for k, data_key_tuple in enumerate(data_key_tuples):
             # Access the nested dictionary using the tuple key
@@ -485,11 +485,11 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         histbinDict["H_yield_DATA_{}".format(phiset)].SetLineColor(it+1)
         histbinDict["H_yield_DATA_{}".format(phiset)].Draw("same, E1")
         histbinDict["H_yield_DATA_{}".format(phiset)].Draw("same, hist")
-    C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+        C_yield_DATA.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
-    C_yield_SIMC = TCanvas()
     # Loop over each tuple key in the dictionary
     for it,phiset in enumerate(phisetlist):
+        C_yield_SIMC = TCanvas()
         simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
         for k, simc_key_tuple in enumerate(simc_key_tuples):
             # Access the nested dictionary using the tuple key
@@ -503,11 +503,12 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         histbinDict["H_yield_SIMC_{}".format(phiset)].SetLineColor(it+1)
         histbinDict["H_yield_SIMC_{}".format(phiset)].Draw("same, E1")
         histbinDict["H_yield_SIMC_{}".format(phiset)].Draw("same, hist")
-    C_yield_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+        C_yield_SIMC.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
-    C_ratio = TCanvas()
+
     # Loop over each tuple key in the dictionary
     for it,phiset in enumerate(phisetlist):
+        C_ratio = TCanvas()
         key_tuples = list(ratioDict["binned"][phiset]['ratio'])
         for k, key_tuple in enumerate(key_tuples):
             # Access the nested dictionary using the tuple key
@@ -521,7 +522,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         histbinDict["H_ratio_{}".format(phiset)].SetLineColor(it+1)
         histbinDict["H_ratio_{}".format(phiset)].Draw("same, E1")
         histbinDict["H_ratio_{}".format(phiset)].Draw("same, hist")
-    C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
+        C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
     C_yield_data_plt = TCanvas()
     G_yield_data_plt = TMultiGraph()
