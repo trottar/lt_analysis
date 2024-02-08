@@ -129,7 +129,7 @@ EffData="coin_production_Prod_efficiency_data_2024_01_14.csv"
 ##############
 ##############
 
-declare -a EPS=("low" "high")
+declare -a EPS=("high")
 for j in "${EPS[@]}"
 do
     # When any flag is used then the user input changes argument order

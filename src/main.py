@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-07 23:30:19 trottar"
+# Time-stamp: "2024-02-07 23:42:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -469,7 +469,6 @@ cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpD
 if DEBUG:
     show_pdf_with_evince(outputpdf)
 show_pdf_with_evince(outputpdf)
-sys.exit(1)
 output_file_lst.append(outputpdf)
 
 ##############################
