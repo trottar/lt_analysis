@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-02 20:22:34 trottar"
+# Time-stamp: "2024-02-08 16:09:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,8 +76,8 @@ def iterWeight(arg_str):
     sigt = sigt*wfactor
     sigtt = sigtt*wfactor
     siglt = siglt*wfactor
-    # RLT (1/30/2024): Removed 1e6 because units are GeV**2 not MeV**2
-    sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/GeV**2/rad
+    
+    sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     #sig = sig / 2.0 / pi  # dsig/dtdphicm in microbarns/GeV**2/rad
 
     wtn = wt_sim * sig / sigcm_sim
