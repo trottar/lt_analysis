@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 17:33:07 trottar"
+# Time-stamp: "2024-02-08 18:10:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -287,20 +287,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    par_vec.append(f_sigL.GetParameter(0))
-    par_vec.append(f_sigL.GetParameter(1))
-    par_vec.append(f_sigL.GetParameter(2))
-    par_vec.append(f_sigL.GetParameter(3))
+    par_vec.append(f_sigL_xproj.GetParameter(0))
+    par_vec.append(f_sigL_xproj.GetParameter(1))
+    par_vec.append(f_sigL_xproj.GetParameter(2))
+    par_vec.append(f_sigL_xproj.GetParameter(3))
 
-    par_err_vec.append(f_sigL.GetParError(0))
-    par_err_vec.append(f_sigL.GetParError(1))
-    par_err_vec.append(f_sigL.GetParError(2))
-    par_err_vec.append(f_sigL.GetParError(3))
+    par_err_vec.append(f_sigL_xproj.GetParError(0))
+    par_err_vec.append(f_sigL_xproj.GetParError(1))
+    par_err_vec.append(f_sigL_xproj.GetParError(2))
+    par_err_vec.append(f_sigL_xproj.GetParError(3))
 
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigL_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigL_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigL_xproj.GetChisquare())
 
     ########
     # SigT #
@@ -395,20 +395,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit_tot.SetLineColor(2)
     g_sigt_fit_tot.Draw("LP")
     
-    par_vec.append(f_sigT.GetParameter(0))
-    par_vec.append(f_sigT.GetParameter(1))
-    par_vec.append(f_sigT.GetParameter(2))
-    par_vec.append(f_sigT.GetParameter(3))
+    par_vec.append(f_sigT_xproj.GetParameter(0))
+    par_vec.append(f_sigT_xproj.GetParameter(1))
+    par_vec.append(f_sigT_xproj.GetParameter(2))
+    par_vec.append(f_sigT_xproj.GetParameter(3))
 
-    par_err_vec.append(f_sigT.GetParError(0))
-    par_err_vec.append(f_sigT.GetParError(1))
-    par_err_vec.append(f_sigT.GetParError(2))
-    par_err_vec.append(f_sigT.GetParError(3))
+    par_err_vec.append(f_sigT_xproj.GetParError(0))
+    par_err_vec.append(f_sigT_xproj.GetParError(1))
+    par_err_vec.append(f_sigT_xproj.GetParError(2))
+    par_err_vec.append(f_sigT_xproj.GetParError(3))
 
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigT_xproj.GetChisquare())
     
     #########
     # SigLT #
@@ -507,20 +507,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit_tot.SetLineColor(2)
     g_siglt_fit_tot.Draw("LP")
         
-    par_vec.append(f_sigLT.GetParameter(0))
-    par_vec.append(f_sigLT.GetParameter(1))
-    par_vec.append(f_sigLT.GetParameter(2))
-    par_vec.append(f_sigLT.GetParameter(3))
+    par_vec.append(f_sigLT_xproj.GetParameter(0))
+    par_vec.append(f_sigLT_xproj.GetParameter(1))
+    par_vec.append(f_sigLT_xproj.GetParameter(2))
+    par_vec.append(f_sigLT_xproj.GetParameter(3))
 
-    par_err_vec.append(f_sigLT.GetParError(0))
-    par_err_vec.append(f_sigLT.GetParError(1))
-    par_err_vec.append(f_sigLT.GetParError(2))
-    par_err_vec.append(f_sigLT.GetParError(3))
+    par_err_vec.append(f_sigLT_xproj.GetParError(0))
+    par_err_vec.append(f_sigLT_xproj.GetParError(1))
+    par_err_vec.append(f_sigLT_xproj.GetParError(2))
+    par_err_vec.append(f_sigLT_xproj.GetParError(3))
 
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(f_sigLT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigLT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigLT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigLT_xproj.GetChisquare())
 
     ########
     # SigTT #
@@ -621,20 +621,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit_tot.SetLineColor(2)
     g_sigtt_fit_tot.Draw("LP")
     
-    par_vec.append(f_sigTT.GetParameter(0))
-    par_vec.append(f_sigTT.GetParameter(1))
-    par_vec.append(f_sigTT.GetParameter(2))
-    par_vec.append(f_sigTT.GetParameter(3))
+    par_vec.append(f_sigTT_xproj.GetParameter(0))
+    par_vec.append(f_sigTT_xproj.GetParameter(1))
+    par_vec.append(f_sigTT_xproj.GetParameter(2))
+    par_vec.append(f_sigTT_xproj.GetParameter(3))
 
-    par_err_vec.append(f_sigTT.GetParError(0))
-    par_err_vec.append(f_sigTT.GetParError(1))
-    par_err_vec.append(f_sigTT.GetParError(2))
-    par_err_vec.append(f_sigTT.GetParError(3))
+    par_err_vec.append(f_sigTT_xproj.GetParError(0))
+    par_err_vec.append(f_sigTT_xproj.GetParError(1))
+    par_err_vec.append(f_sigTT_xproj.GetParError(2))
+    par_err_vec.append(f_sigTT_xproj.GetParError(3))
 
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())
+    par_chi2_vec.append(f_sigTT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigTT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigTT_xproj.GetChisquare())
+    par_chi2_vec.append(f_sigTT_xproj.GetChisquare())
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')

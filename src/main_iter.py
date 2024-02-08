@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-07 20:53:57 trottar"
+# Time-stamp: "2024-02-08 18:08:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -504,24 +504,25 @@ output_file_lst.append(unsep_file)
 
 # ***Moved creation of iteration directory up from where it is in main.py. Now is near the new weight calculation***
 # ***Likewise for SIMC root/hist files***
-    
-f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-# Check if the file exists
-if os.path.exists(f_path):
-    # If it exists, update it with the string
-    with open(f_path, 'a') as file:
-        file.write('\n'+formatted_date)
-else:
-    # If not, create it and fill it with the string
-    with open(f_path, 'x') as file:
-        file.write(formatted_date)
 
-# Get the total number of lines in the file
-with open(f_path, 'r') as file:
-    total_lines = len(file.readlines())
+if EPSSET == "high":
+    f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    # Check if the file exists
+    if os.path.exists(f_path):
+        # If it exists, update it with the string
+        with open(f_path, 'a') as file:
+            file.write('\n'+formatted_date)
+    else:
+        # If not, create it and fill it with the string
+        with open(f_path, 'x') as file:
+            file.write(formatted_date)
 
-f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
-shutil.copy(f_path,f_path_new)
+    # Get the total number of lines in the file
+    with open(f_path, 'r') as file:
+        total_lines = len(file.readlines())
+
+    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
+    shutil.copy(f_path,f_path_new)
 
 for f in output_file_lst:
     if OUTPATH in f:
