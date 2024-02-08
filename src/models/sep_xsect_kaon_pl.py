@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 16:41:14 trottar"
+# Time-stamp: "2024-02-08 16:45:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ def import_model(inp_model, arg_str):
     def sig_LT(*par):
         if inp_model == "sigLT":
             #print("Calculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
-            f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm*PI/180)
+            f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
             return f
 
     # Function for SigTT
@@ -59,7 +59,7 @@ def import_model(inp_model, arg_str):
         if inp_model == "sigTT":
             #print("Calculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-            f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm*PI/180)**2)
+            f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
             return f
 
     modelDict = {
