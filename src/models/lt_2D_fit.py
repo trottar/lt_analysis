@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 03:47:31 trottar"
+# Time-stamp: "2024-02-09 03:52:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -466,7 +466,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
                 
         # Print plots for c1 canvases
         g_plot_err.Draw("perr")
-        g_plot_err.SetTitle("{}".format(i))
+        g_plot_err.SetTitle("t = {:.3f}".format(t_list[i]))
         g_plot_err.GetXaxis().SetTitle("#it{#phi} [degree]")
         g_plot_err.GetXaxis().CenterTitle()
         g_plot_err.GetYaxis().SetTitle("Epsilon")
@@ -483,6 +483,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
                 
         # Update c2
         c2.Update()
+
+        # Go to the c2 canvas
+        c2.cd()
         
         # Set properties for glo
         glo.SetMarkerStyle(5)
@@ -504,7 +507,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Set properties for the TMultiGraph
         #g.GetHistogram().SetMinimum(0.0)
         #g.GetHistogram().SetMaximum(0.8)
-        g.SetTitle("t = {:.3f}".format(t_list[i]))
         g.GetYaxis().SetTitle("Unseparated Cross Section [#mub/GeV^{2}]")
         g.GetYaxis().CenterTitle()
         g.GetYaxis().SetTitleOffset(1.4)
@@ -513,6 +515,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g.GetXaxis().CenterTitle()
         g.GetXaxis().SetLimits(0, 360)
 
+        g.SetTitle("t = {:.3f}".format(t_list[i]))
+        
         # Update canvas c2
         c2.Update()
 
@@ -619,19 +623,19 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [#mub/GeV^{2}]")
-        g_sig_l_total.SetTitle("{}".format(i))
+        g_sig_l_total.SetTitle("t = {:.3f}".format(t_list[i]))
         
         g_sig_t_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_t_total.GetYaxis().SetTitle("#it{#sigma}_{T} [#mub/GeV^{2}]")
-        g_sig_t_total.SetTitle("{}".format(i))
+        g_sig_t_total.SetTitle("t = {:.3f}".format(t_list[i]))
 
         g_sig_lt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_lt_total.GetYaxis().SetTitle("#it{#sigma}_{LT} [#mub/GeV^{2}]")
-        g_sig_lt_total.SetTitle("{}".format(i))
+        g_sig_lt_total.SetTitle("t = {:.3f}".format(t_list[i]))
 
         g_sig_tt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_tt_total.GetYaxis().SetTitle("#it{#sigma}_{TT} [#mub/GeV^{2}]")
-        g_sig_tt_total.SetTitle("{}".format(i))
+        g_sig_tt_total.SetTitle("t = {:.3f}".format(t_list[i]))
         
         # Set points and errors for g_sig_l_total, g_sig_t_total, g_sig_lt_total, and g_sig_tt_total
         g_sig_l_total.SetPoint(g_sig_l_total.GetN(), t_list[i], sig_l)
@@ -648,19 +652,19 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sig_L_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_L_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [#mub/GeV^{2}]")
-        sig_L_g.SetTitle("{}".format(i))
+        sig_L_g.SetTitle("t = {:.3f}".format(t_list[i]))
         
         sig_T_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_T_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [#mub/GeV^{2}]")
-        sig_T_g.SetTitle("{}".format(i))
+        sig_T_g.SetTitle("t = {:.3f}".format(t_list[i]))
 
         sig_LT_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_LT_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [#mub/GeV^{2}]")
-        sig_LT_g.SetTitle("{}".format(i))
+        sig_LT_g.SetTitle("t = {:.3f}".format(t_list[i]))
 
         sig_TT_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_TT_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [#mub/GeV^{2}]")
-        sig_TT_g.SetTitle("{}".format(i))        
+        sig_TT_g.SetTitle("t = {:.3f}".format(t_list[i]))        
         
         # Set points and errors for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.SetPoint(i, t_list[i], sig_l)
