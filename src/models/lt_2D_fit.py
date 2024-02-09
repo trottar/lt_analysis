@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 03:19:14 trottar"
+# Time-stamp: "2024-02-09 03:27:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -309,6 +309,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
+        # Update sigL_change and sigT_change
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
+
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
+        
         #########
         # Fit 3 #
         #########
@@ -361,6 +368,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
+        # Update sigL_change and sigT_change
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
+
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
+        
         #########
         # Fit 5 #
         #########
@@ -383,6 +397,45 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
+        # Update sigL_change and sigT_change
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
+
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
+
+        #########
+        # Fit 6 #
+        #########
+
+        #print("\n/*--------------------------------------------------*/")
+        #print(" Fitting Step 4")
+        #print(" Fit LT and TT, while Fix L and T")
+
+        # Fix parameter 0 and 1
+        # fff2.FixParameter(0, fff2.GetParameter(0))
+        # fff2.FixParameter(1, fff2.GetParameter(1))
+
+        # Set parameter limits
+        fff2.SetParLimits(0, fff2.GetParameter(0) - fff2.GetParError(0), fff2.GetParameter(0) + fff2.GetParError(0))
+        fff2.SetParLimits(1, fff2.GetParameter(1) - fff2.GetParError(1), fff2.GetParameter(0) + fff2.GetParError(0))
+
+        # Release and set parameters
+        fff2.ReleaseParameter(2)
+        fff2.ReleaseParameter(3)
+        fff2.SetParameter(2, fff2.GetParameter(2))
+        fff2.SetParameter(3, fff2.GetParameter(3))
+
+        # Fit
+        g_plot_err.Fit("fff2", "MRQ")
+        
+        # Update sigL_change and sigT_change
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
+
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
+        
         #############
         # Last Step #
         #############
@@ -397,8 +450,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(2)
         fff2.ReleaseParameter(3)
 
-        g_plot_err.Fit(fff2)
+        # Fit
+        g_plot_err.Fit("fff2", "MRQ")
 
+        # Update sigL_change and sigT_change
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
+
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
+        
         c1 =  TCanvas()
 
         c1.Update()
