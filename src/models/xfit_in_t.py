@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 02:03:47 trottar"
+# Time-stamp: "2024-02-09 02:05:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # xsects range
     lo_bound = -10
-    hi_bound =  100
+    hi_bound =  150
     
     # Function for SigL
     def fun_Sig_L(x, par):
