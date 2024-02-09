@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 17:15:31 trottar"
+# Time-stamp: "2024-02-09 17:36:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -697,7 +697,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         for k in range(len(phi_bins) - 1):
             phibin_index = k
             hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
-            yield_val = yield_hist[1][i]
+            yield_val = [yield_hist[0][i], yield_hist[1][i]]
             print("Simc yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val[1]))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
             i+=1
