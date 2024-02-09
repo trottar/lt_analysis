@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 03:52:36 trottar"
+# Time-stamp: "2024-02-09 03:55:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -514,8 +514,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g.GetXaxis().SetTitle("#it{#phi} [degree]")
         g.GetXaxis().CenterTitle()
         g.GetXaxis().SetLimits(0, 360)
-
-        g.SetTitle("t = {:.3f}".format(t_list[i]))
         
         # Update canvas c2
         c2.Update()
@@ -583,7 +581,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Create TText for fit status
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.15, 0.85, "Q2 = " + q2_set)
+        fit_status.DrawTextNDC(0.15, 0.85, "t= {:.3f}, Q2 = {}".format(t_list[i], q2_set))
         fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
         fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
 
