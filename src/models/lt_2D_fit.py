@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 03:39:06 trottar"
+# Time-stamp: "2024-02-09 03:45:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -508,6 +508,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         #g.GetHistogram().SetMinimum(0.0)
         #g.GetHistogram().SetMaximum(0.8)
         g.SetTitle("t = {:.3f}".format(t_list[i]))
+
+        # Update canvas c2
+        c2.Update()
+        
         g.GetYaxis().SetTitle("Unseparated Cross Section [#mub/GeV^{2}]")
         g.GetYaxis().CenterTitle()
         g.GetYaxis().SetTitleOffset(1.4)
