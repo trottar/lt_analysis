@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 13:28:01 trottar"
+# Time-stamp: "2024-02-09 13:44:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -269,7 +269,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.FixParameter(2, 0.0)
         fff2.FixParameter(3, 0.0)
 
-        g_plot_err.Fit(fff2, "MRQ")
+        # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+        g_plot_err.Fit(fff2, "S")
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigL_change.GetXaxis().SetTitle("Fit Step")
@@ -307,7 +308,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.SetParameter(2, 0.0)
         fff2.SetParLimits(2, 0, 5)
 
-        g_plot_err.Fit(fff2, "MRQ")
+        # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+        g_plot_err.Fit(fff2, "S")
 
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -336,7 +338,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.FixParameter(2, fff2.GetParameter(2))
         fff2.FixParameter(3, fff2.GetParameter(3))
 
-        g_plot_err.Fit(fff2, "MRQ")
+        # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+        g_plot_err.Fit(fff2, "S")
 
         # sigL_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -366,7 +369,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.SetParameter(3, 0.0)
         fff2.SetParLimits(3, 0, 5)
 
-        g_plot_err.Fit(fff2, "MRQ")
+        # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+        g_plot_err.Fit(fff2, "S")
 
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -395,7 +399,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.FixParameter(2, fff2.GetParameter(2))
         fff2.FixParameter(3, fff2.GetParameter(3))
 
-        g_plot_err.Fit(fff2, "MRQ")
+        # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+        g_plot_err.Fit(fff2, "S")
 
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -428,7 +433,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.SetParameter(3, fff2.GetParameter(3))
 
         # Fit
-        g_plot_err.Fit("fff2", "MRQ")
+        # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+        g_plot_err.Fit("fff2", "S")
         
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -453,7 +459,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(3)
 
         # Fit
-        g_plot_err.Fit("fff2", "MRQ")
+        # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+        g_plot_err.Fit("fff2", "S")
 
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -541,8 +548,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2)) # sigLT
         fhi_unsep.FixParameter(3, fff2.GetParameter(3)) # sigTT
 
-        glo.Fit(flo, "MRQ")
-        ghi.Fit(fhi, "MRQ")
+        # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+        glo.Fit(flo, "S")
+        ghi.Fit(fhi, "S")
         
         # Set line properties for flo and fhi
         flo.SetLineColor(1)
