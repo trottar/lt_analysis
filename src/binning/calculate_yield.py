@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 15:35:02 trottar"
+# Time-stamp: "2024-02-09 15:36:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -759,7 +759,7 @@ def find_yield_simc(histlist, inpDict, iteration=False):
             
     return {"binned_SIMC" : yieldDict}
 
-def grab_yield_data(histlist, inpDict):
+def grab_yield_data(prev_root_file, histlist, inpDict):
     
     for hist in histlist:
         t_bins = hist["t_bins"]
