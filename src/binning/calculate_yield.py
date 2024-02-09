@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 15:44:23 trottar"
+# Time-stamp: "2024-02-09 15:47:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -779,7 +779,7 @@ def grab_yield_data(prev_root_file, histlist, inpDict):
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        yieldDict[hist["phi_setting"]]["yield"] = get_histogram(prev_root_file, "{}/yield".format(hist["phi_setting"]), "H_yield_DATA")
+        yieldDict[hist["phi_setting"]]["yield"] = get_histogram(prev_root_file, "{}/yield".format(hist["phi_setting"]), "H_yield_DATA_{}".format(hist["phi_setting"]))
 
     for hist in histlist:
         i = 0
@@ -788,7 +788,5 @@ def grab_yield_data(prev_root_file, histlist, inpDict):
                 yield_val = yieldDict[hist["phi_setting"]]["yield"].GetBinContent(i)
                 print("Data yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
                 i+=1
-
-
         
     return {"binned_DATA" : yieldDict}
