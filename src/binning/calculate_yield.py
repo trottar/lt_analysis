@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 15:47:44 trottar"
+# Time-stamp: "2024-02-09 16:05:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -779,14 +779,25 @@ def grab_yield_data(prev_root_file, histlist, inpDict):
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        yieldDict[hist["phi_setting"]]["yield"] = get_histogram(prev_root_file, "{}/yield".format(hist["phi_setting"]), "H_yield_DATA_{}".format(hist["phi_setting"]))
-
-    for hist in histlist:
         i = 0
         for j in range(len(t_bins) - 1):
             for k in range(len(phi_bins) - 1):
-                yield_val = yieldDict[hist["phi_setting"]]["yield"].GetBinContent(i)
-                print("Data yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
+                binned_sub_data = get_histogram(prev_root_file, \
+                                                "{}/yield".format(hist["phi_setting"]), "H_totevts_DATA_{}_{}_{}".format(hist["phi_setting"], j+1, k+1))
+                hist_val = [binned_sub_data.GetBinCenter(i), binned_sub_data.GetBinContent(i)]
+                yield_val = yield_hist[i]
+                print("Data yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))                
                 i+=1
+
+        # Group the tuples by the first two elements using defaultdict
+        groups = defaultdict(list)
+        for tup in dict_lst:
+            key = (tup[0], tup[1])
+            groups[key] = {
+                "{}_arr".format(kin_type) : tup[2],
+                "{}".format(kin_type) : tup[3],
+            }            
+
+        yieldDict[hist["phi_setting"]]["yield"] = groups
         
     return {"binned_DATA" : yieldDict}
