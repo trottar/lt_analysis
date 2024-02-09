@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 03:55:11 trottar"
+# Time-stamp: "2024-02-09 03:58:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -271,7 +271,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_plot_err.Fit(fff2, "MRQ")
 
-        sigL_change.SetTitle("sigL_change {}".format(i))
+        sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigL_change.GetXaxis().SetTitle("Fit Step")
         sigL_change.GetYaxis().SetTitle("sigL")
         
@@ -279,7 +279,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
 
-        sigT_change.SetTitle("sigT_change {}".format(i))
+        sigT_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigT_change.GetXaxis().SetTitle("Fit Step")
         sigT_change.GetYaxis().SetTitle("sigT")
         
@@ -581,7 +581,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Create TText for fit status
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.15, 0.85, "t= {:.3f}, Q2 = {}".format(t_list[i], q2_set))
+        fit_status.DrawTextNDC(0.15, 0.85, "t= {:.3f}, Q2 = {:.1f}".format(t_list[i], float(q2_set.replace("p","."))))
         fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
         fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
 
