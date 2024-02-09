@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 02:05:39 trottar"
+# Time-stamp: "2024-02-09 02:11:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -278,7 +278,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigL_status_message))
+        fit_status.DrawTextNDC(0.35, 0.80-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigL_status_message))
+
+    # Check the fit status for 'f_sigL'
+    f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
+    f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
+
+    fit_status = TText()
+    fit_status.SetTextSize(0.04)
+    fit_status.DrawTextNDC(0.35, 0.85, " t-bin {} Fit Status: {}".format(i+1, f_sigL_status_message))
         
     c1.cd(1)
 
@@ -386,7 +394,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigT_status_message))
+        fit_status.DrawTextNDC(0.35, 0.80-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigT_status_message))
+
+    # Check the fit status for 'f_sigT'
+    f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+    f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
+
+    fit_status = TText()
+    fit_status.SetTextSize(0.04)
+    fit_status.DrawTextNDC(0.35, 0.85, " t-bin {} Fit Status: {}".format(i+1, f_sigT_status_message))
         
     c1.cd(2)
 
@@ -498,7 +514,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigLT_status_message))
+        fit_status.DrawTextNDC(0.35, 0.80-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigLT_status_message))
+
+    # Check the fit status for 'f_sigLT'
+    f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+    f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
+
+    fit_status = TText()
+    fit_status.SetTextSize(0.04)
+    fit_status.DrawTextNDC(0.35, 0.85, " t-bin {} Fit Status: {}".format(i+1, f_sigLT_status_message))
         
     c1.cd(3)
 
@@ -612,7 +636,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         fit_status = TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigTT_status_message))
+        fit_status.DrawTextNDC(0.35, 0.80-(0.05*i), " t-bin {} Fit Status: {}".format(i+1, f_sigTT_status_message))
+
+    # Check the fit status for 'f_sigTT'
+    f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+    f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
+
+    fit_status = TText()
+    fit_status.SetTextSize(0.04)
+    fit_status.DrawTextNDC(0.35, 0.85, " t-bin {} Fit Status: {}".format(i+1, f_sigTT_status_message))
         
     c1.cd(4)
 
