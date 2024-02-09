@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 14:23:15 trottar"
+# Time-stamp: "2024-02-09 14:27:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -528,22 +528,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.Update()
 
         # Fix parameters for flo, flo_unsep, fhi, and fhi_unsep
-        if fff2.GetParameter(0) > 0.0:
-            flo.FixParameter(0, fff2.GetParameter(0)) # sigT
-        else:
-            flo.FixParameter(0, 0.0) # sigT
-        if fff2.GetParameter(1) > 0.0:
-            flo.FixParameter(1, fff2.GetParameter(1)) # sigL
-        else:
-            flo.FixParameter(1, 0.0) # sigL
-        if fff2.GetParameter(2) > 0.0:
-            flo.FixParameter(2, fff2.GetParameter(2)) # sigLT
-        else:
-            flo.FixParameter(2, 0.0) # sigLT
-        if fff2.GetParameter(3) > 0.0:
-            flo.FixParameter(3, fff2.GetParameter(3)) # sigTT
-        else:
-            flo.FixParameter(3, 0.0) # sigTT                
+        flo.FixParameter(0, fff2.GetParameter(0)) # sigT
+        flo.FixParameter(1, fff2.GetParameter(1)) # sigL
+        flo.FixParameter(2, fff2.GetParameter(2)) # sigLT
+        flo.FixParameter(3, fff2.GetParameter(3)) # sigTT
 
         flo_unsep.FixParameter(0, fff2.GetParameter(0)) # sigT
         flo_unsep.FixParameter(1, fff2.GetParameter(1)) # sigL
@@ -617,6 +605,15 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Define variables for cross sections and errors
         sig_l, sig_t, sig_lt, sig_tt = fff2.GetParameter(1), fff2.GetParameter(0), fff2.GetParameter(2), fff2.GetParameter(3)
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
+
+        if sig_l < 0.0:
+            sig_l = 0.0
+        if sig_t < 0.0:
+            sig_t = 0.0
+        if sig_lt < 0.0:
+            sig_lt = 0.0
+        if sig_tt < 0.0:
+            sig_tt = 0.0
 
         # Print values to console
         print("\nBin {}: Outputting...  ".format(i+1), "sig_l: ", sig_l, "sig_t: ", sig_t, \
