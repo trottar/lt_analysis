@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 14:29:50 trottar"
+# Time-stamp: "2024-02-09 15:09:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -460,7 +460,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Fit
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-        g_plot_err.Fit("fff2", "MRV")
+        g_plot_err.Fit(fff2, "MRV")
 
         # Update sigL_change and sigT_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
