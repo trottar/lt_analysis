@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 13:03:38 trottar"
+# Time-stamp: "2024-02-09 15:35:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,6 +49,12 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import get_histogram
 
 ##################################################################################################################################################
 
@@ -752,3 +758,37 @@ def find_yield_simc(histlist, inpDict, iteration=False):
         yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict, iteration=iteration)
             
     return {"binned_SIMC" : yieldDict}
+
+def grab_yield_data(histlist, inpDict):
+    
+    for hist in histlist:
+        t_bins = hist["t_bins"]
+        phi_bins = hist["phi_bins"]
+
+    yieldDict = {
+        "t_bins" : t_bins,
+        "phi_bins" : phi_bins
+    }
+        
+    # Loop through histlist and update yieldDict
+    for hist in histlist:
+        print("\n\n")
+        print("-"*25)
+        print("-"*25)
+        print("Finding data yields for {}...".format(hist["phi_setting"]))
+        print("-"*25)
+        print("-"*25)
+        yieldDict[hist["phi_setting"]] = {}
+        yieldDict[hist["phi_setting"]]["yield"] = get_histogram(prev_root_file, "{}/simc".format(hist["phi_setting"]), "H_yield_DATA")
+
+    for hist in histlist:
+        i = 0
+        for j in range(len(t_bins) - 1):
+            for k in range(len(phi_bins) - 1):
+                yield_val = yieldDict[hist["phi_setting"]]["yield"].GetBinContent(i)
+                print("Data yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
+                i+=1
+
+
+        
+    return {"binned_DATA" : yieldDict}

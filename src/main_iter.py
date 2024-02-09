@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 18:08:29 trottar"
+# Time-stamp: "2024-02-09 15:27:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,7 +138,6 @@ histlist = prev_iter_combineDict["histlist"]
 # Add closest and formatted dates to inpDict (used in plot comparison)
 inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
-
 
 if EPSSET == "low":
     # Run weight iteration script for optimizing parameterization
@@ -329,11 +328,12 @@ output_file_lst.append(outputpdf)
 
 '''
 
+# ***Grabbing data yield and average values from previous iteration rather than rebinning***
 sys.path.append("binning")
-from calculate_yield import find_yield_data, find_yield_simc
+from calculate_yield import grab_yield_data, find_yield_simc
 
 yieldDict = {}
-yieldDict.update(find_yield_data(histlist, inpDict))
+yieldDict.update(grab_yield_data(prev_root_file, histlist, inpDict))
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
 
 sys.path.append("binning")
