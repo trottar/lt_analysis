@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 02:39:33 trottar"
+# Time-stamp: "2024-02-09 02:42:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,10 +53,8 @@ mkpl = 0.493677
 
 def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
 
-    #tmin_range = inpDict["tmin"]
-    #tmax_range = inpDict["tmax"]
-    tmin_range = 0.0
-    tmax_range = 1.0
+    tmin_range = inpDict["tmin"]
+    tmax_range = inpDict["tmax"]
     Q2min_range = inpDict["Q2min"]
     Q2max_range = inpDict["Q2max"]
     
