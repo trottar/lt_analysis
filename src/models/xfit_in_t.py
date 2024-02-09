@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 14:05:11 trottar"
+# Time-stamp: "2024-02-09 14:16:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -262,7 +262,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], q2_vec[i], sigl_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-    g_q2_sigl_fit.Fit(f_sigL, "S")
+    g_q2_sigl_fit.Fit(f_sigL, "SV")
     
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
@@ -381,7 +381,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
         print("$$$$$$$$$$$",i, g_sigt.GetX()[i], sigt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-    g_q2_sigt_fit.Fit(f_sigT, "S")
+    g_q2_sigt_fit.Fit(f_sigT, "SV")
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
@@ -504,7 +504,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
         print("$$$$$$$$$$$",i, g_siglt.GetX()[i], siglt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-    g_q2_siglt_fit.Fit(f_sigLT, "S")
+    g_q2_siglt_fit.Fit(f_sigLT, "SV")
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
@@ -629,7 +629,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-    g_q2_sigtt_fit.Fit(f_sigTT, "S")
+    g_q2_sigtt_fit.Fit(f_sigTT, "SV")
 
     for i in range(len(w_vec)):        
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
