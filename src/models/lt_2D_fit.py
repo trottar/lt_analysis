@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 14:16:20 trottar"
+# Time-stamp: "2024-02-09 14:23:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -528,10 +528,22 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.Update()
 
         # Fix parameters for flo, flo_unsep, fhi, and fhi_unsep
-        flo.FixParameter(0, fff2.GetParameter(0)) # sigT
-        flo.FixParameter(1, fff2.GetParameter(1)) # sigL
-        flo.FixParameter(2, fff2.GetParameter(2)) # sigLT
-        flo.FixParameter(3, fff2.GetParameter(3)) # sigTT
+        if fff2.GetParameter(0) > 0.0:
+            flo.FixParameter(0, fff2.GetParameter(0)) # sigT
+        else:
+            flo.FixParameter(0, 0.0) # sigT
+        if fff2.GetParameter(1) > 0.0:
+            flo.FixParameter(1, fff2.GetParameter(1)) # sigL
+        else:
+            flo.FixParameter(1, 0.0) # sigL
+        if fff2.GetParameter(2) > 0.0:
+            flo.FixParameter(2, fff2.GetParameter(2)) # sigLT
+        else:
+            flo.FixParameter(2, 0.0) # sigLT
+        if fff2.GetParameter(3) > 0.0:
+            flo.FixParameter(3, fff2.GetParameter(3)) # sigTT
+        else:
+            flo.FixParameter(3, 0.0) # sigTT                
 
         flo_unsep.FixParameter(0, fff2.GetParameter(0)) # sigT
         flo_unsep.FixParameter(1, fff2.GetParameter(1)) # sigL
