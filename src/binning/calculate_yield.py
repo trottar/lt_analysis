@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 15:36:52 trottar"
+# Time-stamp: "2024-02-09 15:44:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -779,7 +779,7 @@ def grab_yield_data(prev_root_file, histlist, inpDict):
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        yieldDict[hist["phi_setting"]]["yield"] = get_histogram(prev_root_file, "{}/simc".format(hist["phi_setting"]), "H_yield_DATA")
+        yieldDict[hist["phi_setting"]]["yield"] = get_histogram(prev_root_file, "{}/yield".format(hist["phi_setting"]), "H_yield_DATA")
 
     for hist in histlist:
         i = 0
