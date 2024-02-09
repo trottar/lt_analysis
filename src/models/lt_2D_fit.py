@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 14:27:29 trottar"
+# Time-stamp: "2024-02-09 14:29:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -606,6 +606,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_l, sig_t, sig_lt, sig_tt = fff2.GetParameter(1), fff2.GetParameter(0), fff2.GetParameter(2), fff2.GetParameter(3)
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
 
+        ###########
+        # Testing #
+        ###########        
         if sig_l < 0.0:
             sig_l = 0.0
         if sig_t < 0.0:
