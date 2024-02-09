@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 02:11:10 trottar"
+# Time-stamp: "2024-02-09 02:13:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -286,7 +286,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     fit_status = TText()
     fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.85, " t-bin {} Fit Status: {}".format(i+1, f_sigL_status_message))
+    fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
         
     c1.cd(1)
 
@@ -402,7 +402,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     fit_status = TText()
     fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.85, " t-bin {} Fit Status: {}".format(i+1, f_sigT_status_message))
+    fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigT_status_message))
         
     c1.cd(2)
 
@@ -522,7 +522,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     fit_status = TText()
     fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.85, " t-bin {} Fit Status: {}".format(i+1, f_sigLT_status_message))
+    fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigLT_status_message))
         
     c1.cd(3)
 
@@ -644,7 +644,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     fit_status = TText()
     fit_status.SetTextSize(0.04)
-    fit_status.DrawTextNDC(0.35, 0.85, " t-bin {} Fit Status: {}".format(i+1, f_sigTT_status_message))
+    fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
         
     c1.cd(4)
 
