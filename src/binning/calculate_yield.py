@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 16:25:25 trottar"
+# Time-stamp: "2024-02-09 16:39:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -517,7 +517,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         yield_hist.append(yld)
         binned_sub_data[0].append(bin_val_data)
         binned_sub_data[1].append(sub_val)
-        i+=1    
+        i+=1
 
     # Print statements to check sizes
     #print("Size of binned_t_data:", len(binned_t_data))
@@ -784,9 +784,9 @@ def grab_yield_data(prev_root_file, histlist, inpDict):
             for k in range(len(phi_bins) - 1):
                 binned_sub_data = get_histogram(prev_root_file, \
                                                 "{}/yield".format(hist["phi_setting"]), "H_totevts_DATA_{}_{}_{}".format(hist["phi_setting"], j+1, k+1))
-                hist_val = [binned_sub_data.GetBinCenter(i), binned_sub_data.GetBinContent(i)]
-                yield_val = np.sum(hist_val[1])
-                print("Data yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))                
+                hist_val = [binned_sub_data.GetBinCenter(i), np.sum(binned_sub_data.GetBinContent(i))]
+                yield_val = hist_val[1]
+                print("Data yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
                 i+=1
 
         # Group the tuples by the first two elements using defaultdict
