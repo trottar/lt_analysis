@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 03:07:05 trottar"
+# Time-stamp: "2024-02-09 03:14:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -260,10 +260,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Set parameter 0 and 1
         fff2.SetParameter(0, 1)
-        fff2.SetParLimits(0, 0, 200)
+        fff2.SetParLimits(0, 0, 20)
 
-        fff2.SetParameter(1, 0.1)
-        fff2.SetParLimits(1, 0, 20)
+        fff2.SetParameter(1, 1)
+        fff2.SetParLimits(1, 0, 200)
 
         # Fix parameter 2 and 3
         fff2.FixParameter(2, 0.0)
@@ -272,16 +272,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2, "MRQ")
 
         sigL_change.SetTitle("sigL_change {}".format(i))
-        sigL_change.GetXaxis().SetTitle("Index")
-        sigL_change.GetYaxis().SetTitle("Parameter Value")
+        sigL_change.GetXaxis().SetTitle("Fit Step")
+        sigL_change.GetYaxis().SetTitle("sigL")
         
         # sigL_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN() - 1, 0, fff2.GetParError(1))
 
         sigT_change.SetTitle("sigT_change {}".format(i))
-        sigT_change.GetXaxis().SetTitle("Index")
-        sigT_change.GetYaxis().SetTitle("Parameter Value")
+        sigT_change.GetXaxis().SetTitle("Fit Step")
+        sigT_change.GetYaxis().SetTitle("sigT")
         
         # sigT_change
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
