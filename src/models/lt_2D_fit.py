@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 03:58:21 trottar"
+# Time-stamp: "2024-02-09 04:01:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -305,7 +305,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Set parameter 2
         fff2.SetParameter(2, 0.0)
-        fff2.SetParLimits(2, -5, 5)
+        fff2.SetParLimits(2, 0, 5)
 
         g_plot_err.Fit(fff2, "MRQ")
 
@@ -364,7 +364,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Set parameter 3
         fff2.SetParameter(3, 0.0)
-        fff2.SetParLimits(3, -5, 5)
+        fff2.SetParLimits(3, 0, 5)
 
         g_plot_err.Fit(fff2, "MRQ")
 
