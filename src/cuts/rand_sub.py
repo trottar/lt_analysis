@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 14:10:23 trottar"
+# Time-stamp: "2024-02-10 16:37:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,7 +74,13 @@ def rand_sub(phi_setting, inpDict):
     data_charge_center = inpDict["data_charge_center"] 
     dummy_charge_right = inpDict["dummy_charge_right"] 
     dummy_charge_left = inpDict["dummy_charge_left"] 
-    dummy_charge_center = inpDict["dummy_charge_center"] 
+    dummy_charge_center = inpDict["dummy_charge_center"]
+    data_charge_err_right = inpDict["data_charge_err_right"] 
+    data_charge_err_left = inpDict["data_charge_err_left"] 
+    data_charge_err_center = inpDict["data_charge_err_center"] 
+    dummy_charge_err_right = inpDict["dummy_charge_err_right"] 
+    dummy_charge_err_left = inpDict["dummy_charge_err_left"] 
+    dummy_charge_err_center = inpDict["dummy_charge_err_center"]     
     InData_efficiency_right = inpDict["InData_efficiency_right"] 
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
     InData_efficiency_center = inpDict["InData_efficiency_center"]
@@ -1253,7 +1259,6 @@ def rand_sub(phi_setting, inpDict):
     histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
     histDict["NumEvts_MM_DUMMY"] = H_MM_DUMMY.Integral()
     histDict["NumEvts_MM_DATA"] = H_MM_DATA.Integral()
-
     
     ###
     # CT plots

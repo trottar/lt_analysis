@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 14:26:06 trottar"
+# Time-stamp: "2024-02-10 16:43:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,7 +73,13 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     data_charge_center = inpDict["data_charge_center"] 
     dummy_charge_right = inpDict["dummy_charge_right"] 
     dummy_charge_left = inpDict["dummy_charge_left"] 
-    dummy_charge_center = inpDict["dummy_charge_center"] 
+    dummy_charge_center = inpDict["dummy_charge_center"]
+    data_charge_err_right = inpDict["data_charge_err_right"] 
+    data_charge_err_left = inpDict["data_charge_err_left"] 
+    data_charge_err_center = inpDict["data_charge_err_center"] 
+    dummy_charge_err_right = inpDict["dummy_charge_err_right"] 
+    dummy_charge_err_left = inpDict["dummy_charge_err_left"] 
+    dummy_charge_err_center = inpDict["dummy_charge_err_center"]     
     InData_efficiency_right = inpDict["InData_efficiency_right"] 
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
     InData_efficiency_center = inpDict["InData_efficiency_center"]
@@ -108,47 +114,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     ################################################################################################################################################
     
     for hist in histlist_copy:
-        
-        '''
-        ##############
-        # HARD CODED #
-        ##############
-        hist["H_hsdelta_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_hsxptar_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_hsyptar_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ssxfp_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ssyfp_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ssxpfp_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ssypfp_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_hsxfp_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_hsyfp_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_hsxpfp_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_hsypfp_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ssdelta_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ssxptar_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ssyptar_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_q_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_Q2_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_t_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_epsilon_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_MM_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_th_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ph_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ph_q_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_th_q_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_ph_recoil_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_th_recoil_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_pmiss_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_emiss_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_pmx_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_pmy_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_pmz_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        hist["H_W_SIMC"].Scale(hist["normfac_simc"]*1e5)
-        ##############
-        ##############
-        ##############
-        '''
-        
+                
         hist["H_hsdelta_SIMC"].Scale(hist["normfac_simc"])
         hist["H_hsxptar_SIMC"].Scale(hist["normfac_simc"])
         hist["H_hsyptar_SIMC"].Scale(hist["normfac_simc"])
@@ -246,7 +212,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmz_DATA"].Scale(hist["normfac_data"])
         hist["H_W_DATA"].Scale(hist["normfac_data"])
         hist["H_ct_DATA"].Scale(hist["normfac_data"])
-
+        
         hist["H_hsdelta_DATA"].Add(hist["H_hsdelta_DUMMY"],-1)
         hist["H_hsxptar_DATA"].Add(hist["H_hsxptar_DUMMY"],-1)
         hist["H_hsyptar_DATA"].Add(hist["H_hsyptar_DUMMY"],-1)

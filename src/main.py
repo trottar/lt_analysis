@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 00:46:53 trottar"
+# Time-stamp: "2024-02-10 16:34:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,8 +41,8 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=38:
-    print("!!!!! ERROR !!!!!\n Expected 38 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InData_error_efficiency_right InData_error_efficiency_left InData_error_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date inp_debug\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=44:
+    print("!!!!! ERROR !!!!!\n Expected 44 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center data_charge_err_right data_charge_err_left data_charge_err_center dummy_charge_err_right dummy_charge_err_left dummy_charge_err_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InData_error_efficiency_right InData_error_efficiency_left InData_error_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date inp_debug\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -62,47 +62,36 @@ NumPhiBins = int(sys.argv[11])
 runNumRight = sys.argv[12]
 runNumLeft = sys.argv[13]
 runNumCenter = sys.argv[14]
-##############
-# HARD CODED #
-##############
-# Convert from uC to C?????
-# Divide by 1000 to counter converting to interger (see src/setup/findEffectiveCharge.py),
-# then divide by 1e6 to convert uC to C
-# ERROR: Need to investigate
-#data_charge_right = int(sys.argv[15])/1e9
-#data_charge_left = int(sys.argv[16])/1e9
-#data_charge_center = int(sys.argv[17])/1e9
-#dummy_charge_right = int(sys.argv[18])/1e9
-#dummy_charge_left = int(sys.argv[19])/1e9
-#dummy_charge_center = int(sys.argv[20])/1e9
-# Convert from uC to mC?????
-data_charge_right = int(sys.argv[15])/1000
-data_charge_left = int(sys.argv[16])/1000
-data_charge_center = int(sys.argv[17])/1000
-dummy_charge_right = int(sys.argv[18])/1000
-dummy_charge_left = int(sys.argv[19])/1000
-dummy_charge_center = int(sys.argv[20])/1000
-##############
-##############
-##############
-InData_efficiency_right = sys.argv[21]
-InData_efficiency_left = sys.argv[22]
-InData_efficiency_center = sys.argv[23]
-InData_error_efficiency_right = sys.argv[24]
-InData_error_efficiency_left = sys.argv[25]
-InData_error_efficiency_center = sys.argv[26]
-efficiency_table = sys.argv[27]
-ParticleType = sys.argv[28]
-EPSSET = sys.argv[29]
-pThetaValRight = list(sys.argv[30].split(" "))
-pThetaValLeft = list(sys.argv[31].split(" "))
-pThetaValCenter = list(sys.argv[32].split(" "))
-EbeamValRight = list(sys.argv[33].split(" "))
-EbeamValLeft = list(sys.argv[34].split(" "))
-EbeamValCenter = list(sys.argv[35].split(" "))
-POL = sys.argv[36]
-formatted_date = sys.argv[37]
-inp_debug =  sys.argv[38]
+data_charge_right = float(sys.argv[15])
+data_charge_left = float(sys.argv[16])
+data_charge_center = float(sys.argv[17])
+dummy_charge_right = float(sys.argv[18])
+dummy_charge_left = float(sys.argv[19])
+dummy_charge_center = float(sys.argv[20])
+data_charge_err_right = float(sys.argv[21])
+data_charge_err_left = float(sys.argv[22])
+data_charge_err_center = float(sys.argv[23])
+dummy_charge_err_right = float(sys.argv[24])
+dummy_charge_err_left = float(sys.argv[25])
+dummy_charge_err_center = float(sys.argv[26])
+InData_efficiency_right = sys.argv[27]
+InData_efficiency_left = sys.argv[28]
+InData_efficiency_center = sys.argv[29]
+InData_error_efficiency_right = sys.argv[30]
+InData_error_efficiency_left = sys.argv[31]
+InData_error_efficiency_center = sys.argv[32]
+efficiency_table = sys.argv[33]
+ParticleType = sys.argv[34]
+EPSSET = sys.argv[35]
+pThetaValRight = list(sys.argv[36].split(" "))
+pThetaValLeft = list(sys.argv[37].split(" "))
+pThetaValCenter = list(sys.argv[38].split(" "))
+EbeamValRight = list(sys.argv[39].split(" "))
+EbeamValLeft = list(sys.argv[40].split(" "))
+EbeamValCenter = list(sys.argv[41].split(" "))
+POL = sys.argv[42]
+formatted_date = sys.argv[43]
+inp_debug =  sys.argv[44]
 
 if inp_debug == "False":
     DEBUG = False # Flag for no plot splash
@@ -138,6 +127,12 @@ inpDict = {
     "dummy_charge_right" : dummy_charge_right,
     "dummy_charge_left" : dummy_charge_left,
     "dummy_charge_center" : dummy_charge_center,
+    "data_charge_err_right" : data_charge_err_right,
+    "data_charge_err_left" : data_charge_err_left,
+    "data_charge_err_center" : data_charge_err_center,
+    "dummy_charge_err_right" : dummy_charge_err_right,
+    "dummy_charge_err_left" : dummy_charge_err_left,
+    "dummy_charge_err_center" : dummy_charge_err_center,    
     "InData_efficiency_right" : InData_efficiency_right,
     "InData_efficiency_left" : InData_efficiency_left,
     "InData_efficiency_center" : InData_efficiency_center,

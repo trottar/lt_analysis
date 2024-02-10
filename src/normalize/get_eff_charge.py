@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 15:54:47 trottar"
+# Time-stamp: "2024-02-10 16:40:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,7 +78,13 @@ def get_eff_charge(hist, inpDict):
     data_charge_center = inpDict["data_charge_center"] 
     dummy_charge_right = inpDict["dummy_charge_right"] 
     dummy_charge_left = inpDict["dummy_charge_left"] 
-    dummy_charge_center = inpDict["dummy_charge_center"] 
+    dummy_charge_center = inpDict["dummy_charge_center"]
+    data_charge_err_right = inpDict["data_charge_err_right"] 
+    data_charge_err_left = inpDict["data_charge_err_left"] 
+    data_charge_err_center = inpDict["data_charge_err_center"] 
+    dummy_charge_err_right = inpDict["dummy_charge_err_right"] 
+    dummy_charge_err_left = inpDict["dummy_charge_err_left"] 
+    dummy_charge_err_center = inpDict["dummy_charge_err_center"]     
     InData_efficiency_right = inpDict["InData_efficiency_right"] 
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
     InData_efficiency_center = inpDict["InData_efficiency_center"]
@@ -205,7 +211,7 @@ def get_eff_charge(hist, inpDict):
         normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
         normfac_data = 1/(data_charge_center)
         normfac_simc = (simc_normfactor)/(simc_nevents)
-
+        
     print("\n\n{} data total number of events: {}".format(phi_setting, NumEvts_MM_DATA))
     print("{} dummy total number of events: {}".format(phi_setting, NumEvts_MM_DUMMY))
     print("{} simc weighted total number of events: {}".format(phi_setting, NumEvts_MM_SIMC))
