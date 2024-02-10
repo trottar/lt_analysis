@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 13:24:21 trottar"
+# Time-stamp: "2024-02-10 13:32:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -497,9 +497,9 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             data_nested_dict = yieldDict["binned_DATA"][phiset]
             i = data_key_tuple[0] # t bin
             j = data_key_tuple[1] # phi bin
-            print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["yield"][data_key_tuple]["yield"]), data_nested_dict["yield"][data_key_tuple]["yield"]))
+            #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["yield"][data_key_tuple]["yield"]), data_nested_dict["yield"][data_key_tuple]["yield"]))
             # Fill histogram
-            for (itt,jtt), val in np.ndenumerate(data_nested_dict["yield"][data_key_tuple]["yield"]):
+            for (itt,jtt), val in np.ndenumerate(data_nested_dict["yield"][data_key_tuple]["yield"][1]):
                 histbinDict["H_yield_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
             C_yield_DATA.cd(k+1)
             histbinDict["H_yield_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
@@ -517,9 +517,9 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             simc_nested_dict = yieldDict["binned_SIMC"][phiset]
             i = simc_key_tuple[0] # t bin
             j = simc_key_tuple[1] # phi bin
-            print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
+            #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
             # Fill histogram
-            for (itt,jtt), val in np.ndenumerate(simc_nested_dict["yield"][simc_key_tuple]["yield"]):
+            for (itt,jtt), val in np.ndenumerate(simc_nested_dict["yield"][simc_key_tuple]["yield"][1]):
                 histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
             C_yield_SIMC.cd(k+1)
             histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
@@ -563,10 +563,10 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             simc_nested_dict = yieldDict["binned_SIMC"][phiset]
             i = simc_key_tuple[0] # t bin
             j = simc_key_tuple[1] # phi bin
-            print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
+            #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
             # Fill histogram
-            yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"]])
-            yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"]])
+            yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"][1]])
+            yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"][1]])
             if phiset == "Center": setting = np.append(setting,0)
             elif phiset == "Left": setting = np.append(setting,1)
             else: setting = np.append(setting,2)
