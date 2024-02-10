@@ -1037,11 +1037,22 @@ if [[ $i_flag != "true" ]]; then
 		done
 	    fi
 	    #echo ${DataChargeVal[*]}
-	    # Sums the array to get the total effective charge
-	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to mC
-	    DataChargeSumRight=$(IFS=+; echo "$((${DataChargeValRight[*]}))") # Only works for integers
-	    echo "Total Charge Right: ${DataChargeSumRight} uC"
+	    # Sums the array to get the total effective charge and effective charge error
+	    PYRIGHTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataChargeValRight[*]}" "${DataChargeErrRight[*]}")
+	    arr1=()
+	    arr2=()
+	    itt=0
+	    while read line; do
+		itt=$((itt+1))
+		# split the line into an array based on space
+		IFS=' ' read -ra line_array <<< "$line"
+		# store the elements in the corresponding array
+		eval "arr$itt=(\"\${line_array[@]}\")"
+	    done <<< "$PYRIGHTTOTEFFCHARGE"
+	    TotDataEffChargeValRight=("${arr1[@]}")
+	    TotDataEffChargeErrRight=("${arr2[@]}")
+	    echo "Total Effective Charge Right: ${TotDataEffChargeValRight} uC"
+	    echo "Total Effective Charge Right Error: ${TotDataEffChargeErrRight}%"
 	    echo "Run numbers: [${data_right[@]}]"
 	    #echo "Effective Charge per Run: [${DataChargeValRight[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataChargeErrRight[@]}]"

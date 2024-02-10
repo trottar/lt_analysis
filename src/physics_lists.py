@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-07 17:51:42 trottar"
+# Time-stamp: "2024-02-10 14:32:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -501,7 +501,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     # Open the file in write mode, which creates a new empty file or overwrites the existing one
     open(f_aver, "w").close()
 
-    if float(runNumRight[0]) != 0:        
+    if float(runNumRight[0]) != 0:
         # Open a file in read mode
         with open(f_aver, 'r') as f:
             lines = f.readlines()

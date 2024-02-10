@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-11 16:08:25 trottar"
+# Time-stamp: "2024-02-10 15:51:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,10 +112,28 @@ def get_efficiencies(runNum,efficiency_table):
         sys.exit(0)
     #print(eff_data.keys())
 
+    ##############
+    # HARD CODED #
+    ##############
+    
+    # Find HMS Cherenkov efficiency and error based off golden singles run (6603) without contamination
+    # See https://redmine.jlab.org/attachments/download/1758/KaonLT_Meeting_Feb_23.pdf for more info
+    hcer_eff = 0.9730
+    hcer_eff_error = 0.0006
+    
+    # Find HMS Calorimeter efficiency and error based off golden run () without contamination
+    # See https://redmine.jlab.org/attachments/download/1758/KaonLT_Meeting_Feb_23.pdf for more info
+    hcal_eff = 0.9961
+    hcal_eff_error = 0.0005
+
+    ##############
+    ##############
+    ##############
+    
     # Redefine table to be only the run number of interest
     eff_data = eff_data[eff_data['Run_Number'] == int(runNum)]
     #print(eff_data)
-
+    
     if len(eff_data) > 0:  # Check if eff_data is not empty
     
         if runType == "heep":
@@ -126,10 +144,16 @@ def get_efficiencies(runNum,efficiency_table):
                 # Hodo
                 "HMS_Hodo_3_of_4_EFF" : eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
                 "SHMS_Hodo_3_of_4_EFF" : eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
-                # HMS Cal
-                "HMS_Cal_ALL_Elec_Eff" : eff_data["HMS_Cal_ALL_Elec_Eff"].iloc[0],            
-                # HMS Cer
-                "HMS_Cer_ALL_Elec_Eff" : eff_data["HMS_Cer_ALL_Elec_Eff"].iloc[0],
+                ##############
+                # HARD CODED #
+                ##############
+                # HMS Cal, defined above...
+                "HMS_Cal_ALL_Elec_Eff" : hcal_eff, 
+                # HMS Cer, defined above...
+                "HMS_Cer_ALL_Elec_Eff" : hcer_eff,
+                ##############
+                ##############
+                ##############
                 # Tracking
                 "HMS_Elec_ALL_TRACK_EFF" : eff_data["HMS_Elec_ALL_TRACK_EFF"].iloc[0],
                 "SHMS_Prot_ALL_TRACK_EFF" : eff_data["SHMS_Prot_ALL_TRACK_EFF"].iloc[0],
@@ -140,15 +164,21 @@ def get_efficiencies(runNum,efficiency_table):
             effErrorDict ={
                 # EDTM
                 "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
+                ##############
+                # HARD CODED #
+                ##############
                 # Hodo
                 #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
                 #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-                "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
-                "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
-                # HMS Cal
-                "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
-                # HMS Cer
-                "HMS_Cer_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cer_ALL_Elec_Eff_ERROR"].iloc[0],
+                "HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Elec_ALL_TRACK_EFF_ERROR"].iloc[0], # FIX
+                "SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Prot_ALL_TRACK_EFF_ERROR"].iloc[0], # FIX
+                # HMS Cal, defined above...
+                "HMS_Cal_ALL_Elec_Eff_ERROR" : hcal_eff_error,
+                # HMS Cer, defined above...
+                "HMS_Cer_ALL_Elec_Eff_ERROR" : hcer_eff_error,
+                ##############
+                ##############
+                ##############
                 # Tracking
                 "HMS_Elec_ALL_TRACK_EFF_ERROR" : eff_data["HMS_Elec_ALL_TRACK_EFF_ERROR"].iloc[0],
                 "SHMS_Prot_ALL_TRACK_EFF_ERROR" : eff_data["SHMS_Prot_ALL_TRACK_EFF_ERROR"].iloc[0],
@@ -164,10 +194,16 @@ def get_efficiencies(runNum,efficiency_table):
                 # Hodo
                 "HMS_Hodo_3_of_4_EFF" : eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0],
                 "SHMS_Hodo_3_of_4_EFF" : eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0],
-                # HMS Cal
-                "HMS_Cal_ALL_Elec_Eff" : eff_data["HMS_Cal_ALL_Elec_Eff"].iloc[0],            
-                # HMS Cer
-                "HMS_Cer_ALL_Elec_Eff" : eff_data["HMS_Cer_ALL_Elec_Eff"].iloc[0],
+                ##############
+                # HARD CODED #
+                ##############
+                # HMS Cal, defined above...
+                "HMS_Cal_ALL_Elec_Eff" : hcal_eff, 
+                # HMS Cer, defined above...
+                "HMS_Cer_ALL_Elec_Eff" : hcer_eff,
+                ##############
+                ##############
+                ##############
                 # SHMS Aero
                 "SHMS_Aero_ALL_Pion_Eff" : eff_data["SHMS_Aero_ALL_Pion_Eff"].iloc[0],
                 # Tracking
@@ -180,16 +216,22 @@ def get_efficiencies(runNum,efficiency_table):
             # Define dictionary of efficiency uncertainty values
             effErrorDict ={
                 # EDTM
-                "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
+                "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],                
+                ##############
+                # HARD CODED #
+                ##############                
                 # Hodo
                 #"HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
                 #"SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Hodo_3_of_4_EFF_ERROR"].iloc[0],
-                "HMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["HMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
-                "SHMS_Hodo_3_of_4_EFF_ERROR" : 0.00001*eff_data["SHMS_Hodo_3_of_4_EFF"].iloc[0], # FIX
-                # HMS Cal
-                "HMS_Cal_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cal_ALL_Elec_Eff_ERROR"].iloc[0],            
-                # HMS Cer
-                "HMS_Cer_ALL_Elec_Eff_ERROR" : eff_data["HMS_Cer_ALL_Elec_Eff_ERROR"].iloc[0],
+                "HMS_Hodo_3_of_4_EFF_ERROR" : eff_data["HMS_Elec_ALL_TRACK_EFF_ERROR"].iloc[0], # FIX
+                "SHMS_Hodo_3_of_4_EFF_ERROR" : eff_data["SHMS_Pion_ALL_TRACK_EFF_ERROR"].iloc[0], # FIX
+                # HMS Cal, defined above...
+                "HMS_Cal_ALL_Elec_Eff_ERROR" : hcal_eff_error,
+                # HMS Cer, defined above...
+                "HMS_Cer_ALL_Elec_Eff_ERROR" : hcer_eff_error,
+                ##############
+                ##############
+                ##############
                 # SHMS Aero
                 "SHMS_Aero_ALL_Pion_Eff_ERROR" : eff_data["SHMS_Aero_ALL_Pion_Eff_ERROR"].iloc[0],
                 # Tracking
@@ -213,7 +255,10 @@ def calculate_efficiency(runNum,efficiency_table):
     # takes x,y from the list (ie the list of efficiencies) and multiplies them.
     # This is all pythonic mumbo-jumbo for doing the product of everything in the
     # list. Enjoy!
+
+    # Calculate run by run total efficiency
     tot_efficiency = reduce(lambda x, y: x*y, list(effDict.values()))
+    
     return tot_efficiency
 
 def calculate_effError(runNum,efficiency_table):
@@ -228,6 +273,11 @@ def calculate_effError(runNum,efficiency_table):
     # list. Enjoy!
     tot_efficiency = reduce(lambda x, y: x*y, list(effDict.values()))
 
-    # Calculate total efficiency error. 
-    tot_effError = tot_efficiency*np.sqrt(sum((float(efferr)/float(eff))*(float(efferr)/float(eff)) for efferr,eff in zip(effErrorDict.values(),effDict.values()))) # Error propagation for multiplication, using quadratic correction
+    # Calculate run by run total efficiency error
+    # Error propagation by addition in quadrature
+    d_eff = np.sqrt(sum((float(efferr)/float(eff))**2 for efferr,eff in zip(effErrorDict.values(),effDict.values())))
+    d_charge = 2e-6 # 200 nC
+    # Error propagation by addition in quadrature
+    tot_effError = np.sqrt((tot_efficiency**2)*(d_eff**2+d_charge**2))
+    
     return tot_effError

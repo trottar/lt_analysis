@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-12 15:29:23 trottar"
+# Time-stamp: "2024-02-10 16:07:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,10 +63,11 @@ for runNum in RUNLIST:
         effError = getEfficiencyValue(runNum,efficiency_table,"effError")
         charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
 
-        # Need to convert to int value for bash to interpret correctly
-        effective_charge += " " + str(int(1000*(float(charge)*float(efficiency))))
-        effective_charge_uncern += " " + str(int(1000*(float(charge)*float(effError))))
+        # Run by run list of effective charge
+        effective_charge += " " + str(float(charge)*float(efficiency))
+        effective_charge_uncern += " " + str(float(charge)*float(effError))
 
+        # Calculated run by run total efficiency and efficiency error
         tot_efficiency += " " + str(efficiency)
         tot_efficiency_uncern += " " + str(effError)
 
