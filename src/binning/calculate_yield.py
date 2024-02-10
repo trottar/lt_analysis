@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 14:09:40 trottar"
+# Time-stamp: "2024-02-10 17:08:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -489,6 +489,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
     nWindows, normfac_data, normfac_dummy = hist["nWindows"], hist["normfac_data"], hist["normfac_dummy"]
+
+    # Grab the setting by setting normalized error
+    data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())] 
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict)
@@ -498,6 +501,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
 
     yield_hist = [[],[]]
+    yield_err_hist = [[],[]]
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
@@ -512,10 +516,14 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
         yld = total_count # Normalization applied above
+        # Calculate experimental yield error (%)
+        yld_err = np.sqrt(data_charge_err**2+((np.sqrt(yld)/yld)*100)**2)
         if yld < 0.0:
             yld = 0.0
         yield_hist[0].append(bin_val_data)            
         yield_hist[1].append(yld)
+        yield_err_hist[0].append(bin_val_data)            
+        yield_err_hist[1].append(yld_err)
         binned_sub_data[0].append(bin_val_data)
         binned_sub_data[1].append(sub_val)
         i+=1
@@ -538,8 +546,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             phibin_index = k
             hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
             yield_val = [yield_hist[0][i], yield_hist[1][i]]
-            print("Data yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val[1]))
-            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
+            yield_err_val = [yield_err_hist[0][i], yield_err_hist[1][i]]
+            print("Data yield for t-bin {} phi-bin {}: {:.3f} +/- {:.3f}".format(j+1, k+1, yield_val[1], yield_err_val[1]*yield_val[1]))
+            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val, yield_err_val))
             i+=1
 
     # Group the tuples by the first two elements using defaultdict
@@ -549,9 +558,36 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         groups[key] = {
             "{}_arr".format(kin_type) : tup[2],
             "{}".format(kin_type) : tup[3],
+            "{}_err".format(kin_type) : tup[4],
         }            
             
     return groups
+
+def find_yield_data(histlist, inpDict):
+    
+    for hist in histlist:
+        t_bins = hist["t_bins"]
+        phi_bins = hist["phi_bins"]
+
+    yieldDict = {
+        "t_bins" : t_bins,
+        "phi_bins" : phi_bins
+    }
+        
+    # Loop through histlist and update yieldDict
+    for hist in histlist:
+        print("\n\n")
+        print("-"*25)
+        print("-"*25)
+        print("Finding data yields for {}...".format(hist["phi_setting"]))
+        print("-"*25)
+        print("-"*25)
+        yieldDict[hist["phi_setting"]] = {}
+        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_data("yield", hist, t_bins, phi_bins, inpDict)
+
+    return {"binned_DATA" : yieldDict}
+
+##################################################################################################################################################
 
 def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
@@ -666,6 +702,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
 
     yield_hist = [[],[]]
+    yield_err_hist = [[],[]]
     binned_sub_simc = [[],[]]
     i=0 # iter
     print("-"*25)
@@ -675,8 +712,12 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         total_count = np.sum(sub_val)
         yld = total_count*normfac_simc
+        # Calculate simc yield error (%)
+        yld_err = (np.sqrt(yld)/yld)*100
         yield_hist[0].append(bin_val_simc)        
         yield_hist[1].append(yld)
+        yield_err_hist[0].append(bin_val_simc)        
+        yield_err_hist[1].append(yld_err)        
         binned_sub_simc[0].append(bin_val_simc)
         binned_sub_simc[1].append(sub_val)
         i+=1
@@ -698,8 +739,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
             phibin_index = k
             hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
             yield_val = [yield_hist[0][i], yield_hist[1][i]]
-            print("Simc yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val[1]))
-            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val))
+            yield_err_val = [yield_err_hist[0][i], yield_err_hist[1][i]]            
+            print("Simc yield for t-bin {} phi-bin {}: {:.3f} +/- {:.3f}".format(j+1, k+1, yield_val[1], yield_err_val[1]*yield_val[1]))
+            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val, yield_err_val))
             i+=1
 
     # Group the tuples by the first two elements using defaultdict
@@ -709,33 +751,10 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         groups[key] = {
             "{}_arr".format(kin_type) : tup[2],
             "{}".format(kin_type) : tup[3],
+            "{}_err".format(kin_type) : tup[4],
         }            
             
     return groups
-
-def find_yield_data(histlist, inpDict):
-    
-    for hist in histlist:
-        t_bins = hist["t_bins"]
-        phi_bins = hist["phi_bins"]
-
-    yieldDict = {
-        "t_bins" : t_bins,
-        "phi_bins" : phi_bins
-    }
-        
-    # Loop through histlist and update yieldDict
-    for hist in histlist:
-        print("\n\n")
-        print("-"*25)
-        print("-"*25)
-        print("Finding data yields for {}...".format(hist["phi_setting"]))
-        print("-"*25)
-        print("-"*25)
-        yieldDict[hist["phi_setting"]] = {}
-        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_data("yield", hist, t_bins, phi_bins, inpDict)
-
-    return {"binned_DATA" : yieldDict}
 
 def find_yield_simc(histlist, inpDict, iteration=False):
     
@@ -760,6 +779,8 @@ def find_yield_simc(histlist, inpDict, iteration=False):
         yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict, iteration=iteration)
             
     return {"binned_SIMC" : yieldDict}
+
+##################################################################################################################################################
 
 def grab_yield_data(prev_root_file, histlist, inpDict):
     
