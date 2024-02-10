@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 12:55:03 trottar"
+# Time-stamp: "2024-02-10 13:07:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,6 +130,11 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
     for phiset in phisetlist:
         histbinDict["H_ratio_{}".format(phiset)] = TH1D("H_ratio_{}".format(phiset), "{} Ratio".format(phiset), NumtBins*NumPhiBins, -100.0, 100.0)
 
+    # Yield histograms
+    for phiset in phisetlist:
+        histbinDict["H_yield_DATA_{}".format(phiset)] = TH1D("H_yield_DATA_{}".format(phiset), "{} Data Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.0)
+        histbinDict["H_yield_SIMC_{}".format(phiset)] = TH1D("H_yield_SIMC_{}".format(phiset), "{} Simc Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.
+        
     # Loop over each tuple key in the dictionary
     for phiset in phisetlist:
         for k, data_key_tuple in enumerate(aveDict["binned_DATA"][phiset]['t']):
@@ -645,6 +650,9 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         # t/phi binned histograms
         hist["H_phibins_DATA"] = histbinDict["H_phibins_DATA"]
         hist["H_tbins_DATA"] = histbinDict["H_tbins_DATA"]
+
+        hist["H_yield_DATA"]     = histbinDict["H_yield_DATA_{}".format(phiset)]
+        hist["H_yield_SIMC"]     = histbinDict["H_yield_SIMC_{}".format(phiset)]                                                             
 
         hist["H_ratio"]     = histbinDict["H_ratio_{}".format(phiset)]
 
