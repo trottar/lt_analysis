@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 13:07:51 trottar"
+# Time-stamp: "2024-02-10 13:16:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,7 +133,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
     # Yield histograms
     for phiset in phisetlist:
         histbinDict["H_yield_DATA_{}".format(phiset)] = TH1D("H_yield_DATA_{}".format(phiset), "{} Data Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.0)
-        histbinDict["H_yield_SIMC_{}".format(phiset)] = TH1D("H_yield_SIMC_{}".format(phiset), "{} Simc Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.
+        histbinDict["H_yield_SIMC_{}".format(phiset)] = TH1D("H_yield_SIMC_{}".format(phiset), "{} Simc Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.0)
         
     # Loop over each tuple key in the dictionary
     for phiset in phisetlist:
