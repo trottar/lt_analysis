@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 17:28:03 trottar"
+# Time-stamp: "2024-02-10 17:37:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,14 +70,12 @@ def calculate_ratio(kin_type, phiset, yieldDict):
         #print("Yield_simc: {}".format(yield_simc))
         try:
             ratio = yield_data/yield_simc
+            # Calculate ratio error in quadrature (%)
+            ratio_err = np.sqrt(yield_err_data**2+yield_err_simc**2)
         except ZeroDivisionError:
             ratio = 0.0
-        # Calculate ratio error in quadrature (%)
-        ratio_err = np.sqrt(yield_err_data**2+yield_err_simc**2)
-        if math.isnan(ratio):
-            ratio = 0.0
-        if math.isinf(ratio):
-            ratio = 0.0
+            # Calculate ratio error in quadrature (%)
+            ratio_err = 0.0
         print("Ratio for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(i+1, j+1, ratio, (ratio_err/100)*ratio))
         dict_lst.append((i, j, ratio, ratio_err))
     
