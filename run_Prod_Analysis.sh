@@ -1051,8 +1051,8 @@ if [[ $i_flag != "true" ]]; then
 	    done <<< "$PYRIGHTTOTEFFCHARGE"
 	    TotDataEffChargeValRight=("${arr1[@]}")
 	    TotDataEffChargeErrRight=("${arr2[@]}")
-	    echo "Total Effective Charge Right: ${TotDataEffChargeValRight} uC"
-	    echo "Total Effective Charge Right Error: ${TotDataEffChargeErrRight}%"
+	    echo "Total Effective Charge Right: ${TotDataEffChargeValRight} mC"
+	    echo "Total Effective Charge Right Error: ${TotDataEffChargeErrRight} %"
 	    echo "Run numbers: [${data_right[@]}]"
 	    #echo "Effective Charge per Run: [${DataChargeValRight[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataChargeErrRight[@]}]"
@@ -1066,7 +1066,7 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_right_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge right..."
-	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_right_tmp[*]}" ${ParticleType})
+	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_right_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
 	    arr3=()
@@ -1112,8 +1112,8 @@ if [[ $i_flag != "true" ]]; then
 	    done <<< "$PYRIGHTTOTEFFCHARGE"
 	    TotDummyEffChargeValRight=("${arr1[@]}")
 	    TotDummyEffChargeErrRight=("${arr2[@]}")
-	    echo "Total Effective Charge Right: ${TotDummyEffChargeValRight} uC"
-	    echo "Total Effective Charge Right Error: ${TotDummyEffChargeErrRight}%"
+	    echo "Total Effective Charge Right: ${TotDummyEffChargeValRight} mC"
+	    echo "Total Effective Charge Right Error: ${TotDummyEffChargeErrRight} %"
 	    echo "Run numbers: [${dummy_right[@]}]"
 	    #echo "Effective Charge per Run: [${DummyChargeValRight[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyChargeErrRight[@]}]"
@@ -1173,8 +1173,8 @@ if [[ $i_flag != "true" ]]; then
 	    done <<< "$PYLEFTTOTEFFCHARGE"
 	    TotDataEffChargeValLeft=("${arr1[@]}")
 	    TotDataEffChargeErrLeft=("${arr2[@]}")
-	    echo "Total Effective Charge Left: ${TotDataEffChargeValLeft} uC"
-	    echo "Total Effective Charge Left Error: ${TotDataEffChargeErrLeft}%"
+	    echo "Total Effective Charge Left: ${TotDataEffChargeValLeft} mC"
+	    echo "Total Effective Charge Left Error: ${TotDataEffChargeErrLeft} %"
 	    echo "Run numbers: [${data_left[@]}]"
 	    #echo "Effective Charge per Run: [${DataChargeValLeft[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataChargeErrLeft[@]}]"
@@ -1188,7 +1188,7 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_left_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge left..."
-	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_left_tmp[*]}" ${ParticleType})
+	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_left_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
 	    arr3=()
@@ -1234,8 +1234,8 @@ if [[ $i_flag != "true" ]]; then
 	    done <<< "$PYLEFTTOTEFFCHARGE"
 	    TotDummyEffChargeValLeft=("${arr1[@]}")
 	    TotDummyEffChargeErrLeft=("${arr2[@]}")
-	    echo "Total Effective Charge Left: ${TotDummyEffChargeValLeft} uC"
-	    echo "Total Effective Charge Left Error: ${TotDummyEffChargeErrLeft}%"
+	    echo "Total Effective Charge Left: ${TotDummyEffChargeValLeft} mC"
+	    echo "Total Effective Charge Left Error: ${TotDummyEffChargeErrLeft} %"
 	    echo "Run numbers: [${dummy_left[@]}]"
 	    #echo "Effective Charge per Run: [${DummyChargeValLeft[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyChargeErrLeft[@]}]"
@@ -1295,8 +1295,8 @@ if [[ $i_flag != "true" ]]; then
 	    done <<< "$PYCENTERTOTEFFCHARGE"
 	    TotDataEffChargeValCenter=("${arr1[@]}")
 	    TotDataEffChargeErrCenter=("${arr2[@]}")
-	    echo "Total Effective Charge Center: ${TotDataEffChargeValCenter} uC"
-	    echo "Total Effective Charge Center Error: ${TotDataEffChargeErrCenter}%"
+	    echo "Total Effective Charge Center: ${TotDataEffChargeValCenter} mC"
+	    echo "Total Effective Charge Center Error: ${TotDataEffChargeErrCenter} %"
 	    echo "Run numbers: [${data_center[@]}]"
 	    #echo "Effective Charge per Run: [${DataChargeValCenter[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataChargeErrCenter[@]}]"
@@ -1310,7 +1310,7 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_center_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge center..."
-	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_center_tmp[*]}" ${ParticleType})
+	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_center_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
 	    arr3=()
@@ -1356,8 +1356,8 @@ if [[ $i_flag != "true" ]]; then
 	    done <<< "$PYCENTERTOTEFFCHARGE"
 	    TotDummyEffChargeValCenter=("${arr1[@]}")
 	    TotDummyEffChargeErrCenter=("${arr2[@]}")
-	    echo "Total Effective Charge Center: ${TotDummyEffChargeValCenter} uC"
-	    echo "Total Effective Charge Center Error: ${TotDummyEffChargeErrCenter}%"
+	    echo "Total Effective Charge Center: ${TotDummyEffChargeValCenter} mC"
+	    echo "Total Effective Charge Center Error: ${TotDummyEffChargeErrCenter} %"
 	    echo "Run numbers: [${dummy_center[@]}]"
 	    #echo "Effective Charge per Run: [${DummyChargeValCenter[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyChargeErrCenter[@]}]"
