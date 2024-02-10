@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 16:19:15 trottar"
+# Time-stamp: "2024-02-10 16:20:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,8 +18,8 @@ import sys, os
 '''
 User Inputs
 '''
-runs_effective_charge = sys.argv[1].split(" ")
-runs_effective_charge_uncern = sys.argv[2].split(" ")
+runs_effective_charge = [float(q) for q in sys.argv[1].split(" ")]
+runs_effective_charge_uncern = [float(err) for err in sys.argv[2].split(" ")]
 
 print("\n\n\n",runs_effective_charge,"\n\n\n",runs_effective_charge_uncern)
 
@@ -39,10 +39,10 @@ LTANAPATH=lt.LTANAPATH
 ################################################################################################################################################
 
 # Sum of all the effective charge per run
-tot_effective_charge = sum(runs_effective_charge)
+tot_effective_charge = np.sum(runs_effective_charge)
 
 # Normalized uncertainty (converted to %)
-tot_effective_charge_uncern = (sum(runs_effective_charge_uncern**2)/tot_effective_charge**2)*100
+tot_effective_charge_uncern = (np.sum(runs_effective_charge_uncern**2)/tot_effective_charge**2)*100
         
 BashInput=("{}\n{}".format(tot_effective_charge, tot_effective_charge_uncern))
 print(BashInput)
