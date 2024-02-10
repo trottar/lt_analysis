@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 16:20:20 trottar"
+# Time-stamp: "2024-02-10 16:22:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,7 +42,7 @@ LTANAPATH=lt.LTANAPATH
 tot_effective_charge = np.sum(runs_effective_charge)
 
 # Normalized uncertainty (converted to %)
-tot_effective_charge_uncern = (np.sum(runs_effective_charge_uncern**2)/tot_effective_charge**2)*100
+tot_effective_charge_uncern = np.sqrt(np.sum([err**2 for err in runs_effective_charge_uncern])/tot_effective_charge**2)*100
         
 BashInput=("{}\n{}".format(tot_effective_charge, tot_effective_charge_uncern))
 print(BashInput)
