@@ -1066,14 +1066,14 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_right_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge right..."
-	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_right_tmp[*]}" ${ParticleType})
+	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_right_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
 	    arr3=()
 	    arr4=()
 	    arr5=()
-	    arr7=()	    
 	    arr6=()
+	    arr7=()	    
 	    itt=0
 	    while read line; do
 		itt=$((itt+1))
@@ -1098,11 +1098,22 @@ if [[ $i_flag != "true" ]]; then
 		done
 	    fi
 	    #echo ${DummyChargeVal[*]}
-	    # Sums the array to get the total effective charge
-	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to mC
-	    DummyChargeSumRight=$(IFS=+; echo "$((${DummyChargeValRight[*]}))") # Only works for integers
-	    echo "Total Dummy Charge Right: ${DummyChargeSumRight} uC"
+	    # Sums the array to get the total effective charge and effective charge error
+	    PYRIGHTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyChargeValRight[*]}" "${DummyChargeErrRight[*]}")
+	    arr1=()
+	    arr2=()
+	    itt=0
+	    while read line; do
+		itt=$((itt+1))
+		# split the line into an array based on space
+		IFS=' ' read -ra line_array <<< "$line"
+		# store the elements in the corresponding array
+		eval "arr$itt=(\"\${line_array[@]}\")"
+	    done <<< "$PYRIGHTTOTEFFCHARGE"
+	    TotDummyEffChargeValRight=("${arr1[@]}")
+	    TotDummyEffChargeErrRight=("${arr2[@]}")
+	    echo "Total Effective Charge Right: ${TotDummyEffChargeValRight} uC"
+	    echo "Total Effective Charge Right Error: ${TotDummyEffChargeErrRight}%"
 	    echo "Run numbers: [${dummy_right[@]}]"
 	    #echo "Effective Charge per Run: [${DummyChargeValRight[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyChargeErrRight[@]}]"
@@ -1148,11 +1159,22 @@ if [[ $i_flag != "true" ]]; then
 		done
 	    fi
 	    #echo ${DataChargeVal[*]}
-	    # Sums the array to get the total effective charge
-	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to mC
-	    DataChargeSumLeft=$(IFS=+; echo "$((${DataChargeValLeft[*]}))") # Only works for integers
-	    echo "Total Charge Left: ${DataChargeSumLeft} uC"
+	    # Sums the array to get the total effective charge and effective charge error
+	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataChargeValLeft[*]}" "${DataChargeErrLeft[*]}")
+	    arr1=()
+	    arr2=()
+	    itt=0
+	    while read line; do
+		itt=$((itt+1))
+		# split the line into an array based on space
+		IFS=' ' read -ra line_array <<< "$line"
+		# store the elements in the corresponding array
+		eval "arr$itt=(\"\${line_array[@]}\")"
+	    done <<< "$PYLEFTTOTEFFCHARGE"
+	    TotDataEffChargeValLeft=("${arr1[@]}")
+	    TotDataEffChargeErrLeft=("${arr2[@]}")
+	    echo "Total Effective Charge Left: ${TotDataEffChargeValLeft} uC"
+	    echo "Total Effective Charge Left Error: ${TotDataEffChargeErrLeft}%"
 	    echo "Run numbers: [${data_left[@]}]"
 	    #echo "Effective Charge per Run: [${DataChargeValLeft[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataChargeErrLeft[@]}]"
@@ -1166,7 +1188,7 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_left_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge left..."
-	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_left_tmp[*]}" ${ParticleType})
+	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_left_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
 	    arr3=()
@@ -1198,11 +1220,22 @@ if [[ $i_flag != "true" ]]; then
 		done
 	    fi
 	    #echo ${DummyChargeVal[*]}
-	    # Sums the array to get the total effective charge
-	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to mC
-	    DummyChargeSumLeft=$(IFS=+; echo "$((${DummyChargeValLeft[*]}))") # Only works for integers
-	    echo "Total Dummy Charge Left: ${DummyChargeSumLeft} uC"
+	    # Sums the array to get the total effective charge and effective charge error
+	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyChargeValLeft[*]}" "${DummyChargeErrLeft[*]}")
+	    arr1=()
+	    arr2=()
+	    itt=0
+	    while read line; do
+		itt=$((itt+1))
+		# split the line into an array based on space
+		IFS=' ' read -ra line_array <<< "$line"
+		# store the elements in the corresponding array
+		eval "arr$itt=(\"\${line_array[@]}\")"
+	    done <<< "$PYLEFTTOTEFFCHARGE"
+	    TotDummyEffChargeValLeft=("${arr1[@]}")
+	    TotDummyEffChargeErrLeft=("${arr2[@]}")
+	    echo "Total Effective Charge Left: ${TotDummyEffChargeValLeft} uC"
+	    echo "Total Effective Charge Left Error: ${TotDummyEffChargeErrLeft}%"
 	    echo "Run numbers: [${dummy_left[@]}]"
 	    #echo "Effective Charge per Run: [${DummyChargeValLeft[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyChargeErrLeft[@]}]"
@@ -1239,8 +1272,8 @@ if [[ $i_flag != "true" ]]; then
 	    DatapThetaValCenter=("${arr5[@]}")
 	    DataEbeamValCenter=("${arr6[@]}")
 	    data_center=("${arr7[@]}")
-	    if [ "${#data_center_tmp[@]}" -ne "${#data_center[@]}" ]; then	    
-		echo "Removing bad center data runs..."	
+	    if [ "${#data_center_tmp[@]}" -ne "${#data_center[@]}" ]; then
+		echo "Removing bad center data runs..."
 		for run in "${data_center_tmp[@]}"; do
 		    if [[ ! " ${data_center[@]} " =~ " $run " ]]; then
 			echo "        Removing run: $run"
@@ -1248,11 +1281,22 @@ if [[ $i_flag != "true" ]]; then
 		done
 	    fi
 	    #echo ${DataChargeVal[*]}
-	    # Sums the array to get the total effective charge
-	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to mC
-	    DataChargeSumCenter=$(IFS=+; echo "$((${DataChargeValCenter[*]}))") # Only works for integers
-	    echo "Total Charge Center: ${DataChargeSumCenter} uC"
+	    # Sums the array to get the total effective charge and effective charge error
+	    PYCENTERTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataChargeValCenter[*]}" "${DataChargeErrCenter[*]}")
+	    arr1=()
+	    arr2=()
+	    itt=0
+	    while read line; do
+		itt=$((itt+1))
+		# split the line into an array based on space
+		IFS=' ' read -ra line_array <<< "$line"
+		# store the elements in the corresponding array
+		eval "arr$itt=(\"\${line_array[@]}\")"
+	    done <<< "$PYCENTERTOTEFFCHARGE"
+	    TotDataEffChargeValCenter=("${arr1[@]}")
+	    TotDataEffChargeErrCenter=("${arr2[@]}")
+	    echo "Total Effective Charge Center: ${TotDataEffChargeValCenter} uC"
+	    echo "Total Effective Charge Center Error: ${TotDataEffChargeErrCenter}%"
 	    echo "Run numbers: [${data_center[@]}]"
 	    #echo "Effective Charge per Run: [${DataChargeValCenter[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataChargeErrCenter[@]}]"
@@ -1266,7 +1310,7 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_center_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge center..."
-	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_center_tmp[*]}" ${ParticleType})
+	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_center_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
 	    arr3=()
@@ -1289,7 +1333,7 @@ if [[ $i_flag != "true" ]]; then
 	    DummypThetaValCenter=("${arr5[@]}")
 	    DummyEbeamValCenter=("${arr6[@]}")
 	    dummy_center=("${arr7[@]}")
-	    if [ "${#dummy_center_tmp[@]}" -ne "${#dummy_center[@]}" ]; then	    
+	    if [ "${#dummy_center_tmp[@]}" -ne "${#dummy_center[@]}" ]; then
 		echo "Removing bad center dummy runs..."
 		for run in "${dummy_center_tmp[@]}"; do
 		    if [[ ! " ${dummy_center[@]} " =~ " $run " ]]; then
@@ -1298,11 +1342,22 @@ if [[ $i_flag != "true" ]]; then
 		done
 	    fi
 	    #echo ${DummyChargeVal[*]}
-	    # Sums the array to get the total effective charge
-	    # Note: this must be done as an array! This is why uC is used at this step
-	    #       and later converted to mC
-	    DummyChargeSumCenter=$(IFS=+; echo "$((${DummyChargeValCenter[*]}))") # Only works for integers
-	    echo "Total Dummy Charge Center: ${DummyChargeSumCenter} uC"
+	    # Sums the array to get the total effective charge and effective charge error
+	    PYCENTERTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyChargeValCenter[*]}" "${DummyChargeErrCenter[*]}")
+	    arr1=()
+	    arr2=()
+	    itt=0
+	    while read line; do
+		itt=$((itt+1))
+		# split the line into an array based on space
+		IFS=' ' read -ra line_array <<< "$line"
+		# store the elements in the corresponding array
+		eval "arr$itt=(\"\${line_array[@]}\")"
+	    done <<< "$PYCENTERTOTEFFCHARGE"
+	    TotDummyEffChargeValCenter=("${arr1[@]}")
+	    TotDummyEffChargeErrCenter=("${arr2[@]}")
+	    echo "Total Effective Charge Center: ${TotDummyEffChargeValCenter} uC"
+	    echo "Total Effective Charge Center Error: ${TotDummyEffChargeErrCenter}%"
 	    echo "Run numbers: [${dummy_center[@]}]"
 	    #echo "Effective Charge per Run: [${DummyChargeValCenter[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyChargeErrCenter[@]}]"
@@ -1311,7 +1366,7 @@ if [[ $i_flag != "true" ]]; then
 	    #echo "Theta per Run: [${DummypThetaValCenter[@]}]"
 	    #echo "Beam Energy per Run: [${DummyEbeamValCenter[@]}]"
 	fi
-
+	
 	cd "${LTANAPATH}/src"
 
 	if [ $j = "low" ]; then
@@ -1323,7 +1378,7 @@ if [[ $i_flag != "true" ]]; then
 	fi
 	
 	if [ ${#data_right[@]} -eq 0 ]; then
-	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${DataChargeSumLeft} ${DataChargeSumCenter} "0" ${DummyChargeSumLeft} ${DummyChargeSumCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
+	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
 		echo
@@ -1333,7 +1388,7 @@ if [[ $i_flag != "true" ]]; then
 		exit 1
 	    fi
 	else
-	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${DataChargeSumRight} ${DataChargeSumLeft} ${DataChargeSumCenter} ${DummyChargeSumRight} ${DummyChargeSumLeft} ${DummyChargeSumCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
+	    python3 main.py ${KIN} ${W} ${Q2} ${EPSVAL} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${TotDataEffChargeValRight} ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} ${TotDummyEffChargeValRight} ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
 		echo
