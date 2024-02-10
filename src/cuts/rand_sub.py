@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 00:31:05 trottar"
+# Time-stamp: "2024-02-10 13:59:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -519,7 +519,7 @@ def rand_sub(phi_setting, inpDict):
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
         HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))) > 1.1) & (np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))) < 1.18)
+        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (evt.MM > 1.1) & (evt.MM < 1.18)
 
         if ParticleType == "kaon":
 
@@ -557,21 +557,21 @@ def rand_sub(phi_setting, inpDict):
 
         if(ALLCUTS):
 
-          MM_vs_CoinTime_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), evt.CTime_ROC1)
+          MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_gtr_beta)
-          MM_vs_H_cer_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.H_cer_npeSum)
-          MM_vs_H_cal_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_aero_npeSum)
+          MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DATA.Fill(evt.MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DATA.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DATA.Fill(evt.MM,evt.P_cal_etottracknorm)
+          MM_vs_P_hgcer_DATA.Fill(evt.MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DATA.Fill(evt.MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DATA.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
           Q2_vs_t_DATA.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DATA.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DATA.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), -evt.MandelT)
+          MM_vs_t_DATA.Fill(evt.MM, -evt.MandelT)
           polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
           
           H_ct_DATA.Fill(evt.CTime_ROC1)
@@ -608,8 +608,8 @@ def rand_sub(phi_setting, inpDict):
           H_t_DATA.Fill(-evt.MandelT)
           H_W_DATA.Fill(evt.W)
           H_epsilon_DATA.Fill(evt.epsilon)
-          H_MM_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
-          #H_MM_DATA.Fill(pow(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), 2))  
+          H_MM_DATA.Fill(evt.MM)
+          #H_MM_DATA.Fill(pow(evt.MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
           
           H_cal_etottracknorm_DATA.Fill(evt.H_cal_etottracknorm)
@@ -645,7 +645,7 @@ def rand_sub(phi_setting, inpDict):
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
         HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))) > 1.1) & (np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))) < 1.18)
+        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (evt.MM > 1.1) & (evt.MM < 1.18)
 
         if ParticleType == "kaon":
 
@@ -683,21 +683,21 @@ def rand_sub(phi_setting, inpDict):
 
         if(ALLCUTS):
 
-          MM_vs_CoinTime_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), evt.CTime_ROC1)
+          MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_gtr_beta)
-          MM_vs_H_cer_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.H_cer_npeSum)
-          MM_vs_H_cal_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_aero_npeSum)          
+          MM_vs_beta_DUMMY.Fill(evt.MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DUMMY.Fill(evt.MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DUMMY.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DUMMY.Fill(evt.MM,evt.P_cal_etottracknorm)
+          MM_vs_P_hgcer_DUMMY.Fill(evt.MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DUMMY.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
           Q2_vs_t_DUMMY.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DUMMY.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DUMMY.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), -evt.MandelT)
+          MM_vs_t_DUMMY.Fill(evt.MM, -evt.MandelT)
           polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
 
           H_ct_DUMMY.Fill(evt.CTime_ROC1)
@@ -734,8 +734,8 @@ def rand_sub(phi_setting, inpDict):
           H_t_DUMMY.Fill(-evt.MandelT)
           H_W_DUMMY.Fill(evt.W)
           H_epsilon_DUMMY.Fill(evt.epsilon)
-          H_MM_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
-          #H_MM_DUMMY.Fill(pow(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), 2))  
+          H_MM_DUMMY.Fill(evt.MM)
+          #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
 
     ###################################################################################################################################################    
@@ -764,7 +764,7 @@ def rand_sub(phi_setting, inpDict):
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
         HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))) > 1.1) & (np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))) < 1.18)
+        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (evt.MM > 1.1) & (evt.MM < 1.18)
 
         if ParticleType == "kaon":
 
@@ -802,21 +802,21 @@ def rand_sub(phi_setting, inpDict):
 
         if(ALLCUTS):
 
-          MM_vs_CoinTime_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), evt.CTime_ROC1)
+          MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_gtr_beta)
-          MM_vs_H_cer_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.H_cer_npeSum)
-          MM_vs_H_cal_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.H_cal_etottracknorm)
-          MM_vs_P_cal_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_hgcer_npeSum)
-          MM_vs_P_aero_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_aero_npeSum)          
+          MM_vs_beta_RAND.Fill(evt.MM,evt.P_gtr_beta)
+          MM_vs_H_cer_RAND.Fill(evt.MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_RAND.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_RAND.Fill(evt.MM,evt.P_cal_etottracknorm)
+          MM_vs_P_hgcer_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_RAND.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
           Q2_vs_t_RAND.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_RAND.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_RAND.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), -evt.MandelT)          
+          MM_vs_t_RAND.Fill(evt.MM, -evt.MandelT)          
 
           H_ct_RAND.Fill(evt.CTime_ROC1)          
           
@@ -852,7 +852,7 @@ def rand_sub(phi_setting, inpDict):
           H_t_RAND.Fill(-evt.MandelT)
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
-          H_MM_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+          H_MM_RAND.Fill(evt.MM)
 
     ###################################################################################################################################################    
     # Fill dummy random histograms for various trees called above
@@ -880,7 +880,7 @@ def rand_sub(phi_setting, inpDict):
         HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
         HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))) > 1.1) & (np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))) < 1.18)
+        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (evt.MM > 1.1) & (evt.MM < 1.18)
 
         if ParticleType == "kaon":
 
@@ -918,21 +918,21 @@ def rand_sub(phi_setting, inpDict):
 
         if(ALLCUTS):
 
-          MM_vs_CoinTime_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), evt.CTime_ROC1)
+          MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_gtr_beta)
-          MM_vs_H_cer_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.H_cer_npeSum)
-          MM_vs_H_cal_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))),evt.P_aero_npeSum)          
+          MM_vs_beta_DUMMY_RAND.Fill(evt.MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DUMMY_RAND.Fill(evt.MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DUMMY_RAND.Fill(evt.MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DUMMY_RAND.Fill(evt.MM,evt.P_cal_etottracknorm)
+          MM_vs_P_hgcer_DUMMY_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DUMMY_RAND.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
           Q2_vs_t_DUMMY_RAND.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DUMMY_RAND.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DUMMY_RAND.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))), -evt.MandelT)
+          MM_vs_t_DUMMY_RAND.Fill(evt.MM, -evt.MandelT)
           
           H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)
 
@@ -968,7 +968,7 @@ def rand_sub(phi_setting, inpDict):
           H_t_DUMMY_RAND.Fill(-evt.MandelT)
           H_W_DUMMY_RAND.Fill(evt.W)
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-          H_MM_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2)))  )
+          H_MM_DUMMY_RAND.Fill(evt.MM  )
 
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction

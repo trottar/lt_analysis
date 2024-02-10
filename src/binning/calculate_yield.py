@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 17:36:11 trottar"
+# Time-stamp: "2024-02-10 13:59:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -204,7 +204,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DATA.Fill(-evt.MandelT)
-                            H_MM_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                            H_MM_DATA.Fill(evt.MM)
 
             print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_RAND):
@@ -271,7 +271,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_RAND.Fill(-evt.MandelT)
-                            H_MM_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                            H_MM_RAND.Fill(evt.MM)
 
             print("\nProcessing t-bin {} phi-bin {} dummy...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DUMMY):
@@ -338,7 +338,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DUMMY.Fill(-evt.MandelT)
-                            H_MM_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                            H_MM_DUMMY.Fill(evt.MM)
 
             print("\nProcessing t-bin {} phi-bin {} dummy_rand...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_DUMMY_RAND):
@@ -405,7 +405,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             H_t_DUMMY_RAND.Fill(-evt.MandelT)
-                            H_MM_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                            H_MM_DUMMY_RAND.Fill(evt.MM)
                             
             H_MM_RAND.Scale(1/nWindows)
             H_t_RAND.Scale(1/nWindows)
