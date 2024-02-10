@@ -1160,6 +1160,10 @@ if [[ $i_flag != "true" ]]; then
 	    fi
 	    #echo ${DataChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
+	    echo "££££££££££££££££££££££££££"
+	    echo "${DataChargeValLeft[*]}"
+	    echo "${DataChargeErrLeft[*]}"
+	    echo "££££££££££££££££££££££££££"	    
 	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataChargeValLeft[*]}" "${DataChargeErrLeft[*]}")
 	    arr1=()
 	    arr2=()
