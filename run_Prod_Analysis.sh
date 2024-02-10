@@ -1163,7 +1163,8 @@ if [[ $i_flag != "true" ]]; then
 	    echo "££££££££££££££££££££££££££"
 	    echo "${DataChargeValLeft[*]}"
 	    echo "${DataChargeErrLeft[*]}"
-	    echo "££££££££££££££££££££££££££"	    
+	    echo "££££££££££££££££££££££££££"
+	    python3 calcTotalEffectiveCharge.py "${DataChargeValLeft[*]}" "${DataChargeErrLeft[*]}"
 	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataChargeValLeft[*]}" "${DataChargeErrLeft[*]}")
 	    arr1=()
 	    arr2=()
