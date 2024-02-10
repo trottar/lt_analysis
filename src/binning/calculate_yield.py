@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 17:08:18 trottar"
+# Time-stamp: "2024-02-10 17:16:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -489,6 +489,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
     nWindows, normfac_data, normfac_dummy = hist["nWindows"], hist["normfac_data"], hist["normfac_dummy"]
+    NumEvts_MM_DATA = hist["NumEvts_MM_DATA"]
 
     # Grab the setting by setting normalized error
     data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())] 
@@ -517,7 +518,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         total_count = np.sum(sub_val)
         yld = total_count # Normalization applied above
         # Calculate experimental yield error (%)
-        yld_err = np.sqrt(data_charge_err**2+((np.sqrt(yld)/yld)*100)**2)
+        yld_err = np.sqrt(data_charge_err**2+((np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)*100)**2)
         if yld < 0.0:
             yld = 0.0
         yield_hist[0].append(bin_val_data)            
