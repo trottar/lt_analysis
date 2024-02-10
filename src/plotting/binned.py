@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 13:32:10 trottar"
+# Time-stamp: "2024-02-10 13:40:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -129,11 +129,6 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
     # Ratio histogram
     for phiset in phisetlist:
         histbinDict["H_ratio_{}".format(phiset)] = TH1D("H_ratio_{}".format(phiset), "{} Ratio".format(phiset), NumtBins*NumPhiBins, -100.0, 100.0)
-
-    # Yield histograms
-    for phiset in phisetlist:
-        histbinDict["H_yield_DATA_{}".format(phiset)] = TH1D("H_yield_DATA_{}".format(phiset), "{} Data Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.0)
-        histbinDict["H_yield_SIMC_{}".format(phiset)] = TH1D("H_yield_SIMC_{}".format(phiset), "{} Simc Yield".format(phiset), NumtBins*NumPhiBins, 0, 100.0)
         
     # Loop over each tuple key in the dictionary
     for phiset in phisetlist:
@@ -545,62 +540,6 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         histbinDict["H_ratio_{}".format(phiset)].Draw("same, hist")
         C_ratio.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
-    C_yield_data_plt = TCanvas()
-    G_yield_data_plt = TMultiGraph()
-    l_yield_data_plt = TLegend(0.115,0.35,0.33,0.5)
-
-    C_yield_data_plt.SetGrid()
-
-    yield_data = np.array([])
-    yield_simc = np.array([])
-    setting = np.array([])
-    for it,phiset in enumerate(phisetlist):
-        data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
-        simc_key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
-        for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
-            # Access the nested dictionary using the tuple key
-            data_nested_dict = yieldDict["binned_DATA"][phiset]        
-            simc_nested_dict = yieldDict["binned_SIMC"][phiset]
-            i = simc_key_tuple[0] # t bin
-            j = simc_key_tuple[1] # phi bin
-            #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
-            # Fill histogram
-            yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"][1]])
-            yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"][1]])
-            if phiset == "Center": setting = np.append(setting,0)
-            elif phiset == "Left": setting = np.append(setting,1)
-            else: setting = np.append(setting,2)
-
-    G_yield_data = TGraphErrors(len(yield_data),setting,yield_data,np.array([0]*len(setting)),np.array([0]*len(yield_data)))
-    G_yield_simc = TGraphErrors(len(yield_simc),setting,yield_simc,np.array([0]*len(setting)),np.array([0]*len(yield_simc)))
-
-    G_yield_data.SetMarkerStyle(21)
-    G_yield_data.SetMarkerSize(1)
-    G_yield_data.SetMarkerColor(1)
-    G_yield_data_plt.Add(G_yield_data)
-
-    G_yield_simc.SetMarkerStyle(21)
-    G_yield_simc.SetMarkerSize(1)
-    G_yield_simc.SetMarkerColor(2)
-    G_yield_data_plt.Add(G_yield_simc)
-
-    G_yield_data_plt.Draw("AP")
-    G_yield_data_plt.SetTitle(" ;Setting; Yield")
-
-    for i,hist in enumerate(histlist):
-        bin_ix = G_yield_data_plt.GetXaxis().FindBin(i)
-        G_yield_data_plt.GetXaxis().SetBinLabel(bin_ix,hist["phi_setting"])
-
-    G_yield_data_plt.GetYaxis().SetTitleOffset(1.5)
-    G_yield_data_plt.GetXaxis().SetTitleOffset(1.5)
-    G_yield_data_plt.GetXaxis().SetLabelSize(0.04)
-
-    l_yield_data_plt.AddEntry(G_yield_data,"Data")
-    l_yield_data_plt.AddEntry(G_yield_simc,"Simc")
-    l_yield_data_plt.Draw()
-
-    C_yield_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
-
     C_ratio_plt = TCanvas()
     G_ratio_plt = TMultiGraph()
 
@@ -650,9 +589,6 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         # t/phi binned histograms
         hist["H_phibins_DATA"] = histbinDict["H_phibins_DATA"]
         hist["H_tbins_DATA"] = histbinDict["H_tbins_DATA"]
-
-        hist["H_yield_DATA"]     = histbinDict["H_yield_DATA_{}".format(phiset)]
-        hist["H_yield_SIMC"]     = histbinDict["H_yield_SIMC_{}".format(phiset)]                                                             
 
         hist["H_ratio"]     = histbinDict["H_ratio_{}".format(phiset)]
 
