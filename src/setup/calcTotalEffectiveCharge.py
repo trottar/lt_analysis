@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 16:15:58 trottar"
+# Time-stamp: "2024-02-10 16:18:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,6 +20,8 @@ User Inputs
 '''
 runs_effective_charge = sys.argv[1].split(" ")
 runs_effective_charge_uncern = sys.argv[2].split(" ")
+
+print("\n\n\n",runs_effective_charge,"\n\n\n",runs_effective_charge_uncern)
 
 ################################################################################################################################################
 '''
