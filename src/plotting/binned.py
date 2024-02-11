@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 19:29:04 trottar"
+# Time-stamp: "2024-02-10 19:31:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -494,9 +494,8 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             j = data_key_tuple[1] # phi bin
             #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(data_nested_dict["yield"][data_key_tuple]["yield"]), data_nested_dict["yield"][data_key_tuple]["yield"]))
             # Fill histogram
-            print("!!!!!!!!!!!!!!!",data_nested_dict["yield"][data_key_tuple]["yield"])
-            for (itt,jtt), val in np.ndenumerate(data_nested_dict["yield"][data_key_tuple]["yield"]):
-                histbinDict["H_yield_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
+            val = data_nested_dict["yield"][data_key_tuple]["yield"][1]
+            histbinDict["H_yield_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
             C_yield_DATA.cd(k+1)
             histbinDict["H_yield_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
             histbinDict["H_yield_DATA_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, E1")
@@ -515,8 +514,8 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             j = simc_key_tuple[1] # phi bin
             #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
             # Fill histogram
-            for (itt,jtt), val in np.ndenumerate(simc_nested_dict["yield"][simc_key_tuple]["yield"]):
-                histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
+            val = simc_nested_dict["yield"][simc_key_tuple]["yield"][1]
+            histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Fill(val)
             C_yield_SIMC.cd(k+1)
             histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].SetLineColor(it+1)
             histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset,str(i+1),str(j+1))].Draw("same, E1")
