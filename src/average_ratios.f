@@ -43,7 +43,7 @@ c     in averages/aver.* .
       real yld
       
       integer pol_set
-      real q2_set, w_set
+      real q2_set, w_set, eps_set
 
       real q2_bin, w_bin
       integer t_bin, phi_bin
