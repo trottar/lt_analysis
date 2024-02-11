@@ -197,6 +197,8 @@ c ratio is data/simc - see GH logbook, p.55
 *                      from just units of %
                e=(sqrt(e)/100)*r
                write(*,*)'=========================='
+               write(*,*),'Epsilon=',eps_set
+               write(*,*)'--------------------------'
                write(*,*)'tbin=',it
                write(*,*)'phibin=',ip
               write(*,*)'R=',r,'+/-',e
