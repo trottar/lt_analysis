@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 18:28:38 trottar"
+# Time-stamp: "2024-02-11 18:48:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -497,14 +497,12 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_yield, "w").close()
 
-        processed_yieldvals = set()
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_right):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_right[i], (yield_data_err_right[i]/100)*yield_data_right[i], \
                                                                                   int(phibin_right[i]), int(tbin_right[i]))
                 write_to_file(f_yield,check_line)
-                processed_yieldvals.add(yieldval)
 
     if float(runNumLeft[0]) != 0:
         f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
@@ -513,14 +511,12 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_yield, "w").close()
 
-        processed_yieldvals = set()
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_left):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_left[i], (yield_data_err_left[i]/100)*yield_data_left[i], \
                                                                                   int(phibin_left[i]), int(tbin_left[i]))
                 write_to_file(f_yield,check_line)
-                processed_yieldvals.add(yieldval)
 
     if float(runNumCenter[0]) != 0:
         f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
@@ -529,14 +525,12 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_yield, "w").close()
 
-        processed_yieldvals = set()
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_center):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_center[i], (yield_data_err_center[i]/100)*yield_data_center[i], \
                                                                                   int(phibin_center[i]), int(tbin_center[i]))
                 write_to_file(f_yield,check_line)
-                processed_yieldvals.add(yieldval)
 
     ################################################################################################################################################
 
@@ -547,14 +541,12 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_yield, "w").close()
 
-        processed_yieldvals = set()
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_right):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_right[i], (yield_simc_err_right[i]/100)*yield_simc_right[i], \
                                                                                   int(phibin_right[i]), int(tbin_right[i]))
                 write_to_file(f_yield,check_line)
-                processed_yieldvals.add(yieldval)
 
     if float(runNumLeft[0]) != 0:
         f_yield = '{}/src/{}/yields/yield_simc.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
@@ -563,14 +555,12 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_yield, "w").close()
 
-        processed_yieldvals = set()
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_left):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_left[i], (yield_simc_err_left[i]/100)*yield_simc_left[i], \
                                                                                   int(phibin_left[i]), int(tbin_left[i]))
                 write_to_file(f_yield,check_line)
-                processed_yieldvals.add(yieldval)
 
     if float(runNumCenter[0]) != 0:
         f_yield = '{}/src/{}/yields/yield_simc.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
@@ -579,13 +569,11 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_yield, "w").close()
 
-        processed_yieldvals = set()
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_center):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_center[i], (yield_simc_err_center[i]/100)*yield_simc_center[i], \
                                                                                   int(phibin_center[i]), int(tbin_center[i]))
                 write_to_file(f_yield,check_line)
-                processed_yieldvals.add(yieldval)
                                                                     
     ################################################################################################################################################
