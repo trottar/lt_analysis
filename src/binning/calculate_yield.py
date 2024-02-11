@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 14:08:06 trottar"
+# Time-stamp: "2024-02-11 18:27:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -523,7 +523,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         print("!!!!!!!!!!!!!",data_charge_err, (np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)*100)
         yld_err = np.sqrt(data_charge_err**2+(((np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)*100)**2))
         if yld < 0.0:
-            yld = 0.0            
+            yld = 0.0
+            yld_err = 0.0
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         binned_sub_data[0].append(bin_val_data)
@@ -720,6 +721,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         # Calculate simc yield error (%)
         print("!!!!!!!!!!!!!",np.sqrt(NumEvts_MM_SIMC*normfac_simc))
         yld_err = (np.sqrt(NumEvts_MM_SIMC*normfac_simc))
+        if yld < 0.0:
+            yld = 0.0
+            yld_err = 0.0
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         binned_sub_simc[0].append(bin_val_simc)

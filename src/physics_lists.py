@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 15:34:32 trottar"
+# Time-stamp: "2024-02-11 18:28:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -331,43 +331,6 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     break
                 else:
                     continue
-
-    ################################################################################################################################################
-
-    '''    
-    # Define thpq vector relative to middle setting
-    for phiset in phisetlist:
-        
-        if phiset == "Right":
-            runNums = np.array([int(x) for x in runNumLeft.split(' ')])
-            for i, run in enumerate(runNums):
-                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
-                if os.path.exists(pid_log):
-                    if EbeamValRight[0] != EbeamValRight[i] or pThetaValRight[0] != pThetaValRight[i]:
-                        print("Run {}".format(run))
-                        print("{} | E_{} = {}".format(EbeamValRight[0], phiset, EbeamValRight[i]))
-                        print("{} | theta_{} = {}".format(pThetaValRight[0], phiset, pThetaValRight[i]))
-
-        if phiset == "Left":
-            runNums = np.array([int(x) for x in runNumLeft.split(' ')])
-            for i, run in enumerate(runNums):
-                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
-                if os.path.exists(pid_log):
-                    if EbeamValLeft[0] != EbeamValLeft[i] or pThetaValLeft[0] != pThetaValLeft[i]:
-                        print("Run {}".format(run))
-                        print("{} | E_{} = {}".format(EbeamValLeft[0], phiset, EbeamValLeft[i]))
-                        print("{} | theta_{} = {}".format(pThetaValLeft[0], phiset, pThetaValLeft[i]))
-
-        if phiset == "Center":
-            runNums = np.array([int(x) for x in runNumLeft.split(' ')])
-            for i, run in enumerate(runNums):
-                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
-                if os.path.exists(pid_log):
-                    if EbeamValCenter[0] != EbeamValCenter[i] or pThetaValCenter[0] != pThetaValCenter[i]:
-                        print("Run {}".format(run))
-                        print("{} | E_{} = {}".format(EbeamValCenter[0], phiset, EbeamValCenter[i]))
-                        print("{} | theta_{} = {}".format(pThetaValCenter[0], phiset, pThetaValCenter[i]))
-    '''
                         
     ################################################################################################################################################
 
@@ -538,9 +501,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_right):
-                if yieldval in processed_yieldvals:
-                    continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_data_right[i], (yield_data_err_right[i]/100)*yield_data_right[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_right[i], (yield_data_err_right[i]/100)*yield_data_right[i], \
                                                                                   int(phibin_right[i]), int(tbin_right[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
@@ -556,9 +517,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_left):
-                if yieldval in processed_yieldvals:
-                    continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_data_left[i], (yield_data_err_left[i]/100)*yield_data_left[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_left[i], (yield_data_err_left[i]/100)*yield_data_left[i], \
                                                                                   int(phibin_left[i]), int(tbin_left[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
@@ -574,9 +533,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_center):
-                if yieldval in processed_yieldvals:
-                    continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_data_center[i], (yield_data_err_center[i]/100)*yield_data_center[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_center[i], (yield_data_err_center[i]/100)*yield_data_center[i], \
                                                                                   int(phibin_center[i]), int(tbin_center[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
@@ -594,9 +551,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_right):
-                if yieldval in processed_yieldvals:
-                    continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_right[i], (yield_simc_err_right[i]/100)*yield_simc_right[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_right[i], (yield_simc_err_right[i]/100)*yield_simc_right[i], \
                                                                                   int(phibin_right[i]), int(tbin_right[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
@@ -612,9 +567,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_left):
-                if yieldval in processed_yieldvals:
-                    continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_left[i], (yield_simc_err_left[i]/100)*yield_simc_left[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_left[i], (yield_simc_err_left[i]/100)*yield_simc_left[i], \
                                                                                   int(phibin_left[i]), int(tbin_left[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
@@ -630,60 +583,9 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_center):
-                if yieldval in processed_yieldvals:
-                    continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_center[i], (yield_simc_err_center[i]/100)*yield_simc_center[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_center[i], (yield_simc_err_center[i]/100)*yield_simc_center[i], \
                                                                                   int(phibin_center[i]), int(tbin_center[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
                                                                     
-    ################################################################################################################################################
-
-    '''
-    f_aver = '{}/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
-    output_file_lst.append(f_aver.split('/src/')[1])
-    # Open the file in write mode, which creates a new empty file or overwrites the existing one
-    open(f_aver, "w").close()
-
-    if float(runNumRight[0]) != 0:
-        # Open a file in read mode
-        with open(f_aver, 'r') as f:
-            lines = f.readlines()
-            for i, (ratio, ratio_err) in enumerate(zip(ratio_right,ratio_err_right)):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, (ratio_err/100)*ratio, int(phibin_right[i]), int(tbin_right[i]))
-                # Check if the line already exists
-                if check_line not in lines:
-                    write_to_file(f_aver,check_line)
-                    
-    if float(runNumLeft[0]) != 0:
-        # Open a file in read mode
-        with open(f_aver, 'r') as f:
-            lines = f.readlines()
-            for i, (ratio, ratio_err) in enumerate(zip(ratio_left,ratio_err_left)):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, (ratio_err/100)*ratio, int(phibin_left[i]), int(tbin_left[i]))
-                # Check if the line already exists
-                if check_line not in lines:
-                    write_to_file(f_aver,check_line)
-                    
-    if float(runNumCenter[0]) != 0:
-        # Open a file in read mode
-        with open(f_aver, 'r') as f:
-            lines = f.readlines()
-            for i, (ratio, ratio_err) in enumerate(zip(ratio_center,ratio_err_center)):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, (ratio_err/100)*ratio, int(phibin_center[i]), int(tbin_center[i]))
-                # Check if the line already exists
-                if check_line not in lines:
-                    write_to_file(f_aver,check_line)
-                    
-    # Check if the last character is a newline and remove if so
-    with open(f_aver, "rb") as f:
-        f.seek(-1, os.SEEK_END)
-        last_char = f.read(1)
-        if last_char == b'\n':
-            # Remove the final line
-            with open(f_aver, "rb+") as f:
-                f.seek(-1, os.SEEK_END)
-                f.truncate()
-
-    '''
     ################################################################################################################################################
