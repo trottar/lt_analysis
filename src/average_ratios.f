@@ -35,13 +35,6 @@ c     Output: averages/aver.*.dat
 
 c     Aquire yields over theta_pq settings, calculate ratio, save result
 c     in averages/aver.* .
-
-
-c     Fortran is annoying and can't find parameters
-c     dynamically (since they must be known at compile time).
-c     Therefore, I am setting is arbitrarily to allocate
-c     enough space for the sets
-      parameter (nbin = 10)
       
       integer nt,nphi,it,ip
       integer nset,ipol
@@ -126,7 +119,7 @@ c            pause
 
             open(66,file=fn)
             read(66,*) one
-            do it=1,nbin
+            do it=1,nt
                do ip=1,nphi
                   read(66,*) yld,er
 *                  print*,yld,er
@@ -147,7 +140,7 @@ c            pause
             
             open(66,file=fn)
             read(66,*) one
-            do it=1,nbin
+            do it=1,nt
                do ip=1,nphi
                   read(66,*) yld,er
 *                  print*,yld,er
@@ -185,7 +178,7 @@ c      pause
       print*
 
       open(77,file=fn,status='replace')
-      do it=1,nbin
+      do it=1,nt
          do ip=1,nphi
             r=0.
             e=0.
