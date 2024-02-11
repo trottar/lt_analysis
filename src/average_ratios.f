@@ -189,11 +189,13 @@ c ratio is data/simc - see GH logbook, p.55
                r=(yrd(ip,it))/ymc(ip,it)
 *     RLT (2/11/2024): These are G.H's equations
 *                      Removing to stay consistent
-*                      with units of %
+*                      with Bill Li thesis
 *     e=e+(drd(ip,it))/ymc(ip,it)**2
 *     e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
-              e=drd(ip,it)+dmc(ip,it)
-              e=sqrt(e)
+               e=drd(ip,it)+dmc(ip,it)
+*     RLT (2/11/2024): Convert to proper ratio error
+*                      from just units of %
+              e=(sqrt(e)/100)*r
               write(*,*)'     the data/simc ratio is:'
               write(*,'(2f15.5,2i3)')r,e,ip,it
               write(*,*)'--------------------------'
