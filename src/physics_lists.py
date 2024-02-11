@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 15:08:13 trottar"
+# Time-stamp: "2024-02-11 15:13:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -294,6 +294,9 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         sorted_simc_center_tuples = sorted(simc_center_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
         tbin_center, phibin_center, yield_simc_center, yield_simc_err_center = zip(*sorted_simc_center_tuples[:len(tbin_center)])
+
+        print("!!!!!!!!!!!!!center",yield_simc_center, yield_simc_err_center)
+        print("!!!!!!!!!!!!!left",yield_simc_left, yield_simc_err_left)
         
     ################################################################################################################################################
 
