@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:26:39 trottar"
+# Time-stamp: "2024-02-11 01:29:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -717,8 +717,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         total_count = np.sum(sub_val)
         yld = total_count*normfac_simc
         # Calculate simc yield error (%)
-        print("!!!!!!!!!!!!!",np.sqrt(yld)*100)
-        yld_err = (np.sqrt(yld)*100)
+        print("!!!!!!!!!!!!!",np.sqrt(yld))
+        yld_err = (np.sqrt(yld))
         yield_hist[0].append(bin_val_simc)        
         yield_hist[1].append(yld)
         yield_err_hist[0].append(bin_val_simc)
