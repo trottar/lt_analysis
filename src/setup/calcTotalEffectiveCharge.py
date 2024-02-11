@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 16:25:56 trottar"
+# Time-stamp: "2024-02-11 01:01:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,8 +18,8 @@ import sys, os
 '''
 User Inputs
 '''
-runs_effective_charge = [float(q) for q in sys.argv[1].split(" ")]
-runs_effective_charge_uncern = [float(err) for err in sys.argv[2].split(" ")]
+runs_eff_charge = [float(q) for q in sys.argv[1].split(" ")]
+runs_eff_charge_err = [float(err) for err in sys.argv[2].split(" ")]
 
 ################################################################################################################################################
 '''
@@ -37,10 +37,10 @@ LTANAPATH=lt.LTANAPATH
 ################################################################################################################################################
 
 # Sum of all the effective charge per run
-tot_effective_charge = np.sum(runs_effective_charge)
+tot_eff_charge = np.sum(runs_eff_charge)
 
 # Normalized uncertainty (converted to %)
-tot_effective_charge_uncern = np.sqrt((np.sum([err**2 for err in runs_effective_charge_uncern])/tot_effective_charge**2)*100)
-        
-BashInput=("{:2f}\n{:4f}".format(tot_effective_charge, tot_effective_charge_uncern))
+tot_eff_charge_err = np.sqrt((np.sum([err**2 for err in runs_eff_charge_err])/tot_eff_charge**2)*100)
+
+BashInput=("{:2f}\n{:4f}".format(tot_eff_charge, tot_eff_charge_err))
 print(BashInput)

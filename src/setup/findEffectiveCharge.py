@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 16:07:58 trottar"
+# Time-stamp: "2024-02-11 00:49:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,10 +47,10 @@ from getEfficiencyValue import getEfficiencyValue
 
 ################################################################################################################################################
 
-effective_charge = ""
-effective_charge_uncern = ""
-tot_efficiency = ""
-tot_efficiency_uncern = ""
+efficiency = ""
+efficiency_err = ""
+eff_charge = ""
+eff_charge_err = ""
 ebeam_val = ""
 pTheta_val = ""
 
@@ -60,16 +60,17 @@ for runNum in RUNLIST:
     if check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ParticleType.capitalize())):
     
         efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
-        effError = getEfficiencyValue(runNum,efficiency_table,"effError")
-        charge  = getEfficiencyValue(runNum,efficiency_table,"bcm")
+        efficiency_err = getEfficiencyValue(runNum,efficiency_table,"efficiency_err")
+        eff_charge = getEff_ChargeValue(runNum,eff_charge_table,"eff_charge")
+        eff_charge_err = getEff_ChargeValue(runNum,eff_charge_table,"eff_charge_err")
 
         # Run by run list of effective charge
-        effective_charge += " " + str(float(charge)*float(efficiency))
-        effective_charge_uncern += " " + str(float(charge)*float(effError))
+        eff_charge_lst += " " + str(float(eff_charge))
+        eff_charge_err_lst += " " + str(float(eff_charge_err))
 
         # Calculated run by run total efficiency and efficiency error
-        tot_efficiency += " " + str(efficiency)
-        tot_efficiency_uncern += " " + str(effError)
+        efficiency_lst += " " + str(efficiency)
+        efficiency_err_lst += " " + str(efficiency_err)
 
         ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
         pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
@@ -80,5 +81,5 @@ for runNum in RUNLIST:
 # Convert back to string        
 RUNLIST = ' '.join(map(str, RUNLIST))        
         
-BashInput=("{}\n{}\n{}\n{}\n{}\n{}\n{}".format(effective_charge, effective_charge_uncern, tot_efficiency, tot_efficiency_uncern, pTheta_val, ebeam_val, RUNLIST))
+BashInput=("{}\n{}\n{}\n{}\n{}\n{}\n{}".format(eff_charge_lst, eff_charge_err_lst, efficiency_lst, efficiency_err_lst, pTheta_val, ebeam_val, RUNLIST))
 print(BashInput)

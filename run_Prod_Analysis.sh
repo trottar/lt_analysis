@@ -91,13 +91,13 @@ else
     done
 fi
 
-#NumtBins=1
-#NumPhiBins=1
+NumtBins=1
+NumPhiBins=1
 #NumtBins=2
 #NumPhiBins=8
 # Q2=2p1
-NumtBins=3
-NumPhiBins=10
+#NumtBins=3
+#NumPhiBins=10
 # Q2=3p0, W=3p14
 #NumtBins=4
 #NumPhiBins=12
@@ -1021,8 +1021,8 @@ if [[ $i_flag != "true" ]]; then
 		# store the elements in the corresponding array
 		eval "arr$itt=(\"\${line_array[@]}\")"
 	    done <<< "$PYRIGHTSTRING"
-	    DataChargeValRight=("${arr1[@]}")
-	    DataChargeErrRight=("${arr2[@]}")
+	    DataEffChargeValRight=("${arr1[@]}")
+	    DataEffChargeErrRight=("${arr2[@]}")
 	    DataEffValRight=("${arr3[@]}")
 	    DataEffErrRight=("${arr4[@]}")
 	    DatapThetaValRight=("${arr5[@]}")
@@ -1036,9 +1036,9 @@ if [[ $i_flag != "true" ]]; then
 		    fi
 		done
 	    fi
-	    #echo ${DataChargeVal[*]}
+	    #echo ${DataEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
-	    PYRIGHTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataChargeValRight[*]}" "${DataChargeErrRight[*]}")
+	    PYRIGHTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataEffChargeValRight[*]}" "${DataEffChargeErrRight[*]}")
 	    arr1=()
 	    arr2=()
 	    itt=0
@@ -1054,8 +1054,8 @@ if [[ $i_flag != "true" ]]; then
 	    echo "Total Effective Charge Right: ${TotDataEffChargeValRight} mC"
 	    echo "Total Effective Charge Right Error: ${TotDataEffChargeErrRight} %"
 	    echo "Run numbers: [${data_right[@]}]"
-	    #echo "Effective Charge per Run: [${DataChargeValRight[@]}]"
-	    #echo "Effective Charge Error per Run: [${DataChargeErrRight[@]}]"
+	    #echo "Effective Charge per Run: [${DataEffChargeValRight[@]}]"
+	    #echo "Effective Charge Error per Run: [${DataEffChargeErrRight[@]}]"
 	    #echo "Efficiency per Run: [${DataEffValRight[@]}]"
 	    #echo "Efficiency Error per Run: [${DataEffErrRight[@]}]"
 	    #echo "Theta per Run: [${DatapThetaValRight[@]}]"
@@ -1082,8 +1082,8 @@ if [[ $i_flag != "true" ]]; then
 		# store the elements in the corresponding array
 		eval "arr$itt=(\"\${line_array[@]}\")"
 	    done <<< "$PYRIGHTSTRING"
-	    DummyChargeValRight=("${arr1[@]}")
-	    DummyChargeErrRight=("${arr2[@]}")
+	    DummyEffChargeValRight=("${arr1[@]}")
+	    DummyEffChargeErrRight=("${arr2[@]}")
 	    DummyEffValRight=("${arr3[@]}")
 	    DummyEffErrRight=("${arr4[@]}")
 	    DummypThetaValRight=("${arr5[@]}")
@@ -1097,9 +1097,9 @@ if [[ $i_flag != "true" ]]; then
 		    fi
 		done
 	    fi
-	    #echo ${DummyChargeVal[*]}
+	    #echo ${DummyEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
-	    PYRIGHTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyChargeValRight[*]}" "${DummyChargeErrRight[*]}")
+	    PYRIGHTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyEffChargeValRight[*]}" "${DummyEffChargeErrRight[*]}")
 	    arr1=()
 	    arr2=()
 	    itt=0
@@ -1115,8 +1115,8 @@ if [[ $i_flag != "true" ]]; then
 	    echo "Total Effective Charge Right: ${TotDummyEffChargeValRight} mC"
 	    echo "Total Effective Charge Right Error: ${TotDummyEffChargeErrRight} %"
 	    echo "Run numbers: [${dummy_right[@]}]"
-	    #echo "Effective Charge per Run: [${DummyChargeValRight[@]}]"
-	    #echo "Effective Charge Error per Run: [${DummyChargeErrRight[@]}]"
+	    #echo "Effective Charge per Run: [${DummyEffChargeValRight[@]}]"
+	    #echo "Effective Charge Error per Run: [${DummyEffChargeErrRight[@]}]"
 	    #echo "Efficiency per Run: [${DummyEffValRight[@]}]"
 	    #echo "Efficiency Error per Run: [${DummyEffErrRight[@]}]"
 	    #echo "Theta per Run: [${DummypThetaValRight[@]}]"
@@ -1143,8 +1143,8 @@ if [[ $i_flag != "true" ]]; then
 		# store the elements in the corresponding array
 		eval "arr$itt=(\"\${line_array[@]}\")"
 	    done <<< "$PYLEFTSTRING"
-	    DataChargeValLeft=("${arr1[@]}")
-	    DataChargeErrLeft=("${arr2[@]}")
+	    DataEffChargeValLeft=("${arr1[@]}")
+	    DataEffChargeErrLeft=("${arr2[@]}")
 	    DataEffValLeft=("${arr3[@]}")
 	    DataEffErrLeft=("${arr4[@]}")
 	    DatapThetaValLeft=("${arr5[@]}")
@@ -1158,9 +1158,9 @@ if [[ $i_flag != "true" ]]; then
 		    fi
 		done
 	    fi
-	    #echo ${DataChargeVal[*]}
+	    #echo ${DataEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
-	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataChargeValLeft[*]}" "${DataChargeErrLeft[*]}")
+	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataEffChargeValLeft[*]}" "${DataEffChargeErrLeft[*]}")
 	    arr1=()
 	    arr2=()
 	    itt=0
@@ -1176,8 +1176,8 @@ if [[ $i_flag != "true" ]]; then
 	    echo "Total Effective Charge Left: ${TotDataEffChargeValLeft} mC"
 	    echo "Total Effective Charge Left Error: ${TotDataEffChargeErrLeft} %"
 	    echo "Run numbers: [${data_left[@]}]"
-	    #echo "Effective Charge per Run: [${DataChargeValLeft[@]}]"
-	    #echo "Effective Charge Error per Run: [${DataChargeErrLeft[@]}]"
+	    #echo "Effective Charge per Run: [${DataEffChargeValLeft[@]}]"
+	    #echo "Effective Charge Error per Run: [${DataEffChargeErrLeft[@]}]"
 	    #echo "Efficiency per Run: [${DataEffValLeft[@]}]"
 	    #echo "Efficiency Error per Run: [${DataEffErrLeft[@]}]"
 	    #echo "Theta per Run: [${DatapThetaValLeft[@]}]"
@@ -1204,8 +1204,8 @@ if [[ $i_flag != "true" ]]; then
 		# store the elements in the corresponding array
 		eval "arr$itt=(\"\${line_array[@]}\")"
 	    done <<< "$PYLEFTSTRING"
-	    DummyChargeValLeft=("${arr1[@]}")
-	    DummyChargeErrLeft=("${arr2[@]}")
+	    DummyEffChargeValLeft=("${arr1[@]}")
+	    DummyEffChargeErrLeft=("${arr2[@]}")
 	    DummyEffValLeft=("${arr3[@]}")
 	    DummyEffErrLeft=("${arr4[@]}")
 	    DummypThetaValLeft=("${arr5[@]}")
@@ -1219,9 +1219,9 @@ if [[ $i_flag != "true" ]]; then
 		    fi
 		done
 	    fi
-	    #echo ${DummyChargeVal[*]}
+	    #echo ${DummyEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
-	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyChargeValLeft[*]}" "${DummyChargeErrLeft[*]}")
+	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyEffChargeValLeft[*]}" "${DummyEffChargeErrLeft[*]}")
 	    arr1=()
 	    arr2=()
 	    itt=0
@@ -1237,8 +1237,8 @@ if [[ $i_flag != "true" ]]; then
 	    echo "Total Effective Charge Left: ${TotDummyEffChargeValLeft} mC"
 	    echo "Total Effective Charge Left Error: ${TotDummyEffChargeErrLeft} %"
 	    echo "Run numbers: [${dummy_left[@]}]"
-	    #echo "Effective Charge per Run: [${DummyChargeValLeft[@]}]"
-	    #echo "Effective Charge Error per Run: [${DummyChargeErrLeft[@]}]"
+	    #echo "Effective Charge per Run: [${DummyEffChargeValLeft[@]}]"
+	    #echo "Effective Charge Error per Run: [${DummyEffChargeErrLeft[@]}]"
 	    #echo "Efficiency per Run: [${DummyEffValLeft[@]}]"
 	    #echo "Efficiency Error per Run: [${DummyEffErrLeft[@]}]"
 	    #echo "Theta per Run: [${DummypThetaValLeft[@]}]"
@@ -1265,8 +1265,8 @@ if [[ $i_flag != "true" ]]; then
 		# store the elements in the corresponding array
 		eval "arr$itt=(\"\${line_array[@]}\")"
 	    done <<< "$PYCENTERSTRING"
-	    DataChargeValCenter=("${arr1[@]}")
-	    DataChargeErrCenter=("${arr2[@]}")
+	    DataEffChargeValCenter=("${arr1[@]}")
+	    DataEffChargeErrCenter=("${arr2[@]}")
 	    DataEffValCenter=("${arr3[@]}")
 	    DataEffErrCenter=("${arr4[@]}")
 	    DatapThetaValCenter=("${arr5[@]}")
@@ -1280,9 +1280,9 @@ if [[ $i_flag != "true" ]]; then
 		    fi
 		done
 	    fi
-	    #echo ${DataChargeVal[*]}
+	    #echo ${DataEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
-	    PYCENTERTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataChargeValCenter[*]}" "${DataChargeErrCenter[*]}")
+	    PYCENTERTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataEffChargeValCenter[*]}" "${DataEffChargeErrCenter[*]}")
 	    arr1=()
 	    arr2=()
 	    itt=0
@@ -1298,8 +1298,8 @@ if [[ $i_flag != "true" ]]; then
 	    echo "Total Effective Charge Center: ${TotDataEffChargeValCenter} mC"
 	    echo "Total Effective Charge Center Error: ${TotDataEffChargeErrCenter} %"
 	    echo "Run numbers: [${data_center[@]}]"
-	    #echo "Effective Charge per Run: [${DataChargeValCenter[@]}]"
-	    #echo "Effective Charge Error per Run: [${DataChargeErrCenter[@]}]"
+	    #echo "Effective Charge per Run: [${DataEffChargeValCenter[@]}]"
+	    #echo "Effective Charge Error per Run: [${DataEffChargeErrCenter[@]}]"
 	    #echo "Efficiency per Run: [${DataEffValCenter[@]}]"
 	    #echo "Efficiency Error per Run: [${DataEffErrCenter[@]}]"
 	    #echo "Theta per Run: [${DatapThetaValCenter[@]}]"
@@ -1326,8 +1326,8 @@ if [[ $i_flag != "true" ]]; then
 		# store the elements in the corresponding array
 		eval "arr$itt=(\"\${line_array[@]}\")"
 	    done <<< "$PYCENTERSTRING"
-	    DummyChargeValCenter=("${arr1[@]}")
-	    DummyChargeErrCenter=("${arr2[@]}")
+	    DummyEffChargeValCenter=("${arr1[@]}")
+	    DummyEffChargeErrCenter=("${arr2[@]}")
 	    DummyEffValCenter=("${arr3[@]}")
 	    DummyEffErrCenter=("${arr4[@]}")
 	    DummypThetaValCenter=("${arr5[@]}")
@@ -1341,9 +1341,9 @@ if [[ $i_flag != "true" ]]; then
 		    fi
 		done
 	    fi
-	    #echo ${DummyChargeVal[*]}
+	    #echo ${DummyEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
-	    PYCENTERTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyChargeValCenter[*]}" "${DummyChargeErrCenter[*]}")
+	    PYCENTERTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyEffChargeValCenter[*]}" "${DummyEffChargeErrCenter[*]}")
 	    arr1=()
 	    arr2=()
 	    itt=0
@@ -1359,8 +1359,8 @@ if [[ $i_flag != "true" ]]; then
 	    echo "Total Effective Charge Center: ${TotDummyEffChargeValCenter} mC"
 	    echo "Total Effective Charge Center Error: ${TotDummyEffChargeErrCenter} %"
 	    echo "Run numbers: [${dummy_center[@]}]"
-	    #echo "Effective Charge per Run: [${DummyChargeValCenter[@]}]"
-	    #echo "Effective Charge Error per Run: [${DummyChargeErrCenter[@]}]"
+	    #echo "Effective Charge per Run: [${DummyEffChargeValCenter[@]}]"
+	    #echo "Effective Charge Error per Run: [${DummyEffChargeErrCenter[@]}]"
 	    #echo "Efficiency per Run: [${DummyEffValCenter[@]}]"
 	    #echo "Efficiency Error per Run: [${DummyEffErrCenter[@]}]"
 	    #echo "Theta per Run: [${DummypThetaValCenter[@]}]"

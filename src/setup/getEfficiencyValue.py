@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-04 14:21:25 trottar"
+# Time-stamp: "2024-02-11 00:44:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,18 +41,41 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         return tot_efficiency
 
-    if table_val == "effError":
+    if table_val == "efficiency_err":
         ################################################################################################################################################
-        # Grab and calculate effError 
+        # Grab and calculate efficiency_err 
 
-        from getDataTable import calculate_effError
+        from getDataTable import calculate_efficiency_err
 
-        tot_effError = calculate_effError(runNum,efficiency_table)
+        tot_efficiency_err = calculate_efficiency_err(runNum,efficiency_table)
 
         ################################################################################################################################################
 
-        return tot_effError
+        return tot_efficiency_err
 
+    if table_val == "eff_charge":
+        ################################################################################################################################################
+        # Grab and calculate eff_charge 
+
+        from getDataTable import calculate_eff_charge
+
+        eff_charge = calculate_eff_charge(runNum,eff_charge_table)
+
+        ################################################################################################################################################
+
+        return eff_charge
+
+    if table_val == "eff_charge_err":
+        ################################################################################################################################################
+        # Grab and calculate eff_charge_err 
+
+        from getDataTable import calculate_eff_charge_err
+
+        eff_charge_err = calculate_eff_charge_err(runNum,eff_charge_table)
+
+        ################################################################################################################################################
+
+        return eff_charge_err
     
     if table_val == "bcm":
         ################################################################################################################################################

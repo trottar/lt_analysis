@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 15:51:56 trottar"
+# Time-stamp: "2024-02-11 00:42:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,7 +161,7 @@ def get_efficiencies(runNum,efficiency_table):
                 "BOIL_Eff" : eff_data["BOIL_Eff"].iloc[0],
             }
             # Define dictionary of efficiency uncertainty values
-            effErrorDict ={
+            efficiency_errDict ={
                 # EDTM
                 "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],
                 ##############
@@ -214,7 +214,7 @@ def get_efficiencies(runNum,efficiency_table):
             }
 
             # Define dictionary of efficiency uncertainty values
-            effErrorDict ={
+            efficiency_errDict ={
                 # EDTM
                 "Non_Scaler_EDTM_Live_Time_ERROR" : eff_data["Non_Scaler_EDTM_Live_Time_ERROR"].iloc[0],                
                 ##############
@@ -244,7 +244,7 @@ def get_efficiencies(runNum,efficiency_table):
         print("Error: DataFrame 'eff_data' is empty for {}.".format(runNum))
 
             
-    return [effDict,effErrorDict]
+    return [effDict,efficiency_errDict]
 
 def calculate_efficiency(runNum,efficiency_table):
 
@@ -261,11 +261,11 @@ def calculate_efficiency(runNum,efficiency_table):
     
     return tot_efficiency
 
-def calculate_effError(runNum,efficiency_table):
+def calculate_efficiency_err(runNum,efficiency_table):
 
     effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
-    effErrorDict = get_efficiencies(runNum,efficiency_table)[1] # Efficiency errors dictionary
-
+    efficiency_errDict = get_efficiencies(runNum,efficiency_table)[1] # Efficiency errors dictionary
+    
     # Calculate total efficiency. The reduce function pretty much iterates on
     # its arguments which in this case is a lambda function. This lambda function
     # takes x,y from the list (ie the list of efficiencies) and multiplies them.
@@ -275,9 +275,53 @@ def calculate_effError(runNum,efficiency_table):
 
     # Calculate run by run total efficiency error
     # Error propagation by addition in quadrature
-    d_eff = np.sqrt(sum((float(efferr)/float(eff))**2 for efferr,eff in zip(effErrorDict.values(),effDict.values())))
+    d_eff = np.sqrt(sum((float(efferr)/float(eff))**2 for efferr,eff in zip(efficiency_errDict.values(),effDict.values())))
+    # Error propagation by addition in quadrature
+    tot_efficiency_err = np.sqrt((tot_efficiency**2)*(d_eff**2))
+    
+    return tot_efficiency_err
+
+def calculate_eff_charge(runNum,efficiency_table):
+
+    effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
+
+    # Calculate total efficiency. The reduce function pretty much iterates on
+    # its arguments which in this case is a lambda function. This lambda function
+    # takes x,y from the list (ie the list of efficiencies) and multiplies them.
+    # This is all pythonic mumbo-jumbo for doing the product of everything in the
+    # list. Enjoy!
+
+    # Calculate run by run total efficiency
+    tot_efficiency = reduce(lambda x, y: x*y, list(effDict.values()))
+
+    charge  = get_bcm(runNum,efficiency_table)
+
+    eff_charge = tot_efficiency*charge
+    
+    return eff_charge
+
+def calculate_eff_charge_err(runNum,efficiency_table):
+
+    effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
+    efficiency_errDict = get_efficiencies(runNum,efficiency_table)[1] # Efficiency errors dictionary
+
+    charge  = get_bcm(runNum,efficiency_table)
+    
+    # Calculate total efficiency. The reduce function pretty much iterates on
+    # its arguments which in this case is a lambda function. This lambda function
+    # takes x,y from the list (ie the list of efficiencies) and multiplies them.
+    # This is all pythonic mumbo-jumbo for doing the product of everything in the
+    # list. Enjoy!
+    tot_efficiency = reduce(lambda x, y: x*y, list(effDict.values()))
+
+    eff_charge = tot_efficiency*charge
+    
+    # Calculate run by run total efficiency error
+    # Error propagation by addition in quadrature
+    d_eff = np.sqrt(sum((float(efferr)/float(eff))**2 for efferr,eff in zip(efficiency_errDict.values(),effDict.values())))
     d_charge = 2e-6 # 200 nC
     # Error propagation by addition in quadrature
-    tot_effError = np.sqrt((tot_efficiency**2)*(d_eff**2+d_charge**2))
+    eff_charge_err = np.sqrt((eff_charge**2)*(d_eff**2+d_charge**2))
     
-    return tot_effError
+    return eff_charge_err
+
