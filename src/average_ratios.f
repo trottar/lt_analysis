@@ -44,7 +44,6 @@ c     enough space for the sets
       integer nt,nphi,it,ip
       integer nset,ipol
       real q2,eps,th_pq,tmn,tmx,r,e,er
-      real one
       real yld
       
       integer pol_set
@@ -123,7 +122,6 @@ c     Read real data.
 c            pause
 
             open(66,file=fn)
-            read(66,*) one
             do it=1,nt
                do ip=1,nphi
                   read(66,*) yld,er
@@ -144,7 +142,6 @@ c     Read real simc.
 c            pause
             
             open(66,file=fn)
-            read(66,*) one
             do it=1,nt
                do ip=1,nphi
                   read(66,*) yld,er
