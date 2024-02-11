@@ -127,7 +127,7 @@ c            pause
             do it=1,nt
                do ip=1,nphi
                   read(66,*) yld,er
-*                  print*,yld,er
+                  print*,yld,er
                   yrd(ip,it)=yrd(ip,it)+yld
                   drd(ip,it)=drd(ip,it)+er**2
                end do
