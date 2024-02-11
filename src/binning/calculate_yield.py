@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 17:38:05 trottar"
+# Time-stamp: "2024-02-10 23:33:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -520,7 +520,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         total_count = np.sum(sub_val)
         yld = total_count # Normalization applied above
         # Calculate experimental yield error (%)
-        yld_err = np.sqrt(data_charge_err**2+((np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)*100)**2)
+        print("!!!!!!!!!!!!!",data_charge_err, np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)
+        yld_err = np.sqrt(data_charge_err**2+((np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)**2))
         if yld < 0.0:
             yld = 0.0
         yield_hist[0].append(bin_val_data)            
@@ -716,7 +717,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         total_count = np.sum(sub_val)
         yld = total_count*normfac_simc
         # Calculate simc yield error (%)
-        yld_err = (np.sqrt(yld))*100
+        yld_err = (np.sqrt(yld))
         yield_hist[0].append(bin_val_simc)        
         yield_hist[1].append(yld)
         yield_err_hist[0].append(bin_val_simc)
