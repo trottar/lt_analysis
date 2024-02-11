@@ -91,8 +91,8 @@ else
     done
 fi
 
-#NumtBins=1
-#NumPhiBins=1
+NumtBins=1
+NumPhiBins=1
 #NumtBins=2
 #NumPhiBins=8
 # Q2=2p1
