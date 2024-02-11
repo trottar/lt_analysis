@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 00:44:52 trottar"
+# Time-stamp: "2024-02-11 01:09:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,7 +59,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import calculate_eff_charge
 
-        eff_charge = calculate_eff_charge(runNum,eff_charge_table)
+        eff_charge = calculate_eff_charge(runNum,efficiency_table)
 
         ################################################################################################################################################
 
@@ -71,7 +71,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import calculate_eff_charge_err
 
-        eff_charge_err = calculate_eff_charge_err(runNum,eff_charge_table)
+        eff_charge_err = calculate_eff_charge_err(runNum,efficiency_table)
 
         ################################################################################################################################################
 
