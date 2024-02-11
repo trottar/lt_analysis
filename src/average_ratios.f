@@ -7,6 +7,7 @@ c
 c     Input: yields/yields.*.dat
 c     Output: averages/aver.*.dat
 
+      character*4 inp_pid
       integer inp_pol
       real inp_Q2, inp_loeps, inp_hieps
       write(*,*) "Inputing particle, polarity, Q2, W and both epsilons:"
@@ -21,7 +22,6 @@ c     Output: averages/aver.*.dat
       call average_r(inp_pid, inp_pol, inp_Q2, inp_W,
      *     inp_hieps)
       print*,  "-------------------------------------------------"
-
       
       stop
       end
@@ -120,7 +120,7 @@ c     Read real data.
      *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
      *           i5.4,S,''dat'')') pid, pol, 
      *           nint(q2_set*10.), nint(w_set*100.), 
-     *           nint(eps_set(lh)*100.), nint(th_pq*1000.)
+     *           nint(eps_set*100.), nint(th_pq*1000.)
             print*,'fn=',fn
 c            pause
 
@@ -141,7 +141,7 @@ c     Read real simc.
      *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
      *           i5.4,S,''dat'')') pid, pol, 
      *           nint(q2_set*10.), nint(w_set*100.), 
-     *           nint(eps_set(lh)*100.), nint(th_pq*1000.)
+     *           nint(eps_set*100.), nint(th_pq*1000.)
             print*,'fn=',fn
 c            pause
             
