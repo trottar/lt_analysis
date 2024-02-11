@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:07:26 trottar"
+# Time-stamp: "2024-02-11 01:10:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,10 +47,10 @@ from getEfficiencyValue import getEfficiencyValue
 
 ################################################################################################################################################
 
-efficiency = ""
-efficiency_err = ""
-eff_charge = ""
-eff_charge_err = ""
+efficiency_lst = ""
+efficiency_err_lst = ""
+eff_charge_lst = ""
+eff_charge_err_lst = ""
 ebeam_val = ""
 pTheta_val = ""
 
