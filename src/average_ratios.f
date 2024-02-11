@@ -35,6 +35,13 @@ c     Output: averages/aver.*.dat
 
 c     Aquire yields over theta_pq settings, calculate ratio, save result
 c     in averages/aver.* .
+
+
+c     Fortran is annoying and can't find parameters
+c     dynamically (since they must be known at compile time).
+c     Therefore, I am setting is arbitrarily to allocate
+c     enough space for the sets
+      parameter (nbin = 10)
       
       integer nt,nphi,it,ip
       integer nset,ipol
@@ -50,8 +57,8 @@ c     in averages/aver.* .
 
       real t_min
       
-      real yrd(nphi,nt),drd(nphi,nt)
-      real ymc(nphi,nt),dmc(nphi,nt)
+      real yrd(nbin,nbin),drd(nbin,nbin)
+      real ymc(nbin,nbin),dmc(nbin,nbin)
 
       character*80 fn
       character*2 pol
