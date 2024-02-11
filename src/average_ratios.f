@@ -31,8 +31,6 @@ c     Output: averages/aver.*.dat
       subroutine average_r(pid,pol_set,q2_set,w_set,
      *     eps_set)
 
-      implicit none
-
 c     Aquire yields over theta_pq settings, calculate ratio, save result
 c     in averages/aver.* .
 
