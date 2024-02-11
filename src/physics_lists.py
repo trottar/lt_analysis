@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 14:28:55 trottar"
+# Time-stamp: "2024-02-11 14:30:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -597,7 +597,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if yieldval in processed_yieldvals:
                     continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_right_simc[i], (yield_simc_err_right[i]/100)*yield_simc_right_simc[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                                                                                  int(phibin_right[i]), int(tbin_right[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
 
@@ -615,7 +615,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if yieldval in processed_yieldvals:
                     continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_left_simc[i], (yield_simc_err_left[i]/100)*yield_simc_left_simc[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                                                                                  int(phibin_right[i]), int(tbin_right[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
 
@@ -633,7 +633,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 if yieldval in processed_yieldvals:
                     continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_center_simc[i], (yield_simc_err_center[i]/100)*yield_simc_center_simc[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                                                                                  int(phibin_right[i]), int(tbin_right[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
                                                                     
