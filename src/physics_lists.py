@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 20:15:16 trottar"
+# Time-stamp: "2024-02-10 20:31:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -525,7 +525,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_aver, 'r') as f:
             lines = f.readlines()
             for i, (ratio, ratio_err) in enumerate(zip(ratio_right,ratio_err_right)):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, ratio_err, int(phibin_right[i]), int(tbin_right[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, (ratio_err/100)*ratio, int(phibin_right[i]), int(tbin_right[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_aver,check_line)
@@ -540,7 +540,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_aver, 'r') as f:
             lines = f.readlines()
             for i, (ratio, ratio_err) in enumerate(zip(ratio_left,ratio_err_left)):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, ratio_err, int(phibin_left[i]), int(tbin_left[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, (ratio_err/100)*ratio, int(phibin_left[i]), int(tbin_left[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_aver,check_line)
@@ -555,7 +555,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         with open(f_aver, 'r') as f:
             lines = f.readlines()
             for i, (ratio, ratio_err) in enumerate(zip(ratio_center,ratio_err_center)):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, ratio_err, int(phibin_center[i]), int(tbin_center[i]))
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, (ratio_err/100)*ratio, int(phibin_center[i]), int(tbin_center[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_aver,check_line)
