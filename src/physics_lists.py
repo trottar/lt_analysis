@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 22:29:42 trottar"
+# Time-stamp: "2024-02-10 23:05:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,27 +207,27 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
 
     if float(runNumRight[0]) != 0:
         # Combine data from different lists into tuples
-        data_right_tuples = list(zip(tbin_right, phibin_right, ratio_right))
+        data_right_tuples = list(zip(tbin_right, phibin_right, ratio_right, ratio_err_right))
         # Sort based on tbin and phibin
         sorted_data_right_tuples = sorted(data_right_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_right, phibin_right, ratio_right = zip(*sorted_data_right_tuples[:len(tbin_right)])
+        tbin_right, phibin_right, ratio_right, ratio_err_right = zip(*sorted_data_right_tuples[:len(tbin_right)])
 
     if float(runNumLeft[0]) != 0:        
         # Combine data from different lists into tuples
-        data_left_tuples = list(zip(tbin_left, phibin_left, ratio_left))
+        data_left_tuples = list(zip(tbin_left, phibin_left, ratio_left, ratio_err_left))
         # Sort based on tbin and phibin
         sorted_data_left_tuples = sorted(data_left_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_left, phibin_left, ratio_left = zip(*sorted_data_left_tuples[:len(tbin_left)])
+        tbin_left, phibin_left, ratio_left, ratio_err_left = zip(*sorted_data_left_tuples[:len(tbin_left)])
 
     if float(runNumCenter[0]) != 0:        
         # Combine data from different lists into tuples
-        data_center_tuples = list(zip(tbin_center, phibin_center, ratio_center))
+        data_center_tuples = list(zip(tbin_center, phibin_center, ratio_center, ratio_err_center))
         # Sort based on tbin and phibin
         sorted_data_center_tuples = sorted(data_center_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_center, phibin_center, ratio_center = zip(*sorted_data_center_tuples[:len(tbin_center)])
+        tbin_center, phibin_center, ratio_center, ratio_err_center = zip(*sorted_data_center_tuples[:len(tbin_center)])
         
     ################################################################################################################################################
 
@@ -404,7 +404,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
-        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
+        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
         output_file_lst.append(f_kindata.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_kindata, "w").close()
@@ -422,7 +423,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 processed_Q2vals.add(Q2val)
 
     if float(runNumLeft[0]) != 0:
-        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
+        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
         output_file_lst.append(f_kindata.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_kindata, "w").close()
@@ -440,7 +442,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 processed_Q2vals.add(Q2val)
 
     if float(runNumCenter[0]) != 0:
-        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
+        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                  Ws.replace("p",""), float(EPSVAL)*100)
         output_file_lst.append(f_kindata.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_kindata, "w").close()
