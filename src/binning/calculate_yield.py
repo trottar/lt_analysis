@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:36:10 trottar"
+# Time-stamp: "2024-02-11 01:38:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -698,6 +698,9 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=False):
 
     tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
+
+    # Total number of events selected for setting
+    NumEvts_MM_SIMC = hist["NumEvts_MM_SIMC"]    
     
     # Initialize lists for binned_t_data, binned_hist_data
     binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=iteration)
