@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 20:41:56 trottar"
+# Time-stamp: "2024-02-10 22:29:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -356,62 +356,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
 
-    '''
-    if float(runNumRight[0]) != 0:    
-        check_line = "{:d} {} {} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
-        # Save lines in the file
-        with open(f_list_settings, 'r') as f:
-            lines = f.readlines()
-            if check_kin in line:
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
-
-    if float(runNumLeft[0]) != 0:    
-        check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
-        # Save lines in the file
-        with open(f_list_settings, 'r') as f:
-            lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
-            for line in lines:
-                if check_kin in line:
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
-
-    if float(runNumCenter[0]) != 0:    
-        check_line = "{:d} {} {} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
-        check_kin = ' '.join(check_line.split()[:4])
-        inLine = False
-        # Save lines in the file
-        with open(f_list_settings, 'r') as f:
-            lines = f.readlines()
-        # Overwrite current lines if already in file, this fixes the times bins or t-range is changed
-        with open(f_list_settings, 'w') as f:
-            for line in lines:
-                if check_kin in line:
-                    inLine = True
-                    f.write(check_line)
-                else:
-                    f.write(line)                    
-        # Append file if line not in file already
-        if not inLine:
-            write_to_file(f_list_settings,check_line)
-    '''
-
     if float(runNumRight[0]) != 0:    
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
@@ -496,7 +440,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 processed_Q2vals.add(Q2val)
 
     if float(runNumCenter[0]) != 0:
-        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_center*1000))
+        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
         output_file_lst.append(f_kindata.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_kindata, "w").close()
