@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:10:06 trottar"
+# Time-stamp: "2024-02-11 01:10:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,8 +51,8 @@ efficiency_lst = ""
 efficiency_err_lst = ""
 eff_charge_lst = ""
 eff_charge_err_lst = ""
-ebeam_val = ""
-pTheta_val = ""
+ebeam_val_lst = ""
+pTheta_val_lst = ""
 
 for runNum in RUNLIST:
 
@@ -72,8 +72,8 @@ for runNum in RUNLIST:
         efficiency_lst += " " + str(efficiency)
         efficiency_err_lst += " " + str(efficiency_err)
 
-        ebeam_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
-        pTheta_val += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
+        ebeam_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
+        pTheta_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
         
     else:
         RUNLIST.remove(runNum)
@@ -81,5 +81,5 @@ for runNum in RUNLIST:
 # Convert back to string        
 RUNLIST = ' '.join(map(str, RUNLIST))        
         
-BashInput=("{}\n{}\n{}\n{}\n{}\n{}\n{}".format(eff_charge_lst, eff_charge_err_lst, efficiency_lst, efficiency_err_lst, pTheta_val, ebeam_val, RUNLIST))
+BashInput=("{}\n{}\n{}\n{}\n{}\n{}\n{}".format(eff_charge_lst, eff_charge_err_lst, efficiency_lst, efficiency_err_lst, pTheta_val_lst, ebeam_val_lst, RUNLIST))
 print(BashInput)
