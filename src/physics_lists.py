@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 14:37:26 trottar"
+# Time-stamp: "2024-02-11 14:43:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -164,7 +164,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
                         phibin_right.append(k+1)                        
                 yield_data_right.append(nested_dict['yield'][key_tuple]["yield"])
-                yield_data_err_right.append(nested_dict['yield'][key_tuple]["yield_data_err"])
+                yield_data_err_right.append(nested_dict['yield'][key_tuple]["yield_err"])
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_DATA"]["t_bins"][i]:
@@ -173,7 +173,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
                         phibin_left.append(k+1)                        
                 yield_data_left.append(nested_dict['yield'][key_tuple]["yield"])
-                yield_data_err_left.append(nested_dict['yield'][key_tuple]["yield_data_err"])
+                yield_data_err_left.append(nested_dict['yield'][key_tuple]["yield_err"])
             if phiset == "Center":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_DATA"]["t_bins"][i]:
@@ -182,7 +182,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
                         phibin_center.append(k+1)                        
                 yield_data_center.append(nested_dict['yield'][key_tuple]["yield"])
-                yield_data_err_center.append(nested_dict['yield'][key_tuple]["yield_data_err"])
+                yield_data_err_center.append(nested_dict['yield'][key_tuple]["yield_err"])
 
         key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
         for key_tuple in yieldDict["binned_SIMC"][phiset]['yield']:
@@ -198,7 +198,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
                         phibin_right.append(k+1)                        
                 yield_simc_right.append(nested_dict['yield'][key_tuple]["yield"])
-                yield_simc_err_right.append(nested_dict['yield'][key_tuple]["yield_simc_err"])
+                yield_simc_err_right.append(nested_dict['yield'][key_tuple]["yield_err"])
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_SIMC"]["t_bins"][i]:
@@ -207,7 +207,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
                         phibin_left.append(k+1)                        
                 yield_simc_left.append(nested_dict['yield'][key_tuple]["yield"])
-                yield_simc_err_left.append(nested_dict['yield'][key_tuple]["yield_simc_err"])
+                yield_simc_err_left.append(nested_dict['yield'][key_tuple]["yield_err"])
             if phiset == "Center":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_SIMC"]["t_bins"][i]:
@@ -216,7 +216,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
                         phibin_center.append(k+1)                        
                 yield_simc_center.append(nested_dict['yield'][key_tuple]["yield"])
-                yield_simc_err_center.append(nested_dict['yield'][key_tuple]["yield_simc_err"])
+                yield_simc_err_center.append(nested_dict['yield'][key_tuple]["yield_err"])
                 
     ################################################################################################################################################
     '''
