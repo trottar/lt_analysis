@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 12:47:17 trottar"
+# Time-stamp: "2024-02-11 12:48:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -476,11 +476,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_aver,check_line)
-
-    f_aver = '{}/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
-    output_file_lst.append(f_aver.split('/src/')[1])
-    # Open the file in write mode, which creates a new empty file or overwrites the existing one
-    open(f_aver, "w").close()
                     
     if float(runNumLeft[0]) != 0:
         # Open a file in read mode
@@ -491,11 +486,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_aver,check_line)
-
-    f_aver = '{}/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
-    output_file_lst.append(f_aver.split('/src/')[1])
-    # Open the file in write mode, which creates a new empty file or overwrites the existing one
-    open(f_aver, "w").close()
                     
     if float(runNumCenter[0]) != 0:
         # Open a file in read mode
