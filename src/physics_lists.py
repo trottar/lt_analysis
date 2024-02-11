@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 13:06:25 trottar"
+# Time-stamp: "2024-02-11 13:09:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -230,7 +230,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         tbin_center, phibin_center, ratio_center, ratio_err_center = zip(*sorted_data_center_tuples[:len(tbin_center)])
 
 
-    print("!!!!!!!!!!!!!!!!",ratio,ratio_err)
+    print("!!!!!!!!!!!!!!!!",ratio_center,ratio_err_center)
     ################################################################################################################################################
 
     # Define thpq vector relative to middle setting
