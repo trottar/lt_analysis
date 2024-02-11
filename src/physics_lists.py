@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 23:05:43 trottar"
+# Time-stamp: "2024-02-10 23:08:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,7 +156,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         phibin_right.append(k+1)                        
                 ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
-                ratio_right.append(nested_dict['ratio'][key_tuple]["ratio_err"])
+                ratio_err_right.append(nested_dict['ratio'][key_tuple]["ratio_err"])
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
@@ -165,7 +165,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         phibin_left.append(k+1)                        
                 ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
-                ratio_left.append(nested_dict['ratio'][key_tuple]["ratio_err"])
+                ratio_err_left.append(nested_dict['ratio'][key_tuple]["ratio_err"])
             if phiset == "Center":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
@@ -174,7 +174,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         phibin_center.append(k+1)                        
                 ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
-                ratio_center.append(nested_dict['ratio'][key_tuple]["ratio_err"])
+                ratio_err_center.append(nested_dict['ratio'][key_tuple]["ratio_err"])
 
     ################################################################################################################################################
     '''
