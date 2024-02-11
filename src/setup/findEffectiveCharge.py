@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:06:54 trottar"
+# Time-stamp: "2024-02-11 01:07:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ for runNum in RUNLIST:
     
         efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
         efficiency_err = getEfficiencyValue(runNum,efficiency_table,"efficiency_err")
-        eff_charge = getEfficiencyValue(runNum,eff_charge_table,"eff_charge")
-        eff_charge_err = getEfficiencyValue(runNum,eff_charge_table,"eff_charge_err")
+        eff_charge = getEfficiencyValue(runNum,efficiency_table,"eff_charge")
+        eff_charge_err = getEfficiencyValue(runNum,efficiency_table,"eff_charge_err")
 
         # Run by run list of effective charge
         eff_charge_lst += " " + str(float(eff_charge))
