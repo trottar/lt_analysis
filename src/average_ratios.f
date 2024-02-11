@@ -173,12 +173,16 @@ c            pause
 
 c      pause
 
-      write(r_fn,10) pid,pol,nint(q2*10),nint(w*100),nint(eps*100)
+      write(r_fn,10) pid,pol,nint(q2_set*10),nint(w_set*100),
+     *     nint(eps_set*100)
  10   format(a4,'/averages/aver.'
      *     ,a2,'_Q',i2.2,'W',i3.3,'_',i2,'.dat')
       print*,'r_fn=',r_fn
       print*
 
+      write(*,*)'=========================='
+      write(*,*),'Epsilon=',eps_set
+      write(*,*)'--------------------------'
       open(77,file=r_fn,status='replace')
       do it=1,nt
          do ip=1,nphi
@@ -196,17 +200,14 @@ c ratio is data/simc - see GH logbook, p.55
 *     RLT (2/11/2024): Convert to proper ratio error
 *                      from just units of %
                e=(sqrt(e)/100)*r
-               write(*,*)'=========================='
-               write(*,*),'Epsilon=',eps_set
-               write(*,*)'--------------------------'
                write(*,*)'tbin=',it
                write(*,*)'phibin=',ip
               write(*,*)'R=',r,'+/-',e
-              write(*,*)'=========================='
             end if
             write(77,'(2f15.5,2i3)') r,e,ip,it
          end do
       end do
       close(77)
+      write(*,*)'=========================='      
 
       end
