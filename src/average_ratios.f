@@ -155,8 +155,8 @@ c            pause
             do it=1,nt
                do ip=1,nphi
                   write(*,*) it,ip
-                  write(*,*)'exp_yield=',yrd(ip,it),drd(ip,it)
-                  write(*,*)'MC_yield=',ymc(ip,it),dmc(ip,it)
+                  write(*,*)'Y_data=',yrd(ip,it),drd(ip,it)
+                  write(*,*)'Y_simc=',ymc(ip,it),dmc(ip,it)
                enddo
             enddo
 
@@ -195,10 +195,12 @@ c ratio is data/simc - see GH logbook, p.55
                e=drd(ip,it)+dmc(ip,it)
 *     RLT (2/11/2024): Convert to proper ratio error
 *                      from just units of %
-              e=(sqrt(e)/100)*r
-              write(*,*)'     the data/simc ratio is:'
-              write(*,'(2f15.5,2i3)')r,e,ip,it
-              write(*,*)'--------------------------'
+               e=(sqrt(e)/100)*r
+               write(*,*)'=========================='
+               write(*,*)'tbin=',it
+               write(*,*)'phibin=',ip
+              write(*,*)'R='r,'+/-',e
+              write(*,*)'=========================='
             end if
             write(77,'(2f15.5,2i3)') r,e,ip,it
          end do
