@@ -116,7 +116,7 @@ c     enough space for the sets
             WRITE(*,*) 'tmx = ', tmx
 
 c     Read real data.
-            write(fn,'(a4,''/yield/yield_data.'',a2,''_Q'',
+            write(fn,'(a4,''/yields/yield_data.'',a2,''_Q'',
      *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
      *           i5.4,S,''dat'')') pid, pol, 
      *           nint(q2_set*10.), nint(w_set*100.), 
@@ -136,13 +136,15 @@ c            pause
             end do
             close(66)
 
-c     Read simc data.
-            write(fn,'(''yields/yields.'',a2,''_'',i3.3,''_'',i2.2,
-     *      ''_'',SP,i5.4,S,''.simc'')')
-     *      pol,nint(q2_set*100.),nint(eps_set*100.),nint(th_pq*1000.)
+c     Read real simc.
+            write(fn,'(a4,''/yields/yield_simc.'',a2,''_Q'',
+     *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
+     *           i5.4,S,''dat'')') pid, pol, 
+     *           nint(q2_set*10.), nint(w_set*100.), 
+     *           nint(eps_set(lh)*100.), nint(th_pq*1000.)
             print*,'fn=',fn
 c            pause
-
+            
             open(66,file=fn)
             read(66,*) one
             do it=1,nbin
@@ -155,13 +157,13 @@ c            pause
             end do
             close(66)
 
-c            do it=1,nt
-c               do ip=1,nphi
-c                  write(*,*) it,ip
-c                  write(*,*)'exp_yield=',yrd(ip,it),drd(ip,it)
-c                  write(*,*)'MC_yield=',ymc(ip,it),dmc(ip,it)
-c               enddo
-c            enddo
+            do it=1,nt
+               do ip=1,nphi
+                  write(*,*) it,ip
+                  write(*,*)'exp_yield=',yrd(ip,it),drd(ip,it)
+                  write(*,*)'MC_yield=',ymc(ip,it),dmc(ip,it)
+               enddo
+            enddo
 
             nset=nset+1
 
@@ -189,9 +191,13 @@ c      pause
             e=0.
 c ratio is data/simc - see GH logbook, p.55
             if(ymc(ip,it).ne.0.) then
-              r=(yrd(ip,it))/ymc(ip,it)
-              e=e+(drd(ip,it))/ymc(ip,it)**2
-              e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
+               r=(yrd(ip,it))/ymc(ip,it)
+*     RLT (2/11/2024): These are G.H's equations
+*                      Removing to stay consistent
+*                      with units of %
+*     e=e+(drd(ip,it))/ymc(ip,it)**2
+*     e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
+              e=drd(ip,it)+dmc(ip,it)
               e=sqrt(e)
               write(*,*)'     the data/simc ratio is:'
               write(*,'(2f15.5,2i3)')r,e,ip,it
