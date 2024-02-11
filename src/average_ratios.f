@@ -57,7 +57,7 @@ c     enough space for the sets
       real yrd(nbin,nbin),drd(nbin,nbin)
       real ymc(nbin,nbin),dmc(nbin,nbin)
 
-      character*80 fn
+      character*80 yrd_fn,ymc_fn,r_fn
       character*2 pol
       character*4 pid
       
@@ -113,15 +113,15 @@ c     enough space for the sets
             WRITE(*,*) 'tmx = ', tmx
 
 c     Read real data.
-            write(fn,'(a4,''/yields/yield_data.'',a2,''_Q'',
+            write(yrd_fn,'(a4,''/yields/yield_data.'',a2,''_Q'',
      *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
      *           i5.4,S,''.dat'')') pid, pol, 
      *           nint(q2_set*10.), nint(w_set*100.), 
      *           nint(eps_set*100.), nint(th_pq*1000.)
-            print*,'fn=',fn
+            print*,'_yrd_fn=',yrd_fn
 c            pause
 
-            open(66,file=fn)
+            open(66,file=yrd_fn)
             do it=1,nt
                do ip=1,nphi
                   read(66,*) yld,er
@@ -133,15 +133,15 @@ c            pause
             close(66)
 
 c     Read real simc.
-            write(fn,'(a4,''/yields/yield_simc.'',a2,''_Q'',
+            write(ymc_fn,'(a4,''/yields/yield_simc.'',a2,''_Q'',
      *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
      *           i5.4,S,''.dat'')') pid, pol, 
      *           nint(q2_set*10.), nint(w_set*100.), 
      *           nint(eps_set*100.), nint(th_pq*1000.)
-            print*,'fn=',fn
+            print*,'ymc_fn=',ymc_fn
 c            pause
             
-            open(66,file=fn)
+            open(66,file=ymc_fn)
             do it=1,nt
                do ip=1,nphi
                   read(66,*) yld,er
@@ -173,13 +173,13 @@ c            pause
 
 c      pause
 
-      write(fn,10) pid,pol,nint(q2*10),nint(w*100),nint(eps*100)
+      write(r_fn,10) pid,pol,nint(q2*10),nint(w*100),nint(eps*100)
  10   format(a4,'/averages/aver.'
      *     ,a2,'_Q',i2.2,'W',i3.3,'_',i2,'.dat')
-      print*,'fn=',fn
+      print*,'r_fn=',r_fn
       print*
 
-      open(77,file=fn,status='replace')
+      open(77,file=r_fn,status='replace')
       do it=1,nt
          do ip=1,nphi
             r=0.
