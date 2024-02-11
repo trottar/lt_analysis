@@ -118,7 +118,7 @@ c     Read real data.
      *           i5.4,S,''.dat'')') pid, pol, 
      *           nint(q2_set*10.), nint(w_set*100.), 
      *           nint(eps_set*100.), nint(th_pq*1000.)
-            print*,'_yrd_fn=',yrd_fn
+            print*,'yrd_fn=',yrd_fn
 c            pause
 
             open(66,file=yrd_fn)
