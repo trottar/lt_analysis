@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 14:43:34 trottar"
+# Time-stamp: "2024-02-11 14:48:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -528,7 +528,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
-        f_yield = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+        f_yield_data = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
         output_file_lst.append(f_yield_data.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
@@ -546,7 +546,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 processed_yieldvals.add(yieldval)
 
     if float(runNumLeft[0]) != 0:
-        f_yield = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+        f_yield_data = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
         output_file_lst.append(f_yield_data.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
@@ -564,7 +564,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 processed_yieldvals.add(yieldval)
 
     if float(runNumCenter[0]) != 0:
-        f_yield = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+        f_yield_data = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                   Ws.replace("p",""), float(EPSVAL)*100)
         output_file_lst.append(f_yield_data.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
@@ -584,7 +584,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
-        f_yield = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+        f_yield_simc = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
         output_file_lst.append(f_yield_simc.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
@@ -602,7 +602,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 processed_yieldvals.add(yieldval)
 
     if float(runNumLeft[0]) != 0:
-        f_yield = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+        f_yield_simc = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
         output_file_lst.append(f_yield_simc.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
@@ -620,7 +620,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 processed_yieldvals.add(yieldval)
 
     if float(runNumCenter[0]) != 0:
-        f_yield = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+        f_yield_simc = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                   Ws.replace("p",""), float(EPSVAL)*100)
         output_file_lst.append(f_yield_simc.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
