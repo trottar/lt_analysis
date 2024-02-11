@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 14:37:49 trottar"
+# Time-stamp: "2024-02-11 16:18:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -490,11 +490,13 @@ yieldDict = {}
 yieldDict.update(find_yield_data(histlist, inpDict))
 yieldDict.update(find_yield_simc(histlist, inpDict))
 
+'''
 sys.path.append("binning")
 from calculate_ratio import find_ratio
 
 ratioDict = {}
 ratioDict.update(find_ratio(histlist, inpDict, yieldDict))
+'''
 
 sys.path.append("binning")
 from ave_per_bin import ave_per_bin_data, ave_per_bin_simc
