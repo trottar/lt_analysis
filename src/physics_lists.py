@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 14:32:28 trottar"
+# Time-stamp: "2024-02-10 20:15:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,7 +62,13 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     data_charge_center = inpDict["data_charge_center"] 
     dummy_charge_right = inpDict["dummy_charge_right"] 
     dummy_charge_left = inpDict["dummy_charge_left"] 
-    dummy_charge_center = inpDict["dummy_charge_center"] 
+    dummy_charge_center = inpDict["dummy_charge_center"]
+    data_charge_err_right = inpDict["data_charge_err_right"] 
+    data_charge_err_left = inpDict["data_charge_err_left"] 
+    data_charge_err_center = inpDict["data_charge_err_center"] 
+    dummy_charge_err_right = inpDict["dummy_charge_err_right"] 
+    dummy_charge_err_left = inpDict["dummy_charge_err_left"] 
+    dummy_charge_err_center = inpDict["dummy_charge_err_center"]    
     InData_efficiency_right = inpDict["InData_efficiency_right"] 
     InData_efficiency_left = inpDict["InData_efficiency_left"] 
     InData_efficiency_center = inpDict["InData_efficiency_center"]
@@ -103,6 +109,10 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     ratio_right = []
     ratio_left = []
     ratio_center = []
+
+    ratio_err_right = []
+    ratio_err_left = []
+    ratio_err_center = []
 
     tbin_right = []
     tbin_left = []
@@ -146,6 +156,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         phibin_right.append(k+1)                        
                 ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
+                ratio_right.append(nested_dict['ratio'][key_tuple]["ratio_err"])
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
@@ -154,6 +165,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         phibin_left.append(k+1)                        
                 ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
+                ratio_left.append(nested_dict['ratio'][key_tuple]["ratio_err"])
             if phiset == "Center":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == ratioDict["binned"]["t_bins"][i]:
@@ -162,6 +174,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     if phi_bin == ratioDict["binned"]["phi_bins"][j]:
                         phibin_center.append(k+1)                        
                 ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
+                ratio_center.append(nested_dict['ratio'][key_tuple]["ratio_err"])
 
     ################################################################################################################################################
     '''
@@ -458,7 +471,9 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_right_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], 0.5, averW_right_data[i], 0.5, avert_right_data[i], 0.5)
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], (data_charge_err_right/100)*averQ2_right_data[i], \
+                                                                                  averW_right_data[i], (data_charge_err_right/100)*averW_right_data[i], \
+                                                                                  avert_right_data[i], (data_charge_err_right/100)*avert_right_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
@@ -474,12 +489,14 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_left_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], 0.5, averW_left_data[i], 0.5, avert_left_data[i], 0.5)
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], (data_charge_err_left/100)*averQ2_left_data[i], \
+                                                                                  averW_left_data[i], (data_charge_err_left/100)*averW_left_data[i], \
+                                                                                  avert_left_data[i], (data_charge_err_left/100)*avert_left_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
     if float(runNumCenter[0]) != 0:
-        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
+        f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100, int(thpq_center*1000))
         output_file_lst.append(f_kindata.split('/src/')[1])
         # Open the file in write mode, which creates a new empty file or overwrites the existing one
         open(f_kindata, "w").close()
@@ -490,7 +507,9 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_center_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], 0.5, averW_center_data[i], 0.5, avert_center_data[i], 0.5)
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], (data_charge_err_center/100)*averQ2_center_data[i], \
+                                                                                  averW_center_data[i], (data_charge_err_center/100)*averW_center_data[i], \
+                                                                                  avert_center_data[i], (data_charge_err_center/100)*avert_center_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
                 
@@ -505,8 +524,8 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_aver, 'r') as f:
             lines = f.readlines()
-            for i, ratio in enumerate(ratio_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.5, int(phibin_right[i]), int(tbin_right[i]))
+            for i, (ratio, ratio_err) in enumerate(zip(ratio_right,ratio_err_right)):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, ratio_err, int(phibin_right[i]), int(tbin_right[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_aver,check_line)
@@ -516,12 +535,12 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     # Open the file in write mode, which creates a new empty file or overwrites the existing one
     open(f_aver, "w").close()
 
-    if float(runNumLeft[0]) != 0:        
+    if float(runNumLeft[0]) != 0:
         # Open a file in read mode
         with open(f_aver, 'r') as f:
             lines = f.readlines()
-            for i, ratio in enumerate(ratio_left):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.5, int(phibin_left[i]), int(tbin_left[i]))
+            for i, (ratio, ratio_err) in enumerate(zip(ratio_left,ratio_err_left)):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, ratio_err, int(phibin_left[i]), int(tbin_left[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_aver,check_line)
@@ -531,12 +550,12 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     # Open the file in write mode, which creates a new empty file or overwrites the existing one
     open(f_aver, "w").close()
 
-    if float(runNumCenter[0]) != 0:        
+    if float(runNumCenter[0]) != 0:
         # Open a file in read mode
         with open(f_aver, 'r') as f:
             lines = f.readlines()
-            for i, ratio in enumerate(ratio_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, 0.5, int(phibin_center[i]), int(tbin_center[i]))
+            for i, (ratio, ratio_err) in enumerate(zip(ratio_center,ratio_err_center)):
+                check_line = "{:.4f} {:.4f} {} {}\n".format(ratio, ratio_err, int(phibin_center[i]), int(tbin_center[i]))
                 # Check if the line already exists
                 if check_line not in lines:
                     write_to_file(f_aver,check_line)

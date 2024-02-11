@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 19:55:13 trottar"
+# Time-stamp: "2024-02-10 20:06:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -115,7 +115,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             data_nested_dict = yieldDict["binned_DATA"][phiset]
             i = data_key_tuple[0] # t bin
             j = data_key_tuple[1] # phi bin
-            histbinDict["H_yield_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = TH1D("H_yield_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data Total Events (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 1.0)
+            histbinDict["H_yield_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = TH1D("H_yield_DATA_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Data Total Events (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 100.0)
 
     # Loop over each tuple key in the dictionary
     for phiset in phisetlist:
@@ -124,7 +124,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             simc_nested_dict = yieldDict["binned_SIMC"][phiset]
             i = simc_key_tuple[0] # t bin
             j = simc_key_tuple[1] # phi bin
-            histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = TH1D("H_yield_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc Total Events (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 1.0)
+            histbinDict["H_yield_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1))] = TH1D("H_yield_SIMC_{}_{}_{}".format(phiset, str(i+1), str(j+1)), "{} Simc Total Events (t bin {}, phi bin {})".format(phiset, str(i+1), str(j+1)), 100, 0.0, 100.0)
 
     # Ratio histogram
     for phiset in phisetlist:
