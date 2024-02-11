@@ -116,7 +116,7 @@ c     enough space for the sets
 c     Read real data.
             write(fn,'(a4,''/yields/yield_data.'',a2,''_Q'',
      *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
-     *           i5.4,S,''dat'')') pid, pol, 
+     *           i5.4,S,''.dat'')') pid, pol, 
      *           nint(q2_set*10.), nint(w_set*100.), 
      *           nint(eps_set*100.), nint(th_pq*1000.)
             print*,'fn=',fn
@@ -137,7 +137,7 @@ c            pause
 c     Read real simc.
             write(fn,'(a4,''/yields/yield_simc.'',a2,''_Q'',
      *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
-     *           i5.4,S,''dat'')') pid, pol, 
+     *           i5.4,S,''.dat'')') pid, pol, 
      *           nint(q2_set*10.), nint(w_set*100.), 
      *           nint(eps_set*100.), nint(th_pq*1000.)
             print*,'fn=',fn
