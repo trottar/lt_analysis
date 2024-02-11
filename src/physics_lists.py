@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 14:30:48 trottar"
+# Time-stamp: "2024-02-11 14:37:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,7 +37,7 @@ from utility import write_to_file, replace_line
 
 ###############################################################################################################################################
 
-def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst):
+def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst):
 
     ################################################################################################################################################
 
