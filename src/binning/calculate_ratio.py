@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 19:17:32 trottar"
+# Time-stamp: "2024-02-11 14:26:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,10 +62,10 @@ def calculate_ratio(kin_type, phiset, yieldDict):
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
         # Fill histogram
-        yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)][1]
-        yield_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}".format(kin_type)][1]
-        yield_err_data = data_nested_dict[kin_type][data_key_tuple]["{}_err".format(kin_type)][1]
-        yield_err_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}_err".format(kin_type)][1]        
+        yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]
+        yield_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}".format(kin_type)]
+        yield_err_data = data_nested_dict[kin_type][data_key_tuple]["{}_err".format(kin_type)]
+        yield_err_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}_err".format(kin_type)]        
         #print("\nYield_data: {}".format(yield_data))
         #print("Yield_simc: {}".format(yield_simc))
         try:
