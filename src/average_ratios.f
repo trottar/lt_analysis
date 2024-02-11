@@ -204,7 +204,7 @@ c ratio is data/simc - see GH logbook, p.55
                write(*,*)'phibin=',ip
               write(*,*)'R=',r,'+/-',e
             end if
-            write(77,'(2f15.5,2i3)') r,e,ip,it
+            write(77,'(2f9.5,2i3)') r,e,ip,it
          end do
       end do
       close(77)
