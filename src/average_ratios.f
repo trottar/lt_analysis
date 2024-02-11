@@ -9,14 +9,17 @@ c     Output: averages/aver.*.dat
 
       integer inp_pol
       real inp_Q2, inp_loeps, inp_hieps
-      write(*,*) "Please input your polarity, Q2 and low+high epsilon:"
-      read(*,*) inp_pol, inp_Q2, inp_loeps, inp_hieps
+      write(*,*) "Inputing particle, polarity, Q2, W and both epsilons:"
+      read(*,*) inp_pid, inp_pol, inp_Q2, inp_W, inp_loeps, inp_hieps
 
-      write(*,*) "POL = ",inp_pol,"Q2 = ",inp_Q2,
-     *           "low_eps = ",inp_loeps,"high_eps = ",inp_hieps
+      write(*,*) "PID = ",inp_pid,"POL = ",inp_pol,
+     *     "Q2 = ",inp_Q2,"W = ",inp_W,
+     *     "low_eps = ",inp_loeps,"high_eps = ",inp_hieps
       
-      call average_r(inp_pol, inp_Q2, inp_loeps)
-      call average_r(inp_pol, inp_Q2, inp_hieps)
+      call average_r(inp_pid, inp_pol, inp_Q2, inp_W,
+     *     inp_loeps)
+      call average_r(inp_pid, inp_pol, inp_Q2, inp_W,
+     *     inp_hieps)
       print*,  "-------------------------------------------------"
 
       
@@ -25,46 +28,73 @@ c     Output: averages/aver.*.dat
 
 *-----------------------------------------------------------------------
 
-      subroutine average_r(pol_set,q2_set,eps_set)
+      subroutine average_r(pid,pol_set,q2_set,w_set,
+     *     eps_set)
 
       implicit none
 
 c     Aquire yields over theta_pq settings, calculate ratio, save result
 c     in averages/aver.* .
 
+
+c     Fortran is annoying and can't find parameters
+c     dynamically (since they must be known at compile time).
+c     Therefore, I am setting is arbitrarily to allocate
+c     enough space for the sets
+      parameter (nbin = 10)
+      
       integer nt,nphi,it,ip
       integer nset,ipol
-      integer nbin
       real q2,eps,th_pq,tmn,tmx,r,e,er
       real one
-      real yd
+      real yld
+      
+      integer pol_set
+      real q2_set, w_set
 
-      parameter (nt=6,nphi=16)
+      real q2_bin, w_bin
+      integer t_bin, phi_bin
 
+      real t_min
+      
       real yrd(nphi,nt),drd(nphi,nt)
-      real ydm(nphi,nt),ddm(nphi,nt)
       real ymc(nphi,nt),dmc(nphi,nt)
 
       character*80 fn
       character*2 pol
+      character*4 pid
+      
+      character(len=100) :: fn_t_bins
+      
+!     Construct the file path using a format string
+      write(fn_t_bins, '(a, a, i2.2, a, i3.3, a)') trim(pid),
+     *     '/t_bin_interval_Q', nint(q2_set*10), 'W', nint(w_set*100)
 
+!     Open the file
+      open (unit=22, file=fn_t_bins, action='read')
+      read (22, *) q2_bin, w_bin, t_bin, phi_bin
+      
+      close(22)
+
+      nt = t_bin
+      nphi = phi_bin
+      
       do it=1,nt
          do ip=1,nphi
             yrd(ip,it)=0.
             drd(ip,it)=0.
-            ydm(ip,it)=0.
-            ddm(ip,it)=0.
             ymc(ip,it)=0.
             dmc(ip,it)=0.
          end do
       end do
 
       nset=0
-      open(55,file='./list.settings')
+      open(55, file=trim(pid) // '/list.settings')
       do while(.true.)
 
-         read(55,*,end=9) ipol,q2,eps,th_pq,tmn,tmx,nbin
-         if(ipol.eq.pol_set.and.q2.eq.q2_set.and.eps.eq.eps_set) then
+         read(55,*,end=9) ipol,q2,w,eps,th_pq,tmn,tmx         
+         if(ipol.eq.pol_set.and.q2.eq.q2_set.and.
+     *        w.eq.w_set.and.eps.eq.eps_set) then
 
             if(ipol.eq.-1) then
                pol='mn'
@@ -74,13 +104,23 @@ c     in averages/aver.* .
                stop '*** aver: wrong pol ***'
             endif
 
-            write(*,*)'We are averaging the following kinematics:'
-            write(*,*)ipol,q2,eps,th_pq,pol
+            WRITE(*,*) '------------'
+            WRITE(*,*) 'Values read:'
+            WRITE(*,*) '------------'
+            WRITE(*,*) 'ipol = ', ipol
+            WRITE(*,*) 'pol = ', pol
+            WRITE(*,*) 'q2 = ', q2
+            WRITE(*,*) 'eps = ', eps
+            WRITE(*,*) 'th_pq = ', th_pq
+            WRITE(*,*) 'tmn = ', tmn
+            WRITE(*,*) 'tmx = ', tmx
 
 c     Read real data.
-            write(fn,'(''yields/yields.'',
-     *      a2,''_'',i3.3,''_'',i2.2,''_'',SP,i5.4,S,''.target'')')
-     *      pol,nint(q2_set*100.),nint(eps_set*100.),nint(th_pq*1000.)
+            write(fn,'(a4,''/yield/yield_data.'',a2,''_Q'',
+     *           i2.2,''W'',i3.3,''_'',i2.2,''_'',SP,
+     *           i5.4,S,''dat'')') pid, pol, 
+     *           nint(q2_set*10.), nint(w_set*100.), 
+     *           nint(eps_set(lh)*100.), nint(th_pq*1000.)
             print*,'fn=',fn
 c            pause
 
@@ -88,29 +128,10 @@ c            pause
             read(66,*) one
             do it=1,nbin
                do ip=1,nphi
-                  read(66,*) yd,er
-*                  print*,yd,er
-                  yrd(ip,it)=yrd(ip,it)+yd
+                  read(66,*) yld,er
+*                  print*,yld,er
+                  yrd(ip,it)=yrd(ip,it)+yld
                   drd(ip,it)=drd(ip,it)+er**2
-               end do
-            end do
-            close(66)
-
-c     Read dummy data.
-            write(fn,'(''yields/yields.'',
-     *      a2,''_'',i3.3,''_'',i2.2,''_'',SP,i5.4,S,''.dummy'')')
-     *      pol,nint(q2_set*100.),nint(eps_set*100.),nint(th_pq*1000.)
-            print*,'fn=',fn
-c            pause
-
-            open(66,file=fn)
-            read(66,*) one
-            do it=1,nbin
-               do ip=1,nphi
-                  read(66,*) yd,er
-*                  print*,yd,er
-                  ydm(ip,it)=ydm(ip,it)+yd
-                  ddm(ip,it)=ddm(ip,it)+er**2
                end do
             end do
             close(66)
@@ -126,9 +147,9 @@ c            pause
             read(66,*) one
             do it=1,nbin
                do ip=1,nphi
-                  read(66,*) yd,er
-*                  print*,yd,er
-                  ymc(ip,it)=ymc(ip,it)+yd
+                  read(66,*) yld,er
+*                  print*,yld,er
+                  ymc(ip,it)=ymc(ip,it)+yld
                   dmc(ip,it)=dmc(ip,it)+er**2
                end do
             end do
@@ -138,7 +159,6 @@ c            do it=1,nt
 c               do ip=1,nphi
 c                  write(*,*) it,ip
 c                  write(*,*)'exp_yield=',yrd(ip,it),drd(ip,it)
-c                  write(*,*)'dummy_yield=',ydm(ip,it),ddm(ip,it)
 c                  write(*,*)'MC_yield=',ymc(ip,it),dmc(ip,it)
 c               enddo
 c            enddo
@@ -156,8 +176,9 @@ c            enddo
 
 c      pause
 
-      write(fn,'(''averages/aver.'',a2,''_'',i3.3,''_'',i2.2,''.dat'')'
-     *     )pol,nint(q2_set*100.),nint(eps_set*100.)
+      write(fn,10) pid,pol,nint(q2*10),nint(w*100),nint(eps*100)
+ 10   format(a4,'/averages/aver.'
+     *     ,a2,'_Q',i2.2,'W',i3.3,'_',i2,'.dat')
       print*,'fn=',fn
       print*
 
@@ -168,24 +189,14 @@ c      pause
             e=0.
 c ratio is data/simc - see GH logbook, p.55
             if(ymc(ip,it).ne.0.) then
-              r=(yrd(ip,it)-ydm(ip,it))/ymc(ip,it)
-              e=e+(drd(ip,it)+ddm(ip,it))/ymc(ip,it)**2
+              r=(yrd(ip,it))/ymc(ip,it)
+              e=e+(drd(ip,it))/ymc(ip,it)**2
               e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
               e=sqrt(e)
               write(*,*)'     the data/simc ratio is:'
               write(*,'(2f15.5,2i3)')r,e,ip,it
               write(*,*)'--------------------------'
             end if
-c ratio is simc/data - see GH logbook, p.55
-c            if ((yrd(ip,it)-ydm(ip,it)).ne.0) then
-c              r=ymc(ip,it)/(yrd(ip,it)-ydm(ip,it))
-c              e=e+(drd(ip,it)+ddm(ip,it))*(r/(yrd(ip,it)-ydm(ip,it)))**2
-c              e=e+dmc(ip,it)/(yrd(ip,it)-ydm(ip,it))**2
-c              e=sqrt(e)
-c              write(*,*)'     the simc/data ratio is:'
-c              write(*,'(2f15.5,2i3)')r,e,ip,it
-c              write(*,*)'--------------------------'
-c            end if
             write(77,'(2f15.5,2i3)') r,e,ip,it
          end do
       end do

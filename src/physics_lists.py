@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 13:09:42 trottar"
+# Time-stamp: "2024-02-11 14:21:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,14 +106,22 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
     averW_center_data = []
     avert_center_data = []
 
-    ratio_right = []
-    ratio_left = []
-    ratio_center = []
+    yield_data_right = []
+    yield_data_left = []
+    yield_data_center = []
 
-    ratio_err_right = []
-    ratio_err_left = []
-    ratio_err_center = []
+    yield_data_err_right = []
+    yield_data_err_left = []
+    yield_data_err_center = []
 
+    yield_simc_right = []
+    yield_simc_left = []
+    yield_simc_center = []
+
+    yield_simc_err_right = []
+    yield_simc_err_left = []
+    yield_simc_err_center = []
+    
     tbin_right = []
     tbin_left = []
     tbin_center = []
@@ -142,40 +150,74 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                 averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
                 avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
                 
-        key_tuples = list(ratioDict["binned"][phiset]['ratio'])
-        for key_tuple in ratioDict["binned"][phiset]['ratio']:
+        key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
+        for key_tuple in yieldDict["binned_DATA"][phiset]['yield']:
             # Access the nested dictionary using the tuple key
-            nested_dict = ratioDict["binned"][phiset]
+            nested_dict = yieldDict["binned_DATA"][phiset]
             i = key_tuple[0] # t bin
             j = key_tuple[1] # phi bin
             if phiset == "Right":
                 for k, t_bin in enumerate(t_bins):
-                    if t_bin == ratioDict["binned"]["t_bins"][i]:
+                    if t_bin == yieldDict["binned_DATA"]["t_bins"][i]:
                         tbin_right.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
-                    if phi_bin == ratioDict["binned"]["phi_bins"][j]:
+                    if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
                         phibin_right.append(k+1)                        
-                ratio_right.append(nested_dict['ratio'][key_tuple]["ratio"])
-                ratio_err_right.append(nested_dict['ratio'][key_tuple]["ratio_err"])
+                yield_data_right.append(nested_dict['yield'][key_tuple]["yield"])
+                yield_data_err_right.append(nested_dict['yield'][key_tuple]["yield_data_err"])
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
-                    if t_bin == ratioDict["binned"]["t_bins"][i]:
+                    if t_bin == yieldDict["binned_DATA"]["t_bins"][i]:
                         tbin_left.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
-                    if phi_bin == ratioDict["binned"]["phi_bins"][j]:
+                    if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
                         phibin_left.append(k+1)                        
-                ratio_left.append(nested_dict['ratio'][key_tuple]["ratio"])
-                ratio_err_left.append(nested_dict['ratio'][key_tuple]["ratio_err"])
+                yield_data_left.append(nested_dict['yield'][key_tuple]["yield"])
+                yield_data_err_left.append(nested_dict['yield'][key_tuple]["yield_data_err"])
             if phiset == "Center":
                 for k, t_bin in enumerate(t_bins):
-                    if t_bin == ratioDict["binned"]["t_bins"][i]:
+                    if t_bin == yieldDict["binned_DATA"]["t_bins"][i]:
                         tbin_center.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
-                    if phi_bin == ratioDict["binned"]["phi_bins"][j]:
+                    if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
                         phibin_center.append(k+1)                        
-                ratio_center.append(nested_dict['ratio'][key_tuple]["ratio"])
-                ratio_err_center.append(nested_dict['ratio'][key_tuple]["ratio_err"])
+                yield_data_center.append(nested_dict['yield'][key_tuple]["yield"])
+                yield_data_err_center.append(nested_dict['yield'][key_tuple]["yield_data_err"])
 
+        key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
+        for key_tuple in yieldDict["binned_SIMC"][phiset]['yield']:
+            # Access the nested dictionary using the tuple key
+            nested_dict = yieldDict["binned_SIMC"][phiset]
+            i = key_tuple[0] # t bin
+            j = key_tuple[1] # phi bin
+            if phiset == "Right":
+                for k, t_bin in enumerate(t_bins):
+                    if t_bin == yieldDict["binned_SIMC"]["t_bins"][i]:
+                        tbin_right.append(k+1)
+                for k, phi_bin in enumerate(phi_bins):
+                    if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
+                        phibin_right.append(k+1)                        
+                yield_simc_right.append(nested_dict['yield'][key_tuple]["yield"])
+                yield_simc_err_right.append(nested_dict['yield'][key_tuple]["yield_simc_err"])
+            if phiset == "Left":
+                for k, t_bin in enumerate(t_bins):
+                    if t_bin == yieldDict["binned_SIMC"]["t_bins"][i]:
+                        tbin_left.append(k+1)
+                for k, phi_bin in enumerate(phi_bins):
+                    if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
+                        phibin_left.append(k+1)                        
+                yield_simc_left.append(nested_dict['yield'][key_tuple]["yield"])
+                yield_simc_err_left.append(nested_dict['yield'][key_tuple]["yield_simc_err"])
+            if phiset == "Center":
+                for k, t_bin in enumerate(t_bins):
+                    if t_bin == yieldDict["binned_SIMC"]["t_bins"][i]:
+                        tbin_center.append(k+1)
+                for k, phi_bin in enumerate(phi_bins):
+                    if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
+                        phibin_center.append(k+1)                        
+                yield_simc_center.append(nested_dict['yield'][key_tuple]["yield"])
+                yield_simc_err_center.append(nested_dict['yield'][key_tuple]["yield_simc_err"])
+                
     ################################################################################################################################################
     '''
     Need to sort data properly from least to greatest so that the fortran binning stays consistent (ie the lowest tbin corresponds to the first iteration)
@@ -207,30 +249,52 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
 
     if float(runNumRight[0]) != 0:
         # Combine data from different lists into tuples
-        data_right_tuples = list(zip(tbin_right, phibin_right, ratio_right, ratio_err_right))
+        data_right_tuples = list(zip(tbin_right, phibin_right, yield_data_right, yield_data_err_right))
         # Sort based on tbin and phibin
         sorted_data_right_tuples = sorted(data_right_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_right, phibin_right, ratio_right, ratio_err_right = zip(*sorted_data_right_tuples[:len(tbin_right)])
+        tbin_right, phibin_right, yield_data_right, yield_data_err_right = zip(*sorted_data_right_tuples[:len(tbin_right)])
 
     if float(runNumLeft[0]) != 0:        
         # Combine data from different lists into tuples
-        data_left_tuples = list(zip(tbin_left, phibin_left, ratio_left, ratio_err_left))
+        data_left_tuples = list(zip(tbin_left, phibin_left, yield_data_left, yield_data_err_left))
         # Sort based on tbin and phibin
         sorted_data_left_tuples = sorted(data_left_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_left, phibin_left, ratio_left, ratio_err_left = zip(*sorted_data_left_tuples[:len(tbin_left)])
+        tbin_left, phibin_left, yield_data_left, yield_data_err_left = zip(*sorted_data_left_tuples[:len(tbin_left)])
 
     if float(runNumCenter[0]) != 0:        
         # Combine data from different lists into tuples
-        data_center_tuples = list(zip(tbin_center, phibin_center, ratio_center, ratio_err_center))
+        data_center_tuples = list(zip(tbin_center, phibin_center, yield_data_center, yield_data_err_center))
         # Sort based on tbin and phibin
         sorted_data_center_tuples = sorted(data_center_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_center, phibin_center, ratio_center, ratio_err_center = zip(*sorted_data_center_tuples[:len(tbin_center)])
+        tbin_center, phibin_center, yield_data_center, yield_data_err_center = zip(*sorted_data_center_tuples[:len(tbin_center)])
 
+    if float(runNumRight[0]) != 0:
+        # Combine simc from different lists into tuples
+        simc_right_tuples = list(zip(tbin_right, phibin_right, yield_simc_right, yield_simc_err_right))
+        # Sort based on tbin and phibin
+        sorted_simc_right_tuples = sorted(simc_right_tuples, key=lambda x: (x[0], x[1]))
+        # Extract sorted values back into separate lists
+        tbin_right, phibin_right, yield_simc_right, yield_simc_err_right = zip(*sorted_simc_right_tuples[:len(tbin_right)])
 
-    print("!!!!!!!!!!!!!!!!",ratio_center,ratio_err_center)
+    if float(runNumLeft[0]) != 0:        
+        # Combine simc from different lists into tuples
+        simc_left_tuples = list(zip(tbin_left, phibin_left, yield_simc_left, yield_simc_err_left))
+        # Sort based on tbin and phibin
+        sorted_simc_left_tuples = sorted(simc_left_tuples, key=lambda x: (x[0], x[1]))
+        # Extract sorted values back into separate lists
+        tbin_left, phibin_left, yield_simc_left, yield_simc_err_left = zip(*sorted_simc_left_tuples[:len(tbin_left)])
+
+    if float(runNumCenter[0]) != 0:        
+        # Combine simc from different lists into tuples
+        simc_center_tuples = list(zip(tbin_center, phibin_center, yield_simc_center, yield_simc_err_center))
+        # Sort based on tbin and phibin
+        sorted_simc_center_tuples = sorted(simc_center_tuples, key=lambda x: (x[0], x[1]))
+        # Extract sorted values back into separate lists
+        tbin_center, phibin_center, yield_simc_center, yield_simc_err_center = zip(*sorted_simc_center_tuples[:len(tbin_center)])
+        
     ################################################################################################################################################
 
     # Define thpq vector relative to middle setting
@@ -267,7 +331,6 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                     break
                 else:
                     continue
-
 
     ################################################################################################################################################
 
@@ -461,9 +524,122 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
                                                                                   avert_center_data[i], (data_charge_err_center/100)*avert_center_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
-                
+
     ################################################################################################################################################
 
+    if float(runNumRight[0]) != 0:
+        f_yield = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
+        output_file_lst.append(f_yield_data.split('/src/')[1])
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_yield, "w").close()
+
+        processed_yieldvals = set()
+        # Open a file in read mode
+        with open(f_yield, 'r') as f:
+            for i, yieldval in enumerate(yield_data_right_data):
+                if yieldval in processed_yieldvals:
+                    continue
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_data_right_data[i], (yield_data_err_right[i]/100)*yield_data_right_data[i], \
+                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                write_to_file(f_yield,check_line)
+                processed_yieldvals.add(yieldval)
+
+    if float(runNumLeft[0]) != 0:
+        f_yield = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
+        output_file_lst.append(f_yield_data.split('/src/')[1])
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_yield, "w").close()
+
+        processed_yieldvals = set()
+        # Open a file in read mode
+        with open(f_yield, 'r') as f:
+            for i, yieldval in enumerate(yield_data_left_data):
+                if yieldval in processed_yieldvals:
+                    continue
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_data_left_data[i], (yield_data_err_left[i]/100)*yield_data_left_data[i], \
+                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                write_to_file(f_yield,check_line)
+                processed_yieldvals.add(yieldval)
+
+    if float(runNumCenter[0]) != 0:
+        f_yield = '{}/src/{}/yield/yield_data.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                  Ws.replace("p",""), float(EPSVAL)*100)
+        output_file_lst.append(f_yield_data.split('/src/')[1])
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_yield, "w").close()
+
+        processed_yieldvals = set()
+        # Open a file in read mode
+        with open(f_yield, 'r') as f:
+            for i, yieldval in enumerate(yield_data_center_data):
+                if yieldval in processed_yieldvals:
+                    continue
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_data_center_data[i], (yield_data_err_center[i]/100)*yield_data_center_data[i], \
+                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                write_to_file(f_yield,check_line)
+                processed_yieldvals.add(yieldval)
+
+    ################################################################################################################################################
+
+    if float(runNumRight[0]) != 0:
+        f_yield = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
+        output_file_lst.append(f_yield_simc.split('/src/')[1])
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_yield, "w").close()
+
+        processed_yieldvals = set()
+        # Open a file in read mode
+        with open(f_yield, 'r') as f:
+            for i, yieldval in enumerate(yield_simc_right_simc):
+                if yieldval in processed_yieldvals:
+                    continue
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_right_simc[i], (yield_simc_err_right[i]/100)*yield_simc_right_simc[i], \
+                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                write_to_file(f_yield,check_line)
+                processed_yieldvals.add(yieldval)
+
+    if float(runNumLeft[0]) != 0:
+        f_yield = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
+        output_file_lst.append(f_yield_simc.split('/src/')[1])
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_yield, "w").close()
+
+        processed_yieldvals = set()
+        # Open a file in read mode
+        with open(f_yield, 'r') as f:
+            for i, yieldval in enumerate(yield_simc_left_simc):
+                if yieldval in processed_yieldvals:
+                    continue
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_left_simc[i], (yield_simc_err_left[i]/100)*yield_simc_left_simc[i], \
+                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                write_to_file(f_yield,check_line)
+                processed_yieldvals.add(yieldval)
+
+    if float(runNumCenter[0]) != 0:
+        f_yield = '{}/src/{}/yield/yield_simc.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                  Ws.replace("p",""), float(EPSVAL)*100)
+        output_file_lst.append(f_yield_simc.split('/src/')[1])
+        # Open the file in write mode, which creates a new empty file or overwrites the existing one
+        open(f_yield, "w").close()
+
+        processed_yieldvals = set()
+        # Open a file in read mode
+        with open(f_yield, 'r') as f:
+            for i, yieldval in enumerate(yield_simc_center_simc):
+                if yieldval in processed_yieldvals:
+                    continue
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_center_simc[i], (yield_simc_err_center[i]/100)*yield_simc_center_simc[i], \
+                                                                                  int(phibin_right[i]), int(tbin_right[i])
+                write_to_file(f_yield,check_line)
+                processed_yieldvals.add(yieldval)
+                                                                    
+    ################################################################################################################################################
+
+    '''
     f_aver = '{}/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), Ws.replace("p",""), float(EPSVAL)*100)
     output_file_lst.append(f_aver.split('/src/')[1])
     # Open the file in write mode, which creates a new empty file or overwrites the existing one
@@ -507,5 +683,7 @@ def create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_
             # Remove the final line
             with open(f_aver, "rb+") as f:
                 f.seek(-1, os.SEEK_END)
-                f.truncate()                    
+                f.truncate()
+
+    '''
     ################################################################################################################################################

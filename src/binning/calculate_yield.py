@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:43:48 trottar"
+# Time-stamp: "2024-02-11 14:08:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -503,8 +503,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
     binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
 
-    yield_hist = [[],[]]
-    yield_err_hist = [[],[]]
+    yield_hist = []
+    yield_err_hist = []
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
@@ -523,11 +523,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         print("!!!!!!!!!!!!!",data_charge_err, (np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)*100)
         yld_err = np.sqrt(data_charge_err**2+(((np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)*100)**2))
         if yld < 0.0:
-            yld = 0.0
-        yield_hist[0].append(bin_val_data)            
-        yield_hist[1].append(yld)
-        yield_err_hist[0].append(bin_val_data)            
-        yield_err_hist[1].append(yld_err)
+            yld = 0.0            
+        yield_hist.append(yld)
+        yield_err_hist.append(yld_err)
         binned_sub_data[0].append(bin_val_data)
         binned_sub_data[1].append(sub_val)
         i+=1
@@ -549,9 +547,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         for k in range(len(phi_bins) - 1):
             phibin_index = k
             hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
-            yield_val = [yield_hist[0][i], yield_hist[1][i]]
-            yield_err_val = [yield_err_hist[0][i], yield_err_hist[1][i]]
-            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val[1], (yield_err_val[1]/100)*yield_val[1]))
+            yield_val = yield_hist[i]
+            yield_err_val = yield_err_hist[i]
+            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val/100)*yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val, yield_err_val))
             i+=1
 
@@ -708,8 +706,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
 
-    yield_hist = [[],[]]
-    yield_err_hist = [[],[]]
+    yield_hist = []
+    yield_err_hist = []
     binned_sub_simc = [[],[]]
     i=0 # iter
     print("-"*25)
@@ -722,10 +720,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         # Calculate simc yield error (%)
         print("!!!!!!!!!!!!!",np.sqrt(NumEvts_MM_SIMC*normfac_simc))
         yld_err = (np.sqrt(NumEvts_MM_SIMC*normfac_simc))
-        yield_hist[0].append(bin_val_simc)        
-        yield_hist[1].append(yld)
-        yield_err_hist[0].append(bin_val_simc)
-        yield_err_hist[1].append(yld_err)        
+        yield_hist.append(yld)
+        yield_err_hist.append(yld_err)
         binned_sub_simc[0].append(bin_val_simc)
         binned_sub_simc[1].append(sub_val)
         i+=1
@@ -746,9 +742,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         for k in range(len(phi_bins) - 1):
             phibin_index = k
             hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
-            yield_val = [yield_hist[0][i], yield_hist[1][i]]
-            yield_err_val = [yield_err_hist[0][i], yield_err_hist[1][i]]
-            print("Simc yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val[1], (yield_err_val[1]/100)*yield_val[1]))
+            yield_val = yield_hist[i]
+            yield_err_val = yield_err_hist[i]
+            print("Simc yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val/100)*yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val, yield_err_val))
             i+=1
 
