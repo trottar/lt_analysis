@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:01:37 trottar"
+# Time-stamp: "2024-02-11 01:11:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,6 +41,7 @@ tot_eff_charge = np.sum(runs_eff_charge)
 
 # Normalized uncertainty (converted to %)
 tot_eff_charge_err = np.sqrt((np.sum([err**2 for err in runs_eff_charge_err])/tot_eff_charge**2)*100)
-
+print("!!!!!!!!!","{:2f}\n{:4f}".format(tot_eff_charge, tot_eff_charge_err))
 BashInput=("{:2f}\n{:4f}".format(tot_eff_charge, tot_eff_charge_err))
+
 print(BashInput)
