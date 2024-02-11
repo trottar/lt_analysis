@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 15:19:57 trottar"
+# Time-stamp: "2024-02-11 15:30:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -564,7 +564,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 if yieldval in processed_yieldvals:
                     continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_data_left[i], (yield_data_err_left[i]/100)*yield_data_left[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i]))
+                                                                                  int(phibin_left[i]), int(tbin_left[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
 
@@ -582,7 +582,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 if yieldval in processed_yieldvals:
                     continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_data_center[i], (yield_data_err_center[i]/100)*yield_data_center[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i]))
+                                                                                  int(phibin_center[i]), int(tbin_center[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
 
@@ -620,7 +620,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 if yieldval in processed_yieldvals:
                     continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_left[i], (yield_simc_err_left[i]/100)*yield_simc_left[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i]))
+                                                                                  int(phibin_left[i]), int(tbin_left[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
 
@@ -638,7 +638,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 if yieldval in processed_yieldvals:
                     continue
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f}\n".format(yield_simc_center[i], (yield_simc_err_center[i]/100)*yield_simc_center[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i]))
+                                                                                  int(phibin_center[i]), int(tbin_center[i]))
                 write_to_file(f_yield,check_line)
                 processed_yieldvals.add(yieldval)
                                                                     
