@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 13:09:48 trottar"
+# Time-stamp: "2024-02-12 13:36:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -159,28 +159,28 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             if phiset == "Right":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_DATA"]["t_bins"][i]:
-                        tbin_right.append(k+1)
+                        tbin_data_right.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
-                        phibin_right.append(k+1)                        
+                        phibin_data_right.append(k+1)                        
                 yield_data_right.append(nested_dict['yield'][key_tuple]["yield"])
                 yield_data_err_right.append(nested_dict['yield'][key_tuple]["yield_err"])
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_DATA"]["t_bins"][i]:
-                        tbin_left.append(k+1)
+                        tbin_data_left.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
-                        phibin_left.append(k+1)                        
+                        phibin_data_left.append(k+1)                        
                 yield_data_left.append(nested_dict['yield'][key_tuple]["yield"])
                 yield_data_err_left.append(nested_dict['yield'][key_tuple]["yield_err"])
             if phiset == "Center":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_DATA"]["t_bins"][i]:
-                        tbin_center.append(k+1)
+                        tbin_data_center.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == yieldDict["binned_DATA"]["phi_bins"][j]:
-                        phibin_center.append(k+1)                        
+                        phibin_data_center.append(k+1)                        
                 yield_data_center.append(nested_dict['yield'][key_tuple]["yield"])
                 yield_data_err_center.append(nested_dict['yield'][key_tuple]["yield_err"])
 
@@ -193,28 +193,28 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             if phiset == "Right":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_SIMC"]["t_bins"][i]:
-                        tbin_right.append(k+1)
+                        tbin_simc_right.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
-                        phibin_right.append(k+1)                        
+                        phibin_simc_right.append(k+1)                        
                 yield_simc_right.append(nested_dict['yield'][key_tuple]["yield"])
                 yield_simc_err_right.append(nested_dict['yield'][key_tuple]["yield_err"])
             if phiset == "Left":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_SIMC"]["t_bins"][i]:
-                        tbin_left.append(k+1)
+                        tbin_simc_left.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
-                        phibin_left.append(k+1)                        
+                        phibin_simc_left.append(k+1)                        
                 yield_simc_left.append(nested_dict['yield'][key_tuple]["yield"])
                 yield_simc_err_left.append(nested_dict['yield'][key_tuple]["yield_err"])
             if phiset == "Center":
                 for k, t_bin in enumerate(t_bins):
                     if t_bin == yieldDict["binned_SIMC"]["t_bins"][i]:
-                        tbin_center.append(k+1)
+                        tbin_simc_center.append(k+1)
                 for k, phi_bin in enumerate(phi_bins):
                     if phi_bin == yieldDict["binned_SIMC"]["phi_bins"][j]:
-                        phibin_center.append(k+1)                        
+                        phibin_simc_center.append(k+1)                        
                 yield_simc_center.append(nested_dict['yield'][key_tuple]["yield"])
                 yield_simc_err_center.append(nested_dict['yield'][key_tuple]["yield_err"])
                 
@@ -254,52 +254,52 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
 
     if float(runNumRight[0]) != 0:
         # Combine data from different lists into tuples
-        data_right_tuples = list(zip(tbin_right, phibin_right, yield_data_right, yield_data_err_right))
+        data_right_tuples = list(zip(tbin_data_right, phibin_data_right, yield_data_right, yield_data_err_right))
         # Sort based on tbin and phibin
         sorted_data_right_tuples = sorted(data_right_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_right, phibin_right, yield_data_right, yield_data_err_right = zip(*sorted_data_right_tuples[:len(tbin_right)])
+        tbin_data_right, phibin_data_right, yield_data_right, yield_data_err_right = zip(*sorted_data_right_tuples[:len(tbin_data_right)])
 
     if float(runNumLeft[0]) != 0:        
         # Combine data from different lists into tuples
-        data_left_tuples = list(zip(tbin_left, phibin_left, yield_data_left, yield_data_err_left))
+        data_left_tuples = list(zip(tbin_data_left, phibin_data_left, yield_data_left, yield_data_err_left))
         # Sort based on tbin and phibin
         sorted_data_left_tuples = sorted(data_left_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_left, phibin_left, yield_data_left, yield_data_err_left = zip(*sorted_data_left_tuples[:len(tbin_left)])
+        tbin_data_left, phibin_data_left, yield_data_left, yield_data_err_left = zip(*sorted_data_left_tuples[:len(tbin_data_left)])
 
     if float(runNumCenter[0]) != 0:        
         # Combine data from different lists into tuples
-        data_center_tuples = list(zip(tbin_center, phibin_center, yield_data_center, yield_data_err_center))
+        data_center_tuples = list(zip(tbin_data_center, phibin_data_center, yield_data_center, yield_data_err_center))
         # Sort based on tbin and phibin
         sorted_data_center_tuples = sorted(data_center_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_center, phibin_center, yield_data_center, yield_data_err_center = zip(*sorted_data_center_tuples[:len(tbin_center)])
+        tbin_data_center, phibin_data_center, yield_data_center, yield_data_err_center = zip(*sorted_data_center_tuples[:len(tbin_data_center)])
 
     if float(runNumRight[0]) != 0:
         # Combine simc from different lists into tuples
-        simc_right_tuples = list(zip(tbin_right, phibin_right, yield_simc_right, yield_simc_err_right))
+        simc_right_tuples = list(zip(tbin_simc_right, phibin_simc_right, yield_simc_right, yield_simc_err_right))
         # Sort based on tbin and phibin
         sorted_simc_right_tuples = sorted(simc_right_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_right, phibin_right, yield_simc_right, yield_simc_err_right = zip(*sorted_simc_right_tuples[:len(tbin_right)])
+        tbin_simc_right, phibin_simc_right, yield_simc_right, yield_simc_err_right = zip(*sorted_simc_right_tuples[:len(tbin_simc_right)])
 
     if float(runNumLeft[0]) != 0:        
         # Combine simc from different lists into tuples
-        simc_left_tuples = list(zip(tbin_left, phibin_left, yield_simc_left, yield_simc_err_left))
+        simc_left_tuples = list(zip(tbin_simc_left, phibin_simc_left, yield_simc_left, yield_simc_err_left))
         # Sort based on tbin and phibin
         sorted_simc_left_tuples = sorted(simc_left_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_left, phibin_left, yield_simc_left, yield_simc_err_left = zip(*sorted_simc_left_tuples[:len(tbin_left)])
+        tbin_simc_left, phibin_simc_left, yield_simc_left, yield_simc_err_left = zip(*sorted_simc_left_tuples[:len(tbin_simc_left)])
 
     if float(runNumCenter[0]) != 0:        
         # Combine simc from different lists into tuples
-        simc_center_tuples = list(zip(tbin_center, phibin_center, yield_simc_center, yield_simc_err_center))
+        simc_center_tuples = list(zip(tbin_simc_center, phibin_simc_center, yield_simc_center, yield_simc_err_center))
         # Sort based on tbin and phibin
         sorted_simc_center_tuples = sorted(simc_center_tuples, key=lambda x: (x[0], x[1]))
         # Extract sorted values back into separate lists
-        tbin_center, phibin_center, yield_simc_center, yield_simc_err_center = zip(*sorted_simc_center_tuples[:len(tbin_center)])
-
+        tbin_simc_center, phibin_simc_center, yield_simc_center, yield_simc_err_center = zip(*sorted_simc_center_tuples[:len(tbin_simc_center)])
+        
     print("!!!!!!!!!!!!!DATA",tbin_left, phibin_left, yield_data_left, yield_data_err_left)
     print("!!!!!!!!!!!!!DATA",tbin_center, phibin_center, yield_data_center, yield_data_err_center)        
     print("!!!!!!!!!!!!!SIMC",tbin_left, phibin_left, yield_simc_left, yield_simc_err_left)
