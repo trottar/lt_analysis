@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 13:52:02 trottar"
+# Time-stamp: "2024-02-12 14:43:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,6 +20,8 @@ ltsep package import and pathing definitions
 '''
 # Import package for cuts
 from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
 
 lt=Root(os.path.realpath(__file__),"Plot_Prod")
 
@@ -138,7 +140,9 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     phibin_simc_left = []
     phibin_simc_center = []
     
-    for phiset in phisetlist:
+    for i,phiset in enumerate(phisetlist):
+        # Progress bar
+        Misc.progressBar(i, len(phisetlist)-1,bar_length=25)
         data_key_tuples = list(aveDict["binned_DATA"][phiset]['t'])
         for data_key_tuple in data_key_tuples:
             # Access the nested dictionary using the tuple key
