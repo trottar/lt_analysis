@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 04:29:31 trottar"
+# Time-stamp: "2024-02-12 18:13:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -520,8 +520,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         total_count = np.sum(sub_val)
         yld = total_count # Normalization applied above
         # Calculate experimental yield error (%)
-        print("!!!!!!!!!!!!!",data_charge_err, (np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)*100)
-        yld_err = np.sqrt(data_charge_err**2+(((np.sqrt(NumEvts_MM_DATA)/NumEvts_MM_DATA)*100)**2))
+        print("!!!!!!!!!!!!!",data_charge_err, (1/np.sqrt(hist_val_data)))
+        yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(hist_val_data))**2)
         if yld < 0.0:
             yld = 0.0
             yld_err = 0.0
@@ -616,6 +616,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
             H_MM_SIMC       = TH1D("H_MM_SIMC","MM", 500, 0.7, 1.5)
             H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            H_MM_SIMC_unweighted = TH1D("H_MM_SIMC","MM", 500, 0.7, 1.5)
 
             print("\nProcessing t-bin {} phi-bin {} simc...".format(j+1, k+1))
             for i,evt in enumerate(TBRANCH_SIMC):
@@ -642,10 +643,12 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
                             else:
                                 H_t_SIMC.Fill(-evt.t, evt.Weight)
                                 H_MM_SIMC.Fill(evt.missmass, evt.Weight)
+                            H_MM_SIMC_unweighted.Fill(evt.missmass)
 
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : H_MM_SIMC,
                 "H_t_SIMC" : H_t_SIMC,
+                "NumEvts_bin_MM_SIMC_unweighted" : H_MM_SIMC_unweighted->Integral(),
             }
     
     return processed_dict
@@ -666,6 +669,7 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
             H_MM_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SIMC"]
             H_t_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SIMC"]
+            NumEvts_bin_MM_SIMC_unweighted = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["NumEvts_bin_MM_SIMC_unweighted"]
 
             # Initialize lists for tmp_binned_t_simc, tmp_binned_hist_simc, and tmp_binned_hist_dummy
             tmp_binned_t_simc = []
@@ -685,11 +689,14 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
             binned_t_simc.append(tmp_binned_t_simc[0]) # Save a list of hists where each one is a t-bin
             binned_hist_simc.append(tmp_binned_hist_simc[0])
+            
+            binned_unweighted_NumEvts_simc.append(NumEvts_bin_MM_SIMC_unweighted)
 
             if j+1 == len(t_bins)-1:
                 binned_dict[kin_type] = {
                     "binned_t_simc" : binned_t_simc,
-                    "binned_hist_simc" : binned_hist_simc
+                    "binned_hist_simc" : binned_hist_simc,
+                    "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
                 }
         
     return binned_dict
@@ -707,6 +714,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
 
+    binned_unweighted_NumEvts_simc = binned_dict[kin_type]["binned_unweighted_NumEvts_simc"]
+
     yield_hist = []
     yield_err_hist = []
     binned_sub_simc = [[],[]]
@@ -719,8 +728,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         total_count = np.sum(sub_val)
         yld = total_count*normfac_simc
         # Calculate simc yield error (%)
-        print("!!!!!!!!!!!!!",np.sqrt(NumEvts_MM_SIMC*normfac_simc))
-        yld_err = (np.sqrt(NumEvts_MM_SIMC*normfac_simc))
+        print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
+        yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc
         if yld < 0.0:
             yld = 0.0
             yld_err = 0.0
