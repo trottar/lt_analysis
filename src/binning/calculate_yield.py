@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 18:39:51 trottar"
+# Time-stamp: "2024-02-12 18:43:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -529,7 +529,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         if math.isnan(yld):
             yld = 0.0
             yld_err = 0.0
-        if math.isinf(ratio):
+        if math.isinf(yld):
             yld = 0.0
             yld_err = 0.0
         yield_hist.append(yld)
@@ -744,7 +744,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         if math.isnan(yld):
             yld = 0.0
             yld_err = 0.0
-        if math.isinf(ratio):
+        if math.isinf(yld):
             yld = 0.0
             yld_err = 0.0            
         yield_hist.append(yld)
