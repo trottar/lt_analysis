@@ -192,15 +192,9 @@ c      pause
 c ratio is data/simc - see GH logbook, p.55
             if(ymc(ip,it).ne.0.) then
                r=(yrd(ip,it))/ymc(ip,it)
-*     RLT (2/11/2024): These are G.H's equations
-*                      Removing to stay consistent
-*                      with Bill Li thesis
-*     e=e+(drd(ip,it))/ymc(ip,it)**2
-*     e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
-               e=drd(ip,it)+dmc(ip,it)
-*     RLT (2/11/2024): Convert to proper ratio error
-*                      from just units of %
-               e=(sqrt(e)/100)*r
+               e=e+(drd(ip,it))/ymc(ip,it)**2
+               e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
+               e=sqrt(e)
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e
