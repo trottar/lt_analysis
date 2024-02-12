@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 18:47:02 trottar"
+# Time-stamp: "2024-02-12 18:52:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -669,6 +669,8 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False):
     # Initialize lists for binned_t_simc, binned_hist_simc, and binned_hist_dummy
     binned_t_simc = []
     binned_hist_simc = []
+
+    binned_unweighted_NumEvts_simc = []
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
