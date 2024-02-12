@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-09 15:09:01 trottar"
+# Time-stamp: "2024-02-12 00:37:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -605,18 +605,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Define variables for cross sections and errors
         sig_l, sig_t, sig_lt, sig_tt = fff2.GetParameter(1), fff2.GetParameter(0), fff2.GetParameter(2), fff2.GetParameter(3)
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
-
-        ###########
-        # Testing #
-        ###########        
-        if sig_l < 0.0:
-            sig_l = 0.0
-        if sig_t < 0.0:
-            sig_t = 0.0
-        if sig_lt < 0.0:
-            sig_lt = 0.0
-        if sig_tt < 0.0:
-            sig_tt = 0.0
 
         # Print values to console
         print("\nBin {}: Outputting...  ".format(i+1), "sig_l: ", sig_l, "sig_t: ", sig_t, \
