@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 00:42:53 trottar"
+# Time-stamp: "2024-02-12 17:34:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -319,8 +319,8 @@ def calculate_eff_charge_err(runNum,efficiency_table):
     # Calculate run by run total efficiency error
     # Error propagation by addition in quadrature
     d_eff = np.sqrt(sum((float(efferr)/float(eff))**2 for efferr,eff in zip(efficiency_errDict.values(),effDict.values())))
-    d_charge = 2e-6 # 200 nC
-    # Error propagation by addition in quadrature
+    d_charge = 2e-6 # 200 nC, FIX!! NEED TO CHECK WITH DAVE MACK WRITE UP!!
+    # Error propagation by addition in quadrature (units of mC)
     eff_charge_err = np.sqrt((eff_charge**2)*(d_eff**2+d_charge**2))
     
     return eff_charge_err
