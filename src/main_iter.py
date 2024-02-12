@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-10 12:48:19 trottar"
+# Time-stamp: "2024-02-12 02:51:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,6 +183,9 @@ for hist in histlist:
 # so arbitrarily grabbing from first setting of list
 t_bins = np.array(histlist[0]["t_bins"])
 phi_bins = np.array(histlist[0]["phi_bins"])
+
+sys.path.append("binning")
+from find_bins import find_bins, check_bins
 
 #print("\n\nt_bins = ", t_bins)
 #print("phi_bins = ", phi_bins)
