@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 00:55:42 trottar"
+# Time-stamp: "2024-02-12 12:54:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -565,7 +565,7 @@ if not os.path.exists(foutroot):
                 hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
             if is_hist(val):
                 if "ratio" in key:
-                    hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
+                    continue
                 if "DATA" in key:
                     if "yield" in key:
                         continue
