@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 18:34:47 trottar"
+# Time-stamp: "2024-02-12 18:39:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -518,11 +518,18 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
-        yld = total_count # Normalization applied above
-        # Calculate experimental yield error (relative error)
-        print("!!!!!!!!!!!!!",data_charge_err, (1/np.sqrt(sum(hist_val_data))))
-        yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(sum(hist_val_data)))**2)
-        if yld < 0.0:
+        try:
+            yld = total_count # Normalization applied above
+            # Calculate experimental yield error (relative error)
+            print("!!!!!!!!!!!!!",data_charge_err, (1/np.sqrt(sum(hist_val_data))))
+            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(sum(hist_val_data)))**2)
+        except ZeroDivisionError:
+            yld = 0.0
+            yld_err = 0.0
+        if math.isnan(yld):
+            yld = 0.0
+            yld_err = 0.0
+        if math.isinf(ratio):
             yld = 0.0
             yld_err = 0.0
         yield_hist.append(yld)
@@ -726,13 +733,20 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         #print("Y_simc = {:.5e}*{:.5e}".format(np.sum(hist_val_simc), normfac_simc))
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         total_count = np.sum(sub_val)
-        yld = total_count*normfac_simc
-        # Calculate simc yield error (relative error)
-        print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
-        yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc
-        if yld < 0.0:
+        try:
+            yld = total_count*normfac_simc
+            # Calculate simc yield error (relative error)
+            print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
+            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc
+        except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
+        if math.isnan(yld):
+            yld = 0.0
+            yld_err = 0.0
+        if math.isinf(ratio):
+            yld = 0.0
+            yld_err = 0.0            
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         binned_sub_simc[0].append(bin_val_simc)
