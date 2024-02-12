@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 18:13:56 trottar"
+# Time-stamp: "2024-02-12 18:19:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -648,7 +648,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : H_MM_SIMC,
                 "H_t_SIMC" : H_t_SIMC,
-                "NumEvts_bin_MM_SIMC_unweighted" : H_MM_SIMC_unweighted->Integral(),
+                "NumEvts_bin_MM_SIMC_unweighted" : H_MM_SIMC_unweighted.Integral(),
             }
     
     return processed_dict

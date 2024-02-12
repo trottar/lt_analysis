@@ -189,7 +189,6 @@ c      pause
          do ip=1,nphi
             r=0.
             e=0.
-c ratio is data/simc - see GH logbook, p.55
             if(ymc(ip,it).ne.0.) then
                r=(yrd(ip,it))/ymc(ip,it)
                e=e+(drd(ip,it))/ymc(ip,it)**2
