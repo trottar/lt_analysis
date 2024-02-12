@@ -204,7 +204,7 @@ c ratio is data/simc - see GH logbook, p.55
                e=drd(ip,it)+dmc(ip,it)
 *     RLT (2/11/2024): Convert to proper ratio error
 *                      from just units of %
-               e=sqrt((e/100)*r)
+               e=(sqrt(e)/100)*r
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e
