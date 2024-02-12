@@ -127,7 +127,9 @@ c            pause
                   read(66,*) yld,er
 *                  print*,yld,er
                   yrd(ip,it)=yrd(ip,it)+yld
-                  drd(ip,it)=drd(ip,it)+er**2
+*     RLT (2/11/2024): Input is % based
+*                 drd(ip,it)=drd(ip,it)+er**2
+                  drd(ip,it)=drd(ip,it)+((er/100)*yld)**2
                end do
             end do
             close(66)
@@ -147,14 +149,17 @@ c            pause
                   read(66,*) yld,er
 *                  print*,yld,er
                   ymc(ip,it)=ymc(ip,it)+yld
-                  dmc(ip,it)=dmc(ip,it)+er**2
+*     RLT (2/11/2024): Input is % based                  
+*                 dmc(ip,it)=dmc(ip,it)+er**2
+                  dmc(ip,it)=dmc(ip,it)+((er/100)*yld)**2
                end do
             end do
             close(66)
 
             do it=1,nt
                do ip=1,nphi
-                  write(*,*)'t-bin=',it,'phi-bin=',ip
+                  write(*,*)'t-bin=',it
+                  write(*,*)'phi-bin=',ip
                   write(*,*)'Y_data=',yrd(ip,it),drd(ip,it)
                   write(*,*)'Y_simc=',ymc(ip,it),dmc(ip,it)
                enddo
@@ -199,7 +204,7 @@ c ratio is data/simc - see GH logbook, p.55
                e=drd(ip,it)+dmc(ip,it)
 *     RLT (2/11/2024): Convert to proper ratio error
 *                      from just units of %
-               e=(sqrt(e)/100)*r
+               e=sqrt((e/100)*r)
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e
