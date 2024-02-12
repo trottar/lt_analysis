@@ -1174,7 +1174,7 @@ if [[ $i_flag != "true" ]]; then
 	    TotDataEffChargeValLeft=("${arr1[@]}")
 	    TotDataEffChargeErrLeft=("${arr2[@]}")
 	    echo "Total Effective Charge Left: ${TotDataEffChargeValLeft} mC"
-	    echo "Total Effective Charge Left Error: ${$((TotDataEffChargeErrRight * 100))} %"
+	    echo "Total Effective Charge Left Error: $(eval $((TotDataEffChargeErrRight * 100))) %"
 	    echo "Run numbers: [${data_left[@]}]"
 	    #echo "Effective Charge per Run: [${DataEffChargeValLeft[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataEffChargeErrLeft[@]}]"
