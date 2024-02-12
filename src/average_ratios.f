@@ -181,7 +181,7 @@ c      pause
       print*
 
       write(*,*)'=========================='
-      write(*,*),'Epsilon=',eps_set
+      write(*,*)'Epsilon=',eps_set
       write(*,*)'--------------------------'
       open(77,file=r_fn,status='replace')
       do it=1,nt
