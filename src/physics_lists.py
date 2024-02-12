@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 13:44:23 trottar"
+# Time-stamp: "2024-02-12 13:52:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -519,7 +519,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_right):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_right[i], (yield_data_err_right[i]/100)*yield_data_right[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i]))
+                                                                                  int(phibin_data_right[i]), int(tbin_data_right[i]))
                 write_to_file(f_yield,check_line)
 
     if float(runNumLeft[0]) != 0:
@@ -533,7 +533,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_left):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_left[i], (yield_data_err_left[i]/100)*yield_data_left[i], \
-                                                                                  int(phibin_left[i]), int(tbin_left[i]))
+                                                                                  int(phibin_data_left[i]), int(tbin_data_left[i]))
                 write_to_file(f_yield,check_line)
 
     if float(runNumCenter[0]) != 0:
@@ -547,11 +547,11 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_center):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_center[i], (yield_data_err_center[i]/100)*yield_data_center[i], \
-                                                                                  int(phibin_center[i]), int(tbin_center[i]))
+                                                                                  int(phibin_data_center[i]), int(tbin_data_center[i]))
                 write_to_file(f_yield,check_line)
 
     ################################################################################################################################################
-
+    
     if float(runNumRight[0]) != 0:
         f_yield = '{}/src/{}/yields/yield_simc.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
@@ -563,7 +563,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_right):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_right[i], (yield_simc_err_right[i]/100)*yield_simc_right[i], \
-                                                                                  int(phibin_right[i]), int(tbin_right[i]))
+                                                                                  int(phibin_simc_right[i]), int(tbin_simc_right[i]))
                 write_to_file(f_yield,check_line)
 
     if float(runNumLeft[0]) != 0:
@@ -577,7 +577,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_left):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_left[i], (yield_simc_err_left[i]/100)*yield_simc_left[i], \
-                                                                                  int(phibin_left[i]), int(tbin_left[i]))
+                                                                                  int(phibin_simc_left[i]), int(tbin_simc_left[i]))
                 write_to_file(f_yield,check_line)
 
     if float(runNumCenter[0]) != 0:
@@ -591,7 +591,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_center):
                 check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_center[i], (yield_simc_err_center[i]/100)*yield_simc_center[i], \
-                                                                                  int(phibin_center[i]), int(tbin_center[i]))
+                                                                                  int(phibin_simc_center[i]), int(tbin_simc_center[i]))
                 write_to_file(f_yield,check_line)
                                                                     
     ################################################################################################################################################
