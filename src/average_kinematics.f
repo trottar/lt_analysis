@@ -325,13 +325,12 @@ c     Save data.
       print*,'fn=',fn
       print*
 
+      write(*,*)'=========================='      
       open(77,file=fn)
       do it=1,ntbins
          write(77,'(6f9.5,f10.2,i3)')
      *        aveW(it),errW(it),aveQ2(it),errQ2(it),
      *        avett(it), errtt(it), thetacm_only(it),it
-
-         write(*,*) '------------'
          write(*,*) 't-bin: ', it
          write(*,*) 'avet: ', avett(it), errtt(it)
          write(*,*) 'ave Q2: ', aveQ2(it),errQ2(it)
@@ -339,7 +338,8 @@ c     Save data.
          write(*,*) 'thetacm: ', thetacm_only(it)
       end do
       close(77)
-
+      write(*,*)'=========================='      
+      
       end
 
       include 'eps_n_theta.f'

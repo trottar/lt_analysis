@@ -200,8 +200,8 @@ c ratio is data/simc - see GH logbook, p.55
 *     RLT (2/11/2024): Convert to proper ratio error
 *                      from just units of %
                e=(sqrt(e)/100)*r
-               write(*,*)'tbin=',it
-               write(*,*)'phibin=',ip
+               write(*,*)'t-bin=',it
+               write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e
             end if
             write(77,'(2f9.5,2i3)') r,e,ip,it
