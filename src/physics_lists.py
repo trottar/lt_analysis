@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 13:36:13 trottar"
+# Time-stamp: "2024-02-12 13:39:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,13 +122,21 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     yield_simc_err_left = []
     yield_simc_err_center = []
     
-    tbin_right = []
-    tbin_left = []
-    tbin_center = []
+    tbin_data_right = []
+    tbin_data_left = []
+    tbin_data_center = []
 
-    phibin_right = []
-    phibin_left = []
-    phibin_center = []
+    phibin_data_right = []
+    phibin_data_left = []
+    phibin_data_center = []
+
+    tbin_simc_right = []
+    tbin_simc_left = []
+    tbin_simc_center = []
+
+    phibin_simc_right = []
+    phibin_simc_left = []
+    phibin_simc_center = []
     
     for phiset in phisetlist:
         data_key_tuples = list(aveDict["binned_DATA"][phiset]['t'])
