@@ -127,9 +127,7 @@ c            pause
                   read(66,*) yld,er
 *                  print*,yld,er
                   yrd(ip,it)=yrd(ip,it)+yld
-*     RLT (2/11/2024): Input is % based
-*                 drd(ip,it)=drd(ip,it)+er**2
-                  drd(ip,it)=drd(ip,it)+((er/100)*yld)**2
+                  drd(ip,it)=drd(ip,it)+er**2
                end do
             end do
             close(66)
@@ -148,10 +146,8 @@ c            pause
                do ip=1,nphi
                   read(66,*) yld,er
 *                  print*,yld,er
-                  ymc(ip,it)=ymc(ip,it)+yld
-*     RLT (2/11/2024): Input is % based                  
-*                 dmc(ip,it)=dmc(ip,it)+er**2
-                  dmc(ip,it)=dmc(ip,it)+((er/100)*yld)**2
+                  ymc(ip,it)=ymc(ip,it)+yld            
+                  dmc(ip,it)=dmc(ip,it)+er**2
                end do
             end do
             close(66)
