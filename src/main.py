@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 16:19:25 trottar"
+# Time-stamp: "2024-02-12 00:55:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -513,6 +513,7 @@ if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
 
+'''
 # Save histograms to root file
 # Check that root file doesnt already exist    
 if not os.path.exists(foutroot):
@@ -525,7 +526,7 @@ if not os.path.exists(foutroot):
             Misc.progressBar(i, len(hist.items())-1,bar_length=25)
             if "G_data_eff" in key:
                 hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
-            if is_hist(val):                
+            if is_hist(val):
                 if "ratio" in key:
                     hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
                 if "DATA" in key:
@@ -544,6 +545,43 @@ if not os.path.exists(foutroot):
                         hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
                     elif "totevts" in key:
                         hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
+                    else:
+                        hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
+                if "DUMMY" in key:
+                    hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
+'''
+
+# Save histograms to root file
+# Check that root file doesnt already exist    
+if not os.path.exists(foutroot):
+#if os.path.exists(foutroot):
+    for hist in histlist:
+        print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
+        # Loop through all keggys,values of dictionary
+        for i, (key, val) in enumerate(hist.items()):
+            # Progress bar
+            Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+            if "G_data_eff" in key:
+                hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
+            if is_hist(val):
+                if "ratio" in key:
+                    hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
+                if "DATA" in key:
+                    if "yield" in key:
+                        continue
+                    elif "bin" in key:
+                        continue
+                    elif "totevts" in key:
+                        continue
+                    else:
+                        hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
+                if "SIMC" in key:
+                    if "yield" in key:
+                        continue
+                    elif "bin" in key:
+                        continue
+                    elif "totevts" in key:
+                        continue
                     else:
                         hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
                 if "DUMMY" in key:
