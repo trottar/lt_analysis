@@ -121,16 +121,16 @@ c     Read real data.
             print*,'yrd_fn=',yrd_fn
 c            pause
 
-            open(66,file=yrd_fn)
-            do it=1,nt
-               do ip=1,nphi
-                  read(66,*) yld,er
-                  print*,yld,er
-                  yrd(ip,it)=yrd(ip,it)+yld
-                  drd(ip,it)=drd(ip,it)+er**2
-               end do
-            end do
-            close(66)
+*            open(66,file=yrd_fn)
+*            do it=1,nt
+*               do ip=1,nphi
+*                  read(66,*) yld,er
+*                  print*,yld,er
+*                  yrd(ip,it)=yrd(ip,it)+yld
+*                  drd(ip,it)=drd(ip,it)+er**2
+*               end do
+*            end do
+*            close(66)
 
 c     Read real simc.
             write(ymc_fn,'(a4,''/yields/yield_simc.'',a2,''_Q'',
