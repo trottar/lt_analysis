@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 18:19:41 trottar"
+# Time-stamp: "2024-02-12 18:24:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -519,7 +519,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
         yld = total_count # Normalization applied above
-        # Calculate experimental yield error (%)
+        # Calculate experimental yield error (relative error)
         print("!!!!!!!!!!!!!",data_charge_err, (1/np.sqrt(hist_val_data)))
         yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(hist_val_data))**2)
         if yld < 0.0:
@@ -550,7 +550,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
             yield_val = yield_hist[i]
             yield_err_val = yield_err_hist[i]
-            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val/100)*yield_val))
+            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val)*yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val, yield_err_val))
             i+=1
 
@@ -727,7 +727,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         total_count = np.sum(sub_val)
         yld = total_count*normfac_simc
-        # Calculate simc yield error (%)
+        # Calculate simc yield error (relative error)
         print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
         yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc
         if yld < 0.0:
@@ -757,7 +757,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
             hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
             yield_val = yield_hist[i]
             yield_err_val = yield_err_hist[i]
-            print("Simc yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val/100)*yield_val))
+            print("Simc yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val)*yield_val))
             dict_lst.append((tbin_index, phibin_index, hist_val, yield_val, yield_err_val))
             i+=1
 
