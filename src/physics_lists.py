@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 13:39:44 trottar"
+# Time-stamp: "2024-02-12 13:44:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -230,11 +230,11 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     '''
     Need to sort data properly from least to greatest so that the fortran binning stays consistent (ie the lowest tbin corresponds to the first iteration)
     '''
-
-    print("$$$$$$$$$$$$$DATA",tbin_left, phibin_left, yield_data_left, yield_data_err_left)
-    print("$$$$$$$$$$$$$DATA",tbin_center, phibin_center, yield_data_center, yield_data_err_center)        
-    print("$$$$$$$$$$$$$SIMC",tbin_left, phibin_left, yield_simc_left, yield_simc_err_left)
-    print("$$$$$$$$$$$$$SIMC",tbin_center, phibin_center, yield_simc_center, yield_simc_err_center)    
+    
+    print("$$$$$$$$$$$$$DATA",tbin_data_left, phibin_data_left, yield_data_left, yield_data_err_left)
+    print("$$$$$$$$$$$$$DATA",tbin_data_center, phibin_data_center, yield_data_center, yield_data_err_center)        
+    print("$$$$$$$$$$$$$SIMC",tbin_simc_left, phibin_simc_left, yield_simc_left, yield_simc_err_left)
+    print("$$$$$$$$$$$$$SIMC",tbin_simc_center, phibin_simc_center, yield_simc_center, yield_simc_err_center)
     
     if float(runNumRight[0]) != 0:
         # Combine data from different lists into tuples
@@ -308,11 +308,11 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_simc_center, phibin_simc_center, yield_simc_center, yield_simc_err_center = zip(*sorted_simc_center_tuples[:len(tbin_simc_center)])
         
-    print("!!!!!!!!!!!!!DATA",tbin_left, phibin_left, yield_data_left, yield_data_err_left)
-    print("!!!!!!!!!!!!!DATA",tbin_center, phibin_center, yield_data_center, yield_data_err_center)        
-    print("!!!!!!!!!!!!!SIMC",tbin_left, phibin_left, yield_simc_left, yield_simc_err_left)
-    print("!!!!!!!!!!!!!SIMC",tbin_center, phibin_center, yield_simc_center, yield_simc_err_center)
-        
+    print("!!!!!!!!!!!!!DATA",tbin_data_left, phibin_data_left, yield_data_left, yield_data_err_left)
+    print("!!!!!!!!!!!!!DATA",tbin_data_center, phibin_data_center, yield_data_center, yield_data_err_center)        
+    print("!!!!!!!!!!!!!SIMC",tbin_simc_left, phibin_simc_left, yield_simc_left, yield_simc_err_left)
+    print("!!!!!!!!!!!!!SIMC",tbin_simc_center, phibin_simc_center, yield_simc_center, yield_simc_err_center)
+    
     ################################################################################################################################################
 
     # Define thpq vector relative to middle setting
