@@ -154,7 +154,7 @@ c            pause
 
             do it=1,nt
                do ip=1,nphi
-                  write(*,*) it,ip
+                  write(*,*)'t-bin=',it,'phi-bin='ip
                   write(*,*)'Y_data=',yrd(ip,it),drd(ip,it)
                   write(*,*)'Y_simc=',ymc(ip,it),dmc(ip,it)
                enddo
