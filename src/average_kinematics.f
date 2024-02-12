@@ -336,6 +336,7 @@ c     Save data.
          write(*,*) 'ave Q2: ', aveQ2(it),errQ2(it)
          write(*,*) 'ave W: ', aveW(it),errW(it)
          write(*,*) 'thetacm: ', thetacm_only(it)
+         write(*,*)'--------------------------'
       end do
       close(77)
       write(*,*)'=========================='      
