@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 19:31:39 trottar"
+# Time-stamp: "2024-02-12 19:46:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,9 +265,9 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(simc_nested_dict["yield"][simc_key_tuple]["yield"]), simc_nested_dict["yield"][simc_key_tuple]["yield"]))
             # Fill histogram
             yield_data = np.append(yield_data, [data_nested_dict["yield"][data_key_tuple]["yield"]])
-            yield_err_data = np.append(yield_err_data, [data_nested_dict["yield_err"][data_key_tuple]["yield_err"]])
+            yield_err_data = np.append(yield_err_data, [data_nested_dict["yield"][data_key_tuple]["yield_err"]])
             yield_simc = np.append(yield_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield"]])
-            yield_err_simc = np.append(yield_err_simc, [simc_nested_dict["yield_err"][simc_key_tuple]["yield_err"]])
+            yield_err_simc = np.append(yield_err_simc, [simc_nested_dict["yield"][simc_key_tuple]["yield_err"]])
             if phiset == "Center": setting = np.append(setting,0)
             elif phiset == "Left": setting = np.append(setting,1)
             else: setting = np.append(setting,2)
