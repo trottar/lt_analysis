@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 19:46:34 trottar"
+# Time-stamp: "2024-02-12 20:07:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -308,6 +308,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
     C_ratio_plt.SetGrid()
 
     ratio_data = np.array([])
+    ratio_err_data = np.array([])    
     setting = np.array([])
     for it,phiset in enumerate(phisetlist):
         key_tuples = list(ratioDict["binned"][phiset]['ratio'])
