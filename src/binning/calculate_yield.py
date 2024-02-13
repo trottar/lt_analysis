@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 16:51:52 trottar"
+# Time-stamp: "2024-02-13 16:57:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -818,6 +818,9 @@ def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
     Q2 = float(Qs.replace("p","."))
     W = float(Ws.replace("p","."))
     EPSVAL = float(inpDict["EPSVAL"] )
+    runNumRight = inpDict["runNumRight"] 
+    runNumLeft = inpDict["runNumLeft"] 
+    runNumCenter = inpDict["runNumCenter"]    
     ParticleType = inpDict["ParticleType"]
     POL = float(inpDict["POL"])
     
