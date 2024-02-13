@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 17:08:16 trottar"
+# Time-stamp: "2024-02-13 18:13:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,8 +168,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
                     # Defined HGCer Geometric cuts
                     cutg = TCutG("cutg",21)
-                    cutg.SetVarX("P_hgcer_yAtCer")
-                    cutg.SetVarY("P_hgcer_xAtCer")
+                    cutg.SetVarX("P_hgcer_xAtCer")
+                    cutg.SetVarY("P_hgcer_yAtCer")
                     cutg.SetPoint(0,-25,2)
                     cutg.SetPoint(1,-2,2)
                     cutg.SetPoint(2,-1,2.5)
@@ -192,7 +192,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     cutg.SetPoint(19,-25,0.5)
                     cutg.SetPoint(20,-25,2)
 
-                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
 
                 else:
 
@@ -235,8 +235,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
                     # Defined HGCer Geometric cuts
                     cutg = TCutG("cutg",21)
-                    cutg.SetVarX("P_hgcer_yAtCer")
-                    cutg.SetVarY("P_hgcer_xAtCer")
+                    cutg.SetVarX("P_hgcer_xAtCer")
+                    cutg.SetVarY("P_hgcer_yAtCer")
                     cutg.SetPoint(0,-25,2)
                     cutg.SetPoint(1,-2,2)
                     cutg.SetPoint(2,-1,2.5)
@@ -259,7 +259,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     cutg.SetPoint(19,-25,0.5)
                     cutg.SetPoint(20,-25,2)
 
-                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
 
                 else:
 
@@ -302,8 +302,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
                     # Defined HGCer Geometric cuts
                     cutg = TCutG("cutg",21)
-                    cutg.SetVarX("P_hgcer_yAtCer")
-                    cutg.SetVarY("P_hgcer_xAtCer")
+                    cutg.SetVarX("P_hgcer_xAtCer")
+                    cutg.SetVarY("P_hgcer_yAtCer")
                     cutg.SetPoint(0,-25,2)
                     cutg.SetPoint(1,-2,2)
                     cutg.SetPoint(2,-1,2.5)
@@ -326,7 +326,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     cutg.SetPoint(19,-25,0.5)
                     cutg.SetPoint(20,-25,2)
 
-                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
 
                 else:
 
@@ -369,8 +369,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
                     # Defined HGCer Geometric cuts
                     cutg = TCutG("cutg",21)
-                    cutg.SetVarX("P_hgcer_yAtCer")
-                    cutg.SetVarY("P_hgcer_xAtCer")
+                    cutg.SetVarX("P_hgcer_xAtCer")
+                    cutg.SetVarY("P_hgcer_yAtCer")
                     cutg.SetPoint(0,-25,2)
                     cutg.SetPoint(1,-2,2)
                     cutg.SetPoint(2,-1,2.5)
@@ -393,7 +393,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                     cutg.SetPoint(19,-25,0.5)
                     cutg.SetPoint(20,-25,2)
 
-                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+                    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
 
                 else:
 
