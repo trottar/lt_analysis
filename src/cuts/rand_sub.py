@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 17:42:49 trottar"
+# Time-stamp: "2024-02-13 17:45:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1120,8 +1120,8 @@ def rand_sub(phi_setting, inpDict):
 
     ###
     # Data Random subtraction
-    P_hgcer_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_xAtCer_vs_yAtCer__RAND,-1)
-    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_nohole_xAtCer_vs_yAtCer__RAND,-1)
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_xAtCer_vs_yAtCer_RAND,-1)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_nohole_xAtCer_vs_yAtCer_RAND,-1)
     MM_vs_CoinTime_DATA.Add(MM_vs_CoinTime_RAND,-1)
     CoinTime_vs_beta_DATA.Add(CoinTime_vs_beta_RAND,-1)
     MM_vs_beta_DATA.Add(MM_vs_beta_RAND,-1)
@@ -1168,8 +1168,8 @@ def rand_sub(phi_setting, inpDict):
 
     ###
     # Dummy Random subtraction
-    P_hgcer_xAtCer_vs_yAtCer_DUMMY.Add(P_hgcer_xAtCer_vs_yAtCer__DUMMY_RAND,-1)
-    P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Add(P_hgcer_nohole_xAtCer_vs_yAtCer__DUMMY_RAND,-1)        
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY.Add(P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND,-1)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Add(P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND,-1)        
     MM_vs_CoinTime_DUMMY.Add(MM_vs_CoinTime_DUMMY_RAND,-1)
     CoinTime_vs_beta_DUMMY.Add(CoinTime_vs_beta_DUMMY_RAND,-1)
     MM_vs_beta_DUMMY.Add(MM_vs_beta_DUMMY_RAND,-1)
