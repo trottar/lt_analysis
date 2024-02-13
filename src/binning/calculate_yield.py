@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 18:52:49 trottar"
+# Time-stamp: "2024-02-12 23:29:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -739,7 +739,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
             yld = total_count*normfac_simc
             # Calculate simc yield error (relative error)
             print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
-            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc
+            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc/100 # FIX (/100 is temporary)
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0

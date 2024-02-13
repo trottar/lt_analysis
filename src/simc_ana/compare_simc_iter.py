@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-04 18:38:18 trottar"
+# Time-stamp: "2024-02-12 23:28:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -162,6 +162,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     H_t_SIMC       = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_SIMC  = TH1D("H_MM_SIMC","MM_{K}", 100, 0.7, 1.5)
+    H_MM_unweighted_SIMC  = TH1D("H_MM_unweighted_SIMC","MM_unweighted_{K}", 100, 0.7, 1.5)    
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
     H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 100, -0.1, 0.1)
     H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -231,6 +232,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
           H_epsilon_SIMC.Fill(evt.epsilon, evt.iter_weight)
           #H_MM_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.iter_weight)
           H_MM_SIMC.Fill(evt.missmass, evt.iter_weight)
+          H_MM_unweighted_SIMC.Fill(evt.missmass)
               
     ################################################################################################################################################    
 
@@ -271,40 +273,10 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["H_pmz_SIMC"] =     H_pmz_SIMC
     histDict["H_W_SIMC"] =     H_W_SIMC
     histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC
+    histDict["NumEvts_MM_SIMC"] = H_MM_SIMC.Integral()
+    histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted_SIMC.Integral()
     
     ################################################################################################################################################
-
-    #################
-    # HARD CODED
-    #################    
-    #H_ssxfp_SIMC.Scale(10)
-    #H_ssyfp_SIMC.Scale(10)
-    #H_ssxpfp_SIMC.Scale(10)
-    #H_ssypfp_SIMC.Scale(10)
-    #H_hsxfp_SIMC.Scale(10)
-    #H_hsyfp_SIMC.Scale(10)
-    #H_hsxpfp_SIMC.Scale(10)
-    #H_hsypfp_SIMC.Scale(10)
-    #H_ssxptar_SIMC.Scale(10)
-    #H_ssyptar_SIMC.Scale(10)
-    #H_hsxptar_SIMC.Scale(10)
-    #H_hsyptar_SIMC.Scale(10)
-    #H_ssdelta_SIMC.Scale(10)
-    #H_hsdelta_SIMC.Scale(10)
-    #H_Q2_SIMC.Scale(10)
-    #H_t_SIMC.Scale(10)
-    #H_epsilon_SIMC.Scale(10)
-    #H_MM_SIMC.Scale(10)
-    #H_ph_q_SIMC.Scale(10)
-    #H_th_q_SIMC.Scale(10)
-    #H_ph_recoil_SIMC.Scale(10)
-    #H_th_recoil_SIMC.Scale(10)
-    #H_pmiss_SIMC.Scale(10)
-    #H_emiss_SIMC.Scale(10)
-    #H_W_SIMC.Scale(10)
-    #################
-    #################
-    #################    
 
     ###
     # Q2 plots    

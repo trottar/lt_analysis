@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:30:56 trottar"
+# Time-stamp: "2024-02-12 23:26:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,7 +57,8 @@ def get_eff_charge(hist, inpDict):
     simc_nevents = hist["simc_nevents"]
     NumEvts_MM_DATA = hist["NumEvts_MM_DATA"]
     NumEvts_MM_DUMMY = hist["NumEvts_MM_DUMMY"]
-    NumEvts_MM_SIMC = hist["NumEvts_MM_SIMC"]        
+    NumEvts_MM_SIMC = hist["NumEvts_MM_SIMC"]
+    NumEvts_MM_unweighted_SIMC = hist["NumEvts_MM_unweighted_SIMC"]
     
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
@@ -215,6 +216,7 @@ def get_eff_charge(hist, inpDict):
     print("\n\n{} data total number of events: {:.3e}".format(phi_setting, NumEvts_MM_DATA))
     print("{} dummy total number of events: {:.3e}".format(phi_setting, NumEvts_MM_DUMMY))
     print("{} simc weighted total number of events: {:.3e}".format(phi_setting, NumEvts_MM_SIMC))
+    print("{} simc unweighted total number of events: {:.3e}".format(phi_setting, NumEvts_MM_unweighted_SIMC))
     print("\n\n{} data normalization: {:.3e}".format(phi_setting, normfac_data))
     print("{} dummy normalization: {:.3e}".format(phi_setting, normfac_dummy))
     print("{} simc normalization: {:.3e}".format(phi_setting, normfac_simc))
