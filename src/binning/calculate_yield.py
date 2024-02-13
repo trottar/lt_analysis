@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 17:06:40 trottar"
+# Time-stamp: "2024-02-13 17:08:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -898,7 +898,6 @@ def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
         yieldDict[hist["phi_setting"]] = {}
         with open(f_yield, 'r') as f:
             lines = f.readlines()
-            print(lines)
         dict_lst = []            
         for line in lines:
             line_lst = line.split(" ") # yield, yield_err, phibin, tbin
