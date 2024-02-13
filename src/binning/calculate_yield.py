@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 16:57:46 trottar"
+# Time-stamp: "2024-02-13 16:59:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -841,7 +841,9 @@ def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
     # Loop through histlist and update yieldDict
     for hist in histlist:
 
-        if hist["phi_setting"] == "Right":
+        phiset = hist["phi_setting"]
+        
+        if phiset == "Right":
             runNums = np.array([int(x) for x in runNumRight.split(' ')])
             for i, run in enumerate(runNums):
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
@@ -854,7 +856,7 @@ def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
             f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                     Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
 
-        if hist["phi_setting"] == "Left":
+        if phiset == "Left":
             runNums = np.array([int(x) for x in runNumLeft.split(' ')])
             for i, run in enumerate(runNums):
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
@@ -867,7 +869,7 @@ def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
             f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                     Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
 
-        if hist["phi_setting"] == "Center":
+        if phiset == "Center":
             runNums = np.array([int(x) for x in runNumCenter.split(' ')])
             for i, run in enumerate(runNums):
                 pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
