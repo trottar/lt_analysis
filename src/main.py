@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 12:54:36 trottar"
+# Time-stamp: "2024-02-13 11:53:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -703,6 +703,12 @@ if EPSSET == "high":
 # Save for high and low eps
 unsep_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSVAL)*100)
 output_file_lst.append(unsep_file)
+
+# Save for high and low eps
+avek_file = '{}/avekages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+output_file_lst.append(avek_file)
+aver_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSVAL)*100)
+output_file_lst.append(aver_file)
 
 ##############################
 # Step 8 of the lt_analysis: #
