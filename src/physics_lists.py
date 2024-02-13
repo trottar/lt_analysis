@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 14:56:25 trottar"
+# Time-stamp: "2024-02-13 16:52:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -456,9 +456,9 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_right_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], (data_charge_err_right/100)*averQ2_right_data[i], \
-                                                                                  averW_right_data[i], (data_charge_err_right/100)*averW_right_data[i], \
-                                                                                  avert_right_data[i], (data_charge_err_right/100)*avert_right_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], (data_charge_err_right)*averQ2_right_data[i], \
+                                                                                  averW_right_data[i], (data_charge_err_right)*averW_right_data[i], \
+                                                                                  avert_right_data[i], (data_charge_err_right)*avert_right_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
@@ -475,9 +475,9 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_left_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], (data_charge_err_left/100)*averQ2_left_data[i], \
-                                                                                  averW_left_data[i], (data_charge_err_left/100)*averW_left_data[i], \
-                                                                                  avert_left_data[i], (data_charge_err_left/100)*avert_left_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], (data_charge_err_left)*averQ2_left_data[i], \
+                                                                                  averW_left_data[i], (data_charge_err_left)*averW_left_data[i], \
+                                                                                  avert_left_data[i], (data_charge_err_left)*avert_left_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
@@ -494,9 +494,9 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(averQ2_center_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], (data_charge_err_center/100)*averQ2_center_data[i], \
-                                                                                  averW_center_data[i], (data_charge_err_center/100)*averW_center_data[i], \
-                                                                                  avert_center_data[i], (data_charge_err_center/100)*avert_center_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], (data_charge_err_center)*averQ2_center_data[i], \
+                                                                                  averW_center_data[i], (data_charge_err_center)*averW_center_data[i], \
+                                                                                  avert_center_data[i], (data_charge_err_center)*avert_center_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
@@ -512,7 +512,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_right[i], (yield_data_err_right[i]/100)*yield_data_right[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_right[i], (yield_data_err_right[i])*yield_data_right[i], \
                                                                                   int(phibin_data_right[i]), int(tbin_data_right[i]))
                 write_to_file(f_yield,check_line)
 
@@ -526,7 +526,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_left):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_left[i], (yield_data_err_left[i]/100)*yield_data_left[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_left[i], (yield_data_err_left[i])*yield_data_left[i], \
                                                                                   int(phibin_data_left[i]), int(tbin_data_left[i]))
                 write_to_file(f_yield,check_line)
 
@@ -540,7 +540,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_data_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_center[i], (yield_data_err_center[i]/100)*yield_data_center[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_data_center[i], (yield_data_err_center[i])*yield_data_center[i], \
                                                                                   int(phibin_data_center[i]), int(tbin_data_center[i]))
                 write_to_file(f_yield,check_line)
 
@@ -556,7 +556,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_right):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_right[i], (yield_simc_err_right[i]/100)*yield_simc_right[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_right[i], (yield_simc_err_right[i])*yield_simc_right[i], \
                                                                                   int(phibin_simc_right[i]), int(tbin_simc_right[i]))
                 write_to_file(f_yield,check_line)
 
@@ -570,7 +570,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_left):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_left[i], (yield_simc_err_left[i]/100)*yield_simc_left[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_left[i], (yield_simc_err_left[i])*yield_simc_left[i], \
                                                                                   int(phibin_simc_left[i]), int(tbin_simc_left[i]))
                 write_to_file(f_yield,check_line)
 
@@ -584,7 +584,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Open a file in read mode
         with open(f_yield, 'r') as f:
             for i, yieldval in enumerate(yield_simc_center):
-                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_center[i], (yield_simc_err_center[i]/100)*yield_simc_center[i], \
+                check_line = "{:.4f} {:.4f} {} {}\n".format(yield_simc_center[i], (yield_simc_err_center[i])*yield_simc_center[i], \
                                                                                   int(phibin_simc_center[i]), int(tbin_simc_center[i]))
                 write_to_file(f_yield,check_line)
                                                                     

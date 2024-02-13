@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 23:29:04 trottar"
+# Time-stamp: "2024-02-13 16:51:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -554,11 +554,10 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
-            hist_val = [binned_sub_data[0][i], binned_sub_data[1][i]]
             yield_val = yield_hist[i]
             yield_err_val = yield_err_hist[i]
             print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val)*yield_val))
-            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val, yield_err_val))
+            dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
             i+=1
 
     # Group the tuples by the first two elements using defaultdict
@@ -566,9 +565,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     for tup in dict_lst:
         key = (tup[0], tup[1])
         groups[key] = {
-            "{}_arr".format(kin_type) : tup[2],
-            "{}".format(kin_type) : tup[3],
-            "{}_err".format(kin_type) : tup[4],
+            "{}".format(kin_type) : tup[2],
+            "{}_err".format(kin_type) : tup[3],
         }            
             
     return groups
@@ -770,11 +768,10 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
-            hist_val = [binned_sub_simc[0][i], binned_sub_simc[1][i]]
             yield_val = yield_hist[i]
             yield_err_val = yield_err_hist[i]
             print("Simc yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val)*yield_val))
-            dict_lst.append((tbin_index, phibin_index, hist_val, yield_val, yield_err_val))
+            dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
             i+=1
 
     # Group the tuples by the first two elements using defaultdict
@@ -782,9 +779,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
     for tup in dict_lst:
         key = (tup[0], tup[1])
         groups[key] = {
-            "{}_arr".format(kin_type) : tup[2],
-            "{}".format(kin_type) : tup[3],
-            "{}_err".format(kin_type) : tup[4],
+            "{}".format(kin_type) : tup[2],
+            "{}_err".format(kin_type) : tup[3],
         }            
             
     return groups
@@ -815,8 +811,21 @@ def find_yield_simc(histlist, inpDict, iteration=False):
 
 ##################################################################################################################################################
 
-def grab_yield_data(prev_root_file, histlist, inpDict):
+def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
+
+    Ws = inpDict["W"]
+    Qs = inpDict["Q2"]
+    Q2 = float(Qs.replace("p","."))
+    W = float(Ws.replace("p","."))
+    EPSVAL = float(inpDict["EPSVAL"] )
+    ParticleType = inpDict["ParticleType"]
+    POL = float(inpDict["POL"])
     
+    if POL > 0:
+        polID = 'pl'
+    else:
+        polID = 'mn'
+            
     for hist in histlist:
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
@@ -828,30 +837,73 @@ def grab_yield_data(prev_root_file, histlist, inpDict):
         
     # Loop through histlist and update yieldDict
     for hist in histlist:
+
+        if hist["phi_setting"] == "Right":
+            runNums = np.array([int(x) for x in runNumRight.split(' ')])
+            for i, run in enumerate(runNums):
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
+                if os.path.exists(pid_log):
+                    thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
+                    ebeam_right = float(EbeamValRight[i])
+                    break
+                else:
+                    continue            
+            f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                    Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
+
+        if hist["phi_setting"] == "Left":
+            runNums = np.array([int(x) for x in runNumLeft.split(' ')])
+            for i, run in enumerate(runNums):
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
+                if os.path.exists(pid_log):
+                    thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
+                    ebeam_left = float(EbeamValLeft[i])
+                    break
+                else:
+                    continue            
+            f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                    Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
+
+        if hist["phi_setting"] == "Center":
+            runNums = np.array([int(x) for x in runNumCenter.split(' ')])
+            for i, run in enumerate(runNums):
+                pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,phiset,ParticleType,run)
+                if os.path.exists(pid_log):
+                    thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
+                    ebeam_center = float(EbeamValCenter[i])
+                    break
+                else:
+                    continue            
+            f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
+                                                                                      Ws.replace("p",""), float(EPSVAL)*100)
+            
         print("\n\n")
         print("-"*25)
         print("-"*25)
         print("Finding data yields for {}...".format(hist["phi_setting"]))
+        print("Iteration, therefore grabbing data from {}...".format(f_yield))
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        i = 0
-        for j in range(len(t_bins) - 1):
-            for k in range(len(phi_bins) - 1):
-                binned_sub_data = get_histogram(prev_root_file, \
-                                                "{}/yield".format(hist["phi_setting"]), "H_totevts_DATA_{}_{}_{}".format(hist["phi_setting"], j+1, k+1))
-                hist_val = [binned_sub_data.GetBinCenter(i), binned_sub_data.GetBinContent(i)]
-                yield_val = binned_sub_data.GetMean()
-                print("Data yield for t-bin {} phi-bin {}: {:.3f}".format(j+1, k+1, yield_val))
-                i+=1
+        with open(f_yield, 'r') as f:
+            lines = f.readlines()
+        dict_lst = []            
+        for line in lines:
+            line_lst = line.split(" ") # yield, yield_err, phibin, tbin
+            yield_val = line_lst[0]
+            yield_err_val = line_lst[1]
+            phibin_index = line_lst[2]
+            tbin_index = line_lst[3]        
+            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(tbin_index, phibin_index, yield_val, (yield_err_val)*yield_val))
+            dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
 
         # Group the tuples by the first two elements using defaultdict
         groups = defaultdict(list)
         for tup in dict_lst:
             key = (tup[0], tup[1])
             groups[key] = {
-                "{}_arr".format(kin_type) : tup[2],
-                "{}".format(kin_type) : tup[3],
+                "{}".format(kin_type) : tup[2],
+                "{}_err".format(kin_type) : tup[3],
             }            
 
         yieldDict[hist["phi_setting"]]["yield"] = groups
