@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 17:38:14 trottar"
+# Time-stamp: "2024-02-13 17:42:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1026,7 +1026,7 @@ def rand_sub(phi_setting, inpDict):
 
     # Data Random subtraction window
     P_hgcer_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
-    P_hgcer_nohole_xAtCer_vs_nohole_yAtCer_RAND.Scale(1/nWindows)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
     MM_vs_CoinTime_RAND.Scale(1/nWindows)
     CoinTime_vs_beta_RAND.Scale(1/nWindows)
     MM_vs_beta_RAND.Scale(1/nWindows)
@@ -1073,7 +1073,7 @@ def rand_sub(phi_setting, inpDict):
 
     # Data Dummy_Random subtraction window
     P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND.Scale(1/nWindows)
-    P_hgcer_nohole_xAtCer_vs_nohole_yAtCer_DUMMY_RAND.Scale(1/nWindows)    
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Scale(1/nWindows)    
     MM_vs_CoinTime_DUMMY_RAND.Scale(1/nWindows)
     CoinTime_vs_beta_DUMMY_RAND.Scale(1/nWindows)
     MM_vs_beta_DUMMY_RAND.Scale(1/nWindows)
@@ -1121,7 +1121,7 @@ def rand_sub(phi_setting, inpDict):
     ###
     # Data Random subtraction
     P_hgcer_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_xAtCer_vs_yAtCer__RAND,-1)
-    P_hgcer_nohole_xAtCer_vs_nohole_yAtCer_DATA.Add(P_hgcer_nohole_xAtCer_vs_nohole_yAtCer__RAND,-1)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_nohole_xAtCer_vs_yAtCer__RAND,-1)
     MM_vs_CoinTime_DATA.Add(MM_vs_CoinTime_RAND,-1)
     CoinTime_vs_beta_DATA.Add(CoinTime_vs_beta_RAND,-1)
     MM_vs_beta_DATA.Add(MM_vs_beta_RAND,-1)
@@ -1169,7 +1169,7 @@ def rand_sub(phi_setting, inpDict):
     ###
     # Dummy Random subtraction
     P_hgcer_xAtCer_vs_yAtCer_DUMMY.Add(P_hgcer_xAtCer_vs_yAtCer__DUMMY_RAND,-1)
-    P_hgcer_nohole_xAtCer_vs_nohole_yAtCer_DUMMY.Add(P_hgcer_nohole_xAtCer_vs_nohole_yAtCer__DUMMY_RAND,-1)        
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Add(P_hgcer_nohole_xAtCer_vs_yAtCer__DUMMY_RAND,-1)        
     MM_vs_CoinTime_DUMMY.Add(MM_vs_CoinTime_DUMMY_RAND,-1)
     CoinTime_vs_beta_DUMMY.Add(CoinTime_vs_beta_DUMMY_RAND,-1)
     MM_vs_beta_DUMMY.Add(MM_vs_beta_DUMMY_RAND,-1)
