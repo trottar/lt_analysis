@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 19:22:56 trottar"
+# Time-stamp: "2024-02-12 19:31:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,7 +107,9 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         l_yieldvsphi_data_plt = TLegend(0.115,0.35,0.33,0.5)
 
         yield_data = []
+        yield_err_data = []
         yield_simc = []
+        yield_err_simc = []
         phibins_data = []
         phibins_simc = []    
         data_key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 04:11:14 trottar"
+# Time-stamp: "2024-02-12 19:31:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -478,10 +478,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_plot_err.SetTitle("t = {:.3f}".format(t_list[i]))
         g_plot_err.GetXaxis().SetTitle("#it{#phi} [degree]")
         g_plot_err.GetXaxis().CenterTitle()
+        g_plot_err.GetXaxis().SetTitleOffset(1.5)
         g_plot_err.GetYaxis().SetTitle("Epsilon")
         g_plot_err.GetYaxis().CenterTitle()
+        g_plot_err.GetYaxis().SetTitleOffset(1.5)
         g_plot_err.GetZaxis().SetTitle("#it{#sigma}")
         g_plot_err.GetZaxis().CenterTitle()
+        g_plot_err.GetZaxis().SetTitleOffset(1.5)
         if i == 0:
             c1.Print(outputpdf+'(')
         else:
