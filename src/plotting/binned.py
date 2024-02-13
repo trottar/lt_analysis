@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 20:49:50 trottar"
+# Time-stamp: "2024-02-12 20:50:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -327,6 +327,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             j = key_tuple[1] # phi bin
             #print("~~~~~~~~~~~~~~~~~~~~~~",(k, i, j, len(nested_dict["ratio"][key_tuple]["ratio"]), nested_dict["ratio"][key_tuple]["ratio"]))
             ratio_data = np.append(ratio_data, [nested_dict["ratio"][key_tuple]["ratio"]])
+            ratio_err_data = np.append(ratio_err_data, [nested_dict["ratio"][key_tuple]["ratio_err"]])
             if phiset == "Center": setting = np.append(setting,0)
             elif phiset == "Left": setting = np.append(setting,1)
             else: setting = np.append(setting,2)
