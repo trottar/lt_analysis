@@ -91,13 +91,13 @@ else
     done
 fi
 
-#NumtBins=1
-#NumPhiBins=1
+NumtBins=1
+NumPhiBins=1
 #NumtBins=2
 #NumPhiBins=8
 # Q2=2p1
-NumtBins=3
-NumPhiBins=10
+#NumtBins=3
+#NumPhiBins=10
 # Q2=3p0, W=3p14
 #NumtBins=4
 #NumPhiBins=12
