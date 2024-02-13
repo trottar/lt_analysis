@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 04:29:24 trottar"
+# Time-stamp: "2024-02-13 17:38:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -410,7 +410,10 @@ def rand_sub(phi_setting, inpDict):
     W_vs_t_DATA = TH2D("W_vs_t_DATA", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
     EPS_vs_t_DATA = TH2D("EPS_vs_t_DATA", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
     MM_vs_t_DATA = TH2D("MM_vs_t_DATA", "Missing Mass vs t; MM; t", 50, 0, 2, 50, inpDict["tmin"], inpDict["tmax"])
-
+    # HGCer hole comparison plots
+    P_hgcer_xAtCer_vs_yAtCer_DATA = TH2D("P_hgcer_xAtCer_vs_yAtCer_DATA", "X vs Y; X; Y", 50, 0, 50, 50, 0, 50)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_DATA", "X vs Y; X; Y", 50, 0, 50, 50, 0, 50)
+    
     MM_vs_CoinTime_DUMMY = TH2D("MM_vs_CoinTime_DUMMY","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_DUMMY = TH2D("CoinTime_vs_beta_DUMMY", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
     MM_vs_beta_DUMMY = TH2D("MM_vs_beta_DUMMY", "Missing Mass vs SHMS #beta; MM; SHMS_#beta", 50, 0, 2, 50, 0, 2)
@@ -427,6 +430,9 @@ def rand_sub(phi_setting, inpDict):
     W_vs_t_DUMMY = TH2D("W_vs_t_DUMMY", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
     EPS_vs_t_DUMMY = TH2D("EPS_vs_t_DUMMY", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
     MM_vs_t_DUMMY = TH2D("MM_vs_t_DUMMY", "Missing Mass vs t; MM; t", 50, 0, 2, 50, inpDict["tmin"], inpDict["tmax"])
+    # HGCer hole comparison plots
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY = TH2D("P_hgcer_xAtCer_vs_yAtCer_DUMMY", "X vs Y; X; Y", 50, 0, 50, 50, 0, 50)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY", "X vs Y; X; Y", 50, 0, 50, 50, 0, 50)
     
     MM_vs_CoinTime_RAND = TH2D("MM_vs_CoinTime_RAND","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_RAND = TH2D("CoinTime_vs_beta_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
@@ -442,6 +448,9 @@ def rand_sub(phi_setting, inpDict):
     W_vs_t_RAND = TH2D("W_vs_t_RAND", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
     EPS_vs_t_RAND = TH2D("EPS_vs_t_RAND", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
     MM_vs_t_RAND = TH2D("MM_vs_t_RAND", "Missing Mass vs t; MM; t", 50, 0, 2, 50, inpDict["tmin"], inpDict["tmax"])
+    # HGCer hole comparison plots
+    P_hgcer_xAtCer_vs_yAtCer_RAND = TH2D("P_hgcer_xAtCer_vs_yAtCer_RAND", "X vs Y; X; Y", 50, 0, 50, 50, 0, 50)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_RAND = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_RAND", "X vs Y; X; Y", 50, 0, 50, 50, 0, 50)
     
     MM_vs_CoinTime_DUMMY_RAND = TH2D("MM_vs_CoinTime_DUMMY_RAND","Missing Mass vs CTime; MM; Coin_Time",50, 0, 2, 50, -50, 50)
     CoinTime_vs_beta_DUMMY_RAND = TH2D("CoinTime_vs_beta_DUMMY_RAND", "CTime vs SHMS #beta; Coin_Time; SHMS_#beta", 50, -50, 50, 50, 0, 2)
@@ -457,7 +466,10 @@ def rand_sub(phi_setting, inpDict):
     W_vs_t_DUMMY_RAND = TH2D("W_vs_t_DUMMY_RAND", "W vs t; W; t", 50, inpDict["Wmin"], inpDict["Wmax"], 50, inpDict["tmin"], inpDict["tmax"])
     EPS_vs_t_DUMMY_RAND = TH2D("EPS_vs_t_DUMMY_RAND", "Epsilon vs t; Epsilon; t", 50, inpDict["Epsmin"], inpDict["Epsmax"], 50, inpDict["tmin"], inpDict["tmax"])
     MM_vs_t_DUMMY_RAND = TH2D("MM_vs_t_DUMMY_RAND", "Missing Mass vs t; MM; t", 50, 0, 2, 50, inpDict["tmin"], inpDict["tmax"])
-
+    # HGCer hole comparison plots
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND = TH2D("P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND", "X vs Y; X; Y", 50, 0, 50, 50, 0, 50)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND", "X vs Y; X; Y", 50, 0, 50, 50, 0, 50)
+    
     ################################################################################################################################################
     
     ##############
@@ -556,12 +568,20 @@ def rand_sub(phi_setting, inpDict):
             cutg.SetPoint(20,-25,2)
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
         else:
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
+        if(NOHOLECUTS):
+          # HGCer hole comparison            
+          P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+            
         if(ALLCUTS):
+
+          # HGCer hole comparison
+          P_hgcer_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
 
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -682,12 +702,20 @@ def rand_sub(phi_setting, inpDict):
             cutg.SetPoint(20,-25,2)
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
+            NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            
         else:
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
+        if(NOHOLECUTS):
+          # HGCer hole comparison            
+          P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+            
         if(ALLCUTS):
+
+          # HGCer hole comparison
+          P_hgcer_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
 
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -801,12 +829,20 @@ def rand_sub(phi_setting, inpDict):
             cutg.SetPoint(20,-25,2)
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
+            NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            
         else:
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
+        if(NOHOLECUTS):
+          # HGCer hole comparison            
+          P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+            
         if(ALLCUTS):
+
+          # HGCer hole comparison
+          P_hgcer_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
 
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -917,12 +953,20 @@ def rand_sub(phi_setting, inpDict):
             cutg.SetPoint(20,-25,2)
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
+            NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            
         else:
 
             ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
+        if(NOHOLECUTS):
+          # HGCer hole comparison            
+          P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+            
         if(ALLCUTS):
+
+          # HGCer hole comparison
+          P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
 
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -981,6 +1025,8 @@ def rand_sub(phi_setting, inpDict):
     # Normalize data by effective charge
 
     # Data Random subtraction window
+    P_hgcer_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
+    P_hgcer_nohole_xAtCer_vs_nohole_yAtCer_RAND.Scale(1/nWindows)
     MM_vs_CoinTime_RAND.Scale(1/nWindows)
     CoinTime_vs_beta_RAND.Scale(1/nWindows)
     MM_vs_beta_RAND.Scale(1/nWindows)
@@ -1026,6 +1072,8 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_RAND.Scale(1/nWindows)
 
     # Data Dummy_Random subtraction window
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND.Scale(1/nWindows)
+    P_hgcer_nohole_xAtCer_vs_nohole_yAtCer_DUMMY_RAND.Scale(1/nWindows)    
     MM_vs_CoinTime_DUMMY_RAND.Scale(1/nWindows)
     CoinTime_vs_beta_DUMMY_RAND.Scale(1/nWindows)
     MM_vs_beta_DUMMY_RAND.Scale(1/nWindows)
@@ -1072,6 +1120,8 @@ def rand_sub(phi_setting, inpDict):
 
     ###
     # Data Random subtraction
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_xAtCer_vs_yAtCer__RAND,-1)
+    P_hgcer_nohole_xAtCer_vs_nohole_yAtCer_DATA.Add(P_hgcer_nohole_xAtCer_vs_nohole_yAtCer__RAND,-1)
     MM_vs_CoinTime_DATA.Add(MM_vs_CoinTime_RAND,-1)
     CoinTime_vs_beta_DATA.Add(CoinTime_vs_beta_RAND,-1)
     MM_vs_beta_DATA.Add(MM_vs_beta_RAND,-1)
@@ -1118,6 +1168,8 @@ def rand_sub(phi_setting, inpDict):
 
     ###
     # Dummy Random subtraction
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY.Add(P_hgcer_xAtCer_vs_yAtCer__DUMMY_RAND,-1)
+    P_hgcer_nohole_xAtCer_vs_nohole_yAtCer_DUMMY.Add(P_hgcer_nohole_xAtCer_vs_nohole_yAtCer__DUMMY_RAND,-1)        
     MM_vs_CoinTime_DUMMY.Add(MM_vs_CoinTime_DUMMY_RAND,-1)
     CoinTime_vs_beta_DUMMY.Add(CoinTime_vs_beta_DUMMY_RAND,-1)
     MM_vs_beta_DUMMY.Add(MM_vs_beta_DUMMY_RAND,-1)
@@ -1381,6 +1433,24 @@ def rand_sub(phi_setting, inpDict):
 
     c_pid.Draw()
 
-    c_pid.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')
+    c_pid.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    ##
+    # HGCer Hole Plots
+    c_hgcer_hole = TCanvas()
+
+    c_hgcer_hole.Divide(2,1)
+
+    c_hgcer_hole.cd(1)
+
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Draw("colz")
+
+    c_hgcer_hole.cd(2)
+
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Draw("colz")
+
+    c_hgcer_hole.Draw()
+
+    c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')      
 
     return histDict
