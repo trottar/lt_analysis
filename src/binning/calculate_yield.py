@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 17:03:28 trottar"
+# Time-stamp: "2024-02-13 17:06:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -892,12 +892,13 @@ def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
         print("-"*25)
         print("-"*25)
         print("Finding data yields for {}...".format(hist["phi_setting"]))
-        print("Iteration, therefore grabbing data from {}...".format(f_yield))
+        print("\nIteration, therefore grabbing data from {}...".format(f_yield))
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
         with open(f_yield, 'r') as f:
             lines = f.readlines()
+            print(lines)
         dict_lst = []            
         for line in lines:
             line_lst = line.split(" ") # yield, yield_err, phibin, tbin
@@ -913,9 +914,9 @@ def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
         for tup in dict_lst:
             key = (tup[0], tup[1])
             groups[key] = {
-                "{}".format(kin_type) : tup[2],
-                "{}_err".format(kin_type) : tup[3],
-            }            
+                "{}".format("yield") : tup[2],
+                "{}_err".format("yield") : tup[3],
+            }
 
         yieldDict[hist["phi_setting"]]["yield"] = groups
         
