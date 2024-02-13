@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 20:31:08 trottar"
+# Time-stamp: "2024-02-12 20:34:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,8 +192,10 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         l_yieldvsphi_data_plt.AddEntry(G_yieldvsphi_simc,"Simc")
         l_yieldvsphi_data_plt.Draw()
 
-        C_yieldvsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+'(')
+        #C_yieldvsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+'(')
+        C_yieldvsphi_data_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 
+    '''
     for it,phiset in enumerate(phisetlist):
 
         C_ratiovsphi_plt = TCanvas()
@@ -351,3 +353,4 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
     G_ratio_plt.GetXaxis().SetLabelSize(0.04)
 
     C_ratio_plt.Print(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType))+')')
+    '''
