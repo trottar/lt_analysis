@@ -208,6 +208,7 @@ c angle check
 
 *     Convert from ub/MeV^2 to ub/GeV^2
             x_mod = x_mod*1.d+06
+*     x_real=x_mod*r
             x_real=x_mod*r
             dx_real=x_mod*dr/r
                         
