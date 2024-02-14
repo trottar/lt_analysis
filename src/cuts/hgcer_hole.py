@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 23:39:44 trottar"
+# Time-stamp: "2024-02-13 23:42:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,7 +15,7 @@ from ROOT import TCutG
 
 def apply_HGCer_hole_cut(Q2, W, EPSSET, simc=False):
 
-    if "high" in EPSSET:
+    if "low" in EPSSET:
         # Defined HGCer Geometric cuts
         cutg = TCutG("cutg",21)
         cutg.SetVarX("P_hgcer_xAtCer")
