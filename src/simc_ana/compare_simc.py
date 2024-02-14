@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 23:27:42 trottar"
+# Time-stamp: "2024-02-13 19:50:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,6 +107,12 @@ def compare_simc(hist, inpDict):
     histDict = {}
 
     ################################################################################################################################################
+    # Define HGCer hole cut for KaonLT 2018-19
+    if ParticleType == "kaon":
+        from hgcer_hole import apply_HGCer_hole_cut
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, simc=True)
+    
+    ################################################################################################################################################
     # Define simc root file trees of interest
 
     # Names don't match so need to do some string rearrangement
@@ -177,6 +183,9 @@ def compare_simc(hist, inpDict):
 
     polar_phiq_vs_t_SIMC = TGraphPolar()
     polar_phiq_vs_t_SIMC.SetName("polar_phiq_vs_t_SIMC")
+    # HGCer hole comparison plots
+    P_hgcer_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_xAtCer_vs_yAtCer_SIMC", "X vs Y; X; Y", 100, -30, 30, 100, -30, 30)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC", "X vs Y (no hole cut); X; Y", 100, -30, 30, 100, -30, 30)
     
     ################################################################################################################################################
     # Fill data histograms for various trees called above
@@ -193,11 +202,25 @@ def compare_simc(hist, inpDict):
       
       Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-      #........................................
+      if ParticleType == "kaon":
+          
+          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)
+          NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
 
+      else:
+
+          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
+          
+      if(NOHOLECUTS):
+          # HGCer hole comparison            
+          P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
+          
       #Fill SIMC events
-      if(HMS_Acceptance & SHMS_Acceptance & Diamond):
+      if(ALLCUTS):
 
+          # HGCer hole comparison
+          P_hgcer_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
+          
           # SIMC goes from 0 to 2pi so no need for +pi/2
           polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (evt.phipq+math.pi)*(180/math.pi), -evt.t)
           
@@ -348,6 +371,24 @@ def compare_simc(hist, inpDict):
     l_phi.AddEntry(histDict["H_ph_q_SIMC"],phi_setting)
     histDict["H_ph_q_SIMC"].Draw("same, E1")    
 
-    Cphi.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType))+')')
+    Cphi.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
+    
+    ##
+    # HGCer Hole Plots
+    c_hgcer_hole = TCanvas()
+
+    c_hgcer_hole.Divide(2,1)
+
+    c_hgcer_hole.cd(1)
+
+    P_hgcer_xAtCer_vs_yAtCer_SIMC.Draw("colz")
+
+    c_hgcer_hole.cd(2)
+
+    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Draw("colz")
+
+    c_hgcer_hole.Draw()    
+
+    c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType))+')')
     
     return histDict

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 19:26:26 trottar"
+# Time-stamp: "2024-02-13 19:39:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,7 +77,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
     if ParticleType == "kaon":
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
     
     ################################################################################################################################################
         

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 19:20:29 trottar"
+# Time-stamp: "2024-02-13 19:42:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,7 +13,7 @@
 import ROOT
 from ROOT import TCutG
 
-def apply_HGCer_hole_cut(Q2, W):
+def apply_HGCer_hole_cut(Q2, W, EPSSET, simc=False):
 
     '''
     # Defined HGCer Geometric cuts
