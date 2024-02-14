@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 04:09:22 trottar"
+# Time-stamp: "2024-02-14 04:11:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -787,60 +787,3 @@ def ave_per_bin_simc(histlist, inpDict, iteration=False):
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
         
     return {"binned_SIMC" : aveDict}
-
-##################################################################################################################################################
-
-
-# **************FINISH
-def grab_ave_data(prev_root_file, histlist, phisetlist, inpDict):
-
-    W = inpDict["W"]
-    Q2 = inpDict["Q2"]
-    f_avek = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
-    
-    for hist in histlist:
-        t_bins = hist["t_bins"]
-        phi_bins = hist["phi_bins"]
-
-    aveDict = {
-        "t_bins" : t_bins,
-        "phi_bins" : phi_bins
-    }
-        
-    # Loop through histlist and update aveDict
-    for hist in histlist:
-
-        phiset = hist["phi_setting"]        
-
-        print("\n\n")
-        print("-"*25)
-        print("-"*25)
-        print("Finding data aves for {}...".format(hist["phi_setting"]))
-        print("\nIteration, therefore grabbing data from {}...".format(f_ave))
-        print("-"*25)
-        print("-"*25)
-        aveDict[hist["phi_setting"]] = {}
-        with open(f_avek, 'r') as f:
-            lines = f.readlines()
-        dict_lst = []            
-        for line in lines:
-            line_lst = line.split(" ") # aveW, errW, aveQ2, errQ2, avett, errtt, theta_cm, tbin
-            ave_val = float(line_lst[0])
-            ave_err_val = float(line_lst[1])
-            phibin_index = int(line_lst[2])
-            tbin_index = int(line_lst[3])
-            print("Data ave for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(tbin_index, phibin_index, ave_val, (ave_err_val)*ave_val))
-            dict_lst.append((tbin_index, phibin_index, ave_val, ave_err_val))
-
-        # Group the tuples by the first two elements using defaultdict
-        groups = defaultdict(list)
-        for tup in dict_lst:
-            key = (tup[0], tup[1])
-            groups[key] = {
-                "{}_arr".format("ave") : tup[2],
-                "{}_ave".format("ave") : tup[3],
-            }
-
-        aveDict[hist["phi_setting"]]["ave"] = groups
-        
-    return {"binned_DATA" : aveDict}

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 04:09:54 trottar"
+# Time-stamp: "2024-02-14 04:11:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,9 +350,7 @@ sys.path.append("binning")
 from ave_per_bin import ave_per_bin_data, ave_per_bin_simc
 
 aveDict = {}
-# **************FINISH using grab_ave_data()
 aveDict.update(ave_per_bin_data(histlist, inpDict))
-# **************
 aveDict.update(ave_per_bin_simc(histlist, inpDict, iteration=True))
 
 sys.path.append("plotting")
