@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 22:28:28 trottar"
+# Time-stamp: "2024-02-13 22:32:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,8 +186,8 @@ def compare_simc(rootFileSimc, hist, inpDict):
     polar_phiq_vs_t_SIMC.SetName("polar_phiq_vs_t_SIMC")
     
     # HGCer hole comparison plots
-    P_hgcer_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_xAtCer_vs_yAtCer_SIMC", "X vs Y; X; Y", 100, -30, 30, 100, -30, 30)
-    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC", "X vs Y (no hole cut); X; Y", 100, -30, 30, 100, -30, 30)
+    P_hgcer_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_xAtCer_vs_yAtCer_SIMC", "X vs Y; X; Y", 50, -30, 30, 50, -30, 30)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC", "X vs Y (no hole cut); X; Y", 50, -30, 30, 50, -30, 30)
     
     ################################################################################################################################################
     # Fill data histograms for various trees called above
