@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 10:34:12 trottar"
+# Time-stamp: "2024-02-14 10:40:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -172,20 +172,20 @@ echo
 echo "Running average_kinematics..."
 ./average_kinematics.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 
-echo
-echo "Compiling average_ratios.f..."
-eval "gfortran -o average_ratios average_ratios.f"
-# Check the exit status of the Fortran script
-if [ $? -ne 0 ]; then
-    echo
-    echo
-    echo "2 ERROR: Fortran script failed!"
-    echo "       See error above..."
-    exit 1
-fi
-echo
-echo "Running average_ratios..."
-./average_ratios.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
+#echo
+#echo "Compiling average_ratios.f..."
+#eval "gfortran -o average_ratios average_ratios.f"
+## Check the exit status of the Fortran script
+#if [ $? -ne 0 ]; then
+#    echo
+#    echo
+#    echo "2 ERROR: Fortran script failed!"
+#    echo "       See error above..."
+#    exit 1
+#fi
+#echo
+#echo "Running average_ratios..."
+#./average_ratios.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
