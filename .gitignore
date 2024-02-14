@@ -24,6 +24,7 @@ par.*
 
 # Fortran
 average_kinematics
+average_ratios
 calc_xsect
 fort.99
 
