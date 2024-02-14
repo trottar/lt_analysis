@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 20:50:33 trottar"
+# Time-stamp: "2024-02-13 19:09:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,15 +151,6 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
         yield_err_simc = match_to_bin(yield_err_simc)        
         phibins_data = match_to_bin(phibins_data)
         phibins_simc = match_to_bin(phibins_simc)
-
-        print("!!!!!!!!!!!!")
-        print(yield_data)
-        print(yield_simc)
-        print(yield_err_data)
-        print(yield_err_simc)
-        print(phibins_data)
-        print(phibins_simc)
-        print("!!!!!!!!!!!!")
         
         multiDict = {}
         for i, val in enumerate(t_bin_centers):

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 18:54:07 trottar"
+# Time-stamp: "2024-02-13 19:11:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,6 +71,15 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
     b3 = inpDict["b3"]
     a4 = inpDict["a4"]
     b4 = inpDict["b4"]    
+
+    ################################################################################################################################################
+    # Define HGCer hole cut for KaonLT 2018-19
+    if ParticleType == "kaon":
+        sys.path.append("cuts")
+        from hgcer_hole import apply_HGCer_hole_cut
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W)
+    
+    ################################################################################################################################################
         
     TBRANCH_DATA  = tree_data.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
     TBRANCH_RAND  = tree_data.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
@@ -167,32 +176,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
 
             if ParticleType == "kaon":
 
-                # Defined HGCer Geometric cuts
-                cutg = TCutG("cutg",21)
-                cutg.SetVarX("P_hgcer_yAtCer")
-                cutg.SetVarY("P_hgcer_xAtCer")
-                cutg.SetPoint(0,-25,2+10)
-                cutg.SetPoint(1,-2,2+10)
-                cutg.SetPoint(2,-1,2.5+10)
-                cutg.SetPoint(3,0,3+10)
-                cutg.SetPoint(4,1,3+10)
-                cutg.SetPoint(5,2,3.3+10)
-                cutg.SetPoint(6,3,3.0+10)
-                cutg.SetPoint(7,4,2.5+10)
-                cutg.SetPoint(8,5,2+10)
-                cutg.SetPoint(9,25,2+10)
-                cutg.SetPoint(10,25,0.5+10)
-                cutg.SetPoint(11,5,0.5+10)
-                cutg.SetPoint(12,4,1+10)
-                cutg.SetPoint(13,3,-1+10)
-                cutg.SetPoint(14,2,-2+10)
-                cutg.SetPoint(15,1,-2.3+10)
-                cutg.SetPoint(16,0,-1.5+10)
-                cutg.SetPoint(17,-1,-1+10)
-                cutg.SetPoint(18,-2,0.5+10)
-                cutg.SetPoint(19,-25,0.5+10)
-                cutg.SetPoint(20,-25,2+10)
-
                 ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 
             else:
@@ -233,32 +216,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
             if ParticleType == "kaon":
-
-                # Defined HGCer Geometric cuts
-                cutg = TCutG("cutg",21)
-                cutg.SetVarX("P_hgcer_yAtCer")
-                cutg.SetVarY("P_hgcer_xAtCer")
-                cutg.SetPoint(0,-25,2+10)
-                cutg.SetPoint(1,-2,2+10)
-                cutg.SetPoint(2,-1,2.5+10)
-                cutg.SetPoint(3,0,3+10)
-                cutg.SetPoint(4,1,3+10)
-                cutg.SetPoint(5,2,3.3+10)
-                cutg.SetPoint(6,3,3.0+10)
-                cutg.SetPoint(7,4,2.5+10)
-                cutg.SetPoint(8,5,2+10)
-                cutg.SetPoint(9,25,2+10)
-                cutg.SetPoint(10,25,0.5+10)
-                cutg.SetPoint(11,5,0.5+10)
-                cutg.SetPoint(12,4,1+10)
-                cutg.SetPoint(13,3,-1+10)
-                cutg.SetPoint(14,2,-2+10)
-                cutg.SetPoint(15,1,-2.3+10)
-                cutg.SetPoint(16,0,-1.5+10)
-                cutg.SetPoint(17,-1,-1+10)
-                cutg.SetPoint(18,-2,0.5+10)
-                cutg.SetPoint(19,-25,0.5+10)
-                cutg.SetPoint(20,-25,2+10)
 
                 ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 
@@ -301,32 +258,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
 
             if ParticleType == "kaon":
 
-                # Defined HGCer Geometric cuts
-                cutg = TCutG("cutg",21)
-                cutg.SetVarX("P_hgcer_yAtCer")
-                cutg.SetVarY("P_hgcer_xAtCer")
-                cutg.SetPoint(0,-25,2+10)
-                cutg.SetPoint(1,-2,2+10)
-                cutg.SetPoint(2,-1,2.5+10)
-                cutg.SetPoint(3,0,3+10)
-                cutg.SetPoint(4,1,3+10)
-                cutg.SetPoint(5,2,3.3+10)
-                cutg.SetPoint(6,3,3.0+10)
-                cutg.SetPoint(7,4,2.5+10)
-                cutg.SetPoint(8,5,2+10)
-                cutg.SetPoint(9,25,2+10)
-                cutg.SetPoint(10,25,0.5+10)
-                cutg.SetPoint(11,5,0.5+10)
-                cutg.SetPoint(12,4,1+10)
-                cutg.SetPoint(13,3,-1+10)
-                cutg.SetPoint(14,2,-2+10)
-                cutg.SetPoint(15,1,-2.3+10)
-                cutg.SetPoint(16,0,-1.5+10)
-                cutg.SetPoint(17,-1,-1+10)
-                cutg.SetPoint(18,-2,0.5+10)
-                cutg.SetPoint(19,-25,0.5+10)
-                cutg.SetPoint(20,-25,2+10)
-
                 ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 
             else:
@@ -367,32 +298,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
             if ParticleType == "kaon":
-
-                # Defined HGCer Geometric cuts
-                cutg = TCutG("cutg",21)
-                cutg.SetVarX("P_hgcer_yAtCer")
-                cutg.SetVarY("P_hgcer_xAtCer")
-                cutg.SetPoint(0,-25,2+10)
-                cutg.SetPoint(1,-2,2+10)
-                cutg.SetPoint(2,-1,2.5+10)
-                cutg.SetPoint(3,0,3+10)
-                cutg.SetPoint(4,1,3+10)
-                cutg.SetPoint(5,2,3.3+10)
-                cutg.SetPoint(6,3,3.0+10)
-                cutg.SetPoint(7,4,2.5+10)
-                cutg.SetPoint(8,5,2+10)
-                cutg.SetPoint(9,25,2+10)
-                cutg.SetPoint(10,25,0.5+10)
-                cutg.SetPoint(11,5,0.5+10)
-                cutg.SetPoint(12,4,1+10)
-                cutg.SetPoint(13,3,-1+10)
-                cutg.SetPoint(14,2,-2+10)
-                cutg.SetPoint(15,1,-2.3+10)
-                cutg.SetPoint(16,0,-1.5+10)
-                cutg.SetPoint(17,-1,-1+10)
-                cutg.SetPoint(18,-2,0.5+10)
-                cutg.SetPoint(19,-25,0.5+10)
-                cutg.SetPoint(20,-25,2+10)
 
                 ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 

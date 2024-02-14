@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 12:17:26 trottar"
+# Time-stamp: "2024-02-13 19:14:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -221,7 +221,7 @@ create_dir(new_dir)
 
 '''
 
-#Importing diamond cut script
+# Importing diamond cut script
 sys.path.append("cuts")
 from diamond import DiamondPlot
 
