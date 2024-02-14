@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 22:11:07 trottar"
+# Time-stamp: "2024-02-13 22:19:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -566,15 +566,15 @@ def rand_sub(phi_setting, inpDict):
         if(NOHOLECUTS):
           # HGCer hole comparison            
           P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-          P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.missmass)
-          P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.missmass)                    
+          P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
+          P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
             
         if(ALLCUTS):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-          P_hgcer_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.missmass)
-          P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.missmass)                    
+          P_hgcer_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
+          P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -678,15 +678,15 @@ def rand_sub(phi_setting, inpDict):
         if(NOHOLECUTS):
           # HGCer hole comparison            
           P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-          P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.missmass)
-          P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.missmass)                    
+          P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.MM)
+          P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
             
         if(ALLCUTS):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-          P_hgcer_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.missmass)
-          P_hgcer_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.missmass)                    
+          P_hgcer_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.MM)
+          P_hgcer_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -783,15 +783,15 @@ def rand_sub(phi_setting, inpDict):
         if(NOHOLECUTS):
           # HGCer hole comparison            
           P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-          P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.missmass)
-          P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.missmass)                    
+          P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
+          P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
             
         if(ALLCUTS):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-          P_hgcer_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.missmass)
-          P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.missmass)                    
+          P_hgcer_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
+          P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -885,15 +885,15 @@ def rand_sub(phi_setting, inpDict):
         if(NOHOLECUTS):
           # HGCer hole comparison            
           P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-          P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.missmass)
-          P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.missmass)                    
+          P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
+          P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
             
         if(ALLCUTS):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-          P_hgcer_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.missmass)
-          P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.missmass)                    
+          P_hgcer_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
+          P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
