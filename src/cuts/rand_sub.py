@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 22:39:40 trottar"
+# Time-stamp: "2024-02-13 22:45:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -556,7 +556,7 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
         else:
@@ -668,7 +668,7 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
             
         else:
@@ -773,7 +773,7 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
             
         else:
@@ -875,7 +875,7 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
             
         else:
