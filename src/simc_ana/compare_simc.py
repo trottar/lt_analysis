@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 19:50:16 trottar"
+# Time-stamp: "2024-02-13 19:52:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,6 +84,7 @@ def compare_simc(hist, inpDict):
     InData_error_efficiency_left = inpDict["InData_error_efficiency_left"]
     InData_error_efficiency_center = inpDict["InData_error_efficiency_center"]    
     efficiency_table = inpDict["efficiency_table"]
+    EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
 
     # Define diamond cut parameters
