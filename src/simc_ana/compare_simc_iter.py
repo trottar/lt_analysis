@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 22:32:19 trottar"
+# Time-stamp: "2024-02-13 22:40:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -379,7 +379,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     # HGCer Hole Plots
     c_hgcer_hole = TCanvas()
 
-    c_hgcer_hole.Divide(2,1)
+    c_hgcer_hole.Divide(2,2)
 
     c_hgcer_hole.cd(1)
     P_hgcer_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
@@ -389,8 +389,20 @@ def compare_simc(rootFileSimc, hist, inpDict):
     P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
     P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Draw("colz")
 
-    c_hgcer_hole.Draw()    
+    c_hgcer_hole.cd(3)
+    P_hgcer_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
+    P_hgcer_xAtCer_vs_yAtCer_SIMC.Draw("colz")
+    hgcer_cutg.SetLineColor(7)
+    hgcer_cutg.Draw("same")
 
+    c_hgcer_hole.cd(4)
+    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
+    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Draw("colz")
+    hgcer_cutg.SetLineColor(7)
+    hgcer_cutg.Draw("same")
+    
+    c_hgcer_hole.Draw()    
+    
     c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType))+')')
     
     return histDict
