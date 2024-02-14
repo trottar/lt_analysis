@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 22:19:29 trottar"
+# Time-stamp: "2024-02-13 22:27:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1385,19 +1385,19 @@ def rand_sub(phi_setting, inpDict):
     c_hgcervsMM.Divide(2,2)
 
     c_hgcervsMM.cd(1)
-
+    P_hgcer_xAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
     P_hgcer_xAtCer_vs_MM_DATA.Draw("colz")
 
     c_hgcervsMM.cd(2)
-    
+    P_hgcer_nohole_xAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
     P_hgcer_nohole_xAtCer_vs_MM_DATA.Draw("colz")
 
     c_hgcervsMM.cd(3)
-
+    P_hgcer_yAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
     P_hgcer_yAtCer_vs_MM_DATA.Draw("colz")
 
     c_hgcervsMM.cd(4)
-    
+    P_hgcer_nohole_yAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
     P_hgcer_nohole_yAtCer_vs_MM_DATA.Draw("colz")    
     
     c_hgcervsMM.Draw()
@@ -1411,11 +1411,11 @@ def rand_sub(phi_setting, inpDict):
     c_hgcer_hole.Divide(2,1)
 
     c_hgcer_hole.cd(1)
-
+    P_hgcer_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
     P_hgcer_xAtCer_vs_yAtCer_DATA.Draw("colz")
 
     c_hgcer_hole.cd(2)
-
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
     P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Draw("colz")
 
     c_hgcer_hole.Draw()
