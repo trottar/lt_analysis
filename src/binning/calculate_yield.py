@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 21:22:41 trottar"
+# Time-stamp: "2024-02-14 11:08:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -736,7 +736,7 @@ def find_yield_simc(histlist, inpDict, iteration=False):
 
 ##################################################################################################################################################
 
-def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
+def grab_yield_data(histlist, phisetlist, inpDict):
 
     Ws = inpDict["W"]
     Qs = inpDict["Q2"]
@@ -842,6 +842,7 @@ def grab_yield_data(prev_root_file, histlist, phisetlist, inpDict):
                 "{}_err".format("yield") : tup[3],
             }
 
+        print("!!!!!!!",groups)
         yieldDict[hist["phi_setting"]]["yield"] = groups
         
     return {"binned_DATA" : yieldDict}

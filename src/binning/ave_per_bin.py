@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 04:11:26 trottar"
+# Time-stamp: "2024-02-14 11:07:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -498,15 +498,14 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
                 ave_val = ave_hist[j]
                 print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))
-                dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
+                dict_lst.append((tbin_index, phibin_index, ave_val))
                 
         # Group the tuples by the first two elements using defaultdict
         groups = defaultdict(list)
         for tup in dict_lst:
             key = (tup[0], tup[1])
             groups[key] = {
-                "{}_arr".format(kin_type) : tup[2],
-                "{}_ave".format(kin_type) : tup[3],
+                "{}_ave".format(kin_type) : tup[2],
             }
 
         group_dict[kin_type] = groups
@@ -744,15 +743,14 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 hist_val = [binned_sub_simc[0][j], binned_sub_simc[1][j]]
                 ave_val = ave_hist[j]
                 print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))            
-                dict_lst.append((tbin_index, phibin_index, hist_val, ave_val))
+                dict_lst.append((tbin_index, phibin_index, ave_val))
 
         # Group the tuples by the first two elements using defaultdict
         groups = defaultdict(list)
         for tup in dict_lst:
             key = (tup[0], tup[1])
             groups[key] = {
-                "{}_arr".format(kin_type) : tup[2],
-                "{}_ave".format(kin_type) : tup[3],
+                "{}_ave".format(kin_type) : tup[2],
             }                    
     
         group_dict[kin_type] = groups
@@ -787,3 +785,67 @@ def ave_per_bin_simc(histlist, inpDict, iteration=False):
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
         
     return {"binned_SIMC" : aveDict}
+
+##################################################################################################################################################
+
+def grab_ave_data(histlist, inpDict):
+
+    W = inpDict["W"]
+    Q2 = inpDict["Q2"]
+    
+    for hist in histlist:
+        t_bins = hist["t_bins"]
+        phi_bins = hist["phi_bins"]
+
+    aveDict = {
+        "t_bins" : t_bins,
+        "phi_bins" : phi_bins
+    }
+
+    f_avek = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+    
+    # List of kinematic types
+    kinematic_types = ["Q2", "W", "t", "epsilon"]
+
+    # Loop through histlist and update aveDict
+    for hist in histlist:
+        print("\n\n")
+        print("-"*25)
+        print("-"*25)
+        print("Finding data averages for {}...".format(hist["phi_setting"]))
+        print("-"*25)
+        print("-"*25)
+        aveDict[hist["phi_setting"]] = {}
+        group_dict = {}
+        for kin_type in kinematic_types:
+            with open(f_yield, 'r') as f:
+                lines = f.readlines()
+            dict_lst = []
+            for line in lines:
+                line_lst = line.split(" ") # aveW, errW, aveQ2, errQ2, avett, errtt, thetacm, tbin
+                if kin_type == "W":
+                    ave_val = float(line_lst[0])
+                if kin_type == "Q2":
+                    ave_val = float(line_lst[2])
+                if kin_type == "t":
+                    ave_val = float(line_lst[4])
+                tbin_index = int(line_lst[7])
+                print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, tbin_index, ave_val))
+                dict_lst.append((tbin_index, phibin_index, ave_val))
+
+            # Group the tuples by the first two elements using defaultdict
+            groups = defaultdict(list)
+            for tup in dict_lst:
+                key = (tup[0], tup[1])
+                groups[key] = {
+                    "{}_ave".format(kin_type) : tup[2],
+                }
+                
+            print("!!!!!!!",groups)                
+            group_dict[kin_type] = groups
+        
+        binned_dict = group_dict
+        for kin_type in kinematic_types:
+            aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
+                
+    return {"binned_DATA" : aveDict}
