@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 19:42:22 trottar"
+# Time-stamp: "2024-02-13 22:22:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,7 +15,7 @@ from ROOT import TCutG
 
 def apply_HGCer_hole_cut(Q2, W, EPSSET, simc=False):
 
-    '''
+    #'''
     # Defined HGCer Geometric cuts
     cutg = TCutG("cutg",21)
     cutg.SetVarX("P_hgcer_yAtCer")
@@ -41,10 +41,11 @@ def apply_HGCer_hole_cut(Q2, W, EPSSET, simc=False):
     cutg.SetPoint(18,-2,0.5+10)
     cutg.SetPoint(19,-25,0.5+10)
     cutg.SetPoint(20,-25,2+10)
+
     '''
     # Defined HGCer Geometric cuts
     cutg = TCutG("cutg")
     cutg.SetVarX("P_hgcer_yAtCer")
     cutg.SetVarY("P_hgcer_xAtCer")
-    
+    '''
     return cutg
