@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 19:40:03 trottar"
+# Time-stamp: "2024-02-13 21:22:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -506,6 +506,10 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
     processed_dict = {}
     
+    Q2 = inpDict["Q2"]
+    W = inpDict["W"]
+    EPSSET = inpDict["EPSSET"]
+    
     ParticleType = inpDict["ParticleType"]
 
     # Define diamond cut parameters
@@ -517,6 +521,15 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
     b3 = inpDict["b3"]
     a4 = inpDict["a4"]
     b4 = inpDict["b4"]
+
+    ################################################################################################################################################
+    # Define HGCer hole cut for KaonLT 2018-19
+    if ParticleType == "kaon":
+        sys.path.append("cuts")
+        from hgcer_hole import apply_HGCer_hole_cut
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, simc=True)
+        
+    ################################################################################################################################################
     
     TBRANCH_SIMC  = tree_simc.Get("h10")
     
@@ -540,10 +553,17 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
                 Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-                #........................................
+                if ParticleType == "kaon":
 
+                    ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)
+                    NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
+
+                else:
+
+                    ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond                
+                
                 #Fill SIMC events
-                if(HMS_Acceptance & SHMS_Acceptance & Diamond):
+                if(ALLCUTS):
 
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
                         if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
