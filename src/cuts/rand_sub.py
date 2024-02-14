@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 22:35:45 trottar"
+# Time-stamp: "2024-02-13 22:39:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1421,13 +1421,13 @@ def rand_sub(phi_setting, inpDict):
     c_hgcer_hole.cd(3)
     P_hgcer_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
     hgcer_cutg.SetLineColor(7)
-    hgcer_cutg.Draw()
+    hgcer_cutg.Draw("same")
     P_hgcer_xAtCer_vs_yAtCer_DATA.Draw("colz")
 
     c_hgcer_hole.cd(4)
     P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
     hgcer_cutg.SetLineColor(7)
-    hgcer_cutg.Draw()
+    hgcer_cutg.Draw("same")
     P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Draw("colz")
     
     c_hgcer_hole.Draw()
