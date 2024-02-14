@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 22:40:25 trottar"
+# Time-stamp: "2024-02-13 23:15:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,7 +206,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
       if ParticleType == "kaon":
           
-          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)
+          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
           NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
 
       else:
