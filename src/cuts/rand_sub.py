@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-15 00:17:14 trottar"
+# Time-stamp: "2024-02-15 00:20:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1172,7 +1172,8 @@ def rand_sub(phi_setting, inpDict):
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
         from particle_subtraction import particle_subtraction
-        H_MM_SUB_SIMC = particle_subtraction(inpDict, phi_setting, "pion", scale_factor=1.0)
+        H_MM_SUB_SIMC  = TH1D("H_MM_SUB_SIMC","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        particle_subtraction(H_MM_SUB_SIMC, inpDict, phi_setting, "pion", scale_factor=1.0)
         print("!!!!!!!!!!!!H_MM_SUB_SIMC",H_MM_SUB_SIMC)
         print("!!!!!!!!!!!!H_MM_SUB_SIMC",type(H_MM_SUB_SIMC))
         H_MM_DATA.Add(H_MM_SUB_SIMC,-1)

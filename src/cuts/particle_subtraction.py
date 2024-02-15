@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-15 00:11:38 trottar"
+# Time-stamp: "2024-02-15 00:20:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,7 +43,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=1.0):
+def particle_subtraction(H_MM_SUB_SIMC, inpDict, phi_setting, SubtractedParticle, scale_factor=1.0):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -84,7 +84,7 @@ def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=
     ################################################################################################################################################
     # Plot definitions
 
-    H_MM_SUB_SIMC  = TH1D("H_MM_SUB_SIMC","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+    #H_MM_SUB_SIMC  = TH1D("H_MM_SUB_SIMC","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
 
     ################################################################################################################################################    
     # Fill data histograms for various trees called above
@@ -120,4 +120,4 @@ def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=
     print("!!!!!!!!!!!!H_MM_SUB_SIMC",H_MM_SUB_SIMC)
     print("!!!!!!!!!!!!H_MM_SUB_SIMC",type(H_MM_SUB_SIMC))
         
-    return H_MM_SUB_SIMC
+    #return H_MM_SUB_SIMC
