@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 23:50:55 trottar"
+# Time-stamp: "2024-02-14 23:52:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,8 +17,7 @@ import uproot as up
 import numpy as np
 import root_numpy as rnp
 import ROOT
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
-from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
+from ROOT import TH1D
 import os
 
 ################################################################################################################################################
