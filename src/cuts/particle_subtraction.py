@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 23:56:39 trottar"
+# Time-stamp: "2024-02-14 23:57:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=
     # Define simc root file trees of interest
 
     # Names don't match so need to do some string rearrangement
-    #InSIMCFilename = "{}_Sub_Q{}W{}_{}e.root".format(SubtractedParticle, Q2, W, EPSSET)
+    #InSIMCFilename = "{}_Sub_Q{}W{}{}_{}e.root".format(SubtractedParticle, Q2, W, phi_setting.lower(), EPSSET)
     InSIMCFilename = "Prod_Coin_Q{}W{}{}_{}e.root".format(Q2, W, phi_setting.lower(), EPSSET)
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
