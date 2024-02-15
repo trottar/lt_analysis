@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-15 00:33:24 trottar"
+# Time-stamp: "2024-02-15 00:35:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,7 +92,7 @@ def particle_subtraction(H_MM_SUB_SIMC, hgcer_cutg, inpDict, phi_setting, Subtra
 
       if ParticleType == "kaon":
           
-          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not sub_hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
 
       else:
 
