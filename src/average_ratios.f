@@ -199,7 +199,7 @@ c      pause
                write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e
             end if
-            write(77,'(2f9.5,2i3)') r,e,ip,it
+            write(77,'(3f9.4,2i3)') r,e,ip,it
          end do
       end do
       close(77)
