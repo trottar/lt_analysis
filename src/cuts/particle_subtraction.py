@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 23:59:55 trottar"
+# Time-stamp: "2024-02-15 00:01:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -121,7 +121,7 @@ def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=
     ################################################################################################################################################    
     # Fill data histograms for various trees called above
 
-    print("\nGrabbing %s subtraction simc..." % SubtractedParticle)
+    print("\nGrabbing %s %s subtraction simc...".format(phi_setting, SubtractedParticle))
     for i,evt in enumerate(TBRANCH_SIMC):
 
       # Progress bar

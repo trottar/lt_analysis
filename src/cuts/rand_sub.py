@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 23:55:21 trottar"
+# Time-stamp: "2024-02-15 00:02:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1168,7 +1168,6 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
-
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
