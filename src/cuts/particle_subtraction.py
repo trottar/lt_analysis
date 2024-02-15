@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-15 00:35:11 trottar"
+# Time-stamp: "2024-02-15 00:38:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,7 +102,8 @@ def particle_subtraction(H_MM_SUB_SIMC, hgcer_cutg, inpDict, phi_setting, Subtra
       if(ALLCUTS):
           
           #H_MM_SUB_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
-          H_MM_SUB_SIMC.Fill(evt.missmass, evt.Weight)    
+          #H_MM_SUB_SIMC.Fill(evt.missmass, evt.Weight)
+          H_MM_SUB_SIMC.Fill(evt.missmass)
 
     H_MM_SUB_SIMC.Scale(scale_factor)
 
