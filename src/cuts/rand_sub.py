@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-15 00:30:13 trottar"
+# Time-stamp: "2024-02-15 00:33:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1168,18 +1168,18 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
-    '''
+
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
         from particle_subtraction import particle_subtraction
         SubtractedParticle = "pion"
         H_MM_SUB_SIMC  = TH1D("H_MM_SUB_SIMC","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        particle_subtraction(H_MM_SUB_SIMC, inpDict, phi_setting, SubtractedParticle, scale_factor=1.0)
+        particle_subtraction(H_MM_SUB_SIMC, hgcer_cutg, inpDict, phi_setting, SubtractedParticle, scale_factor=1.0)
         print("!!!!!!!!!!!!H_MM_SUB_SIMC",H_MM_SUB_SIMC)
         print("!!!!!!!!!!!!H_MM_SUB_SIMC",type(H_MM_SUB_SIMC))
         H_MM_DATA.Add(H_MM_SUB_SIMC,-1)
         histDict["H_MM_SUB_SIMC"] =     H_MM_SUB_SIMC
-    '''
+    
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
     histDict["phi_setting"] = phi_setting
