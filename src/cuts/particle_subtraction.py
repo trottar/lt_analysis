@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-15 00:20:41 trottar"
+# Time-stamp: "2024-02-15 00:28:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ def particle_subtraction(H_MM_SUB_SIMC, inpDict, phi_setting, SubtractedParticle
     # Define HGCer hole cut for KaonLT 2018-19
     if ParticleType == "kaon":
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
+        sub_hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
     
     ################################################################################################################################################
     # Define simc root file trees of interest
@@ -103,7 +103,7 @@ def particle_subtraction(H_MM_SUB_SIMC, inpDict, phi_setting, SubtractedParticle
 
       if ParticleType == "kaon":
           
-          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not sub_hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
 
       else:
 
@@ -119,5 +119,3 @@ def particle_subtraction(H_MM_SUB_SIMC, inpDict, phi_setting, SubtractedParticle
 
     print("!!!!!!!!!!!!H_MM_SUB_SIMC",H_MM_SUB_SIMC)
     print("!!!!!!!!!!!!H_MM_SUB_SIMC",type(H_MM_SUB_SIMC))
-        
-    #return H_MM_SUB_SIMC
