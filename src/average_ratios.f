@@ -39,7 +39,7 @@ c     Fortran is annoying and can't find parameters
 c     dynamically (since they must be known at compile time).
 c     Therefore, I am setting is arbitrarily to allocate
 c     enough space for the sets
-      parameter (nbin = 100)
+      parameter (nbin = 1000)
       
       integer nt,nphi,it,ip
       integer nset,ipol

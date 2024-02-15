@@ -38,7 +38,7 @@ c     Fortran is annoying and can't find parameters
 c     dynamically (since they must be known at compile time).
 c     Therefore, I am setting is arbitrarily to allocate
 c     enough space for the sets
-      parameter (nbin = 10)
+      parameter (nbin = 100)
 
       real, dimension(nbin) :: aveW,errW,aveQ2,errQ2
       real, dimension(nbin) :: avett,errtt
