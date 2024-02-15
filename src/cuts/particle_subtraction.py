@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 23:58:17 trottar"
+# Time-stamp: "2024-02-14 23:59:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -144,39 +144,39 @@ def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=
       #Fill SIMC events
       if(ALLCUTS):
           
-          H_Weight_SIMC.Fill(evt.Weight)
+          H_Weight_SUB_SIMC.Fill(evt.Weight)
 
-          H_ssxfp_SIMC.Fill(evt.ssxfp, evt.Weight)
-          H_ssyfp_SIMC.Fill(evt.ssyfp, evt.Weight)
-          H_ssxpfp_SIMC.Fill(evt.ssxpfp, evt.Weight)
-          H_ssypfp_SIMC.Fill(evt.ssypfp, evt.Weight)
-          H_hsxfp_SIMC.Fill(evt.hsxfp, evt.Weight)
-          H_hsyfp_SIMC.Fill(evt.hsyfp, evt.Weight)
-          H_hsxpfp_SIMC.Fill(evt.hsxpfp, evt.Weight)
-          H_hsypfp_SIMC.Fill(evt.hsypfp, evt.Weight)
-          H_ssdelta_SIMC.Fill(evt.ssdelta, evt.Weight) 
-          H_hsdelta_SIMC.Fill(evt.hsdelta, evt.Weight)	
-          H_ssxptar_SIMC.Fill(evt.ssxptar, evt.Weight)
-          H_ssyptar_SIMC.Fill(evt.ssyptar, evt.Weight)
-          H_hsxptar_SIMC.Fill(evt.hsxptar, evt.Weight)	
-          H_hsyptar_SIMC.Fill(evt.hsyptar, evt.Weight)
+          H_ssxfp_SUB_SIMC.Fill(evt.ssxfp, evt.Weight)
+          H_ssyfp_SUB_SIMC.Fill(evt.ssyfp, evt.Weight)
+          H_ssxpfp_SUB_SIMC.Fill(evt.ssxpfp, evt.Weight)
+          H_ssypfp_SUB_SIMC.Fill(evt.ssypfp, evt.Weight)
+          H_hsxfp_SUB_SIMC.Fill(evt.hsxfp, evt.Weight)
+          H_hsyfp_SUB_SIMC.Fill(evt.hsyfp, evt.Weight)
+          H_hsxpfp_SUB_SIMC.Fill(evt.hsxpfp, evt.Weight)
+          H_hsypfp_SUB_SIMC.Fill(evt.hsypfp, evt.Weight)
+          H_ssdelta_SUB_SIMC.Fill(evt.ssdelta, evt.Weight) 
+          H_hsdelta_SUB_SIMC.Fill(evt.hsdelta, evt.Weight)	
+          H_ssxptar_SUB_SIMC.Fill(evt.ssxptar, evt.Weight)
+          H_ssyptar_SUB_SIMC.Fill(evt.ssyptar, evt.Weight)
+          H_hsxptar_SUB_SIMC.Fill(evt.hsxptar, evt.Weight)	
+          H_hsyptar_SUB_SIMC.Fill(evt.hsyptar, evt.Weight)
 
           # SIMC goes from 0 to 2pi so no need for +pi/2
-          H_ph_q_SIMC.Fill((evt.phipq+math.pi), evt.Weight)
-          H_th_q_SIMC.Fill(evt.thetapq, evt.Weight)
+          H_ph_q_SUB_SIMC.Fill((evt.phipq+math.pi), evt.Weight)
+          H_th_q_SUB_SIMC.Fill(evt.thetapq, evt.Weight)
 
-          H_pmiss_SIMC.Fill(evt.Pm, evt.Weight)	
-          H_emiss_SIMC.Fill(evt.Em, evt.Weight)	
-          #H_pmx_SIMC.Fill(evt.Pmx, evt.Weight)
-          #H_pmy_SIMC.Fill(evt.Pmy, evt.Weight)
-          #H_pmz_SIMC.Fill(evt.Pmz, evt.Weight)
-          H_Q2_SIMC.Fill(evt.Q2, evt.Weight)
-          H_W_SIMC.Fill(evt.W, evt.Weight)
-          H_t_SIMC.Fill(-evt.t, evt.Weight)
-          H_epsilon_SIMC.Fill(evt.epsilon, evt.Weight)
-          #H_MM_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
-          H_MM_SIMC.Fill(evt.missmass, evt.Weight)
-          H_MM_unweighted_SIMC.Fill(evt.missmass)
+          H_pmiss_SUB_SIMC.Fill(evt.Pm, evt.Weight)	
+          H_emiss_SUB_SIMC.Fill(evt.Em, evt.Weight)	
+          #H_pmx_SUB_SIMC.Fill(evt.Pmx, evt.Weight)
+          #H_pmy_SUB_SIMC.Fill(evt.Pmy, evt.Weight)
+          #H_pmz_SUB_SIMC.Fill(evt.Pmz, evt.Weight)
+          H_Q2_SUB_SIMC.Fill(evt.Q2, evt.Weight)
+          H_W_SUB_SIMC.Fill(evt.W, evt.Weight)
+          H_t_SUB_SIMC.Fill(-evt.t, evt.Weight)
+          H_epsilon_SUB_SIMC.Fill(evt.epsilon, evt.Weight)
+          #H_MM_SUB_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
+          H_MM_SUB_SIMC.Fill(evt.missmass, evt.Weight)
+          H_MM_unweighted_SUB_SIMC.Fill(evt.missmass)
     
     H_Weight_SUB_SIMC.Scale(scale_factor)
     H_hsdelta_SUB_SIMC.Scale(scale_factor)
