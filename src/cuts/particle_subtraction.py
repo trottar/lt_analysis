@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 23:45:48 trottar"
+# Time-stamp: "2024-02-14 23:47:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ def particle_subtraction(Q2, W, EPSSET, ParticleType, SubtractedParticle, scale_
 
     # Names don't match so need to do some string rearrangement
     #InSIMCFilename = "{}_Sub_Q{}W{}_{}e.root".format(SubtractedParticle, Q2, W, EPSSET)
-    InSIMCFilename = "Prod_Coin_{}.root".format(kinematics[0]+phi_setting.lower()+"_"+kinematics[1])
+    InSIMCFilename = "Prod_Coin_Q{}W{}_{}e.root".format(Q2, W, EPSSET)
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
