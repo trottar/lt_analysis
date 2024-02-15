@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 23:52:17 trottar"
+# Time-stamp: "2024-02-14 23:55:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,8 +43,13 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def particle_subtraction(Q2, W, phi_setting, EPSSET, ParticleType, SubtractedParticle, scale_factor=1.0):
+def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=1.0):
 
+    W = inpDict["W"] 
+    Q2 = inpDict["Q2"]
+    EPSSET = inpDict["EPSSET"]
+    ParticleType = inpDict["ParticleType"]
+    
     ################################################################################################################################################
     # Define simc root file trees of interest
 
