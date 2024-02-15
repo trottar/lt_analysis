@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 16:09:15 trottar"
+# Time-stamp: "2024-02-15 15:43:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,7 +56,10 @@ def iterWeight(arg_str):
     #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev) - 0.2))
     # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
     sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
-    sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
+    # RLT (2/15/2024): Removing t dependence from sigT because it seems
+    #                  to be driving poor sep xsects results    
+    #sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
+    sigt = p5 + p6 * math.log(q2_gev)
     siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
     #                 xfit_in_t.py script to work. LT/TT are zeros

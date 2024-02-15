@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-08 16:50:51 trottar"
+# Time-stamp: "2024-02-15 15:45:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,7 +42,10 @@ def import_model(inp_model, arg_str):
             print("Calculating function for sigT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             tav = (0.1112 + 0.0066*math.log(Q2))*Q2
             ftav = (abs(tt)-tav)/tav
-            f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
+            # RLT (2/15/2024): Removing t dependence from sigT because it seems
+            #                  to be driving poor sep xsects results
+            #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
+            f = par[0]+par[1]*math.log(qq)
             return f
 
     # Function for SigLT
