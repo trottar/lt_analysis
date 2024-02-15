@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 23:57:29 trottar"
+# Time-stamp: "2024-02-14 23:58:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,6 +49,22 @@ def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=
     Q2 = inpDict["Q2"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
+
+    # Define diamond cut parameters
+    a1 = inpDict["a1"]
+    b1 = inpDict["b1"]
+    a2 = inpDict["a2"]
+    b2 = inpDict["b2"]
+    a3 = inpDict["a3"]
+    b3 = inpDict["b3"]
+    a4 = inpDict["a4"]
+    b4 = inpDict["b4"]    
+
+    ################################################################################################################################################
+    # Define HGCer hole cut for KaonLT 2018-19
+    if ParticleType == "kaon":
+        from hgcer_hole import apply_HGCer_hole_cut
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
     
     ################################################################################################################################################
     # Define simc root file trees of interest
