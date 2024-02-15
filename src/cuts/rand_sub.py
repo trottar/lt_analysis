@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 23:02:10 trottar"
+# Time-stamp: "2024-02-14 23:38:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -273,6 +273,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DATA       = TH1D("H_t_DATA","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DATA  = TH1D("H_MM_DATA","MM_{K}", 100, 0.7, 1.5)
+    H_MM_nosub_DATA  = TH1D("H_MM_nosub_DATA","MM_nosub_{K}", 100, 0.7, 1.5)    
     H_th_DATA  = TH1D("H_th_DATA","X' tar", 100, -0.1, 0.1)
     H_ph_DATA  = TH1D("H_ph_DATA","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DATA  = TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -311,6 +312,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 100, inpDict["tmin"], inpDict["tmax"])  
     H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DUMMY  = TH1D("H_MM_DUMMY","MM_{K}", 100, 0.7, 1.5)
+    H_MM_nosub_DUMMY  = TH1D("H_MM_nosub_DUMMY","MM_nosub_{K}", 100, 0.7, 1.5)        
     H_th_DUMMY  = TH1D("H_th_DUMMY","X' tar", 100, -0.1, 0.1)
     H_ph_DUMMY  = TH1D("H_ph_DUMMY","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DUMMY  = TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -344,6 +346,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_RAND       = TH1D("H_t_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_RAND  = TH1D("H_MM_RAND","MM_{K}", 100, 0.7, 1.5)
+    H_MM_nosub_RAND  = TH1D("H_MM_nosub_RAND","MM_nosub_{K}", 100, 0.7, 1.5)        
     H_th_RAND  = TH1D("H_th_RAND","X' tar", 100, -0.1, 0.1)
     H_ph_RAND  = TH1D("H_ph_RAND","Y' tar", 100, -0.1, 0.1)
     H_ph_q_RAND  = TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -377,6 +380,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DUMMY_RAND  = TH1D("H_MM_DUMMY_RAND","MM_{K}", 100, 0.7, 1.5)
+    H_MM_nosub_DUMMY_RAND  = TH1D("H_MM_nosub_DUMMY_RAND","MM_nosub_{K}", 100, 0.7, 1.5)        
     H_th_DUMMY_RAND  = TH1D("H_th_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
     H_ph_DUMMY_RAND  = TH1D("H_ph_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DUMMY_RAND  = TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -628,6 +632,7 @@ def rand_sub(phi_setting, inpDict):
           H_W_DATA.Fill(evt.W)
           H_epsilon_DATA.Fill(evt.epsilon)
           H_MM_DATA.Fill(evt.MM)
+          H_MM_nosub_DATA.Fill(evt.MM)
           #H_MM_DATA.Fill(pow(evt.MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
           
@@ -740,6 +745,7 @@ def rand_sub(phi_setting, inpDict):
           H_W_DUMMY.Fill(evt.W)
           H_epsilon_DUMMY.Fill(evt.epsilon)
           H_MM_DUMMY.Fill(evt.MM)
+          H_MM_nosub_DUMMY.Fill(evt.MM)          
           #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
 
@@ -844,6 +850,7 @@ def rand_sub(phi_setting, inpDict):
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(evt.MM)
+          H_MM_nosub_RAND.Fill(evt.MM)
 
     ###################################################################################################################################################    
     # Fill dummy random histograms for various trees called above
@@ -946,6 +953,7 @@ def rand_sub(phi_setting, inpDict):
           H_W_DUMMY_RAND.Fill(evt.W)
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
           H_MM_DUMMY_RAND.Fill(evt.MM  )
+          H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
 
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
@@ -996,6 +1004,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_RAND.Scale(1/nWindows)
     H_epsilon_RAND.Scale(1/nWindows)
     H_MM_RAND.Scale(1/nWindows)
+    H_MM_nosub_RAND.Scale(1/nWindows)
     H_pmiss_RAND.Scale(1/nWindows)
     H_emiss_RAND.Scale(1/nWindows)
     H_pmx_RAND.Scale(1/nWindows)
@@ -1045,6 +1054,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY_RAND.Scale(1/nWindows)
     H_epsilon_DUMMY_RAND.Scale(1/nWindows)
     H_MM_DUMMY_RAND.Scale(1/nWindows)
+    H_MM_nosub_DUMMY_RAND.Scale(1/nWindows)
     H_pmiss_DUMMY_RAND.Scale(1/nWindows)
     H_emiss_DUMMY_RAND.Scale(1/nWindows)
     H_pmx_DUMMY_RAND.Scale(1/nWindows)
@@ -1098,6 +1108,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DATA.Add(H_t_RAND,-1)
     H_epsilon_DATA.Add(H_epsilon_RAND,-1)
     H_MM_DATA.Add(H_MM_RAND,-1)
+    H_MM_nosub_DATA.Add(H_MM_nosub_RAND,-1)
     H_pmiss_DATA.Add(H_pmiss_RAND,-1)
     H_emiss_DATA.Add(H_emiss_RAND,-1)
     H_pmx_DATA.Add(H_pmx_RAND,-1)
@@ -1149,6 +1160,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
     H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
+    H_MM_nosub_DUMMY.Add(H_MM_nosub_DUMMY_RAND,-1)
     H_pmiss_DUMMY.Add(H_pmiss_DUMMY_RAND,-1)
     H_emiss_DUMMY.Add(H_emiss_DUMMY_RAND,-1)
     H_pmx_DUMMY.Add(H_pmx_DUMMY_RAND,-1)
@@ -1157,6 +1169,13 @@ def rand_sub(phi_setting, inpDict):
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
+
+    # Pion subtraction by scaling simc to peak size
+    if ParticleType == "kaon":
+        H_MM_SUB_SIMC = particle_subtraction(Q2, W, EPSSET, ParticleType, "pion", scale_factor=1.0)
+        H_MM_DATA.Add(H_MM_SUB_SIMC,-1)
+        histDict["H_MM_SUB_SIMC"] =     H_MM_SUB_SIMC
+    
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
     histDict["phi_setting"] = phi_setting
@@ -1182,6 +1201,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_t_DUMMY"] =     H_t_DUMMY     
     histDict["H_epsilon_DUMMY"] =     H_epsilon_DUMMY
     histDict["H_MM_DUMMY"] =     H_MM_DUMMY
+    histDict["H_MM_nosub_DUMMY"] =     H_MM_nosub_DUMMY
     histDict["H_th_DUMMY"] =     H_th_DUMMY
     histDict["H_ph_DUMMY"] =     H_ph_DUMMY
     histDict["H_ph_q_DUMMY"] =     H_ph_q_DUMMY
@@ -1219,6 +1239,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_t_DATA"] =     H_t_DATA     
     histDict["H_epsilon_DATA"] =     H_epsilon_DATA
     histDict["H_MM_DATA"] =     H_MM_DATA
+    histDict["H_MM_nosub_DATA"] =     H_MM_nosub_DATA
     histDict["H_th_DATA"] =     H_th_DATA
     histDict["H_ph_DATA"] =     H_ph_DATA
     histDict["H_ph_q_DATA"] =     H_ph_q_DATA
@@ -1294,6 +1315,18 @@ def rand_sub(phi_setting, inpDict):
 
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
+    if ParticleType == "kaon":
+        ###
+        # MM sub plots    
+        CMMsub = TCanvas()
+
+        histDict["H_MM_nosub_DATA"].SetLineColor(1)
+        histDict["H_MM_nosub_DATA"].Draw("same, E1")
+        histDict["H_MM_SUB_SIMC"].SetLineColor(2)
+        histDict["H_MM_SUB_SIMC"].Draw("same, E1")    
+
+        CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    
     ###
     # t-Phi plots        
     Cpht_data = TCanvas()
