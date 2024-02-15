@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-15 00:08:42 trottar"
+# Time-stamp: "2024-02-15 00:11:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,5 +116,8 @@ def particle_subtraction(inpDict, phi_setting, SubtractedParticle, scale_factor=
           H_MM_SUB_SIMC.Fill(evt.missmass, evt.Weight)    
 
     H_MM_SUB_SIMC.Scale(scale_factor)
+
+    print("!!!!!!!!!!!!H_MM_SUB_SIMC",H_MM_SUB_SIMC)
+    print("!!!!!!!!!!!!H_MM_SUB_SIMC",type(H_MM_SUB_SIMC))
         
     return H_MM_SUB_SIMC
