@@ -657,22 +657,23 @@ done
 # HARD CODED #
 ##############
 
+# tbins should not exceed 8 (major drop in statistics)
 # TMIN should not equal zero (unless calc_xsect.f is adapted)
 # Make sure 3 sig figs (no more)
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
-    # Q2=2p1
+    # Q2=2p1, W=2p95
     NumtBins=3
     NumPhiBins=10
     TMIN=0.001
     TMAX=0.600
 elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     # Q2=3p0, W=3p14
-    NumtBins=12
-    NumPhiBins=20
+    NumtBins=8
+    NumPhiBins=16
     TMIN=0.001
     TMAX=0.990
 elif [[ $Q2 = "5p5" && $W = "3p02" ]]; then    
-    # Q2=5p5
+    # Q2=5p5, W=3.02
     NumtBins=2
     NumPhiBins=8
     TMIN=0.001
