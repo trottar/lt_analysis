@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-16 18:14:51 trottar"
+# Time-stamp: "2024-02-16 18:25:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,12 +70,12 @@ def import_model(inp_model, arg_str):
         "sigTT" : sig_TT(p13, p14, p15, p16),
     }
 
-    sig = modelDict[inp_model]
+    sig_sep = modelDict[inp_model]
 
     # Apply weight factor
     g = 1 / ((ww**2) - (m_p**2))**2
-    sig = sig*g
+    sig_sep = sig_sep*g
     
-    print("Model {} = {:.4e}".format(inp_model, sig))
+    print("Model {} = {:.4e}".format(inp_model, sig_sep))
     
-    return sig
+    return sig_sep
