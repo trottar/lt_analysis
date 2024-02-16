@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-15 15:45:17 trottar"
+# Time-stamp: "2024-02-16 18:14:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -26,8 +26,6 @@ def import_model(inp_model, arg_str):
     Q2, theta_cm, tt, qq, ww, *params = args
 
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
-
-    g = 1 / ((ww**2) - (m_p**2))**2
     
     # Function for SigL
     def sig_L(*par):
@@ -74,6 +72,10 @@ def import_model(inp_model, arg_str):
 
     sig = modelDict[inp_model]
 
+    # Apply weight factor
+    g = 1 / ((ww**2) - (m_p**2))**2
+    sig = sig*g
+    
     print("Model {} = {:.4e}".format(inp_model, sig))
     
     return sig

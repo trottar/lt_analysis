@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-16 06:25:55 trottar"
+# Time-stamp: "2024-02-16 17:44:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -848,7 +848,6 @@ def grab_yield_data(histlist, phisetlist, inpDict):
                 "{}_err".format("yield") : tup[3],
             }
 
-        print("!!!!!!!",groups)
         yieldDict[hist["phi_setting"]]["yield"] = groups
         
     return {"binned_DATA" : yieldDict}

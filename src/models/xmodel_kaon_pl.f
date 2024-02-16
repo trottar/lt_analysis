@@ -108,6 +108,7 @@ c     Correct for W.
       g_W=1./(W**2-targ**2)**2       ! W factor
       
       wfactor=g_W
+      sig=sig*wfactor
       sigL=sigL*wfactor
       sigT=sigT*wfactor
       sigTT=sigTT*wfactor
