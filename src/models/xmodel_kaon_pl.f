@@ -113,8 +113,6 @@ c     Correct for W.
       sigTT=sigTT*wfactor
       sigLT=sigLT*wfactor
 
-*     RLT (2/16/2024): Weight factor not applied here for reasons...?
-*                      Blows up to infinity if I do?
       sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 *     sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad      
 
