@@ -108,13 +108,12 @@ c     Correct for W.
       g_W=1./(W**2-targ**2)**2       ! W factor
       
       wfactor=g_W
-      sig=sig*wfactor
       sigL=sigL*wfactor
       sigT=sigT*wfactor
       sigTT=sigTT*wfactor
       sigLT=sigLT*wfactor
 
-*      sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
+      sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 *     sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad      
 
       x_mod=sig
