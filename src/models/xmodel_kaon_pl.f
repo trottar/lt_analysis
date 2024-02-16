@@ -96,13 +96,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     RLT (9/25/2023): There are two tav parameterizations in here.
 *                      I am only using the one above, for now.
 *      tav=(-0.178+0.315*log(q2))*q2
-      
-** !! MODEL DEP STUDY !!
-c      sigL=sigL*0.90-0.1
-      
-      sig=sigT+eps_mod*sigL+eps_mod*cos(2.*phi)*sigTT
-     >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sigLT
-      
+            
 c     Correct for W.
 
       g_W=1./(W**2-targ**2)**2       ! W factor
@@ -113,6 +107,12 @@ c     Correct for W.
       sigTT=sigTT*wfactor
       sigLT=sigLT*wfactor
 
+** !! MODEL DEP STUDY !!
+c      sigL=sigL*0.90-0.1
+      
+      sig=sigT+eps_mod*sigL+eps_mod*cos(2.*phi)*sigTT
+     >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sigLT
+      
       sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 *     sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad      
 
