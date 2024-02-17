@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-16 20:01:16 trottar"
+# Time-stamp: "2024-02-16 20:36:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,6 +140,17 @@ inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
 
 if EPSSET == "low":
+    # Save python script that contain separated xsect models for xfit script
+    py_xfit = 'models/xfit_{}_{}.py'.format(ParticleType, pol_str)
+    output_file_lst.append(py_xfit)
+
+    # Active scripts to make file selection dynamic
+    # Needs to be done this way because of fortran compiler limitations
+    py_xfit_active = 'models/xfit_active.py'
+    # Copying content of used models to actively used files
+    print("Copying {} to {}".format(LTANAPATH+"/src/"+py_xfit, LTANAPATH+"/src/"+py_xfit_active))
+    shutil.copy(LTANAPATH+"/src/"+py_xfit, LTANAPATH+"/src/"+py_xfit_active)
+    
     # Run weight iteration script for optimizing parameterization
     sys.path.append("models")
     from xfit_in_t import x_fit_in_t
