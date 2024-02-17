@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-14 11:07:34 trottar"
+# Time-stamp: "2024-02-17 01:59:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -792,6 +792,7 @@ def grab_ave_data(histlist, inpDict):
 
     W = inpDict["W"]
     Q2 = inpDict["Q2"]
+    ParticleType = inpDict["ParticleType"]
     
     for hist in histlist:
         t_bins = hist["t_bins"]
