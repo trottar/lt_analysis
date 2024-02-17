@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 10:50:09 trottar"
+# Time-stamp: "2024-02-17 14:36:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -311,6 +311,15 @@ from iter_check import plot_iteration
 
 # Comparison plots of 0th to current iteration
 plot_iteration(histlist, phisetlist, inpDict)
+
+for hist in histDict:
+    print("\n\n{} data total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_DATA"]))
+    print("{} dummy total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_DUMMY"]))
+    print("{} simc weighted total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_SIMC"]))
+    print("{} simc unweighted total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_unweighted_SIMC"]))
+    print("\n\n{} data normalization: {:.3e}".format(hist["phi_setting"], hist["normfac_data"]))
+    print("{} dummy normalization: {:.3e}".format(hist["phi_setting"], hist["normfac_dummy"]))
+    print("{} simc normalization: {:.3e}".format(hist["phi_setting"], hist["normfac_simc"]))
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))

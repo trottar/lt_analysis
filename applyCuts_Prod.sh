@@ -610,7 +610,7 @@ else
 		echo
 		rm "$out_f_file"
 	    fi
-	    rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log	    
+	    rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
 	fi
 

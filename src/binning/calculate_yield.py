@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-16 17:44:48 trottar"
+# Time-stamp: "2024-02-17 14:42:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -664,8 +664,11 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
         try:
             yld = total_count*normfac_simc
             # Calculate simc yield error (relative error)
-            print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
-            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc/100 # FIX (/100 is temporary)
+            #print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
+            #yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc/100 # FIX (/100 is temporary)
+            # FIX: Removed norm_fac because shouldn't normalize non-weighted distribution
+            print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i])))
+            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
