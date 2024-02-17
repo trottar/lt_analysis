@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 16:01:27 trottar"
+# Time-stamp: "2024-02-17 16:09:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -312,7 +312,7 @@ from iter_check import plot_iteration
 # Comparison plots of 0th to current iteration
 plot_iteration(histlist, phisetlist, inpDict)
 
-for hist in histDict:
+for hist in histlist:
     print("\n\n{} data total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_DATA"]))
     print("{} dummy total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_DUMMY"]))
     print("{} simc weighted total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_SIMC"]))
