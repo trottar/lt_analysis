@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 01:59:43 trottar"
+# Time-stamp: "2024-02-17 03:11:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -819,7 +819,7 @@ def grab_ave_data(histlist, inpDict):
         aveDict[hist["phi_setting"]] = {}
         group_dict = {}
         for kin_type in kinematic_types:
-            with open(f_yield, 'r') as f:
+            with open(f_avek, 'r') as f:
                 lines = f.readlines()
             dict_lst = []
             for line in lines:
