@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 00:36:02 trottar"
+# Time-stamp: "2024-02-17 00:47:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -12,11 +12,26 @@
 #
 import math
 
+###############################################################################################################################################
+
 # Define constants
 PI = math.pi
 m_p = 0.93827231
 m_n = 0.93956541
 mkpl = 0.493677
+
+###############################################################################################################################################
+# Need to grab polarity and Q2 string values from xfit script
+
+# First, define empty strings
+pol_str = ""
+q2_set = ""
+
+# Then, set global variables which is called with arguments defined in xfit script
+def set_val(inp_pol_str, inp_q2_set):
+    global pol_str, q2_set
+    pol_str = inp_pol_str
+    q2_set = inp_q2_set
 
 ###############################################################################################################################################
 
@@ -27,19 +42,6 @@ def fun_Sig_L(x, par):
     #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
     return f
-
-###############################################################################################################################################
-# Need to grab polarity and Q2 string values from xfit script
-
-# First, define empty strings
-pol_str = ""
-q2_set = ""
-
-# Then, set as global variables which is called and set in xfit script
-def set_val(inp_pol_str, inp_q2_set):
-    global pol_str, q2_set
-    pol_str = inp_pol_str
-    q2_set = inp_q2_set
 
 ###############################################################################################################################################
     
