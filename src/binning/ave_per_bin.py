@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 09:49:43 trottar"
+# Time-stamp: "2024-02-17 10:45:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -832,9 +832,9 @@ def grab_ave_data(histlist, inpDict):
                         ave_val = float(line_lst[2])
                     if kin_type == "t":
                         ave_val = float(line_lst[4])
-                    tbin_index = int(line_lst[7])
+                    tbin_index = int(line_lst[7])-1
                     phibin_index = k
-                    print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, tbin_index, phibin_index, ave_val))
+                    print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, tbin_index+1, phibin_index+1, ave_val))
                     dict_lst.append((tbin_index, phibin_index, ave_val))
 
             # Group the tuples by the first two elements using defaultdict
