@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 00:17:00 trottar"
+# Time-stamp: "2024-02-17 00:18:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,7 +32,7 @@ def fun_Sig_L(x, par):
 
 # HERE!!!! Need to incorporate q2_set
 
-q2_set = 0.0
+q2_set = ""
 
 def q2_set_val(inp_q2_set):
     global q2_set
