@@ -109,7 +109,8 @@ c     Correct for W.
 
 ** !! MODEL DEP STUDY !!
 c      sigL=sigL*0.90-0.1
-      
+*     RLT (2/16/2024): Moved the unsep xsect down here so that the weight
+*                      factor is included in calculation
       sig=sigT+eps_mod*sigL+eps_mod*cos(2.*phi)*sigTT
      >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sigLT
 
