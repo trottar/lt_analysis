@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 00:30:58 trottar"
+# Time-stamp: "2024-02-17 00:33:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,16 +29,19 @@ def fun_Sig_L(x, par):
     return f
 
 ###############################################################################################################################################
+# Need to grab polarity and Q2 string values from xfit script
 
-# HERE!!!! Need to incorporate q2_set
+# First, define empty strings
+pol_str, q2_set = ""
 
-q2_set = ""
-
+# Then, set as global variables which is called and set in xfit script
 def set_val(inp_pol_str, inp_q2_set):
     global pol_str, q2_set
     pol_str = inp_pol_str
     q2_set = inp_q2_set
 
+###############################################################################################################################################
+    
 # Function for SigT
 def fun_Sig_T(x, par):
     tt = abs(x[0])
