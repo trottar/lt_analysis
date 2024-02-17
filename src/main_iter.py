@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 16:09:35 trottar"
+# Time-stamp: "2024-02-17 16:39:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -159,7 +159,6 @@ if EPSSET == "low":
         show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
     show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_xfit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
-    output_file_lst.append('models/xfit_in_t.py')
 
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
@@ -499,6 +498,17 @@ if EPSSET == "high":
     # Copying content of used models to actively used files
     print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
     shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
+
+    # Save python script that contain separated xsect models for lt script
+    py_lt = 'models/lt_{}_{}.py'.format(ParticleType, pol_str)
+    output_file_lst.append(py_lt)
+
+    # Active scripts to make file selection dynamic
+    # Needs to be done this way because of fortran compiler limitations
+    py_lt_active = 'models/lt_active.py'
+    # Copying content of used models to actively used files
+    print("Copying {} to {}".format(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active))
+    shutil.copy(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active)
     
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
@@ -514,7 +524,7 @@ if EPSSET == "high":
         show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))        
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_lt_fit_Q{}W{}.pdf".format(ParticleType, Q2, W))
-    output_file_lst.append('models/lt_2D_fit.py')
+
     
     # Save sep and unsep values from current iteration
     sep_file = '{}/xsects/x_sep.{}_Q{}W{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
