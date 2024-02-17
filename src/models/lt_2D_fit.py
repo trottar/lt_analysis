@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 19:31:05 trottar"
+# Time-stamp: "2024-02-17 16:30:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,38 +65,20 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Constants
 pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
-PI = ROOT.TMath.Pi()
+PI = math.pi
 
-# Low epsilon drawing function
-def LT_sep_x_lo_fun(x, par):
-    eps = float(LOEPS)
-    xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
-    return xs
+###############################################################################################################################################
+# Import separated xsects models
 
-# High epsilon drawing function
-def LT_sep_x_hi_fun(x, par):
-    eps = float(HIEPS)
-    xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
-    return xs
+from lt_active import LT_sep_x_lo_fun, LT_sep_x_lo_fun_unsep, LT_sep_x_hi_fun, LT_sep_x_hi_fun_unsep, set_val
 
-# Low epsilon calculating unseparated cross section
-def LT_sep_x_lo_fun_unsep(x, par):
-    eps = float(LOEPS)
-    xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
-    return xs
-
-# High epsilon calculating unseparated cross section
-def LT_sep_x_hi_fun_unsep(x, par):
-    eps = float(HIEPS)
-    xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
-    return xs
+###############################################################################################################################################
 
 def single_setting(q2_set, fn_lo, fn_hi):
 
+    # Set HIEPS for lt_active script
+    set_val(LOEPS, HIEPS)
+    
     sig_L_g  = TGraphErrors()
     sig_T_g  = TGraphErrors()
     sig_LT_g = TGraphErrors()
