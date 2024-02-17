@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 05:20:17 trottar"
+# Time-stamp: "2024-02-17 09:49:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -790,6 +790,7 @@ def ave_per_bin_simc(histlist, inpDict, iteration=False):
 
 def grab_ave_data(histlist, inpDict):
 
+    NumtBins = inpDict["NumtBins"]
     W = inpDict["W"]
     Q2 = inpDict["Q2"]
     ParticleType = inpDict["ParticleType"]
@@ -823,16 +824,18 @@ def grab_ave_data(histlist, inpDict):
                 lines = f.readlines()
             dict_lst = []
             for line in lines:
-                line_lst = line.split(" ") # aveW, errW, aveQ2, errQ2, avett, errtt, thetacm, tbin
-                if kin_type == "W":
-                    ave_val = float(line_lst[0])
-                if kin_type == "Q2":
-                    ave_val = float(line_lst[2])
-                if kin_type == "t":
-                    ave_val = float(line_lst[4])
-                tbin_index = int(line_lst[7])
-                print("Average {} for t-bin {}: {:.3f}".format(kin_type, tbin_index, ave_val))
-                dict_lst.append((tbin_index, phibin_index, ave_val))
+                for k in range(len(phi_bins) - 1):
+                    line_lst = line.split(" ") # aveW, errW, aveQ2, errQ2, avett, errtt, thetacm, tbin
+                    if kin_type == "W":
+                        ave_val = float(line_lst[0])
+                    if kin_type == "Q2":
+                        ave_val = float(line_lst[2])
+                    if kin_type == "t":
+                        ave_val = float(line_lst[4])
+                    tbin_index = int(line_lst[7])
+                    phibin_index = k
+                    print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, tbin_index, phibin_index, ave_val))
+                    dict_lst.append((tbin_index, phibin_index, ave_val))
 
             # Group the tuples by the first two elements using defaultdict
             groups = defaultdict(list)
