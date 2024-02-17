@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-16 20:22:44 trottar"
+# Time-stamp: "2024-02-16 20:31:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -46,10 +46,16 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 ###############################################################################################################################################
 
 # Define constants
-PI = ROOT.TMath.Pi()
+PI = math.pi
 m_p = 0.93827231
 m_n = 0.93956541
 mkpl = 0.493677
+
+###############################################################################################################################################
+
+from xfit_kaon_pl import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
+
+###############################################################################################################################################
 
 def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
 
@@ -66,48 +72,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # xsects range
     lo_bound = -1
-    hi_bound =  2
-    
-    # Function for SigL
-    def fun_Sig_L(x, par):
-        tt = abs(x[0])
-        qq = abs(x[1])
-        #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-        f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
-        return f
-    
-    # Function for SigT
-    def fun_Sig_T(x, par):
-        tt = abs(x[0])
-        qq = abs(x[1])
-        tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
-        ftav = (abs(tt)-tav)/tav
-        #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-        # RLT (2/15/2024): Removing t dependence from sigT because it seems
-        #                  to be driving poor sep xsects results    
-        #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
-        f = par[0]+par[1]*math.log(qq)
-        return f
-
-    # Function for SigLT
-    # thetacm term is defined on function calling
-    def fun_Sig_LT(x, par):
-        tt = abs(x[0])
-        qq = abs(x[1])
-        #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-        f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
-        return f
-
-    # Function for SigTT
-    # thetacm term is defined on function calling
-    def fun_Sig_TT(x, par):
-        tt = abs(x[0])
-        qq = abs(x[1])
-        if pol_str == "pl":
-            f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-        #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-        f = (par[0]*qq*math.exp(-qq))*f_tt
-        return f
+    hi_bound =  2    
     
     outputpdf  = "{}/{}_xfit_in_t_Q{}W{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
     
@@ -560,9 +525,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
 
-    ########
+    #########
     # SigTT #
-    ########
+    #########
 
     print("/*--------------------------------------------------*/")
     print("Fit for Sig TT")
