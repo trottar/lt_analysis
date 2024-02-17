@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 00:24:56 trottar"
+# Time-stamp: "2024-02-17 00:28:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ mkpl = 0.493677
 ###############################################################################################################################################
 # Import separated xsects models
 
-from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT, q2_set_val
+from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT, set_vals
 
 ###############################################################################################################################################
 
@@ -72,7 +72,7 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
 def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range, Q2min_range, Q2max_range):
 
     # Set q2_set for xfit_active script
-    q2_set_val(q2_set)
+    set_val(pol_str, q2_set)
     
     # xsects range
     lo_bound = -1

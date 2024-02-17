@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 00:18:02 trottar"
+# Time-stamp: "2024-02-17 00:28:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -34,8 +34,9 @@ def fun_Sig_L(x, par):
 
 q2_set = ""
 
-def q2_set_val(inp_q2_set):
-    global q2_set
+def q2_set_val(inp_pol_str, inp_q2_set):
+    global pol_str, q2_set
+    pol_str = inp_pol_str
     q2_set = inp_q2_set
 
 # Function for SigT
