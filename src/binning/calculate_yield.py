@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 18:34:44 trottar"
+# Time-stamp: "2024-02-18 18:50:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -553,53 +553,62 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
     ################################################################################################################################################
     
     TBRANCH_SIMC  = tree_simc.Get("h10")
+
+    hist_bin_dict = {}
     
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
 
-            H_MM_SIMC       = TH1D("H_MM_SIMC","MM", 500, 0.7, 1.5)
-            H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
-            H_MM_SIMC_unweighted = TH1D("H_MM_SIMC","MM", 500, 0.7, 1.5)
+            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 500, 0.7, 1.5)
+            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 500, inpDict["tmin"], inpDict["tmax"])
+            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 500, 0.7, 1.5)
 
-            print("\nProcessing t-bin {} phi-bin {} simc...".format(j+1, k+1))
-            for i,evt in enumerate(TBRANCH_SIMC):
-            
-                # Progress bar
-                Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
+    print("\nProcessing t-bin {} phi-bin {} simc...".format(j+1, k+1))
+    for i,evt in enumerate(TBRANCH_SIMC):
 
-                # Define the acceptance cuts  
-                SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-                HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+        # Progress bar
+        Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
-                Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+        # Define the acceptance cuts  
+        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+        HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-                if ParticleType == "kaon":
+        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-                    ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)
-                    NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
+        if ParticleType == "kaon":
 
-                else:
+            ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)
+            NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
 
-                    ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond                
-                
-                #Fill SIMC events
-                if(ALLCUTS):
+        else:
 
+            ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond                
+
+        #Fill SIMC events
+        if(ALLCUTS):
+
+            # Loop through bins in t_simc and identify events in specified bins
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
                         if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             if iteration:
-                                H_t_SIMC.Fill(-evt.t, evt.iter_weight)
-                                H_MM_SIMC.Fill(evt.missmass, evt.iter_weight)
+                                hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
+                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.iter_weight)
                             else:
-                                H_t_SIMC.Fill(-evt.t, evt.Weight)
-                                H_MM_SIMC.Fill(evt.missmass, evt.Weight)
-                            H_MM_SIMC_unweighted.Fill(evt.missmass)
+                                hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.Weight)
+                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.Weight)
+                                hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(evt.missmass)
 
+    # Loop through bins in t_simc and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
+                                
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
-                "H_MM_SIMC" : H_MM_SIMC,
-                "H_t_SIMC" : H_t_SIMC,
-                "NumEvts_bin_MM_SIMC_unweighted" : H_MM_SIMC_unweighted.Integral(),
+                "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC"],
+                "H_t_SIMC" : hist_bin_dict["H_t_SIMC"],
+                "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted"].Integral(),
             }
     
     return processed_dict
