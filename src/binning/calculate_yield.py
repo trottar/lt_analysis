@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 17:49:02 trottar"
+# Time-stamp: "2024-02-18 18:25:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -132,9 +132,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
     ##############        
     ##############
 
-    hist_bin_dict = {
-        
-    }
+    hist_bin_dict = {}
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -152,7 +150,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_RAND_{}_{}".format(j, k),"MM", 500, 0.7, 1.5)
             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_t_DUMMY_RAND_{}_{}".format(j, k),"-t", 500, inpDict["tmin"], inpDict["tmax"])
 
-    print("\nProcessing t-bin {} phi-bin {} data...".format(j+1, k+1))
+    print("\nBinning data...".format(j+1, k+1))
     for i,evt in enumerate(TBRANCH_DATA):
 
         # Progress bar
@@ -187,54 +185,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
         if(ALLCUTS):                
 
-            if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
-                    #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
-                    H_t_DATA.Fill(-evt.MandelT)
-                    H_MM_DATA.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+            # Loop through bins in t_data and identify events in specified bins
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):            
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
+                            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
-    print("\nProcessing t-bin {} phi-bin {} rand...".format(j+1, k+1))
-    for i,evt in enumerate(TBRANCH_RAND):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-
-        if ParticleType == "kaon":
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
-        else:
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
-
-        if(ALLCUTS):                
-
-            if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
-                    #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
-                    H_t_RAND.Fill(-evt.MandelT)
-                    H_MM_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
-
-    print("\nProcessing t-bin {} phi-bin {} dummy...".format(j+1, k+1))
+    print("\nBinning dummy...".format(j+1, k+1))
     for i,evt in enumerate(TBRANCH_DUMMY):
 
         # Progress bar
@@ -269,13 +229,60 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
         if(ALLCUTS):                
 
-            if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
-                    #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
-                    H_t_DUMMY.Fill(-evt.MandelT)
-                    H_MM_DUMMY.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+            # Loop through bins in t_dummy and identify events in specified bins
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):            
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
+                            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
-    print("\nProcessing t-bin {} phi-bin {} dummy_rand...".format(j+1, k+1))
+    print("\nBinning rand...".format(j+1, k+1))
+    for i,evt in enumerate(TBRANCH_RAND):
+
+        # Progress bar
+        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
+
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+
+        #CUTs Definations 
+        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+
+        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+
+        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+
+        if ParticleType == "kaon":
+
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+
+        else:
+
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+
+        if(ALLCUTS):                
+
+            # Loop through bins in t_rand and identify events in specified bins
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):            
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
+                            hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+
+    print("\nBinning dummy_rand...".format(j+1, k+1))
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
         # Progress bar
@@ -310,29 +317,36 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
         if(ALLCUTS):                
 
-            if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
-                    #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
-                    H_t_DUMMY_RAND.Fill(-evt.MandelT)
-                    H_MM_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+            # Loop through bins in t_dummy_rand and identify events in specified bins
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):            
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
+                            hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
                             
-            H_MM_RAND.Scale(1/nWindows)
-            H_t_RAND.Scale(1/nWindows)
+    # Loop through bins in t_data and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):                            
+                            
+            hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
 
-            H_MM_DATA.Add(H_MM_RAND,-1)
-            H_t_DATA.Add(H_t_RAND,-1)         
+            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(H_MM_RAND,-1)
+            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(H_t_RAND,-1)         
 
-            H_MM_DUMMY_RAND.Scale(1/nWindows)
-            H_t_DUMMY_RAND.Scale(1/nWindows)
+            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
 
-            H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
-            H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
+            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
 
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
-                "H_MM_DATA" : H_MM_DATA,
-                "H_t_DATA" : H_t_DATA,
-                "H_MM_DUMMY" : H_MM_DUMMY,
-                "H_t_DUMMY" : H_t_DUMMY,
+                "H_MM_DATA" : hist_bin_dict["H_MM_DATA"],
+                "H_t_DATA" : hist_bin_dict["H_t_DATA"],
+                "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY"],
+                "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY"],
             }
     
     return processed_dict
