@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 18:25:01 trottar"
+# Time-stamp: "2024-02-18 18:30:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,8 +333,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
 
-            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(H_MM_RAND,-1)
-            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(H_t_RAND,-1)         
+            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)],-1)
+            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_RAND_{}_{}".format(j, k)],-1)
 
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
