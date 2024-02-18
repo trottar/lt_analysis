@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 16:41:37 trottar"
+# Time-stamp: "2024-02-17 21:18:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,7 +117,7 @@ inpDict = {
     "tmin" : tmin,
     "tmax" : tmax,
     "NumtBins" : NumtBins,
-    "NumPhiBi1ns" : NumPhiBins,
+    "NumPhiBins" : NumPhiBins,
     "runNumRight" : runNumRight,
     "runNumLeft" : runNumLeft,
     "runNumCenter" : runNumCenter,
