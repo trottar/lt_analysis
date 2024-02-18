@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 18:30:20 trottar"
+# Time-stamp: "2024-02-18 18:34:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -343,10 +343,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
 
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
-                "H_MM_DATA" : hist_bin_dict["H_MM_DATA"],
-                "H_t_DATA" : hist_bin_dict["H_t_DATA"],
-                "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY"],
-                "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY"],
+                "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
+                "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
+                "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)],
+                "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)],
             }
     
     return processed_dict
