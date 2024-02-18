@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 16:15:55 trottar"
+# Time-stamp: "2024-02-17 16:41:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -677,6 +677,16 @@ if EPSSET == "high":
     print("Copying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
     shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 
+    # Save python script that contain separated xsect models for lt script
+    py_lt = 'models/lt_{}_{}.py'.format(ParticleType, pol_str)
+    output_file_lst.append(py_lt)
+    # Active scripts to make file selection dynamic
+    # Needs to be done this way because of fortran compiler limitations
+    py_lt_active = 'models/lt_active.py'
+    # Copying content of used models to actively used files
+    print("Copying {} to {}".format(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active))
+    shutil.copy(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active)
+    
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
     # if still iterating weights

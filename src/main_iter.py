@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 16:39:09 trottar"
+# Time-stamp: "2024-02-17 16:41:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -502,7 +502,6 @@ if EPSSET == "high":
     # Save python script that contain separated xsect models for lt script
     py_lt = 'models/lt_{}_{}.py'.format(ParticleType, pol_str)
     output_file_lst.append(py_lt)
-
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
     py_lt_active = 'models/lt_active.py'
