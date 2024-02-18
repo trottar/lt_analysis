@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 18:50:08 trottar"
+# Time-stamp: "2024-02-18 18:56:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -564,7 +564,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 500, inpDict["tmin"], inpDict["tmax"])
             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 500, 0.7, 1.5)
 
-    print("\nProcessing t-bin {} phi-bin {} simc...".format(j+1, k+1))
+    print("\nBinning simc...".format(j+1, k+1))
     for i,evt in enumerate(TBRANCH_SIMC):
 
         # Progress bar
@@ -606,9 +606,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
         for k in range(len(phi_bins)-1):
                                 
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
-                "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC"],
-                "H_t_SIMC" : hist_bin_dict["H_t_SIMC"],
-                "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted"].Integral(),
+                "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
+                "H_t_SIMC" : hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)],
+                "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Integral(),
             }
     
     return processed_dict
