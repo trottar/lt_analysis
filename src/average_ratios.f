@@ -152,14 +152,14 @@ c            pause
             end do
             close(66)
 
-            do it=1,nt
-               do ip=1,nphi
-                  write(*,*)'t-bin=',it
-                  write(*,*)'phi-bin=',ip
-                  write(*,*)'Y_data=',yrd(ip,it),drd(ip,it)
-                  write(*,*)'Y_simc=',ymc(ip,it),dmc(ip,it)
-               enddo
-            enddo
+*            do it=1,nt
+*               do ip=1,nphi
+*                  write(*,*)'t-bin=',it
+*                  write(*,*)'phi-bin=',ip
+*                  write(*,*)'Y_data=',yrd(ip,it),drd(ip,it)
+*                  write(*,*)'Y_simc=',ymc(ip,it),dmc(ip,it)
+*               enddo
+*            enddo
 
             nset=nset+1
 
