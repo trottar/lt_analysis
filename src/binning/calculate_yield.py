@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 05:49:30 trottar"
+# Time-stamp: "2024-02-19 05:56:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -867,7 +867,10 @@ def grab_yield_data(histlist, phisetlist, inpDict):
         for line in lines:
             line_lst = line.split(" ") # yield, yield_err, phibin, tbin
             yield_val = float(line_lst[0])
-            yield_err_val = float(line_lst[1])/yield_val
+            if yield_val > 0.0:
+                yield_err_val = float(line_lst[1])/yield_val
+            else:
+                yield_err_val = 0.0
             phibin_index = int(line_lst[2])
             tbin_index = int(line_lst[3])
             print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(tbin_index, phibin_index, yield_val, (yield_err_val)*yield_val))
