@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 03:00:33 trottar"
+# Time-stamp: "2024-02-19 03:12:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,8 +357,6 @@ from calculate_yield import grab_yield_data, find_yield_simc
 
 yieldDict = {}
 yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
-for key,val in yieldDict.items():
-    print(key)
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
 
 sys.path.append("binning")
@@ -372,12 +370,12 @@ from ave_per_bin import grab_ave_data, ave_per_bin_simc
 
 aveDict = {}
 aveDict.update(grab_ave_data(histlist, inpDict))
-for key,val in aveDict.items():
-    print(key)
 aveDict.update(ave_per_bin_simc(histlist, inpDict, iteration=True))
 
 sys.path.append("plotting")
 from binned import plot_binned
+
+print("!!!!!!!!!!!!!",yieldDict, ratioDict, aveDict)
 
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
 notify_email(email_address="trotta@cua.edu")
