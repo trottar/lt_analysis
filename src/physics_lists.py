@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 21:40:53 trottar"
+# Time-stamp: "2024-02-18 22:01:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -398,7 +398,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             lines = f.readlines()
             inLine = False
             check_line = "{:d} {:.1f} {:.2f} {:.4f} -{:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_right, tmin, tmax, NumtBins)
-            check_kin = ' '.join(check_line.split()[:4])
+            check_kin = ' '.join(check_line.split()[:5])
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
@@ -412,7 +412,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             lines = f.readlines()
             inLine = False
             check_line = "{:d} {:.1f} {:.2f} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
-            check_kin = ' '.join(check_line.split()[:4])
+            check_kin = ' '.join(check_line.split()[:5])
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
@@ -426,7 +426,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             lines = f.readlines()
             inLine = False
             check_line = "{:d} {:.1f} {:.2f} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
-            check_kin = ' '.join(check_line.split()[:4])
+            check_kin = ' '.join(check_line.split()[:5])
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
