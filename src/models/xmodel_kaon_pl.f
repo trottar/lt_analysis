@@ -80,8 +80,12 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     >     +par(4)*log(q2))*(abs(tm)-0.2))
 *     RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for
 *                       initial start parameterization
+*     RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the
+*                      extreme slope at high t      
+*      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+*     >     +par(4)*log(q2))*(abs(tm)))
       sigL=(par(1)+par(2)*log(q2))*exp((par(3)
-     >     +par(4)*log(q2))*(abs(tm)))
+     >     +par(4)*log(q2))*(abs(tm)+0.2))      
 *       RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results      
 *      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav

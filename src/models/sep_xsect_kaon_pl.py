@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 17:02:45 trottar"
+# Time-stamp: "2024-02-19 17:04:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,6 +31,8 @@ def import_model(inp_model, arg_str):
     def sig_L(*par):
         if inp_model == "sigL":
             print("Calculating function for sigL...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
+            # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
+            #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
             f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
             return f
 

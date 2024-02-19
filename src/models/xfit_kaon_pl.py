@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 00:47:15 trottar"
+# Time-stamp: "2024-02-19 17:06:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,7 +40,9 @@ def fun_Sig_L(x, par):
     tt = abs(x[0])
     qq = abs(x[1])
     #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-    f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
+    # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
+    #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
+    f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
     return f
 
 ###############################################################################################################################################
