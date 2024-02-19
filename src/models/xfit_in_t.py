@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 02:47:50 trottar"
+# Time-stamp: "2024-02-19 15:44:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -177,6 +177,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL_pre = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigL_pre.SetParNames("p1","p2","p3","p4")
     f_sigL_pre.SetParameters(l0, l1, l2, l3)
+
+    ##############
+    # HARD CODED #
+    ##############
+    # Fixed unused parameters
+    #f_sigL_pre.FixParameter(1, 0)
+    #f_sigL_pre.FixParameter(2, 0)
+    #f_sigL_pre.FixParameter(3, 0)
+    #f_sigL_pre.FixParameter(4, 0)
+    ##############
+    ##############
+    ##############    
     
     #g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
     g_sigl = TGraphErrors()
@@ -221,6 +233,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL.SetParNames("p1","p2","p3","p4")
     f_sigL.SetParameters(l0, l1, l2, l3)
 
+    ##############
+    # HARD CODED #
+    ##############
+    # Fixed unused parameters
+    #f_sigL.FixParameter(1, 0)
+    #f_sigL.FixParameter(2, 0)
+    #f_sigL.FixParameter(3, 0)
+    #f_sigL.FixParameter(4, 0)
+    ##############
+    ##############
+    ##############    
+    
     g_q2_sigl_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
         g_q2_sigl_fit.SetPoint(g_q2_sigl_fit.GetN(), g_sigl_fit.GetX()[i], q2_vec[i], g_sigl_fit.GetY()[i])
@@ -293,6 +317,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigT_pre.SetParNames("p5","p6","p7","p8")
     f_sigT_pre.SetParameters(t0, t1, t2, t3)
+
+    ##############
+    # HARD CODED #
+    ##############
+    # Fixed unused parameters
+    #f_sigT_pre.FixParameter(1, 0)
+    #f_sigT_pre.FixParameter(2, 0)
+    f_sigT_pre.FixParameter(3, 0)
+    f_sigT_pre.FixParameter(4, 0)
+    ##############
+    ##############
+    ##############    
     
     #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
     g_sigt = TGraphErrors()
@@ -336,6 +372,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigT.SetParNames("p5","p6","p7","p8")
     f_sigT.SetParameters(t0, t1, t2, t3)
+
+    ##############
+    # HARD CODED #
+    ##############
+    # Fixed unused parameters
+    #f_sigT.FixParameter(1, 0)
+    #f_sigT.FixParameter(2, 0)
+    f_sigT.FixParameter(3, 0)
+    f_sigT.FixParameter(4, 0)
+    ##############
+    ##############
+    ##############    
     
     g_q2_sigt_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
@@ -409,6 +457,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigLT_pre.SetParNames("p9","p10","p11","p12")
     f_sigLT_pre.SetParameters(lt0, lt1, lt2, lt3)
+
+    ##############
+    # HARD CODED #
+    ##############
+    # Fixed unused parameters
+    #f_sigLT_pre.FixParameter(1, 0)
+    #f_sigLT_pre.FixParameter(2, 0)
+    #f_sigLT_pre.FixParameter(3, 0)
+    f_sigLT_pre.FixParameter(4, 0)
+    ##############
+    ##############
+    ##############    
     
     #g_siglt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), ROOT.nullptr, nsep.GetV3())
     g_siglt = TGraphErrors()
@@ -457,6 +517,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigLT.SetParNames("p9","p10","p11","p12")
     f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
 
+    ##############
+    # HARD CODED #
+    ##############
+    # Fixed unused parameters
+    #f_sigLT.FixParameter(1, 0)
+    #f_sigLT.FixParameter(2, 0)
+    #f_sigLT.FixParameter(3, 0)
+    f_sigLT.FixParameter(4, 0)
+    ##############
+    ##############
+    ##############    
+    
     g_q2_siglt_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
         g_q2_siglt_fit.SetPoint(g_q2_siglt_fit.GetN(), g_siglt_fit.GetX()[i], q2_vec[i], g_siglt_fit.GetY()[i])
@@ -529,6 +601,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigTT_pre.SetParNames("p13","p14","p15","p16")
     f_sigTT_pre.SetParameters(tt0, tt1, tt2, tt3)
+
+    ##############
+    # HARD CODED #
+    ##############
+    # Fixed unused parameters
+    #f_sigTT_pre.FixParameter(1, 0)
+    f_sigTT_pre.FixParameter(2, 0)
+    f_sigTT_pre.FixParameter(3, 0)
+    f_sigTT_pre.FixParameter(4, 0)
+    ##############
+    ##############
+    ##############    
     
     #g_sigtt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0]*nsep.GetSelectedRows(), nsep.GetV3())
     g_sigtt = TGraphErrors()
@@ -578,6 +662,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigTT.SetParNames("p13","p14","p15","p16")
     f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
+
+    ##############
+    # HARD CODED #
+    ##############
+    # Fixed unused parameters
+    #f_sigTT.FixParameter(1, 0)
+    f_sigTT.FixParameter(2, 0)
+    f_sigTT.FixParameter(3, 0)
+    f_sigTT.FixParameter(4, 0)
+    ##############
+    ##############
+    ##############    
     
     g_q2_sigtt_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):

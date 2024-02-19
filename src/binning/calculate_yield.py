@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 05:56:05 trottar"
+# Time-stamp: "2024-02-19 15:23:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,7 +192,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(evt.MM)
 
     print("\nBinning dummy...")
     for i,evt in enumerate(TBRANCH_DUMMY):
@@ -236,7 +236,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
 
     print("\nBinning rand...")
     for i,evt in enumerate(TBRANCH_RAND):
@@ -280,7 +280,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                            hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(evt.MM)
 
     print("\nBinning dummy_rand...")
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
@@ -324,7 +324,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                         if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
+                            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
                             
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
