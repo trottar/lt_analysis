@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 04:49:07 trottar"
+# Time-stamp: "2024-02-19 05:25:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -125,7 +125,6 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             simc_nested_dict = yieldDict["binned_SIMC"][phiset]
             i = data_key_tuple[0] # t bin
             j = data_key_tuple[1] # phi bin
-            print("!!!!!!!!!!!",yieldDict["binned_DATA"]["t_bins"])
             tmp_yield_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])
             tmp_yield_data[1].append(data_nested_dict["yield"][data_key_tuple]["yield"])
             tmp_yield_err_data[0].append(yieldDict["binned_DATA"]["t_bins"][i])            
