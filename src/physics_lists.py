@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-13 19:30:28 trottar"
+# Time-stamp: "2024-02-18 21:15:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -404,6 +404,8 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     inLine = True
                     if check_line in line:
                         replace_line(f_list_settings, i+1, check_line)
+                    else:
+                        write_to_file(f_list_settings, check_line)                        
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
 
@@ -419,8 +421,10 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     inLine = True
                     if check_line in line:
                         replace_line(f_list_settings, i+1, check_line)
+                    else:
+                        write_to_file(f_list_settings, check_line)
             if not inLine:
-                write_to_file(f_list_settings, check_line)                        
+                write_to_file(f_list_settings, check_line)
 
     if float(runNumCenter[0]) != 0:    
         # Save lines in the file
@@ -434,6 +438,8 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     inLine = True
                     if check_line in line:
                         replace_line(f_list_settings, i+1, check_line)
+                    else:
+                        write_to_file(f_list_settings, check_line)                        
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
                 
