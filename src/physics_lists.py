@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 21:15:51 trottar"
+# Time-stamp: "2024-02-18 21:40:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -402,10 +402,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
-                    if check_line in line:
-                        replace_line(f_list_settings, i+1, check_line)
-                    else:
-                        write_to_file(f_list_settings, check_line)                        
+                    replace_line(f_list_settings, i+1, check_line)
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
 
@@ -419,10 +416,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
-                    if check_line in line:
-                        replace_line(f_list_settings, i+1, check_line)
-                    else:
-                        write_to_file(f_list_settings, check_line)
+                    replace_line(f_list_settings, i+1, check_line)
             if not inLine:
                 write_to_file(f_list_settings, check_line)
 
@@ -436,10 +430,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
-                    if check_line in line:
-                        replace_line(f_list_settings, i+1, check_line)
-                    else:
-                        write_to_file(f_list_settings, check_line)                        
+                    replace_line(f_list_settings, i+1, check_line)
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
                 
