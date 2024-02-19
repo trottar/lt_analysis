@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 15:44:56 trottar"
+# Time-stamp: "2024-02-19 16:23:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,10 +182,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # HARD CODED #
     ##############
     # Fixed unused parameters
+    #f_sigL_pre.FixParameter(0, 0)
     #f_sigL_pre.FixParameter(1, 0)
     #f_sigL_pre.FixParameter(2, 0)
     #f_sigL_pre.FixParameter(3, 0)
-    #f_sigL_pre.FixParameter(4, 0)
     ##############
     ##############
     ##############    
@@ -237,10 +237,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # HARD CODED #
     ##############
     # Fixed unused parameters
+    #f_sigL.FixParameter(0, 0)
     #f_sigL.FixParameter(1, 0)
     #f_sigL.FixParameter(2, 0)
     #f_sigL.FixParameter(3, 0)
-    #f_sigL.FixParameter(4, 0)
     ##############
     ##############
     ##############    
@@ -322,10 +322,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # HARD CODED #
     ##############
     # Fixed unused parameters
+    #f_sigT_pre.FixParameter(0, 0)
     #f_sigT_pre.FixParameter(1, 0)
-    #f_sigT_pre.FixParameter(2, 0)
+    f_sigT_pre.FixParameter(2, 0)
     f_sigT_pre.FixParameter(3, 0)
-    f_sigT_pre.FixParameter(4, 0)
     ##############
     ##############
     ##############    
@@ -377,10 +377,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # HARD CODED #
     ##############
     # Fixed unused parameters
+    #f_sigT.FixParameter(0, 0)
     #f_sigT.FixParameter(1, 0)
-    #f_sigT.FixParameter(2, 0)
+    f_sigT.FixParameter(2, 0)
     f_sigT.FixParameter(3, 0)
-    f_sigT.FixParameter(4, 0)
     ##############
     ##############
     ##############    
@@ -462,10 +462,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # HARD CODED #
     ##############
     # Fixed unused parameters
+    #f_sigLT_pre.FixParameter(0, 0)
     #f_sigLT_pre.FixParameter(1, 0)
     #f_sigLT_pre.FixParameter(2, 0)
-    #f_sigLT_pre.FixParameter(3, 0)
-    f_sigLT_pre.FixParameter(4, 0)
+    f_sigLT_pre.FixParameter(3, 0)
     ##############
     ##############
     ##############    
@@ -521,10 +521,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # HARD CODED #
     ##############
     # Fixed unused parameters
+    #f_sigLT.FixParameter(0, 0)
     #f_sigLT.FixParameter(1, 0)
     #f_sigLT.FixParameter(2, 0)
-    #f_sigLT.FixParameter(3, 0)
-    f_sigLT.FixParameter(4, 0)
+    f_sigLT.FixParameter(3, 0)
     ##############
     ##############
     ##############    
@@ -606,10 +606,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # HARD CODED #
     ##############
     # Fixed unused parameters
-    #f_sigTT_pre.FixParameter(1, 0)
+    #f_sigTT_pre.FixParameter(0, 0)
+    f_sigTT_pre.FixParameter(1, 0)
     f_sigTT_pre.FixParameter(2, 0)
     f_sigTT_pre.FixParameter(3, 0)
-    f_sigTT_pre.FixParameter(4, 0)
     ##############
     ##############
     ##############    
@@ -667,10 +667,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # HARD CODED #
     ##############
     # Fixed unused parameters
-    #f_sigTT.FixParameter(1, 0)
+    #f_sigTT.FixParameter(0, 0)
+    f_sigTT.FixParameter(1, 0)
     f_sigTT.FixParameter(2, 0)
     f_sigTT.FixParameter(3, 0)
-    f_sigTT.FixParameter(4, 0)
     ##############
     ##############
     ##############    
