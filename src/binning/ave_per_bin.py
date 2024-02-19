@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 02:25:19 trottar"
+# Time-stamp: "2024-02-19 04:11:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -556,7 +556,7 @@ def ave_per_bin_data(histlist, inpDict):
 
 ##################################################################################################################################################
 
-def process_hist_simc(tree_simc, t_bins, inpDict, iteration=False):
+def process_hist_simc(tree_simc, t_bins, inpDict, iter_file=""):
 
     processed_dict = {}
 
@@ -583,6 +583,10 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration=False):
         hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, simc=True)
     
     ################################################################################################################################################
+
+    if iter_file != "":
+        iteration = True
+        tree_simc = iter_file
     
     TBRANCH_SIMC  = tree_simc.Get("h10")
 
@@ -646,9 +650,9 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration=False):
     
     return processed_dict                    
         
-def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration=False):
+def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iter_file=""):
 
-    processed_dict = process_hist_simc(tree_simc, t_bins, inpDict, iteration=iteration)
+    processed_dict = process_hist_simc(tree_simc, t_bins, inpDict, iter_file="")
     
     binned_dict = {}
     
@@ -708,12 +712,12 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration=False):
         
     return binned_dict                
 
-def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iteration=False):
+def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iter_file=""):
 
     tree_simc = hist["InFile_SIMC"]
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration=iteration)
+    binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iter_file="")
 
     group_dict = {}
     
@@ -778,7 +782,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
             
     return group_dict
 
-def ave_per_bin_simc(histlist, inpDict, iteration=False):
+def ave_per_bin_simc(histlist, inpDict, iter_file=""):
 
     for hist in histlist:
         t_bins = hist["t_bins"]
@@ -801,7 +805,7 @@ def ave_per_bin_simc(histlist, inpDict, iteration=False):
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
-        binned_dict = calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iteration=iteration)
+        binned_dict = calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iter_file="")
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
         
