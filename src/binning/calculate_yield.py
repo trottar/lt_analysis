@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 18:56:37 trottar"
+# Time-stamp: "2024-02-18 19:08:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,7 +150,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_RAND_{}_{}".format(j, k),"MM", 500, 0.7, 1.5)
             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_t_DUMMY_RAND_{}_{}".format(j, k),"-t", 500, inpDict["tmin"], inpDict["tmax"])
 
-    print("\nBinning data...".format(j+1, k+1))
+    print("\nBinning data...")
     for i,evt in enumerate(TBRANCH_DATA):
 
         # Progress bar
@@ -194,7 +194,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
-    print("\nBinning dummy...".format(j+1, k+1))
+    print("\nBinning dummy...")
     for i,evt in enumerate(TBRANCH_DUMMY):
 
         # Progress bar
@@ -238,7 +238,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
-    print("\nBinning rand...".format(j+1, k+1))
+    print("\nBinning rand...")
     for i,evt in enumerate(TBRANCH_RAND):
 
         # Progress bar
@@ -282,7 +282,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
                             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(np.sqrt(abs(pow(evt.emiss, 2) - pow(evt.pmiss, 2))))
 
-    print("\nBinning dummy_rand...".format(j+1, k+1))
+    print("\nBinning dummy_rand...")
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
         # Progress bar
@@ -564,7 +564,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 500, inpDict["tmin"], inpDict["tmax"])
             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 500, 0.7, 1.5)
 
-    print("\nBinning simc...".format(j+1, k+1))
+    print("\nBinning simc...")
     for i,evt in enumerate(TBRANCH_SIMC):
 
         # Progress bar

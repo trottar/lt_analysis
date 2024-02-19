@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 10:45:01 trottar"
+# Time-stamp: "2024-02-18 19:14:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -125,194 +125,79 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
     ##############
     ##############        
     ##############
+
+    hist_bin_dict = {}
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
 
-        H_Q2_DATA       = TH1D("H_Q2_DATA","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
-        H_W_DATA  = TH1D("H_W_DATA","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
-        H_t_DATA       = TH1D("H_t_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
-        H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+        hist_bin_dict["H_Q2_DATA_{}".format(j)]       = TH1D("H_Q2_DATA_{}".format(j),"Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+        hist_bin_dict["H_W_DATA_{}".format(j)]  = TH1D("H_W_DATA_{}".format(j),"W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+        hist_bin_dict["H_t_DATA_{}".format(j)]       = TH1D("H_t_DATA_{}".format(j),"-t", 500, inpDict["tmin"], inpDict["tmax"])
+        hist_bin_dict["H_epsilon_DATA_{}".format(j)]  = TH1D("H_epsilon_DATA_{}".format(j),"epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-        H_Q2_RAND       = TH1D("H_Q2_RAND","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
-        H_W_RAND  = TH1D("H_W_RAND","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
-        H_t_RAND       = TH1D("H_t_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
-        H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+        hist_bin_dict["H_Q2_RAND_{}".format(j)]       = TH1D("H_Q2_RAND_{}".format(j),"Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+        hist_bin_dict["H_W_RAND_{}".format(j)]  = TH1D("H_W_RAND_{}".format(j),"W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+        hist_bin_dict["H_t_RAND_{}".format(j)]       = TH1D("H_t_RAND_{}".format(j),"-t", 500, inpDict["tmin"], inpDict["tmax"])
+        hist_bin_dict["H_epsilon_RAND_{}".format(j)]  = TH1D("H_epsilon_RAND_{}".format(j),"epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-        H_Q2_DUMMY       = TH1D("H_Q2_DUMMY","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
-        H_W_DUMMY  = TH1D("H_W_DUMMY","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
-        H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
-        H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+        hist_bin_dict["H_Q2_DUMMY_{}".format(j)]       = TH1D("H_Q2_DUMMY_{}".format(j),"Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+        hist_bin_dict["H_W_DUMMY_{}".format(j)]  = TH1D("H_W_DUMMY_{}".format(j),"W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+        hist_bin_dict["H_t_DUMMY_{}".format(j)]       = TH1D("H_t_DUMMY_{}".format(j),"-t", 500, inpDict["tmin"], inpDict["tmax"])
+        hist_bin_dict["H_epsilon_DUMMY_{}".format(j)]  = TH1D("H_epsilon_DUMMY_{}".format(j),"epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-        H_Q2_DUMMY_RAND       = TH1D("H_Q2_DUMMY_RAND","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
-        H_W_DUMMY_RAND  = TH1D("H_W_DUMMY_RAND","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
-        H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
-        H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+        hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)]       = TH1D("H_Q2_DUMMY_RAND_{}".format(j),"Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+        hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)]  = TH1D("H_W_DUMMY_RAND_{}".format(j),"W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+        hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)]       = TH1D("H_t_DUMMY_RAND_{}".format(j),"-t", 500, inpDict["tmin"], inpDict["tmax"])
+        hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)]  = TH1D("H_epsilon_DUMMY_RAND_{}".format(j),"epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-        print("\nProcessing t-bin {} data...".format(j+1))
-        for i,evt in enumerate(TBRANCH_DATA):
+    print("\nBinning data...")
+    for i,evt in enumerate(TBRANCH_DATA):
 
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
+        # Progress bar
+        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
-            ##############
-            # HARD CODED #
-            ##############
+        ##############
+        # HARD CODED #
+        ##############
 
-            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-            ##############
-            ##############        
-            ##############
-            
-            #CUTs Definations 
-            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+        ##############
+        ##############        
+        ##############
 
-            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+        #CUTs Definations 
+        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
+        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
 
-            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
+        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-            if ParticleType == "kaon":
+        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+        if ParticleType == "kaon":
 
-            else:
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
 
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+        else:
 
-            if(ALLCUTS):
+            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
+        if(ALLCUTS):
+
+            # Loop through bins in t_data and identify events in specified bins
+            for j in range(len(t_bins)-1):                
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                     H_t_DATA.Fill(-evt.MandelT)
                     H_Q2_DATA.Fill(evt.Q2)
                     H_W_DATA.Fill(evt.W)                        
                     H_epsilon_DATA.Fill(evt.epsilon)
 
-        print("\nProcessing t-bin {} rand...".format(j+1))
-        for i,evt in enumerate(TBRANCH_RAND):
 
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
-
-            ##############
-            # HARD CODED #
-            ##############
-
-            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-            ##############
-            ##############        
-            ##############
-            
-            #CUTs Definations 
-            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-
-            if ParticleType == "kaon":
-
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
-            else:
-
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
-
-            if(ALLCUTS):
-
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    H_t_RAND.Fill(-evt.MandelT)
-                    H_Q2_RAND.Fill(evt.Q2)
-                    H_W_RAND.Fill(evt.W)                        
-                    H_epsilon_RAND.Fill(evt.epsilon)
-
-        print("\nProcessing t-bin {} dummy...".format(j+1))
-        for i,evt in enumerate(TBRANCH_DUMMY):
-
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
-
-            ##############
-            # HARD CODED #
-            ##############
-
-            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-            ##############
-            ##############        
-            ##############
-            
-            #CUTs Definations 
-            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-
-            if ParticleType == "kaon":
-
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
-            else:
-
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
-
-            if(ALLCUTS):
-
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    H_t_DUMMY.Fill(-evt.MandelT)
-                    H_Q2_DUMMY.Fill(evt.Q2)
-                    H_W_DUMMY.Fill(evt.W)                        
-                    H_epsilon_DUMMY.Fill(evt.epsilon)
-
-        print("\nProcessing t-bin {} dummy rand...".format(j+1))
-        for i,evt in enumerate(TBRANCH_DUMMY_RAND):
-
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
-
-            ##############
-            # HARD CODED #
-            ##############
-
-            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-            ##############
-            ##############        
-            ##############
-            
-            #CUTs Definations 
-            SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-            HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-            HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-
-            if ParticleType == "kaon":
-
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
-            else:
-
-                ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
-
-            if(ALLCUTS):
-
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    H_t_DUMMY_RAND.Fill(-evt.MandelT)
-                    H_Q2_DUMMY_RAND.Fill(evt.Q2)
-                    H_W_DUMMY_RAND.Fill(evt.W)                        
-                    H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-
+    # Loop through bins in t_data and identify events in specified bins
+    for j in range(len(t_bins)-1):
+                    
         H_Q2_RAND.Scale(1/nWindows)
         H_W_RAND.Scale(1/nWindows)    
         H_t_RAND.Scale(1/nWindows)
