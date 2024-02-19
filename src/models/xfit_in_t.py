@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 21:08:34 trottar"
+# Time-stamp: "2024-02-18 20:46:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -546,9 +546,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigTT_pre.SetParNames("p13","p14","p15","p16")
     #f_sigTT_pre.SetParameters(tt0, tt1, tt2, tt3)
     # Variable does not use all 4 parameters    
-    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
-    f_sigTT_pre.SetParNames("p13","p14")
-    f_sigTT_pre.SetParameters(tt0, tt1)
+    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 1)
+    f_sigTT_pre.SetParNames("p13")
+    f_sigTT_pre.SetParameters(tt0)
     
     #g_sigtt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0]*nsep.GetSelectedRows(), nsep.GetV3())
     g_sigtt = TGraphErrors()
@@ -599,9 +599,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigTT.SetParNames("p13","p14","p15","p16")
     #f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
     # Variable does not use all 4 parameters    
-    f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
-    f_sigTT.SetParNames("p13","p14")
-    f_sigTT.SetParameters(tt0, tt1)
+    f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 1)
+    f_sigTT.SetParNames("p13")
+    f_sigTT.SetParameters(tt0)
     
     g_q2_sigtt_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
