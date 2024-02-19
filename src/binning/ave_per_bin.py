@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 19:25:07 trottar"
+# Time-stamp: "2024-02-18 19:33:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -331,20 +331,20 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         hist_bin_dict["H_t_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_epsilon_RAND_{}".format(j)].Scale(1/nWindows)
 
-        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(H_Q2_RAND,-1)
-        hist_bin_dict["H_W_DATA_{}".format(j)].Add(H_W_RAND,-1)
-        hist_bin_dict["H_t_DATA_{}".format(j)].Add(H_t_RAND,-1)
-        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(H_epsilon_RAND,-1)    
+        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(hist_bin_dict["H_Q2_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_W_DATA_{}".format(j)].Add(hist_bin_dict["H_W_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_t_DATA_{}".format(j)].Add(hist_bin_dict["H_t_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(hist_bin_dict["H_epsilon_RAND_{}".format(j)],-1)    
 
         hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)    
         hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
 
-        hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Add(H_Q2_DUMMY_RAND,-1)
-        hist_bin_dict["H_W_DUMMY_{}".format(j)].Add(H_W_DUMMY_RAND,-1)
-        hist_bin_dict["H_t_DUMMY_{}".format(j)].Add(H_t_DUMMY_RAND,-1)
-        hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(H_epsilon_DUMMY_RAND,-1)
+        hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Add(hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_W_DUMMY_{}".format(j)].Add(hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_t_DUMMY_{}".format(j)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
 
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
