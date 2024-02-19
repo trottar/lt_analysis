@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 05:38:47 trottar"
+# Time-stamp: "2024-02-19 05:39:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -480,7 +480,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         for k in range(len(phi_bins) - 1):
             phibin_index = k
             yield_val = yield_hist[i]
-            yield_err_val = yield_err_hist[i]
+            yield_err_val = yield_err_hist[i]/yield_val
             print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val)*yield_val))
             dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
             i+=1
