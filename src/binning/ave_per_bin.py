@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 19:43:13 trottar"
+# Time-stamp: "2024-02-18 19:50:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -624,24 +624,24 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration=False):
             for j in range(len(t_bins)-1):            
                 if t_bins[j] <= -evt.t <= t_bins[j+1]:
                     if iteration:
-                        hist_bin_dict["H_t_SIMC"].Fill(-evt.t, evt.iter_weight)
-                        hist_bin_dict["H_Q2_SIMC"].Fill(evt.Q2, evt.iter_weight)
-                        hist_bin_dict["H_W_SIMC"].Fill(evt.W, evt.iter_weight)
-                        hist_bin_dict["H_epsilon_SIMC"].Fill(evt.epsilon, evt.iter_weight)
+                        hist_bin_dict["H_t_SIMC_{}".format(j)].Fill(-evt.t, evt.iter_weight)
+                        hist_bin_dict["H_Q2_SIMC_{}".format(j)].Fill(evt.Q2, evt.iter_weight)
+                        hist_bin_dict["H_W_SIMC_{}".format(j)].Fill(evt.W, evt.iter_weight)
+                        hist_bin_dict["H_epsilon_SIMC_{}".format(j)].Fill(evt.epsilon, evt.iter_weight)
                     else:
-                        hist_bin_dict["H_t_SIMC"].Fill(-evt.t, evt.Weight)
-                        hist_bin_dict["H_Q2_SIMC"].Fill(evt.Q2, evt.Weight)
-                        hist_bin_dict["H_W_SIMC"].Fill(evt.W, evt.Weight)
-                        hist_bin_dict["H_epsilon_SIMC"].Fill(evt.epsilon, evt.Weight)                    
+                        hist_bin_dict["H_t_SIMC_{}".format(j)].Fill(-evt.t, evt.Weight)
+                        hist_bin_dict["H_Q2_SIMC_{}".format(j)].Fill(evt.Q2, evt.Weight)
+                        hist_bin_dict["H_W_SIMC_{}".format(j)].Fill(evt.W, evt.Weight)
+                        hist_bin_dict["H_epsilon_SIMC_{}".format(j)].Fill(evt.epsilon, evt.Weight)                    
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
                         
         processed_dict["t_bin{}".format(j+1)] = {
-            "H_Q2_SIMC" : hist_bin_dict["H_Q2_SIMC"],
-            "H_W_SIMC" : hist_bin_dict["H_W_SIMC"],
-            "H_t_SIMC" : hist_bin_dict["H_t_SIMC"],
-            "H_epsilon_SIMC" : hist_bin_dict["H_epsilon_SIMC"],
+            "H_Q2_SIMC" : hist_bin_dict["H_Q2_SIMC_{}".format(j)],
+            "H_W_SIMC" : hist_bin_dict["H_W_SIMC_{}".format(j)],
+            "H_t_SIMC" : hist_bin_dict["H_t_SIMC_{}".format(j)],
+            "H_epsilon_SIMC" : hist_bin_dict["H_epsilon_SIMC_{}".format(j)],
         }
     
     return processed_dict                    
