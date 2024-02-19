@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 02:26:02 trottar"
+# Time-stamp: "2024-02-19 02:47:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -290,13 +290,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(2).SetLeftMargin(0.12)
     nsep.Draw("sigt:t:sigt_e", "", "goff")
 
-    #f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    #f_sigT_pre.SetParNames("p5","p6","p7","p8")
-    #f_sigT_pre.SetParameters(t0, t1, t2, t3)
-    # Variable does not use all 4 parameters    
-    f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
-    f_sigT_pre.SetParNames("p5","p6")
-    f_sigT_pre.SetParameters(t0, t1)    
+    f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigT_pre.SetParNames("p5","p6","p7","p8")
+    f_sigT_pre.SetParameters(t0, t1, t2, t3)
     
     #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
     g_sigt = TGraphErrors()
@@ -337,14 +333,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
-    #f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    #f_sigT.SetParNames("p5","p6","p7","p8")
-    #f_sigT.SetParameters(t0, t1, t2, t3)
-    # Variable does not use all 4 parameters    
-    f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
-    f_sigT.SetParNames("p5","p6")
-    f_sigT.SetParameters(t0, t1)    
-
+    f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigT.SetParNames("p5","p6","p7","p8")
+    f_sigT.SetParameters(t0, t1, t2, t3)
+    
     g_q2_sigt_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
         g_q2_sigt_fit.SetPoint(g_q2_sigt_fit.GetN(), g_sigt_fit.GetX()[i], q2_vec[i], g_sigt_fit.GetY()[i])
@@ -414,13 +406,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(3).SetLeftMargin(0.12)
     nsep.Draw("siglt:t:siglt_e", "", "goff")
 
-    #f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    #f_sigLT_pre.SetParNames("p9","p10","p11","p12")
-    #f_sigLT_pre.SetParameters(lt0, lt1, lt2, lt3)
-    # Variable does not use all 4 parameters
-    f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 3)
-    f_sigLT_pre.SetParNames("p9","p10","p11")
-    f_sigLT_pre.SetParameters(lt0, lt1, lt2)
+    f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigLT_pre.SetParNames("p9","p10","p11","p12")
+    f_sigLT_pre.SetParameters(lt0, lt1, lt2, lt3)
     
     #g_siglt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), ROOT.nullptr, nsep.GetV3())
     g_siglt = TGraphErrors()
@@ -465,13 +453,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.SetTitle("Sigma LT Model Fit")
     g_siglt_fit.Draw("A*")
 
-    #f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    #f_sigLT.SetParNames("p9","p10","p11","p12")
-    #f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
-    # Variable does not use all 4 parameters
-    f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 3)
-    f_sigLT.SetParNames("p9","p10","p11")
-    f_sigLT.SetParameters(lt0, lt1, lt2)    
+    f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigLT.SetParNames("p9","p10","p11","p12")
+    f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
 
     g_q2_siglt_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
@@ -542,13 +526,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(4).SetLeftMargin(0.12)
     nsep.Draw("sigtt:t:sigtt_e", "", "goff")
     
-    #f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    #f_sigTT_pre.SetParNames("p13","p14","p15","p16")
-    #f_sigTT_pre.SetParameters(tt0, tt1, tt2, tt3)
-    # Variable does not use all 4 parameters    
-    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 1)
-    f_sigTT_pre.SetParNames("p13")
-    f_sigTT_pre.SetParameters(tt0)
+    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigTT_pre.SetParNames("p13","p14","p15","p16")
+    f_sigTT_pre.SetParameters(tt0, tt1, tt2, tt3)
     
     #g_sigtt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0]*nsep.GetSelectedRows(), nsep.GetV3())
     g_sigtt = TGraphErrors()
@@ -595,13 +575,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
-    #f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    #f_sigTT.SetParNames("p13","p14","p15","p16")
-    #f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
-    # Variable does not use all 4 parameters    
-    f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 1)
-    f_sigTT.SetParNames("p13")
-    f_sigTT.SetParameters(tt0)
+    f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigTT.SetParNames("p13","p14","p15","p16")
+    f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
     
     g_q2_sigtt_fit = ROOT.TGraph2DErrors()
     for i in range(len(w_vec)):
