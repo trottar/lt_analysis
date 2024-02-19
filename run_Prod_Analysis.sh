@@ -662,8 +662,8 @@ done
 # Make sure 3 sig figs (no more)
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
-    NumtBins=2
-    NumPhiBins=10
+    NumtBins=3
+    NumPhiBins=12
     TMIN=0.100
     TMAX=0.600
 elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
