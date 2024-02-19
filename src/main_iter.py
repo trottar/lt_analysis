@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 03:12:03 trottar"
+# Time-stamp: "2024-02-19 03:24:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -375,8 +375,6 @@ aveDict.update(ave_per_bin_simc(histlist, inpDict, iteration=True))
 sys.path.append("plotting")
 from binned import plot_binned
 
-print("!!!!!!!!!!!!!",yieldDict, ratioDict, aveDict)
-
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
 notify_email(email_address="trotta@cua.edu")
 
@@ -446,7 +444,7 @@ if not os.path.exists(foutjson):
 output_file_lst.append(foutjson)
 
 from physics_lists import create_lists
-create_lists(aveDict, ratioDict, histlist, inpDict, phisetlist, output_file_lst)
+create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Redefinition from above, but should be the same! This is just to stay consistent with main.py
 # ***Parameter files from last and this iteration!***
