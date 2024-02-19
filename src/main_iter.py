@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 03:24:50 trottar"
+# Time-stamp: "2024-02-19 03:57:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,7 +357,7 @@ from calculate_yield import grab_yield_data, find_yield_simc
 
 yieldDict = {}
 yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
-yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
+yieldDict.update(find_yield_simc(histlist, inpDict, iter_file=new_simc_root))
 
 sys.path.append("binning")
 from calculate_ratio import find_ratio
@@ -370,7 +370,7 @@ from ave_per_bin import grab_ave_data, ave_per_bin_simc
 
 aveDict = {}
 aveDict.update(grab_ave_data(histlist, inpDict))
-aveDict.update(ave_per_bin_simc(histlist, inpDict, iteration=True))
+aveDict.update(ave_per_bin_simc(histlist, inpDict, iter_file=new_simc_root))
 
 sys.path.append("plotting")
 from binned import plot_binned
