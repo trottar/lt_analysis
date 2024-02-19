@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 19:50:42 trottar"
+# Time-stamp: "2024-02-18 23:53:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -866,7 +866,6 @@ def grab_ave_data(histlist, inpDict):
                     "{}_ave".format(kin_type) : tup[2],
                 }
                 
-            print("!!!!!!!",groups)                
             group_dict[kin_type] = groups
         
         binned_dict = group_dict

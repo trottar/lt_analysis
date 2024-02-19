@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 19:08:30 trottar"
+# Time-stamp: "2024-02-18 23:54:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -444,7 +444,6 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
-            print("!!!!!!!!!!!!!",data_charge_err, (1/np.sqrt(sum(hist_val_data))))
             yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(sum(hist_val_data)))**2)
         except ZeroDivisionError:
             yld = 0.0
@@ -694,7 +693,6 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=Fa
             #print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
             #yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc/100 # FIX (/100 is temporary)
             # FIX: Removed norm_fac because shouldn't normalize non-weighted distribution
-            print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i])))
             yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
         except ZeroDivisionError:
             yld = 0.0
