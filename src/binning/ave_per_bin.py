@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-18 19:33:26 trottar"
+# Time-stamp: "2024-02-18 19:43:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -585,55 +585,63 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration=False):
     ################################################################################################################################################
     
     TBRANCH_SIMC  = tree_simc.Get("h10")
+
+    hist_bin_dict = {}
     
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
 
-        H_Q2_SIMC       = TH1D("H_Q2_SIMC","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
-        H_W_SIMC  = TH1D("H_W_SIMC","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
-        H_t_SIMC       = TH1D("H_t_SIMC","-t", 500, inpDict["tmin"], inpDict["tmax"])
-        H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+        hist_bin_dict["H_Q2_SIMC_{}".format(j)]       = TH1D("H_Q2_SIMC_{}".format(j),"Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+        hist_bin_dict["H_W_SIMC_{}".format(j)]  = TH1D("H_W_SIMC_{}".format(j),"W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+        hist_bin_dict["H_t_SIMC_{}".format(j)]       = TH1D("H_t_SIMC_{}".format(j),"-t", 500, inpDict["tmin"], inpDict["tmax"])
+        hist_bin_dict["H_epsilon_SIMC_{}".format(j)]  = TH1D("H_epsilon_SIMC_{}".format(j),"epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
 
-        print("\nProcessing t-bin {} simc...".format(j+1))
-        for i,evt in enumerate(TBRANCH_SIMC):
+    print("\nBinning simc...")
+    for i,evt in enumerate(TBRANCH_SIMC):
 
-            # Progress bar
-            Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
+        # Progress bar
+        Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
-            # Define the acceptance cuts  
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
+        # Define the acceptance cuts  
+        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+        HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-            if ParticleType == "kaon":
+        if ParticleType == "kaon":
 
-                ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)
-                NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
+            ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)
+            NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
 
-            else:
+        else:
 
-                ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond                
+            ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond                
 
-            #Fill SIMC events
-            if(ALLCUTS):            
+        #Fill SIMC events
+        if(ALLCUTS):
+
+            # Loop through bins in t_simc and identify events in specified bins
+            for j in range(len(t_bins)-1):            
                 if t_bins[j] <= -evt.t <= t_bins[j+1]:
                     if iteration:
-                        H_t_SIMC.Fill(-evt.t, evt.iter_weight)
-                        H_Q2_SIMC.Fill(evt.Q2, evt.iter_weight)
-                        H_W_SIMC.Fill(evt.W, evt.iter_weight)
-                        H_epsilon_SIMC.Fill(evt.epsilon, evt.iter_weight)
+                        hist_bin_dict["H_t_SIMC"].Fill(-evt.t, evt.iter_weight)
+                        hist_bin_dict["H_Q2_SIMC"].Fill(evt.Q2, evt.iter_weight)
+                        hist_bin_dict["H_W_SIMC"].Fill(evt.W, evt.iter_weight)
+                        hist_bin_dict["H_epsilon_SIMC"].Fill(evt.epsilon, evt.iter_weight)
                     else:
-                        H_t_SIMC.Fill(-evt.t, evt.Weight)
-                        H_Q2_SIMC.Fill(evt.Q2, evt.Weight)
-                        H_W_SIMC.Fill(evt.W, evt.Weight)
-                        H_epsilon_SIMC.Fill(evt.epsilon, evt.Weight)                    
+                        hist_bin_dict["H_t_SIMC"].Fill(-evt.t, evt.Weight)
+                        hist_bin_dict["H_Q2_SIMC"].Fill(evt.Q2, evt.Weight)
+                        hist_bin_dict["H_W_SIMC"].Fill(evt.W, evt.Weight)
+                        hist_bin_dict["H_epsilon_SIMC"].Fill(evt.epsilon, evt.Weight)                    
 
+    # Loop through bins in t_simc and identify events in specified bins
+    for j in range(len(t_bins)-1):
+                        
         processed_dict["t_bin{}".format(j+1)] = {
-            "H_Q2_SIMC" : H_Q2_SIMC,
-            "H_W_SIMC" : H_W_SIMC,
-            "H_t_SIMC" : H_t_SIMC,
-            "H_epsilon_SIMC" : H_epsilon_SIMC,
+            "H_Q2_SIMC" : hist_bin_dict["H_Q2_SIMC"],
+            "H_W_SIMC" : hist_bin_dict["H_W_SIMC"],
+            "H_t_SIMC" : hist_bin_dict["H_t_SIMC"],
+            "H_epsilon_SIMC" : hist_bin_dict["H_epsilon_SIMC"],
         }
     
     return processed_dict                    
