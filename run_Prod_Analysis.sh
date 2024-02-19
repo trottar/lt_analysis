@@ -663,9 +663,9 @@ done
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
     NumtBins=3
-    NumPhiBins=12
+    NumPhiBins=10
     TMIN=0.100
-    TMAX=0.600
+    TMAX=0.900
 elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     # Q2=3p0, W=3p14
     NumtBins=8
