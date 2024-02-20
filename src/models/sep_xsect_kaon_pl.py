@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 00:07:16 trottar"
+# Time-stamp: "2024-02-20 00:09:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,7 +44,8 @@ def import_model(inp_model, arg_str):
             ftav = (abs(tt)-tav)/tav
             # RLT (2/15/2024): Removing t dependence from sigT because it seems
             #                  to be driving poor sep xsects results
-            f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
+            #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
+            f = par[0]+par[1]*math.log(qq)+par[2] * ftav
             return f
 
     # Function for SigLT
