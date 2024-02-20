@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 00:24:39 trottar"
+# Time-stamp: "2024-02-20 00:27:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,8 +165,8 @@ setting_file = LTANAPATH+"/src/{}/list.settings".format(ParticleType)
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'W', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins'],\
                                         filter_conditions={'Q2': float(Q2.replace("p",".")), 'W': float(W.replace("p","."))})
 print("!!!!!!!!!!!",file_df_dict['setting_df'])
-tmin = file_df_dict['setting_df'].loc[0, 'TMIN']
-tmax = file_df_dict['setting_df'].loc[0, 'TMAX']
+tmin = file_df_dict['setting_df'].loc[0]['TMIN']
+tmax = file_df_dict['setting_df'].loc[0]['TMAX']
 
 try:
     with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
