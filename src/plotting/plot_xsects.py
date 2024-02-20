@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 00:32:59 trottar"
+# Time-stamp: "2024-02-20 00:19:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,7 +156,7 @@ fix_spacing(LTANAPATH+"/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(ParticleType, 
 file_df_dict = {}
 
 setting_file = LTANAPATH+"/src/{}/list.settings".format(ParticleType)
-file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'W', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins'])
+file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'W', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins'],filter_conditions={'Q2': Q2, 'W': W})
 
 tmin = file_df_dict['setting_df'].loc[0, 'TMIN']
 tmax = file_df_dict['setting_df'].loc[0, 'TMAX']
