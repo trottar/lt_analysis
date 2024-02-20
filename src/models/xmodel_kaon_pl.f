@@ -90,8 +90,8 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *                        to be driving poor sep xsects results
 *     RLT (2/20/2024): Added 1/Q^4 term to dampen sigT      
 *     sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
-      sigT=par(5)+par(6)*log(q2)
-*      sigT=par(5)*log(q2)++par(6)/(q2**2)
+*      sigT=par(5)+par(6)*log(q2)
+      sigT=par(5)*log(q2)++par(6)/(q2**2)
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
 *     RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for

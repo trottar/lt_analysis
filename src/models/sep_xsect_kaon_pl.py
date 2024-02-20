@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 12:20:20 trottar"
+# Time-stamp: "2024-02-20 13:14:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -46,8 +46,8 @@ def import_model(inp_model, arg_str):
             #                  to be driving poor sep xsects results
             # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
             #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
-            f = par[0]+par[1]*math.log(qq)
-            #f = par[0]*math.log(qq)+par[1]/(qq**2)
+            #f = par[0]+par[1]*math.log(qq)
+            f = par[0]*math.log(qq)+par[1]/(qq**2)
             return f
 
     # Function for SigLT
