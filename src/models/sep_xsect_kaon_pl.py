@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 00:31:32 trottar"
+# Time-stamp: "2024-02-20 00:34:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,7 +48,7 @@ def import_model(inp_model, arg_str):
             #f = par[0]+par[1]*math.log(qq)
             # Testing parameters
             #f = 0.31423E+02-0.18000E+02*math.log(qq)
-            f = 0.31423E+01-0.18000E+01*math.log(qq)
+            f = 0.31423E+00-0.18000E+00*math.log(qq)
             return f
 
     # Function for SigLT
