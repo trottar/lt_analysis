@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 00:22:45 trottar"
+# Time-stamp: "2024-02-20 00:24:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -164,7 +164,7 @@ file_df_dict = {}
 setting_file = LTANAPATH+"/src/{}/list.settings".format(ParticleType)
 file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'W', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins'],\
                                         filter_conditions={'Q2': float(Q2.replace("p",".")), 'W': float(W.replace("p","."))})
-
+print("!!!!!!!!!!!",file_df_dict['setting_df'])
 tmin = file_df_dict['setting_df'].loc[0, 'TMIN']
 tmax = file_df_dict['setting_df'].loc[0, 'TMAX']
 
