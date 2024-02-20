@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 00:19:17 trottar"
+# Time-stamp: "2024-02-20 00:21:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,24 +102,30 @@ with open(param_file, 'r') as f:
 def are_within_tolerance(num1, num2, tolerance=0.1):
     return abs(num1 - num2) <= tolerance
 
-def file_to_df(f_name, columns):
+def file_to_df(f_name, columns, filter_conditions=None):
     '''
     Read in file and convert to dataframe with custom column names
+    Optionally filter the dataframe based on specified conditions
     '''
-
-    lineskip=False
+    lineskip = False
     
     # Open the file for reading
     with open(f_name, 'r') as file:
         lines = file.readlines()
         if '1.000000\n' in lines:
-            lineskip=True
+            lineskip = True
 
     if lineskip:
         df = pd.read_csv(f_name, header=None, sep=' ', skiprows=1, skipfooter=1, engine='python')
     else:
         df = pd.read_csv(f_name, header=None, sep=' ')    
     df.columns = columns
+    
+    # Filter the dataframe based on specified conditions
+    if filter_conditions:
+        for column, value in filter_conditions.items():
+            df = df[df[column] == value]
+    
     return df
 
 ################################################################################################################################################
