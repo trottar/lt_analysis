@@ -407,9 +407,11 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
      1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)+0.2))
 *       RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
+*       RLT (2/20/2024): Added 1/Q^4 term to dampen sigT	   
 *       sigt=fitpar(5)+fitpar(6)*log(Q2_g)
 *       1           +(fitpar(7)+fitpar(8)*log(Q2_g))*ftav
-	   sigt=fitpar(5)+fitpar(6)*log(Q2_g)	   
+*       sigt=fitpar(5)+fitpar(6)*log(Q2_g)
+	   sigt=fitpar(5)*log(Q2_g)+fitpar(6)/(Q2_g**2)
 
 	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
      1           +fitpar(11)/abs(t_gev))*sin(thetacm)
