@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 00:41:10 trottar"
+# Time-stamp: "2024-02-20 00:55:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,10 +45,7 @@ def import_model(inp_model, arg_str):
             # RLT (2/15/2024): Removing t dependence from sigT because it seems
             #                  to be driving poor sep xsects results
             #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
-            #f = par[0]+par[1]*math.log(qq)
-            # Testing parameters
-            #f = 0.31423E+02-0.18000E+02*math.log(qq) # Original
-            f = 0.31423E+01-0.18000E+01*math.log(qq) # Modified
+            f = par[0]+par[1]*math.log(qq)
             return f
 
     # Function for SigLT
