@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 12:09:57 trottar"
+# Time-stamp: "2024-02-20 12:41:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -461,11 +461,11 @@ try:
         for line in file:
             cut_summary_lst += line            
 except FileNotFoundError:
-    print('''
+    print(''
     \n\n
     File not found!
     Assuming first iteration!
-    ''')
+    '')
 '''
 
 cut_summary_lst += "\nUnsep Parameterization for {}...".format(closest_date)
