@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 13:57:45 trottar"
+# Time-stamp: "2024-02-20 14:17:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -449,7 +449,7 @@ create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 # Redefinition from above, but should be the same! This is just to stay consistent with main.py
 # ***Parameter files from last and this iteration!***
 # FIX BELOW!!!
-old_param_file = '{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat'.format(CACHEPATH, USER, ParticleType, Q2.replace("p",""), W.replace("p",""), closest_date, \
+old_param_file = '{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat'.format(CACHEPATH, USER, ParticleType, Q2, W, closest_date, \
                                                                        pol_str, Q2.replace("p",""), W.replace("p",""))
 '''
 try:
