@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 23:32:33 trottar"
+# Time-stamp: "2024-02-19 23:38:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,6 +77,7 @@ def iterWeight(arg_str):
 
     wfactor = 1.0 / (s_gev - mtar_gev**2)**2
     #sig = sig219*wfactor
+    sig = sig219
     sigl = sigl*wfactor
     sigt = sigt*wfactor
     sigtt = sigtt*wfactor
