@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 03:38:40 trottar"
+# Time-stamp: "2024-02-21 13:19:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,11 +45,9 @@ def import_model(inp_model, arg_str):
             # RLT (2/15/2024): Removing t dependence from sigT because it seems
             #                  to be driving poor sep xsects results
             # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
-            # RLT (2/21/2024): Reintroducing t-dependence
             #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
             #f = par[0]+par[1]*math.log(qq)
-            #f = par[0]*math.log(qq)+par[1]/(qq**2)
-            f = par[0]*math.log(qq)+par[1]/(qq**2)+(par[2]+par[3]*math.log(qq)) * ftav
+            f = par[0]*math.log(qq)+par[1]/(qq**2)
             return f
 
     # Function for SigLT
@@ -79,7 +77,9 @@ def import_model(inp_model, arg_str):
     sig_sep = modelDict[inp_model]
 
     # Apply weight factor
-    g = 1 / ((ww**2) - (m_p**2))**2
+    # RLT (2/21/2024): Adjusting W-dependence to test how xsect changes with x (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
+    #g = 1 / ((ww**2) - (m_p**2))**2
+    g = 1 / ((ww**2) - (m_p**2))**3
     sig_sep = sig_sep*g
     
     print("Model {} = {:.4e}".format(inp_model, sig_sep))

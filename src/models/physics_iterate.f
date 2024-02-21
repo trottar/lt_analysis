@@ -407,14 +407,12 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
      1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)+0.2))
 *       RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
-*       RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
-*       RLT (2/21/2024): Reintroducing t-dependence	   
+*       RLT (2/20/2024): Added 1/Q^4 term to dampen sigT	   
 *       sigt=fitpar(5)+fitpar(6)*log(Q2_g)
 *       1           +(fitpar(7)+fitpar(8)*log(Q2_g))*ftav
 *       sigt=fitpar(5)+fitpar(6)*log(Q2_g)
-*       sigt=fitpar(5)*log(Q2_g)+fitpar(6)/(Q2_g**2)
-	   sigt=fitpar(5)*log(Q2_g)+fitpar(6)/(Q2_g**2)	   
-     1           +(fitpar(7)+fitpar(8)*log(Q2_g))*ftav
+	   sigt=fitpar(5)*log(Q2_g)+fitpar(6)/(Q2_g**2)
+
 	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
      1           +fitpar(11)/abs(t_gev))*sin(thetacm)
 *       RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
@@ -432,8 +430,11 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 c now convert to different W
 c W dependence given by 1/(W^2-M^2)^2
 c factor 15.333 is value of (w**2-ami**2)**2 at W=2.19
-
-	  wfactor=1.D0/(s_gev-mtar_gev**2)**2
+*     RLT (2/21/2024): Adjusting W-dependence to test how xsect changes
+*                      with x
+*     (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)               	   
+*       wfactor=1.D0/(s_gev-mtar_gev**2)**2
+	   wfactor=1.D0/(s_gev-mtar_gev**2)**3
 	  sig=sig219*wfactor
 	  sigl=sigl*wfactor
 	  sigt=sigt*wfactor
