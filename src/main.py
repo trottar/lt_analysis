@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 23:03:20 trottar"
+# Time-stamp: "2024-02-20 23:36:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,8 +41,8 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=44:
-    print("!!!!! ERROR !!!!!\n Expected 44 arguments\n Usage is with - KIN W Q2 EPSVAL OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center data_charge_err_right data_charge_err_left data_charge_err_center dummy_charge_err_right dummy_charge_err_left dummy_charge_err_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InData_error_efficiency_right InData_error_efficiency_left InData_error_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date inp_debug\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=45:
+    print("!!!!! ERROR !!!!!\n Expected 45 arguments\n Usage is with - KIN W Q2 EPSLO EPSHI OutDATAFilename OutDUMMYFilename OutFullAnalysisFilename tmin tmax NumtBins NumPhiBins runNumRight runNumLeft runNumCenter data_charge_right data_charge_left data_charge_center dummy_charge_right dummy_charge_left dummy_charge_center data_charge_err_right data_charge_err_left data_charge_err_center dummy_charge_err_right dummy_charge_err_left dummy_charge_err_center InData_efficiency_right InData_efficiency_left InData_efficiency_center InData_error_efficiency_right InData_error_efficiency_left InData_error_efficiency_center efficiency_table ParticleType EPSSET pThetaValRight pThetaValLeft pThetaValCenter EbeamValRight EbeamValLeft EbeamValCenter POL formatted_date inp_debug\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -51,47 +51,48 @@ if len(sys.argv)-1!=44:
 kinematics = sys.argv[1].split("_")
 W = sys.argv[2]
 Q2 = sys.argv[3]
-EPSVAL = sys.argv[4]
-InDATAFilename = sys.argv[5]
-InDUMMYFilename = sys.argv[6]
-OutFilename = sys.argv[7]
-tmin = float(sys.argv[8])
-tmax = float(sys.argv[9])
-NumtBins = int(sys.argv[10])
-NumPhiBins = int(sys.argv[11])
-runNumRight = sys.argv[12]
-runNumLeft = sys.argv[13]
-runNumCenter = sys.argv[14]
-data_charge_right = float(sys.argv[15])
-data_charge_left = float(sys.argv[16])
-data_charge_center = float(sys.argv[17])
-dummy_charge_right = float(sys.argv[18])
-dummy_charge_left = float(sys.argv[19])
-dummy_charge_center = float(sys.argv[20])
-data_charge_err_right = float(sys.argv[21])
-data_charge_err_left = float(sys.argv[22])
-data_charge_err_center = float(sys.argv[23])
-dummy_charge_err_right = float(sys.argv[24])
-dummy_charge_err_left = float(sys.argv[25])
-dummy_charge_err_center = float(sys.argv[26])
-InData_efficiency_right = sys.argv[27]
-InData_efficiency_left = sys.argv[28]
-InData_efficiency_center = sys.argv[29]
-InData_error_efficiency_right = sys.argv[30]
-InData_error_efficiency_left = sys.argv[31]
-InData_error_efficiency_center = sys.argv[32]
-efficiency_table = sys.argv[33]
-ParticleType = sys.argv[34]
-EPSSET = sys.argv[35]
-pThetaValRight = list(sys.argv[36].split(" "))
-pThetaValLeft = list(sys.argv[37].split(" "))
-pThetaValCenter = list(sys.argv[38].split(" "))
-EbeamValRight = list(sys.argv[39].split(" "))
-EbeamValLeft = list(sys.argv[40].split(" "))
-EbeamValCenter = list(sys.argv[41].split(" "))
-POL = sys.argv[42]
-formatted_date = sys.argv[43]
-inp_debug =  sys.argv[44]
+EPSLO = sys.argv[4]
+EPSHI = sys.argv[5]
+InDATAFilename = sys.argv[6]
+InDUMMYFilename = sys.argv[7]
+OutFilename = sys.argv[8]
+tmin = float(sys.argv[9])
+tmax = float(sys.argv[10])
+NumtBins = int(sys.argv[11])
+NumPhiBins = int(sys.argv[12])
+runNumRight = sys.argv[13]
+runNumLeft = sys.argv[14]
+runNumCenter = sys.argv[15]
+data_charge_right = float(sys.argv[16])
+data_charge_left = float(sys.argv[17])
+data_charge_center = float(sys.argv[18])
+dummy_charge_right = float(sys.argv[19])
+dummy_charge_left = float(sys.argv[20])
+dummy_charge_center = float(sys.argv[21])
+data_charge_err_right = float(sys.argv[22])
+data_charge_err_left = float(sys.argv[23])
+data_charge_err_center = float(sys.argv[24])
+dummy_charge_err_right = float(sys.argv[25])
+dummy_charge_err_left = float(sys.argv[26])
+dummy_charge_err_center = float(sys.argv[27])
+InData_efficiency_right = sys.argv[28]
+InData_efficiency_left = sys.argv[29]
+InData_efficiency_center = sys.argv[30]
+InData_error_efficiency_right = sys.argv[31]
+InData_error_efficiency_left = sys.argv[32]
+InData_error_efficiency_center = sys.argv[33]
+efficiency_table = sys.argv[34]
+ParticleType = sys.argv[35]
+EPSSET = sys.argv[36]
+pThetaValRight = list(sys.argv[37].split(" "))
+pThetaValLeft = list(sys.argv[38].split(" "))
+pThetaValCenter = list(sys.argv[39].split(" "))
+EbeamValRight = list(sys.argv[40].split(" "))
+EbeamValLeft = list(sys.argv[41].split(" "))
+EbeamValCenter = list(sys.argv[42].split(" "))
+POL = sys.argv[43]
+formatted_date = sys.argv[44]
+inp_debug =  sys.argv[45]
 
 if inp_debug == "False":
     DEBUG = False # Flag for no plot splash
@@ -106,6 +107,11 @@ else:
     print("ERROR: Invalid polarity...must be +1 or -1")
     sys.exit(2)
 
+if EPSSET == "low":
+    EPSVAL = EPSLO
+else:
+    EPSVAL = EPSHI
+    
 inpDict = {
     "kinematics" : kinematics,
     "W" : W,
@@ -702,14 +708,17 @@ if EPSSET == "high":
     new_param_file = '{}/parameters/par.{}_Q{}W{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
     output_file_lst.append(new_param_file) 
     sep_file = '{}/xsects/x_sep.{}_Q{}W{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
-    output_file_lst.append(sep_file)
-# Save for high and low eps
-unsep_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSVAL)*100)
-output_file_lst.append(unsep_file)
-avek_file = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
-output_file_lst.append(avek_file)
-aver_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSVAL)*100)
-output_file_lst.append(aver_file)
+    output_file_lst.append(sep_file)    
+    unsep_lo_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSLO)*100)
+    output_file_lst.append(unsep_lo_file)
+    unsep_hi_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSHI)*100)
+    output_file_lst.append(unsep_hi_file)        
+    avek_file = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+    output_file_lst.append(avek_file)
+    aver_lo_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSLO)*100)
+    output_file_lst.append(aver_lo_file)
+    aver_hi_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSHI)*100)
+    output_file_lst.append(aver_hi_file)    
 
 ##############################
 # Step 8 of the lt_analysis: #

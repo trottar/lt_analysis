@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 14:37:09 trottar"
+# Time-stamp: "2024-02-20 23:36:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,8 +41,8 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=12:
-    print("!!!!! ERROR !!!!!\n Expected 12 arguments\n Usage is with - KIN W Q2 EPSVAL ParticleType EPSSET POL OutFilename formatted_date NumtBins NumPhiBins inp_debug\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=13:
+    print("!!!!! ERROR !!!!!\n Expected 13 arguments\n Usage is with - KIN W Q2 EPSLO EPSHI ParticleType EPSSET POL OutFilename formatted_date NumtBins NumPhiBins inp_debug\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -51,15 +51,16 @@ if len(sys.argv)-1!=12:
 kinematics = sys.argv[1].split("_")
 W = sys.argv[2]
 Q2 = sys.argv[3]
-EPSVAL = sys.argv[4]
-ParticleType = sys.argv[5]
-EPSSET = sys.argv[6]
-POL = sys.argv[7]
-OutFilename = sys.argv[8]
-formatted_date = sys.argv[9]
-NumtBins = sys.argv[10]
-NumPhiBins = sys.argv[11]
-inp_debug =  sys.argv[12]
+EPSLO = sys.argv[4]
+EPSHI = sys.argv[5]
+ParticleType = sys.argv[6]
+EPSSET = sys.argv[7]
+POL = sys.argv[8]
+OutFilename = sys.argv[9]
+formatted_date = sys.argv[10]
+NumtBins = sys.argv[11]
+NumPhiBins = sys.argv[12]
+inp_debug =  sys.argv[13]
 
 if inp_debug == "False":
     DEBUG = False # Flag for no plot splash
@@ -74,6 +75,11 @@ else:
     print("ERROR: Invalid polarity...must be +1 or -1")
     sys.exit(2)
 
+if EPSSET == "low":
+    EPSVAL = EPSLO
+else:
+    EPSVAL = EPSHI    
+    
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
 
@@ -515,18 +521,20 @@ if EPSSET == "high":
         show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))        
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_lt_fit_Q{}W{}.pdf".format(ParticleType, Q2, W))
-
     
     # Save sep and unsep values from current iteration
     sep_file = '{}/xsects/x_sep.{}_Q{}W{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
     output_file_lst.append(sep_file)
-# Save for high and low eps
-unsep_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSVAL)*100)
-output_file_lst.append(unsep_file)    
-avek_file = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
-output_file_lst.append(avek_file)
-aver_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSVAL)*100)
-output_file_lst.append(aver_file)
+    unsep_lo_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSLO)*100)
+    output_file_lst.append(unsep_lo_file)
+    unsep_hi_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSHI)*100)
+    output_file_lst.append(unsep_hi_file)        
+    avek_file = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+    output_file_lst.append(avek_file)
+    aver_lo_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSLO)*100)
+    output_file_lst.append(aver_lo_file)
+    aver_hi_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSHI)*100)
+    output_file_lst.append(aver_hi_file)    
 
 ##############################
 # Step 8 of the lt_analysis: #
