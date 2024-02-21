@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 21:18:35 trottar"
+# Time-stamp: "2024-02-20 14:36:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -632,18 +632,11 @@ shutil.copy('{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace(
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
-try:
-    cut_summary_lst += "\n\nUnsep Parameterization for {}...\n".format(formatted_date)
-    with open(old_param_file, 'r') as file:
-        for line in file:
-            cut_summary_lst += line
-except FileNotFoundError:
-    print('''
-    \n\n
-    File not found!
-    Assuming first iteration!
-    ''')
-    
+cut_summary_lst += "\n\nUnsep Parameterization for {}...\n".format(formatted_date)
+with open(old_param_file, 'r') as file:
+    for line in file:
+        cut_summary_lst += line
+        
 print("\n\n")
 print("="*25)
 print("{} Epsilon Summary...".format(EPSSET.capitalize()),cut_summary_lst)

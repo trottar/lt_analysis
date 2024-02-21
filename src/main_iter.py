@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 14:19:12 trottar"
+# Time-stamp: "2024-02-20 14:37:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -451,23 +451,6 @@ create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 # FIX BELOW!!!
 old_param_file = '{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat'.format(CACHEPATH, USER, ParticleType, Q2, W, closest_date, \
                                                                        pol_str, Q2.replace("p",""), W.replace("p",""))
-'''
-try:
-    cut_summary_lst += "\nUnsep Parameterization for {}...".format(closest_date)
-    with open(old_param_file, 'r') as file:
-        for line in file:
-            cut_summary_lst += line
-    cut_summary_lst += "\nUnsep Parameterization for {}...".format(formatted_date)
-    with open(new_param_file, 'r') as file:
-        for line in file:
-            cut_summary_lst += line            
-except FileNotFoundError:
-    print(''
-    \n\n
-    File not found!
-    Assuming first iteration!
-    '')
-'''
 
 cut_summary_lst += "\nUnsep Parameterization for {}...".format(closest_date)
 with open(old_param_file, 'r') as file:
