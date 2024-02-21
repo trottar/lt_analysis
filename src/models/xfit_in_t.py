@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 01:56:57 trottar"
+# Time-stamp: "2024-02-21 01:59:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -386,6 +386,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT.FixParameter(3, 0)
     # Fixing sigL terms for testing
     f_sigT.FixParameter(0, t0)
+    f_sigT.FixParameter(0, -250)
     ##############
     ##############
     ##############    
