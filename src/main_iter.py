@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 23:36:37 trottar"
+# Time-stamp: "2024-02-21 00:11:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -389,64 +389,58 @@ if DEBUG:
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
 
 # Save histograms to root file
-# Check that root file doesnt already exist    
-if not os.path.exists(foutroot):
-#if os.path.exists(foutroot):    
-    for hist in histlist:
-        print("\nUpdating simc {} histograms in {}".format(hist["phi_setting"],foutroot))
-        # Loop through all keys,values of dictionary
-        for i, (key, val) in enumerate(hist.items()):
-            # Progress bar
-            Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-            if "G_data_eff" in key:
-                hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))            
-            if is_hist(val):
-                if "ratio" in key:
-                    hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
-                if "SIMC" in key:
-                    if "yield" in key:
-                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))                        
-                    elif "bin" in key:
-                        hist_to_root(val, foutroot, "{}/bins".format(hist["phi_setting"]))
-                    elif "totevts" in key:
-                        hist_to_root(val, foutroot, "{}/yield".format(hist["phi_setting"]))
-                    else:
-                        hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
+for hist in histlist:
+    print("\nUpdating simc {} histograms in {}".format(hist["phi_setting"],foutroot))
+    # Loop through all keys,values of dictionary
+    for i, (key, val) in enumerate(hist.items()):
+        # Progress bar
+        Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+        if "G_data_eff" in key:
+            hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))            
+        if is_hist(val):
+            if "ratio" in key:
+                continue
+            if "SIMC" in key:
+                if "yield" in key:
+                    continue
+                elif "bin" in key:
+                    continue
+                elif "totevts" in key:
+                    continue
+                else:
+                    hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
 
-    # Open the ROOT file
-    root_file = TFile.Open(foutroot, "UPDATE")
+# Open the ROOT file
+root_file = TFile.Open(foutroot, "UPDATE")
 
-    # Check if the file was opened successfully
-    if root_file.IsOpen():
-        # Close the file
-        root_file.Close()
-        print("\nThe root file {} has been successfully closed.".format(foutroot))
-    else:
-        print("\nError: Unable to close the root file {}.".format(foutroot))
+# Check if the file was opened successfully
+if root_file.IsOpen():
+    # Close the file
+    root_file.Close()
+    print("\nThe root file {} has been successfully closed.".format(foutroot))
+else:
+    print("\nError: Unable to close the root file {}.".format(foutroot))
 output_file_lst.append(foutroot)
 
 # Create combined dictionary of all non-histogram information
-if not os.path.exists(foutjson):
-#if os.path.exists(foutjson):
-    # Create combined dictionary of all non-histogram information        
-    combineDict = {}
-    combineDict.update({"inpDict" : inpDict})
-    tmp_lst = []
-    for hist in histlist:
-        print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
-        tmp_dict = {}
-        for i, (key, val) in enumerate(hist.items()):
-            # Progress bar
-            Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-            if not is_root_obj(val):
-                tmp_dict[key] = val
-        tmp_lst.append(tmp_dict)
-    combineDict.update({ "histlist" : tmp_lst})
+combineDict = {}
+combineDict.update({"inpDict" : inpDict})
+tmp_lst = []
+for hist in histlist:
+    print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
+    tmp_dict = {}
+    for i, (key, val) in enumerate(hist.items()):
+        # Progress bar
+        Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+        if not is_root_obj(val):
+            tmp_dict[key] = val
+    tmp_lst.append(tmp_dict)
+combineDict.update({ "histlist" : tmp_lst})
 
-    # Save combined dictionary to json file
-    # Open the file in write mode and use json.dump() to save the dictionary to JSON
-    with open(foutjson, 'w') as f_json:
-        json.dump(combineDict, f_json, default=custom_encoder)
+# Save combined dictionary to json file
+# Open the file in write mode and use json.dump() to save the dictionary to JSON
+with open(foutjson, 'w') as f_json:
+    json.dump(combineDict, f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
 
 from physics_lists import create_lists
