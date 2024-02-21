@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 01:32:05 trottar"
+# Time-stamp: "2024-02-21 13:28:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,7 +42,7 @@ from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist
 # Check the number of arguments provided to the script
 
 if len(sys.argv)-1!=13:
-    print("!!!!! ERROR !!!!!\n Expected 13 arguments\n Usage is with - KIN W Q2 EPSLO EPSHI ParticleType EPSSET POL OutFilename formatted_date NumtBins NumPhiBins inp_debug\n!!!!! ERROR !!!!!")
+    print("!!!!! ERROR !!!!!\n Expected 13 arguments\n Usage is with - KIN W Q2 LOEPS HIEPS ParticleType EPSSET POL OutFilename formatted_date NumtBins NumPhiBins inp_debug\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -51,8 +51,8 @@ if len(sys.argv)-1!=13:
 kinematics = sys.argv[1].split("_")
 W = sys.argv[2]
 Q2 = sys.argv[3]
-EPSLO = sys.argv[4]
-EPSHI = sys.argv[5]
+LOEPS = sys.argv[4]
+HIEPS = sys.argv[5]
 ParticleType = sys.argv[6]
 EPSSET = sys.argv[7]
 POL = sys.argv[8]
@@ -76,9 +76,9 @@ else:
     sys.exit(2)
 
 if EPSSET == "low":
-    EPSVAL = EPSLO
+    EPSVAL = LOEPS
 else:
-    EPSVAL = EPSHI    
+    EPSVAL = HIEPS    
     
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
@@ -519,15 +519,15 @@ if EPSSET == "high":
     # Save sep and unsep values from current iteration
     sep_file = '{}/xsects/x_sep.{}_Q{}W{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
     output_file_lst.append(sep_file)
-    unsep_lo_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSLO)*100)
+    unsep_lo_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
     output_file_lst.append(unsep_lo_file)
-    unsep_hi_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSHI)*100)
+    unsep_hi_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
     output_file_lst.append(unsep_hi_file)        
     avek_file = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
     output_file_lst.append(avek_file)
-    aver_lo_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSLO)*100)
+    aver_lo_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
     output_file_lst.append(aver_lo_file)
-    aver_hi_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(EPSHI)*100)
+    aver_hi_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
     output_file_lst.append(aver_hi_file)    
 
 ##############################
