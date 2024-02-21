@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 00:11:16 trottar"
+# Time-stamp: "2024-02-21 01:32:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -382,7 +382,7 @@ sys.path.append("plotting")
 from binned import plot_binned
 
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
-notify_email(email_address="trotta@cua.edu")
+#notify_email(email_address="trotta@cua.edu")
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
