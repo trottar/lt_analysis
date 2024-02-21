@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 03:29:24 trottar"
+# Time-stamp: "2024-02-21 03:37:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,9 +56,11 @@ def fun_Sig_T(x, par):
     #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     # RLT (2/15/2024): Removing t dependence from sigT because it seems
     #                  to be driving poor sep xsects results
-    # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT    
+    # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
+    # RLT (2/21/2024): Reintroducing t-dependence
     #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
     #f = par[0]+par[1]*math.log(qq)
+    #f = par[0]*math.log(qq)+par[1]/(qq**2)
     f = par[0]*math.log(qq)+par[1]/(qq**2)+(par[2]+par[3]*math.log(qq)) * ftav
     return f
 

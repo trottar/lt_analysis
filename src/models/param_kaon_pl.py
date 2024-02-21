@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 03:30:08 trottar"
+# Time-stamp: "2024-02-21 03:37:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,9 +60,11 @@ def iterWeight(arg_str):
     sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
     # RLT (2/15/2024): Removing t dependence from sigT because it seems
     #                  to be driving poor sep xsects results
-    # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT    
+    # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
+    # RLT (2/21/2024): Reintroducing t-dependence
     #sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
     #sigt = p5 + p6 * math.log(q2_gev)
+    #sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
     sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2) + (p7 + p8 * math.log(q2_gev)) * ftav
     siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
