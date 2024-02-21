@@ -249,7 +249,6 @@ do
 		fi
 		EPSLO=0.1838
 		EPSHI=0.5291
-		fi
 		KIN="Q5p5W3p02_${EPSILON}e"
 	    fi
 
@@ -290,7 +289,6 @@ do
 		fi
 		EPSLO=0.4805
 		EPSHI=0.7148
-		fi
 		KIN="Q4p4W2p74_${EPSILON}e"
 	    fi
 
@@ -331,7 +329,6 @@ do
 		fi
 		EPSLO=0.3935
 		EPSHI=0.6668
-		fi
 		KIN="Q3p0W3p14_${EPSILON}e"
 	    fi
 
@@ -372,7 +369,6 @@ do
 		fi
 		EPSLO=0.5736
 		EPSHI=0.8791
-		fi
 		KIN="Q3p0W2p32_${EPSILON}e"
 	    fi
 
@@ -413,7 +409,6 @@ do
 		fi
 		EPSLO=0.2477
 		EPSHI=0.7864
-		fi
 		KIN="Q2p1W2p95_${EPSILON}e"
 	    fi
 
@@ -454,7 +449,6 @@ do
 		fi
 		EPSLO=0.4515
 		EPSHI=0.6979
-		fi
 		KIN="Q0p5W2p40_${EPSILON}e"
 	    fi
 	    ##############
@@ -779,7 +773,6 @@ if [[ $i_flag != "true" ]]; then
 		fi
 		EPSLO=0.1838
 		EPSHI=0.5291
-		fi
 		KIN="Q5p5W3p02_${EPSILON}e"
 	    fi
 
@@ -820,7 +813,6 @@ if [[ $i_flag != "true" ]]; then
 		fi
 		EPSLO=0.4805
 		EPSHI=0.7148
-		fi
 		KIN="Q4p4W2p74_${EPSILON}e"
 	    fi
 
@@ -861,7 +853,6 @@ if [[ $i_flag != "true" ]]; then
 		fi
 		EPSLO=0.3935
 		EPSHI=0.6668
-		fi
 		KIN="Q3p0W3p14_${EPSILON}e"
 	    fi
 
@@ -902,7 +893,6 @@ if [[ $i_flag != "true" ]]; then
 		fi
 		EPSLO=0.5736
 		EPSHI=0.8791
-		fi
 		KIN="Q3p0W2p32_${EPSILON}e"
 	    fi
 
@@ -943,7 +933,6 @@ if [[ $i_flag != "true" ]]; then
 		fi
 		EPSLO=0.2477
 		EPSHI=0.7864
-		fi
 		KIN="Q2p1W2p95_${EPSILON}e"
 	    fi
 
@@ -984,7 +973,6 @@ if [[ $i_flag != "true" ]]; then
 		fi
 		EPSLO=0.4515
 		EPSHI=0.6979
-		fi
 		KIN="Q0p5W2p40_${EPSILON}e"
 	    fi
 	    ##############
