@@ -650,10 +650,10 @@ if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     TMIN=0.100
     TMAX=0.600
 elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
-    # Q2=3p0, W=3p14
+    # Q2=3p0, W=2p32
     NumtBins=5
-    NumPhiBins=12
-    TMIN=0.001
+    NumPhiBins=10
+    TMIN=0.100
     TMAX=0.990
 elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     # Q2=3p0, W=3p14
