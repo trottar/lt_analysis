@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 13:28:11 trottar"
+# Time-stamp: "2024-02-22 16:33:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,6 +130,30 @@ print("\n\nThe last iteration was ",closest_date)
 
 # Save this as the directory to grab further information
 prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
+
+# Copy all files from previous iteration to OUTPATH to assure consistency
+print("Copying {} to {}...".format(prev_iter_dir+'/averages/*', '{}/src/{}/averages/'.format(LTANAPATH, ParticleType)))
+shutil.copy(prev_iter_dir+'/averages/*', '{}/src/{}/averages/'.format(LTANAPATH, ParticleType))
+print("Copying {} to {}...".format(prev_iter_dir+'/kindata/*', '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType)))
+shutil.copy(prev_iter_dir+'/kindata/*', '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType))
+print("Copying {} to {}...".format(prev_iter_dir+'/parameters/*', '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType)))
+shutil.copy(prev_iter_dir+'/parameters/*', '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType))
+print("Copying {} to {}...".format(prev_iter_dir+'/xsects/*', '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType)))
+shutil.copy(prev_iter_dir+'/xsects/*', '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType))
+print("Copying {} to {}...".format(prev_iter_dir+'/yields/*', '{}/src/{}/yields'.format(LTANAPATH, ParticleType)))
+shutil.copy(prev_iter_dir+'/yields/*', '{}/src/{}/yields'.format(LTANAPATH, ParticleType))
+print("Copying {} to {}...".format(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH)))
+shutil.copy(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH))
+print("Copying {} to {}...".format(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH)))
+shutil.copy(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH))
+print("Copying {} to {}...".format(prev_iter_dir+'/param_kaon_pl.py', '{}/src/models/param_kaon_pl.py'.format(LTANAPATH)))
+shutil.copy(prev_iter_dir+'/param_kaon_pl.py', '{}/src/models/param_kaon_pl.py'.format(LTANAPATH))
+print("Copying {} to {}...".format(prev_iter_dir+'/xmodel_kaon_pl.f', '{}/src/models/xmodel_kaon_pl.f'.format(LTANAPATH)))
+shutil.copy(prev_iter_dir+'/xmodel_kaon_pl.f', '{}/src/models/xmodel_kaon_pl.f'.format(LTANAPATH))
+print("Copying {} to {}...".format(prev_iter_dir+'/root/*', OUTPATH))
+shutil.copy(prev_iter_dir+'/root/*', OUTPATH)
+print("Copying {} to {}...".format(prev_iter_dir+'/json/*', OUTPATH))
+shutil.copy(prev_iter_dir+'/json/*', OUTPATH)
 
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
@@ -449,8 +473,7 @@ create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 # Redefinition from above, but should be the same! This is just to stay consistent with main.py
 # ***Parameter files from last and this iteration!***
 # FIX BELOW!!!
-old_param_file = '{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat'.format(CACHEPATH, USER, ParticleType, Q2, W, closest_date, \
-                                                                       pol_str, Q2.replace("p",""), W.replace("p",""))
+old_param_file = '{}/parameters/par.{}_Q{}W{}.dat'.format(prev_iter_dir, pol_str, Q2.replace("p",""), W.replace("p",""))
 
 cut_summary_lst += "\nUnsep Parameterization for {}...".format(closest_date)
 with open(old_param_file, 'r') as file:
