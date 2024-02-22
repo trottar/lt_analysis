@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 18:00:30 trottar"
+# Time-stamp: "2024-02-22 18:41:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -592,9 +592,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                             if iteration:
                                 hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
                                 hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.iter_weight)
-                            else:
-                                hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.Weight)
-                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.Weight)
+
                             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(evt.missmass)
 
     # Loop through bins in t_simc and identify events in specified bins
