@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 13:20:11 trottar"
+# Time-stamp: "2024-02-21 19:16:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,9 +61,11 @@ def iterWeight(arg_str):
     # RLT (2/15/2024): Removing t dependence from sigT because it seems
     #                  to be driving poor sep xsects results
     # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
+    # RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
     #sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
     #sigt = p5 + p6 * math.log(q2_gev)
-    sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
+    #sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
+    sigt = p5 / (1 + p6*q2_gev)
     siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
     #                 xfit_in_t.py script to work. LT/TT are zeros
@@ -77,9 +79,7 @@ def iterWeight(arg_str):
     sig219 = (sigt + eps_sim * sigl + eps_sim * math.cos(2. * phicm_sim) * sigtt +
              math.sqrt(2.0 * eps_sim * (1. + eps_sim)) * math.cos(phicm_sim) * siglt)
 
-    # RLT (2/21/2024): Adjusting W-dependence to test how xsect changes with x (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)    
-    #wfactor = 1.0 / (s_gev - mtar_gev**2)**2
-    wfactor = 1.0 / (s_gev - mtar_gev**2)**3
+    wfactor = 1.0 / (s_gev - mtar_gev**2)**2
     sig = sig219*wfactor
     sigl = sigl*wfactor
     sigt = sigt*wfactor

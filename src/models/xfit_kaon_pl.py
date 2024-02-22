@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 12:35:28 trottar"
+# Time-stamp: "2024-02-21 19:17:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,9 +58,11 @@ def fun_Sig_T(x, par):
     #                  to be driving poor sep xsects results
     # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
     # RLT (2/21/2024): Reintroducing t-dependence
+    # RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
     #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
     #f = par[0]+par[1]*math.log(qq)
-    f = par[0]*math.log(qq)+par[1]/(qq**2)
+    #f = par[0]*math.log(qq)+par[1]/(qq**2)
+    f = par[0] / (1 + par[1]*qq)
     return f
 
 ###############################################################################################################################################

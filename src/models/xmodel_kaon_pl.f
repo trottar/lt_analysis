@@ -86,12 +86,15 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     >     +par(4)*log(q2))*(abs(tm)))
       sigL=(par(1)+par(2)*log(q2))*exp((par(3)
      >     +par(4)*log(q2))*(abs(tm)+0.2))      
-*       RLT (2/15/2024): Removing t dependence from sigT because it seems
+*     RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
 *     RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
+*     RLT (2/21/2024): Using global analysis sig T model and params
+*     (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)       
 *     sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
 *     sigT=par(5)+par(6)*log(q2)
-      sigT=par(5)*log(q2)++par(6)/(q2**2)
+*     sigT=par(5)*log(q2)++par(6)/(q2**2)
+      sigT=par(5)/(1+par(6)*q2)
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
 *     RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
@@ -104,11 +107,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *      tav=(-0.178+0.315*log(q2))*q2
             
 c     Correct for W.
-*     RLT (2/21/2024): Adjusting W-dependence to test how xsect changes
-*                      with x
-*     (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)               
-*     g_W=1./(W**2-targ**2)**2       ! W factor
-      g_W=1./(W**2-targ**2)**3       ! W factor      
+      g_W=1./(W**2-targ**2)**2       ! W factor
 
       wfactor=g_W
       sigL=sigL*wfactor

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 13:22:40 trottar"
+# Time-stamp: "2024-02-21 19:20:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -121,10 +121,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         for line in f:
             w, w_e, q2, q2_e, tt, tt_e, thetacm, it = map(float, line.strip().split())
 
-            # RLT (2/21/2024): Adjusting W-dependence to test how xsect changes with x (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)                
             if pol_str == "pl":
-                #g = (1 / ((w**2) - (m_p**2))**2)
-                g = (1 / ((w**2) - (m_p**2))**3)
+                g = (1 / ((w**2) - (m_p**2))**2)
             else:
                 g = (1 / ((w**2) - (m_n**2))**2)
             g_vec.append(g)
