@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 16:42:27 trottar"
+# Time-stamp: "2024-02-22 16:43:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -164,11 +164,11 @@ shutil.copy(prev_iter_dir+'/xmodel_kaon_pl.f', '{}/src/models/xmodel_kaon_pl.f'.
 files = os.listdir(prev_iter_dir+'/root/')
 for f in files:
     print("Copying {} to {}...".format(prev_iter_dir+'/root/'+f, OUTPATH))
-    shutil.copy(prev_iter_dir+'/root/*', OUTPATH)
+    shutil.copy(prev_iter_dir+'/root/'+f, OUTPATH)
 files = os.listdir(prev_iter_dir+'/json/')
 for f in files:
     print("Copying {} to {}...".format(prev_iter_dir+'/json/'+f, OUTPATH))
-    shutil.copy(prev_iter_dir+'/json/*', OUTPATH)
+    shutil.copy(prev_iter_dir+'/json/'+f, OUTPATH)
 
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
