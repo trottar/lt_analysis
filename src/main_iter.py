@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 16:33:06 trottar"
+# Time-stamp: "2024-02-22 16:41:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -132,16 +132,27 @@ print("\n\nThe last iteration was ",closest_date)
 prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
 
 # Copy all files from previous iteration to OUTPATH to assure consistency
-print("Copying {} to {}...".format(prev_iter_dir+'/averages/*', '{}/src/{}/averages/'.format(LTANAPATH, ParticleType)))
-shutil.copy(prev_iter_dir+'/averages/*', '{}/src/{}/averages/'.format(LTANAPATH, ParticleType))
-print("Copying {} to {}...".format(prev_iter_dir+'/kindata/*', '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType)))
-shutil.copy(prev_iter_dir+'/kindata/*', '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType))
-print("Copying {} to {}...".format(prev_iter_dir+'/parameters/*', '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType)))
-shutil.copy(prev_iter_dir+'/parameters/*', '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType))
-print("Copying {} to {}...".format(prev_iter_dir+'/xsects/*', '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType)))
-shutil.copy(prev_iter_dir+'/xsects/*', '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType))
-print("Copying {} to {}...".format(prev_iter_dir+'/yields/*', '{}/src/{}/yields'.format(LTANAPATH, ParticleType)))
-shutil.copy(prev_iter_dir+'/yields/*', '{}/src/{}/yields'.format(LTANAPATH, ParticleType))
+# List all files in the source directory
+files = os.listdir(prev_iter_dir+'/averages/')
+for f in files:
+    print("Copying {} to {}...".format(prev_iter_dir+'/averages/'+f, '{}/src/{}/averages/'.format(LTANAPATH, ParticleType)))
+    shutil.copy(prev_iter_dir+'/averages/'+f, '{}/src/{}/averages/'.format(LTANAPATH, ParticleType))
+files = os.listdir(prev_iter_dir+'/kindata/')
+for f in files:
+    print("Copying {} to {}...".format(prev_iter_dir+'/kindata/'+f, '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType)))
+    shutil.copy(prev_iter_dir+'/kindata/'+f, '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType))
+files = os.listdir(prev_iter_dir+'/parameters/')
+for f in files:
+    print("Copying {} to {}...".format(prev_iter_dir+'/parameters/'+f, '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType)))
+    shutil.copy(prev_iter_dir+'/parameters/'+f, '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType))
+files = os.listdir(prev_iter_dir+'/xsects/')
+for f in files:
+    print("Copying {} to {}...".format(prev_iter_dir+'/xsects/'+f, '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType)))
+    shutil.copy(prev_iter_dir+'/xsects/'+f, '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType))
+files = os.listdir(prev_iter_dir+'/yields/')
+for f in files:
+    print("Copying {} to {}...".format(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType)))
+    shutil.copy(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType))
 print("Copying {} to {}...".format(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH)))
 shutil.copy(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH))
 print("Copying {} to {}...".format(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH)))
