@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 15:23:49 trottar"
+# Time-stamp: "2024-02-22 17:23:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -553,7 +553,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iter_file=""):
 
     if iter_file != "":
         iteration = True
-        tree_simc = iter_file
+        tree_simc = TFile.Open(iter_file, "OPEN")
     else:
         iteration = False
         
