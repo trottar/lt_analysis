@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 17:40:50 trottar"
+# Time-stamp: "2024-02-22 17:47:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -519,7 +519,7 @@ def find_yield_data(histlist, inpDict):
 
 ##################################################################################################################################################
 
-def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iter_file=""):
+def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
     processed_dict = {}
     
@@ -547,12 +547,6 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iter_file=""):
         hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, simc=True)
         
     ################################################################################################################################################
-
-    if iter_file != "":
-        iteration = True
-        tree_simc = TFile.Open(iter_file, "OPEN")
-    else:
-        iteration = False
         
     TBRANCH_SIMC  = tree_simc.Get("h10")
 
@@ -596,6 +590,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iter_file=""):
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
                         if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             if iteration:
+                                print("!!!!!!!!!!!!!!!!!!")
                                 hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
                                 hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.iter_weight)
                             else:
@@ -615,9 +610,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iter_file=""):
     
     return processed_dict
 
-def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iter_file=""):
+def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False):
 
-    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iter_file="")
+    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False)
     
     binned_dict = {}
 
@@ -665,19 +660,12 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iter_file=""):
         
     return binned_dict
 
-def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iter_file=""):
+def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=False):
 
     tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
-
-    if iter_file != "":
-        iteration = True
-        tree_simc = TFile.Open(iter_file, "OPEN")
-        print("!!!!!!!!!!!!!!!")
-    else:
-        iteration = False
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iter_file="")
+    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False)
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
@@ -751,7 +739,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iter_file=""
             
     return groups
 
-def find_yield_simc(histlist, inpDict, iter_file=""):
+def find_yield_simc(histlist, inpDict, iteration=False):
     
     for hist in histlist:
         t_bins = hist["t_bins"]
@@ -771,7 +759,7 @@ def find_yield_simc(histlist, inpDict, iter_file=""):
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict, iter_file="")
+        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict, iteration=False)
             
     return {"binned_SIMC" : yieldDict}
 
