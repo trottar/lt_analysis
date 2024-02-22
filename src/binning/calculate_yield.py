@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 17:47:42 trottar"
+# Time-stamp: "2024-02-22 17:55:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -519,7 +519,7 @@ def find_yield_data(histlist, inpDict):
 
 ##################################################################################################################################################
 
-def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
+def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
 
     processed_dict = {}
     
@@ -610,9 +610,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False):
     
     return processed_dict
 
-def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False):
+def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration):
 
-    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration=False)
+    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration)
     
     binned_dict = {}
 
@@ -660,12 +660,12 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False):
         
     return binned_dict
 
-def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration=False):
+def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
     tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration=False)
+    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration)
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
@@ -759,7 +759,7 @@ def find_yield_simc(histlist, inpDict, iteration=False):
         print("-"*25)
         print("-"*25)
         yieldDict[hist["phi_setting"]] = {}
-        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict, iteration=False)
+        yieldDict[hist["phi_setting"]]["yield"] = calculate_yield_simc("yield", hist, t_bins, phi_bins, inpDict, iteration)
             
     return {"binned_SIMC" : yieldDict}
 
