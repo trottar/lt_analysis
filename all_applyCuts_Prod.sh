@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-29 04:37:45 trottar"
+# Time-stamp: "2024-02-22 16:55:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,7 +117,7 @@ for t in "${TARGET[@]}"; do
 			    echo
 			    echo "Run $(( ${i} + 2 ))/$(( ${numlines} + 1 ))"
 			    echo "Running ${number}"
-			    cd $kaonlt/../lt_analysis
+			    cd "${LTANAPATH}"
 			    ./applyCuts_Prod.sh -p ${EPS} ${PHISET} ${Q2} ${W} ${TARGET} ${number} kaon
 			    i+=1
 			done
