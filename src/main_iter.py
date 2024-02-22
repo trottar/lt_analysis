@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 16:41:13 trottar"
+# Time-stamp: "2024-02-22 16:42:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,10 +161,14 @@ print("Copying {} to {}...".format(prev_iter_dir+'/param_kaon_pl.py', '{}/src/mo
 shutil.copy(prev_iter_dir+'/param_kaon_pl.py', '{}/src/models/param_kaon_pl.py'.format(LTANAPATH))
 print("Copying {} to {}...".format(prev_iter_dir+'/xmodel_kaon_pl.f', '{}/src/models/xmodel_kaon_pl.f'.format(LTANAPATH)))
 shutil.copy(prev_iter_dir+'/xmodel_kaon_pl.f', '{}/src/models/xmodel_kaon_pl.f'.format(LTANAPATH))
-print("Copying {} to {}...".format(prev_iter_dir+'/root/*', OUTPATH))
-shutil.copy(prev_iter_dir+'/root/*', OUTPATH)
-print("Copying {} to {}...".format(prev_iter_dir+'/json/*', OUTPATH))
-shutil.copy(prev_iter_dir+'/json/*', OUTPATH)
+files = os.listdir(prev_iter_dir+'/root/')
+for f in files:
+    print("Copying {} to {}...".format(prev_iter_dir+'/root/'+f, OUTPATH))
+    shutil.copy(prev_iter_dir+'/root/*', OUTPATH)
+files = os.listdir(prev_iter_dir+'/json/')
+for f in files:
+    print("Copying {} to {}...".format(prev_iter_dir+'/json/'+f, OUTPATH))
+    shutil.copy(prev_iter_dir+'/json/*', OUTPATH)
 
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
