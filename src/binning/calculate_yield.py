@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 17:32:33 trottar"
+# Time-stamp: "2024-02-22 17:40:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -413,9 +413,6 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
     nWindows, normfac_data, normfac_dummy = hist["nWindows"], hist["normfac_data"], hist["normfac_dummy"]
 
-    # Total number of events selected for setting
-    NumEvts_MM_DATA = hist["NumEvts_MM_DATA"]
-
     # Grab the setting by setting normalized error
     data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())] 
     
@@ -675,11 +672,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iter_file=""
     if iter_file != "":
         iteration = True
         tree_simc = TFile.Open(iter_file, "OPEN")
+        print("!!!!!!!!!!!!!!!")
     else:
         iteration = False
-    
-    # Total number of events selected for setting
-    NumEvts_MM_SIMC = hist["NumEvts_MM_SIMC"]    
     
     # Initialize lists for binned_t_data, binned_hist_data
     binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iter_file="")
