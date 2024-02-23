@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 19:05:26 trottar"
+# Time-stamp: "2024-02-22 19:13:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -400,8 +400,8 @@ sys.path.append("binning")
 from calculate_yield import grab_yield_data, find_yield_simc, find_yield_data
 
 yieldDict = {}
-#yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
-yieldDict.update(find_yield_data(histlist, inpDict))
+yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
+#yieldDict.update(find_yield_data(histlist, inpDict))
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
 
 sys.path.append("binning")

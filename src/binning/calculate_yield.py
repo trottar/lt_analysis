@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 18:55:59 trottar"
+# Time-stamp: "2024-02-22 19:18:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -851,7 +851,7 @@ def grab_yield_data(histlist, phisetlist, inpDict):
         yieldDict[hist["phi_setting"]] = {}
         with open(f_yield, 'r') as f:
             lines = f.readlines()
-        dict_lst = []            
+        dict_lst = []
         for line in lines:
             line_lst = line.split(" ") # yield, yield_err, phibin, tbin
             yield_val = float(line_lst[0])
@@ -864,6 +864,7 @@ def grab_yield_data(histlist, phisetlist, inpDict):
             print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(tbin_index, phibin_index, yield_val, (yield_err_val)*yield_val))
             dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
 
+        dict_lst = sorted(dict_lst, key=lambda x: (x[0], x[1]))            
         # Group the tuples by the first two elements using defaultdict
         groups = defaultdict(list)
         for tup in dict_lst:
