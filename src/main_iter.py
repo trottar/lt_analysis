@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 22:58:24 trottar"
+# Time-stamp: "2024-02-22 23:00:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,6 +130,11 @@ print("\n\nThe last iteration was ",closest_date)
 
 # Save this as the directory to grab further information
 prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
+
+if not os.path.exists(prev_iter_dir):
+    print("ERROR: {} does not exist...".format(prev_iter_dir))
+    sys.exit(2)
+    
 
 if EPSSET == "low":
     # Copy all files from previous iteration to OUTPATH to assure consistency
