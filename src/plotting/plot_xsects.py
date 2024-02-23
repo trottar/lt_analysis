@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-20 00:29:26 trottar"
+# Time-stamp: "2024-02-23 15:53:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -275,7 +275,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
 with PdfPages(outputpdf) as pdf:
     
     # Create a figure and axis objects
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Define markers and colors
     markers = ['o', 's'] # 'o'->circle, 's'->square
@@ -309,7 +309,7 @@ with PdfPages(outputpdf) as pdf:
     for k in range(NumtBins):
 
         # Create a figure and axis objects
-        fig, axes = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
+        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         ax = axes
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
@@ -334,7 +334,7 @@ with PdfPages(outputpdf) as pdf:
         pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure and axis objects
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -357,7 +357,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
     
     # Create a figure and axis objects
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -380,7 +380,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure and axis objects
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -401,7 +401,7 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
 
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -422,7 +422,7 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -444,7 +444,7 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -470,7 +470,7 @@ with PdfPages(outputpdf) as pdf:
     for k in range(NumtBins):
 
         # Create a figure and axis objects
-        fig, axes = plt.subplots(1, 1, figsize=(8, 6), sharex=True)
+        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         ax = axes
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
@@ -493,7 +493,7 @@ with PdfPages(outputpdf) as pdf:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
     
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(8, 6 * NumtBins), sharex=True)
+    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -516,7 +516,7 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
-    fig, axes = plt.subplots(2, 2, figsize=(8, 6), sharex=True)
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
 
     for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
         
