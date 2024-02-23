@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 23:00:22 trottar"
+# Time-stamp: "2024-02-22 23:01:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -132,7 +132,7 @@ print("\n\nThe last iteration was ",closest_date)
 prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
 
 if not os.path.exists(prev_iter_dir):
-    print("ERROR: {} does not exist...".format(prev_iter_dir))
+    print("\n\n\tERROR: {} does not exist...".format(prev_iter_dir))
     sys.exit(2)
     
 
