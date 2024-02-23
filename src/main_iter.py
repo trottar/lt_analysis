@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 20:39:19 trottar"
+# Time-stamp: "2024-02-22 21:10:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -429,6 +429,7 @@ if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
 
+'''
 # Save histograms to root file
 for hist in histlist:
     print("\nUpdating simc {} histograms in {}".format(hist["phi_setting"],foutroot))
@@ -436,8 +437,6 @@ for hist in histlist:
     for i, (key, val) in enumerate(hist.items()):
         # Progress bar
         Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-        if "G_data_eff" in key:
-            hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))            
         if is_hist(val):
             if "ratio" in key:
                 continue
@@ -462,6 +461,7 @@ if root_file.IsOpen():
 else:
     print("\nError: Unable to close the root file {}.".format(foutroot))
 output_file_lst.append(foutroot)
+'''
 
 # Create combined dictionary of all non-histogram information
 combineDict = {}
