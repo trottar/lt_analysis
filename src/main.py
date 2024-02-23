@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 16:46:23 trottar"
+# Time-stamp: "2024-02-23 17:07:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -728,7 +728,6 @@ f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(t
 print("Copying {} to {}".format(f_path,f_path_new))
 shutil.copy(f_path,f_path_new)
 
-file_saved_lst = []
 for f in output_file_lst:
     if OUTPATH in f:
         if ".pdf" in f:
@@ -736,46 +735,35 @@ for f in output_file_lst:
             f_new = f.replace(OUTPATH,new_dir+"/plots")
             print("Copying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
-            file_saved_lst.append(f)
         if ".json" in f:
             create_dir(new_dir+"/json")
             f_new = f.replace(OUTPATH,new_dir+"/json")
             print("Copying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)
-            file_saved_lst.append(f)
+            shutil.copy(f, f_new)                
         if ".root" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
             print("Copying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
-            file_saved_lst.append(f)
         if ".hist" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
             print("Copying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
-            file_saved_lst.append(f)
     elif "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
+        print("!!!!!!!!!!!!!!!",f_arr)
         for f_dir in f_arr:
             if "{}".format(ParticleType) not in f_dir:
                 create_dir(new_dir+"/"+f_dir)
                 f_new = new_dir+"/"+f_dir+"/"+f_tmp    
                 print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
                 shutil.copy(LTANAPATH+"/src/"+f, f_new)
-                file_saved_lst.append(f)
     else:
         f_new = new_dir
         print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
         shutil.copy(LTANAPATH+"/src/"+f, f_new)
-        file_saved_lst.append(LTANAPATH+"/src/"+f)
-
-# Use list comprehension to find elements in list1 that are not in list2
-missing_elements = [element for element in file_saved_lst if element not in output_file_lst]
-
-# Output the missing elements
-print("Missing elements between file_saved_lst and output_file_lst:", missing_elements)        
                
 # Need summary for both high and low eps.
 # All others should be saved once both are complete
