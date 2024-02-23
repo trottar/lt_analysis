@@ -85,7 +85,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
 *     >     +par(4)*log(q2))*(abs(tm)))
       sigL=(par(1)+par(2)*log(q2))*exp((par(3)
-     >     +par(4)*log(q2))*(abs(tm)+0.2))      
+     >     +par(4)*log(q2))*(abs(tm)+0.2))
 *     RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
 *     RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
