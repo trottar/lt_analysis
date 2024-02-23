@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 17:27:58 trottar"
+# Time-stamp: "2024-02-23 17:56:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -754,12 +754,17 @@ for f in output_file_lst:
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
         print("!!!!!!!!!!!!!!!",f_arr, f_tmp)
-        for f_dir in f_arr:
-            if "{}".format(ParticleType) not in f_dir:
-                create_dir(new_dir+"/"+f_dir)
-                f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-                shutil.copy(LTANAPATH+"/src/"+f, f_new)
+        if len(f_arr) > 1:
+            for f_dir in f_arr:
+                if "{}".format(ParticleType) not in f_dir:
+                    create_dir(new_dir+"/"+f_dir)
+                    f_new = new_dir+"/"+f_dir+"/"+f_tmp    
+                    print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
+        else:
+            f_new = new_dir+"/"+f_tmp
+            print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+            shutil.copy(LTANAPATH+"/src/"+f, f_new)
     else:
         f_new = new_dir
         print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
