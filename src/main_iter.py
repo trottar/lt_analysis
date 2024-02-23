@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 18:31:21 trottar"
+# Time-stamp: "2024-02-23 18:32:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,6 +140,7 @@ if EPSSET == "low":
     # List all files in the source directory
     files = os.listdir(prev_iter_dir+'/')
     for f in files:
+        print("!!!!!!!!!!!!!",f)
         if ".txt" not in f and ".settings" not in f:
             print("Copying {} to {}".format(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType)))
             shutil.copy(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType))
