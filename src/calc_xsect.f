@@ -227,7 +227,7 @@ c angle check
      *           th_mod*180./3.14159,phi*180./3.14159,tm,tm_min,w,q2
  40         format(3G15.5,f8.5,2f7.2,4f8.5)
 
-            print *,"--------------"            
+            print *,""
             print *,"--------------"
             WRITE(*,*) 'phi (deg): ', phi*180./3.14159
             print *,'it',it
@@ -254,7 +254,7 @@ c angle check
             print *,"x_mod: ", x_mod
             print *,"x_real: ", x_real
             print *,"--------------"
-            print *,"--------------"
+            print *,""
             
          end do                 !phi
 

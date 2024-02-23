@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 23:01:30 trottar"
+# Time-stamp: "2024-02-22 23:01:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,8 +133,7 @@ prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),
 
 if not os.path.exists(prev_iter_dir):
     print("\n\n\tERROR: {} does not exist...".format(prev_iter_dir))
-    sys.exit(2)
-    
+    sys.exit(2)    
 
 if EPSSET == "low":
     # Copy all files from previous iteration to OUTPATH to assure consistency
