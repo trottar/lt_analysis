@@ -56,7 +56,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
          read(57, *, end=9) p, e, i
          par(i) = p
 !     Print Statements
-         print *,"param: ", i, p, e
+*         print *,"param: ", i, p, e
 ! You can customize the format as needed
       end do      
  9    close(57)      
