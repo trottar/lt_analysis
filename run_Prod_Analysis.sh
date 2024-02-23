@@ -73,8 +73,8 @@ formatted_date=$(date +%Y%B%d_H%HM%MS%S)
 # HARD CODED #
 ##############
 
-#DEBUG="False" # Flag for no plot splash
-DEBUG="True" # Flag for plot splash
+DEBUG="False" # Flag for no plot splash
+#DEBUG="True" # Flag for plot splash
 
 if [[ $p_flag != "true" ]]; then
     ParticleType="kaon"
