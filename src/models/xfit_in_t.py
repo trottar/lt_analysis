@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 16:25:35 trottar"
+# Time-stamp: "2024-02-23 18:18:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,7 +105,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     prv_par_vec = []
     para_file_in =  "{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat".format(CACHEPATH, USER, ParticleType, q2_set, w_set, dir_iter, \
                                                                              pol_str, q2_set.replace("p",""), w_set.replace("p",""))
-    '''
     print("Reading {}...".format(para_file_in))
     try:
         with open(para_file_in, 'r') as f:
@@ -116,7 +115,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 prv_par_vec.append(par)
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
-    '''
         
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     
