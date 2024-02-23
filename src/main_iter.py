@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 23:09:57 trottar"
+# Time-stamp: "2024-02-22 23:15:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,8 +245,8 @@ phi_bins = np.array(histlist[0]["phi_bins"])
 sys.path.append("binning")
 from find_bins import find_bins, check_bins
 
-output_file_lst.append("t_bin_interval_Q{}W{}".format(Q2.replace("p",""), W.replace("p","")))
-output_file_lst.append("phi_bin_interval_Q{}W{}".format(Q2.replace("p",""), W.replace("p","")))
+output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
+output_file_lst.append("{}/phi_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
 
 #print("\n\nt_bins = ", t_bins)
 #print("phi_bins = ", phi_bins)
