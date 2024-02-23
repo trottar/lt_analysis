@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 01:40:47 trottar"
+# Time-stamp: "2024-02-23 06:29:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -534,6 +534,15 @@ if not os.path.exists(foutroot):
             if "G_data_eff" in key:
                 hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
             if is_hist(val):
+                if "SIMC" in key:
+                    if "yield" in key:
+                        continue
+                    elif "bin" in key:
+                        continue
+                    elif "totevts" in key:
+                        continue
+                    else:
+                        hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))                
                 if "DATA" in key:
                     if "yield" in key:
                         continue
