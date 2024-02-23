@@ -230,13 +230,13 @@ c angle check
             print *,""
             print *,"--------------"
             WRITE(*,*) 'phi (deg): ', phi*180./3.14159
+            print *,"--------------"
             print *,'it',it
             print *,'nt',nt            
             print *,'ip',ip
             print *,'nphi',nphi
             print *,'ratio',r
             print *,'dratio',dr
-            print *,""
             print *,"--------------"            
             print *,"xmodel inputs"
             print *,"--------------"
