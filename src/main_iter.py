@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 07:17:00 trottar"
+# Time-stamp: "2024-02-23 18:28:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,6 +138,10 @@ if not os.path.exists(prev_iter_dir):
 if EPSSET == "low":
     # Copy all files from previous iteration to OUTPATH to assure consistency
     # List all files in the source directory
+    files = os.listdir(prev_iter_dir+'/')
+    for f in files:
+        print("Copying {} to {}".format(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType)))
+        shutil.copy(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType))    
     files = os.listdir(prev_iter_dir+'/averages/')
     for f in files:
         print("Copying {} to {}".format(prev_iter_dir+'/averages/'+f, '{}/src/{}/averages/'.format(LTANAPATH, ParticleType)))
