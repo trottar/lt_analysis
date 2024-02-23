@@ -67,7 +67,7 @@ done
 # - `+%Y` extracts the year.
 # - `+%B` extracts the full month name.
 # - `%d` extracts the day of the month.
-formatted_date=$(date +H%HM%MS%S_%Y%B%d)
+formatted_date=$(date +%Y%B%d_H%HM%MS%S)
 
 ##############
 # HARD CODED #

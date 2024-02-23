@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-17 16:16:09 trottar"
+# Time-stamp: "2024-02-23 00:17:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -290,7 +290,7 @@ def last_iter(file_name, current_date):
     # Function to convert formatted date to datetime object for comparison
     def convert_to_datetime(date_str):
         # Format of dates, see run_Prod_Analysis.sh
-        date_format = "H%HM%MS%S_%Y%B%d"
+        date_format = "%Y%B%d_H%HM%MS%S"
         return datetime.strptime(date_str, date_format)
 
     # Find the closest date
