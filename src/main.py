@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 23:15:05 trottar"
+# Time-stamp: "2024-02-23 01:40:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -534,8 +534,6 @@ if not os.path.exists(foutroot):
             if "G_data_eff" in key:
                 hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
             if is_hist(val):
-                if "ratio" in key:
-                    continue
                 if "DATA" in key:
                     if "yield" in key:
                         continue
@@ -545,15 +543,6 @@ if not os.path.exists(foutroot):
                         continue
                     else:
                         hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
-                if "SIMC" in key:
-                    if "yield" in key:
-                        continue
-                    elif "bin" in key:
-                        continue
-                    elif "totevts" in key:
-                        continue
-                    else:
-                        hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
                 if "DUMMY" in key:
                     hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
 
@@ -567,6 +556,8 @@ if not os.path.exists(foutroot):
         print("\nThe root file {} has been successfully closed.".format(foutroot))
     else:
         print("\nError: Unable to close the root file {}.".format(foutroot))
+        
+# Add root file with data histograms        
 output_file_lst.append(foutroot)
 
 # Check that root file doesnt already exist

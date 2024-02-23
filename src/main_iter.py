@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 23:40:00 trottar"
+# Time-stamp: "2024-02-23 01:40:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -435,39 +435,8 @@ if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
 
-'''
-# Save histograms to root file
-for hist in histlist:
-    print("\nUpdating simc {} histograms in {}".format(hist["phi_setting"],foutroot))
-    # Loop through all keys,values of dictionary
-    for i, (key, val) in enumerate(hist.items()):
-        # Progress bar
-        Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-        if is_hist(val):
-            if "ratio" in key:
-                continue
-            if "SIMC" in key:
-                if "yield" in key:
-                    continue
-                elif "bin" in key:
-                    continue
-                elif "totevts" in key:
-                    continue
-                else:
-                    hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
-
-# Open the ROOT file
-root_file = TFile.Open(foutroot, "UPDATE")
-
-# Check if the file was opened successfully
-if root_file.IsOpen():
-    # Close the file
-    root_file.Close()
-    print("\nThe root file {} has been successfully closed.".format(foutroot))
-else:
-    print("\nError: Unable to close the root file {}.".format(foutroot))
+# Add root file with data histograms
 output_file_lst.append(foutroot)
-'''
 
 # Create combined dictionary of all non-histogram information
 combineDict = {}
