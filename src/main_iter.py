@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 23:01:58 trottar"
+# Time-stamp: "2024-02-22 23:06:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -174,7 +174,6 @@ if EPSSET == "low":
     for f in files:
         print("Copying {} to {}".format(prev_iter_dir+'/json/'+f, OUTPATH))
         shutil.copy(prev_iter_dir+'/json/'+f, OUTPATH)
-    sys.exit(2)
         
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
