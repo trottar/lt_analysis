@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 23:06:27 trottar"
+# Time-stamp: "2024-02-22 23:09:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -212,9 +212,7 @@ if EPSSET == "low":
 
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
-#new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
-new_param_file = 'parameters/par.{}_Q{}W{}.dat'.format(pol_str, Q2.replace("p",""), W.replace("p",""))
-output_file_lst.append(new_param_file)
+new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 
 # Grab combined root files for data and dummy.
 # Then save to dictionary
