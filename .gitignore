@@ -21,7 +21,6 @@ list.*
 x_unsep.*
 Eb*
 par.*
-par_*
 
 # Fortran
 average_kinematics
