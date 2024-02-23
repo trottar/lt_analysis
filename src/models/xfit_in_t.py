@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 15:52:51 trottar"
+# Time-stamp: "2024-02-23 16:25:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -94,15 +94,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2:thetacm")
     nsep.ReadFile(fn_sep)
 
+    '''
     print("Reading {}...".format(fn_sep))
     for entry in nsep:
         print("sigl: {}, sigl_e: {}, sigt: {}, sigt_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, t_min: {}, w: {}, q2: {}, thetacm: {}".format(
             entry.sigl, entry.sigl_e, entry.sigt, entry.sigt_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.t_min, entry.w, entry.q2, entry.thetacm
         ))
+    '''
 
     prv_par_vec = []
     para_file_in =  "{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat".format(CACHEPATH, USER, ParticleType, q2_set, w_set, dir_iter, \
                                                                              pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    '''
     print("Reading {}...".format(para_file_in))
     try:
         with open(para_file_in, 'r') as f:
@@ -113,6 +116,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 prv_par_vec.append(par)
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
+    '''
         
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     
