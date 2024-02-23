@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 16:38:37 trottar"
+# Time-stamp: "2024-02-23 16:46:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -772,7 +772,7 @@ for f in output_file_lst:
         file_saved_lst.append(LTANAPATH+"/src/"+f)
 
 # Use list comprehension to find elements in list1 that are not in list2
-missing_elements = [element for element in listfile_saved_lst if element not in output_file_lst]
+missing_elements = [element for element in file_saved_lst if element not in output_file_lst]
 
 # Output the missing elements
 print("Missing elements between file_saved_lst and output_file_lst:", missing_elements)        
