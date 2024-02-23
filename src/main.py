@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 13:27:58 trottar"
+# Time-stamp: "2024-02-22 22:54:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -377,6 +377,7 @@ if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
 
 try:
+    output_file_lst.append("t_bin_interval_Q{}W{}".format(Q2.replace("p",""), W.replace("p","")))
     with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()
@@ -392,6 +393,7 @@ except IOError:
     print("Error reading {}...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
 
 try:
+    output_file_lst.append("phi_bin_interval_Q{}W{}".format(Q2.replace("p",""), W.replace("p","")))
     with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
         # Read all lines from the file into a list
         all_lines = file.readlines()

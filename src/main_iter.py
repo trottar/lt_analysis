@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-22 22:00:30 trottar"
+# Time-stamp: "2024-02-22 22:58:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -170,6 +170,7 @@ if EPSSET == "low":
     for f in files:
         print("Copying {} to {}".format(prev_iter_dir+'/json/'+f, OUTPATH))
         shutil.copy(prev_iter_dir+'/json/'+f, OUTPATH)
+    sys.exit(2)
         
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
@@ -208,7 +209,8 @@ if EPSSET == "low":
 
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
-new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
+#new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
+new_param_file = 'parameters/par.{}_Q{}W{}.dat'.format(pol_str, Q2.replace("p",""), W.replace("p",""))
 output_file_lst.append(new_param_file)
 
 # Grab combined root files for data and dummy.
@@ -241,6 +243,9 @@ phi_bins = np.array(histlist[0]["phi_bins"])
 
 sys.path.append("binning")
 from find_bins import find_bins, check_bins
+
+output_file_lst.append("t_bin_interval_Q{}W{}".format(Q2.replace("p",""), W.replace("p","")))
+output_file_lst.append("phi_bin_interval_Q{}W{}".format(Q2.replace("p",""), W.replace("p","")))
 
 #print("\n\nt_bins = ", t_bins)
 #print("phi_bins = ", phi_bins)
