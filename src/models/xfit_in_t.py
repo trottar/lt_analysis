@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 22:15:41 trottar"
+# Time-stamp: "2024-02-24 01:15:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ mkpl = 0.493677
 # HARD CODED #
 ##############
 # Limit for finding new parameters (units of percent)
-par_lim = 0.1 # +/-10%
+par_lim = 0.2 # +/-20%
 ##############
 ##############
 ##############
