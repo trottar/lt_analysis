@@ -26,6 +26,29 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
+
+# Flag definitions (flags: h, a, o, s)
+while getopts 'h' flag; do
+    case "${flag}" in
+        h) 
+        echo "--------------------------------------------------------------"
+        echo "./set_SymLinks.sh {variable arguments, see help}"
+	echo
+        echo "Description: Setup symlinks across lt_analysis and simc_gfortran"
+        echo "--------------------------------------------------------------"
+        echo
+        echo "The following flags can be called for the heep analysis..."
+	echo "    ParticleType=arg1"
+        echo "    -h, help"
+        exit 0
+        ;;
+        *) print_usage
+        exit 1 ;;
+    esac
+done
+
+ParticleType=$1
+
 # Check symlinks and create/fix if bad
 if [ ! -L "${LTANAPATH}/simc_gfortran" ]; then
     ln -s "${SIMCPATH}" "${LTANAPATH}/simc_gfortran"
@@ -103,15 +126,15 @@ elif [ -L "${LTANAPATH}/simc_gfortran/OUTPUTS" ]; then
 fi
 
 if [ ! -L "${LTANAPATH}/simc_gfortran/input" ]; then
-    ln -s "${LTANAPATH}/input/" "${LTANAPATH}/simc_gfortran/input"
+    ln -s "${LTANAPATH}/input/${ParticleType}/" "${LTANAPATH}/simc_gfortran/input"
 elif [ -L "${LTANAPATH}/simc_gfortran/input" ]; then
     if [ ! -e "${LTANAPATH}/simc_gfortran/input" ]; then
 	echo "${LTANAPATH}/simc_gfortran/input sym link exits but is broken, replacing"
 	rm "${LTANAPATH}/simc_gfortran/input"
-	ln -s "${LTANAPATH}/input/" "${LTANAPATH}/simc_gfortran/input"
+	ln -s "${LTANAPATH}/input/${ParticleType}/" "${LTANAPATH}/simc_gfortran/input"
     else 
 	echo "${LTANAPATH}/simc_gfortran/input sym link already exists and not broken"
-	echo "             ${LTANAPATH}/simc_gfortran/input-->${LTANAPATH}/input/"
+	echo "             ${LTANAPATH}/simc_gfortran/input-->${LTANAPATH}/input/${ParticleType}/"
 	echo
 	echo
     fi
