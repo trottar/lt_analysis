@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 16:25:52 trottar"
+# Time-stamp: "2024-02-24 05:50:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -244,10 +244,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Set parameter 0 and 1
         fff2.SetParameter(0, 1)
-        fff2.SetParLimits(0, 0, 20)
+        fff2.SetParLimits(0, 0, 2)
 
         fff2.SetParameter(1, 10)
-        fff2.SetParLimits(1, 0, 200)
+        fff2.SetParLimits(1, 0, 20)
 
         # Fix parameter 2 and 3
         fff2.FixParameter(2, 0.0)
