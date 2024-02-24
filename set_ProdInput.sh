@@ -37,7 +37,7 @@ while getopts 'h' flag; do
         echo "----------------------------------------------------------"
         echo
         echo "The following flags can be called for the production analysis..."
-	echo "    EPSILON=arg1, Q2=arg2, W=arg3"
+	echo "    EPSILON=arg1, Q2=arg2, W=arg3, ParticleType=arg4"
         echo "    -h, help"
 	echo
 	echo " Avaliable Kinematics..."	
@@ -57,6 +57,7 @@ done
 EPSILON=$1
 Q2=$2
 W=$3
+ParticleType=$4
 echo "Epsilon must be - high - low - Case Sensitive!"
 echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
 echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
@@ -96,6 +97,18 @@ if [[ -z "$3" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3r
 	esac
     done
 fi
+if [[ -z "$4" || ! "$ParticleType" =~ kaon|pion|proton ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+    echo ""
+    echo "I need a valid particle type..."
+    while true; do
+	echo ""
+	read -p "Particle type must be one of - [kaon - pion - proton] - or press ctrl-c to exit : " ParticleType
+	case $ParticleType in
+	    '');; # If blank, prompt again
+	    'kaon'|'pion'|'proton') break;; # If a valid option, break the loop and continue
+	esac
+    done
+fi
 
 InputSIMC_right="Prod_Coin_Q${Q2}W${W}right_${EPSILON}e"
 InputSIMC_left="Prod_Coin_Q${Q2}W${W}left_${EPSILON}e"
@@ -107,7 +120,7 @@ python3 set_q2_simc.py ${Q2}
 python3 set_w_simc.py ${W}
 python3 set_params_simc.py ${Q2} ${W}
 
-if [[ -f "${LTANAPATH}/input/${InputSIMC_right}.inp" ]]; then
+if [[ -f "${LTANAPATH}/input/${ParticleType}${InputSIMC_right}.inp" ]]; then
     echo
     echo 
     echo "Running simc analysis for ${InputSIMC_right}..."
@@ -115,7 +128,7 @@ if [[ -f "${LTANAPATH}/input/${InputSIMC_right}.inp" ]]; then
     ./run_simc_tree "${InputSIMC_right}" "production"
 fi
 
-if [[ -f "${LTANAPATH}/input/${InputSIMC_left}.inp" ]]; then
+if [[ -f "${LTANAPATH}/input/${ParticleType}${InputSIMC_left}.inp" ]]; then
     echo
     echo 
     echo "Running simc analysis for ${InputSIMC_left}..."
@@ -123,7 +136,7 @@ if [[ -f "${LTANAPATH}/input/${InputSIMC_left}.inp" ]]; then
     ./run_simc_tree "${InputSIMC_left}" "production"
 fi
 
-if [[ -f "${LTANAPATH}/input/${InputSIMC_center}.inp" ]]; then
+if [[ -f "${LTANAPATH}/input/${ParticleType}${InputSIMC_center}.inp" ]]; then
     echo
     echo 
     echo "Running simc analysis for ${InputSIMC_center}..."
