@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:24:28 trottar"
+# Time-stamp: "2024-02-24 16:03:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -188,7 +188,8 @@ def compare_simc(hist, inpDict):
     
     # HGCer hole comparison plots
     P_hgcer_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_xAtCer_vs_yAtCer_SIMC", "X vs Y; X; Y", 50, -30, 30, 50, -30, 30)
-    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC", "X vs Y (no hole cut); X; Y", 50, -30, 30, 50, -30, 30)
+    if ParticleType == "kaon":    
+        P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC", "X vs Y (no hole cut); X; Y", 50, -30, 30, 50, -30, 30)
     
     ################################################################################################################################################
     # Fill data histograms for various trees called above
@@ -209,14 +210,14 @@ def compare_simc(hist, inpDict):
           
           ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
           NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
-
+          
+          if(NOHOLECUTS):
+              # HGCer hole comparison            
+              P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
+          
       else:
 
           ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
-          
-      if(NOHOLECUTS):
-          # HGCer hole comparison            
-          P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
           
       #Fill SIMC events
       if(ALLCUTS):
@@ -374,36 +375,41 @@ def compare_simc(hist, inpDict):
     l_phi.AddEntry(histDict["H_ph_q_SIMC"],phi_setting)
     histDict["H_ph_q_SIMC"].Draw("same, E1")    
 
-    Cphi.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
+    if ParticleType == "kaon":
+        Cphi.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
+    else:
+        Cphi.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType))+')')
+
+    if ParticleType == "kaon":
     
-    ##
-    # HGCer Hole Plots
-    c_hgcer_hole = TCanvas()
+        ##
+        # HGCer Hole Plots
+        c_hgcer_hole = TCanvas()
 
-    c_hgcer_hole.Divide(2,2)
+        c_hgcer_hole.Divide(2,2)
 
-    c_hgcer_hole.cd(1)
-    P_hgcer_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_xAtCer_vs_yAtCer_SIMC.Draw("colz")
+        c_hgcer_hole.cd(1)
+        P_hgcer_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_xAtCer_vs_yAtCer_SIMC.Draw("colz")
 
-    c_hgcer_hole.cd(2)
-    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Draw("colz")
+        c_hgcer_hole.cd(2)
+        P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Draw("colz")
 
-    c_hgcer_hole.cd(3)
-    P_hgcer_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_xAtCer_vs_yAtCer_SIMC.Draw("colz")
-    hgcer_cutg.SetLineColor(7)
-    hgcer_cutg.Draw("same")
+        c_hgcer_hole.cd(3)
+        P_hgcer_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_xAtCer_vs_yAtCer_SIMC.Draw("colz")
+        hgcer_cutg.SetLineColor(7)
+        hgcer_cutg.Draw("same")
 
-    c_hgcer_hole.cd(4)
-    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Draw("colz")
-    hgcer_cutg.SetLineColor(7)
-    hgcer_cutg.Draw("same")
-    
-    c_hgcer_hole.Draw()    
-    
-    c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType))+')')
+        c_hgcer_hole.cd(4)
+        P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Draw("colz")
+        hgcer_cutg.SetLineColor(7)
+        hgcer_cutg.Draw("same")
+
+        c_hgcer_hole.Draw()    
+
+        c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType))+')')
     
     return histDict
