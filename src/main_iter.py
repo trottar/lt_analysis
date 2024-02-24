@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 17:13:45 trottar"
+# Time-stamp: "2024-02-24 18:16:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,43 +141,43 @@ if EPSSET == "low":
     files = os.listdir(prev_iter_dir+'/')
     for f in files:
         if ".txt" not in f and not os.path.isdir(prev_iter_dir+'/'+f):
-            print("Copying {} to {}".format(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType)))
+            print("\nCopying {} to {}".format(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType)))
             shutil.copy(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType))
     files = os.listdir(prev_iter_dir+'/averages/')
     for f in files:
-        print("Copying {} to {}".format(prev_iter_dir+'/averages/'+f, '{}/src/{}/averages/'.format(LTANAPATH, ParticleType)))
+        print("\nCopying {} to {}".format(prev_iter_dir+'/averages/'+f, '{}/src/{}/averages/'.format(LTANAPATH, ParticleType)))
         shutil.copy(prev_iter_dir+'/averages/'+f, '{}/src/{}/averages/'.format(LTANAPATH, ParticleType))
     files = os.listdir(prev_iter_dir+'/kindata/')
     for f in files:
-        print("Copying {} to {}".format(prev_iter_dir+'/kindata/'+f, '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType)))
+        print("\nCopying {} to {}".format(prev_iter_dir+'/kindata/'+f, '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType)))
         shutil.copy(prev_iter_dir+'/kindata/'+f, '{}/src/{}/kindata/'.format(LTANAPATH, ParticleType))
     files = os.listdir(prev_iter_dir+'/parameters/')
     for f in files:
-        print("Copying {} to {}".format(prev_iter_dir+'/parameters/'+f, '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType)))
+        print("\nCopying {} to {}".format(prev_iter_dir+'/parameters/'+f, '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType)))
         shutil.copy(prev_iter_dir+'/parameters/'+f, '{}/src/{}/parameters/'.format(LTANAPATH, ParticleType))
     files = os.listdir(prev_iter_dir+'/xsects/')
     for f in files:
-        print("Copying {} to {}".format(prev_iter_dir+'/xsects/'+f, '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType)))
+        print("\nCopying {} to {}".format(prev_iter_dir+'/xsects/'+f, '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType)))
         shutil.copy(prev_iter_dir+'/xsects/'+f, '{}/src/{}/xsects/'.format(LTANAPATH, ParticleType))
     files = os.listdir(prev_iter_dir+'/yields/')
     for f in files:
-        print("Copying {} to {}".format(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType)))
+        print("\nCopying {} to {}".format(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType)))
         shutil.copy(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType))
-    print("Copying {} to {}".format(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH)))
+    print("\nCopying {} to {}".format(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH)))
     shutil.copy(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH))
-    print("Copying {} to {}".format(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH)))
+    print("\nCopying {} to {}".format(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH)))
     shutil.copy(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH))
-    print("Copying {} to {}".format(prev_iter_dir+'/param_kaon_pl.py', '{}/src/models/param_kaon_pl.py'.format(LTANAPATH)))
+    print("\nCopying {} to {}".format(prev_iter_dir+'/param_kaon_pl.py', '{}/src/models/param_kaon_pl.py'.format(LTANAPATH)))
     shutil.copy(prev_iter_dir+'/param_kaon_pl.py', '{}/src/models/param_kaon_pl.py'.format(LTANAPATH))
-    print("Copying {} to {}".format(prev_iter_dir+'/xmodel_kaon_pl.f', '{}/src/models/xmodel_kaon_pl.f'.format(LTANAPATH)))
+    print("\nCopying {} to {}".format(prev_iter_dir+'/xmodel_kaon_pl.f', '{}/src/models/xmodel_kaon_pl.f'.format(LTANAPATH)))
     shutil.copy(prev_iter_dir+'/xmodel_kaon_pl.f', '{}/src/models/xmodel_kaon_pl.f'.format(LTANAPATH))
     files = os.listdir(prev_iter_dir+'/root/')
     for f in files:
-        print("Copying {} to {}".format(prev_iter_dir+'/root/'+f, OUTPATH))
+        print("\nCopying {} to {}".format(prev_iter_dir+'/root/'+f, OUTPATH))
         shutil.copy(prev_iter_dir+'/root/'+f, OUTPATH)
     files = os.listdir(prev_iter_dir+'/json/')
     for f in files:
-        print("Copying {} to {}".format(prev_iter_dir+'/json/'+f, OUTPATH))
+        print("\nCopying {} to {}".format(prev_iter_dir+'/json/'+f, OUTPATH))
         shutil.copy(prev_iter_dir+'/json/'+f, OUTPATH)
         
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
@@ -202,8 +202,8 @@ if EPSSET == "low":
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
     py_xfit_active = 'models/xfit_active.py'
-    # Copying content of used models to actively used files
-    print("Copying {} to {}".format(LTANAPATH+"/src/"+py_xfit, LTANAPATH+"/src/"+py_xfit_active))
+    # \nCopying content of used models to actively used files
+    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_xfit, LTANAPATH+"/src/"+py_xfit_active))
     shutil.copy(LTANAPATH+"/src/"+py_xfit, LTANAPATH+"/src/"+py_xfit_active)
     
     # Run weight iteration script for optimizing parameterization
@@ -320,8 +320,8 @@ output_file_lst.append(py_param)
 # Active scripts to make file selection dynamic
 # Needs to be done this way because of fortran compiler limitations
 py_param_active = 'models/param_active.py'
-# Copying content of used models to actively used files
-print("Copying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
+# \nCopying content of used models to actively used files
+print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
 shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 
 sys.path.append("simc_ana")
@@ -340,7 +340,7 @@ for hist in histlist:
     # Make sure old simc root file exists
     if os.path.exists(old_simc_root):
         # Copy to new iteration so and then edit the weight
-        print("Copying {} to {}".format(old_simc_root, new_simc_root))
+        print("\nCopying {} to {}".format(old_simc_root, new_simc_root))
         shutil.copy(old_simc_root,new_simc_root)
         shutil.copy(old_simc_hist,new_simc_hist)        
         # Make sure new simc root file exists
@@ -537,8 +537,8 @@ if EPSSET == "high":
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
     fort_xmodel_active = 'models/xmodel_active.f'
-    # Copying content of used models to actively used files
-    print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
+    # \nCopying content of used models to actively used files
+    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
     shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
 
     # Save python script that contain separated xsect models for lt script
@@ -547,8 +547,8 @@ if EPSSET == "high":
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
     py_lt_active = 'models/lt_active.py'
-    # Copying content of used models to actively used files
-    print("Copying {} to {}".format(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active))
+    # \nCopying content of used models to actively used files
+    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active))
     shutil.copy(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active)
     
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
@@ -617,22 +617,22 @@ for f in output_file_lst:
         if ".pdf" in f:
             create_dir(new_dir+"/plots")
             f_new = f.replace(OUTPATH,new_dir+"/plots")
-            print("Copying {} to {}".format(f,f_new))
+            print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
         if ".json" in f:
             create_dir(new_dir+"/json")
             f_new = f.replace(OUTPATH,new_dir+"/json")
-            print("Copying {} to {}".format(f,f_new))
+            print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)                
         if ".root" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
-            print("Copying {} to {}".format(f,f_new))
+            print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
         if ".hist" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
-            print("Copying {} to {}".format(f,f_new))
+            print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)                
     elif "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
@@ -641,11 +641,15 @@ for f in output_file_lst:
             if "{}".format(ParticleType) not in f_dir:
                 create_dir(new_dir+"/"+f_dir)
                 f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                print("Copying {} to {}".format(f,f_new))
+                print("\nCopying {} to {}".format(f,f_new))
                 shutil.copy(f, f_new)
+        else:
+            f_new = new_dir+"/"+f_tmp
+            print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+            shutil.copy(LTANAPATH+"/src/"+f, f_new)                
     else:
         f_new = new_dir
-        print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+        print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
         shutil.copy(LTANAPATH+"/src/"+f, f_new)
                
 # Need summary for both high and low eps.

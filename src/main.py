@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:35:30 trottar"
+# Time-stamp: "2024-02-24 18:16:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -634,10 +634,10 @@ if EPSSET == "high":
     # Needs to be done this way because of fortran compiler limitations
     py_param_active = 'models/param_active.py'
     fort_xmodel_active = 'models/xmodel_active.f'
-    # Copying content of used models to actively used files
-    print("Copying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
+    # \nCopying content of used models to actively used files
+    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
     shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
-    print("Copying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
+    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
     shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 
     # Save python script that contain separated xsect models for lt script
@@ -646,8 +646,8 @@ if EPSSET == "high":
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
     py_lt_active = 'models/lt_active.py'
-    # Copying content of used models to actively used files
-    print("Copying {} to {}".format(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active))
+    # \nCopying content of used models to actively used files
+    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active))
     shutil.copy(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active)
     
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
@@ -725,7 +725,7 @@ with open(f_path, 'r') as file:
     total_lines = len(file.readlines())
 
 f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
-print("Copying {} to {}".format(f_path,f_path_new))
+print("\nCopying {} to {}".format(f_path,f_path_new))
 shutil.copy(f_path,f_path_new)
 
 for f in output_file_lst:
@@ -733,22 +733,22 @@ for f in output_file_lst:
         if ".pdf" in f:
             create_dir(new_dir+"/plots")
             f_new = f.replace(OUTPATH,new_dir+"/plots")
-            print("Copying {} to {}".format(f,f_new))
+            print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
         if ".json" in f:
             create_dir(new_dir+"/json")
             f_new = f.replace(OUTPATH,new_dir+"/json")
-            print("Copying {} to {}".format(f,f_new))
+            print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)                
         if ".root" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
-            print("Copying {} to {}".format(f,f_new))
+            print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
         if ".hist" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
-            print("Copying {} to {}".format(f,f_new))
+            print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
@@ -758,15 +758,15 @@ for f in output_file_lst:
                 if "{}".format(ParticleType) not in f_dir:
                     create_dir(new_dir+"/"+f_dir)
                     f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+                    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
                     shutil.copy(LTANAPATH+"/src/"+f, f_new)
         else:
             f_new = new_dir+"/"+f_tmp
-            print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+            print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
             shutil.copy(LTANAPATH+"/src/"+f, f_new)
     else:
         f_new = new_dir
-        print("Copying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+        print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
         shutil.copy(LTANAPATH+"/src/"+f, f_new)
                
 # Need summary for both high and low eps.
