@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 16:52:13 trottar"
+# Time-stamp: "2024-02-24 16:54:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -435,7 +435,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                     replace_line(f_list_settings, i+1, check_line)
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
-                
+    sys.exit(2)                
     ################################################################################################################################################
 
     if float(runNumRight[0]) != 0:
