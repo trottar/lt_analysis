@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 14:39:22 trottar"
+# Time-stamp: "2024-02-24 14:42:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,7 +116,7 @@ for t in "${TARGET[@]}"; do
 			    echo
 			    echo "Running ${number}"
 			    cd "${LTANAPATH}"
-			    ./applyCuts_Prod.sh -p ${EPS} ${PHISET} ${Q2} ${W} ${TARGET} ${number} kaon
+			    ./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
 			done
 			break ;;
 		    [Nn]* ) 
