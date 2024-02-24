@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:49:21 trottar"
+# Time-stamp: "2024-02-24 15:57:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1411,62 +1411,67 @@ def rand_sub(phi_setting, inpDict):
 
     c_pid.Draw()
 
-    c_pid.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    if ParticleType == "kaon":
+        c_pid.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    else:
+        c_pid.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')
 
-    ##
-    # HGCer Hole Plots
-    c_hgcervsMM = TCanvas()
+    if ParticleType == "kaon":
+        
+        ##
+        # HGCer Hole Plots
+        c_hgcervsMM = TCanvas()
 
-    c_hgcervsMM.Divide(2,2)
+        c_hgcervsMM.Divide(2,2)
 
-    c_hgcervsMM.cd(1)
-    P_hgcer_xAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_xAtCer_vs_MM_DATA.Draw("colz")
+        c_hgcervsMM.cd(1)
+        P_hgcer_xAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_xAtCer_vs_MM_DATA.Draw("colz")
 
-    c_hgcervsMM.cd(2)
-    P_hgcer_nohole_xAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_nohole_xAtCer_vs_MM_DATA.Draw("colz")
+        c_hgcervsMM.cd(2)
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.Draw("colz")
 
-    c_hgcervsMM.cd(3)
-    P_hgcer_yAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_yAtCer_vs_MM_DATA.Draw("colz")
+        c_hgcervsMM.cd(3)
+        P_hgcer_yAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_yAtCer_vs_MM_DATA.Draw("colz")
 
-    c_hgcervsMM.cd(4)
-    P_hgcer_nohole_yAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_nohole_yAtCer_vs_MM_DATA.Draw("colz")    
-    
-    c_hgcervsMM.Draw()
+        c_hgcervsMM.cd(4)
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Draw("colz")    
 
-    c_hgcervsMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+        c_hgcervsMM.Draw()
 
-    ##
-    # HGCer Hole Plots
-    c_hgcer_hole = TCanvas()
+        c_hgcervsMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
-    c_hgcer_hole.Divide(2,2)
+        ##
+        # HGCer Hole Plots
+        c_hgcer_hole = TCanvas()
 
-    c_hgcer_hole.cd(1)
-    P_hgcer_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_xAtCer_vs_yAtCer_DATA.Draw("colz")
+        c_hgcer_hole.Divide(2,2)
 
-    c_hgcer_hole.cd(2)
-    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Draw("colz")
+        c_hgcer_hole.cd(1)
+        P_hgcer_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_xAtCer_vs_yAtCer_DATA.Draw("colz")
 
-    c_hgcer_hole.cd(3)
-    P_hgcer_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_xAtCer_vs_yAtCer_DATA.Draw("colz")
-    hgcer_cutg.SetLineColor(7)
-    hgcer_cutg.Draw("same")
-    
-    c_hgcer_hole.cd(4)
-    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
-    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Draw("colz")
-    hgcer_cutg.SetLineColor(7)
-    hgcer_cutg.Draw("same")    
-    
-    c_hgcer_hole.Draw()
+        c_hgcer_hole.cd(2)
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Draw("colz")
 
-    c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')      
+        c_hgcer_hole.cd(3)
+        P_hgcer_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_xAtCer_vs_yAtCer_DATA.Draw("colz")
+        hgcer_cutg.SetLineColor(7)
+        hgcer_cutg.Draw("same")
+
+        c_hgcer_hole.cd(4)
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.SetMinimum(1e-6) # Remove color of empty bins
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Draw("colz")
+        hgcer_cutg.SetLineColor(7)
+        hgcer_cutg.Draw("same")    
+
+        c_hgcer_hole.Draw()
+
+        c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')      
 
     return histDict
