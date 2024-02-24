@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-19 02:24:28 trottar"
+# Time-stamp: "2024-02-23 19:10:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,7 +130,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     ###############################################################################################################################################
 
     # Grabs simc number of events and normalizaton factor
-    simc_hist = rootFileSimc.replace('.root','.hist')
+    simc_hist = rootFileSimc.replace('_iter.root','.hist')
     f_simc = open(simc_hist)
     for line in f_simc:
         #print(line)

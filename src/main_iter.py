@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 19:07:46 trottar"
+# Time-stamp: "2024-02-23 19:09:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -351,7 +351,6 @@ for hist in histlist:
             #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             # Use newly created simc root and hist file
             new_simc_root = new_simc_root.replace(".root","_iter.root")
-            new_simc_hist = new_simc_hist.replace(".hist","_iter.hist")
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
             print("ERROR: {} not properly copied to {}".format(old_simc_root, new_simc_root))
