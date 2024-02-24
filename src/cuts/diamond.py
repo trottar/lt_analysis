@@ -24,7 +24,6 @@ import pandas as pd
 import glob
 
 ###############################################################################################################################################
-
 '''
 ltsep package import and pathing definitions
 '''
@@ -32,7 +31,7 @@ ltsep package import and pathing definitions
 # Import package for cuts
 from ltsep import Root
 
-lt=Root(os.path.realpath(__file__),"Plot_Prod")
+lt=Root(os.path.realpath(__file__),"Plot_LTSep")
 
 # Add this to all files for more dynamic pathing
 USER=lt.USER # Grab user info for file finding
@@ -57,11 +56,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     
     #FilenameOverride = 'Q'+Qs+'W'+Ws+phi_setting
     FilenameOverride = 'Q'+Qs+'W'+Ws
-    target = phi_setting
     
-    Analysis_Distributions = OUTPATH+"/{}_{}_diamond_{}.pdf".format(target, ParticleType, FilenameOverride)
-
-    #sys.exit(1)
+    Analysis_Distributions = OUTPATH+"/{}_{}_diamond_{}.pdf".format(phi_setting, ParticleType, FilenameOverride)
 
     lowe_input = False
     mide_input = False
@@ -71,10 +67,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     lenh = 10000
     lenm = 10000
     lenl = 10000
-    if(target == '0'): target = ""
-    print("\n\nKinematics: ",FilenameOverride,"\nPhi Setting: ",target)
-    #    for file in glob.glob(OUTPATH+'/**/'+FilenameOverride+'*'+target+'*Analysed_Data.root',recursive = True):
-    for file in glob.glob(OUTPATH+'/*'+ParticleType+'*'+FilenameOverride+'*'+target+'*.root'):
+    if(phi_setting == '0'): phi_setting = ""
+    print("\n\nKinematics: ",FilenameOverride,"\nPhi Setting: ",phi_setting)
+    #    for file in glob.glob(OUTPATH+'/**/'+FilenameOverride+'*'+phi_setting+'*Analysed_Data.root',recursive = True):
+    for file in glob.glob(OUTPATH+'/*'+ParticleType+'*'+FilenameOverride+'*'+phi_setting+'*.root'):
 	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
         # Shortest file assumed to be full analyisis as it will not have "part" or "week" or "dummy" labels
         #print(file)
@@ -82,7 +78,6 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             if (len(file) < lenh):
                 highe_input = file
                 lenh = len(file)
-
         
         if "mid" in file:
             if (len(file) < lenm):
@@ -308,7 +303,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 xla = np.array(xvl)
                 xra = np.array(xvr)
 
-                if target == "Center":
+                if phi_setting == "Center":
                     a1, b1 = np.polyfit(xla, lola, 1)
                     a2, b2 = np.polyfit(xla, hila, 1)
                     a3, b3 = np.polyfit(xra, lora, 1)
@@ -365,7 +360,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         infile.Close()
 
-    if target == "Center":        
+    if phi_setting == "Center":        
         paramDict = {
 
             "a1" : a1,

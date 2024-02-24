@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-02-23 18:59:54 trottar"
+# Time-stamp: "2024-02-24 15:24:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,7 +40,7 @@ from ltsep import Root
 # Import package for progress bar
 from ltsep import Misc
 
-lt=Root(os.path.realpath(__file__),"Plot_Prod")
+lt=Root(os.path.realpath(__file__),"Plot_LTSep")
 
 # Add this to all files for more dynamic pathing
 USER=lt.USER # Grab user info for file finding
