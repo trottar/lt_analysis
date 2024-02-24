@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 16:54:49 trottar"
+# Time-stamp: "2024-02-24 17:02:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -413,7 +413,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             inLine = False
             check_line = "{:d} {:.1f} {:.2f} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_left, tmin, tmax, NumtBins)
             check_kin = ' '.join(check_line.split()[:5])
-            print("$$$$$$$$$$$$",check_kin)
+            print("$$$$$$$$$$$$",check_line)
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
@@ -428,7 +428,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             inLine = False
             check_line = "{:d} {:.1f} {:.2f} {:.4f} {:.3f} {:.3f} {:.3f} {}\n".format(int(POL), Q2, W, EPSVAL, thpq_center, tmin, tmax, NumtBins)
             check_kin = ' '.join(check_line.split()[:5])
-            print("$$$$$$$$$$$$",check_kin)
+            print("$$$$$$$$$$$$",check_line)
             for i, line in enumerate(lines):
                 if check_kin in line:
                     inLine = True
