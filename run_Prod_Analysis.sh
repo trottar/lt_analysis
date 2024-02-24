@@ -999,7 +999,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_right_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge right..."
-	    python3 findEffectiveCharge.py ${EffData} "${data_right_tmp[*]}" ${ParticleType} # New line, it'll crash after this
 	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_right_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()

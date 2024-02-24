@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:25:39 trottar"
+# Time-stamp: "2024-02-24 15:35:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -500,7 +500,6 @@ create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Redefinition from above, but should be the same! This is just to stay consistent with main.py
 # ***Parameter files from last and this iteration!***
-# FIX BELOW!!!
 old_param_file = '{}/parameters/par.{}_Q{}W{}.dat'.format(prev_iter_dir, pol_str, Q2.replace("p",""), W.replace("p",""))
 
 cut_summary_lst += "\nUnsep Parameterization for {}...".format(closest_date)

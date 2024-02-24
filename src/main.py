@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:25:36 trottar"
+# Time-stamp: "2024-02-24 15:35:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -753,7 +753,6 @@ for f in output_file_lst:
     elif "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
-        print("!!!!!!!!!!!!!!!",f_arr, f_tmp)
         if len(f_arr) > 1:
             for f_dir in f_arr:
                 if "{}".format(ParticleType) not in f_dir:
