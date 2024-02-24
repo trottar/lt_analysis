@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 16:05:55 trottar"
+# Time-stamp: "2024-02-24 16:06:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -384,7 +384,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     
         ##
         # HGCer Hole Plots
-        c_hgcer_hole = TCanvas()
+        c_hgcer_hole = TCanvas() 
 
         c_hgcer_hole.Divide(2,2)
 
