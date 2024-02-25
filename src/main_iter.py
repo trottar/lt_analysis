@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 21:43:49 trottar"
+# Time-stamp: "2024-02-24 23:02:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -190,6 +190,12 @@ with open(prev_iter_json, 'r') as f:
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
 
+print("!!!!!!!!!!!",inpDict["tmin"],inpDict["tmax"])
+for hist in histlist:
+    print("$$$$$$$$$$$",inpDict["TMIN"],inpDict["TMAX"])
+
+sys.exit(2)    
+
 # Add closest and formatted dates to inpDict (used in plot comparison)
 inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
@@ -280,9 +286,6 @@ except IOError:
 for hist in histlist:
     hist["t_bins"] = t_bins
     hist["phi_bins"] = phi_bins
-
-if EPSSET == "high":
-    check_bins(histlist, inpDict)
 
 check_bins(histlist, inpDict)
 
