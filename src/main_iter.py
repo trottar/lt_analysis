@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 23:26:06 trottar"
+# Time-stamp: "2024-02-25 02:14:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,10 +189,6 @@ with open(prev_iter_json, 'r') as f:
 
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
-
-print("!!!!!!!!!!!",inpDict["tmin"],inpDict["tmax"])
-
-sys.exit(2)    
 
 # Add closest and formatted dates to inpDict (used in plot comparison)
 inpDict["closest_date"] = closest_date
