@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 18:16:38 trottar"
+# Time-stamp: "2024-02-24 20:59:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -633,20 +633,21 @@ for f in output_file_lst:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
             print("\nCopying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)                
+            shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
-        for f_dir in f_arr:
-            if "{}".format(ParticleType) not in f_dir:
-                create_dir(new_dir+"/"+f_dir)
-                f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                print("\nCopying {} to {}".format(f,f_new))
-                shutil.copy(f, f_new)
+        if len(f_arr) > 1:
+            for f_dir in f_arr:
+                if "{}".format(ParticleType) not in f_dir:
+                    create_dir(new_dir+"/"+f_dir)
+                    f_new = new_dir+"/"+f_dir+"/"+f_tmp    
+                    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
+                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
         else:
             f_new = new_dir+"/"+f_tmp
             print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-            shutil.copy(LTANAPATH+"/src/"+f, f_new)                
+            shutil.copy(LTANAPATH+"/src/"+f, f_new)
     else:
         f_new = new_dir
         print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
