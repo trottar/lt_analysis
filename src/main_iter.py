@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 20:59:44 trottar"
+# Time-stamp: "2024-02-24 21:43:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,19 +242,48 @@ for hist in histlist:
     hist.update(hist_in_dir(prev_root_file, "{}/data".format(hist["phi_setting"])))
     hist.update(hist_in_dir(prev_root_file, "{}/dummy".format(hist["phi_setting"])))
     
-# t/phi bins are the same for all settings
-# so arbitrarily grabbing from first setting of list
-t_bins = np.array(histlist[0]["t_bins"])
-phi_bins = np.array(histlist[0]["phi_bins"])
-
 sys.path.append("binning")
-from find_bins import find_bins, check_bins
+from find_bins import check_bins
 
-output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
-output_file_lst.append("{}/phi_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
+try:
+    output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
+    with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
+        # Read all lines from the file into a list
+        all_lines = file.readlines()
+        # Check if the file has at least two lines
+        if len(all_lines) >= 2:
+            # Extract the second line and remove leading/trailing whitespace
+            t_bins = all_lines[1].split("\t")
+            del t_bins[0]
+            t_bins = np.array([float(element) for element in t_bins])
+except FileNotFoundError:
+    print("{} not found...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
+except IOError:
+    print("Error reading {}...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
 
-#print("\n\nt_bins = ", t_bins)
-#print("phi_bins = ", phi_bins)
+try:
+    output_file_lst.append("{}/phi_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
+    with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
+        # Read all lines from the file into a list
+        all_lines = file.readlines()
+        # Check if the file has at least two lines
+        if len(all_lines) >= 2:
+            # Extract the second line and remove leading/trailing whitespace
+            phi_bins = all_lines[1].split("\t")
+            del phi_bins[0]
+            phi_bins = np.array([float(element) for element in phi_bins])
+except FileNotFoundError:
+    print("{} not found...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
+except IOError:
+    print("Error reading {}...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
+    
+for hist in histlist:
+    hist["t_bins"] = t_bins
+    hist["phi_bins"] = phi_bins
+
+if EPSSET == "high":
+    check_bins(histlist, inpDict)
+
 check_bins(histlist, inpDict)
 
 phisetlist = []
