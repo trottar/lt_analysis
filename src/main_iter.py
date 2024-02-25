@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 23:02:39 trottar"
+# Time-stamp: "2024-02-24 23:17:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,7 +192,7 @@ histlist = prev_iter_combineDict["histlist"]
 
 print("!!!!!!!!!!!",inpDict["tmin"],inpDict["tmax"])
 for hist in histlist:
-    print("$$$$$$$$$$$",inpDict["TMIN"],inpDict["TMAX"])
+    print("$$$$$$$$$$$",hist["TMIN"],hist["TMAX"])
 
 sys.exit(2)    
 
