@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-26 18:06:21 trottar"
+# Time-stamp: "2024-02-26 18:10:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,7 +140,7 @@ if EPSSET == "low":
     # List all files in the source directory
     files = os.listdir(prev_iter_dir+'/')
     for f in files:
-        if ".txt" not in f and not os.path.isdir(prev_iter_dir+'/'+f) and '.py' not in f and '.f' not in f:
+        if ".txt" not in f and not os.path.isdir(prev_iter_dir+'/'+f) and '.py' not in f and '.f' not in f and 'iter' not in f:
             print("\nCopying {} to {}".format(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType)))
             shutil.copy(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType))
     files = os.listdir(prev_iter_dir+'/averages/')
