@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-21 19:16:20 trottar"
+# Time-stamp: "2024-02-26 15:44:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,8 +85,10 @@ def iterWeight(arg_str):
     sigt = sigt*wfactor
     sigtt = sigtt*wfactor
     siglt = siglt*wfactor
-    
-    sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
+
+    # RLT (2/26/2024): Removing 2/pi term as it may be causing a phase shift in the unsep xsect results
+    #sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
+    sig = sig / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     #sig = sig / 2.0 / pi  # dsig/dtdphicm in microbarns/GeV**2/rad
 
     wtn = wt_sim * sig / sigcm_sim
