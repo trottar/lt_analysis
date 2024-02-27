@@ -209,7 +209,10 @@ c angle check
 *     Convert from ub/MeV^2 to ub/GeV^2
             x_mod=x_mod*1.d+06
             x_real=x_mod*r
-            dx_real=x_mod*dr/r
+*     RLT (2/26/2024): The ratio is not calculated as a % in
+*                      average_ratios.f, it is the abs error
+*     dx_real=x_mod*dr/r
+            dx_real=x_mod*dr
                         
 *     Check for NaN values
             if (isnan(x_real)) x_real = -1000.0

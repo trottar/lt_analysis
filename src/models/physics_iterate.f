@@ -455,8 +455,8 @@ C--->Debug
 *       RLT (2/6/2024): Removed 2./pi/1.d+06, because not needed. Already converted
 *       RLT (2/26/2024): Removing 2/pi term as it may be causing
 *                        a phase shift in the unsep xsect results      	  
-*	  sig=sig/2./pi/1.d+06	!dsig/dtdphicm in microbarns/MeV**2/rad
-	  sig=sig/1.d+06	!dsig/dtdphicm in microbarns/MeV**2/rad
+	  sig=sig/2./pi/1.d+06	!dsig/dtdphicm in microbarns/MeV**2/rad
+*	  sig=sig/1.d+06	!dsig/dtdphicm in microbarns/MeV**2/rad
 
 c       RLT (10/30/2023): Testing this sig with the flux corrected one below
 	  ntup%sigcm = sig

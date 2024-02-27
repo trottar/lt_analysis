@@ -124,8 +124,8 @@ c      sigL=sigL*0.90-0.1
 
 *     RLT (2/26/2024): Removing 2/pi term as it may be causing
 *                      a phase shift in the unsep xsect results      
-*     sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
-      sig=sig/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
+      sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
+*      sig=sig/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 *     sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad      
 
       x_mod=sig
