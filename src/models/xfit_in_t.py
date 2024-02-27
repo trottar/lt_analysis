@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-26 21:52:59 trottar"
+# Time-stamp: "2024-02-27 00:42:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -239,7 +239,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigl.GetXaxis().CenterTitle()
-    g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [#mub/GeV^{2}]")
+    g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [#nb/GeV^{2}]")
     g_sigl.GetYaxis().SetTitleOffset(1.5)
     g_sigl.GetYaxis().SetTitleSize(0.035)
     g_sigl.GetYaxis().CenterTitle()
@@ -392,7 +392,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigt.GetXaxis().CenterTitle()
-    g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [#mub/GeV^{2}]")
+    g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [#nb/GeV^{2}]")
     g_sigt.GetYaxis().SetTitleOffset(1.5)
     g_sigt.GetYaxis().SetTitleSize(0.035)
     g_sigt.GetYaxis().CenterTitle()
@@ -547,7 +547,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     g_siglt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_siglt.GetXaxis().CenterTitle()
-    g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [#mub/GeV^{2}]")
+    g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [#nb/GeV^{2}]")
     g_siglt.GetYaxis().SetTitleOffset(1.5)
     g_siglt.GetYaxis().SetTitleSize(0.035)
     g_siglt.GetYaxis().CenterTitle()
@@ -702,7 +702,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigtt.GetXaxis().CenterTitle()
-    g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [#mub/GeV^{2}]")
+    g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [#nb/GeV^{2}]")
     g_sigtt.GetYaxis().SetTitleOffset(1.5)
     g_sigtt.GetYaxis().SetTitleSize(0.035)
     g_sigtt.GetYaxis().CenterTitle()
