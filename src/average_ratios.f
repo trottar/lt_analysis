@@ -195,10 +195,10 @@ c      pause
 *     Calculate ratio error in quadrature (absolute error)
 *               e=e+(drd(ip,it))/ymc(ip,it)**2
 *               e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
-*     Calculate ratio error in quadrature (relative error)
+*     Calculate ratio error in quadrature (absolute error)
                e=e+drd(ip,it)**2
                e=e+dmc(ip,it)**2
-               e=sqrt(e)
+               e=sqrt(e)*r
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e

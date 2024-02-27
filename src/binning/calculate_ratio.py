@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-26 19:56:43 trottar"
+# Time-stamp: "2024-02-26 20:16:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,7 @@ def calculate_ratio(kin_type, phiset, yieldDict):
             ratio = 0.0
             ratio_err = 0.0
         print("Ratio for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(i+1, j+1, ratio, ratio*ratio_err))
-        dict_lst.append((i, j, ratio, ratio_err))
+        dict_lst.append((i, j, ratio, ratio*ratio_err))
     
     # Group the tuples by the first two elements using defaultdict
     groups = defaultdict(list)
