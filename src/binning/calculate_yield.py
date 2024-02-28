@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-28 07:23:59 trottar"
+# Time-stamp: "2024-02-28 07:27:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,6 +64,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
     
     ParticleType = inpDict["ParticleType"]
 
+    tmin = inpDict["tmin"] 
+    tmax = inpDict["tmax"] 
+    
     Q2 = inpDict["Q2"]
     W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]
@@ -526,6 +529,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
     Q2 = inpDict["Q2"]
     W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]
+
+    tmin = inpDict["tmin"] 
+    tmax = inpDict["tmax"] 
     
     ParticleType = inpDict["ParticleType"]
 
