@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-28 00:57:25 trottar"
+# Time-stamp: "2024-02-28 01:00:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,7 +167,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         for j in range(nlo.GetSelectedRows()):
 
             # Skip insane uncertainty bins
-            if nlo.GetV3()[j] > nlo.GetV1()[j]*1.50:
+            if nlo.GetV3()[j] > nlo.GetV1()[j]*3.00:
                 continue
             
             glo_tmp.SetPoint(j, nlo.GetV2()[j], nlo.GetV1()[j])
@@ -192,7 +192,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         for j in range(nhi.GetSelectedRows()):
             
             # Skip insane uncertainty bins
-            if nhi.GetV3()[j] > nhi.GetV1()[j]*1.50:
+            if nhi.GetV3()[j] > nhi.GetV1()[j]*3.00:
                 continue
             
             ghi_tmp.SetPoint(j, nhi.GetV2()[j], nhi.GetV1()[j])
@@ -215,7 +215,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         for ii in range(glo.GetN()):
 
             # Skip insane uncertainty bins
-            if nlo.GetV3()[ii] > nlo.GetV1()[ii]*1.50:
+            if nlo.GetV3()[ii] > nlo.GetV1()[ii]*3.00:
                 continue
             
             glo.GetPoint(ii, g_xx, g_yy)
@@ -229,7 +229,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         for ii in range(ghi.GetN()):
 
             # Skip insane uncertainty bins
-            if nhi.GetV3()[ii] > nhi.GetV1()[ii]*1.50:
+            if nhi.GetV3()[ii] > nhi.GetV1()[ii]*3.00:
                 continue
             
             ghi.GetPoint(ii, g_xx, g_yy)
