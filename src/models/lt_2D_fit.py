@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-27 23:40:43 trottar"
+# Time-stamp: "2024-02-28 00:27:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,8 +64,8 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 ###############################################################################################################################################
 
 # Constants
-pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
-#pt_to_pt_systematic_error = 0.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
+#pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
+pt_to_pt_systematic_error = 1.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
 
 ###############################################################################################################################################
@@ -502,8 +502,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g.Draw("AP")
 
         # Set properties for the TMultiGraph
-        #g.GetHistogram().SetMinimum(0.0)
-        #g.GetHistogram().SetMaximum(0.8)
+        g.GetHistogram().SetMinimum(0.0)
+        g.GetHistogram().SetMaximum(50)
         g.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
         g.GetYaxis().CenterTitle()
         g.GetYaxis().SetTitleOffset(1.4)
