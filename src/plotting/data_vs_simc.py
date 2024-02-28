@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-27 23:35:18 trottar"
+# Time-stamp: "2024-02-27 23:49:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -906,10 +906,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         polar_plots.append(polar_plot)  # Store the plot in the list
         polar_plot.Draw("AP same")
 
-    # Set titles and axes for the last plot
-    polar_plots[-1].GetXaxis().SetName("#Phi")
-    polar_plots[-1].GetYaxis().SetName("-t")
-    polar_plots[-1].SetTitle("") # SIMC
+        # Set titles and axes for the last plot
+        polar_plots[-1].GetXaxis().SetName("#Phi")
+        polar_plots[-1].GetYaxis().SetName("-t")
+        polar_plots[-1].SetTitle("") # SIMC
     
     Cpht_simc.Print(outputpdf)
     
@@ -926,10 +926,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         polar_plots.append(polar_plot)  # Store the plot in the list
         polar_plot.Draw("AP same")
 
-    # Set titles and axes for the last plot
-    polar_plots[-1].GetXaxis().SetName("#Phi")
-    polar_plots[-1].GetYaxis().SetName("-t")
-    polar_plots[-1].SetTitle("") # DATA
+        # Set titles and axes for the last plot
+        polar_plots[-1].GetXaxis().SetName("#Phi")
+        polar_plots[-1].GetYaxis().SetName("-t")
+        polar_plots[-1].SetTitle("") # DATA
     
     Cpht.Print(outputpdf)
 
