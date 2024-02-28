@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-26 21:30:15 trottar"
+# Time-stamp: "2024-02-28 10:29:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,7 +57,7 @@ def iterWeight(arg_str):
     # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
     # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
     #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
-    sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
+    sigl = -(p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
     # RLT (2/15/2024): Removing t dependence from sigT because it seems
     #                  to be driving poor sep xsects results
     # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
