@@ -73,8 +73,8 @@ formatted_date=$(date +%Y%B%d_H%HM%MS%S)
 # HARD CODED #
 ##############
 
-DEBUG="False" # Flag for no plot splash
-#DEBUG="True" # Flag for plot splash
+#DEBUG="False" # Flag for no plot splash
+DEBUG="True" # Flag for plot splash
 
 if [[ $p_flag != "true" ]]; then
     ParticleType="kaon"
@@ -669,14 +669,14 @@ elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     TMAX=0.350
 elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     # Q2=4p4, W=2p74
-    NumtBins=2
-    NumPhiBins=8
+    NumtBins=3
+    NumPhiBins=12
     TMIN=0.001
     TMAX=1.300    
 elif [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     # Q2=5p5, W=3p02
-    NumtBins=2
-    NumPhiBins=8
+    NumtBins=3
+    NumPhiBins=12
     TMIN=0.001
     TMAX=1.300
 else
