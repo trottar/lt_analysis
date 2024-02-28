@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-27 00:41:56 trottar"
+# Time-stamp: "2024-02-27 02:21:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,6 +65,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Constants
 pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
+#pt_to_pt_systematic_error = 0.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
 
 ###############################################################################################################################################
