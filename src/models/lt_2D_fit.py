@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-28 07:32:32 trottar"
+# Time-stamp: "2024-02-28 09:24:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -522,8 +522,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g.Draw("AP")
 
         # Set properties for the TMultiGraph
-        g.GetHistogram().SetMinimum(0.0)
-        g.GetHistogram().SetMaximum(35)
+        #g.GetHistogram().SetMinimum(0.0)
+        #g.GetHistogram().SetMaximum(35)
         g.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
         g.GetYaxis().CenterTitle()
         g.GetYaxis().SetTitleOffset(1.4)
