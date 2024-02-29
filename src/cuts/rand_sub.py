@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-28 07:19:42 trottar"
+# Time-stamp: "2024-02-29 14:00:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,16 +91,6 @@ def rand_sub(phi_setting, inpDict):
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
 
-    # Define diamond cut parameters
-    a1 = inpDict["a1"]
-    b1 = inpDict["b1"]
-    a2 = inpDict["a2"]
-    b2 = inpDict["b2"]
-    a3 = inpDict["a3"]
-    b3 = inpDict["b3"]
-    a4 = inpDict["a4"]
-    b4 = inpDict["b4"]
-
     ################################################################################################################################################
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
@@ -111,6 +101,10 @@ def rand_sub(phi_setting, inpDict):
     # Define return dictionary of data
     histDict = {}
 
+    ################################################################################################################################################
+    # Import function to define cut bools
+    from apply_cuts import apply_data_cuts
+    
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
     if ParticleType == "kaon":
@@ -549,31 +543,12 @@ def rand_sub(phi_setting, inpDict):
     for i,evt in enumerate(TBRANCH_DATA):
 
         # Progress bar
-        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
-        
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.MM) & (evt.MM<1.18) & (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
+        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)        
 
         if ParticleType == "kaon":
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18)
 
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -583,7 +558,7 @@ def rand_sub(phi_setting, inpDict):
 
         else:
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
 
@@ -664,39 +639,20 @@ def rand_sub(phi_setting, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-        
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.MM) & (evt.MM<1.18) & (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
-
         if ParticleType == "kaon":
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18)
 
             if(NOHOLECUTS):
                 # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-                P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.MM)
-                P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
-            
+                P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
+                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
+
         else:
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
 
@@ -769,40 +725,21 @@ def rand_sub(phi_setting, inpDict):
 
         # Progress bar
         Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
         
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.MM) & (evt.MM<1.18) & (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
-
         if ParticleType == "kaon":
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18)
 
             if(NOHOLECUTS):
                 # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-                P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
-                P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
-            
+                P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
+                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
+
         else:
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
 
@@ -873,39 +810,20 @@ def rand_sub(phi_setting, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-        
-        #CUTs Definations 
-        MS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.MM) & (evt.MM<1.18) & (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
-
         if ParticleType == "kaon":
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18)
 
             if(NOHOLECUTS):
                 # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-                P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
-                P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
-            
+                P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
+                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
+
         else:
 
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
 

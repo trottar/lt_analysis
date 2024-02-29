@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-28 07:26:56 trottar"
+# Time-stamp: "2024-02-29 14:10:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,15 +65,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
     W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]
     
-    # Define diamond cut parameters
-    a1 = inpDict["a1"]
-    b1 = inpDict["b1"]
-    a2 = inpDict["a2"]
-    b2 = inpDict["b2"]
-    a3 = inpDict["a3"]
-    b3 = inpDict["b3"]
-    a4 = inpDict["a4"]
-    b4 = inpDict["b4"]    
+    ################################################################################################################################################
+    # Import function to define cut bools
+    from apply_cuts import apply_data_cuts
 
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
@@ -160,34 +154,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.MM) & (evt.MM<1.18) & (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
-
         if ParticleType == "kaon":
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
+            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
         else:
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
-
-        if(ALLCUTS):
+            ALLCUTS = apply_data_cuts(evt)
 
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):                
@@ -203,32 +173,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.MM) & (evt.MM<1.18) & (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
-
         if ParticleType == "kaon":
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
+            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
         else:
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt)
 
         if(ALLCUTS):
 
@@ -246,32 +194,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.MM) & (evt.MM<1.18) & (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
-
         if ParticleType == "kaon":
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
+            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
         else:
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt)
 
         if(ALLCUTS):
 
@@ -289,32 +215,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-
-        #CUTs Definations 
-        SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-        HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-        HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.MM) & (evt.MM<1.18) & (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
-
         if ParticleType == "kaon":
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-
+            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
         else:
-
-            ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+            ALLCUTS = apply_data_cuts(evt)
 
         if(ALLCUTS):
 
@@ -572,16 +476,10 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
     
     ParticleType = inpDict["ParticleType"]
 
-    # Define diamond cut parameters
-    a1 = inpDict["a1"]
-    b1 = inpDict["b1"]
-    a2 = inpDict["a2"]
-    b2 = inpDict["b2"]
-    a3 = inpDict["a3"]
-    b3 = inpDict["b3"]
-    a4 = inpDict["a4"]
-    b4 = inpDict["b4"]
-
+    ################################################################################################################################################
+    # Import function to define cut bools
+    from apply_cuts import apply_simc_cuts
+    
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
     if ParticleType == "kaon":
@@ -608,20 +506,10 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
         # Progress bar
         Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
-        # Define the acceptance cuts  
-        SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-        HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-        Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.missmass) & (evt.missmass<1.18) & (tmin<-evt.t) & (-evt.t<tmax)
-
         if ParticleType == "kaon":
-
-            ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)
-            NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
-
+          ALLCUTS =  apply_simc_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
         else:
-
-            ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond                
+            ALLCUTS = apply_simc_cuts(evt)
 
         #Fill SIMC events
         if(ALLCUTS):

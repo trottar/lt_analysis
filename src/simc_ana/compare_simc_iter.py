@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-28 07:23:54 trottar"
+# Time-stamp: "2024-02-29 14:04:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,16 +86,6 @@ def compare_simc(rootFileSimc, hist, inpDict):
     efficiency_table = inpDict["efficiency_table"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
-
-    # Define diamond cut parameters
-    a1 = inpDict["a1"]
-    b1 = inpDict["b1"]
-    a2 = inpDict["a2"]
-    b2 = inpDict["b2"]
-    a3 = inpDict["a3"]
-    b3 = inpDict["b3"]
-    a4 = inpDict["a4"]
-    b4 = inpDict["b4"]    
     
     ################################################################################################################################################
 
@@ -107,6 +97,10 @@ def compare_simc(rootFileSimc, hist, inpDict):
     # Define return dictionary of data
     histDict = {}
 
+    ################################################################################################################################################
+    # Import function to define cut bools
+    from apply_cuts import apply_simc_cuts
+    
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
     if ParticleType == "kaon":
@@ -200,16 +194,10 @@ def compare_simc(rootFileSimc, hist, inpDict):
       # Progress bar
       Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
-      # Define the acceptance cuts  
-      SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-      HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-      Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2) & (1.10<evt.missmass) & (evt.missmass<1.18) & (tmin<-evt.t) & (-evt.t<tmax)
-
       if ParticleType == "kaon":
           
-          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
-          NOHOLECUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
+          ALLCUTS =  apply_simc_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+          NOHOLECUTS =  apply_simc_cuts(evt, mm_min=1.10, mm_max=1.18)
           
           if(NOHOLECUTS):
               # HGCer hole comparison            
@@ -217,7 +205,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
           
       else:
 
-          ALLCUTS =  HMS_Acceptance and SHMS_Acceptance and Diamond
+          ALLCUTS = apply_simc_cuts(evt)
           
       #Fill SIMC events
       if(ALLCUTS):
