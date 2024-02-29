@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:36:14 trottar"
+# Time-stamp: "2024-02-29 18:38:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -776,7 +776,7 @@ c_total_l_t = TCanvas()
 
 # Set properties for g_sig_l_total and g_sig_t_total
 g_sig_l_total.SetMarkerStyle(5)
-g_sig_t_total.SetLineColor(1)
+g_sig_l_total.SetLineColor(1)
 g_sig_t_total.SetMarkerColor(2)
 g_sig_t_total.SetLineColor(2)
 g_sig_t_total.SetMarkerStyle(4)
@@ -797,12 +797,19 @@ g_sig_mult.GetXaxis().SetTitleOffset(1.4)
 g_sig_l_total.Fit(f_exp_l, "MRQ")
 g_sig_t_total.Fit(f_exp_t, "MRQ")
 
+# Set line properties for g_sig_l_total and g_sig_t_total
+f_exp_l.SetLineColor(1)
+f_exp_l.SetLineWidth(2)
+f_exp_t.SetLineColor(2)
+f_exp_t.SetLineWidth(2)
+f_exp_t.SetLineStyle(2)
+
 # Create and draw TLegend
 leg = ROOT.TLegend(0.7, 0.7, 0.97, 0.97)
 leg.SetFillColor(0)
 leg.SetMargin(0.4)
-leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L} [nb/GeV^{2}]", "p")
-leg.AddEntry(g_sig_t_total, "#it{#sigma}_{T} [nb/GeV^{2}]", "p")
+leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L}", "p")
+leg.AddEntry(g_sig_t_total, "#it{#sigma}_{T}", "p")
 leg.Draw()
 
 c_total_l_t.Print(outputpdf)
