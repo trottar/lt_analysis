@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:55:52 trottar"
+# Time-stamp: "2024-02-29 15:46:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -145,6 +145,9 @@ def rand_sub(phi_setting, inpDict):
     # HARD CODED #
     ##############
 
+    mm_min = 1.10
+    mm_max = 1.18
+    
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
     # Note: these momenta are from Dave's slides and may not reflect what is used here
@@ -556,8 +559,8 @@ def rand_sub(phi_setting, inpDict):
         
         if ParticleType == "kaon":
 
-            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-            NOHOLECUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
 
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -660,8 +663,8 @@ def rand_sub(phi_setting, inpDict):
         
         if ParticleType == "kaon":
 
-            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-            NOHOLECUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
 
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -757,8 +760,8 @@ def rand_sub(phi_setting, inpDict):
 
         if ParticleType == "kaon":
 
-            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-            NOHOLECUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
 
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -851,8 +854,8 @@ def rand_sub(phi_setting, inpDict):
         
         if ParticleType == "kaon":
 
-            ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
-            NOHOLECUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
 
             if(NOHOLECUTS):
                 # HGCer hole comparison            

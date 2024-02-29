@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:19:04 trottar"
+# Time-stamp: "2024-02-29 15:48:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -185,7 +185,18 @@ def compare_simc(rootFileSimc, hist, inpDict):
     P_hgcer_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_xAtCer_vs_yAtCer_SIMC", "X vs Y; X; Y", 50, -30, 30, 50, -30, 30)
     if ParticleType == "kaon":
         P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC = TH2D("P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC", "X vs Y (no hole cut); X; Y", 50, -30, 30, 50, -30, 30)
-    
+
+    ##############
+    # HARD CODED #
+    ##############
+        
+    mm_min = 1.10
+    mm_max = 1.18
+
+    ##############
+    ##############
+    ##############
+        
     ################################################################################################################################################
     # Fill data histograms for various trees called above
 
@@ -197,8 +208,8 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
       if ParticleType == "kaon":
           
-          ALLCUTS =  apply_simc_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
-          NOHOLECUTS =  apply_simc_cuts(evt, mm_min=1.10, mm_max=1.18)
+          ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+          NOHOLECUTS =  apply_simc_cuts(evt, mm_min, mm_max)
           
           if(NOHOLECUTS):
               # HGCer hole comparison            
