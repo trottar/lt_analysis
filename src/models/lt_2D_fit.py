@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:40:24 trottar"
+# Time-stamp: "2024-02-29 18:42:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -776,7 +776,6 @@ c_total_l_t = TCanvas()
 
 # Set properties for g_sig_l_total and g_sig_t_total
 g_sig_l_total.SetMarkerStyle(5)
-g_sig_l_total.SetLineColor(1)
 g_sig_t_total.SetMarkerColor(2)
 g_sig_t_total.SetLineColor(2)
 g_sig_t_total.SetMarkerStyle(4)
@@ -797,8 +796,15 @@ g_sig_mult.GetXaxis().SetTitleOffset(1.4)
 g_sig_l_total.Fit(f_exp_l, "MRQ")
 g_sig_t_total.Fit(f_exp_t, "MRQ")
 
+# Set line properties for g_sig_l_total and g_sig_t_total
+f_exp_l.SetLineColor(1)
+f_exp_l.SetLineWidth(2)
+f_exp_t.SetLineColor(2)
+f_exp_t.SetLineWidth(2)
+f_exp_t.SetLineStyle(2)
+
 # Create and draw TLegend
-leg = ROOT.TLegend(0.5, 0.5, 0.75, 0.75)
+leg = ROOT.TLegend(0.7, 0.5, 0.95, 0.75)
 leg.SetFillColor(0)
 leg.SetMargin(0.4)
 leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L}", "p")
