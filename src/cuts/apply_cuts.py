@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:28:13 trottar"
+# Time-stamp: "2024-02-29 14:31:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,18 +41,18 @@ def set_val(inpDict):
     Q2 = inpDict["Q2"] 
     EPSSET = inpDict["EPSSET"]
 
-    tmin = inpDict["tmin"] 
-    tmax = inpDict["tmax"] 
+    tmin = float(inpDict["tmin"] )
+    tmax = float(inpDict["tmax"] )
     
     # Define diamond cut parameters
-    a1 = inpDict["a1"]
-    b1 = inpDict["b1"]
-    a2 = inpDict["a2"]
-    b2 = inpDict["b2"]
-    a3 = inpDict["a3"]
-    b3 = inpDict["b3"]
-    a4 = inpDict["a4"]
-    b4 = inpDict["b4"]
+    a1 = float(inpDict["a1"])
+    b1 = float(inpDict["b1"])
+    a2 = float(inpDict["a2"])
+    b2 = float(inpDict["b2"])
+    a3 = float(inpDict["a3"])
+    b3 = float(inpDict["b3"])
+    a4 = float(inpDict["a4"])
+    b4 = float(inpDict["b4"])
     
     ##############
     # HARD CODED #
@@ -98,7 +98,7 @@ def set_val(inpDict):
     
 def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 
-    print("!!!!!!!!!!!!!!!!!!",a1,a2,a3)
+    print("!!!!!!!!!!!!!!!!!!",evt.Q2,evt.W)
     ##############
     # HARD CODED #
     ##############
