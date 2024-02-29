@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:15:15 trottar"
+# Time-stamp: "2024-02-29 14:18:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,7 +103,8 @@ def rand_sub(phi_setting, inpDict):
 
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts
+    from apply_cuts import apply_data_cuts, set_val
+    set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19

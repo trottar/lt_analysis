@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:04:09 trottar"
+# Time-stamp: "2024-02-29 14:19:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,7 +99,8 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_simc_cuts
+    from apply_cuts import apply_simc_cuts, set_val
+    set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19

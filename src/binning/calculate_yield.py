@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:08:02 trottar"
+# Time-stamp: "2024-02-29 14:20:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,7 +73,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
 
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts
+    from apply_cuts import apply_data_cuts, set_val
+    set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
@@ -443,7 +444,8 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_simc_cuts
+    from apply_cuts import apply_simc_cuts, set_val
+    set_val(inpDict) # Set global variables for optimization
 
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
