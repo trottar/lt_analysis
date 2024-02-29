@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:18:33 trottar"
+# Time-stamp: "2024-02-29 14:55:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,6 +141,45 @@ def rand_sub(phi_setting, inpDict):
     
     TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
+    ##############
+    # HARD CODED #
+    ##############
+
+    # Adjusted HMS delta to fix hsxfp correlation
+    # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
+    # Note: these momenta are from Dave's slides and may not reflect what is used here
+    h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
+    c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
+
+    c0_dict = {}
+
+    for c0, p in zip(c0_list, h_momentum_list):
+        if p == 0.889:
+            c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888
+        elif p == 0.968:
+            c0_dict["Q0p5W2p40_lowe"] = c0
+            c0_dict["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
+            c0_dict["Q5p5W3p02_lowe"] = c0 # Proper value 0.962
+        elif p == 2.185:
+            c0_dict["Q0p5W2p40_highe"] = c0 # Proper value 2.066
+            c0_dict["Q3p0W2p32_lowe"] = c0
+        elif p == 2.328:
+            c0_dict["Q4p4W2p74_lowe"] = c0
+        elif p == 3.266:
+            c0_dict["Q5p5W3p02_highe"] = c0            
+        elif p == 4.2:
+            c0_dict["Q3p0W3p14_highe"] = c0 # Proper value 4.204
+        elif p == 4.712:
+            c0_dict["Q4p4W2p74_highe"] = c0            
+        elif p == 5.292:
+            c0_dict["Q2p1W2p95_highe"] = c0
+        elif p == 6.59:
+            c0_dict["Q3p0W2p32_highe"] = c0
+            
+    ##############
+    ##############        
+    ##############
+    
     ################################################################################################################################################
     # Grabs PID cut string
 
@@ -505,6 +544,16 @@ def rand_sub(phi_setting, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)        
 
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
         if ParticleType == "kaon":
 
             ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
@@ -599,6 +648,16 @@ def rand_sub(phi_setting, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
 
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
         if ParticleType == "kaon":
 
             ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
@@ -686,6 +745,16 @@ def rand_sub(phi_setting, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
         
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+
         if ParticleType == "kaon":
 
             ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
@@ -770,6 +839,16 @@ def rand_sub(phi_setting, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
 
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
         if ParticleType == "kaon":
 
             ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:19:40 trottar"
+# Time-stamp: "2024-02-29 14:40:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -155,6 +155,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
         else:
@@ -174,6 +184,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
 
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
         else:
@@ -195,6 +215,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
 
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
         else:
@@ -216,6 +246,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
         # Progress bar
         Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
 
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.P_hgcer_yAtCer, evt.P_hgcer_xAtCer)
         else:
