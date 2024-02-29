@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:31:58 trottar"
+# Time-stamp: "2024-02-29 18:36:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -769,6 +769,45 @@ g_sig_tt_total = TGraphErrors()
 
 single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 
+f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
+f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
+
+c_total_l_t = TCanvas()
+
+# Set properties for g_sig_l_total and g_sig_t_total
+g_sig_l_total.SetMarkerStyle(5)
+g_sig_t_total.SetLineColor(1)
+g_sig_t_total.SetMarkerColor(2)
+g_sig_t_total.SetLineColor(2)
+g_sig_t_total.SetMarkerStyle(4)
+
+# Create TMultiGraph and add glo, ghi
+g_sig_mult = ROOT.TMultiGraph()
+g_sig_mult.Add(g_sig_l_total)
+g_sig_mult.Add(g_sig_t_total)
+
+g_sig_mult.Draw("AP")
+
+g_sig_mult.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right) [nb/GeV^{2}]")
+g_sig_mult.GetYaxis().SetTitleOffset(1.4)
+
+g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+g_sig_mult.GetXaxis().SetTitleOffset(1.4)
+
+g_sig_l_total.Fit(f_exp_l, "MRQ")
+g_sig_t_total.Fit(f_exp_t, "MRQ")
+
+# Create and draw TLegend
+leg = ROOT.TLegend(0.7, 0.7, 0.97, 0.97)
+leg.SetFillColor(0)
+leg.SetMargin(0.4)
+leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L} [nb/GeV^{2}]", "p")
+leg.AddEntry(g_sig_t_total, "#it{#sigma}_{T} [nb/GeV^{2}]", "p")
+leg.Draw()
+
+c_total_l_t.Print(outputpdf)
+c_total_l_t.Clear()
+
 ROOT.gStyle.SetOptFit(1)
 
 f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
@@ -792,53 +831,5 @@ c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
 g_sig_tt_total.Fit(f_exp, "MRQ")
-c_total.Print(outputpdf)
+c_total.Print(outputpdf+')')
 c_total.Clear()
-
-ROOT.gStyle.SetOptFit(0)
-
-f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
-f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
-
-c_total_l_t = TCanvas()
-
-# Set properties for g_sig_l_total and g_sig_t_total
-g_sig_l_total.SetMarkerStyle(5)
-g_sig_t_total.SetMarkerColor(2)
-g_sig_t_total.SetLineColor(2)
-g_sig_t_total.SetMarkerStyle(4)
-
-
-# Create TMultiGraph and add glo, ghi
-g_sig_mult = ROOT.TMultiGraph()
-g_sig_mult.Add(g_sig_l_total)
-g_sig_mult.Add(g_sig_t_total)
-
-g_sig_mult.Draw("AP")
-
-g_sig_mult.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right) [nb/GeV^{2}]")
-g_sig_mult.GetYaxis().SetTitleOffset(1.4)
-
-g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-g_sig_mult.GetXaxis().SetTitleOffset(1.4)
-
-g_sig_l_total.Fit(f_exp_l, "MRQ")
-g_sig_t_total.Fit(f_exp_t, "MRQ")
-
-# Set line properties for g_sig_l_total and g_sig_t_total
-f_exp_l.SetLineColor(1)
-f_exp_t.SetLineColor(2)
-f_exp_l.SetLineWidth(2)
-f_exp_t.SetLineWidth(2)
-f_exp_t.SetLineStyle(2)
-
-# Create and draw TLegend
-leg = ROOT.TLegend(0.7, 0.7, 0.97, 0.97)
-leg.SetFillColor(0)
-leg.SetMargin(0.4)
-leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L} [nb/GeV^{2}]", "p")
-leg.AddEntry(g_sig_t_total, "#it{#sigma}_{T} [nb/GeV^{2}]", "p")
-leg.Draw()
-
-c_total_l_t.Print(outputpdf+')')
-c_total_l_t.Clear()
