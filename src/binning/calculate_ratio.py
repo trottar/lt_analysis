@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-27 23:58:46 trottar"
+# Time-stamp: "2024-02-29 16:42:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,7 +71,11 @@ def calculate_ratio(kin_type, phiset, yieldDict):
         try:
             ratio = yield_data/yield_simc
             # Calculate ratio error in quadrature (absolute error)
-            ratio_err = np.sqrt((yield_err_data/yield_data)**2+(yield_err_simc/yield_simc)**2)*ratio
+            #ratio_err = np.sqrt((yield_err_data/yield_data)**2+(yield_err_simc/yield_simc)**2)*ratio
+            # Matching formatting from average_ratio.f
+            ratio_err = (yield_err_data/yield_simc)**2
+            ratio_err += ((ratio/yield_simc)**2)*(yield_err_simc**2)
+            ratio_err = np.sqrt(ratio_err)
         except ZeroDivisionError:
             ratio = 0.0
             ratio_err = 0.0
