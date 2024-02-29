@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:00:59 trottar"
+# Time-stamp: "2024-02-29 14:15:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -493,48 +493,7 @@ def rand_sub(phi_setting, inpDict):
         P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND = TH2D("P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND", "X vs MM (no hole cut); X; MM", 50, -30, 30, 50, 0, 2)
     P_hgcer_yAtCer_vs_MM_DUMMY_RAND = TH2D("P_hgcer_yAtCer_vs_MM_DUMMY_RAND", "Y vs MM; Y; MM", 50, -30, 30, 50, 0, 2)
     if ParticleType == "kaon":
-        P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND = TH2D("P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND", "Y vs MM (no hole cut); Y; MM", 50, -30, 30, 50, 0, 2)
-    
-    ################################################################################################################################################
-    
-    ##############
-    # HARD CODED #
-    ##############
-
-    # Adjusted HMS delta to fix hsxfp correlation
-    # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
-    # Note: these momenta are from Dave's slides and may not reflect what is used here
-    h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
-    c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
-
-    c0_dict = {}
-
-    for c0, p in zip(c0_list, h_momentum_list):
-        if p == 0.889:
-            c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888        
-        elif p == 0.968:
-            c0_dict["Q0p5W2p40_lowe"] = c0
-            c0_dict["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
-            c0_dict["Q5p5W3p02_lowe"] = c0 # Proper value 0.962
-        elif p == 2.185:
-            c0_dict["Q0p5W2p40_highe"] = c0 # Proper value 2.066
-            c0_dict["Q3p0W2p32_lowe"] = c0
-        elif p == 2.328:
-            c0_dict["Q4p4W2p74_lowe"] = c0
-        elif p == 3.266:
-            c0_dict["Q5p5W3p02_highe"] = c0            
-        elif p == 4.2:
-            c0_dict["Q3p0W3p14_highe"] = c0 # Proper value 4.204
-        elif p == 4.712:
-            c0_dict["Q4p4W2p74_highe"] = c0            
-        elif p == 5.292:
-            c0_dict["Q2p1W2p95_highe"] = c0
-        elif p == 6.59:
-            c0_dict["Q3p0W2p32_highe"] = c0
-            
-    ##############
-    ##############        
-    ##############
+        P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND = TH2D("P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND", "Y vs MM (no hole cut); Y; MM", 50, -30, 30, 50, 0, 2)        
     
     ################################################################################################################################################
     # Fill histograms for various trees called above

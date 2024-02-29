@@ -1054,7 +1054,7 @@ if [[ $i_flag != "true" ]]; then
 	    TotDataEffChargeValRight=("${arr1[@]}")
 	    TotDataEffChargeErrRight=("${arr2[@]}")
 	    echo "Total Effective Charge Right: ${TotDataEffChargeValRight} mC"
-	    echo "Total Effective Charge Right Error: ${TotDataEffChargeErrRight}"
+	    echo "Total Effective Charge Right Relative Error: ${TotDataEffChargeErrRight}"
 	    echo "Run numbers: [${data_right[@]}]"
 	    #echo "Effective Charge per Run: [${DataEffChargeValRight[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataEffChargeErrRight[@]}]"
@@ -1115,7 +1115,7 @@ if [[ $i_flag != "true" ]]; then
 	    TotDummyEffChargeValRight=("${arr1[@]}")
 	    TotDummyEffChargeErrRight=("${arr2[@]}")
 	    echo "Total Effective Charge Right: ${TotDummyEffChargeValRight} mC"
-	    echo "Total Effective Charge Right Error: ${TotDummyEffChargeErrRight}"
+	    echo "Total Effective Charge Right Relative Error: ${TotDummyEffChargeErrRight}"
 	    echo "Run numbers: [${dummy_right[@]}]"
 	    #echo "Effective Charge per Run: [${DummyEffChargeValRight[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyEffChargeErrRight[@]}]"
@@ -1176,7 +1176,7 @@ if [[ $i_flag != "true" ]]; then
 	    TotDataEffChargeValLeft=("${arr1[@]}")
 	    TotDataEffChargeErrLeft=("${arr2[@]}")
 	    echo "Total Effective Charge Left: ${TotDataEffChargeValLeft} mC"
-	    echo "Total Effective Charge Left Error: ${TotDataEffChargeErrLeft}"
+	    echo "Total Effective Charge Left Relative Error: ${TotDataEffChargeErrLeft}"
 	    echo "Run numbers: [${data_left[@]}]"
 	    #echo "Effective Charge per Run: [${DataEffChargeValLeft[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataEffChargeErrLeft[@]}]"
@@ -1237,7 +1237,7 @@ if [[ $i_flag != "true" ]]; then
 	    TotDummyEffChargeValLeft=("${arr1[@]}")
 	    TotDummyEffChargeErrLeft=("${arr2[@]}")
 	    echo "Total Effective Charge Left: ${TotDummyEffChargeValLeft} mC"
-	    echo "Total Effective Charge Left Error: ${TotDummyEffChargeErrLeft}"
+	    echo "Total Effective Charge Left Relative Error: ${TotDummyEffChargeErrLeft}"
 	    echo "Run numbers: [${dummy_left[@]}]"
 	    #echo "Effective Charge per Run: [${DummyEffChargeValLeft[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyEffChargeErrLeft[@]}]"
@@ -1298,7 +1298,7 @@ if [[ $i_flag != "true" ]]; then
 	    TotDataEffChargeValCenter=("${arr1[@]}")
 	    TotDataEffChargeErrCenter=("${arr2[@]}")
 	    echo "Total Effective Charge Center: ${TotDataEffChargeValCenter} mC"
-	    echo "Total Effective Charge Center Error: ${TotDataEffChargeErrCenter}"
+	    echo "Total Effective Charge Center Relative Error: ${TotDataEffChargeErrCenter}"
 	    echo "Run numbers: [${data_center[@]}]"
 	    #echo "Effective Charge per Run: [${DataEffChargeValCenter[@]}]"
 	    #echo "Effective Charge Error per Run: [${DataEffChargeErrCenter[@]}]"
@@ -1359,7 +1359,7 @@ if [[ $i_flag != "true" ]]; then
 	    TotDummyEffChargeValCenter=("${arr1[@]}")
 	    TotDummyEffChargeErrCenter=("${arr2[@]}")
 	    echo "Total Effective Charge Center: ${TotDummyEffChargeValCenter} mC"
-	    echo "Total Effective Charge Center Error: ${TotDummyEffChargeErrCenter}"
+	    echo "Total Effective Charge Center Relative Error: ${TotDummyEffChargeErrCenter}"
 	    echo "Run numbers: [${dummy_center[@]}]"
 	    #echo "Effective Charge per Run: [${DummyEffChargeValCenter[@]}]"
 	    #echo "Effective Charge Error per Run: [${DummyEffChargeErrCenter[@]}]"
