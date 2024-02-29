@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:30:33 trottar"
+# Time-stamp: "2024-02-29 18:31:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -817,12 +817,10 @@ g_sig_mult.Add(g_sig_t_total)
 g_sig_mult.Draw("AP")
 
 g_sig_mult.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right) [nb/GeV^{2}]")
-g_sig_mult.GetYaxis().CenterTitle()
 g_sig_mult.GetYaxis().SetTitleOffset(1.4)
 
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-g_sig_mult.GetXaxis().CenterTitle()
-g_sig_mult.GetXaxis().SetLimits(0, 360)
+g_sig_mult.GetXaxis().SetTitleOffset(1.4)
 
 g_sig_l_total.Fit(f_exp_l, "MRQ")
 g_sig_t_total.Fit(f_exp_t, "MRQ")
