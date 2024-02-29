@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:25:30 trottar"
+# Time-stamp: "2024-02-29 18:28:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -797,6 +797,9 @@ c_total.Clear()
 
 ROOT.gStyle.SetOptFit(0)
 
+f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
+f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
+
 c_total_l_t = TCanvas()
 
 # Set properties for g_sig_l_total and g_sig_t_total
@@ -821,8 +824,15 @@ g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
 g.GetXaxis().CenterTitle()
 g.GetXaxis().SetLimits(0, 360)
 
-g_sig_l_total.Fit(f_exp, "MRQ")
-g_sig_t_total.Fit(f_exp, "MRQ")
+g_sig_l_total.Fit(f_exp_l, "MRQ")
+g_sig_t_total.Fit(f_exp_t, "MRQ")
+
+# Set line properties for g_sig_l_total and g_sig_t_total
+f_exp_l.SetLineColor(1)
+f_exp_t.SetLineColor(2)
+f_exp_l.SetLineWidth(2)
+f_exp_t.SetLineWidth(2)
+f_exp_t.SetLineStyle(2)
 
 # Create and draw TLegend
 leg = ROOT.TLegend(0.7, 0.7, 0.97, 0.97)
