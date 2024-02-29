@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:22:43 trottar"
+# Time-stamp: "2024-02-29 18:25:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -799,6 +799,13 @@ ROOT.gStyle.SetOptFit(0)
 
 c_total_l_t = TCanvas()
 
+# Set properties for g_sig_l_total and g_sig_t_total
+g_sig_l_total.SetMarkerStyle(5)
+g_sig_t_total.SetMarkerColor(2)
+g_sig_t_total.SetLineColor(2)
+g_sig_t_total.SetMarkerStyle(4)
+
+
 # Create TMultiGraph and add glo, ghi
 g = ROOT.TMultiGraph()
 g.Add(g_sig_l_total)
@@ -816,13 +823,6 @@ g.GetXaxis().SetLimits(0, 360)
 
 g_sig_l_total.Fit(f_exp, "MRQ")
 g_sig_t_total.Fit(f_exp, "MRQ")
-
-# Set line properties for g_sig_l_total and g_sig_t_total
-g_sig_l_total.SetLineColor(1)
-g_sig_t_total.SetLineColor(2)
-g_sig_l_total.SetLineWidth(2)
-g_sig_t_total.SetLineWidth(2)
-g_sig_t_total.SetLineStyle(2)
 
 # Create and draw TLegend
 leg = ROOT.TLegend(0.7, 0.7, 0.97, 0.97)
