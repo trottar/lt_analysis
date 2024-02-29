@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:54:45 trottar"
+# Time-stamp: "2024-02-29 15:20:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -514,10 +514,10 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
         # Progress bar
         Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
-      if ParticleType == "kaon":          
-          ALLCUTS =  apply_simc_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
-      else:
-          ALLCUTS = apply_simc_cuts(evt)
+        if ParticleType == "kaon":          
+            ALLCUTS =  apply_simc_cuts(evt, mm_min=1.10, mm_max=1.18) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
+        else:
+            ALLCUTS = apply_simc_cuts(evt)
 
         #Fill SIMC events
         if(ALLCUTS):
