@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:22:08 trottar"
+# Time-stamp: "2024-02-29 14:26:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,7 +14,7 @@
 ###############################################################################################################################################
 # Establish global variables so that they're not called each iteration of loop
 
-# First, define empty strings
+# First, define empty variables
 W = ""
 Q2 = ""
 EPSSET = ""
@@ -45,15 +45,17 @@ def set_val(inpDict):
     tmax = inpDict["tmax"] 
     
     # Define diamond cut parameters
-    a1 = float(inpDict["a1"])
-    b1 = float(inpDict["b1"])
-    a2 = float(inpDict["a2"])
-    b2 = float(inpDict["b2"])
-    a3 = float(inpDict["a3"])
-    b3 = float(inpDict["b3"])
-    a4 = float(inpDict["a4"])
-    b4 = float(inpDict["b4"])
+    a1 = inpDict["a1"]
+    b1 = inpDict["b1"]
+    a2 = inpDict["a2"]
+    b2 = inpDict["b2"]
+    a3 = inpDict["a3"]
+    b3 = inpDict["b3"]
+    a4 = inpDict["a4"]
+    b4 = inpDict["b4"]
 
+    print("!!!!!!!!!!!!!!!!!!",a1,a2,a3)
+    
     ##############
     # HARD CODED #
     ##############
