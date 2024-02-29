@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:44:15 trottar"
+# Time-stamp: "2024-02-29 18:46:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -777,7 +777,6 @@ c_total_l_t = TCanvas()
 # Set properties for g_sig_l_total and g_sig_t_total
 g_sig_l_total.SetMarkerStyle(5)
 g_sig_t_total.SetMarkerColor(2)
-g_sig_t_total.SetLineColor(2)
 g_sig_t_total.SetMarkerStyle(4)
 
 # Create TMultiGraph and add glo, ghi
@@ -825,7 +824,7 @@ g_sig_l_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
-g_sig_t_total.SetLineColor(1)
+g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.Draw("A*")
 g_sig_t_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
