@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-28 09:24:23 trottar"
+# Time-stamp: "2024-02-29 17:12:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -79,6 +79,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
     # Set HIEPS for lt_active script
     set_val(LOEPS, HIEPS)
+
+    eps_diff = HIEPS-LOEPS
     
     sig_L_g  = TGraphErrors()
     sig_T_g  = TGraphErrors()
@@ -87,7 +89,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
     sig_lo = TGraphErrors()
     sig_hi = TGraphErrors()
-    sig_diff = TGraphErrors()
+    sig_diff_g = TGraphErrors()
 
     nlo = TNtuple("nlo", "nlo", "x/F:dx:x_mod:eps:theta:phi:t:t_min:w:Q2")
     nlo.ReadFile(fn_lo)
@@ -610,6 +612,12 @@ def single_setting(q2_set, fn_lo, fn_hi):
         if ghi.GetMinimum() < glo.GetMinimum():
             glo.SetMinimum(ghi.GetMinimum() * 0.9)
 
+        sig_diff = (ave_sig_hi-ave_sig_lo)/eps_diff
+        sig_diff_g.SetPoint(sig_diff_g.GetN(), t_list[i], sig_diff)
+
+        sig_diff_err = sig_diff*math.sqrt((err_sig_hi/ave_sig_hi)**2+(err_sig_lo/ave_sig_lo)**2)
+        sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)
+            
         # Define variables for cross sections and errors
         sig_l, sig_t, sig_lt, sig_tt = fff2.GetParameter(1), fff2.GetParameter(0), fff2.GetParameter(2), fff2.GetParameter(3)
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = fff2.GetParError(1), fff2.GetParError(0), fff2.GetParError(2), fff2.GetParError(3)
@@ -732,11 +740,24 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_TT_g.Draw("a*")
         c3.Print(outputpdf)
 
+        # Create TCanvas
+        c5 = ROOT.TCanvas()
+
+        sig_t_lo.Draw("a*")
+        c5.Print(outputpdf)
+        
+        sig_t_hi.Draw("a*")
+        c5.Print(outputpdf)
+
+        sig_diff_g.Draw("a*")
+        c5.Print(outputpdf)
+        
         # Delete canvases
         del c1
         del c2
         del c3
         del c4
+        del c5
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
 fn_hi =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)

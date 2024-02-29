@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:23:34 trottar"
+# Time-stamp: "2024-02-29 16:59:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -323,7 +323,8 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             elif phiset == "Left": setting = np.append(setting,1)
             else: setting = np.append(setting,2)
 
-    G_ratio = TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),ratio_err_data)
+    #G_ratio = TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),ratio_err_data)
+    G_ratio = TGraphErrors(len(ratio_data),setting,ratio_data)
 
     G_ratio.SetMarkerStyle(21)
     G_ratio.SetMarkerSize(1)
