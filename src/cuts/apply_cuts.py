@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:35:30 trottar"
+# Time-stamp: "2024-02-29 14:37:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,7 +35,7 @@ def set_val(inpDict):
     
     global W, Q2, EPSSET
     global tmin, tmax
-    global a1, b1, a2, b2, a3, b3
+    global a1, b1, a2, b2, a3, b3, a4, b4
     
     W = inpDict["W"] 
     Q2 = inpDict["Q2"] 
