@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:46:20 trottar"
+# Time-stamp: "2024-02-29 18:48:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -775,7 +775,9 @@ f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total_l_t = TCanvas()
 
 # Set properties for g_sig_l_total and g_sig_t_total
+g_sig_l_total.SetLineColor(1)
 g_sig_l_total.SetMarkerStyle(5)
+g_sig_t_total.SetLineColor(2)
 g_sig_t_total.SetMarkerColor(2)
 g_sig_t_total.SetMarkerStyle(4)
 
@@ -803,7 +805,7 @@ f_exp_t.SetLineWidth(2)
 f_exp_t.SetLineStyle(2)
 
 # Create and draw TLegend
-leg = ROOT.TLegend(0.7, 0.5, 0.95, 0.75)
+leg = ROOT.TLegend(0.5, 0.7, 0.75, 0.95)
 leg.SetFillColor(0)
 leg.SetMargin(0.4)
 leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L}", "p")
