@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:42:57 trottar"
+# Time-stamp: "2024-02-29 18:44:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -825,6 +825,7 @@ g_sig_l_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
+g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
 g_sig_t_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
