@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 17:53:22 trottar"
+# Time-stamp: "2024-02-29 17:54:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -774,21 +774,21 @@ ROOT.gStyle.SetOptFit(1)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit("MRQ")
+g_sig_l_total.Fit("R")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit("MRQ")
+g_sig_t_total.Fit("R")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit("MRQ")
+g_sig_lt_total.Fit("R")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit("MRQ")
+g_sig_tt_total.Fit("R")
 c_total.Print(outputpdf+')')
 c_total.Clear()
