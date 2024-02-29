@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 17:14:57 trottar"
+# Time-stamp: "2024-02-29 17:53:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,8 +29,8 @@ else:
 Q2 = sys.argv[3]
 W = sys.argv[4]
 
-LOEPS = sys.argv[5]
-HIEPS = sys.argv[6]
+LOEPS = float(sys.argv[5])
+HIEPS = float(sys.argv[6])
 
 ################################################################################################################################################
 '''
@@ -149,19 +149,19 @@ def single_setting(q2_set, fn_lo, fn_hi):
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
         
-        tpp = ""
+        tcut = ""
 
         if i == 0:
-            tpp = "t < {0} && x!=0.0".format(float(t_list[i]+0.01))
-            print(tpp)
+            tcut = "t < {0} && x!=0.0".format(float(t_list[i]+0.01))
+            print(tcut)
         else:
-            tpp = "(t > {0} && t < {1}) && x!=0.0".format(float(t_list[i-1])+0.01, float(t_list[i])+0.01)
-            print(tpp)
+            tcut = "(t > {0} && t < {1}) && x!=0.0".format(float(t_list[i-1])+0.01, float(t_list[i])+0.01)
+            print(tcut)
 
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        nlo.Draw("x:phi:dx", tpp, "goff")
+        nlo.Draw("x:phi:dx", tcut, "goff")
 
         #glo_tmp = TGraphErrors(nlo.GetSelectedRows(), nlo.GetV2(), nlo.GetV1(), [0]*nlo.GetSelectedRows(), nlo.GetV3())
         glo_tmp = TGraphErrors()
@@ -186,7 +186,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
 
-        nhi.Draw("x:phi:dx", tpp, "goff")
+        nhi.Draw("x:phi:dx", tcut, "goff")
 
         #ghi_tmp = TGraphErrors(nhi.GetSelectedRows(), nhi.GetV2(), nhi.GetV1(), 0, nhi.GetV3())
         ghi_tmp = TGraphErrors()
@@ -662,16 +662,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_sig_tt_total.SetTitle("t = {:.3f}".format(t_list[i]))
         
         # Set points and errors for g_sig_l_total, g_sig_t_total, g_sig_lt_total, and g_sig_tt_total
-        g_sig_l_total.SetPoint(g_sig_l_total.GetN(), t_list[i], sig_l)
+        g_sig_l_total.SetPoint(g_sig_l_total.GetN(), float(t_list[i]), sig_l)
         g_sig_l_total.SetPointError(g_sig_l_total.GetN() - 1, 0, sig_l_err)
 
-        g_sig_t_total.SetPoint(g_sig_t_total.GetN(), t_list[i], sig_t)
+        g_sig_t_total.SetPoint(g_sig_t_total.GetN(), float(t_list[i]), sig_t)
         g_sig_t_total.SetPointError(g_sig_t_total.GetN() - 1, 0, sig_t_err)
 
-        g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), t_list[i], sig_lt)
+        g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), float(t_list[i]), sig_lt)
         g_sig_lt_total.SetPointError(g_sig_lt_total.GetN() - 1, 0, sig_lt_err)
 
-        g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), t_list[i], sig_tt)
+        g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), float(t_list[i]), sig_tt)
         g_sig_tt_total.SetPointError(g_sig_tt_total.GetN() - 1, 0, sig_tt_err)
 
         sig_L_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
@@ -691,10 +691,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_TT_g.SetTitle("t = {:.3f}".format(t_list[i]))        
         
         # Set points and errors for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
-        sig_L_g.SetPoint(i, t_list[i], sig_l)
-        sig_T_g.SetPoint(i, t_list[i], sig_t)
-        sig_LT_g.SetPoint(i, t_list[i], sig_lt)
-        sig_TT_g.SetPoint(i, t_list[i], sig_tt)
+        sig_L_g.SetPoint(i, float(t_list[i]), sig_l)
+        sig_T_g.SetPoint(i, float(t_list[i]), sig_t)
+        sig_LT_g.SetPoint(i, float(t_list[i]), sig_lt)
+        sig_TT_g.SetPoint(i, float(t_list[i]), sig_tt)
 
         sig_L_g.SetPointError(i, 0.0, sig_l_err)
         sig_T_g.SetPointError(i, 0.0, sig_t_err)
@@ -774,17 +774,21 @@ ROOT.gStyle.SetOptFit(1)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
+g_sig_l_total.Fit("MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.Draw("A*")
+g_sig_t_total.Fit("MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
+g_sig_lt_total.Fit("MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
+g_sig_tt_total.Fit("MRQ")
 c_total.Print(outputpdf+')')
 c_total.Clear()
