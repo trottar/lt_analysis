@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:50:54 trottar"
+# Time-stamp: "2024-02-29 18:53:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -804,8 +804,12 @@ f_exp_t.SetLineColor(2)
 f_exp_t.SetLineWidth(2)
 f_exp_t.SetLineStyle(2)
 
+# Draw f_exp_l and f_exp_t on the same canvas
+f_exp_l.Draw("same")
+f_exp_t.Draw("same")
+
 # Create and draw TLegend
-leg = ROOT.TLegend(0.7, 0.7, 0.95, 0.95)
+leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
 leg.SetFillColor(0)
 leg.SetMargin(0.4)
 leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L}", "p")
