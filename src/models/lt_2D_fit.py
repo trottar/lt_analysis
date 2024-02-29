@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 17:12:37 trottar"
+# Time-stamp: "2024-02-29 17:14:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -613,7 +613,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
             glo.SetMinimum(ghi.GetMinimum() * 0.9)
 
         sig_diff = (ave_sig_hi-ave_sig_lo)/eps_diff
-        sig_diff_g.SetPoint(sig_diff_g.GetN(), t_list[i], sig_diff)
+        sig_diff_g.SetPoint(sig_diff_g.GetN(), float(t_list[i]), sig_diff)
 
         sig_diff_err = sig_diff*math.sqrt((err_sig_hi/ave_sig_hi)**2+(err_sig_lo/ave_sig_lo)**2)
         sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)
@@ -743,10 +743,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Create TCanvas
         c5 = ROOT.TCanvas()
 
-        sig_t_lo.Draw("a*")
+        sig_lo.Draw("a*")
         c5.Print(outputpdf)
         
-        sig_t_hi.Draw("a*")
+        sig_hi.Draw("a*")
         c5.Print(outputpdf)
 
         sig_diff_g.Draw("a*")
