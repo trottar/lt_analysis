@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 14:33:58 trottar"
+# Time-stamp: "2024-02-29 14:35:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,7 +116,7 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
     HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
 
-    print("!!!!!!!!!!!!!!!!!!",type(evt.Q2),type(evt.W),type(a1),type(b1))
+    print("!!!!!!!!!!!!!!!!!!",type(a1),type(b1),type(a2),type(b2),type(a3),type(b3),type(a4),type(b4))
     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
     t_RANGE =  (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
