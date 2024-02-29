@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:06:11 trottar"
+# Time-stamp: "2024-02-29 18:16:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -647,15 +647,19 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [nb/GeV^{2}]")
+        g_sig_l_total.SetTitle("t = {:.3f}".format(t_list[i]))
         
         g_sig_t_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_t_total.GetYaxis().SetTitle("#it{#sigma}_{T} [nb/GeV^{2}]")
+        g_sig_t_total.SetTitle("t = {:.3f}".format(t_list[i]))
 
         g_sig_lt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_lt_total.GetYaxis().SetTitle("#it{#sigma}_{LT} [nb/GeV^{2}]")
+        g_sig_lt_total.SetTitle("t = {:.3f}".format(t_list[i]))
 
         g_sig_tt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_tt_total.GetYaxis().SetTitle("#it{#sigma}_{TT} [nb/GeV^{2}]")
+        g_sig_tt_total.SetTitle("t = {:.3f}".format(t_list[i]))
         
         # Set points and errors for g_sig_l_total, g_sig_t_total, g_sig_lt_total, and g_sig_tt_total
         g_sig_l_total.SetPoint(g_sig_l_total.GetN(), float(t_list[i]), sig_l)
@@ -672,15 +676,19 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sig_L_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_L_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+        sig_L_g.SetTitle("t = {:.3f}".format(t_list[i]))
         
         sig_T_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_T_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [nb/GeV^{2}]")
+        sig_T_g.SetTitle("t = {:.3f}".format(t_list[i]))
 
         sig_LT_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_LT_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
+        sig_LT_g.SetTitle("t = {:.3f}".format(t_list[i]))
 
         sig_TT_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_TT_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
+        sig_TT_g.SetTitle("t = {:.3f}".format(t_list[i]))        
         
         # Set points and errors for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.SetPoint(i, float(t_list[i]), sig_l)
@@ -763,9 +771,9 @@ single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 
 ROOT.gStyle.SetOptFit(1)
 
-c_total = TCanvas()
-
 f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
+
+c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
 g_sig_l_total.Fit(f_exp, "MRQ")
@@ -784,5 +792,36 @@ c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
 g_sig_tt_total.Fit(f_exp, "MRQ")
-c_total.Print(outputpdf+')')
+c_total.Print(outputpdf)
 c_total.Clear()
+
+c_total_l_t = TCanvas()
+
+# Create TMultiGraph and add glo, ghi
+g = ROOT.TMultiGraph()
+g.Add(g_sig_l_total)
+g.Add(g_sig_t_total)
+
+g.Draw("A*")
+
+g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right) [nb/GeV^{2}]")
+g.GetYaxis().CenterTitle()
+g.GetYaxis().SetTitleOffset(1.4)
+
+g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+g.GetXaxis().CenterTitle()
+g.GetXaxis().SetLimits(0, 360)
+
+g_sig_l_total.Fit(f_exp, "MRQ")
+g_sig_t_total.Fit(f_exp, "MRQ")
+
+# Create and draw TLegend
+leg = ROOT.TLegend(0.7, 0.7, 0.97, 0.97)
+leg.SetFillColor(0)
+leg.SetMargin(0.4)
+leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L} [nb/GeV^{2}]", "p")
+leg.AddEntry(g_sig_t_total, "#it{#sigma}_{T} [nb/GeV^{2}]", "p")
+leg.Draw()
+
+c_total_l_t.Print(outputpdf+')')
+c_total_l_t.Clear()
