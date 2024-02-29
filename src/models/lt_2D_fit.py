@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:00:11 trottar"
+# Time-stamp: "2024-02-29 18:06:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -647,19 +647,15 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [nb/GeV^{2}]")
-        g_sig_l_total.SetTitle("t = {:.3f}".format(t_list[i]))
         
         g_sig_t_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_t_total.GetYaxis().SetTitle("#it{#sigma}_{T} [nb/GeV^{2}]")
-        g_sig_t_total.SetTitle("t = {:.3f}".format(t_list[i]))
 
         g_sig_lt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_lt_total.GetYaxis().SetTitle("#it{#sigma}_{LT} [nb/GeV^{2}]")
-        g_sig_lt_total.SetTitle("t = {:.3f}".format(t_list[i]))
 
         g_sig_tt_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_tt_total.GetYaxis().SetTitle("#it{#sigma}_{TT} [nb/GeV^{2}]")
-        g_sig_tt_total.SetTitle("t = {:.3f}".format(t_list[i]))
         
         # Set points and errors for g_sig_l_total, g_sig_t_total, g_sig_lt_total, and g_sig_tt_total
         g_sig_l_total.SetPoint(g_sig_l_total.GetN(), float(t_list[i]), sig_l)
@@ -676,19 +672,15 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sig_L_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_L_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
-        sig_L_g.SetTitle("t = {:.3f}".format(t_list[i]))
         
         sig_T_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_T_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [nb/GeV^{2}]")
-        sig_T_g.SetTitle("t = {:.3f}".format(t_list[i]))
 
         sig_LT_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_LT_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
-        sig_LT_g.SetTitle("t = {:.3f}".format(t_list[i]))
 
         sig_TT_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_TT_g.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
-        sig_TT_g.SetTitle("t = {:.3f}".format(t_list[i]))        
         
         # Set points and errors for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.SetPoint(i, float(t_list[i]), sig_l)
