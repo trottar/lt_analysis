@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 19:51:49 trottar"
+# Time-stamp: "2024-02-29 19:53:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -184,7 +184,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         err_sig_lo = glo.GetRMS(2)
 
         sig_lo.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        sig_lo.GetYaxis().SetTitle("#it{#epsilon}_{Low}")
+        sig_lo.GetYaxis().SetTitle("#it{#epsilon}_{Truth, Low}")
         sig_lo.SetTitle("t = {:.3f}".format(t_list[i]))
         
         sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
@@ -213,7 +213,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         err_sig_hi = ghi.GetRMS(2)
 
         sig_hi.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        sig_hi.GetYaxis().SetTitle("#it{#epsilon}_{High}")
+        sig_hi.GetYaxis().SetTitle("#it{#epsilon}_{Truth, High}")
         sig_hi.SetTitle("t = {:.3f}".format(t_list[i]))
         
         sig_hi.SetPoint(sig_hi.GetN(), float(t_list[i]), ave_sig_hi)
@@ -621,7 +621,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
             glo.SetMinimum(ghi.GetMinimum() * 0.9)
 
         sig_diff_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        sig_diff_g.GetYaxis().SetTitle("#frac{#it{#Delta#epsilon}_{true}}{#it{#Delta#epsilon}}")
+        sig_diff_g.GetYaxis().SetTitle("#frac{#it{#Delta#epsilon}_{Truth}}{#it{#Delta#epsilon}}")
             
         sig_diff = (ave_sig_hi-ave_sig_lo)/eps_diff
         sig_diff_g.SetPoint(sig_diff_g.GetN(), float(t_list[i]), sig_diff)
