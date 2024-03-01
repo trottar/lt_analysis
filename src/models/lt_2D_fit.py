@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:28:08 trottar"
+# Time-stamp: "2024-02-29 23:29:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -847,23 +847,9 @@ for i in range(num_events):
     g_lo_event.Fit(f_lin_l, "MRQ")
     #g_hi_event.Fit(f_lin_t, "MRQ")
     
-    # Set properties for 'lo' and 'hi' events
-    g_lo_event.SetLineColor(1)
-    g_lo_event.SetMarkerStyle(5)
-    g_hi_event.SetLineColor(2)
-    g_hi_event.SetMarkerColor(2)
-    g_hi_event.SetMarkerStyle(4)
-    
-    # Set line properties for 'lo' and 'hi' fits
-    f_lin_l.SetLineColor(1)
-    f_lin_l.SetLineWidth(2)
-    f_lin_t.SetLineColor(2)
-    f_lin_t.SetLineWidth(2)
-    f_lin_t.SetLineStyle(2)
-    
     # Draw 'lo' and 'hi' fits on the same canvas
     f_lin_l.Draw("same")
-    f_lin_t.Draw("same")
+    #f_lin_t.Draw("same")
     
     # Create and draw TLegend
     leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
