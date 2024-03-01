@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 17:11:35 trottar"
+# Time-stamp: "2024-03-01 17:25:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -160,7 +160,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) 
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -190,7 +190,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) 
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -220,7 +220,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) 
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -250,7 +250,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) 
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
