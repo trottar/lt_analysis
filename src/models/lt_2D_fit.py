@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 20:54:40 trottar"
+# Time-stamp: "2024-02-29 20:55:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -755,9 +755,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_diff_g.Draw("a*")
         c5.Print(outputpdf)
 
-        f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
-        f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
-
         # Calculate integrated cross sections
         lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
         hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
@@ -795,6 +792,9 @@ g_unsep_lo = TGraphErrors()
 g_unsep_hi = TGraphErrors()
 
 single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
+
+f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
+f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
 
 c6 = TCanvas()
 
