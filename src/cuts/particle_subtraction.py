@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:02:30 trottar"
+# Time-stamp: "2024-03-01 15:08:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -169,8 +169,8 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
         if(ALLCUTS):
     
           #H_MM_SUB_DATA.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
-          #H_MM_SUB_DATA.Fill(evt.missmass, evt.Weight)
-          H_MM_SUB_DATA.Fill(evt.missmass)
+          #H_MM_SUB_DATA.Fill(evt.MM, evt.Weight)
+          H_MM_SUB_DATA.Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -202,8 +202,8 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
         if(ALLCUTS):
     
           #H_MM_SUB_DUMMY.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
-          #H_MM_SUB_DUMMY.Fill(evt.missmass, evt.Weight)
-          H_MM_SUB_DUMMY.Fill(evt.missmass)
+          #H_MM_SUB_DUMMY.Fill(evt.MM, evt.Weight)
+          H_MM_SUB_DUMMY.Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -235,8 +235,8 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
         if(ALLCUTS):
     
           #H_MM_SUB_RAND.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
-          #H_MM_SUB_RAND.Fill(evt.missmass, evt.Weight)
-          H_MM_SUB_RAND.Fill(evt.missmass)
+          #H_MM_SUB_RAND.Fill(evt.MM, evt.Weight)
+          H_MM_SUB_RAND.Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -268,8 +268,8 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
         if(ALLCUTS):
     
           #H_MM_SUB_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
-          #H_MM_SUB_DUMMY_RAND.Fill(evt.missmass, evt.Weight)
-          H_MM_SUB_DUMMY_RAND.Fill(evt.missmass)
+          #H_MM_SUB_DUMMY_RAND.Fill(evt.MM, evt.Weight)
+          H_MM_SUB_DUMMY_RAND.Fill(evt.MM)
 
 
     H_MM_SUB_RAND.Scale(1/nWindows)
