@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:42:07 trottar"
+# Time-stamp: "2024-03-01 15:46:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,7 +43,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def particle_subtraction(nWindows, inpDict, phi_setting, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
+def particle_subtraction(histDict, nWindows, inpDict, phi_setting, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -53,6 +53,8 @@ def particle_subtraction(nWindows, inpDict, phi_setting, SubtractedParticle, hgc
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
+    nWindows = histDict["nWindows"]
+    
     ################################################################################################################################################
     # Import function to define cut bools
     from apply_cuts import apply_data_cuts, set_val
@@ -285,4 +287,5 @@ def particle_subtraction(nWindows, inpDict, phi_setting, SubtractedParticle, hgc
     
     H_MM_SUB_DATA.Scale(scale_factor)
 
-    return H_MM_SUB_DATA
+    histDict["H_MM_SUB_DUMMY"] = H_MM_SUB_DUMMY
+    histDict["H_MM_SUB_DATA"] = H_MM_SUB_DATA
