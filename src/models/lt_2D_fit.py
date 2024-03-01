@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:43:34 trottar"
+# Time-stamp: "2024-02-29 23:45:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -756,6 +756,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Calculate integrated cross sections
         lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
         hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
+
+        g_unsep_lo.SetTitle("t = {:.3f}".format(t_list[i]))
         
         #unsep_lo = sig_t + ave_sig_lo*sig_l
         #unsep_lo_err = math.sqrt(sig_l_err**2+sig_t_err**2)
