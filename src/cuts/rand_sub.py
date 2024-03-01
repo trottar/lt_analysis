@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:38:43 trottar"
+# Time-stamp: "2024-03-01 15:42:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1152,12 +1152,6 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
-
-    # Pion subtraction by scaling simc to peak size
-    if ParticleType == "kaon":
-        from particle_subtraction import particle_subtraction
-        SubtractedParticle = "pion"
-        histDict["H_MM_SUB_DATA"] =  particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
     
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
@@ -1258,6 +1252,12 @@ def rand_sub(phi_setting, inpDict):
     histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
     histDict["NumEvts_MM_DUMMY"] = int(H_MM_DUMMY.Integral())
     histDict["NumEvts_MM_DATA"] = int(H_MM_DATA.Integral())
+
+    # Pion subtraction by scaling simc to peak size
+    if ParticleType == "kaon":
+        from particle_subtraction import particle_subtraction
+        SubtractedParticle = "pion"
+        histDict["H_MM_SUB_DATA"] =  particle_subtraction(nWindows, inpDict, phi_setting, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
     
     ###
     # CT plots

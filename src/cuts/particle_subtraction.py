@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:38:53 trottar"
+# Time-stamp: "2024-03-01 15:42:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,7 +43,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
+def particle_subtraction(nWindows, inpDict, phi_setting, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
