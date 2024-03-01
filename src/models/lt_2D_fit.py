@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:56:25 trottar"
+# Time-stamp: "2024-02-29 23:58:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -841,22 +841,13 @@ for i in range(num_events):
     g_unsep_mult.GetXaxis().SetTitleOffset(1.4)
     
     # Fit functions to 'lo' and 'hi' events
-    f_lin_l = ROOT.TF1("f_lin_l", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
-    #f_lin_t = ROOT.TF1("f_lin_t", "[0]*x + [1]", 0, 1)  # Define fit function for 'hi'
-    #g_lo_event.Fit(f_lin_l, "MRQ")
-    #g_hi_event.Fit(f_lin_t, "MRQ")
-    g_unsep_mult.Fit(f_lin_l, "MRQ")
+    f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
+    g_unsep_mult.Fit(f_lin, "MRQ")
         
     # Set line properties for 'lo' and 'hi' fits
-    f_lin_l.SetLineColor(2)
-    f_lin_l.SetLineWidth(2)
-    #f_lin_t.SetLineColor(2)
-    #f_lin_t.SetLineWidth(2)
-    #f_lin_t.SetLineStyle(2)
-    
-    # Draw 'lo' and 'hi' fits on the same canvas
-    f_lin_l.Draw("same")
-    #f_lin_t.Draw("same")
+    f_lin.SetLineColor(2)
+    f_lin.SetLineWidth(2)    
+    f_lin.Draw("same")
     
     # Create and draw TLegend
     leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
