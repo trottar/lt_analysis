@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 21:11:13 trottar"
+# Time-stamp: "2024-02-29 21:15:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -799,51 +799,93 @@ f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
 f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
 
 # Create a canvas
-c6 = ROOT.TCanvas()
+c = ROOT.TCanvas("c", "c", 800, 600)
 
-# Draw points from g_unsep_lo on separate plots
-for i in range(g_unsep_lo.GetN()):
-    x = ROOT.Double(0)
-    y = ROOT.Double(0)
-    g_unsep_lo.GetPoint(i, x, y)
-    point_graph = ROOT.TGraph(1)
-    point_graph.SetPoint(0, x, y)
-    point_graph.SetMarkerStyle(5)  # Use the same marker style as g_unsep_lo
-    point_graph.SetMarkerColor(1)  # Use the same color as g_unsep_lo
-    point_graph.Draw("AP" if i == 0 else "P same")  # Use "AP" for the first point to draw axes
+# Define the number of events in 'lo'
+num_events = g_unsep_lo.GetN()
 
-# Draw points from g_unsep_hi on separate plots
-for i in range(g_unsep_hi.GetN()):
-    x = ROOT.Double(0)
-    y = ROOT.Double(0)
-    g_unsep_hi.GetPoint(i, x, y)
-    point_graph = ROOT.TGraph(1)
-    point_graph.SetPoint(0, x, y)
-    point_graph.SetMarkerStyle(20)  # Use a different marker style for g_unsep_hi
-    point_graph.SetMarkerColor(2)   # Use a different color for g_unsep_hi
-    point_graph.Draw("P same")  # Draw points from g_unsep_hi on the same canvas
+# Loop over each event in 'lo'
+for i in range(num_events):
+    # Create a new canvas for each event
+    c.Clear()
+    
+    # Create a new TMultiGraph for each event
+    g_sig_mult = ROOT.TMultiGraph()
+    
+    # Create TGraphErrors for 'lo' event
+    g_lo_event = ROOT.TGraphErrors(1, ROOT.Double(0), ROOT.Double(0), ROOT.Double(0), ROOT.Double(0))
+    
+    # Get the data points for the current event in 'lo'
+    x_lo, y_lo = ROOT.Double(0), ROOT.Double(0)
+    g_unsep_lo.GetPoint(i, x_lo, y_lo)
+    x_err_lo = g_unsep_lo.GetErrorX(i)
+    y_err_lo = g_unsep_lo.GetErrorY(i)
+    
+    # Set the data points for 'lo' event
+    g_lo_event.SetPoint(0, x_lo, y_lo)
+    g_lo_event.SetPointError(0, x_err_lo, y_err_lo)
+    
+    # Add 'lo' event to the TMultiGraph
+    g_sig_mult.Add(g_lo_event)
+    
+    # Create TGraphErrors for 'hi' event
+    g_hi_event = ROOT.TGraphErrors(1, ROOT.Double(0), ROOT.Double(0), ROOT.Double(0), ROOT.Double(0))
+    
+    # Get the data points for the corresponding event in 'hi'
+    x_hi, y_hi = ROOT.Double(0), ROOT.Double(0)
+    g_unsep_hi.GetPoint(i, x_hi, y_hi)
+    x_err_hi = g_unsep_hi.GetErrorX(i)
+    y_err_hi = g_unsep_hi.GetErrorY(i)
+    
+    # Set the data points for 'hi' event
+    g_hi_event.SetPoint(0, x_hi, y_hi)
+    g_hi_event.SetPointError(0, x_err_hi, y_err_hi)
+    
+    # Add 'hi' event to the TMultiGraph
+    g_sig_mult.Add(g_hi_event)
+    
+    # Draw TMultiGraph for the current event
+    g_sig_mult.Draw("AP")
+    
+    # Set axis titles and offsets
+    g_sig_mult.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
+    g_sig_mult.GetYaxis().SetTitleOffset(1.4)
+    g_sig_mult.GetXaxis().SetTitle("#epsilon")
+    g_sig_mult.GetXaxis().SetTitleOffset(1.4)
+    
+    # Fit functions to 'lo' and 'hi' events
+    f_lin_l = ROOT.TF1("f_lin_l", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
+    f_lin_t = ROOT.TF1("f_lin_t", "[0]*x + [1]", 0, 1)  # Define fit function for 'hi'
+    g_lo_event.Fit(f_lin_l, "MRQ")
+    g_hi_event.Fit(f_lin_t, "MRQ")
+    
+    # Set properties for 'lo' and 'hi' events
+    g_lo_event.SetLineColor(1)
+    g_lo_event.SetMarkerStyle(5)
+    g_hi_event.SetLineColor(2)
+    g_hi_event.SetMarkerColor(2)
+    g_hi_event.SetMarkerStyle(4)
+    
+    # Set line properties for 'lo' and 'hi' fits
+    f_lin_l.SetLineColor(1)
+    f_lin_l.SetLineWidth(2)
+    f_lin_t.SetLineColor(2)
+    f_lin_t.SetLineWidth(2)
+    f_lin_t.SetLineStyle(2)
+    
+    # Draw 'lo' and 'hi' fits on the same canvas
+    f_lin_l.Draw("same")
+    f_lin_t.Draw("same")
+    
+    # Create and draw TLegend
+    leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
+    leg.SetFillColor(0)
+    leg.SetMargin(0.4)
+    leg.AddEntry(g_lo_event, "#epsilon_{Low}", "p")
+    leg.AddEntry(g_hi_event, "#epsilon_{High}", "p")
+    leg.Draw()
 
-# Fit functions to the graphs
-g_unsep_lo.Fit(f_lin_l, "MRQ")
-g_unsep_hi.Fit(f_lin_t, "MRQ")
-
-# Set line properties for fitted functions
-f_lin_l.SetLineColor(1)
-f_lin_l.SetLineWidth(2)
-f_lin_t.SetLineColor(2)
-f_lin_t.SetLineWidth(2)
-f_lin_t.SetLineStyle(2)
-
-# Create and draw a legend
-leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
-leg.SetFillColor(0)
-leg.SetMargin(0.4)
-leg.AddEntry(g_unsep_lo, "#epsilon_{Low}", "p")
-leg.AddEntry(g_unsep_hi, "#epsilon_{High}", "p")
-leg.Draw()
-
-# Save plot to PDF
-c6.Print(outputpdf)
+    c.Print(outputpdf)
 
 f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
 f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
