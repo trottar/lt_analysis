@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:55:46 trottar"
+# Time-stamp: "2024-02-29 23:56:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -843,8 +843,9 @@ for i in range(num_events):
     # Fit functions to 'lo' and 'hi' events
     f_lin_l = ROOT.TF1("f_lin_l", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
     #f_lin_t = ROOT.TF1("f_lin_t", "[0]*x + [1]", 0, 1)  # Define fit function for 'hi'
-    g_lo_event.Fit(f_lin_l, "MRQ")
+    #g_lo_event.Fit(f_lin_l, "MRQ")
     #g_hi_event.Fit(f_lin_t, "MRQ")
+    g_unsep_mult.Fit(f_lin_l, "MRQ")
         
     # Set line properties for 'lo' and 'hi' fits
     f_lin_l.SetLineColor(2)
