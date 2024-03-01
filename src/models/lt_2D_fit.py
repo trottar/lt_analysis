@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:31:11 trottar"
+# Time-stamp: "2024-02-29 23:32:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -848,8 +848,8 @@ for i in range(num_events):
     #g_hi_event.Fit(f_lin_t, "MRQ")
         
     # Set line properties for 'lo' and 'hi' fits
-    f_lin_l.SetLineStyle(1)
-    f_lin_t.SetLineStyle(1)
+    f_lin_l.SetLineColor(1)
+    f_lin_l.SetLineWidth(2)
     
     # Draw 'lo' and 'hi' fits on the same canvas
     f_lin_l.Draw("same")
