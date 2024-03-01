@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 00:22:13 trottar"
+# Time-stamp: "2024-03-01 00:24:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -757,17 +757,9 @@ def single_setting(q2_set, fn_lo, fn_hi):
         lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
         hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
         
-        #unsep_lo = sig_t + ave_sig_lo*sig_l
-        #unsep_lo_err = math.sqrt(sig_l_err**2+sig_t_err**2)
-        #g_unsep_lo.SetPoint(g_unsep_lo.GetN(), LOEPS, unsep_lo)
-        #g_unsep_lo.SetPointError(g_unsep_lo.GetN()-1, 0, unsep_lo_err)
         g_unsep_lo.SetPoint(g_unsep_lo.GetN(), LOEPS, lo_cross_sec[i])
         g_unsep_lo.SetPointError(g_unsep_lo.GetN()-1, 0, lo_cross_sec_err[i])        
         
-        #unsep_hi = sig_t + ave_sig_hi*sig_l
-        #unsep_hi_err = math.sqrt(sig_l_err**2+sig_t_err**2)
-        #g_unsep_hi.SetPoint(g_unsep_hi.GetN(), HIEPS, unsep_hi)
-        #g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, unsep_hi_err)
         g_unsep_hi.SetPoint(g_unsep_hi.GetN(), HIEPS, hi_cross_sec[i])
         g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, hi_cross_sec_err[i])                
         
