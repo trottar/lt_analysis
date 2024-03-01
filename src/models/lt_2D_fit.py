@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:45:42 trottar"
+# Time-stamp: "2024-02-29 23:48:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -289,7 +289,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigL_change.GetXaxis().SetTitle("Fit Step")
-        sigL_change.GetYaxis().SetTitle("sigL")
+        sigL_change.GetYaxis().SetTitle("#it{#sigma}_{L}")
         
         # sigL_change
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN() + 1, fff2.GetParameter(1))
@@ -297,7 +297,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sigT_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigT_change.GetXaxis().SetTitle("Fit Step")
-        sigT_change.GetYaxis().SetTitle("sigT")
+        sigT_change.GetYaxis().SetTitle("#it{#sigma}_{T}")
         
         # sigT_change
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
@@ -756,8 +756,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Calculate integrated cross sections
         lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
         hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
-
-        g_unsep_lo.SetTitle("t = {:.3f}".format(t_list[i]))
         
         #unsep_lo = sig_t + ave_sig_lo*sig_l
         #unsep_lo_err = math.sqrt(sig_l_err**2+sig_t_err**2)
@@ -780,6 +778,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c4
         del c5
 
+        return t_list
+
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
 fn_hi =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
 
@@ -791,7 +791,7 @@ g_sig_tt_total = TGraphErrors()
 g_unsep_lo = TGraphErrors()
 g_unsep_hi = TGraphErrors()
 
-single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
+t_list = single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 
 f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
 f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
@@ -839,6 +839,7 @@ for i in range(num_events):
     g_unsep_mult.GetYaxis().SetTitleOffset(1.4)
     g_unsep_mult.GetXaxis().SetTitle("#epsilon")
     g_unsep_mult.GetXaxis().SetTitleOffset(1.4)
+    sig_lo.SetTitle("t = {:.3f}".format(t_list[i]))
     
     # Fit functions to 'lo' and 'hi' events
     f_lin_l = ROOT.TF1("f_lin_l", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
