@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:08:46 trottar"
+# Time-stamp: "2024-03-01 15:24:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -193,11 +193,11 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
         
         if ParticleType == "kaon":
 
-            ALLCUTS = apply_dummy_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
 
         else:
 
-            ALLCUTS = apply_dummy_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
     
@@ -226,11 +226,11 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
         
         if ParticleType == "kaon":
 
-            ALLCUTS = apply_rand_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
 
         else:
 
-            ALLCUTS = apply_rand_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
     
@@ -259,11 +259,11 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
         
         if ParticleType == "kaon":
 
-            ALLCUTS = apply_dummy_rand_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
 
         else:
 
-            ALLCUTS = apply_dummy_rand_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
     
