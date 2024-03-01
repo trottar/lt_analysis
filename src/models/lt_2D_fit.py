@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 18:53:34 trottar"
+# Time-stamp: "2024-02-29 19:29:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,6 +183,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
 
+        sig_lo.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        sig_lo.GetYaxis().SetTitle("#it{#epsilon}_{Low}")
+        sig_lo.SetTitle("t = {:.3f}".format(t_list[i]))
+        
         sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
 
@@ -208,6 +212,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         ave_sig_hi = ghi.GetMean(2)
         err_sig_hi = ghi.GetRMS(2)
 
+        sig_hi.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        sig_hi.GetYaxis().SetTitle("#it{#epsilon}_{High}")
+        sig_hi.SetTitle("t = {:.3f}".format(t_list[i]))
+        
         sig_hi.SetPoint(sig_hi.GetN(), float(t_list[i]), ave_sig_hi)
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
 
@@ -612,6 +620,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
         if ghi.GetMinimum() < glo.GetMinimum():
             glo.SetMinimum(ghi.GetMinimum() * 0.9)
 
+        sig_diff_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        sig_diff_g.GetYaxis().SetTitle("#it{#epsilon}_{High}-#it{#epsilon}_{Low}")
+        sig_diff_g.SetTitle("t = {:.3f}".format(t_list[i]))
+            
         sig_diff = (ave_sig_hi-ave_sig_lo)/eps_diff
         sig_diff_g.SetPoint(sig_diff_g.GetN(), float(t_list[i]), sig_diff)
 
