@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 20:53:14 trottar"
+# Time-stamp: "2024-02-29 20:54:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,10 +90,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
     sig_lo = TGraphErrors()
     sig_hi = TGraphErrors()
     sig_diff_g = TGraphErrors()
-
-    g_unsep_lo = TGraphErrors()
-    g_unsep_hi = TGraphErrors()
-
     
     nlo = TNtuple("nlo", "nlo", "x/F:dx:x_mod:eps:theta:phi:t:t_min:w:Q2")
     nlo.ReadFile(fn_lo)
@@ -778,54 +774,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         #g_unsep_hi.SetPoint(g_unsep_hi.GetN(), HIEPS, unsep_hi)
         #g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, unsep_hi_err)
         g_unsep_hi.SetPoint(g_unsep_hi.GetN(), HIEPS, hi_cross_sec[i])
-        g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, hi_cross_sec_err[i])        
-        
-        c6 = TCanvas()
-
-        # Create TMultiGraph and add glo, ghi
-        g_sig_mult = ROOT.TMultiGraph()
-        g_sig_mult.Add(g_unsep_lo)
-        g_sig_mult.Add(g_unsep_hi)
-
-        g_sig_mult.Draw("AP")
-
-        g_sig_mult.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
-        g_sig_mult.GetYaxis().SetTitleOffset(1.4)
-
-        g_sig_mult.GetXaxis().SetTitle("#epsilon")
-        g_sig_mult.GetXaxis().SetTitleOffset(1.4)
-
-        g_unsep_lo.Fit(f_lin_l, "MRQ")
-        g_unsep_hi.Fit(f_lin_t, "MRQ")
-
-        # Set properties for g_unsep_lo and g_unsep_hi
-        g_unsep_lo.SetLineColor(1)
-        g_unsep_lo.SetMarkerStyle(5)
-        g_unsep_hi.SetLineColor(2)
-        g_unsep_hi.SetMarkerColor(2)
-        g_unsep_hi.SetMarkerStyle(4)
-
-        # Set line properties for g_unsep_lo and g_unsep_hi
-        f_lin_l.SetLineColor(1)
-        f_lin_l.SetLineWidth(2)
-        f_lin_t.SetLineColor(2)
-        f_lin_t.SetLineWidth(2)
-        f_lin_t.SetLineStyle(2)
-
-        # Draw f_lin_l and f_lin_t on the same canvas
-        f_lin_l.Draw("same")
-        f_lin_t.Draw("same")
-
-        # Create and draw TLegend
-        leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
-        leg.SetFillColor(0)
-        leg.SetMargin(0.4)
-        leg.AddEntry(g_unsep_lo, "#epsilon_{Low}", "p")
-        leg.AddEntry(g_unsep_hi, "#epsilon_{High}", "p")
-        leg.Draw()
-
-        c6.Print(outputpdf)
-        c6.Clear()
+        g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, hi_cross_sec_err[i])                
         
         # Delete canvases
         del c1
@@ -833,7 +782,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c3
         del c4
         del c5
-        del c6
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
 fn_hi =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
@@ -843,7 +791,57 @@ g_sig_t_total = TGraphErrors()
 g_sig_lt_total = TGraphErrors()
 g_sig_tt_total = TGraphErrors()
 
+g_unsep_lo = TGraphErrors()
+g_unsep_hi = TGraphErrors()
+
 single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
+
+c6 = TCanvas()
+
+# Create TMultiGraph and add glo, ghi
+g_sig_mult = ROOT.TMultiGraph()
+g_sig_mult.Add(g_unsep_lo)
+g_sig_mult.Add(g_unsep_hi)
+
+g_sig_mult.Draw("AP")
+
+g_sig_mult.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
+g_sig_mult.GetYaxis().SetTitleOffset(1.4)
+
+g_sig_mult.GetXaxis().SetTitle("#epsilon")
+g_sig_mult.GetXaxis().SetTitleOffset(1.4)
+
+g_unsep_lo.Fit(f_lin_l, "MRQ")
+g_unsep_hi.Fit(f_lin_t, "MRQ")
+
+# Set properties for g_unsep_lo and g_unsep_hi
+g_unsep_lo.SetLineColor(1)
+g_unsep_lo.SetMarkerStyle(5)
+g_unsep_hi.SetLineColor(2)
+g_unsep_hi.SetMarkerColor(2)
+g_unsep_hi.SetMarkerStyle(4)
+
+# Set line properties for g_unsep_lo and g_unsep_hi
+f_lin_l.SetLineColor(1)
+f_lin_l.SetLineWidth(2)
+f_lin_t.SetLineColor(2)
+f_lin_t.SetLineWidth(2)
+f_lin_t.SetLineStyle(2)
+
+# Draw f_lin_l and f_lin_t on the same canvas
+f_lin_l.Draw("same")
+f_lin_t.Draw("same")
+
+# Create and draw TLegend
+leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
+leg.SetFillColor(0)
+leg.SetMargin(0.4)
+leg.AddEntry(g_unsep_lo, "#epsilon_{Low}", "p")
+leg.AddEntry(g_unsep_hi, "#epsilon_{High}", "p")
+leg.Draw()
+
+c6.Print(outputpdf)
+c6.Clear()
 
 f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
 f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
