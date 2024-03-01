@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:40:32 trottar"
+# Time-stamp: "2024-02-29 23:41:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -796,14 +796,14 @@ single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
 f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
 
-# Create a canvas
-c = ROOT.TCanvas("c", "c", 800, 600)
-
 # Define the number of events in 'lo'
 num_events = g_unsep_lo.GetN()
 
 # Loop over each event in 'lo'
 for i in range(num_events):
+
+    # Create a canvas
+    c = ROOT.TCanvas("c", "c", 800, 600)
     
     # Create a new TMultiGraph for each event
     g_unsep_mult = ROOT.TMultiGraph()
@@ -868,6 +868,8 @@ for i in range(num_events):
     c.Print(outputpdf)
     c.Clear()
 
+    del c
+    
 f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
 f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
 
