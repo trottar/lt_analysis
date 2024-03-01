@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:45:21 trottar"
+# Time-stamp: "2024-03-01 15:56:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1257,7 +1257,13 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":
         from particle_subtraction import particle_subtraction
         SubtractedParticle = "pion"
-        particle_subtraction(histDict, inpDict, phi_setting, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
+        subDict = {}
+        subDict["H_MM_SUB_DATA"] = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        subDict["H_MM_SUB_DUMMY"] = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        subDict["H_MM_SUB_RAND"] = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        subDict["H_MM_SUB_DUMMY_RAND"] = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        subDict["nWindows"] = nWindows
+        histDict["H_MM_SUB_DATA"] = particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
     
     ###
     # CT plots

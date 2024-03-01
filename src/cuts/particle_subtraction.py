@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:49:44 trottar"
+# Time-stamp: "2024-03-01 15:56:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,7 +43,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def particle_subtraction(histDict, inpDict, phi_setting, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
+def particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -53,7 +53,7 @@ def particle_subtraction(histDict, inpDict, phi_setting, SubtractedParticle, hgc
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
-    nWindows = histDict["nWindows"]
+    nWindows = subDict["nWindows"]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -97,10 +97,10 @@ def particle_subtraction(histDict, inpDict, phi_setting, SubtractedParticle, hgc
 
     ################################################################################################################################################
 
-    H_MM_SUB_DATA  = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-    H_MM_SUB_DUMMY  = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-    H_MM_SUB_RAND  = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-    H_MM_SUB_DUMMY_RAND  = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+    H_MM_SUB_DATA = subDict["H_MM_SUB_DATA"]
+    H_MM_SUB_DUMMY = subDict["H_MM_SUB_DUMMY"]
+    H_MM_SUB_RAND = subDict["H_MM_SUB_RAND"]
+    H_MM_SUB_DUMMY_RAND = subDict["H_MM_SUB_DUMMY_RAND"]
     
     ##############
     # HARD CODED #
@@ -287,5 +287,4 @@ def particle_subtraction(histDict, inpDict, phi_setting, SubtractedParticle, hgc
     
     H_MM_SUB_DATA.Scale(scale_factor)
 
-    histDict["H_MM_SUB_DUMMY"] = H_MM_SUB_DUMMY
-    histDict["H_MM_SUB_DATA"] = H_MM_SUB_DATA
+    return H_MM_SUB_DATA
