@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 14:43:48 trottar"
+# Time-stamp: "2024-03-01 14:47:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,8 +80,8 @@ def particle_subtraction(H_MM_SUB_SIMC, hgcer_cutg, inpDict, phi_setting, Subtra
     # HARD CODED #
     ##############
 
-    mm_min = 1.10
-    mm_max = 1.18
+    mm_min = 0.7
+    mm_max = 1.15
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
