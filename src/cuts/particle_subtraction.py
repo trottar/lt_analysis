@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 14:47:14 trottar"
+# Time-stamp: "2024-03-01 14:59:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,12 +43,15 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def particle_subtraction(H_MM_SUB_SIMC, hgcer_cutg, inpDict, phi_setting, SubtractedParticle, scale_factor=1.0):
+def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
+
+    InDATAFilename = inpDict["InDATAFilename"] 
+    InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
     ################################################################################################################################################
     # Import function to define cut bools
@@ -76,6 +79,24 @@ def particle_subtraction(H_MM_SUB_SIMC, hgcer_cutg, inpDict, phi_setting, Subtra
 
     TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
+    ################################################################################################################################################
+    # Define dummy root file trees of interest
+
+    rootFileDummy = OUTPATH + "/" + "{}".format(ParticleType) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+    if not os.path.isfile(rootFileDummy):
+        print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
+        return histDict
+
+    InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
+
+    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    
+    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+
+    H_MM_SUB_DUMMY  = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+    H_MM_SUB_RAND  = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+    H_MM_SUB_DUMMY_RAND  = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+    
     ##############
     # HARD CODED #
     ##############
@@ -151,5 +172,113 @@ def particle_subtraction(H_MM_SUB_SIMC, hgcer_cutg, inpDict, phi_setting, Subtra
           #H_MM_SUB_DATA.Fill(evt.missmass, evt.Weight)
           H_MM_SUB_DATA.Fill(evt.missmass)
 
+    ################################################################################################################################################
+    # Fill histograms for various trees called above
+
+    print("\nGrabbing {} {} dummy...".format(phi_setting,ParticleType))
+    for i,evt in enumerate(TBRANCH_DUMMY):
+
+        # Progress bar
+        Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)        
+
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
+        if ParticleType == "kaon":
+
+            ALLCUTS = apply_dummy_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+
+        else:
+
+            ALLCUTS = apply_dummy_cuts(evt)
+            
+        if(ALLCUTS):
+    
+          #H_MM_SUB_DUMMY.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
+          #H_MM_SUB_DUMMY.Fill(evt.missmass, evt.Weight)
+          H_MM_SUB_DUMMY.Fill(evt.missmass)
+
+    ################################################################################################################################################
+    # Fill histograms for various trees called above
+
+    print("\nGrabbing {} {} rand...".format(phi_setting,ParticleType))
+    for i,evt in enumerate(TBRANCH_RAND):
+
+        # Progress bar
+        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)        
+
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
+        if ParticleType == "kaon":
+
+            ALLCUTS = apply_rand_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+
+        else:
+
+            ALLCUTS = apply_rand_cuts(evt)
+            
+        if(ALLCUTS):
+    
+          #H_MM_SUB_RAND.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
+          #H_MM_SUB_RAND.Fill(evt.missmass, evt.Weight)
+          H_MM_SUB_RAND.Fill(evt.missmass)
+
+    ################################################################################################################################################
+    # Fill histograms for various trees called above
+
+    print("\nGrabbing {} {} dummy_rand...".format(phi_setting,ParticleType))
+    for i,evt in enumerate(TBRANCH_DUMMY_RAND):
+
+        # Progress bar
+        Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)        
+
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        ##############
+        ##############        
+        ##############
+        
+        if ParticleType == "kaon":
+
+            ALLCUTS = apply_dummy_rand_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+
+        else:
+
+            ALLCUTS = apply_dummy_rand_cuts(evt)
+            
+        if(ALLCUTS):
+    
+          #H_MM_SUB_DUMMY_RAND.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
+          #H_MM_SUB_DUMMY_RAND.Fill(evt.missmass, evt.Weight)
+          H_MM_SUB_DUMMY_RAND.Fill(evt.missmass)
+
+
+    H_MM_SUB_RAND.Scale(1/nWindows)
+    H_MM_SUB_DUMMY_RAND.Scale(1/nWindows)
+    
+    H_MM_SUB_DATA.Add(H_MM_SUB_RAND,-1)
+    H_MM_SUB_DUMMY.Add(H_MM_SUB_DUMMY_RAND,-1)
+
+    H_MM_SUB_DATA.Add(H_MM_SUB_DUMMY,-1)
+    
     H_MM_SUB_DATA.Scale(scale_factor)
 

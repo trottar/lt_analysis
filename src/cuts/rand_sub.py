@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 14:41:23 trottar"
+# Time-stamp: "2024-03-01 14:59:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1158,7 +1158,7 @@ def rand_sub(phi_setting, inpDict):
         from particle_subtraction import particle_subtraction
         SubtractedParticle = "pion"
         H_MM_SUB_DATA  = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        particle_subtraction(H_MM_SUB_DATA, hgcer_cutg, inpDict, phi_setting, SubtractedParticle, scale_factor=1e-3)
+        particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
         #H_MM_DATA.Add(H_MM_SUB_DATA,-1)
         histDict["H_MM_SUB_DATA"] =  H_MM_SUB_DATA
     
