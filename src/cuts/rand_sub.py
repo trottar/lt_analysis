@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:20:37 trottar"
+# Time-stamp: "2024-03-01 16:29:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1254,7 +1254,6 @@ def rand_sub(phi_setting, inpDict):
         subDict["phi_setting"] = phi_setting
         particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
-        print("!!!!!!!!!!",histDict["H_MM_SUB_DATA"])
     
     ###
     # CT plots
@@ -1296,13 +1295,13 @@ def rand_sub(phi_setting, inpDict):
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
     if ParticleType == "kaon":
-        print("!!!!!!!!!!",histDict["H_MM_SUB_DATA"])
+        
         ###
         # MM sub plots    
         CMMsub = TCanvas()
 
-        histDict["H_MM_nosub_DATA"].SetLineColor(1)
-        histDict["H_MM_nosub_DATA"].Draw("same, E1")
+        #histDict["H_MM_nosub_DATA"].SetLineColor(1)
+        #histDict["H_MM_nosub_DATA"].Draw("same, E1")
         histDict["H_MM_SUB_DATA"].SetLineColor(2)
         histDict["H_MM_SUB_DATA"].Draw("same, E1")    
 
