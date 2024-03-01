@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:00:09 trottar"
+# Time-stamp: "2024-03-01 16:09:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -558,10 +558,8 @@ def rand_sub(phi_setting, inpDict):
         ##############
         
         if ParticleType == "kaon":
-
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -569,7 +567,6 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
@@ -662,10 +659,8 @@ def rand_sub(phi_setting, inpDict):
         ##############
         
         if ParticleType == "kaon":
-
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -673,7 +668,6 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
@@ -759,10 +753,8 @@ def rand_sub(phi_setting, inpDict):
         ##############
 
         if ParticleType == "kaon":
-
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -770,7 +762,6 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
@@ -853,10 +844,8 @@ def rand_sub(phi_setting, inpDict):
         ##############
         
         if ParticleType == "kaon":
-
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -864,7 +853,6 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
@@ -1263,8 +1251,10 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_MM_SUB_RAND"] = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
         subDict["H_MM_SUB_DUMMY_RAND"] = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
         subDict["nWindows"] = nWindows
-        particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
+        subDict["phi_setting"] = phi_setting
+        particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
+        print("!!!!!!!!!!",histDict["H_MM_SUB_DATA"])
     
     ###
     # CT plots

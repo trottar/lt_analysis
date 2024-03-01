@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:04:17 trottar"
+# Time-stamp: "2024-03-01 16:08:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,7 +43,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
+def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -54,6 +54,8 @@ def particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgce
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
     nWindows = subDict["nWindows"]
+    phi_setting = subDict["phi_setting"]
+
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -164,11 +166,8 @@ def particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgce
         ##############
         
         if ParticleType == "kaon":
-
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-
         else:
-
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
@@ -197,11 +196,8 @@ def particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgce
         ##############
         
         if ParticleType == "kaon":
-
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-
         else:
-
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
@@ -230,11 +226,8 @@ def particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgce
         ##############
         
         if ParticleType == "kaon":
-
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-
         else:
-
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
@@ -263,11 +256,8 @@ def particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgce
         ##############
         
         if ParticleType == "kaon":
-
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-
         else:
-
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
