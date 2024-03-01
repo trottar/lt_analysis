@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 20:41:08 trottar"
+# Time-stamp: "2024-02-29 20:42:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,6 +91,10 @@ def single_setting(q2_set, fn_lo, fn_hi):
     sig_hi = TGraphErrors()
     sig_diff_g = TGraphErrors()
 
+    g_unsep_lo = TGraphErrors()
+    g_unsep_hi = TGraphErrors()
+
+    
     nlo = TNtuple("nlo", "nlo", "x/F:dx:x_mod:eps:theta:phi:t:t_min:w:Q2")
     nlo.ReadFile(fn_lo)
     
@@ -658,13 +662,13 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         unsep_lo = sig_t + ave_sig_lo*sig_l
         unsep_lo_err = math.sqrt(sig_l_err**2+sig_t_err**2)
-        g_unsep_lo_total.SetPoint(g_unsep_lo_total.GetN(), LOEPS, unsep_lo)
-        g_unsep_lo_total.SetPointError(g_unsep_lo_total.GetN()-1, 0, unsep_lo_err)
+        g_unsep_lo.SetPoint(g_unsep_lo.GetN(), LOEPS, unsep_lo)
+        g_unsep_lo.SetPointError(g_unsep_lo.GetN()-1, 0, unsep_lo_err)
         
         unsep_hi = sig_t + ave_sig_hi*sig_l
         unsep_hi_err = math.sqrt(sig_l_err**2+sig_t_err**2)
-        g_unsep_hi_total.SetPoint(g_unsep_hi_total.GetN(), HIEPS, unsep_hi)
-        g_unsep_hi_total.SetPointError(g_unsep_hi_total.GetN()-1, 0, unsep_hi_err)
+        g_unsep_hi.SetPoint(g_unsep_hi.GetN(), HIEPS, unsep_hi)
+        g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, unsep_hi_err)
         
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [nb/GeV^{2}]")
@@ -834,9 +838,6 @@ g_sig_l_total = TGraphErrors()
 g_sig_t_total = TGraphErrors()
 g_sig_lt_total = TGraphErrors()
 g_sig_tt_total = TGraphErrors()
-
-g_unsep_lo_total = TGraphErrors()
-g_unsep_hi_total = TGraphErrors()
 
 single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 
