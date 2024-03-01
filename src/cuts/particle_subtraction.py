@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 14:39:30 trottar"
+# Time-stamp: "2024-03-01 14:43:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,7 +68,7 @@ def particle_subtraction(H_MM_SUB_SIMC, hgcer_cutg, inpDict, phi_setting, Subtra
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         histDict.update({ "phi_setting" : phi_setting})
-        return histDict
+        sys.exit(2)
 
     InFile_DATA = TFile.Open(rootFileData, "OPEN")
 
