@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:37:22 trottar"
+# Time-stamp: "2024-02-29 23:40:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -712,9 +712,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c4.Print(outputpdf)
 
         sigT_change.Draw("a*")
-        c4.Print(outputpdf)
-        
-        # Clear canvas
+        c4.Print(outputpdf)    
         c4.Clear()
 
         # Adjust top and right margins for c2 canvas
@@ -723,8 +721,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Print plots for c2 canvases
         c2.Print(outputpdf)
-
-        # Clear c1 and c2 canvases
         c2.Clear()
             
         # Create TCanvas
@@ -742,6 +738,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sig_TT_g.Draw("a*")
         c3.Print(outputpdf)
+        c3.Clear()
 
         # Create TCanvas
         c5 = TCanvas()
@@ -754,7 +751,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sig_diff_g.Draw("a*")
         c5.Print(outputpdf)
-
+        c5.Clear()
+        
         # Calculate integrated cross sections
         lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
         hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
