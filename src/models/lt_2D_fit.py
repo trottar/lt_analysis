@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:54:22 trottar"
+# Time-stamp: "2024-02-29 23:55:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -861,9 +861,9 @@ for i in range(num_events):
     leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
     leg.SetFillColor(0)
     leg.SetMargin(0.4)
+    leg.AddEntry(g_hi_event, "t = {:.3f}".format(t_list[i]), "")
     leg.AddEntry(g_lo_event, "#epsilon_{Low}", "p")
     leg.AddEntry(g_hi_event, "#epsilon_{High}", "p")
-    leg.AddEntry(g_hi_event, "t = {:.3f}".format(t_list[i]), "p")
     leg.Draw()
     
     c.Print(outputpdf)
