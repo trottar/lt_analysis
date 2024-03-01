@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 20:42:57 trottar"
+# Time-stamp: "2024-02-29 20:43:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -780,8 +780,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         # Create TMultiGraph and add glo, ghi
         g_sig_mult = ROOT.TMultiGraph()
-        g_sig_mult.Add(g_unsep_lo_total)
-        g_sig_mult.Add(g_unsep_hi_total)
+        g_sig_mult.Add(g_unsep_lo)
+        g_sig_mult.Add(g_unsep_hi)
 
         g_sig_mult.Draw("AP")
 
@@ -791,17 +791,17 @@ def single_setting(q2_set, fn_lo, fn_hi):
         g_sig_mult.GetXaxis().SetTitle("#epsilon")
         g_sig_mult.GetXaxis().SetTitleOffset(1.4)
 
-        g_unsep_lo_total.Fit(f_lin_l, "MRQ")
-        g_unsep_hi_total.Fit(f_lin_t, "MRQ")
+        g_unsep_lo.Fit(f_lin_l, "MRQ")
+        g_unsep_hi.Fit(f_lin_t, "MRQ")
 
-        # Set properties for g_unsep_lo_total and g_unsep_hi_total
-        g_unsep_lo_total.SetLineColor(1)
-        g_unsep_lo_total.SetMarkerStyle(5)
-        g_unsep_hi_total.SetLineColor(2)
-        g_unsep_hi_total.SetMarkerColor(2)
-        g_unsep_hi_total.SetMarkerStyle(4)
+        # Set properties for g_unsep_lo and g_unsep_hi
+        g_unsep_lo.SetLineColor(1)
+        g_unsep_lo.SetMarkerStyle(5)
+        g_unsep_hi.SetLineColor(2)
+        g_unsep_hi.SetMarkerColor(2)
+        g_unsep_hi.SetMarkerStyle(4)
 
-        # Set line properties for g_unsep_lo_total and g_unsep_hi_total
+        # Set line properties for g_unsep_lo and g_unsep_hi
         f_lin_l.SetLineColor(1)
         f_lin_l.SetLineWidth(2)
         f_lin_t.SetLineColor(2)
@@ -816,8 +816,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
         leg.SetFillColor(0)
         leg.SetMargin(0.4)
-        leg.AddEntry(g_unsep_lo_total, "#epsilon_{Low}", "p")
-        leg.AddEntry(g_unsep_hi_total, "#epsilon_{High}", "p")
+        leg.AddEntry(g_unsep_lo, "#epsilon_{Low}", "p")
+        leg.AddEntry(g_unsep_hi, "#epsilon_{High}", "p")
         leg.Draw()
 
         c6.Print(outputpdf)
