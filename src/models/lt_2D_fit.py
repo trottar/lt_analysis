@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:51:17 trottar"
+# Time-stamp: "2024-02-29 23:54:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -839,7 +839,6 @@ for i in range(num_events):
     g_unsep_mult.GetYaxis().SetTitleOffset(1.4)
     g_unsep_mult.GetXaxis().SetTitle("#epsilon")
     g_unsep_mult.GetXaxis().SetTitleOffset(1.4)
-    g_unsep_mult.SetTitle("t = {:.3f}".format(t_list[i]))
     
     # Fit functions to 'lo' and 'hi' events
     f_lin_l = ROOT.TF1("f_lin_l", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
@@ -864,6 +863,7 @@ for i in range(num_events):
     leg.SetMargin(0.4)
     leg.AddEntry(g_lo_event, "#epsilon_{Low}", "p")
     leg.AddEntry(g_hi_event, "#epsilon_{High}", "p")
+    leg.AddEntry(g_hi_event, "t = {:.3f}".format(t_list[i]), "p")
     leg.Draw()
     
     c.Print(outputpdf)
