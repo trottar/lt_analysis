@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 20:46:23 trottar"
+# Time-stamp: "2024-02-29 20:53:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -588,10 +588,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         flo.Draw("same")
         fhi.Draw("same")
 
-        # Calculate integrated cross sections
-        lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
-        hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
-
         # Create and draw TLegend
         leg = ROOT.TLegend(0.7, 0.7, 0.97, 0.97)
         leg.SetFillColor(0)
@@ -659,16 +655,6 @@ def single_setting(q2_set, fn_lo, fn_hi):
         
         # Delete g_plot_err
         del g_plot_err
-
-        unsep_lo = sig_t + ave_sig_lo*sig_l
-        unsep_lo_err = math.sqrt(sig_l_err**2+sig_t_err**2)
-        g_unsep_lo.SetPoint(g_unsep_lo.GetN(), LOEPS, unsep_lo)
-        g_unsep_lo.SetPointError(g_unsep_lo.GetN()-1, 0, unsep_lo_err)
-        
-        unsep_hi = sig_t + ave_sig_hi*sig_l
-        unsep_hi_err = math.sqrt(sig_l_err**2+sig_t_err**2)
-        g_unsep_hi.SetPoint(g_unsep_hi.GetN(), HIEPS, unsep_hi)
-        g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, unsep_hi_err)
         
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [nb/GeV^{2}]")
@@ -723,7 +709,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_TT_g.SetPointError(i, 0.0, sig_tt_err)
 
         # Create TCanvas
-        c4 = ROOT.TCanvas()
+        c4 = TCanvas()
 
         # Draw and save plots
         sigL_change.Draw("a*")
@@ -746,7 +732,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c2.Clear()
             
         # Create TCanvas
-        c3 = ROOT.TCanvas()
+        c3 = TCanvas()
 
         # Draw and save plots for sig_L_g, sig_T_g, sig_LT_g, and sig_TT_g
         sig_L_g.Draw("a*")
@@ -762,7 +748,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         c3.Print(outputpdf)
 
         # Create TCanvas
-        c5 = ROOT.TCanvas()
+        c5 = TCanvas()
 
         sig_lo.Draw("a*")
         c5.Print(outputpdf)
@@ -776,6 +762,24 @@ def single_setting(q2_set, fn_lo, fn_hi):
         f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
         f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
 
+        # Calculate integrated cross sections
+        lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
+        hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
+        
+        #unsep_lo = sig_t + ave_sig_lo*sig_l
+        #unsep_lo_err = math.sqrt(sig_l_err**2+sig_t_err**2)
+        #g_unsep_lo.SetPoint(g_unsep_lo.GetN(), LOEPS, unsep_lo)
+        #g_unsep_lo.SetPointError(g_unsep_lo.GetN()-1, 0, unsep_lo_err)
+        g_unsep_lo.SetPoint(g_unsep_lo.GetN(), LOEPS, lo_cross_sec[i])
+        g_unsep_lo.SetPointError(g_unsep_lo.GetN()-1, 0, lo_cross_sec_err[i])        
+        
+        #unsep_hi = sig_t + ave_sig_hi*sig_l
+        #unsep_hi_err = math.sqrt(sig_l_err**2+sig_t_err**2)
+        #g_unsep_hi.SetPoint(g_unsep_hi.GetN(), HIEPS, unsep_hi)
+        #g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, unsep_hi_err)
+        g_unsep_hi.SetPoint(g_unsep_hi.GetN(), HIEPS, hi_cross_sec[i])
+        g_unsep_hi.SetPointError(g_unsep_hi.GetN()-1, 0, hi_cross_sec_err[i])        
+        
         c6 = TCanvas()
 
         # Create TMultiGraph and add glo, ghi
