@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:56:37 trottar"
+# Time-stamp: "2024-03-01 15:59:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -286,5 +286,3 @@ def particle_subtraction(subDict, inpDict, phi_setting, SubtractedParticle, hgce
     H_MM_SUB_DATA.Add(H_MM_SUB_DUMMY,-1)
     
     H_MM_SUB_DATA.Scale(scale_factor)
-
-    return H_MM_SUB_DATA
