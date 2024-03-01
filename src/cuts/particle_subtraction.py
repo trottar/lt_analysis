@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:32:52 trottar"
+# Time-stamp: "2024-03-01 16:39:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,23 +73,23 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
 
     InFile_DATA = TFile.Open(rootFileData, "OPEN")
 
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(SubtractedParticle.capitalize()))
 
-    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(SubtractedParticle.capitalize()))
 
     ################################################################################################################################################
     # Define dummy root file trees of interest
 
-    rootFileDummy = OUTPATH + "/" + "{}".format(ParticleType) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+    rootFileDummy = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         return histDict
 
     InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
 
-    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(SubtractedParticle.capitalize()))
     
-    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(SubtractedParticle.capitalize()))
 
     ################################################################################################################################################
 
@@ -143,7 +143,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} data...".format(phi_setting,ParticleType))
+    print("\nGrabbing {} {} data...".format(phi_setting,SubtractedParticle))
     for i,evt in enumerate(TBRANCH_DATA):
 
         # Progress bar
@@ -173,7 +173,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} dummy...".format(phi_setting,ParticleType))
+    print("\nGrabbing {} {} dummy...".format(phi_setting,SubtractedParticle))
     for i,evt in enumerate(TBRANCH_DUMMY):
 
         # Progress bar
@@ -203,7 +203,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} rand...".format(phi_setting,ParticleType))
+    print("\nGrabbing {} {} rand...".format(phi_setting,SubtractedParticle))
     for i,evt in enumerate(TBRANCH_RAND):
 
         # Progress bar
@@ -233,7 +233,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} dummy_rand...".format(phi_setting,ParticleType))
+    print("\nGrabbing {} {} dummy_rand...".format(phi_setting,SubtractedParticle))
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
         # Progress bar
