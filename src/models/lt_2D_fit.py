@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 21:16:18 trottar"
+# Time-stamp: "2024-02-29 23:25:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -798,9 +798,6 @@ single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
 f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
 
-# Import necessary ROOT modules
-import ROOT
-
 # Create a canvas
 c = ROOT.TCanvas("c", "c", 800, 600)
 
@@ -813,7 +810,7 @@ for i in range(num_events):
     c.Clear()
     
     # Create a new TMultiGraph for each event
-    g_sig_mult = ROOT.TMultiGraph()
+    g_unsep_mult = ROOT.TMultiGraph()
     
     # Create TGraphErrors for 'lo' event
     x_lo, y_lo = ROOT.Double(0), ROOT.Double(0)
@@ -823,7 +820,7 @@ for i in range(num_events):
     g_lo_event = ROOT.TGraphErrors(1, array('d', [x_lo]), array('d', [y_lo]), array('d', [x_err_lo]), array('d', [y_err_lo]))
     
     # Add 'lo' event to the TMultiGraph
-    g_sig_mult.Add(g_lo_event)
+    g_unsep_mult.Add(g_lo_event)
     
     # Create TGraphErrors for 'hi' event
     x_hi, y_hi = ROOT.Double(0), ROOT.Double(0)
@@ -833,16 +830,16 @@ for i in range(num_events):
     g_hi_event = ROOT.TGraphErrors(1, array('d', [x_hi]), array('d', [y_hi]), array('d', [x_err_hi]), array('d', [y_err_hi]))
     
     # Add 'hi' event to the TMultiGraph
-    g_sig_mult.Add(g_hi_event)
+    g_unsep_mult.Add(g_hi_event)
     
     # Draw TMultiGraph for the current event
-    g_sig_mult.Draw("AP")
+    g_unsep_mult.Draw("AP")
     
     # Set axis titles and offsets
-    g_sig_mult.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
-    g_sig_mult.GetYaxis().SetTitleOffset(1.4)
-    g_sig_mult.GetXaxis().SetTitle("#epsilon")
-    g_sig_mult.GetXaxis().SetTitleOffset(1.4)
+    g_unsep_mult.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
+    g_unsep_mult.GetYaxis().SetTitleOffset(1.4)
+    g_unsep_mult.GetXaxis().SetTitle("#epsilon")
+    g_unsep_mult.GetXaxis().SetTitleOffset(1.4)
     
     # Fit functions to 'lo' and 'hi' events
     f_lin_l = ROOT.TF1("f_lin_l", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
