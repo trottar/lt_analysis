@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 21:15:31 trottar"
+# Time-stamp: "2024-02-29 21:16:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -798,6 +798,9 @@ single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
 f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
 
+# Import necessary ROOT modules
+import ROOT
+
 # Create a canvas
 c = ROOT.TCanvas("c", "c", 800, 600)
 
@@ -813,33 +816,21 @@ for i in range(num_events):
     g_sig_mult = ROOT.TMultiGraph()
     
     # Create TGraphErrors for 'lo' event
-    g_lo_event = ROOT.TGraphErrors(1, ROOT.Double(0), ROOT.Double(0), ROOT.Double(0), ROOT.Double(0))
-    
-    # Get the data points for the current event in 'lo'
     x_lo, y_lo = ROOT.Double(0), ROOT.Double(0)
     g_unsep_lo.GetPoint(i, x_lo, y_lo)
     x_err_lo = g_unsep_lo.GetErrorX(i)
     y_err_lo = g_unsep_lo.GetErrorY(i)
-    
-    # Set the data points for 'lo' event
-    g_lo_event.SetPoint(0, x_lo, y_lo)
-    g_lo_event.SetPointError(0, x_err_lo, y_err_lo)
+    g_lo_event = ROOT.TGraphErrors(1, array('d', [x_lo]), array('d', [y_lo]), array('d', [x_err_lo]), array('d', [y_err_lo]))
     
     # Add 'lo' event to the TMultiGraph
     g_sig_mult.Add(g_lo_event)
     
     # Create TGraphErrors for 'hi' event
-    g_hi_event = ROOT.TGraphErrors(1, ROOT.Double(0), ROOT.Double(0), ROOT.Double(0), ROOT.Double(0))
-    
-    # Get the data points for the corresponding event in 'hi'
     x_hi, y_hi = ROOT.Double(0), ROOT.Double(0)
     g_unsep_hi.GetPoint(i, x_hi, y_hi)
     x_err_hi = g_unsep_hi.GetErrorX(i)
     y_err_hi = g_unsep_hi.GetErrorY(i)
-    
-    # Set the data points for 'hi' event
-    g_hi_event.SetPoint(0, x_hi, y_hi)
-    g_hi_event.SetPointError(0, x_err_hi, y_err_hi)
+    g_hi_event = ROOT.TGraphErrors(1, array('d', [x_hi]), array('d', [y_hi]), array('d', [x_err_hi]), array('d', [y_err_hi]))
     
     # Add 'hi' event to the TMultiGraph
     g_sig_mult.Add(g_hi_event)
@@ -884,7 +875,7 @@ for i in range(num_events):
     leg.AddEntry(g_lo_event, "#epsilon_{Low}", "p")
     leg.AddEntry(g_hi_event, "#epsilon_{High}", "p")
     leg.Draw()
-
+    
     c.Print(outputpdf)
 
 f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
