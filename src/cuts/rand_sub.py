@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 14:59:21 trottar"
+# Time-stamp: "2024-03-01 15:28:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1308,8 +1308,8 @@ def rand_sub(phi_setting, inpDict):
 
         histDict["H_MM_nosub_DATA"].SetLineColor(1)
         histDict["H_MM_nosub_DATA"].Draw("same, E1")
-        histDict["H_MM_SUB_SIMC"].SetLineColor(2)
-        histDict["H_MM_SUB_SIMC"].Draw("same, E1")    
+        histDict["H_MM_SUB_DATA"].SetLineColor(2)
+        histDict["H_MM_SUB_DATA"].Draw("same, E1")    
 
         CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
