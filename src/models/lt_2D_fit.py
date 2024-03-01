@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 20:16:08 trottar"
+# Time-stamp: "2024-02-29 20:38:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -656,12 +656,12 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Delete g_plot_err
         del g_plot_err
 
-        unsep_lo = sig_t + ave_sig_lo[i]*sig_l
+        unsep_lo = sig_t + ave_sig_lo*sig_l
         unsep_lo_err = math.sqrt(sig_l_err**2+sig_t_err**2)
         g_unsep_lo_total.SetPoint(g_unsep_lo_total.GetN(), float(LOEPS), unsep_lo)
         g_unsep_lo_total.SetPointError(g_unsep_lo_total.GetN()-1, 0, unsep_lo_err)
         
-        unsep_hi = sig_t + ave_sig_hi[i]*sig_l
+        unsep_hi = sig_t + ave_sig_hi*sig_l
         unsep_hi_err = math.sqrt(sig_l_err**2+sig_t_err**2)
         g_unsep_hi_total.SetPoint(g_unsep_hi_total.GetN(), fhiat(HIEPS), unsep_hi)
         g_unsep_hi_total.SetPointError(g_unsep_hi_total.GetN()-1, 0, unsep_hi_err)
