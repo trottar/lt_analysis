@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:32:46 trottar"
+# Time-stamp: "2024-02-29 23:34:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -806,8 +806,6 @@ num_events = g_unsep_lo.GetN()
 
 # Loop over each event in 'lo'
 for i in range(num_events):
-    # Create a new canvas for each event
-    c.Clear()
     
     # Create a new TMultiGraph for each event
     g_unsep_mult = ROOT.TMultiGraph()
@@ -848,8 +846,11 @@ for i in range(num_events):
     #g_hi_event.Fit(f_lin_t, "MRQ")
         
     # Set line properties for 'lo' and 'hi' fits
-    f_lin_l.SetLineColor(1)
+    f_lin_l.SetLineColor(2)
     f_lin_l.SetLineWidth(2)
+    #f_lin_t.SetLineColor(2)
+    #f_lin_t.SetLineWidth(2)
+    #f_lin_t.SetLineStyle(2)
     
     # Draw 'lo' and 'hi' fits on the same canvas
     f_lin_l.Draw("same")
@@ -864,6 +865,7 @@ for i in range(num_events):
     leg.Draw()
     
     c.Print(outputpdf)
+    c.Clear()
 
 f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
 f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
