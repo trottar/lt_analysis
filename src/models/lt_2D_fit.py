@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 19:57:47 trottar"
+# Time-stamp: "2024-02-29 20:16:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,7 +189,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         
         sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
-
+        
         nhi.Draw("x:phi:dx", tcut, "goff")
 
         #ghi_tmp = TGraphErrors(nhi.GetSelectedRows(), nhi.GetV2(), nhi.GetV1(), 0, nhi.GetV3())
@@ -218,7 +218,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         
         sig_hi.SetPoint(sig_hi.GetN(), float(t_list[i]), ave_sig_hi)
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
-
+        
         g_plot_err = TGraph2DErrors()
         g_xx, g_yy, g_yy_err = ROOT.Double(),ROOT.Double(),ROOT.Double()
 
@@ -656,6 +656,16 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Delete g_plot_err
         del g_plot_err
 
+        unsep_lo = sig_t + ave_sig_lo[i]*sig_l
+        unsep_lo_err = math.sqrt(sig_l_err**2+sig_t_err**2)
+        g_unsep_lo_total.SetPoint(g_unsep_lo_total.GetN(), float(LOEPS), unsep_lo)
+        g_unsep_lo_total.SetPointError(g_unsep_lo_total.GetN()-1, 0, unsep_lo_err)
+        
+        unsep_hi = sig_t + ave_sig_hi[i]*sig_l
+        unsep_hi_err = math.sqrt(sig_l_err**2+sig_t_err**2)
+        g_unsep_hi_total.SetPoint(g_unsep_hi_total.GetN(), fhiat(HIEPS), unsep_hi)
+        g_unsep_hi_total.SetPointError(g_unsep_hi_total.GetN()-1, 0, unsep_hi_err)
+        
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [nb/GeV^{2}]")
         
@@ -758,6 +768,56 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sig_diff_g.Draw("a*")
         c5.Print(outputpdf)
+
+        f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 2.0)
+        f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 2.0)
+
+        c6 = TCanvas()
+
+        # Create TMultiGraph and add glo, ghi
+        g_sig_mult = ROOT.TMultiGraph()
+        g_sig_mult.Add(g_unsep_lo_total)
+        g_sig_mult.Add(g_unsep_hi_total)
+
+        g_sig_mult.Draw("AP")
+
+        g_sig_mult.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
+        g_sig_mult.GetYaxis().SetTitleOffset(1.4)
+
+        g_sig_mult.GetXaxis().SetTitle("#epsilon")
+        g_sig_mult.GetXaxis().SetTitleOffset(1.4)
+
+        g_unsep_lo_total.Fit(f_lin_l, "MRQ")
+        g_unsep_hi_total.Fit(f_lin_t, "MRQ")
+
+        # Set properties for g_unsep_lo_total and g_unsep_hi_total
+        g_unsep_lo_total.SetLineColor(1)
+        g_unsep_lo_total.SetMarkerStyle(5)
+        g_unsep_hi_total.SetLineColor(2)
+        g_unsep_hi_total.SetMarkerColor(2)
+        g_unsep_hi_total.SetMarkerStyle(4)
+
+        # Set line properties for g_unsep_lo_total and g_unsep_hi_total
+        f_lin_l.SetLineColor(1)
+        f_lin_l.SetLineWidth(2)
+        f_lin_t.SetLineColor(2)
+        f_lin_t.SetLineWidth(2)
+        f_lin_t.SetLineStyle(2)
+
+        # Draw f_lin_l and f_lin_t on the same canvas
+        f_lin_l.Draw("same")
+        f_lin_t.Draw("same")
+
+        # Create and draw TLegend
+        leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
+        leg.SetFillColor(0)
+        leg.SetMargin(0.4)
+        leg.AddEntry(g_unsep_lo_total, "#epsilon_{Low}", "p")
+        leg.AddEntry(g_unsep_hi_total, "#epsilon_{High}", "p")
+        leg.Draw()
+
+        c6.Print(outputpdf)
+        c6.Clear()
         
         # Delete canvases
         del c1
@@ -765,6 +825,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         del c3
         del c4
         del c5
+        del c6
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
 fn_hi =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
@@ -773,6 +834,9 @@ g_sig_l_total = TGraphErrors()
 g_sig_t_total = TGraphErrors()
 g_sig_lt_total = TGraphErrors()
 g_sig_tt_total = TGraphErrors()
+
+g_unsep_lo_total = TGraphErrors()
+g_unsep_hi_total = TGraphErrors()
 
 single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
 
