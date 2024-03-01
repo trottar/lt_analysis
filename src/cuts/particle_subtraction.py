@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 15:24:55 trottar"
+# Time-stamp: "2024-03-01 15:38:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,6 +93,9 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
     
     TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
 
+    ################################################################################################################################################
+
+    H_MM_SUB_DATA  = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
     H_MM_SUB_DUMMY  = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
     H_MM_SUB_RAND  = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
     H_MM_SUB_DUMMY_RAND  = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
@@ -282,3 +285,4 @@ def particle_subtraction(H_MM_SUB_DATA, nWindows, inpDict, phi_setting, Subtract
     
     H_MM_SUB_DATA.Scale(scale_factor)
 
+    return H_MM_SUB_DATA
