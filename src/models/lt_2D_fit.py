@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 23:34:49 trottar"
+# Time-stamp: "2024-02-29 23:36:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -829,6 +829,8 @@ for i in range(num_events):
     
     # Add 'hi' event to the TMultiGraph
     g_unsep_mult.Add(g_hi_event)
+
+    g_unsep_mult.SetMarkerStyle(5)
     
     # Draw TMultiGraph for the current event
     g_unsep_mult.Draw("AP")
