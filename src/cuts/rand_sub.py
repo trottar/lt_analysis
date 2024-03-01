@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:29:04 trottar"
+# Time-stamp: "2024-03-01 16:32:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1300,8 +1300,8 @@ def rand_sub(phi_setting, inpDict):
         # MM sub plots    
         CMMsub = TCanvas()
 
-        #histDict["H_MM_nosub_DATA"].SetLineColor(1)
-        #histDict["H_MM_nosub_DATA"].Draw("same, E1")
+        histDict["H_MM_nosub_DATA"].SetLineColor(1)
+        histDict["H_MM_nosub_DATA"].Draw("same, E1")
         histDict["H_MM_SUB_DATA"].SetLineColor(2)
         histDict["H_MM_SUB_DATA"].Draw("same, E1")    
 

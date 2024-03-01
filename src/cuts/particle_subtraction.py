@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:27:42 trottar"
+# Time-stamp: "2024-03-01 16:32:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Define data root file trees of interest
 
-    rootFileData = OUTPATH + "/" + "{}".format(ParticleType) + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+    rootFileData = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDATAFilename + "_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         histDict.update({ "phi_setting" : phi_setting})
