@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 20:43:39 trottar"
+# Time-stamp: "2024-02-29 20:46:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -773,8 +773,8 @@ def single_setting(q2_set, fn_lo, fn_hi):
         sig_diff_g.Draw("a*")
         c5.Print(outputpdf)
 
-        f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 2.0)
-        f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 2.0)
+        f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
+        f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
 
         c6 = TCanvas()
 
