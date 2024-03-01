@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 17:37:15 trottar"
+# Time-stamp: "2024-03-01 17:45:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -145,8 +145,10 @@ def rand_sub(phi_setting, inpDict):
     # HARD CODED #
     ##############
 
-    mm_min = 1.10
-    mm_max = 1.18
+    #mm_min = 1.10
+    #mm_max = 1.18
+    mm_min = 0.7
+    mm_max = 1.5
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316

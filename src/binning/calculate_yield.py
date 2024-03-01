@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 16:22:32 trottar"
+# Time-stamp: "2024-03-01 17:46:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,8 +95,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
     # HARD CODED #
     ##############
 
-    mm_min = 1.10
-    mm_max = 1.18    
+    #mm_min = 1.10
+    #mm_max = 1.18
+    mm_min = 0.7
+    mm_max = 1.5
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316

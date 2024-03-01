@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 17:25:28 trottar"
+# Time-stamp: "2024-03-01 17:46:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,13 +98,6 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     H_MM_SUB_RAND = subDict["H_MM_SUB_RAND"]
     H_MM_SUB_DUMMY_RAND = subDict["H_MM_SUB_DUMMY_RAND"]
     
-    ##############
-    # HARD CODED #
-    ##############
-
-    mm_min = 0.7
-    mm_max = 1.15
-    
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
     # Note: these momenta are from Dave's slides and may not reflect what is used here
@@ -160,7 +153,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -190,7 +183,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -220,7 +213,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -250,7 +243,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
