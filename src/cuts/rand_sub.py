@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:32:38 trottar"
+# Time-stamp: "2024-03-01 16:52:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1252,8 +1252,9 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_MM_SUB_DUMMY_RAND"] = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
-        particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=1e-3)
+        particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=1.0)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
+        H_MM_DATA.Add(histDict["H_MM_SUB_DATA"],-1)
     
     ###
     # CT plots

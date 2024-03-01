@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:39:59 trottar"
+# Time-stamp: "2024-03-01 16:46:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -143,7 +143,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} data...".format(phi_setting,SubtractedParticle))
+    print("\nGrabbing {} {} subtraction data...".format(phi_setting,SubtractedParticle))
     for i,evt in enumerate(TBRANCH_DATA):
 
         # Progress bar
@@ -173,7 +173,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} dummy...".format(phi_setting,SubtractedParticle))
+    print("\nGrabbing {} {} subtraction dummy...".format(phi_setting,SubtractedParticle))
     for i,evt in enumerate(TBRANCH_DUMMY):
 
         # Progress bar
@@ -203,7 +203,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} rand...".format(phi_setting,SubtractedParticle))
+    print("\nGrabbing {} {} subtraction random...".format(phi_setting,SubtractedParticle))
     for i,evt in enumerate(TBRANCH_RAND):
 
         # Progress bar
@@ -233,7 +233,7 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} dummy_rand...".format(phi_setting,SubtractedParticle))
+    print("\nGrabbing {} {} subtraction dummy random...".format(phi_setting,SubtractedParticle))
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
         # Progress bar
