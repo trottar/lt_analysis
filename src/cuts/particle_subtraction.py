@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 16:20:40 trottar"
+# Time-stamp: "2024-03-01 16:25:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,12 +61,6 @@ def particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, 
     # Import function to define cut bools
     from apply_cuts import apply_data_cuts, set_val
     set_val(inpDict) # Set global variables for optimization
-    
-    ################################################################################################################################################
-    # Define HGCer hole cut for KaonLT 2018-19
-    if ParticleType == "kaon":
-        from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
     
     ################################################################################################################################################
     # Define data root file trees of interest
