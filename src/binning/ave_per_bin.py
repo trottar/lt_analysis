@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 17:13:08 trottar"
+# Time-stamp: "2024-03-02 17:25:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 
 ##################################################################################################################################################
 
-def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
+def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict):
 
     processed_dict = {}
     
@@ -386,9 +386,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
     
     return processed_dict
 
-def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
+def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict):
 
-    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict)
+    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict)
     
     binned_dict = {}
 
@@ -480,10 +480,11 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict):
     
 def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
 
-    tree_data, tree_dummy, nWindows = hist["InFile_DATA"], hist["InFile_DUMMY"], hist["nWindows"]
+    tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
+    nWindows, phi_setting = hist["nWindows"], hist["phi_setting"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, inpDict)
+    binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict)
 
     group_dict = {}
     
