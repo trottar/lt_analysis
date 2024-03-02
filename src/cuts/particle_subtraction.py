@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:10:45 trottar"
+# Time-stamp: "2024-03-02 16:13:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -421,7 +421,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           W_vs_t_DATA.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DATA.Fill(evt.epsilon, -evt.MandelT)
           MM_vs_t_DATA.Fill(evt.MM, -evt.MandelT)
-          polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
           
           H_ct_DATA.Fill(evt.CTime_ROC1)
 
@@ -522,7 +521,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           W_vs_t_DUMMY.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DUMMY.Fill(evt.epsilon, -evt.MandelT)
           MM_vs_t_DUMMY.Fill(evt.MM, -evt.MandelT)
-          polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
           
           H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
@@ -623,7 +621,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           W_vs_t_RAND.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_RAND.Fill(evt.epsilon, -evt.MandelT)
           MM_vs_t_RAND.Fill(evt.MM, -evt.MandelT)
-          polar_phiq_vs_t_RAND.SetPoint(polar_phiq_vs_t_RAND.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
           
           H_ct_RAND.Fill(evt.CTime_ROC1)
 
@@ -724,7 +721,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           W_vs_t_DUMMY_RAND.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DUMMY_RAND.Fill(evt.epsilon, -evt.MandelT)
           MM_vs_t_DUMMY_RAND.Fill(evt.MM, -evt.MandelT)
-          polar_phiq_vs_t_DUMMY_RAND.SetPoint(polar_phiq_vs_t_DUMMY_RAND.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
           
           H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)
 
