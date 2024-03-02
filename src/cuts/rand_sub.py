@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 18:07:43 trottar"
+# Time-stamp: "2024-03-01 20:39:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1254,7 +1254,10 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_MM_SUB_DUMMY_RAND"] = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
-        particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=2.5e-2) # Q2=3.0, W=3.14, lowe
+        if Q2 == "2p1" and W == "2p95":
+            particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=1.0e-2) # Q2=2.1, W=2.95, lowe
+        else:
+            particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=2.5e-2) # Q2=3.0, W=3.14, lowe+highe
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
         H_MM_DATA.Add(histDict["H_MM_SUB_DATA"],-1)
     
