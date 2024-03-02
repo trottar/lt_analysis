@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 22:16:06 trottar"
+# Time-stamp: "2024-03-01 23:07:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1262,11 +1262,11 @@ def rand_sub(phi_setting, inpDict):
             "Q3p0W3p14Left_lowe" : 2.5e-2,
             "Q3p0W3p14Center_lowe" : 2.5e-2,
             # Q2=2p1, W=2p95
-            "Q2p1W2p95Right_highe" : 5.0e-2,
+            "Q2p1W2p95Right_highe" : 3.0e-2,
             "Q2p1W2p95Left_highe" : 2.5e-2,
             "Q2p1W2p95Center_highe" : 1.0e-2,
-            "Q2p1W2p95Left_lowe" : 2.5e-2,
-            "Q2p1W2p95Center_lowe" : 2.5e-2,            
+            "Q2p1W2p95Left_lowe" : 2.0e-2,
+            "Q2p1W2p95Center_lowe" : 2.0e-2,            
         }
         scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
         particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
