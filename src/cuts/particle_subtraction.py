@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 17:03:59 trottar"
+# Time-stamp: "2024-03-02 17:18:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1047,7 +1047,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
 ################################################################################################################################################
 
-def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
+def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -1096,30 +1096,34 @@ def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=No
     TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(SubtractedParticle.capitalize()))
 
     ################################################################################################################################################
+
+    hist_dict = {}
     
-    H_Q2_DATA = subDict["H_Q2_SUB_DATA"]
-    H_W_DATA = subDict["H_W_SUB_DATA"]
-    H_t_DATA = subDict["H_t_SUB_DATA"]
-    H_epsilon_DATA = subDict["H_epsilon_SUB_DATA"]
-    H_MM_DATA = subDict["H_MM_SUB_DATA"]
+    for j in range(len(t_bins)-1):
+        
+        hist_dict["H_Q2_DATA_{}".format(j)] = subDict["H_Q2_SUB_DATA_{}".format(j)]
+        hist_dict["H_W_DATA_{}".format(j)] = subDict["H_W_SUB_DATA_{}".format(j)]
+        hist_dict["H_t_DATA_{}".format(j)] = subDict["H_t_SUB_DATA_{}".format(j)]
+        hist_dict["H_epsilon_DATA_{}".format(j)] = subDict["H_epsilon_SUB_DATA_{}".format(j)]
+        hist_dict["H_MM_DATA_{}".format(j)] = subDict["H_MM_SUB_DATA_{}".format(j)]
 
-    H_Q2_DUMMY = subDict["H_Q2_SUB_DUMMY"]
-    H_W_DUMMY = subDict["H_W_SUB_DUMMY"]
-    H_t_DUMMY = subDict["H_t_SUB_DUMMY"]
-    H_epsilon_DUMMY = subDict["H_epsilon_SUB_DUMMY"]
-    H_MM_DUMMY = subDict["H_MM_SUB_DUMMY"]
+        hist_dict["H_Q2_DUMMY_{}".format(j)] = subDict["H_Q2_SUB_DUMMY_{}".format(j)]
+        hist_dict["H_W_DUMMY_{}".format(j)] = subDict["H_W_SUB_DUMMY_{}".format(j)]
+        hist_dict["H_t_DUMMY_{}".format(j)] = subDict["H_t_SUB_DUMMY_{}".format(j)]
+        hist_dict["H_epsilon_DUMMY_{}".format(j)] = subDict["H_epsilon_SUB_DUMMY_{}".format(j)]
+        hist_dict["H_MM_DUMMY_{}".format(j)] = subDict["H_MM_SUB_DUMMY_{}".format(j)]
 
-    H_Q2_RAND = subDict["H_Q2_SUB_RAND"]
-    H_W_RAND = subDict["H_W_SUB_RAND"]
-    H_t_RAND = subDict["H_t_SUB_RAND"]
-    H_epsilon_RAND = subDict["H_epsilon_SUB_RAND"]
-    H_MM_RAND = subDict["H_MM_SUB_RAND"]
+        hist_dict["H_Q2_RAND_{}".format(j)] = subDict["H_Q2_SUB_RAND_{}".format(j)]
+        hist_dict["H_W_RAND_{}".format(j)] = subDict["H_W_SUB_RAND_{}".format(j)]
+        hist_dict["H_t_RAND_{}".format(j)] = subDict["H_t_SUB_RAND_{}".format(j)]
+        hist_dict["H_epsilon_RAND_{}".format(j)] = subDict["H_epsilon_SUB_RAND_{}".format(j)]
+        hist_dict["H_MM_RAND_{}".format(j)] = subDict["H_MM_SUB_RAND_{}".format(j)]
 
-    H_Q2_DUMMY_RAND = subDict["H_Q2_SUB_DUMMY_RAND"]
-    H_W_DUMMY_RAND = subDict["H_W_SUB_DUMMY_RAND"]
-    H_t_DUMMY_RAND = subDict["H_t_SUB_DUMMY_RAND"]
-    H_epsilon_DUMMY_RAND = subDict["H_epsilon_SUB_DUMMY_RAND"]
-    H_MM_DUMMY_RAND = subDict["H_MM_SUB_DUMMY_RAND"]
+        hist_dict["H_Q2_DUMMY_RAND_{}".format(j)] = subDict["H_Q2_SUB_DUMMY_RAND_{}".format(j)]
+        hist_dict["H_W_DUMMY_RAND_{}".format(j)] = subDict["H_W_SUB_DUMMY_RAND_{}".format(j)]
+        hist_dict["H_t_DUMMY_RAND_{}".format(j)] = subDict["H_t_SUB_DUMMY_RAND_{}".format(j)]
+        hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)] = subDict["H_epsilon_SUB_DUMMY_RAND_{}".format(j)]
+        hist_dict["H_MM_DUMMY_RAND_{}".format(j)] = subDict["H_MM_SUB_DUMMY_RAND_{}".format(j)]
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
@@ -1181,12 +1185,12 @@ def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=No
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
-
-          H_Q2_DATA.Fill(evt.Q2)
-          H_t_DATA.Fill(-evt.MandelT)
-          H_W_DATA.Fill(evt.W)
-          H_epsilon_DATA.Fill(evt.epsilon)
-          H_MM_DATA.Fill(evt.MM)
+            for j in range(len(t_bins)-1):
+                  hist_dict["H_Q2_DATA_{}".format(j)].Fill(evt.Q2)
+                  hist_dict["H_t_DATA_{}".format(j)].Fill(-evt.MandelT)
+                  hist_dict["H_W_DATA_{}".format(j)].Fill(evt.W)
+                  hist_dict["H_epsilon_DATA_{}".format(j)].Fill(evt.epsilon)
+                  hist_dict["H_MM_DATA_{}".format(j)].Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1213,11 +1217,12 @@ def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=No
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
-          H_Q2_DUMMY.Fill(evt.Q2)
-          H_t_DUMMY.Fill(-evt.MandelT)
-          H_W_DUMMY.Fill(evt.W)
-          H_epsilon_DUMMY.Fill(evt.epsilon)
-          H_MM_DUMMY.Fill(evt.MM)
+            for j in range(len(t_bins)-1):
+                  hist_dict["H_Q2_DUMMY_{}".format(j)].Fill(evt.Q2)
+                  hist_dict["H_t_DUMMY_{}".format(j)].Fill(-evt.MandelT)
+                  hist_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)
+                  hist_dict["H_epsilon_DUMMY_{}".format(j)].Fill(evt.epsilon)
+                  hist_dict["H_MM_DUMMY_{}".format(j)].Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1244,11 +1249,12 @@ def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=No
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
-          H_Q2_RAND.Fill(evt.Q2)
-          H_t_RAND.Fill(-evt.MandelT)
-          H_W_RAND.Fill(evt.W)
-          H_epsilon_RAND.Fill(evt.epsilon)
-          H_MM_RAND.Fill(evt.MM)
+            for j in range(len(t_bins)-1):
+                  hist_dict["H_Q2_RAND_{}".format(j)].Fill(evt.Q2)
+                  hist_dict["H_t_RAND_{}".format(j)].Fill(-evt.MandelT)
+                  hist_dict["H_W_RAND_{}".format(j)].Fill(evt.W)
+                  hist_dict["H_epsilon_RAND_{}".format(j)].Fill(evt.epsilon)
+                  hist_dict["H_MM_RAND_{}".format(j)].Fill(evt.MM)
           
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1275,48 +1281,51 @@ def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=No
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
-          H_Q2_DUMMY_RAND.Fill(evt.Q2)
-          H_t_DUMMY_RAND.Fill(-evt.MandelT)
-          H_W_DUMMY_RAND.Fill(evt.W)
-          H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-          H_MM_DUMMY_RAND.Fill(evt.MM)
+            for j in range(len(t_bins)-1):
+                  hist_dict["H_Q2_DUMMY_RAND_{}".format(j)].Fill(evt.Q2)
+                  hist_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(-evt.MandelT)
+                  hist_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)
+                  hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
+                  hist_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(evt.MM)
+                  
+    for j in range(len(t_bins)-1):
 
-    # Data Random subtraction window
-    H_Q2_RAND.Scale(1/nWindows)
-    H_W_RAND.Scale(1/nWindows)    
-    H_t_RAND.Scale(1/nWindows)
-    H_epsilon_RAND.Scale(1/nWindows)
-    H_MM_RAND.Scale(1/nWindows)
+        # Data Random subtraction window
+        hist_dict["H_Q2_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_W_RAND_{}".format(j)].Scale(1/nWindows)    
+        hist_dict["H_t_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_epsilon_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_MM_RAND_{}".format(j)].Scale(1/nWindows)
 
-    # Data Dummy_Random subtraction window
-    H_Q2_DUMMY_RAND.Scale(1/nWindows)
-    H_W_DUMMY_RAND.Scale(1/nWindows)
-    H_t_DUMMY_RAND.Scale(1/nWindows)
-    H_epsilon_DUMMY_RAND.Scale(1/nWindows)
-    H_MM_DUMMY_RAND.Scale(1/nWindows)
+        # Data Dummy_Random subtraction window
+        hist_dict["H_Q2_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_W_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_t_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_MM_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
 
-    ###
-    # Data Random subtraction
-    H_Q2_DATA.Add(H_Q2_RAND,-1)
-    H_W_DATA.Add(H_W_RAND,-1)
-    H_t_DATA.Add(H_t_RAND,-1)
-    H_epsilon_DATA.Add(H_epsilon_RAND,-1)
-    H_MM_DATA.Add(H_MM_RAND,-1)
+        ###
+        # Data Random subtraction
+        hist_dict["H_Q2_DATA_{}".format(j)].Add(hist_dict["H_Q2_RAND_{}".format(j)],-1)
+        hist_dict["H_W_DATA_{}".format(j)].Add(hist_dict["H_W_RAND_{}".format(j)],-1)
+        hist_dict["H_t_DATA_{}".format(j)].Add(hist_dict["H_t_RAND_{}".format(j)],-1)
+        hist_dict["H_epsilon_DATA_{}".format(j)].Add(hist_dict["H_epsilon_RAND_{}".format(j)],-1)
+        hist_dict["H_MM_DATA_{}".format(j)].Add(hist_dict["H_MM_RAND_{}".format(j)],-1)
 
-    ###
-    # Dummy Random subtraction
-    H_Q2_DUMMY.Add(H_Q2_DUMMY_RAND,-1)
-    H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
-    H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
-    H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
-    H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
+        ###
+        # Dummy Random subtraction
+        hist_dict["H_Q2_DUMMY_{}".format(j)].Add(hist_dict["H_Q2_DUMMY_RAND_{}".format(j)],-1)
+        hist_dict["H_W_DUMMY_{}".format(j)].Add(hist_dict["H_W_DUMMY_RAND_{}".format(j)],-1)
+        hist_dict["H_t_DUMMY_{}".format(j)].Add(hist_dict["H_t_DUMMY_RAND_{}".format(j)],-1)
+        hist_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
+        hist_dict["H_MM_DUMMY_{}".format(j)].Add(hist_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
 
-    # Scale pion to subtraction proper peak 
-    H_Q2_DATA.Scale(scale_factor)
-    H_W_DATA.Scale(scale_factor)    
-    H_t_DATA.Scale(scale_factor)
-    H_epsilon_DATA.Scale(scale_factor)
-    H_MM_DATA.Scale(scale_factor)    
+        # Scale pion to subtraction proper peak 
+        hist_dict["H_Q2_DATA_{}".format(j)].Scale(scale_factor)
+        hist_dict["H_W_DATA_{}".format(j)].Scale(scale_factor)    
+        hist_dict["H_t_DATA_{}".format(j)].Scale(scale_factor)
+        hist_dict["H_epsilon_DATA_{}".format(j)].Scale(scale_factor)
+        hist_dict["H_MM_DATA_{}".format(j)].Scale(scale_factor)    
 
 ################################################################################################################################################
 
