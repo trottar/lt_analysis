@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 17:37:54 trottar"
+# Time-stamp: "2024-03-02 17:44:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -368,11 +368,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
-            hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(subDict["H_Q2_SUB_DATA"],-1)
-            hist_bin_dict["H_W_DATA_{}".format(j)].Add(subDict["H_W_SUB_DATA"],-1)
-            hist_bin_dict["H_t_DATA_{}".format(j)].Add(subDict["H_t_SUB_DATA"],-1)
-            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(subDict["H_epsilon_SUB_DATA"],-1)
-            hist_bin_dict["H_MM_DATA_{}".format(j)].Add(subDict["H_MM_SUB_DATA"],-1)
+            hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(subDict["H_Q2_SUB_DATA_{}".format(j)],-1)
+            hist_bin_dict["H_W_DATA_{}".format(j)].Add(subDict["H_W_SUB_DATA_{}".format(j)],-1)
+            hist_bin_dict["H_t_DATA_{}".format(j)].Add(subDict["H_t_SUB_DATA_{}".format(j)],-1)
+            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(subDict["H_epsilon_SUB_DATA_{}".format(j)],-1)
+            hist_bin_dict["H_MM_DATA_{}".format(j)].Add(subDict["H_MM_SUB_DATA_{}".format(j)],-1)
         
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
