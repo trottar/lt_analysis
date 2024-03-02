@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:13:34 trottar"
+# Time-stamp: "2024-03-02 16:56:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -990,6 +990,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
           
+    # Scale pion to subtraction proper peak 
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor)
     if ParticleType == "kaon":
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(scale_factor)
@@ -1289,276 +1290,6 @@ def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=No
 
     # Data Dummy_Random subtraction window
     H_Q2_DUMMY_RAND.Scale(1/nWindows)
-    H_t_DUMMY_RAND.Scale(1/nWindows)
-    H_epsilon_DUMMY_RAND.Scale(1/nWindows)
-    H_MM_DUMMY_RAND.Scale(1/nWindows)
-
-    ###
-    # Data Random subtraction
-    H_Q2_DATA.Add(H_Q2_RAND,-1)
-    H_W_DATA.Add(H_W_RAND,-1)
-    H_t_DATA.Add(H_t_RAND,-1)
-    H_epsilon_DATA.Add(H_epsilon_RAND,-1)
-    H_MM_DATA.Add(H_MM_RAND,-1)
-
-    ###
-    # Dummy Random subtraction
-    H_Q2_DUMMY.Add(H_Q2_DUMMY_RAND,-1)
-    H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
-    H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
-    H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
-          
-    H_Q2_DATA.Scale(scale_factor)
-    H_W_DATA.Scale(scale_factor)    
-    H_t_DATA.Scale(scale_factor)
-    H_epsilon_DATA.Scale(scale_factor)
-    H_MM_DATA.Scale(scale_factor)    
-
-################################################################################################################################################
-
-def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
-
-    W = inpDict["W"] 
-    Q2 = inpDict["Q2"]
-    EPSSET = inpDict["EPSSET"]
-    ParticleType = inpDict["ParticleType"]
-
-    InDATAFilename = inpDict["InDATAFilename"] 
-    InDUMMYFilename = inpDict["InDUMMYFilename"] 
-
-    nWindows = subDict["nWindows"]
-    phi_setting = subDict["phi_setting"]
-
-    
-    ################################################################################################################################################
-    # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, set_val
-    set_val(inpDict) # Set global variables for optimization
-    
-    ################################################################################################################################################
-    # Define data root file trees of interest
-
-    rootFileData = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDATAFilename + "_%s.root" % (phi_setting)
-    if not os.path.isfile(rootFileData):
-        print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
-        histDict.update({ "phi_setting" : phi_setting})
-        sys.exit(2)
-
-    InFile_DATA = TFile.Open(rootFileData, "OPEN")
-
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(SubtractedParticle.capitalize()))
-
-    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(SubtractedParticle.capitalize()))
-
-    ################################################################################################################################################
-    # Define dummy root file trees of interest
-
-    rootFileDummy = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
-    if not os.path.isfile(rootFileDummy):
-        print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
-        return histDict
-
-    InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
-
-    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(SubtractedParticle.capitalize()))
-    
-    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(SubtractedParticle.capitalize()))
-
-    ################################################################################################################################################
-    
-    H_Q2_DATA = subDict["H_Q2_SUB_DATA"]
-    H_W_DATA = subDict["H_W_SUB_DATA"]
-    H_t_DATA = subDict["H_t_SUB_DATA"]
-    H_epsilon_DATA = subDict["H_epsilon_SUB_DATA"]
-    H_MM_DATA = subDict["H_MM_SUB_DATA"]
-
-    H_Q2_DUMMY = subDict["H_Q2_SUB_DUMMY"]
-    H_W_DUMMY = subDict["H_W_SUB_DUMMY"]
-    H_t_DUMMY = subDict["H_t_SUB_DUMMY"]
-    H_epsilon_DUMMY = subDict["H_epsilon_SUB_DUMMY"]
-    H_MM_DUMMY = subDict["H_MM_SUB_DUMMY"]
-
-    H_Q2_RAND = subDict["H_Q2_SUB_RAND"]
-    H_W_RAND = subDict["H_W_SUB_RAND"]
-    H_t_RAND = subDict["H_t_SUB_RAND"]
-    H_epsilon_RAND = subDict["H_epsilon_SUB_RAND"]
-    H_MM_RAND = subDict["H_MM_SUB_RAND"]
-
-    H_Q2_DUMMY_RAND = subDict["H_Q2_SUB_DUMMY_RAND"]
-    H_W_DUMMY_RAND = subDict["H_W_SUB_DUMMY_RAND"]
-    H_t_DUMMY_RAND = subDict["H_t_SUB_DUMMY_RAND"]
-    H_epsilon_DUMMY_RAND = subDict["H_epsilon_SUB_DUMMY_RAND"]
-    H_MM_DUMMY_RAND = subDict["H_MM_SUB_DUMMY_RAND"]
-    
-    # Adjusted HMS delta to fix hsxfp correlation
-    # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
-    # Note: these momenta are from Dave's slides and may not reflect what is used here
-    h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
-    c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
-
-    c0_dict = {}
-
-    for c0, p in zip(c0_list, h_momentum_list):
-        if p == 0.889:
-            c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888
-        elif p == 0.968:
-            c0_dict["Q0p5W2p40_lowe"] = c0
-            c0_dict["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
-            c0_dict["Q5p5W3p02_lowe"] = c0 # Proper value 0.962
-        elif p == 2.185:
-            c0_dict["Q0p5W2p40_highe"] = c0 # Proper value 2.066
-            c0_dict["Q3p0W2p32_lowe"] = c0
-        elif p == 2.328:
-            c0_dict["Q4p4W2p74_lowe"] = c0
-        elif p == 3.266:
-            c0_dict["Q5p5W3p02_highe"] = c0            
-        elif p == 4.2:
-            c0_dict["Q3p0W3p14_highe"] = c0 # Proper value 4.204
-        elif p == 4.712:
-            c0_dict["Q4p4W2p74_highe"] = c0            
-        elif p == 5.292:
-            c0_dict["Q2p1W2p95_highe"] = c0
-        elif p == 6.59:
-            c0_dict["Q3p0W2p32_highe"] = c0
-            
-    ##############
-    ##############        
-    ##############
-
-    ################################################################################################################################################
-    # Fill histograms for various trees called above
-
-    print("\nGrabbing {} {} subtraction data...".format(phi_setting,SubtractedParticle))
-    for i,evt in enumerate(TBRANCH_DATA):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)        
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-        else:
-            ALLCUTS = apply_data_cuts(evt)
-            
-        if(ALLCUTS):
-
-          H_Q2_DATA.Fill(evt.Q2)
-          H_t_DATA.Fill(-evt.MandelT)
-          H_W_DATA.Fill(evt.W)
-          H_epsilon_DATA.Fill(evt.epsilon)
-          H_MM_DATA.Fill(evt.MM)
-
-    ################################################################################################################################################
-    # Fill histograms for various trees called above
-
-    print("\nGrabbing {} {} subtraction dummy...".format(phi_setting,SubtractedParticle))
-    for i,evt in enumerate(TBRANCH_DUMMY):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)        
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-        else:
-            ALLCUTS = apply_data_cuts(evt)
-            
-        if(ALLCUTS):
-          H_Q2_DUMMY.Fill(evt.Q2)
-          H_t_DUMMY.Fill(-evt.MandelT)
-          H_W_DUMMY.Fill(evt.W)
-          H_epsilon_DUMMY.Fill(evt.epsilon)
-          H_MM_DUMMY.Fill(evt.MM)
-
-    ################################################################################################################################################
-    # Fill histograms for various trees called above
-
-    print("\nGrabbing {} {} subtraction random...".format(phi_setting,SubtractedParticle))
-    for i,evt in enumerate(TBRANCH_RAND):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)        
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-        else:
-            ALLCUTS = apply_data_cuts(evt)
-            
-        if(ALLCUTS):
-          H_Q2_RAND.Fill(evt.Q2)
-          H_t_RAND.Fill(-evt.MandelT)
-          H_W_RAND.Fill(evt.W)
-          H_epsilon_RAND.Fill(evt.epsilon)
-          H_MM_RAND.Fill(evt.MM)
-          
-    ################################################################################################################################################
-    # Fill histograms for various trees called above
-
-    print("\nGrabbing {} {} subtraction dummy random...".format(phi_setting,SubtractedParticle))
-    for i,evt in enumerate(TBRANCH_DUMMY_RAND):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)        
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-        else:
-            ALLCUTS = apply_data_cuts(evt)
-            
-        if(ALLCUTS):
-          H_Q2_DUMMY_RAND.Fill(evt.Q2)
-          H_t_DUMMY_RAND.Fill(-evt.MandelT)
-          H_W_DUMMY_RAND.Fill(evt.W)
-          H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-          H_MM_DUMMY_RAND.Fill(evt.MM)
-
-    # Data Random subtraction window
-    H_Q2_RAND.Scale(1/nWindows)
-    H_W_RAND.Scale(1/nWindows)    
-    H_t_RAND.Scale(1/nWindows)
-    H_epsilon_RAND.Scale(1/nWindows)
-    H_MM_RAND.Scale(1/nWindows)
-
-    # Data Dummy_Random subtraction window
-    H_Q2_DUMMY_RAND.Scale(1/nWindows)
     H_W_DUMMY_RAND.Scale(1/nWindows)
     H_t_DUMMY_RAND.Scale(1/nWindows)
     H_epsilon_DUMMY_RAND.Scale(1/nWindows)
@@ -1579,7 +1310,8 @@ def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=No
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
     H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
-          
+
+    # Scale pion to subtraction proper peak 
     H_Q2_DATA.Scale(scale_factor)
     H_W_DATA.Scale(scale_factor)    
     H_t_DATA.Scale(scale_factor)
@@ -1637,18 +1369,24 @@ def particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg=
     TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(SubtractedParticle.capitalize()))
 
     ################################################################################################################################################
+
+    hist_dict = {}
     
-    H_t_DATA = subDict["H_t_SUB_DATA"]
-    H_MM_DATA = subDict["H_MM_SUB_DATA"]
+    # Loop through bins in t_data and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
+    
+            hist_dict["H_t_DATA_{}_{}".format(j, k)] = subDict["H_t_SUB_DATA_{}_{}".format(j, k)]
+            hist_dict["H_MM_DATA_{}_{}".format(j, k)] = subDict["H_MM_SUB_DATA_{}_{}".format(j, k)]
 
-    H_t_DUMMY = subDict["H_t_SUB_DUMMY"]
-    H_MM_DUMMY = subDict["H_MM_SUB_DUMMY"]
+            hist_dict["H_t_DUMMY_{}_{}".format(j, k)] = subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)]
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)] = subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)]
 
-    H_t_RAND = subDict["H_t_SUB_RAND"]
-    H_MM_RAND = subDict["H_MM_SUB_RAND"]
+            hist_dict["H_t_RAND_{}_{}".format(j, k)] = subDict["H_t_SUB_RAND_{}_{}".format(j, k)]
+            hist_dict["H_MM_RAND_{}_{}".format(j, k)] = subDict["H_MM_SUB_RAND_{}_{}".format(j, k)]
 
-    H_t_DUMMY_RAND = subDict["H_t_SUB_DUMMY_RAND"]
-    H_MM_DUMMY_RAND = subDict["H_MM_SUB_DUMMY_RAND"]
+            hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_t_SUB_DUMMY_RAND_{}_{}".format(j, k)]
+            hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_MM_SUB_DUMMY_RAND_{}_{}".format(j, k)]
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
@@ -1709,10 +1447,11 @@ def particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg=
         else:
             ALLCUTS = apply_data_cuts(evt)
             
-        if(ALLCUTS):
-
-          H_t_DATA.Fill(-evt.MandelT)
-          H_MM_DATA.Fill(evt.MM)
+        if(ALLCUTS):            
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):
+                    hist_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                    hist_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1739,8 +1478,10 @@ def particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg=
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
-          H_t_DUMMY.Fill(-evt.MandelT)
-          H_MM_DUMMY.Fill(evt.MM)
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):            
+                    hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                    hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1767,8 +1508,10 @@ def particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg=
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
-          H_t_RAND.Fill(-evt.MandelT)
-          H_MM_RAND.Fill(evt.MM)
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):            
+                    hist_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                    hist_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(evt.MM)
           
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1795,26 +1538,32 @@ def particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg=
             ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
-          H_t_DUMMY_RAND.Fill(-evt.MandelT)
-          H_MM_DUMMY_RAND.Fill(evt.MM)
+            for j in range(len(t_bins)-1):
+                for k in range(len(phi_bins)-1):            
+                    hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                    hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
 
-    # Data Random subtraction window    
-    H_t_RAND.Scale(1/nWindows)
-    H_MM_RAND.Scale(1/nWindows)
 
-    # Data Dummy_Random subtraction window
-    H_t_DUMMY_RAND.Scale(1/nWindows)
-    H_MM_DUMMY_RAND.Scale(1/nWindows)
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):                    
+            # Data Random subtraction window    
+            hist_dict["H_t_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
 
-    ###
-    # Data Random subtraction
-    H_t_DATA.Add(H_t_RAND,-1)
-    H_MM_DATA.Add(H_MM_RAND,-1)
+            # Data Dummy_Random subtraction window
+            hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
 
-    ###
-    # Dummy Random subtraction
-    H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
-    H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
-              
-    H_t_DATA.Scale(scale_factor)
-    H_MM_DATA.Scale(scale_factor)    
+            ###
+            # Data Random subtraction
+            hist_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_RAND_{}_{}".format(j, k)],-1)
+
+            ###
+            # Dummy Random subtraction
+            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
+
+            # hist_dict["Scale pion to subtraction proper peak 
+            hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(scale_factor)    
