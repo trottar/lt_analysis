@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 21:23:44 trottar"
+# Time-stamp: "2024-03-01 22:16:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1254,11 +1254,22 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_MM_SUB_DUMMY_RAND"] = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
-        if Q2 == "2p1" and W == "2p95":
-            #particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=1.0e-2) # Q2=2.1, W=2.95, lowe
-            particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=2.5e-2) # Q2=3.0, W=3.14, lowe+highe
-        else:
-            particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=2.5e-2) # Q2=3.0, W=3.14, lowe+highe
+        scale_dict ={
+            # Q2=3p0, W=3p14
+            "Q3p0W3p14Right_highe" : 2.5e-2,
+            "Q3p0W3p14Left_highe" : 2.5e-2,
+            "Q3p0W3p14Center_highe" : 2.5e-2,
+            "Q3p0W3p14Left_lowe" : 2.5e-2,
+            "Q3p0W3p14Center_lowe" : 2.5e-2,
+            # Q2=2p1, W=2p95
+            "Q2p1W2p95Right_highe" : 5.0e-2,
+            "Q2p1W2p95Left_highe" : 2.5e-2,
+            "Q2p1W2p95Center_highe" : 1.0e-2,
+            "Q2p1W2p95Left_lowe" : 2.5e-2,
+            "Q2p1W2p95Center_lowe" : 2.5e-2,            
+        }
+        scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
+        particle_subtraction(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
         H_MM_DATA.Add(histDict["H_MM_SUB_DATA"],-1)
     
