@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:07:02 trottar"
+# Time-stamp: "2024-03-02 16:18:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1157,106 +1157,6 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DUMMY.Add(H_pmy_DUMMY_RAND,-1)
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
-    
-    histDict["InFile_DATA"] = InFile_DATA
-    histDict["InFile_DUMMY"] = InFile_DUMMY
-    histDict["phi_setting"] = phi_setting
-    histDict["pid_text"] = pid_text
-    histDict["runNums"] = runNums.split(' ')
-    histDict["nWindows"] = nWindows
-    histDict["H_hsdelta_DUMMY"] =     H_hsdelta_DUMMY
-    histDict["H_hsxptar_DUMMY"] =     H_hsxptar_DUMMY
-    histDict["H_hsyptar_DUMMY"] =     H_hsyptar_DUMMY
-    histDict["H_ssxfp_DUMMY"] =     H_ssxfp_DUMMY  
-    histDict["H_ssyfp_DUMMY"] =     H_ssyfp_DUMMY  
-    histDict["H_ssxpfp_DUMMY"] =     H_ssxpfp_DUMMY 
-    histDict["H_ssypfp_DUMMY"] =     H_ssypfp_DUMMY 
-    histDict["H_hsxfp_DUMMY"] =     H_hsxfp_DUMMY  
-    histDict["H_hsyfp_DUMMY"] =     H_hsyfp_DUMMY  
-    histDict["H_hsxpfp_DUMMY"] =     H_hsxpfp_DUMMY 
-    histDict["H_hsypfp_DUMMY"] =     H_hsypfp_DUMMY 
-    histDict["H_ssdelta_DUMMY"] =     H_ssdelta_DUMMY
-    histDict["H_ssxptar_DUMMY"] =     H_ssxptar_DUMMY
-    histDict["H_ssyptar_DUMMY"] =     H_ssyptar_DUMMY
-    histDict["H_q_DUMMY"] =     H_q_DUMMY      
-    histDict["H_Q2_DUMMY"] =     H_Q2_DUMMY     
-    histDict["H_t_DUMMY"] =     H_t_DUMMY     
-    histDict["H_epsilon_DUMMY"] =     H_epsilon_DUMMY
-    histDict["H_MM_DUMMY"] =     H_MM_DUMMY
-    histDict["H_MM_nosub_DUMMY"] =     H_MM_nosub_DUMMY
-    histDict["H_th_DUMMY"] =     H_th_DUMMY
-    histDict["H_ph_DUMMY"] =     H_ph_DUMMY
-    histDict["H_ph_q_DUMMY"] =     H_ph_q_DUMMY
-    histDict["H_th_q_DUMMY"] =     H_th_q_DUMMY
-    histDict["H_ph_recoil_DUMMY"] =     H_ph_recoil_DUMMY
-    histDict["H_th_recoil_DUMMY"] =     H_th_recoil_DUMMY
-    histDict["H_pmiss_DUMMY"] =     H_pmiss_DUMMY
-    histDict["H_emiss_DUMMY"] =     H_emiss_DUMMY
-    histDict["H_pmx_DUMMY"] =     H_pmx_DUMMY
-    histDict["H_pmy_DUMMY"] =     H_pmy_DUMMY
-    histDict["H_pmz_DUMMY"] =     H_pmz_DUMMY
-    histDict["H_W_DUMMY"] =     H_W_DUMMY
-    histDict["H_ct_DUMMY"] =     H_ct_DUMMY
-    histDict["MM_vs_CoinTime_DUMMY"] = MM_vs_CoinTime_DUMMY
-    histDict["CoinTime_vs_beta_DUMMY"] = CoinTime_vs_beta_DUMMY
-    histDict["MM_vs_beta_DUMMY"] = MM_vs_beta_DUMMY
-    histDict["phiq_vs_t_DUMMY"] = phiq_vs_t_DUMMY
-    histDict["polar_phiq_vs_t_DUMMY"] = polar_phiq_vs_t_DUMMY    
-    histDict["H_hsdelta_DATA"] =     H_hsdelta_DATA
-    histDict["H_hsxptar_DATA"] =     H_hsxptar_DATA
-    histDict["H_hsyptar_DATA"] =     H_hsyptar_DATA
-    histDict["H_ssxfp_DATA"] =     H_ssxfp_DATA  
-    histDict["H_ssyfp_DATA"] =     H_ssyfp_DATA  
-    histDict["H_ssxpfp_DATA"] =     H_ssxpfp_DATA 
-    histDict["H_ssypfp_DATA"] =     H_ssypfp_DATA 
-    histDict["H_hsxfp_DATA"] =     H_hsxfp_DATA  
-    histDict["H_hsyfp_DATA"] =     H_hsyfp_DATA  
-    histDict["H_hsxpfp_DATA"] =     H_hsxpfp_DATA 
-    histDict["H_hsypfp_DATA"] =     H_hsypfp_DATA 
-    histDict["H_ssdelta_DATA"] =     H_ssdelta_DATA
-    histDict["H_ssxptar_DATA"] =     H_ssxptar_DATA
-    histDict["H_ssyptar_DATA"] =     H_ssyptar_DATA
-    histDict["H_q_DATA"] =     H_q_DATA      
-    histDict["H_Q2_DATA"] =     H_Q2_DATA     
-    histDict["H_t_DATA"] =     H_t_DATA     
-    histDict["H_epsilon_DATA"] =     H_epsilon_DATA
-    histDict["H_MM_DATA"] =     H_MM_DATA
-    histDict["H_MM_nosub_DATA"] =     H_MM_nosub_DATA
-    histDict["H_th_DATA"] =     H_th_DATA
-    histDict["H_ph_DATA"] =     H_ph_DATA
-    histDict["H_ph_q_DATA"] =     H_ph_q_DATA
-    histDict["H_th_q_DATA"] =     H_th_q_DATA
-    histDict["H_ph_recoil_DATA"] =     H_ph_recoil_DATA
-    histDict["H_th_recoil_DATA"] =     H_th_recoil_DATA
-    histDict["H_pmiss_DATA"] =     H_pmiss_DATA
-    histDict["H_emiss_DATA"] =     H_emiss_DATA
-    histDict["H_pmx_DATA"] =     H_pmx_DATA
-    histDict["H_pmy_DATA"] =     H_pmy_DATA
-    histDict["H_pmz_DATA"] =     H_pmz_DATA
-    histDict["H_W_DATA"] =     H_W_DATA
-    histDict["H_ct_DATA"] =     H_ct_DATA
-    histDict["H_cal_etottracknorm_DATA"] =     H_cal_etottracknorm_DATA
-    histDict["H_cer_npeSum_DATA"] =     H_cer_npeSum_DATA
-    histDict["P_cal_etottracknorm_DATA"] =     P_cal_etottracknorm_DATA
-    histDict["P_hgcer_npeSum_DATA"] =     P_hgcer_npeSum_DATA
-    histDict["P_aero_npeSum_DATA"] =     P_aero_npeSum_DATA
-    histDict["MM_vs_CoinTime_DATA"] = MM_vs_CoinTime_DATA
-    histDict["CoinTime_vs_beta_DATA"] = CoinTime_vs_beta_DATA
-    histDict["MM_vs_beta_DATA"] = MM_vs_beta_DATA
-    histDict["phiq_vs_t_DATA"] = phiq_vs_t_DATA
-    histDict["polar_phiq_vs_t_DATA"] = polar_phiq_vs_t_DATA
-    histDict["Q2_vs_W_DATA"] = Q2_vs_W_DATA
-    histDict["Q2_vs_t_DATA"] = Q2_vs_t_DATA
-    histDict["W_vs_t_DATA"] = W_vs_t_DATA
-    histDict["EPS_vs_t_DATA"] = EPS_vs_t_DATA
-    histDict["MM_vs_t_DATA"] = MM_vs_t_DATA    
-    histDict["MM_vs_H_cer_DATA"] = MM_vs_H_cer_DATA
-    histDict["MM_vs_H_cal_DATA"] = MM_vs_H_cal_DATA
-    histDict["MM_vs_P_cal_DATA"] = MM_vs_P_cal_DATA    
-    histDict["MM_vs_P_hgcer_DATA"] = MM_vs_P_hgcer_DATA
-    histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
-    histDict["NumEvts_MM_DUMMY"] = int(H_MM_DUMMY.Integral())
-    histDict["NumEvts_MM_DATA"] = int(H_MM_DATA.Integral())
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -1559,6 +1459,107 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
         H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
+        
+    histDict["InFile_DATA"] = InFile_DATA
+    histDict["InFile_DUMMY"] = InFile_DUMMY
+    histDict["phi_setting"] = phi_setting
+    histDict["pid_text"] = pid_text
+    histDict["runNums"] = runNums.split(' ')
+    histDict["nWindows"] = nWindows
+    histDict["H_hsdelta_DUMMY"] =     H_hsdelta_DUMMY
+    histDict["H_hsxptar_DUMMY"] =     H_hsxptar_DUMMY
+    histDict["H_hsyptar_DUMMY"] =     H_hsyptar_DUMMY
+    histDict["H_ssxfp_DUMMY"] =     H_ssxfp_DUMMY  
+    histDict["H_ssyfp_DUMMY"] =     H_ssyfp_DUMMY  
+    histDict["H_ssxpfp_DUMMY"] =     H_ssxpfp_DUMMY 
+    histDict["H_ssypfp_DUMMY"] =     H_ssypfp_DUMMY 
+    histDict["H_hsxfp_DUMMY"] =     H_hsxfp_DUMMY  
+    histDict["H_hsyfp_DUMMY"] =     H_hsyfp_DUMMY  
+    histDict["H_hsxpfp_DUMMY"] =     H_hsxpfp_DUMMY 
+    histDict["H_hsypfp_DUMMY"] =     H_hsypfp_DUMMY 
+    histDict["H_ssdelta_DUMMY"] =     H_ssdelta_DUMMY
+    histDict["H_ssxptar_DUMMY"] =     H_ssxptar_DUMMY
+    histDict["H_ssyptar_DUMMY"] =     H_ssyptar_DUMMY
+    histDict["H_q_DUMMY"] =     H_q_DUMMY      
+    histDict["H_Q2_DUMMY"] =     H_Q2_DUMMY     
+    histDict["H_t_DUMMY"] =     H_t_DUMMY     
+    histDict["H_epsilon_DUMMY"] =     H_epsilon_DUMMY
+    histDict["H_MM_DUMMY"] =     H_MM_DUMMY
+    histDict["H_MM_nosub_DUMMY"] =     H_MM_nosub_DUMMY
+    histDict["H_th_DUMMY"] =     H_th_DUMMY
+    histDict["H_ph_DUMMY"] =     H_ph_DUMMY
+    histDict["H_ph_q_DUMMY"] =     H_ph_q_DUMMY
+    histDict["H_th_q_DUMMY"] =     H_th_q_DUMMY
+    histDict["H_ph_recoil_DUMMY"] =     H_ph_recoil_DUMMY
+    histDict["H_th_recoil_DUMMY"] =     H_th_recoil_DUMMY
+    histDict["H_pmiss_DUMMY"] =     H_pmiss_DUMMY
+    histDict["H_emiss_DUMMY"] =     H_emiss_DUMMY
+    histDict["H_pmx_DUMMY"] =     H_pmx_DUMMY
+    histDict["H_pmy_DUMMY"] =     H_pmy_DUMMY
+    histDict["H_pmz_DUMMY"] =     H_pmz_DUMMY
+    histDict["H_W_DUMMY"] =     H_W_DUMMY
+    histDict["H_ct_DUMMY"] =     H_ct_DUMMY
+    histDict["MM_vs_CoinTime_DUMMY"] = MM_vs_CoinTime_DUMMY
+    histDict["CoinTime_vs_beta_DUMMY"] = CoinTime_vs_beta_DUMMY
+    histDict["MM_vs_beta_DUMMY"] = MM_vs_beta_DUMMY
+    histDict["phiq_vs_t_DUMMY"] = phiq_vs_t_DUMMY
+    histDict["polar_phiq_vs_t_DUMMY"] = polar_phiq_vs_t_DUMMY    
+    histDict["H_hsdelta_DATA"] =     H_hsdelta_DATA
+    histDict["H_hsxptar_DATA"] =     H_hsxptar_DATA
+    histDict["H_hsyptar_DATA"] =     H_hsyptar_DATA
+    histDict["H_ssxfp_DATA"] =     H_ssxfp_DATA  
+    histDict["H_ssyfp_DATA"] =     H_ssyfp_DATA  
+    histDict["H_ssxpfp_DATA"] =     H_ssxpfp_DATA 
+    histDict["H_ssypfp_DATA"] =     H_ssypfp_DATA 
+    histDict["H_hsxfp_DATA"] =     H_hsxfp_DATA  
+    histDict["H_hsyfp_DATA"] =     H_hsyfp_DATA  
+    histDict["H_hsxpfp_DATA"] =     H_hsxpfp_DATA 
+    histDict["H_hsypfp_DATA"] =     H_hsypfp_DATA 
+    histDict["H_ssdelta_DATA"] =     H_ssdelta_DATA
+    histDict["H_ssxptar_DATA"] =     H_ssxptar_DATA
+    histDict["H_ssyptar_DATA"] =     H_ssyptar_DATA
+    histDict["H_q_DATA"] =     H_q_DATA      
+    histDict["H_Q2_DATA"] =     H_Q2_DATA     
+    histDict["H_t_DATA"] =     H_t_DATA     
+    histDict["H_epsilon_DATA"] =     H_epsilon_DATA
+    histDict["H_MM_DATA"] =     H_MM_DATA
+    histDict["H_MM_nosub_DATA"] =     H_MM_nosub_DATA
+    histDict["H_th_DATA"] =     H_th_DATA
+    histDict["H_ph_DATA"] =     H_ph_DATA
+    histDict["H_ph_q_DATA"] =     H_ph_q_DATA
+    histDict["H_th_q_DATA"] =     H_th_q_DATA
+    histDict["H_ph_recoil_DATA"] =     H_ph_recoil_DATA
+    histDict["H_th_recoil_DATA"] =     H_th_recoil_DATA
+    histDict["H_pmiss_DATA"] =     H_pmiss_DATA
+    histDict["H_emiss_DATA"] =     H_emiss_DATA
+    histDict["H_pmx_DATA"] =     H_pmx_DATA
+    histDict["H_pmy_DATA"] =     H_pmy_DATA
+    histDict["H_pmz_DATA"] =     H_pmz_DATA
+    histDict["H_W_DATA"] =     H_W_DATA
+    histDict["H_ct_DATA"] =     H_ct_DATA
+    histDict["H_cal_etottracknorm_DATA"] =     H_cal_etottracknorm_DATA
+    histDict["H_cer_npeSum_DATA"] =     H_cer_npeSum_DATA
+    histDict["P_cal_etottracknorm_DATA"] =     P_cal_etottracknorm_DATA
+    histDict["P_hgcer_npeSum_DATA"] =     P_hgcer_npeSum_DATA
+    histDict["P_aero_npeSum_DATA"] =     P_aero_npeSum_DATA
+    histDict["MM_vs_CoinTime_DATA"] = MM_vs_CoinTime_DATA
+    histDict["CoinTime_vs_beta_DATA"] = CoinTime_vs_beta_DATA
+    histDict["MM_vs_beta_DATA"] = MM_vs_beta_DATA
+    histDict["phiq_vs_t_DATA"] = phiq_vs_t_DATA
+    histDict["polar_phiq_vs_t_DATA"] = polar_phiq_vs_t_DATA
+    histDict["Q2_vs_W_DATA"] = Q2_vs_W_DATA
+    histDict["Q2_vs_t_DATA"] = Q2_vs_t_DATA
+    histDict["W_vs_t_DATA"] = W_vs_t_DATA
+    histDict["EPS_vs_t_DATA"] = EPS_vs_t_DATA
+    histDict["MM_vs_t_DATA"] = MM_vs_t_DATA    
+    histDict["MM_vs_H_cer_DATA"] = MM_vs_H_cer_DATA
+    histDict["MM_vs_H_cal_DATA"] = MM_vs_H_cal_DATA
+    histDict["MM_vs_P_cal_DATA"] = MM_vs_P_cal_DATA    
+    histDict["MM_vs_P_hgcer_DATA"] = MM_vs_P_hgcer_DATA
+    histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
+    histDict["NumEvts_MM_DUMMY"] = int(H_MM_DUMMY.Integral())
+    histDict["NumEvts_MM_DATA"] = int(H_MM_DATA.Integral())
+
     
     ###
     # CT plots

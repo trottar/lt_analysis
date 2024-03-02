@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 15:55:52 trottar"
+# Time-stamp: "2024-03-02 16:21:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,7 +58,7 @@ from utility import get_histogram
 
 ##################################################################################################################################################
 
-def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict):
+def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
     processed_dict = {}
     
@@ -347,9 +347,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict
     
     return processed_dict
 
-def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict):
+def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
-    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict)
+    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
     
     binned_dict = {}
 
@@ -407,13 +407,14 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDic
 def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
-    nWindows, normfac_data, normfac_dummy = hist["nWindows"], hist["normfac_data"], hist["normfac_dummy"]
+    normfac_data, normfac_dummy = hist["normfac_data"], hist["normfac_dummy"]
+    nWindows, phi_setting = hist["nWindows"], hist["phi_setting"]
 
     # Grab the setting by setting normalized error
     data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())] 
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, inpDict)
+    binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
 
     binned_t_data = binned_dict[kin_type]["binned_t_data"]
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
