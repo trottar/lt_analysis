@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 17:18:31 trottar"
+# Time-stamp: "2024-03-02 17:45:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1327,6 +1327,13 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_epsilon_DATA_{}".format(j)].Scale(scale_factor)
         hist_dict["H_MM_DATA_{}".format(j)].Scale(scale_factor)    
 
+        # Scale pion to subtraction proper peak 
+        hist_dict["H_Q2_DUMMY_{}".format(j)].Scale(scale_factor)
+        hist_dict["H_W_DUMMY_{}".format(j)].Scale(scale_factor)    
+        hist_dict["H_t_DUMMY_{}".format(j)].Scale(scale_factor)
+        hist_dict["H_epsilon_DUMMY_{}".format(j)].Scale(scale_factor)
+        hist_dict["H_MM_DUMMY_{}".format(j)].Scale(scale_factor)    
+        
 ################################################################################################################################################
 
 def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
@@ -1576,3 +1583,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             # hist_dict["Scale pion to subtraction proper peak 
             hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(scale_factor)
             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(scale_factor)    
+
+            # hist_dict["Scale pion to subtraction proper peak 
+            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(scale_factor)
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(scale_factor)    
+            
