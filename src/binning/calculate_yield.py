@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:32:38 trottar"
+# Time-stamp: "2024-03-02 16:41:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,6 +151,12 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
     ##############
 
     hist_bin_dict = {}
+
+    # Pion subtraction by scaling simc to peak size
+    if ParticleType == "kaon":
+        from particle_subtraction import particle_subtraction_yield
+        SubtractedParticle = "pion"
+        subDict = {}
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -168,6 +174,30 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_RAND_{}_{}".format(j, k),"MM", 500, 0.7, 1.5)
             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_t_DUMMY_RAND_{}_{}".format(j, k),"-t", 500, inpDict["tmin"], inpDict["tmax"])
 
+
+            # Pion subtraction by scaling simc to peak size
+            if ParticleType == "kaon":
+
+                subDict["H_t_SUB_DATA"]       = TH1D("H_t_SUB_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
+                subDict["H_MM_SUB_DATA"]  = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
+
+                subDict["H_t_SUB_RAND"]       = TH1D("H_t_SUB_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
+                subDict["H_MM_SUB_RAND"]  = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
+
+                subDict["H_t_SUB_DUMMY"]       = TH1D("H_t_SUB_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
+                subDict["H_MM_SUB_DUMMY"]  = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
+
+                subDict["H_t_SUB_DUMMY_RAND"]       = TH1D("H_t_SUB_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
+                subDict["H_MM_SUB_DUMMY_RAND"]  = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
+
+                subDict["nWindows"] = nWindows
+                subDict["phi_setting"] = phi_setting
+
+    # Pion subtraction by scaling simc to peak size
+    if ParticleType == "kaon":                
+        scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
+        particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
+                
     print("\nBinning data...")
     for i,evt in enumerate(TBRANCH_DATA):
 
@@ -314,28 +344,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
             # Pion subtraction by scaling simc to peak size
             if ParticleType == "kaon":
-                from particle_subtraction import particle_subtraction_yield
-                SubtractedParticle = "pion"
-                subDict = {}
-
-                subDict["H_t_SUB_DATA"]       = TH1D("H_t_SUB_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
-                subDict["H_MM_SUB_DATA"]  = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
-
-                subDict["H_t_SUB_RAND"]       = TH1D("H_t_SUB_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
-                subDict["H_MM_SUB_RAND"]  = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
-
-                subDict["H_t_SUB_DUMMY"]       = TH1D("H_t_SUB_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
-                subDict["H_MM_SUB_DUMMY"]  = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
-
-                subDict["H_t_SUB_DUMMY_RAND"]       = TH1D("H_t_SUB_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
-                subDict["H_MM_SUB_DUMMY_RAND"]  = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
-
-                subDict["nWindows"] = nWindows
-                subDict["phi_setting"] = phi_setting
-                scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
-                particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA"],-1)
-                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA"],-1)
+                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
+                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
 
             
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
