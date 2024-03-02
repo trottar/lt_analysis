@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 15:55:42 trottar"
+# Time-stamp: "2024-03-02 16:28:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -361,11 +361,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
             particle_subtraction_ave
             (subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
-            H_Q2_DATA.Add(subDict["H_Q2_SUB_DATA"],-1)
-            H_W_DATA.Add(subDict["H_W_SUB_DATA"],-1)
-            H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
-            H_epsilon_DATA.Add(subDict["H_epsilon_SUB_DATA"],-1)
-            H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
+            hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(subDict["H_Q2_SUB_DATA"],-1)
+            hist_bin_dict["H_W_DATA_{}".format(j)].Add(subDict["H_W_SUB_DATA"],-1)
+            hist_bin_dict["H_t_DATA_{}".format(j)].Add(subDict["H_t_SUB_DATA"],-1)
+            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(subDict["H_epsilon_SUB_DATA"],-1)
+            hist_bin_dict["H_MM_DATA_{}".format(j)].Add(subDict["H_MM_SUB_DATA"],-1)
         
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],

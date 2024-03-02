@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:21:07 trottar"
+# Time-stamp: "2024-03-02 16:27:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -334,8 +334,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 subDict["phi_setting"] = phi_setting
                 scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
                 particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
-                H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
-                H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
+                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA"],-1)
+                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA"],-1)
 
             
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
