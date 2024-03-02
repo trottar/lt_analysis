@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 17:31:30 trottar"
+# Time-stamp: "2024-03-02 17:37:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -145,6 +145,12 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
     ##############
 
     hist_bin_dict = {}
+
+    # Pion subtraction by scaling simc to peak size
+    if ParticleType == "kaon":
+        from particle_subtraction import particle_subtraction_ave
+        SubtractedParticle = "pion"
+        subDict = {}
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -175,10 +181,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
-            from particle_subtraction import particle_subtraction_ave
-            SubtractedParticle = "pion"
-            subDict = {}
-
+            
             subDict["H_Q2_SUB_DATA_{}".format(j)]       = TH1D("H_Q2_SUB_DATA_{}".format(j),"Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
             subDict["H_W_SUB_DATA_{}".format(j)]  = TH1D("H_W_SUB_DATA_{}".format(j),"W ", 500, inpDict["Wmin"], inpDict["Wmax"])
             subDict["H_t_SUB_DATA_{}".format(j)]       = TH1D("H_t_SUB_DATA_{}".format(j),"-t", 500, inpDict["tmin"], inpDict["tmax"])
