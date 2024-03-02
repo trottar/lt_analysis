@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:28:16 trottar"
+# Time-stamp: "2024-03-02 16:32:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -332,29 +332,29 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, inpDict):
             SubtractedParticle = "pion"
             subDict = {}
 
-            subDict["H_Q2_SUB_DATA"]       = TH1D("H_Q2_SUB_DATA","Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
-            subDict["H_W_SUB_DATA"]  = TH1D("H_W_SUB_DATA","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
-            subDict["H_t_SUB_DATA"]       = TH1D("H_t_SUB_DATA","-t", 100, inpDict["tmin"], inpDict["tmax"])
-            subDict["H_epsilon_SUB_DATA"]  = TH1D("H_epsilon_SUB_DATA","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-            subDict["H_MM_SUB_DATA"]  = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+            subDict["H_Q2_SUB_DATA"]       = TH1D("H_Q2_SUB_DATA","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+            subDict["H_W_SUB_DATA"]  = TH1D("H_W_SUB_DATA","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+            subDict["H_t_SUB_DATA"]       = TH1D("H_t_SUB_DATA","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            subDict["H_epsilon_SUB_DATA"]  = TH1D("H_epsilon_SUB_DATA","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+            subDict["H_MM_SUB_DATA"]  = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
 
-            subDict["H_Q2_SUB_RAND"]       = TH1D("H_Q2_SUB_RAND","Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
-            subDict["H_W_SUB_RAND"]  = TH1D("H_W_SUB_RAND","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
-            subDict["H_t_SUB_RAND"]       = TH1D("H_t_SUB_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
-            subDict["H_epsilon_SUB_RAND"]  = TH1D("H_epsilon_SUB_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-            subDict["H_MM_SUB_RAND"]  = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+            subDict["H_Q2_SUB_RAND"]       = TH1D("H_Q2_SUB_RAND","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+            subDict["H_W_SUB_RAND"]  = TH1D("H_W_SUB_RAND","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+            subDict["H_t_SUB_RAND"]       = TH1D("H_t_SUB_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            subDict["H_epsilon_SUB_RAND"]  = TH1D("H_epsilon_SUB_RAND","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+            subDict["H_MM_SUB_RAND"]  = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
 
-            subDict["H_Q2_SUB_DUMMY"]       = TH1D("H_Q2_SUB_DUMMY","Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
-            subDict["H_W_SUB_DUMMY"]  = TH1D("H_W_SUB_DUMMY","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
-            subDict["H_t_SUB_DUMMY"]       = TH1D("H_t_SUB_DUMMY","-t", 100, inpDict["tmin"], inpDict["tmax"])
-            subDict["H_epsilon_SUB_DUMMY"]  = TH1D("H_epsilon_SUB_DUMMY","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-            subDict["H_MM_SUB_DUMMY"]  = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+            subDict["H_Q2_SUB_DUMMY"]       = TH1D("H_Q2_SUB_DUMMY","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+            subDict["H_W_SUB_DUMMY"]  = TH1D("H_W_SUB_DUMMY","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+            subDict["H_t_SUB_DUMMY"]       = TH1D("H_t_SUB_DUMMY","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            subDict["H_epsilon_SUB_DUMMY"]  = TH1D("H_epsilon_SUB_DUMMY","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+            subDict["H_MM_SUB_DUMMY"]  = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
 
-            subDict["H_Q2_SUB_DUMMY_RAND"]       = TH1D("H_Q2_SUB_DUMMY_RAND","Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
-            subDict["H_W_SUB_DUMMY_RAND"]  = TH1D("H_W_SUB_DUMMY_RAND","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
-            subDict["H_t_SUB_DUMMY_RAND"]       = TH1D("H_t_SUB_DUMMY_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
-            subDict["H_epsilon_SUB_DUMMY_RAND"]  = TH1D("H_epsilon_SUB_DUMMY_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-            subDict["H_MM_SUB_DUMMY_RAND"]  = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+            subDict["H_Q2_SUB_DUMMY_RAND"]       = TH1D("H_Q2_SUB_DUMMY_RAND","Q2", 500, inpDict["Q2min"], inpDict["Q2max"])
+            subDict["H_W_SUB_DUMMY_RAND"]  = TH1D("H_W_SUB_DUMMY_RAND","W ", 500, inpDict["Wmin"], inpDict["Wmax"])
+            subDict["H_t_SUB_DUMMY_RAND"]       = TH1D("H_t_SUB_DUMMY_RAND","-t", 500, inpDict["tmin"], inpDict["tmax"])
+            subDict["H_epsilon_SUB_DUMMY_RAND"]  = TH1D("H_epsilon_SUB_DUMMY_RAND","epsilon", 500, inpDict["Epsmin"], inpDict["Epsmax"])
+            subDict["H_MM_SUB_DUMMY_RAND"]  = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 500, 0.7, 1.5)
 
             subDict["nWindows"] = nWindows
             subDict["phi_setting"] = phi_setting
