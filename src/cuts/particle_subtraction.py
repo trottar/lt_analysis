@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:56:35 trottar"
+# Time-stamp: "2024-03-02 17:03:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1320,7 +1320,7 @@ def particle_subtraction_ave(subDict, inpDict, SubtractedParticle, hgcer_cutg=No
 
 ################################################################################################################################################
 
-def particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
+def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None, scale_factor=1.0):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]

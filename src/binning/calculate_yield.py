@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:42:31 trottar"
+# Time-stamp: "2024-03-02 17:03:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -195,7 +195,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
-        particle_subtraction_yield(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
+        particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
                 
     print("\nBinning data...")
     for i,evt in enumerate(TBRANCH_DATA):
