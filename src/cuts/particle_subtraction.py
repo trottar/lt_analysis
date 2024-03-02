@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 16:01:57 trottar"
+# Time-stamp: "2024-03-02 16:10:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -248,6 +248,90 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     P_cal_etottracknorm_DUMMY_RAND = subDict["P_cal_etottracknorm_SUB_DUMMY_RAND"]
     P_hgcer_npeSum_DUMMY_RAND = subDict["P_hgcer_npeSum_SUB_DUMMY_RAND"]
     P_aero_npeSum_DUMMY_RAND = subDict["P_aero_npeSum_SUB_DUMMY_RAND"]
+
+    MM_vs_CoinTime_DATA = subDict["MM_vs_CoinTime_SUB_DATA"]
+    CoinTime_vs_beta_DATA = subDict["CoinTime_vs_beta_SUB_DATA"]
+    MM_vs_beta_DATA = subDict["MM_vs_beta_SUB_DATA"]
+    MM_vs_H_cer_DATA = subDict["MM_vs_H_cer_SUB_DATA"]
+    MM_vs_H_cal_DATA = subDict["MM_vs_H_cal_SUB_DATA"]
+    MM_vs_P_cal_DATA = subDict["MM_vs_P_cal_SUB_DATA"]
+    MM_vs_P_hgcer_DATA = subDict["MM_vs_P_hgcer_SUB_DATA"]
+    MM_vs_P_aero_DATA = subDict["MM_vs_P_aero_SUB_DATA"]
+    phiq_vs_t_DATA = subDict["phiq_vs_t_SUB_DATA"]
+    Q2_vs_W_DATA = subDict["Q2_vs_W_SUB_DATA"]
+    Q2_vs_t_DATA = subDict["Q2_vs_t_SUB_DATA"]
+    W_vs_t_DATA = subDict["W_vs_t_SUB_DATA"]
+    EPS_vs_t_DATA = subDict["EPS_vs_t_SUB_DATA"]
+    MM_vs_t_DATA = subDict["MM_vs_t_SUB_DATA"]
+    P_hgcer_xAtCer_vs_yAtCer_DATA = subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"]
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DATA = subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"]
+    P_hgcer_xAtCer_vs_MM_DATA = subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"]
+    P_hgcer_nohole_xAtCer_vs_MM_DATA = subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"]
+    P_hgcer_yAtCer_vs_MM_DATA = subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"]
+    P_hgcer_nohole_yAtCer_vs_MM_DATA = subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"]
+
+    MM_vs_CoinTime_DUMMY = subDict["MM_vs_CoinTime_SUB_DUMMY"]
+    CoinTime_vs_beta_DUMMY = subDict["CoinTime_vs_beta_SUB_DUMMY"]
+    MM_vs_beta_DUMMY = subDict["MM_vs_beta_SUB_DUMMY"]
+    MM_vs_H_cer_DUMMY = subDict["MM_vs_H_cer_SUB_DUMMY"]
+    MM_vs_H_cal_DUMMY = subDict["MM_vs_H_cal_SUB_DUMMY"]
+    MM_vs_P_cal_DUMMY = subDict["MM_vs_P_cal_SUB_DUMMY"]
+    MM_vs_P_hgcer_DUMMY = subDict["MM_vs_P_hgcer_SUB_DUMMY"]
+    MM_vs_P_aero_DUMMY = subDict["MM_vs_P_aero_SUB_DUMMY"]
+    phiq_vs_t_DUMMY = subDict["phiq_vs_t_SUB_DUMMY"]
+    Q2_vs_W_DUMMY = subDict["Q2_vs_W_SUB_DUMMY"]
+    Q2_vs_t_DUMMY = subDict["Q2_vs_t_SUB_DUMMY"]
+    W_vs_t_DUMMY = subDict["W_vs_t_SUB_DUMMY"]
+    EPS_vs_t_DUMMY = subDict["EPS_vs_t_SUB_DUMMY"]
+    MM_vs_t_DUMMY = subDict["MM_vs_t_SUB_DUMMY"]
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY = subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DUMMY"]
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY = subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DUMMY"]
+    P_hgcer_xAtCer_vs_MM_DUMMY = subDict["P_hgcer_xAtCer_vs_MM_SUB_DUMMY"]
+    P_hgcer_nohole_xAtCer_vs_MM_DUMMY = subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DUMMY"]
+    P_hgcer_yAtCer_vs_MM_DUMMY = subDict["P_hgcer_yAtCer_vs_MM_SUB_DUMMY"]
+    P_hgcer_nohole_yAtCer_vs_MM_DUMMY = subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DUMMY"]
+
+    MM_vs_CoinTime_RAND = subDict["MM_vs_CoinTime_SUB_RAND"]
+    CoinTime_vs_beta_RAND = subDict["CoinTime_vs_beta_SUB_RAND"]
+    MM_vs_beta_RAND = subDict["MM_vs_beta_SUB_RAND"]
+    MM_vs_H_cer_RAND = subDict["MM_vs_H_cer_SUB_RAND"]
+    MM_vs_H_cal_RAND = subDict["MM_vs_H_cal_SUB_RAND"]
+    MM_vs_P_cal_RAND = subDict["MM_vs_P_cal_SUB_RAND"]
+    MM_vs_P_hgcer_RAND = subDict["MM_vs_P_hgcer_SUB_RAND"]
+    MM_vs_P_aero_RAND = subDict["MM_vs_P_aero_SUB_RAND"]
+    phiq_vs_t_RAND = subDict["phiq_vs_t_SUB_RAND"]
+    Q2_vs_W_RAND = subDict["Q2_vs_W_SUB_RAND"]
+    Q2_vs_t_RAND = subDict["Q2_vs_t_SUB_RAND"]
+    W_vs_t_RAND = subDict["W_vs_t_SUB_RAND"]
+    EPS_vs_t_RAND = subDict["EPS_vs_t_SUB_RAND"]
+    MM_vs_t_RAND = subDict["MM_vs_t_SUB_RAND"]
+    P_hgcer_xAtCer_vs_yAtCer_RAND = subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_RAND"]
+    P_hgcer_nohole_xAtCer_vs_yAtCer_RAND = subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_RAND"]
+    P_hgcer_xAtCer_vs_MM_RAND = subDict["P_hgcer_xAtCer_vs_MM_SUB_RAND"]
+    P_hgcer_nohole_xAtCer_vs_MM_RAND = subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_RAND"]
+    P_hgcer_yAtCer_vs_MM_RAND = subDict["P_hgcer_yAtCer_vs_MM_SUB_RAND"]
+    P_hgcer_nohole_yAtCer_vs_MM_RAND = subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_RAND"]
+
+    MM_vs_CoinTime_DUMMY_RAND = subDict["MM_vs_CoinTime_SUB_DUMMY_RAND"]
+    CoinTime_vs_beta_DUMMY_RAND = subDict["CoinTime_vs_beta_SUB_DUMMY_RAND"]
+    MM_vs_beta_DUMMY_RAND = subDict["MM_vs_beta_SUB_DUMMY_RAND"]
+    MM_vs_H_cer_DUMMY_RAND = subDict["MM_vs_H_cer_SUB_DUMMY_RAND"]
+    MM_vs_H_cal_DUMMY_RAND = subDict["MM_vs_H_cal_SUB_DUMMY_RAND"]
+    MM_vs_P_cal_DUMMY_RAND = subDict["MM_vs_P_cal_SUB_DUMMY_RAND"]
+    MM_vs_P_hgcer_DUMMY_RAND = subDict["MM_vs_P_hgcer_SUB_DUMMY_RAND"]
+    MM_vs_P_aero_DUMMY_RAND = subDict["MM_vs_P_aero_SUB_DUMMY_RAND"]
+    phiq_vs_t_DUMMY_RAND = subDict["phiq_vs_t_SUB_DUMMY_RAND"]
+    Q2_vs_W_DUMMY_RAND = subDict["Q2_vs_W_SUB_DUMMY_RAND"]
+    Q2_vs_t_DUMMY_RAND = subDict["Q2_vs_t_SUB_DUMMY_RAND"]
+    W_vs_t_DUMMY_RAND = subDict["W_vs_t_SUB_DUMMY_RAND"]
+    EPS_vs_t_DUMMY_RAND = subDict["EPS_vs_t_SUB_DUMMY_RAND"]
+    MM_vs_t_DUMMY_RAND = subDict["MM_vs_t_SUB_DUMMY_RAND"]
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND = subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DUMMY_RAND"]
+    P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND = subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DUMMY_RAND"]
+    P_hgcer_xAtCer_vs_MM_DUMMY_RAND = subDict["P_hgcer_xAtCer_vs_MM_SUB_DUMMY_RAND"]
+    P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND = subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DUMMY_RAND"]
+    P_hgcer_yAtCer_vs_MM_DUMMY_RAND = subDict["P_hgcer_yAtCer_vs_MM_SUB_DUMMY_RAND"]
+    P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND = subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DUMMY_RAND"]    
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
@@ -687,8 +771,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           P_cal_etottracknorm_DUMMY_RAND.Fill(evt.P_cal_etottracknorm)
           P_hgcer_npeSum_DUMMY_RAND.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_DUMMY_RAND.Fill(evt.P_aero_npeSum)
-
-
 
     # Data Random subtraction window
     P_hgcer_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
