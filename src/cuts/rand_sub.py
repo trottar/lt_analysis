@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 19:49:19 trottar"
+# Time-stamp: "2024-03-02 22:15:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -887,6 +887,7 @@ def rand_sub(phi_setting, inpDict):
           H_W_DATA.Fill(evt.W)
           H_epsilon_DATA.Fill(evt.epsilon)
           H_MM_DATA.Fill(evt.MM)
+          H_MM_nosub_DATA.Fill(evt.MM)
           #H_MM_DATA.Fill(pow(evt.MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
           
@@ -987,7 +988,7 @@ def rand_sub(phi_setting, inpDict):
           H_W_DUMMY.Fill(evt.W)
           H_epsilon_DUMMY.Fill(evt.epsilon)
           H_MM_DUMMY.Fill(evt.MM)
-          H_MM_nosub_DUMMY.Fill(evt.MM)          
+          H_MM_nosub_DUMMY.Fill(evt.MM)
           #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
 

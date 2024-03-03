@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 19:50:02 trottar"
+# Time-stamp: "2024-03-02 22:31:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1335,7 +1335,6 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
-
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1546,9 +1545,9 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                     hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                     hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
 
-
     for j in range(len(t_bins)-1):
-        for k in range(len(phi_bins)-1):                    
+        for k in range(len(phi_bins)-1):
+            
             # Data Random subtraction window    
             hist_dict["H_t_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
@@ -1573,5 +1572,4 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
             # hist_dict["Scale pion to subtraction proper peak 
             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(scale_factor)
-            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(scale_factor)    
-            
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(scale_factor)
