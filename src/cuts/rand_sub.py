@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 17:09:35 trottar"
+# Time-stamp: "2024-03-02 19:49:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -581,7 +581,6 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_t_SUB_DATA"]       = TH1D("H_t_SUB_DATA","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DATA"]  = TH1D("H_epsilon_SUB_DATA","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         subDict["H_MM_SUB_DATA"]  = TH1D("H_MM_SUB_DATA","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_DATA"]  = TH1D("H_MM_nosub_SUB_DATA","MM_nosub_{}".format(SubtractedParticle), 100, 0.7, 1.5)    
         subDict["H_th_SUB_DATA"]  = TH1D("H_th_SUB_DATA","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DATA"]  = TH1D("H_ph_SUB_DATA","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DATA"]  = TH1D("H_ph_q_SUB_DATA","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -620,7 +619,6 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_t_SUB_RAND"]       = TH1D("H_t_SUB_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_RAND"]  = TH1D("H_epsilon_SUB_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         subDict["H_MM_SUB_RAND"]  = TH1D("H_MM_SUB_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_RAND"]  = TH1D("H_MM_nosub_SUB_RAND","MM_nosub_{}".format(SubtractedParticle), 100, 0.7, 1.5)    
         subDict["H_th_SUB_RAND"]  = TH1D("H_th_SUB_RAND","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_RAND"]  = TH1D("H_ph_SUB_RAND","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_RAND"]  = TH1D("H_ph_q_SUB_RAND","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -659,7 +657,6 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_t_SUB_DUMMY"]       = TH1D("H_t_SUB_DUMMY","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DUMMY"]  = TH1D("H_epsilon_SUB_DUMMY","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         subDict["H_MM_SUB_DUMMY"]  = TH1D("H_MM_SUB_DUMMY","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_DUMMY"]  = TH1D("H_MM_nosub_SUB_DUMMY","MM_nosub_{}".format(SubtractedParticle), 100, 0.7, 1.5)    
         subDict["H_th_SUB_DUMMY"]  = TH1D("H_th_SUB_DUMMY","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DUMMY"]  = TH1D("H_ph_SUB_DUMMY","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DUMMY"]  = TH1D("H_ph_q_SUB_DUMMY","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -698,7 +695,6 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_t_SUB_DUMMY_RAND"]       = TH1D("H_t_SUB_DUMMY_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DUMMY_RAND"]  = TH1D("H_epsilon_SUB_DUMMY_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         subDict["H_MM_SUB_DUMMY_RAND"]  = TH1D("H_MM_SUB_DUMMY_RAND","MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_DUMMY_RAND"]  = TH1D("H_MM_nosub_SUB_DUMMY_RAND","MM_nosub_{}".format(SubtractedParticle), 100, 0.7, 1.5)    
         subDict["H_th_SUB_DUMMY_RAND"]  = TH1D("H_th_SUB_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DUMMY_RAND"]  = TH1D("H_ph_SUB_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DUMMY_RAND"]  = TH1D("H_ph_q_SUB_DUMMY_RAND","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -891,7 +887,6 @@ def rand_sub(phi_setting, inpDict):
           H_W_DATA.Fill(evt.W)
           H_epsilon_DATA.Fill(evt.epsilon)
           H_MM_DATA.Fill(evt.MM)
-          H_MM_nosub_DATA.Fill(evt.MM)
           #H_MM_DATA.Fill(pow(evt.MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
           
@@ -1454,7 +1449,6 @@ def rand_sub(phi_setting, inpDict):
         H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
         H_epsilon_DATA.Add(subDict["H_epsilon_SUB_DATA"],-1)
         H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
-        H_MM_nosub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
         H_pmiss_DATA.Add(subDict["H_pmiss_SUB_DATA"],-1)
         H_emiss_DATA.Add(subDict["H_emiss_SUB_DATA"],-1)
         H_pmx_DATA.Add(subDict["H_pmx_SUB_DATA"],-1)

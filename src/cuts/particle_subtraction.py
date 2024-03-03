@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 17:45:35 trottar"
+# Time-stamp: "2024-03-02 19:50:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,7 +113,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DATA = subDict["H_t_SUB_DATA"]
     H_epsilon_DATA = subDict["H_epsilon_SUB_DATA"]
     H_MM_DATA = subDict["H_MM_SUB_DATA"]
-    H_MM_nosub_DATA = subDict["H_MM_nosub_SUB_DATA"]
     H_th_DATA = subDict["H_th_SUB_DATA"]
     H_ph_DATA = subDict["H_ph_SUB_DATA"]
     H_ph_q_DATA = subDict["H_ph_q_SUB_DATA"]
@@ -152,7 +151,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY = subDict["H_t_SUB_DUMMY"]
     H_epsilon_DUMMY = subDict["H_epsilon_SUB_DUMMY"]
     H_MM_DUMMY = subDict["H_MM_SUB_DUMMY"]
-    H_MM_nosub_DUMMY = subDict["H_MM_nosub_SUB_DUMMY"]
     H_th_DUMMY = subDict["H_th_SUB_DUMMY"]
     H_ph_DUMMY = subDict["H_ph_SUB_DUMMY"]
     H_ph_q_DUMMY = subDict["H_ph_q_SUB_DUMMY"]
@@ -191,7 +189,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_RAND = subDict["H_t_SUB_RAND"]
     H_epsilon_RAND = subDict["H_epsilon_SUB_RAND"]
     H_MM_RAND = subDict["H_MM_SUB_RAND"]
-    H_MM_nosub_RAND = subDict["H_MM_nosub_SUB_RAND"]
     H_th_RAND = subDict["H_th_SUB_RAND"]
     H_ph_RAND = subDict["H_ph_SUB_RAND"]
     H_ph_q_RAND = subDict["H_ph_q_SUB_RAND"]
@@ -230,7 +227,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY_RAND = subDict["H_t_SUB_DUMMY_RAND"]
     H_epsilon_DUMMY_RAND = subDict["H_epsilon_SUB_DUMMY_RAND"]
     H_MM_DUMMY_RAND = subDict["H_MM_SUB_DUMMY_RAND"]
-    H_MM_nosub_DUMMY_RAND = subDict["H_MM_nosub_SUB_DUMMY_RAND"]
     H_th_DUMMY_RAND = subDict["H_th_SUB_DUMMY_RAND"]
     H_ph_DUMMY_RAND = subDict["H_ph_SUB_DUMMY_RAND"]
     H_ph_q_DUMMY_RAND = subDict["H_ph_q_SUB_DUMMY_RAND"]
@@ -457,7 +453,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           H_W_DATA.Fill(evt.W)
           H_epsilon_DATA.Fill(evt.epsilon)
           H_MM_DATA.Fill(evt.MM)
-          H_MM_nosub_DATA.Fill(evt.MM)
           #H_MM_DATA.Fill(pow(evt.MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
           
@@ -557,7 +552,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           H_W_DUMMY.Fill(evt.W)
           H_epsilon_DUMMY.Fill(evt.epsilon)
           H_MM_DUMMY.Fill(evt.MM)
-          H_MM_nosub_DUMMY.Fill(evt.MM)
           #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
           
@@ -657,7 +651,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(evt.MM)
-          H_MM_nosub_RAND.Fill(evt.MM)
           #H_MM_RAND.Fill(pow(evt.MM, 2))  
           #H_MM_RAND.Fill(evt.Mrecoil)
           
@@ -757,7 +750,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           H_W_DUMMY_RAND.Fill(evt.W)
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
           H_MM_DUMMY_RAND.Fill(evt.MM)
-          H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
           #H_MM_DUMMY_RAND.Fill(pow(evt.MM, 2))  
           #H_MM_DUMMY_RAND.Fill(evt.Mrecoil)
           
@@ -816,7 +808,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_RAND.Scale(1/nWindows)
     H_epsilon_RAND.Scale(1/nWindows)
     H_MM_RAND.Scale(1/nWindows)
-    H_MM_nosub_RAND.Scale(1/nWindows)
     H_pmiss_RAND.Scale(1/nWindows)
     H_emiss_RAND.Scale(1/nWindows)
     H_pmx_RAND.Scale(1/nWindows)
@@ -869,7 +860,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY_RAND.Scale(1/nWindows)
     H_epsilon_DUMMY_RAND.Scale(1/nWindows)
     H_MM_DUMMY_RAND.Scale(1/nWindows)
-    H_MM_nosub_DUMMY_RAND.Scale(1/nWindows)
     H_pmiss_DUMMY_RAND.Scale(1/nWindows)
     H_emiss_DUMMY_RAND.Scale(1/nWindows)
     H_pmx_DUMMY_RAND.Scale(1/nWindows)
@@ -926,7 +916,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DATA.Add(H_t_RAND,-1)
     H_epsilon_DATA.Add(H_epsilon_RAND,-1)
     H_MM_DATA.Add(H_MM_RAND,-1)
-    H_MM_nosub_DATA.Add(H_MM_nosub_RAND,-1)
     H_pmiss_DATA.Add(H_pmiss_RAND,-1)
     H_emiss_DATA.Add(H_emiss_RAND,-1)
     H_pmx_DATA.Add(H_pmx_RAND,-1)
@@ -981,7 +970,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
     H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
-    H_MM_nosub_DUMMY.Add(H_MM_nosub_DUMMY_RAND,-1)
     H_pmiss_DUMMY.Add(H_pmiss_DUMMY_RAND,-1)
     H_emiss_DUMMY.Add(H_emiss_DUMMY_RAND,-1)
     H_pmx_DUMMY.Add(H_pmx_DUMMY_RAND,-1)
@@ -1038,7 +1026,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DATA.Scale(scale_factor)
     H_epsilon_DATA.Scale(scale_factor)
     H_MM_DATA.Scale(scale_factor)
-    H_MM_nosub_DATA.Scale(scale_factor)
     H_pmiss_DATA.Scale(scale_factor)
     H_emiss_DATA.Scale(scale_factor)
     H_pmx_DATA.Scale(scale_factor)
