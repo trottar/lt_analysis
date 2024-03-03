@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-03 02:31:59 trottar"
+# Time-stamp: "2024-03-03 17:19:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,10 +158,10 @@ def rand_sub(phi_setting, inpDict):
         "Q2p1W2p95Left_lowe" : 1.5e-2,
         "Q2p1W2p95Center_lowe" : 1.5e-2,
         # Q2=3p0, W=3p14
-        "Q3p0W3p14Right_highe" : 2.35e-2,
-        "Q3p0W3p14Left_highe" : 2.65e-2,
+        "Q3p0W3p14Right_highe" : 2.34e-2,
+        "Q3p0W3p14Left_highe" : 2.67e-2,
         "Q3p0W3p14Center_highe" : 2.5e-2,
-        "Q3p0W3p14Left_lowe" : 2.45e-2,
+        "Q3p0W3p14Left_lowe" : 2.44e-2,
         "Q3p0W3p14Center_lowe" : 2.5e-2,
     }
     
