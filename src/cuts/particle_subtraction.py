@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-02 22:31:18 trottar"
+# Time-stamp: "2024-03-02 23:03:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -384,7 +384,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -483,7 +483,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -582,7 +582,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -681,7 +681,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -1167,7 +1167,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -1199,7 +1199,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -1231,7 +1231,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -1263,7 +1263,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -1445,7 +1445,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -1475,7 +1475,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -1505,7 +1505,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
@@ -1535,7 +1535,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
             ALLCUTS = apply_data_cuts(evt)
             
