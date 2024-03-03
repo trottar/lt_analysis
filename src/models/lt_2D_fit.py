@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-01 00:24:56 trottar"
+# Time-stamp: "2024-03-03 13:13:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -618,12 +618,19 @@ def single_setting(q2_set, fn_lo, fn_hi):
 
         sig_diff_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_diff_g.GetYaxis().SetTitle("#bar{#it{#sigma}_{High}}/#bar{#it{#sigma}_{Low}}")
-            
-        sig_diff = (ave_sig_hi-ave_sig_lo)/eps_diff
-        sig_diff_g.SetPoint(sig_diff_g.GetN(), float(t_list[i]), sig_diff)
 
-        sig_diff_err = sig_diff*math.sqrt((err_sig_hi/ave_sig_hi)**2+(err_sig_lo/ave_sig_lo)**2)
-        sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)
+        try:
+            sig_diff = (ave_sig_hi-ave_sig_lo)/eps_diff
+            sig_diff_g.SetPoint(sig_diff_g.GetN(), float(t_list[i]), sig_diff)
+
+            sig_diff_err = sig_diff*math.sqrt((err_sig_hi/ave_sig_hi)**2+(err_sig_lo/ave_sig_lo)**2)
+            sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)
+        except ZeroDivisionError:
+            sig_diff = 0.0
+            sig_diff_g.SetPoint(sig_diff_g.GetN(), float(t_list[i]), sig_diff)
+
+            sig_diff_err = 0.0
+            sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)            
             
         # Define variables for cross sections and errors
         sig_l, sig_t, sig_lt, sig_tt = fff2.GetParameter(1), fff2.GetParameter(0), fff2.GetParameter(2), fff2.GetParameter(3)
