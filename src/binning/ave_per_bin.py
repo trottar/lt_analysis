@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-03 23:30:18 trottar"
+# Time-stamp: "2024-03-03 23:35:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,7 +104,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # Q2=3p0, W=2p32
         "Q3p0W2p32Right_highe" : 5.25e-2,
         "Q3p0W2p32Left_highe" : 4.10e-2,
-        "Q3p0W2p32Center_highe" : 5.00e-2,,
+        "Q3p0W2p32Center_highe" : 5.00e-2,
         "Q3p0W2p32Left_lowe" : 2.44e-2,
         "Q3p0W2p32Center_lowe" : 2.55e-2,
         # Q2=3p0, W=3p14
