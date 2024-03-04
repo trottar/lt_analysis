@@ -211,7 +211,9 @@ c angle check
 *     Convert from ub/GeV^2 to nb/GeV^2
             x_mod=x_mod*1.d+03
             x_real=x_mod*r
-            dx_real=x_mod*dr/r
+*     Calculate xsect error (absolute error)
+*     Cross section error is same percent as ratio
+            dx_real=x_mod*dr
                         
 *     Check for NaN values
             if (isnan(x_real)) x_real = -1000.0
