@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 15:48:12 trottar"
+# Time-stamp: "2024-03-04 21:25:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,6 +99,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
     ################################################################################################################################################
     # Import function to define cut bools
+    sys.path.append("cuts")
     from apply_cuts import apply_simc_cuts, set_val
     set_val(inpDict) # Set global variables for optimization
     
