@@ -737,6 +737,7 @@ if [[ $i_flag != "true" ]]; then
 	echo
 	echo "                       Number of t bins: ${NumtBins}"
 	echo "                       Range of t: ${TMIN} - ${TMAX}"
+	echo "                       Missing Mass range: ${MissMassMin} - ${MissMassMax}"
 	echo "                       Number of Phi bins: ${NumPhiBins}"
 	echo
 	echo "---------------------------------------------------------"
@@ -1450,6 +1451,7 @@ else
 	echo
 	echo "                       Number of t bins: ${NumtBins}"
 	echo "                       Range of t: ${TMIN} - ${TMAX}"
+	echo "                       Missing Mass range: ${MissMassMin} - ${MissMassMax}"	
 	echo "                       Number of Phi bins: ${NumPhiBins}"
 	echo
 	echo "---------------------------------------------------------"

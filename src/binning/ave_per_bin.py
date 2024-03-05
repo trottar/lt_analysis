@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-05 02:22:13 trottar"
+# Time-stamp: "2024-03-05 02:36:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -614,6 +614,8 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
 
     tmin = inpDict["tmin"] 
     tmax = inpDict["tmax"] 
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]
     
     ParticleType = inpDict["ParticleType"]
 
