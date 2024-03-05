@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-05 02:21:19 trottar"
+# Time-stamp: "2024-03-05 04:33:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1416,7 +1416,6 @@ def rand_sub(phi_setting, inpDict):
         scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
-        '''
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"],-1)
@@ -1466,7 +1465,6 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
         H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
-        '''
         
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
