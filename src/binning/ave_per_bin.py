@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-04 14:34:21 trottar"
+# Time-stamp: "2024-03-04 20:25:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -559,7 +559,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 phibin_index = k
                 hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
                 ave_val = ave_hist[j]
-                print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))
+                print("Data average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))
                 dict_lst.append((tbin_index, phibin_index, ave_val))
                 
         # Group the tuples by the first two elements using defaultdict
@@ -811,7 +811,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 phibin_index = k
                 hist_val = [binned_sub_simc[0][j], binned_sub_simc[1][j]]
                 ave_val = ave_hist[j]
-                print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))            
+                print("Simc average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))            
                 dict_lst.append((tbin_index, phibin_index, ave_val))
 
         # Group the tuples by the first two elements using defaultdict

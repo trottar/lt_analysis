@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-04 11:19:27 trottar"
+# Time-stamp: "2024-03-04 20:32:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1045,7 +1045,6 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
-
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1171,11 +1170,12 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
-                  hist_dict["H_Q2_DATA_{}".format(j)].Fill(evt.Q2)
-                  hist_dict["H_t_DATA_{}".format(j)].Fill(-evt.MandelT)
-                  hist_dict["H_W_DATA_{}".format(j)].Fill(evt.W)
-                  hist_dict["H_epsilon_DATA_{}".format(j)].Fill(evt.epsilon)
-                  hist_dict["H_MM_DATA_{}".format(j)].Fill(evt.MM)
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    hist_dict["H_Q2_DATA_{}".format(j)].Fill(evt.Q2)
+                    hist_dict["H_t_DATA_{}".format(j)].Fill(-evt.MandelT)
+                    hist_dict["H_W_DATA_{}".format(j)].Fill(evt.W)
+                    hist_dict["H_epsilon_DATA_{}".format(j)].Fill(evt.epsilon)
+                    hist_dict["H_MM_DATA_{}".format(j)].Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1203,11 +1203,12 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
-                  hist_dict["H_Q2_DUMMY_{}".format(j)].Fill(evt.Q2)
-                  hist_dict["H_t_DUMMY_{}".format(j)].Fill(-evt.MandelT)
-                  hist_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)
-                  hist_dict["H_epsilon_DUMMY_{}".format(j)].Fill(evt.epsilon)
-                  hist_dict["H_MM_DUMMY_{}".format(j)].Fill(evt.MM)
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    hist_dict["H_Q2_DUMMY_{}".format(j)].Fill(evt.Q2)
+                    hist_dict["H_t_DUMMY_{}".format(j)].Fill(-evt.MandelT)
+                    hist_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)
+                    hist_dict["H_epsilon_DUMMY_{}".format(j)].Fill(evt.epsilon)
+                    hist_dict["H_MM_DUMMY_{}".format(j)].Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1235,11 +1236,12 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
-                  hist_dict["H_Q2_RAND_{}".format(j)].Fill(evt.Q2)
-                  hist_dict["H_t_RAND_{}".format(j)].Fill(-evt.MandelT)
-                  hist_dict["H_W_RAND_{}".format(j)].Fill(evt.W)
-                  hist_dict["H_epsilon_RAND_{}".format(j)].Fill(evt.epsilon)
-                  hist_dict["H_MM_RAND_{}".format(j)].Fill(evt.MM)
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    hist_dict["H_Q2_RAND_{}".format(j)].Fill(evt.Q2)
+                    hist_dict["H_t_RAND_{}".format(j)].Fill(-evt.MandelT)
+                    hist_dict["H_W_RAND_{}".format(j)].Fill(evt.W)
+                    hist_dict["H_epsilon_RAND_{}".format(j)].Fill(evt.epsilon)
+                    hist_dict["H_MM_RAND_{}".format(j)].Fill(evt.MM)
           
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1267,11 +1269,12 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
-                  hist_dict["H_Q2_DUMMY_RAND_{}".format(j)].Fill(evt.Q2)
-                  hist_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(-evt.MandelT)
-                  hist_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)
-                  hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
-                  hist_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(evt.MM)
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    hist_dict["H_Q2_DUMMY_RAND_{}".format(j)].Fill(evt.Q2)
+                    hist_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(-evt.MandelT)
+                    hist_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)
+                    hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
+                    hist_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(evt.MM)
                   
     for j in range(len(t_bins)-1):
 
@@ -1449,8 +1452,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         if(ALLCUTS):            
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):
-                    hist_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                    hist_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(evt.MM)
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:                    
+                            hist_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1478,9 +1483,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
-                for k in range(len(phi_bins)-1):            
-                    hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                    hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
+                for k in range(len(phi_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1508,9 +1515,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
-                for k in range(len(phi_bins)-1):            
-                    hist_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                    hist_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                for k in range(len(phi_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            hist_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(evt.MM)
           
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1538,9 +1547,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
-                for k in range(len(phi_bins)-1):            
-                    hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                    hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                for k in range(len(phi_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                            hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
 
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
