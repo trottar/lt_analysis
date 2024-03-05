@@ -643,6 +643,11 @@ done
 # TMIN should not equal zero (unless calc_xsect.f is adapted)
 # Make sure 3 sig figs (no more)
 
+MissMassMin=0.7
+MissMassMax=1.5
+#MissMassMin=1.10
+#MissMassMax=1.18
+
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
     NumtBins=2
@@ -1380,7 +1385,7 @@ if [[ $i_flag != "true" ]]; then
 	fi
 	
 	if [ ${#data_right[@]} -eq 0 ]; then
-	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
+	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
 		echo
@@ -1390,7 +1395,7 @@ if [[ $i_flag != "true" ]]; then
 		exit 1
 	    fi
 	else
-	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${TotDataEffChargeValRight} ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} ${TotDummyEffChargeValRight} ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} ${TotDataEffChargeErrRight} ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} ${TotDummyEffChargeErrRight} ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
+	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${TotDataEffChargeValRight} ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} ${TotDummyEffChargeValRight} ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} ${TotDataEffChargeErrRight} ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} ${TotDummyEffChargeErrRight} ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
 		echo

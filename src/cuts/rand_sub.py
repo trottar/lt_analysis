@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-04 14:34:19 trottar"
+# Time-stamp: "2024-03-05 02:21:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,7 +63,9 @@ def rand_sub(phi_setting, inpDict):
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
     OutFilename = inpDict["OutFilename"] 
     tmin = inpDict["tmin"] 
-    tmax = inpDict["tmax"] 
+    tmax = inpDict["tmax"]
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]     
     NumtBins = inpDict["NumtBins"] 
     NumPhiBins = inpDict["NumPhiBins"] 
     runNumRight = inpDict["runNumRight"] 
@@ -144,11 +146,6 @@ def rand_sub(phi_setting, inpDict):
     ##############
     # HARD CODED #
     ##############
-
-    #mm_min = 1.10
-    #mm_max = 1.18
-    mm_min = 0.7
-    mm_max = 1.5
 
     scale_dict ={
         # Q2=2p1, W=2p95
@@ -838,7 +835,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
 
@@ -939,7 +936,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
 
@@ -1033,7 +1030,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
 
@@ -1124,7 +1121,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
 
@@ -1419,6 +1416,7 @@ def rand_sub(phi_setting, inpDict):
         scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
+        '''
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"],-1)
@@ -1468,6 +1466,7 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
         H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
+        '''
         
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY

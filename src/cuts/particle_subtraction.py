@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-04 20:32:04 trottar"
+# Time-stamp: "2024-03-05 02:13:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,6 +49,9 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     Q2 = inpDict["Q2"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
+
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]
 
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
@@ -383,8 +386,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -392,7 +395,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
 
@@ -482,8 +485,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -491,7 +494,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
 
@@ -581,8 +584,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -590,7 +593,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
 
@@ -680,8 +683,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -689,7 +692,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
 
@@ -1040,6 +1043,9 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
 
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]
+    
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
@@ -1164,9 +1170,9 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1197,9 +1203,9 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1230,9 +1236,9 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1263,9 +1269,9 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1331,6 +1337,9 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
 
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]
+    
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
@@ -1445,9 +1454,9 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):            
             for j in range(len(t_bins)-1):
@@ -1477,9 +1486,9 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1509,9 +1518,9 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1541,9 +1550,9 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):

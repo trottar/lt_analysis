@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-04 20:25:38 trottar"
+# Time-stamp: "2024-03-05 02:22:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,7 +59,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
     ParticleType = inpDict["ParticleType"]
 
     tmin = inpDict["tmin"] 
-    tmax = inpDict["tmax"] 
+    tmax = inpDict["tmax"]
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]
     
     Q2 = inpDict["Q2"]
     W = inpDict["W"]
@@ -88,11 +90,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
     ##############
     # HARD CODED #
     ##############
-    
-    #mm_min = 1.10
-    #mm_max = 1.18
-    mm_min = 0.7
-    mm_max = 1.5
 
     scale_dict ={
         # Q2=2p1, W=2p95
@@ -244,7 +241,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
 
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):                
@@ -274,7 +271,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
 
         if(ALLCUTS):
 
@@ -306,7 +303,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
 
         if(ALLCUTS):
 
@@ -338,7 +335,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
         else:
-            ALLCUTS = apply_data_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
 
         if(ALLCUTS):
 
@@ -378,6 +375,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
 
+        '''
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
             hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(subDict["H_Q2_SUB_DATA_{}".format(j)],-1)
@@ -391,6 +389,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             hist_bin_dict["H_t_DUMMY_{}".format(j)].Add(subDict["H_t_SUB_DUMMY_{}".format(j)],-1)
             hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(subDict["H_epsilon_SUB_DUMMY_{}".format(j)],-1)
             hist_bin_dict["H_MM_DUMMY_{}".format(j)].Add(subDict["H_MM_SUB_DUMMY_{}".format(j)],-1)
+        '''
             
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
@@ -632,17 +631,6 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
     ################################################################################################################################################
         
     TBRANCH_SIMC  = tree_simc.Get("h10")
-
-    ##############
-    # HARD CODED #
-    ##############
-        
-    mm_min = 1.10
-    mm_max = 1.18
-
-    ##############
-    ##############
-    ##############
     
     hist_bin_dict = {}
     
@@ -663,7 +651,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
         if ParticleType == "kaon":
           ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
         else:
-            ALLCUTS = apply_simc_cuts(evt)
+            ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 
         #Fill SIMC events
         if(ALLCUTS):
