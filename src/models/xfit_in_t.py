@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-05 12:02:44 trottar"
+# Time-stamp: "2024-03-05 23:07:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,8 @@ mkpl = 0.493677
 # HARD CODED #
 ##############
 # Limit for finding new parameters (units of percent)
-par_lim = 0.2 # +/-20%
+#par_lim = 0.2 # +/-20%
+par_lim = 1.0 # +/-100%
 ##############
 ##############
 ##############
@@ -661,8 +662,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigTT_pre.FixParameter(3, 0)
     # Set range limit of used parameters
     # Currently 20% range
-    #f_sigTT_pre.SetParLimits(0, tt0-tt0*par_lim, tt0+tt0*par_lim)
-    f_sigTT_pre.SetParLimits(0, tt0-tt0*1.00, tt0+tt0*1.00)
+    f_sigTT_pre.SetParLimits(0, tt0-tt0*par_lim, tt0+tt0*par_lim)
     #f_sigTT_pre.SetParLimits(1, tt1-tt1*par_lim, tt1+tt1*par_lim)
     #f_sigTT_pre.SetParLimits(2, tt2-tt2*par_lim, tt2+tt2*par_lim)
     #f_sigTT_pre.SetParLimits(3, tt3-tt3*par_lim, tt3+tt3*par_lim)
@@ -731,8 +731,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigTT.FixParameter(3, 0)
     # Set range limit of used parameters
     # Currently 20% range
-    #f_sigTT.SetParLimits(0, tt0-tt0*par_lim, tt0+tt0*par_lim)
-    f_sigTT.SetParLimits(0, tt0-tt0*1.00, tt0+tt0*1.00)
+    f_sigTT.SetParLimits(0, tt0-tt0*par_lim, tt0+tt0*par_lim)
     #f_sigTT.SetParLimits(1, tt1-tt1*par_lim, tt1+tt1*par_lim)
     #f_sigTT.SetParLimits(2, tt2-tt2*par_lim, tt2+tt2*par_lim)
     #f_sigTT.SetParLimits(3, tt3-tt3*par_lim, tt3+tt3*par_lim)    
