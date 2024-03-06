@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-05 23:59:27 trottar"
+# Time-stamp: "2024-03-06 00:01:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -795,7 +795,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigTT.FixParameter(3, 0)
     # Set range limit of used parameters
     # Currently 20% range
-    f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim), tt0+abs(tt0*par_lim))
+    if tt0 != 0.0:
+        f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim), tt0+abs(tt0*par_lim))
+    else:
+        f_sigTT.SetParLimits(0, -par_lim*100, par_lim*100)    
     #f_sigTT.SetParLimits(1, tt1-abs(tt1*par_lim), tt1+abs(tt1*par_lim))
     #f_sigTT.SetParLimits(2, tt2-abs(tt2*par_lim), tt2+abs(tt2*par_lim))
     #f_sigTT.SetParLimits(3, tt3-abs(tt3*par_lim), tt3+abs(tt3*par_lim))    
