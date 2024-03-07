@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-07 13:25:41 trottar"
+# Time-stamp: "2024-03-07 13:31:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,8 +55,8 @@ mkpl = 0.493677
 # HARD CODED #
 ##############
 # Limit for finding new parameters (units of percent)
-par_lim = 0.2 # +/-20%
-#par_lim = 0.75 # +/-75%
+#par_lim = 0.2 # +/-20%
+par_lim = 0.75 # +/-75%
 ##############
 ##############
 ##############
@@ -199,8 +199,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigL_pre.FixParameter(2, 0)
     #f_sigL_pre.FixParameter(3, 0)
     # Set range limit of used parameters
-    # Currently 20% range
-    '''
+    # Currently 20% range    
     if l0 != 0.0:
         f_sigL_pre.SetParLimits(0, l0-abs(l0*par_lim), l0+abs(l0*par_lim))
     else:
@@ -216,8 +215,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if l3 != 0.0:
         f_sigL_pre.SetParLimits(3, l3-abs(l3*par_lim), l3+abs(l3*par_lim))
     else:
-        f_sigL_pre.SetParLimits(3, -par_lim*100, par_lim*100)
-    '''
+        f_sigL_pre.SetParLimits(3, -par_lim*100, par_lim*100)        
     # Fixing sigL terms for testing
     #f_sigL_pre.FixParameter(0, l0)
     f_sigL_pre.FixParameter(0, 0.0)
@@ -282,7 +280,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigL.FixParameter(3, 0)
     # Set range limit of used parameters
     # Currently 20% range
-    '''
     if l0 != 0.0:
         f_sigL.SetParLimits(0, l0-abs(l0*par_lim), l0+abs(l0*par_lim))
     else:
@@ -298,8 +295,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if l3 != 0.0:
         f_sigL.SetParLimits(3, l3-abs(l3*par_lim), l3+abs(l3*par_lim))
     else:
-        f_sigL.SetParLimits(3, -par_lim*100, par_lim*100)
-    '''
+        f_sigL.SetParLimits(3, -par_lim*100, par_lim*100)            
     # Fixing sigL terms for testing
     #f_sigL.FixParameter(0, l0)
     f_sigL.FixParameter(0, 0.0)
