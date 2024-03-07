@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:24:03 trottar"
+# Time-stamp: "2024-03-07 16:17:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -295,7 +295,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('Ratio')
-        ax.set_ylim(0.0, 2.0)
+        #ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
 
         ax.legend()
@@ -323,7 +323,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$')
         ax.set_ylabel('Ratio')
-        ax.set_ylim(0.0, 2.0)
+        #ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
 
         ax.legend()
