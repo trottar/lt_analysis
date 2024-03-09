@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-09 05:51:53 trottar"
+# Time-stamp: "2024-03-09 06:15:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -163,8 +163,8 @@ if EPSSET == "low":
     for f in files:
         print("\nCopying {} to {}".format(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType)))
         shutil.copy(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType))
-    #print("\nCopying {} to {}".format(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH)))
-    #shutil.copy(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH))
+    print("\nCopying {} to {}".format(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH)))
+    shutil.copy(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH))
     print("\nCopying {} to {}".format(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH)))
     shutil.copy(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH))
     print("\nCopying {} to {}".format(prev_iter_dir+'/param_kaon_pl.py', '{}/src/models/param_kaon_pl.py'.format(LTANAPATH)))
@@ -467,7 +467,7 @@ plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDic
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
-'''
+
 # Save histograms to root file
 for hist in histlist:
     print("\nUpdating simc {} histograms in {}".format(hist["phi_setting"],foutroot))
@@ -487,7 +487,7 @@ for hist in histlist:
                     continue
                 else:
                     hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
-'''
+
 # Open the ROOT file
 root_file = TFile.Open(foutroot, "UPDATE")
 
