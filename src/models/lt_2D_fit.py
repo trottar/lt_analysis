@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-03 13:13:07 trottar"
+# Time-stamp: "2024-03-08 21:25:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,7 +75,7 @@ from lt_active import LT_sep_x_lo_fun, LT_sep_x_lo_fun_unsep, LT_sep_x_hi_fun, L
 
 ###############################################################################################################################################
 
-def single_setting(q2_set, fn_lo, fn_hi):
+def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
     # Set HIEPS for lt_active script
     set_val(LOEPS, HIEPS)
@@ -605,7 +605,7 @@ def single_setting(q2_set, fn_lo, fn_hi):
         # Create TText for fit status
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.15, 0.85, "t= {:.3f}, Q2 = {:.1f}".format(t_list[i], float(q2_set.replace("p","."))))
+        fit_status.DrawTextNDC(0.15, 0.85, "t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_list[i], float(q2_set.replace("p",".")), float(w_set.replace("p","."))))
         fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
         fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
 
@@ -790,7 +790,7 @@ g_sig_tt_total = TGraphErrors()
 g_unsep_lo = TGraphErrors()
 g_unsep_hi = TGraphErrors()
 
-t_list = single_setting(Q2, fn_lo, fn_hi) # Main function that performs fitting
+t_list = single_setting(Q2, W, fn_lo, fn_hi) # Main function that performs fitting
 
 f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
 f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
