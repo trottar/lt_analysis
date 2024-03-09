@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-09 05:39:28 trottar"
+# Time-stamp: "2024-03-09 06:10:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -618,7 +618,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo.SetMinimum(ghi.GetMinimum() * 0.9)
 
         sig_diff_g.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        sig_diff_g.GetYaxis().SetTitle("#bar{#it{#sigma}_{High}}/#bar{#it{#sigma}_{Low}}")
+        sig_diff_g.GetYaxis().SetTitle("#Delta#sigma_{ave}/#Delta#epsilon")
 
         try:
             sig_diff = (ave_sig_hi-ave_sig_lo)/eps_diff
