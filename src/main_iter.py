@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-09 05:02:19 trottar"
+# Time-stamp: "2024-03-09 05:20:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -467,7 +467,7 @@ plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDic
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
-'''
+
 # Save histograms to root file
 for hist in histlist:
     print("\nUpdating simc {} histograms in {}".format(hist["phi_setting"],foutroot))
@@ -487,7 +487,7 @@ for hist in histlist:
                     continue
                 else:
                     hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
-'''
+
 # Open the ROOT file
 root_file = TFile.Open(foutroot, "UPDATE")
 
