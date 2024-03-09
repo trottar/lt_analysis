@@ -643,11 +643,11 @@ done
 # TMIN should not equal zero (unless calc_xsect.f is adapted)
 # Make sure 3 sig figs (no more)
 
-#MissMassMin=0.7
-#MissMassMax=1.5
-MissMassMin=1.10
+MissMassMin=0.7
+MissMassMax=1.5
+#MissMassMin=1.10
 #MissMassMax=1.18
-MissMassMax=1.24
+#MissMassMax=1.24
 
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
