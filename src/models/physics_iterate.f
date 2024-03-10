@@ -401,10 +401,12 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *       initial start parameterization
 *       RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the
 *                        extreme slope at high t
-*	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
-*       1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)))
+*       RLT (3/09/2024): Removing +0.2 term for better parameterization of
+*                        Q2=3.0, W=2.32	   
 	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
-     1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)+0.2))
+     1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)))
+*       sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
+*       1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)+0.2))
 *       RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
 *       RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
