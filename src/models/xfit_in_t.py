@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-10 06:02:37 trottar"
+# Time-stamp: "2024-03-10 06:05:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,8 +265,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_prv.Draw("P")
 
     c2.cd(1)
-    g_sigl_fit.SetTitle("Sigma L Model Fit")
-    g_sigl_fit.Draw("A*")
+    g_sigl.SetTitle("Sigma L Model Fit")
+    g_sigl.Draw("A*")
 
     f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigL.SetParNames("p1","p2","p3","p4")
@@ -325,17 +325,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
         f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
-        # Project the TF12 histogram onto the x-axis to create a TH1D histogram
-        hist = f_sigL_xproj.ProjectionX()
-        
-        # Scale the histogram by a float value (replace scale_factor with your desired float value)
-        scale_factor = 1 / (g_vec[i])  # Example scale factor
-        hist.Scale(scale_factor)
         # Set line properties for f_sigL_xproj
-        hist.SetLineColor(i+1)
-        hist.SetLineWidth(2)
-        # Draw hist
-        hist.Draw("same")
+        f_sigL_xproj.SetLineColor(i+1)
+        f_sigL_xproj.SetLineWidth(2)
+        # Draw f_sigL_xproj
+        f_sigL_xproj.Draw("same")
         
         g_sigl_fit.Fit(f_sigL_xproj)
 
@@ -451,8 +445,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_prv.Draw("P")
         
     c2.cd(2)
-    g_sigt_fit.SetTitle("Sigma T Model Fit")
-    g_sigt_fit.Draw("A*")
+    g_sigt.SetTitle("Sigma T Model Fit")
+    g_sigt.Draw("A*")
 
     f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigT.SetParNames("p5","p6","p7","p8")
@@ -630,8 +624,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_prv.Draw("P")
 
     c2.cd(3)
-    g_siglt_fit.SetTitle("Sigma LT Model Fit")
-    g_siglt_fit.Draw("A*")
+    g_siglt.SetTitle("Sigma LT Model Fit")
+    g_siglt.Draw("A*")
 
     f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigLT.SetParNames("p9","p10","p11","p12")
@@ -803,9 +797,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_prv.Draw("P")
 
     c2.cd(4)
-
-    g_sigtt_fit.SetTitle("Sigma TT Model Fit")
-    g_sigtt_fit.Draw("A*")
+    g_sigtt.SetTitle("Sigma TT Model Fit")
+    g_sigtt.Draw("A*")
 
     f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
     f_sigTT.SetParNames("p13","p14","p15","p16")
