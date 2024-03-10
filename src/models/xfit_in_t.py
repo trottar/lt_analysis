@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-10 06:00:12 trottar"
+# Time-stamp: "2024-03-10 06:02:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -324,12 +324,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigL_xproj = ROOT.TF12("f_sigL_xproj","f_sigL(q2_vec[i])/(g_vec[i])","x")
+        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
+        # Project the TF12 histogram onto the x-axis to create a TH1D histogram
+        hist = f_sigL_xproj.ProjectionX()
+        
+        # Scale the histogram by a float value (replace scale_factor with your desired float value)
+        scale_factor = 1 / (g_vec[i])  # Example scale factor
+        hist.Scale(scale_factor)
         # Set line properties for f_sigL_xproj
-        f_sigL_xproj.SetLineColor(i+1)
-        f_sigL_xproj.SetLineWidth(2)
-        # Draw f_sigL_xproj
-        f_sigL_xproj.Draw("same")
+        hist.SetLineColor(i+1)
+        hist.SetLineWidth(2)
+        # Draw hist
+        hist.Draw("same")
         
         g_sigl_fit.Fit(f_sigL_xproj)
 
