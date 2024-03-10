@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-10 04:43:51 trottar"
+# Time-stamp: "2024-03-10 04:46:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -316,8 +316,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], q2_vec[i], sigl_X_fit)
         g_q2_sigl_fit.SetPointError(i, 0.0, 0.0, sigl_X_fit_err)
-        #sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
-        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i]))
+        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
+        #sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i]))
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], q2_vec[i], sigl_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
