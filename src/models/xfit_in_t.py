@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-10 06:31:25 trottar"
+# Time-stamp: "2024-03-10 06:44:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -927,4 +927,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
                 print("  {:.3f} {:.3f} {:.1f} {:.1f}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
     else:
-        print("DEBUG ENABLED: No changes to previous iteration...")
+        print("\n\nDEBUG ENABLED: No changes to previous iteration...")
+        for i,par in enumerate(prv_par_vec):
+            print("par{} = {:.3f}".format(i+1, par))
