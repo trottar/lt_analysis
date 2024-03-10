@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-10 05:57:01 trottar"
+# Time-stamp: "2024-03-10 05:59:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -324,11 +324,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigL_xproj = ROOT.TF12("f_sigL_xproj",f_sigL,q2_vec[i],"x")
+        f_sigL_xproj = ROOT.TF12("f_sigL_xproj","f_sigL/(g_vec[i])",q2_vec[i],"x")
         # Set line properties for f_sigL_xproj
         f_sigL_xproj.SetLineColor(i+1)
         f_sigL_xproj.SetLineWidth(2)
-        f_sigL_xproj.Scale(1 / (g_vec[i]))
         # Draw f_sigL_xproj
         f_sigL_xproj.Draw("same")
         
