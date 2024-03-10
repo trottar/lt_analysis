@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-10 06:23:02 trottar"
+# Time-stamp: "2024-03-10 06:30:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,6 +229,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigL_pre.FixParameter(1, 0.0)
     #f_sigL_pre.FixParameter(2, 0.0)
     #f_sigL_pre.FixParameter(3, 0.0)
+    if DEBUG:
+        f_sigL_pre.FixParameter(0, l0)
+        f_sigL_pre.FixParameter(1, l1)
+        f_sigL_pre.FixParameter(2, l2)
+        f_sigL_pre.FixParameter(3, l3)
     ##############
     ##############
     ##############    
@@ -310,7 +315,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigL.FixParameter(0, 0.0)
     #f_sigL.FixParameter(1, 0.0)
     #f_sigL.FixParameter(2, 0.0)
-    #f_sigL.FixParameter(3, 0.0)    
+    #f_sigL.FixParameter(3, 0.0)
+    if DEBUG:
+        f_sigL.FixParameter(0, l0)
+        f_sigL.FixParameter(1, l1)
+        f_sigL.FixParameter(2, l2)
+        f_sigL.FixParameter(3, l3)    
     ##############
     ##############
     ##############    
@@ -403,11 +413,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigT_pre.SetParLimits(2, t2-abs(t2*par_lim), t2+abs(t2*par_lim))
     #f_sigT_pre.SetParLimits(3, t3-abs(t3*par_lim), t3+abs(t3*par_lim))    
     # Fixing sigT terms for testing
-    f_sigT_pre.FixParameter(0, t0)
-    f_sigT_pre.FixParameter(1, t1)
+    #f_sigT_pre.FixParameter(0, t0)
+    #f_sigT_pre.FixParameter(1, t1)
     # Fixing sigT terms to zero
     #f_sigT_pre.FixParameter(0, 0.0)
-    #f_sigT_pre.FixParameter(1, 0.0)    
+    #f_sigT_pre.FixParameter(1, 0.0)
+    if DEBUG:
+        f_sigT_pre.FixParameter(0, t0)
+        f_sigT_pre.FixParameter(1, t1)
     ##############
     ##############
     ##############    
@@ -478,11 +491,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigT.SetParLimits(2, t2-abs(t2*par_lim), t2+abs(t2*par_lim))
     #f_sigT.SetParLimits(3, t3-abs(t3*par_lim), t3+abs(t3*par_lim))        
     # Fixing sigT terms for testing
-    f_sigT.FixParameter(0, t0)
-    f_sigT.FixParameter(1, t1)
+    #f_sigT.FixParameter(0, t0)
+    #f_sigT.FixParameter(1, t1)
     # Fixing sigT terms to zero
     #f_sigT.FixParameter(0, 0.0)
-    #f_sigT.FixParameter(1, 0.0)    
+    #f_sigT.FixParameter(1, 0.0)
+    if DEBUG:
+        f_sigT.FixParameter(0, t0)
+        f_sigT.FixParameter(1, t1)
     ##############
     ##############
     ##############    
@@ -583,6 +599,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigLT_pre.FixParameter(0, 0.0)
     #f_sigLT_pre.FixParameter(1, 0.0)
     #f_sigLT_pre.FixParameter(2, 0.0)
+    if DEBUG:
+        f_sigLT_pre.FixParameter(0, lt0)
+        f_sigLT_pre.FixParameter(1, lt1)
+        f_sigLT_pre.FixParameter(2, lt2)
     ##############
     ##############
     ##############    
@@ -665,6 +685,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigLT.FixParameter(0, 0.0)
     #f_sigLT.FixParameter(1, 0.0)
     #f_sigLT.FixParameter(2, 0.0)
+    if DEBUG:
+        f_sigLT.FixParameter(0, lt0)
+        f_sigLT.FixParameter(1, lt1)
+        f_sigLT.FixParameter(2, lt2)
     ##############
     ##############
     ##############    
@@ -754,7 +778,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Fixing sigTT terms for testing
     #f_sigTT_pre.FixParameter(0, tt0)
     # Fixing sigTT terms to zero
-    #f_sigTT_pre.FixParameter(0, 0.0)    
+    #f_sigTT_pre.FixParameter(0, 0.0)
+    if DEBUG:
+        f_sigTT_pre.FixParameter(0, tt0)
     ##############
     ##############
     ##############    
@@ -827,7 +853,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Fixing sigTT terms for testing
     #f_sigTT.FixParameter(0, tt0)
     # Fixing sigTT terms to zero
-    #f_sigTT.FixParameter(0, 0.0)        
+    #f_sigTT.FixParameter(0, 0.0)
+    if DEBUG:
+        f_sigTT.FixParameter(0, tt0)    
     ##############
     ##############
     ##############    
@@ -885,7 +913,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
-
+    
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
             print("par{} changed from {:.3f} to {:.3f}".format(i+1, old, new))
