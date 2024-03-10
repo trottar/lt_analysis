@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-10 06:44:20 trottar"
+# Time-stamp: "2024-03-10 07:02:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -400,7 +400,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT_pre.FixParameter(3, 0)
     # Set range limit of used parameters
     # Currently 20% range
-    '''
     if t0 != 0.0:
         f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim), t0+abs(t0*par_lim))
     else: 
@@ -408,8 +407,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if t1 != 0.0:
         f_sigT_pre.SetParLimits(1, t1-abs(t1*par_lim), t1+abs(t1*par_lim))
     else: 
-        f_sigT_pre.SetParLimits(1, -0.001, 0.001)       
-    '''
+        f_sigT_pre.SetParLimits(1, -0.001, 0.001)
     #f_sigT_pre.SetParLimits(2, t2-abs(t2*par_lim), t2+abs(t2*par_lim))
     #f_sigT_pre.SetParLimits(3, t3-abs(t3*par_lim), t3+abs(t3*par_lim))    
     # Fixing sigT terms for testing
@@ -478,7 +476,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigT.FixParameter(3, 0)
     # Set range limit of used parameters
     # Currently 20% range
-    '''
     if t0 != 0.0:
         f_sigT.SetParLimits(0, t0-abs(t0*par_lim), t0+abs(t0*par_lim))
     else: 
@@ -487,7 +484,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigT.SetParLimits(1, t1-abs(t1*par_lim), t1+abs(t1*par_lim))
     else: 
         f_sigT.SetParLimits(1, -0.001, 0.001)
-    '''
     #f_sigT.SetParLimits(2, t2-abs(t2*par_lim), t2+abs(t2*par_lim))
     #f_sigT.SetParLimits(3, t3-abs(t3*par_lim), t3+abs(t3*par_lim))        
     # Fixing sigT terms for testing
