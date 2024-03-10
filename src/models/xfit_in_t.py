@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-10 04:42:57 trottar"
+# Time-stamp: "2024-03-10 04:43:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -241,8 +241,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
         g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
-        sigl_X_fit = g_sigl.GetY()[i] / (g_vec[i])
-        sigl_X_fit_err = g_sigl.GetEY()[i] / (g_vec[i])
+        sigl_X_fit = g_sigl.GetY()[i] / (1.0)
+        sigl_X_fit_err = g_sigl.GetEY()[i] / (1.0)
 
         g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
@@ -316,8 +316,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], q2_vec[i], sigl_X_fit)
         g_q2_sigl_fit.SetPointError(i, 0.0, 0.0, sigl_X_fit_err)
-        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
-        #sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i]))
+        #sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
+        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i]))
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
         print("$$$$$$$$$$$",i, g_sigl.GetX()[i], q2_vec[i], sigl_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
@@ -420,8 +420,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i], q2_vec[i])) * (g_vec[i])
         g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
 
-        sigt_X_fit = (g_sigt.GetY()[i]) / (g_vec[i])
-        sigt_X_fit_err = g_sigt.GetEY()[i] / (g_vec[i])
+        sigt_X_fit = (g_sigt.GetY()[i]) / (1.0)
+        sigt_X_fit_err = g_sigt.GetEY()[i] / (1.0)
 
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
