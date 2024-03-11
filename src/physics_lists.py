@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-11 01:56:41 trottar"
+# Time-stamp: "2024-03-11 02:09:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,11 +259,11 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         avet_right_data, aveQ2_right_data, aveW_right_data = zip(*sorted_data_right_tuples[:len(avet_right_data)])
 
         # Combine data from different lists into tuples
-        data_right_tuples = list(zip(avet_err_right_data, aveQ_err2_right_data, aveW_err_right_data))
+        data_right_tuples = list(zip(avet_err_right_data, aveQ_err_right_data, aveW_err_right_data))
         # Sort based on avet_err data
         sorted_data_right_tuples = sorted(data_right_tuples, key=lambda x: x[0])
         # Extract sorted values back into separate lists
-        avet_err_right_data, aveQ_err2_right_data, aveW_err_right_data = zip(*sorted_data_right_tuples[:len(avet_err_right_data)])        
+        avet_err_right_data, aveQ_err_right_data, aveW_err_right_data = zip(*sorted_data_right_tuples[:len(avet_err_right_data)])        
         
     if float(runNumLeft[0]) != 0:        
         # Combine data from different lists into tuples
@@ -274,11 +274,11 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         avet_left_data, aveQ2_left_data, aveW_left_data = zip(*sorted_data_left_tuples[:len(avet_left_data)])
 
         # Combine data from different lists into tuples
-        data_left_tuples = list(zip(avet_err_left_data, aveQ_err2_left_data, aveW_err_left_data))
+        data_left_tuples = list(zip(avet_err_left_data, aveQ_err_left_data, aveW_err_left_data))
         # Sort based on avet_err data
         sorted_data_left_tuples = sorted(data_left_tuples, key=lambda x: x[0])
         # Extract sorted values back into separate lists
-        avet_err_left_data, aveQ_err2_left_data, aveW_err_left_data = zip(*sorted_data_left_tuples[:len(avet_err_left_data)])
+        avet_err_left_data, aveQ_err_left_data, aveW_err_left_data = zip(*sorted_data_left_tuples[:len(avet_err_left_data)])
         
     if float(runNumCenter[0]) != 0:        
         # Combine data from different lists into tuples
@@ -289,11 +289,11 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         avet_center_data, aveQ2_center_data, aveW_center_data = zip(*sorted_data_center_tuples[:len(avet_center_data)])
 
         # Combine data from different lists into tuples
-        data_center_tuples = list(zip(avet_err_center_data, aveQ_err2_center_data, aveW_err_center_data))
+        data_center_tuples = list(zip(avet_err_center_data, aveQ_err_center_data, aveW_err_center_data))
         # Sort based on avet_err data
         sorted_data_center_tuples = sorted(data_center_tuples, key=lambda x: x[0])
         # Extract sorted values back into separate lists
-        avet_err_center_data, aveQ_err2_center_data, aveW_err_center_data = zip(*sorted_data_center_tuples[:len(avet_err_center_data)])
+        avet_err_center_data, aveQ_err_center_data, aveW_err_center_data = zip(*sorted_data_center_tuples[:len(avet_err_center_data)])
         
     if float(runNumRight[0]) != 0:
         # Combine data from different lists into tuples
