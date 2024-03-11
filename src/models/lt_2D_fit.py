@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-09 06:10:37 trottar"
+# Time-stamp: "2024-03-11 02:52:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,10 +167,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         glo_tmp = TGraphErrors()
         # Use SetPoint and SetPointError to fill the graph
         for j in range(nlo.GetSelectedRows()):
-
-            # Skip insane uncertainty bins
-            if nlo.GetV3()[j] > nlo.GetV1()[j]*3.00:
-                continue
             
             glo_tmp.SetPoint(j, nlo.GetV2()[j], nlo.GetV1()[j])
             glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
@@ -196,11 +192,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         ghi_tmp = TGraphErrors()
         # Use SetPoint and SetPointError to fill the graph
         for j in range(nhi.GetSelectedRows()):
-            
-            # Skip insane uncertainty bins
-            if nhi.GetV3()[j] > nhi.GetV1()[j]*3.00:
-                continue
-            
+                        
             ghi_tmp.SetPoint(j, nhi.GetV2()[j], nhi.GetV1()[j])
             ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
 
@@ -223,10 +215,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_xx, g_yy, g_yy_err = ROOT.Double(),ROOT.Double(),ROOT.Double()
 
         for ii in range(glo.GetN()):
-
-            # Skip insane uncertainty bins
-            if nlo.GetV3()[ii] > nlo.GetV1()[ii]*3.00:
-                continue
             
             glo.GetPoint(ii, g_xx, g_yy)
             g_yy_err = math.sqrt((glo.GetErrorY(ii) / g_yy)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy
@@ -237,10 +225,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, g_yy_err)
 
         for ii in range(ghi.GetN()):
-
-            # Skip insane uncertainty bins
-            if nhi.GetV3()[ii] > nhi.GetV1()[ii]*3.00:
-                continue
             
             ghi.GetPoint(ii, g_xx, g_yy)
             g_yy_err = math.sqrt((ghi.GetErrorY(ii) / g_yy)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy
