@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-11 02:53:29 trottar"
+# Time-stamp: "2024-03-11 04:33:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -458,6 +458,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
             yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(sum(hist_val_data)))**2)
+            # Convert to absolute error (required for average_ratio.f)
+            yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
@@ -494,7 +496,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             phibin_index = k
             yield_val = yield_hist[i]
             yield_err_val = yield_err_hist[i]
-            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val)*yield_val))
+            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, yield_err_val))
             dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
             i+=1
 
@@ -693,7 +695,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
             #print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
             #yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc/100 # FIX (/100 is temporary)
             # FIX: Removed norm_fac because shouldn't normalize non-weighted distribution
-            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))/100
+            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
+            # Convert to absolute error (required for average_ratio.f)
+            yld_err = yld_err*yld            
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
@@ -729,7 +733,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
             phibin_index = k
             yield_val = yield_hist[i]
             yield_err_val = yield_err_hist[i]
-            print("Simc yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, (yield_err_val)*yield_val))
+            print("Simc yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, yield_err_val))
             dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
             i+=1
 
