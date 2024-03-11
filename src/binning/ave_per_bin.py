@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-11 01:45:42 trottar"
+# Time-stamp: "2024-03-11 02:03:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -770,6 +770,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
         binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
     
         ave_hist = []
+        ave_err_hist = []
         binned_sub_simc = [[],[]]
         i=0 # iter
         print("-"*25)
