@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-11 16:35:06 trottar"
+# Time-stamp: "2024-03-11 16:38:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -149,15 +149,15 @@ def rand_sub(phi_setting, inpDict):
 
     scale_dict ={
         # Q2=2p1, W=2p95
-        "Q2p1W2p95Right_highe" : 3.55e-2,
+        "Q2p1W2p95Right_highe" : 3.35e-2,
         "Q2p1W2p95Left_highe" : 3.75e-2,
         "Q2p1W2p95Center_highe" : 1.95e-2,
         "Q2p1W2p95Left_lowe" : 1.5e-2,
         "Q2p1W2p95Center_lowe" : 1.5e-2,
         # Q2=3p0, W=2p32
         "Q3p0W2p32Right_highe" : 3.25e-2,
-        "Q3p0W2p32Left_highe" : 1.25e-2,
-        "Q3p0W2p32Center_highe" : 2.15e-2,
+        "Q3p0W2p32Left_highe" : 1.50e-2,
+        "Q3p0W2p32Center_highe" : 2.30e-2,
         "Q3p0W2p32Left_lowe" : 2.44e-2,
         "Q3p0W2p32Center_lowe" : 2.55e-2,        
         # Q2=3p0, W=3p14
