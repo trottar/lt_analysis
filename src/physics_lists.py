@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 17:13:59 trottar"
+# Time-stamp: "2024-03-11 01:50:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,16 +96,26 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         
     ################################################################################################################################################        
 
-    averQ2_right_data = []
-    averW_right_data = []
-    avert_right_data = []
-    averQ2_left_data = []
-    averW_left_data = []
-    avert_left_data = []
-    averQ2_center_data = []
-    averW_center_data = []
-    avert_center_data = []
+    aveQ2_right_data = []
+    aveW_right_data = []
+    avet_right_data = []
+    aveQ2_left_data = []
+    aveW_left_data = []
+    avet_left_data = []
+    aveQ2_center_data = []
+    aveW_center_data = []
+    avet_center_data = []
 
+    aveQ2_err_right_data = []
+    aveW_err_right_data = []
+    avet_err_right_data = []
+    aveQ2_err_left_data = []
+    aveW_err_left_data = []
+    avet_err_left_data = []
+    aveQ2_err_center_data = []
+    aveW_err_center_data = []
+    avet_err_center_data = []
+    
     yield_data_right = []
     yield_data_left = []
     yield_data_center = []
@@ -146,17 +156,26 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             i = data_key_tuple[0] # t bin
             j = data_key_tuple[1] # phi bin
             if phiset == "Right":
-                averQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
-                averW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
-                avert_right_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
+                aveQ2_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
+                aveW_right_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
+                avet_right_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
+                aveQ2_err_right_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave_err"])
+                aveW_err_right_data.append(data_nested_dict['W'][data_key_tuple]["W_ave_err"])
+                avet_err_right_data.append(data_nested_dict['t'][data_key_tuple]["t_ave_err"])                
             if phiset == "Left":
-                averQ2_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
-                averW_left_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
-                avert_left_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
+                aveQ2_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
+                aveW_left_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
+                avet_left_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
+                aveQ2_err_left_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave_err"])
+                aveW_err_left_data.append(data_nested_dict['W'][data_key_tuple]["W_ave_err"])
+                avet_err_left_data.append(data_nested_dict['t'][data_key_tuple]["t_ave_err"])                
             if phiset == "Center":
-                averQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
-                averW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
-                avert_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
+                aveQ2_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave"])
+                aveW_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave"])
+                avet_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave"])
+                aveQ2_err_center_data.append(data_nested_dict['Q2'][data_key_tuple]["Q2_ave_err"])
+                aveW_err_center_data.append(data_nested_dict['W'][data_key_tuple]["W_ave_err"])
+                avet_err_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave_err"])                
                 
         key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
         for key_tuple in yieldDict["binned_DATA"][phiset]['yield']:
@@ -233,28 +252,49 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     
     if float(runNumRight[0]) != 0:
         # Combine data from different lists into tuples
-        data_right_tuples = list(zip(avert_right_data, averQ2_right_data, averW_right_data))
-        # Sort based on avert data
+        data_right_tuples = list(zip(avet_right_data, aveQ2_right_data, aveW_right_data))
+        # Sort based on avet data
         sorted_data_right_tuples = sorted(data_right_tuples, key=lambda x: x[0])
         # Extract sorted values back into separate lists
-        avert_right_data, averQ2_right_data, averW_right_data = zip(*sorted_data_right_tuples[:len(avert_right_data)])
+        avet_right_data, aveQ2_right_data, aveW_right_data = zip(*sorted_data_right_tuples[:len(avet_right_data)])
 
+        # Combine data from different lists into tuples
+        data_right_tuples = list(zip(avet_err_right_data, aveQ_err2_right_data, aveW_err_right_data))
+        # Sort based on avet_err data
+        sorted_data_right_tuples = sorted(data_right_tuples, key=lambda x: x[0])
+        # Extract sorted values back into separate lists
+        avet_err_right_data, aveQ_err2_right_data, aveW_err_right_data = zip(*sorted_data_right_tuples[:len(avet_err_right_data)])        
+        
     if float(runNumLeft[0]) != 0:        
         # Combine data from different lists into tuples
-        data_left_tuples = list(zip(avert_left_data, averQ2_left_data, averW_left_data))
-        # Sort based on avert data
+        data_left_tuples = list(zip(avet_left_data, aveQ2_left_data, aveW_left_data))
+        # Sort based on avet data
         sorted_data_left_tuples = sorted(data_left_tuples, key=lambda x: x[0])
         # Extract sorted values back into separate lists
-        avert_left_data, averQ2_left_data, averW_left_data = zip(*sorted_data_left_tuples[:len(avert_left_data)])
+        avet_left_data, aveQ2_left_data, aveW_left_data = zip(*sorted_data_left_tuples[:len(avet_left_data)])
 
+        # Combine data from different lists into tuples
+        data_left_tuples = list(zip(avet_err_left_data, aveQ_err2_left_data, aveW_err_left_data))
+        # Sort based on avet_err data
+        sorted_data_left_tuples = sorted(data_left_tuples, key=lambda x: x[0])
+        # Extract sorted values back into separate lists
+        avet_err_left_data, aveQ_err2_left_data, aveW_err_left_data = zip(*sorted_data_left_tuples[:len(avet_err_left_data)])
+        
     if float(runNumCenter[0]) != 0:        
         # Combine data from different lists into tuples
-        data_center_tuples = list(zip(avert_center_data, averQ2_center_data, averW_center_data))
-        # Sort based on avert data
+        data_center_tuples = list(zip(avet_center_data, aveQ2_center_data, aveW_center_data))
+        # Sort based on avet data
         sorted_data_center_tuples = sorted(data_center_tuples, key=lambda x: x[0])
         # Extract sorted values back into separate lists
-        avert_center_data, averQ2_center_data, averW_center_data = zip(*sorted_data_center_tuples[:len(avert_center_data)])
+        avet_center_data, aveQ2_center_data, aveW_center_data = zip(*sorted_data_center_tuples[:len(avet_center_data)])
 
+        # Combine data from different lists into tuples
+        data_center_tuples = list(zip(avet_err_center_data, aveQ_err2_center_data, aveW_err_center_data))
+        # Sort based on avet_err data
+        sorted_data_center_tuples = sorted(data_center_tuples, key=lambda x: x[0])
+        # Extract sorted values back into separate lists
+        avet_err_center_data, aveQ_err2_center_data, aveW_err_center_data = zip(*sorted_data_center_tuples[:len(avet_err_center_data)])
+        
     if float(runNumRight[0]) != 0:
         # Combine data from different lists into tuples
         data_right_tuples = list(zip(tbin_data_right, phibin_data_right, yield_data_right, yield_data_err_right))
@@ -446,12 +486,12 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         processed_Q2vals = set()
         # Open a file in read mode
         with open(f_kindata, 'r') as f:
-            for i, Q2val in enumerate(averQ2_right_data):
+            for i, Q2val in enumerate(aveQ2_right_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_right_data[i], (data_charge_err_right)*averQ2_right_data[i], \
-                                                                                  averW_right_data[i], (data_charge_err_right)*averW_right_data[i], \
-                                                                                  avert_right_data[i], (data_charge_err_right)*avert_right_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(aveQ2_right_data[i], aveQ2_err_right_data[i], \
+                                                                                  aveW_right_data[i], aveW_err_right_data[i], \
+                                                                                  avet_right_data[i], avet_err_right_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
@@ -465,12 +505,12 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         processed_Q2vals = set()
         # Open a file in read mode
         with open(f_kindata, 'r') as f:
-            for i, Q2val in enumerate(averQ2_left_data):
+            for i, Q2val in enumerate(aveQ2_left_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_left_data[i], (data_charge_err_left)*averQ2_left_data[i], \
-                                                                                  averW_left_data[i], (data_charge_err_left)*averW_left_data[i], \
-                                                                                  avert_left_data[i], (data_charge_err_left)*avert_left_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(aveQ2_left_data[i], aveQ2_err_left_data[i], \
+                                                                                  aveW_left_data[i], aveW_err_left_data[i], \
+                                                                                  avet_left_data[i], avet_err_left_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
@@ -484,12 +524,12 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         processed_Q2vals = set()
         # Open a file in read mode
         with open(f_kindata, 'r') as f:
-            for i, Q2val in enumerate(averQ2_center_data):
+            for i, Q2val in enumerate(aveQ2_center_data):
                 if Q2val in processed_Q2vals:
                     continue
-                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(averQ2_center_data[i], (data_charge_err_center)*averQ2_center_data[i], \
-                                                                                  averW_center_data[i], (data_charge_err_center)*averW_center_data[i], \
-                                                                                  avert_center_data[i], (data_charge_err_center)*avert_center_data[i])
+                check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(aveQ2_center_data[i], aveQ2_err_center_data[i], \
+                                                                                  aveW_center_data[i], aveW_err_center_data[i], \
+                                                                                  avet_center_data[i], avet_err_center_data[i])
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 

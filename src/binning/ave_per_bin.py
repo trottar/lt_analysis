@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-09 08:32:09 trottar"
+# Time-stamp: "2024-03-11 01:45:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -512,6 +512,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
 
         ave_hist = []
+        ave_err_hist = []
         binned_sub_data = [[],[]]
         i=0 # iter
         print("-"*25)
@@ -526,6 +527,14 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 total_count = np.sum(sub_val)
                 average = weighted_sum / total_count            
                 ave_hist.append(average)
+                # Calculate the standard deviation of the data points within the bin
+                std_dev = np.std(bin_val_data)
+                # Determine the number of data points within the bin
+                n = len(bin_val_data)
+                # Calculate the standard error of the mean (SEM) for the bin
+                sem = std_dev / np.sqrt(n)
+                # Append the uncertainty (SEM) to the list
+                ave_err_hist.append(sem)
                 #print("Weighted Sum:",weighted_sum)
                 #print("Total Count:",total_count)
                 #print("Average for t-bin {}:".format(i+1),average)
@@ -533,6 +542,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 binned_sub_data[1].append(sub_val)
             else:
                 ave_hist.append(0)
+                ave_err_hist.append(0)
                 #print("Weighted Sum: N/A")
                 #print("Total Count: N/A")
                 #print("Average for t-bin {}: 0.0".format(i+1))
@@ -556,8 +566,9 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 phibin_index = k
                 hist_val = [binned_sub_data[0][j], binned_sub_data[1][j]]
                 ave_val = ave_hist[j]
-                print("Data average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))
-                dict_lst.append((tbin_index, phibin_index, ave_val))
+                ave_err_val = ave_err_hist[j]
+                print("Data average {} for t-bin {} phi-bin {}: {:.3f} +/- {:.3e}".format(kin_type, j+1, k+1, ave_val, ave_err_val))
+                dict_lst.append((tbin_index, phibin_index, ave_val, ave_err_val))
                 
         # Group the tuples by the first two elements using defaultdict
         groups = defaultdict(list)
@@ -565,6 +576,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
             key = (tup[0], tup[1])
             groups[key] = {
                 "{}_ave".format(kin_type) : tup[2],
+                "{}_ave_err".format(kin_type) : tup[3],
             }
 
         group_dict[kin_type] = groups
@@ -770,6 +782,14 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 total_count = np.sum(sub_val)
                 average = weighted_sum / total_count            
                 ave_hist.append(average)
+                # Calculate the standard deviation of the simc points within the bin
+                std_dev = np.std(bin_val_simc)
+                # Determine the number of simc points within the bin
+                n = len(bin_val_simc)
+                # Calculate the standard error of the mean (SEM) for the bin
+                sem = std_dev / np.sqrt(n)
+                # Append the uncertainty (SEM) to the list
+                ave_err_hist.append(sem)                
                 #print("Weighted Sum:",weighted_sum)
                 #print("Total Count:",total_count)
                 #print("Average for t-bin {}:".format(i+1),average)
@@ -777,6 +797,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 binned_sub_simc[1].append(sub_val)
             else:
                 ave_hist.append(0)
+                ave_err_hist.append(0)
                 #print("Weighted Sum: N/A")
                 #print("Total Count: N/A")
                 #print("Average for t-bin {}: 0.0".format(i+1))
@@ -799,8 +820,9 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 phibin_index = k
                 hist_val = [binned_sub_simc[0][j], binned_sub_simc[1][j]]
                 ave_val = ave_hist[j]
-                print("Simc average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, j+1, k+1, ave_val))            
-                dict_lst.append((tbin_index, phibin_index, ave_val))
+                ave_err_val = ave_err_hist[j]
+                print("Simc average {} for t-bin {} phi-bin {}: {:.3f} +/- {:.3e}".format(kin_type, j+1, k+1, ave_val, ave_err_val))
+                dict_lst.append((tbin_index, phibin_index, ave_val, ave_err_val))
 
         # Group the tuples by the first two elements using defaultdict
         groups = defaultdict(list)
@@ -808,6 +830,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
             key = (tup[0], tup[1])
             groups[key] = {
                 "{}_ave".format(kin_type) : tup[2],
+                "{}_ave_err".format(kin_type) : tup[3],
             }                    
     
         group_dict[kin_type] = groups
