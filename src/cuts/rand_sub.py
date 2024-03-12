@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-12 07:15:06 trottar"
+# Time-stamp: "2024-03-12 07:28:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -169,9 +169,9 @@ def rand_sub(phi_setting, inpDict):
         #"Q3p0W2p32Left_lowe" : 2.44e-2,
         #"Q3p0W2p32Center_lowe" : 2.55e-2,
         # 0.1000-1.500 
-        "Q3p0W2p32Right_highe" : 1.00e-2,
-        "Q3p0W2p32Left_highe" : 0.25e-2,
-        "Q3p0W2p32Center_highe" : 1.00e-2,
+        "Q3p0W2p32Right_highe" : 0.75e-2,
+        "Q3p0W2p32Left_highe" : 0.75e-2,
+        "Q3p0W2p32Center_highe" : 0.25e-2,
         "Q3p0W2p32Left_lowe" : 0.44e-2,
         "Q3p0W2p32Center_lowe" : 0.55e-2,
         # Q2=3p0, W=3p14
@@ -185,8 +185,8 @@ def rand_sub(phi_setting, inpDict):
         "Q3p0W3p14Right_highe" : 0.75e-2,
         "Q3p0W3p14Left_highe" : 1.00e-2,
         "Q3p0W3p14Center_highe" : 1.00e-2,
-        "Q3p0W3p14Left_lowe" : 0.10e-2,
-        "Q3p0W3p14Center_lowe" : 0.5e-2,
+        "Q3p0W3p14Left_lowe" : 1.00e-2,
+        "Q3p0W3p14Center_lowe" : 0.75e-2,
         # Q2=4p4, W=2p74
         "Q4p4W2p74Right_highe" : 2.28e-2,
         "Q4p4W2p74Left_highe" : 4.50e-2,
