@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:25:03 trottar"
+# Time-stamp: "2024-03-12 05:57:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -118,9 +118,6 @@ def show_pdf_with_evince(file_path):
         print("\n\n\tCTRL+C detected...Exiting analysis!")
         process.terminate()
         sys.exit(2)        
-
-    scratch_path  = file_path.replace(OUTPATH+"/", "/scratch/"+USER+"/")
-    shutil.copy(file_path,scratch_path)
         
 ################################################################################################################################################
 

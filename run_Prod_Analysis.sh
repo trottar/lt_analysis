@@ -644,12 +644,12 @@ done
 # Make sure 3 sig figs (no more)
 
 # Full spectrum
-#MissMassMin=0.7
-#MissMassMax=1.5
+MissMassMin=0.7
+MissMassMax=1.5
 # MM cut
-MissMassMin=1.08
+#MissMassMin=1.08
 #MissMassMin=1.10
-MissMassMax=1.16
+#MissMassMax=1.16
 #MissMassMax=1.18
 #MissMassMax=1.24
 
@@ -667,10 +667,12 @@ elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     NumPhiBins=10
     #TMIN=0.100
     #TMAX=0.990
+    TMIN=0.100
+    TMAX=1.500    
     #TMIN=0.450 # Center low
     #TMAX=0.800 # Center low
-    TMIN=0.500 # Max value of tmin across phi settings
-    TMAX=0.950 # Max value of tmax across phi settings
+    #TMIN=0.500 # Max value of tmin across phi settings
+    #TMAX=0.950 # Max value of tmax across phi settings
 elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     # Q2=3p0, W=3p14
     NumtBins=5
