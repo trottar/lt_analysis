@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-09 09:05:20 trottar"
+# Time-stamp: "2024-03-13 09:13:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -509,11 +509,10 @@ ratioDict = {}
 ratioDict.update(find_ratio(histlist, inpDict, yieldDict))
 
 sys.path.append("binning")
-from ave_per_bin import ave_per_bin_data, ave_per_bin_simc
+from ave_per_bin import ave_per_bin_data
 
 aveDict = {}
 aveDict.update(ave_per_bin_data(histlist, inpDict))
-aveDict.update(ave_per_bin_simc(histlist, inpDict))
 
 sys.path.append("plotting")
 from binned import plot_binned
