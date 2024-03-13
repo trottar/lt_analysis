@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-12 16:11:40 trottar"
+# Time-stamp: "2024-03-12 23:19:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -146,54 +146,6 @@ def rand_sub(phi_setting, inpDict):
     ##############
     # HARD CODED #
     ##############
-
-    scale_dict ={
-        # Q2=2p1, W=2p95
-        # 0.1500-0.4000
-        #"Q2p1W2p95Right_highe" : 2.25e-2,
-        #"Q2p1W2p95Left_highe" : 3.00e-2,
-        #"Q2p1W2p95Center_highe" : 2.15e-2,
-        #"Q2p1W2p95Left_lowe" : 1.5e-2,
-        #"Q2p1W2p95Center_lowe" : 1.5e-2,
-        # 0.1000-1.0000
-        "Q2p1W2p95Right_highe" : 2.75e-2,
-        "Q2p1W2p95Left_highe" : 2.00e-2,
-        "Q2p1W2p95Center_highe" : 1.25e-2,
-        "Q2p1W2p95Left_lowe" : 0.5e-2,
-        "Q2p1W2p95Center_lowe" : 0.5e-2,
-        # Q2=3p0, W=2p32
-        # 0.5000-0.950
-        #"Q3p0W2p32Right_highe" : 3.00e-2,
-        #"Q3p0W2p32Left_highe" : 2.25e-2,
-        #"Q3p0W2p32Center_highe" : 3.00e-2,
-        #"Q3p0W2p32Left_lowe" : 2.44e-2,
-        #"Q3p0W2p32Center_lowe" : 2.55e-2,
-        # 0.1000-1.500 
-        "Q3p0W2p32Right_highe" : 0.85e-2,
-        "Q3p0W2p32Left_highe" : 0.55e-2,
-        "Q3p0W2p32Center_highe" : 0.50e-2,
-        "Q3p0W2p32Left_lowe" : 0.44e-2,
-        "Q3p0W2p32Center_lowe" : 0.55e-2,
-        # Q2=3p0, W=3p14
-        # 0.1500-0.4500
-        #"Q3p0W3p14Right_highe" : 1.75e-2,
-        #"Q3p0W3p14Left_highe" : 3.00e-2,
-        #"Q3p0W3p14Center_highe" : 2.00e-2,
-        #"Q3p0W3p14Left_lowe" : 1.10e-2,
-        #"Q3p0W3p14Center_lowe" : 1.5e-2,
-        # 0.1000-1.0000
-        "Q3p0W3p14Right_highe" : 1.25e-2,
-        "Q3p0W3p14Left_highe" : 2.75e-2,
-        "Q3p0W3p14Center_highe" : 1.00e-2,
-        "Q3p0W3p14Left_lowe" : 1.00e-2,
-        "Q3p0W3p14Center_lowe" : 0.75e-2,
-        # Q2=4p4, W=2p74
-        "Q4p4W2p74Right_highe" : 2.28e-2,
-        "Q4p4W2p74Left_highe" : 4.50e-2,
-        "Q4p4W2p74Center_highe" : 2.5e-2,
-        "Q4p4W2p74Left_lowe" : 2.38e-2,
-        "Q4p4W2p74Center_lowe" : 2.5e-2,        
-    }
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
@@ -1434,8 +1386,7 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":                
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
-        scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
-        particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg, scale_factor=scale_factor)
+        particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
