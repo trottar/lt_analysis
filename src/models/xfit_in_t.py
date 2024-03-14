@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-13 21:58:14 trottar"
+# Time-stamp: "2024-03-13 22:55:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -309,7 +309,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL.FixParameter(0, l0)
     f_sigL.FixParameter(1, l1)
     #f_sigL.FixParameter(2, l2)
-    f_sigL_pre.FixParameter(2, 0.2) # HARD CODE    
+    f_sigL.FixParameter(2, 0.2) # HARD CODE    
     f_sigL.FixParameter(3, l3)
     # Fixing sigL terms to zero
     #f_sigL.FixParameter(0, 0.0)
