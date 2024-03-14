@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-12 23:19:03 trottar"
+# Time-stamp: "2024-03-14 11:01:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -39,7 +39,7 @@ from ltsep import Root
 # Import package for progress bar
 from ltsep import Misc
 
-lt=Root(os.path.realpath(__file__),"Plot_LTSep!")
+lt=Root(os.path.realpath(__file__),"Plot_LTSep")
 
 # Add this to all files for more dynamic pathing
 USER=lt.USER # Grab user info for file finding
@@ -881,14 +881,17 @@ def grab_ave_data(histlist, inpDict):
                     line_lst = line.split(" ") # aveW, errW, aveQ2, errQ2, avett, errtt, thetacm, tbin
                     if kin_type == "W":
                         ave_val = float(line_lst[0])
+                        ave_err_val = float(line_lst[1])                        
                     if kin_type == "Q2":
                         ave_val = float(line_lst[2])
+                        ave_err_val = float(line_lst[3])                        
                     if kin_type == "t":
                         ave_val = float(line_lst[4])
+                        ave_err_val = float(line_lst[5])                        
                     tbin_index = int(line_lst[7])-1
                     phibin_index = k
-                    print("Average {} for t-bin {} phi-bin {}: {:.3f}".format(kin_type, tbin_index+1, phibin_index+1, ave_val))
-                    dict_lst.append((tbin_index, phibin_index, ave_val))
+                    print("Data average {} for t-bin {} phi-bin {}: {:.3f} +/- {:.3e}".format(kin_type, j+1, k+1, ave_val, ave_err_val))
+                    dict_lst.append((tbin_index, phibin_index, ave_val, ave_err_val))
 
             # Group the tuples by the first two elements using defaultdict
             groups = defaultdict(list)
@@ -896,6 +899,7 @@ def grab_ave_data(histlist, inpDict):
                 key = (tup[0], tup[1])
                 groups[key] = {
                     "{}_ave".format(kin_type) : tup[2],
+                    "{}_ave_err".format(kin_type) : tup[3],                    
                 }
                 
             group_dict[kin_type] = groups
