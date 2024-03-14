@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 14:42:17 trottar"
+# Time-stamp: "2024-03-14 16:24:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,22 +52,22 @@ grab_runs () {
     fi
 }
 
-# ONGOING
-Q2="0p5"
-W="2p40"
-# NEXT???
+#
+#Q2="0p5"
+#W="2p40"
+#
 #Q2="2p1"
 #W="2p95"
-# DONE
+#
+Q2="3p0"
+W="2p32"
+#
 #Q2="3p0"
 #W="3p14"
-# DONE
-#Q2="3p0"
-#W="2p32"
-# DONE
+#
 #Q2="4p4"
 #W="2p74"
-# DONE
+#
 #Q2="5p5"
 #W="3p02"
 
@@ -116,7 +116,7 @@ for t in "${TARGET[@]}"; do
 			    echo
 			    echo "Running ${number}"
 			    cd "${LTANAPATH}"
-			    ./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
+			    ./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} pion
 			done
 			break ;;
 		    [Nn]* ) 
