@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-14 11:10:04 trottar"
+# Time-stamp: "2024-03-14 11:31:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -840,7 +840,7 @@ def grab_yield_data(histlist, phisetlist, inpDict):
             yield_err_val = float(line_lst[1])
             phibin_index = int(line_lst[2])
             tbin_index = int(line_lst[3])
-            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(tbin_index+1, phibin_index+1, yield_val, yield_err_val))
+            print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(tbin_index, phibin_index, yield_val, yield_err_val))
             dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
         
         # Group the tuples by the first two elements using defaultdict
