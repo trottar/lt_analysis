@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-15 11:03:39 trottar"
+# Time-stamp: "2024-03-15 13:39:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,11 +56,11 @@ grab_runs () {
 #Q2="0p5"
 #W="2p40"
 #
-Q2="2p1"
-W="2p95"
-# DONE (pion), maybe not??
-#Q2="3p0"
-#W="2p32"
+#Q2="2p1"
+#W="2p95"
+# DONE
+Q2="3p0"
+W="2p32"
 #
 #Q2="3p0"
 #W="3p14"
@@ -120,7 +120,7 @@ for t in "${TARGET[@]}"; do
 			    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
 			    # Using the test command with -e option
 			    if test -e $rootfile; then
-				./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} pion
+				./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
 			    else
 				echo "${rootfile} does not exist! Running jcache..."
 				jcache get $rootfile
