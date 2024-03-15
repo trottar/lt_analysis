@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-15 06:52:33 trottar"
+# Time-stamp: "2024-03-15 06:53:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -123,6 +123,7 @@ for t in "${TARGET[@]}"; do
 			    else
 				echo "${rootfile} does not exist! Running jcache..."
 				jcache get $rootfile
+			        continue
 			    fi
 			done
 			break ;;
