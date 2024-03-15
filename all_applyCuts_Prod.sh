@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-15 06:53:32 trottar"
+# Time-stamp: "2024-03-15 10:07:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,11 +56,11 @@ grab_runs () {
 #Q2="0p5"
 #W="2p40"
 #
-#Q2="2p1"
-#W="2p95"
-#
-Q2="3p0"
-W="2p32"
+Q2="2p1"
+W="2p95"
+# DONE (pion)
+#Q2="3p0"
+#W="2p32"
 #
 #Q2="3p0"
 #W="3p14"
@@ -104,7 +104,8 @@ for t in "${TARGET[@]}"; do
 	    replay_root_path="${ROOTPATH}/${ANATYPE}LT"
 	    while true; do
 		# Prompt for confirmation before proceeding
-		read -p "Are you sure you want to remove files with specified numbers in the filename? (yes/no): " answer
+		#read -p "Are you sure you want to remove files with specified numbers in the filename? (yes/no): " answer
+		answer="yes"
 
 		case "$answer" in
 		    [Yy]* )
