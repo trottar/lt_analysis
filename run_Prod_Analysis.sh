@@ -667,7 +667,7 @@ elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     # Q2=3p0, W=2p32
     #NumtBins=3
     #NumPhiBins=10
-    NumtBins=5
+    NumtBins=3
     NumPhiBins=16
     #TMIN=0.100
     #TMAX=0.990
