@@ -668,10 +668,10 @@ elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     #NumtBins=3
     NumtBins=2
     NumPhiBins=10
-    #TMIN=0.100
-    #TMAX=0.990
     TMIN=0.100
-    TMAX=1.200
+    TMAX=0.990
+    #TMIN=0.100
+    #TMAX=1.200
     #TMIN=0.450 # Center low
     #TMAX=0.800 # Center low
     #TMIN=0.500 # Max value of tmin across phi settings
