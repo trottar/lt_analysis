@@ -673,7 +673,7 @@ elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     #TMIN=0.100
     #TMAX=1.200
     TMIN=0.300
-    TMAX=0.650
+    TMAX=0.500
     #TMIN=0.450 # Center low
     #TMAX=0.800 # Center low
     #TMIN=0.500 # Max value of tmin across phi settings
