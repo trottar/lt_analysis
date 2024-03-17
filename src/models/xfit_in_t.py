@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-16 13:49:04 trottar"
+# Time-stamp: "2024-03-17 08:22:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,8 +51,8 @@ m_p = 0.93827231
 m_n = 0.93956541
 mkpl = 0.493677
 
-DEBUG=False
-#DEBUG=True
+#DEBUG=False
+DEBUG=True
 
 ##############
 # HARD CODED #
