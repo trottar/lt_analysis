@@ -644,12 +644,12 @@ done
 # Make sure 3 sig figs (no more)
 
 # Full spectrum
-#MissMassMin=0.7
-#MissMassMax=1.5
+MissMassMin=0.7
+MissMassMax=1.5
 # MM cut
-MissMassMin=1.08
+#MissMassMin=1.08
 #MissMassMin=1.10
-MissMassMax=1.16
+#MissMassMax=1.16
 #MissMassMax=1.18
 #MissMassMax=1.24
 
