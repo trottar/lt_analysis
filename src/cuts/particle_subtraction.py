@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-18 11:31:30 trottar"
+# Time-stamp: "2024-03-18 16:33:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,17 +88,17 @@ scale_dict ={
     "Q3p0W3p14Left_lowe" : 1.00e-2,
     "Q3p0W3p14Center_lowe" : 0.75e-2,
     # Q2=4p4, W=2p74
-    "Q4p4W2p74Right_highe" : 2.28e-2,
-    "Q4p4W2p74Left_highe" : 4.50e-2,
-    "Q4p4W2p74Center_highe" : 2.5e-2,
-    "Q4p4W2p74Left_lowe" : 2.38e-2,
-    "Q4p4W2p74Center_lowe" : 2.5e-2,
+    "Q4p4W2p74Right_highe" : 1.25e-2,
+    "Q4p4W2p74Left_highe" : 2.75e-2,
+    "Q4p4W2p74Center_highe" : 1.00e-2,
+    "Q4p4W2p74Left_lowe" : 1.00e-2,
+    "Q4p4W2p74Center_lowe" : 0.75e-2,
     # Q2=5p5, W=3p02
-    "Q5p5W3p02Right_highe" : 2.28e-2,
-    "Q5p5W3p02Left_highe" : 4.50e-2,
-    "Q5p5W3p02Center_highe" : 2.5e-2,
-    "Q5p5W3p02Left_lowe" : 2.38e-2,
-    "Q5p5W3p02Center_lowe" : 2.5e-2,    
+    "Q5p5W3p02Right_highe" : 1.25e-2,
+    "Q5p5W3p02Left_highe" : 2.75e-2,
+    "Q5p5W3p02Center_highe" : 1.00e-2,
+    "Q5p5W3p02Left_lowe" : 1.00e-2,
+    "Q5p5W3p02Center_lowe" : 0.75e-2,
 }
 
 ##############
