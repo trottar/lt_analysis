@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-16 12:46:39 trottar"
+# Time-stamp: "2024-03-18 07:13:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,18 +55,18 @@ grab_runs () {
 #
 #Q2="0p5"
 #W="2p40"
-# ONGOING
+# DONE (pi+k)
 Q2="2p1"
 W="2p95"
 # DONE (pi+k)
 #Q2="3p0"
 #W="2p32"
-# ONGOING
+# DONE (pi+k)
 #Q2="3p0"
 #W="3p14"
-#
-#Q2="4p4"
-#W="2p74"
+# ONGOING
+Q2="4p4"
+W="2p74"
 #
 #Q2="5p5"
 #W="3p02"
