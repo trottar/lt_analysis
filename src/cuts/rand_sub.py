@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 17:36:45 trottar"
+# Time-stamp: "2024-03-19 17:39:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1596,8 +1596,8 @@ def rand_sub(phi_setting, inpDict):
     histDict["MM_vs_P_cal_DATA"] = remove_negative_bins(MM_vs_P_cal_DATA)
     histDict["MM_vs_P_hgcer_DATA"] = remove_negative_bins(MM_vs_P_hgcer_DATA)
     histDict["MM_vs_P_aero_DATA"] = remove_negative_bins(MM_vs_P_aero_DATA)
-    histDict["NumEvts_MM_DUMMY"] = int(remove_negative_bins(H_MM_DUMMY).Integral())
-    histDict["NumEvts_MM_DATA"] = int(remove_negative_bins(H_MM_DATA).Integral())
+    histDict["NumEvts_MM_DUMMY"] = int(H_MM_DUMMY.Integral())
+    histDict["NumEvts_MM_DATA"] = int(H_MM_DATA.Integral())
     
     ###
     # CT plots
