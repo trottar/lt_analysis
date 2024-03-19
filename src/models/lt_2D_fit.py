@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 14:13:41 trottar"
+# Time-stamp: "2024-03-19 14:18:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -763,7 +763,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             mode = 'w' if i == 0 else 'a'
             with open(fn_unsep, mode) as f:
                 # Write values to output file
-                f.write("{} {} {} {} {}\n".format(
+                f.write("{:.3f} {:.3f} {:.3f} {:.3f} {:.4f}\n".format(
                     lo_cross_sec[i], lo_cross_sec_err[i], hi_cross_sec[i], hi_cross_sec_err[i], t_list[i]
                 ))
 
