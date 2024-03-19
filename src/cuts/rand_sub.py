@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 17:44:12 trottar"
+# Time-stamp: "2024-03-19 18:13:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -785,6 +785,10 @@ def rand_sub(phi_setting, inpDict):
         subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DUMMY_RAND"] = TH2D("P_hgcer_nohole_xAtCer_vs_MM_SUB_DUMMY_RAND", "X vs MM (no hole cut); X; MM", 50, -30, 30, 50, 0, 2)
         subDict["P_hgcer_yAtCer_vs_MM_SUB_DUMMY_RAND"] = TH2D("P_hgcer_yAtCer_vs_MM_SUB_DUMMY_RAND", "Y vs MM; Y; MM", 50, -30, 30, 50, 0, 2)
         subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DUMMY_RAND"] = TH2D("P_hgcer_nohole_yAtCer_vs_MM_SUB_DUMMY_RAND", "Y vs MM (no hole cut); Y; MM", 50, -30, 30, 50, 0, 2)
+
+    # Fit background and subtract
+    if ParticleType == "kaon":        
+        from background_fit import bg_fit
         
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1447,7 +1451,6 @@ def rand_sub(phi_setting, inpDict):
 
     # Fit background and subtract
     if ParticleType == "kaon":        
-        from background_fit import bg_fit
         background_fit = bg_fit(inpDict, H_MM_DATA)
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)

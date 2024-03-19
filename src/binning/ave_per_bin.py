@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-14 11:32:14 trottar"
+# Time-stamp: "2024-03-19 18:26:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,6 +49,12 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import remove_negative_bins
 
 ##################################################################################################################################################
 
@@ -133,7 +139,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         from particle_subtraction import particle_subtraction_ave
         SubtractedParticle = "pion"
         subDict = {}
-    
+
+    # Fit background and subtract
+    if ParticleType == "kaon":        
+        from background_fit import bg_fit
+        
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
 
@@ -360,18 +370,34 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             hist_bin_dict["H_t_DUMMY_{}".format(j)].Add(subDict["H_t_SUB_DUMMY_{}".format(j)],-1)
             hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(subDict["H_epsilon_SUB_DUMMY_{}".format(j)],-1)
             hist_bin_dict["H_MM_DUMMY_{}".format(j)].Add(subDict["H_MM_SUB_DUMMY_{}".format(j)],-1)
+
+        # Fit background and subtract
+        if ParticleType == "kaon":
+            background_data_fit = bg_fit(inpDict, hist_bin_dict["H_MM_DATA_{}".format(j)])
+            hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(background_data_fit[0], -1)
+            hist_bin_dict["H_W_DATA_{}".format(j)].Add(background_data_fit[0], -1)
+            hist_bin_dict["H_t_DATA_{}".format(j)].Add(background_data_fit[0], -1)
+            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(background_data_fit[0], -1)
+            hist_bin_dict["H_MM_DATA_{}".format(j)].Add(background_data_fit[0], -1)
+
+            background_dummy_fit = bg_fit(inpDict, hist_bin_dict["H_MM_DUMMY_{}".format(j)])            
+            hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Add(background_dummy_fit[0], -1)
+            hist_bin_dict["H_W_DUMMY_{}".format(j)].Add(background_dummy_fit[0], -1)
+            hist_bin_dict["H_t_DUMMY_{}".format(j)].Add(background_dummy_fit[0], -1)
+            hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(background_dummy_fit[0], -1)
+            hist_bin_dict["H_MM_DUMMY_{}".format(j)].Add(background_dummy_fit[0], -1)
             
         processed_dict["t_bin{}".format(j+1)] = {
-            "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
-            "H_W_DATA" : hist_bin_dict["H_W_DATA_{}".format(j)],
-            "H_t_DATA" : hist_bin_dict["H_t_DATA_{}".format(j)],
-            "H_epsilon_DATA" : hist_bin_dict["H_epsilon_DATA_{}".format(j)],
-            "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}".format(j)],
-            "H_Q2_DUMMY" : hist_bin_dict["H_Q2_DUMMY_{}".format(j)],
-            "H_W_DUMMY" : hist_bin_dict["H_W_DUMMY_{}".format(j)],
-            "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY_{}".format(j)],
-            "H_epsilon_DUMMY" : hist_bin_dict["H_epsilon_DUMMY_{}".format(j)],
-            "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY_{}".format(j)],            
+            "H_Q2_DATA" : remove_negative_bins(hist_bin_dict["H_Q2_DATA_{}".format(j)]),
+            "H_W_DATA" : remove_negative_bins(hist_bin_dict["H_W_DATA_{}".format(j)]),
+            "H_t_DATA" : remove_negative_bins(hist_bin_dict["H_t_DATA_{}".format(j)]),
+            "H_epsilon_DATA" : remove_negative_bins(hist_bin_dict["H_epsilon_DATA_{}".format(j)]),
+            "H_MM_DATA" : remove_negative_bins(hist_bin_dict["H_MM_DATA_{}".format(j)]),
+            "H_Q2_DUMMY" : remove_negative_bins(hist_bin_dict["H_Q2_DUMMY_{}".format(j)]),
+            "H_W_DUMMY" : remove_negative_bins(hist_bin_dict["H_W_DUMMY_{}".format(j)]),
+            "H_t_DUMMY" : remove_negative_bins(hist_bin_dict["H_t_DUMMY_{}".format(j)]),
+            "H_epsilon_DUMMY" : remove_negative_bins(hist_bin_dict["H_epsilon_DUMMY_{}".format(j)]),
+            "H_MM_DUMMY" : remove_negative_bins(hist_bin_dict["H_MM_DUMMY_{}".format(j)]),
         }
     
     return processed_dict
