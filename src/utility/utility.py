@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 17:31:31 trottar"
+# Time-stamp: "2024-03-19 17:34:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -473,7 +473,7 @@ def notify_email(email_address):
 
 ################################################################################################################################################        
 
-# Remove negative histogram events
+# Remove negative bins
 def remove_negative_bins(histogram):
     nbins = histogram.GetNbinsX()
     for i in range(1, nbins + 1):
