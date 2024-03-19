@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 14:18:40 trottar"
+# Time-stamp: "2024-03-19 15:32:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Constants
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
-pt_to_pt_systematic_error = 1.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
+pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
 
 ###############################################################################################################################################
@@ -576,8 +576,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         leg = ROOT.TLegend(0.85, 0.85, 0.99, 0.99)
         leg.SetFillColor(0)
         leg.SetMargin(0.4)
-        leg.AddEntry(glo, "Low #it{#font[120]{e}} data", "p")
-        leg.AddEntry(ghi, "High #it{#font[120]{e}} data", "p")
+        leg.AddEntry(glo, "Low #it{#font[120]{e}} data", "pl")
+        leg.AddEntry(ghi, "High #it{#font[120]{e}} data", "pl")
         #leg.AddEntry(flo, "Low #it{#font[120]{e}} fit", "l")
         #leg.AddEntry(fhi, "High #it{#font[120]{e}} fit", "l")
         leg.Draw()
@@ -594,8 +594,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
         fit_status.DrawTextNDC(0.15, 0.85, "t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_list[i], float(q2_set.replace("p",".")), float(w_set.replace("p","."))))
-        fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
-        fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
+        #fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
+        #fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
 
         # Adjust the maximum and minimum of glo based on ghi values
         if ghi.GetMaximum() > glo.GetMaximum():
