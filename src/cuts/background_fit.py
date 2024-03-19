@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 16:10:53 trottar"
+# Time-stamp: "2024-03-19 16:17:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,7 +56,7 @@ def bg_fit(inpDict, hist, fittype):
         # Fit the background function to the histogram
         fit_func = TF1("fit_func", constant, mm_min, mm_max, 1)
 
-    hist.Fit("fit_func", "R")
+    hist.Fit("fit_func", "RQ")
     
     # Get the fitted constant value and its uncertainties
     bg_par = fit_func.GetParameter(0)
