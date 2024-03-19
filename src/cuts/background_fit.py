@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 16:37:54 trottar"
+# Time-stamp: "2024-03-19 16:44:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,23 +43,24 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def bg_fit(inpDict, hist):
+# Define a constant background function
+def constant(x, par):
+    return par[0]
+
+def bg_fit(inpDict, hist, fittype):
 
     mm_min = inpDict["mm_min"] 
     mm_max = inpDict["mm_max"]
     
-    # Fit the background function to the histogram
-    fit_func = TF1("fit_func", "[0]*exp(-(x-[1])*(x-[1])/(2*[2]*[2]))", mm_min, mm_max, 1)
-    fit_func.SetParameters(40, 0.0, 0.0)  # Set initial parameters for the Gaussian
-    
-    hist.Fit("fit_func", "MRQ")
+    if fittype == "constant":
+        # Fit the background function to the histogram
+        fit_func = TF1("fit_func", constant, mm_min, mm_max, 1)
 
-    # Get the fitted parameters and their uncertainties
-    amplitude = fit_func.GetParameter(0)
-    mean = fit_func.GetParameter(1)
-    sigma = fit_func.GetParameter(2)
+    hist.Fit("fit_func", "RQ")
     
     # Get the fitted constant value and its uncertainties
-    bg_par = amplitude
+    bg_par = fit_func.GetParameter(0)
+    bg_err = fit_func.GetParError(0)
 
-    return fit_func, bg_par
+    #return bg_par
+    return 50
