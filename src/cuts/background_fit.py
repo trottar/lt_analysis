@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 19:33:18 trottar"
+# Time-stamp: "2024-03-19 19:37:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,6 +82,8 @@ def bg_fit(inpDict, hist):
 
     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
     hist.Draw()
+
+    canvas.SaveAs(LTANAPATH+"{}_Q{}W{}_{}e.png".format(hist.GetName(), Q2, W, EPSSET))
     
     hist.GetFunction("fit_func").Delete()  # Delete any previous fit function
     
