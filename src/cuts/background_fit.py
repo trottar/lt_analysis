@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 16:17:46 trottar"
+# Time-stamp: "2024-03-19 16:22:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,7 +45,8 @@ OUTPATH=lt.OUTPATH
 
 # Define a constant background function
 def constant(x, par):
-    return par[0]
+    #return par[0]
+    return 50
 
 def bg_fit(inpDict, hist, fittype):
 
