@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 17:16:12 trottar"
+# Time-stamp: "2024-03-19 17:21:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1441,10 +1441,8 @@ def rand_sub(phi_setting, inpDict):
 
     # Fit background and subtract
     if ParticleType == "kaon":        
-        fit_func = ROOT.TF1("fit_func", "[0]", mm_min, mm_max)
-        fit_func.SetParameter(0, 50)
-        H_MM_DATA.Fit("fit_func", "Q")
-        background_fit = fit_func, fit_func.GetParameter(0)
+        from background_fit import bg_fit
+        background_fit = bg_fit(inpDict, H_MM_DATA)
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[1], -1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[1], -1)
         P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[1], -1)
