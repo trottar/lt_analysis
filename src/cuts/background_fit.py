@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 17:00:48 trottar"
+# Time-stamp: "2024-03-19 17:09:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,11 +45,6 @@ OUTPATH=lt.OUTPATH
 
 def bg_fit(inpDict, hist):
 
-    mm_min = inpDict["mm_min"] 
-    mm_max = inpDict["mm_max"]
-    
-    # Fit the background function to the histogram
-    fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     fit_func.SetParameter(0, 50)
 
     hist.Fit("fit_func", "Q")
