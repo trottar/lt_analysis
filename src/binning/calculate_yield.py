@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 18:25:56 trottar"
+# Time-stamp: "2024-03-19 19:19:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -330,8 +330,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
 
-                hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)],-1)
+                #hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)],-1)
+                #hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)],-1)
 
             # Fit background and subtract
             if ParticleType == "kaon":
@@ -339,9 +339,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_data_fit[0], -1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_data_fit[0], -1)
 
-                background_dummy_fit = bg_fit(inpDict, hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)])                
-                hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(background_dummy_fit[0], -1)
-                hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(background_dummy_fit[0], -1)
+                #background_dummy_fit = bg_fit(inpDict, hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)])                
+                #hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(background_dummy_fit[0], -1)
+                #hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(background_dummy_fit[0], -1)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
                 "H_MM_DATA" : remove_negative_bins(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]),

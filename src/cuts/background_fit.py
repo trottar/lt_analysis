@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 19:05:27 trottar"
+# Time-stamp: "2024-03-19 19:16:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,8 +73,6 @@ def bg_fit(inpDict, hist):
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
     fit_func.FixParameter(0, bg_factor) 
-
-    #fit_func.SetLineColorAlpha(ROOT.kWhite, 0)  # Transparent color
 
     hist.Fit("fit_func", "Q")
     
