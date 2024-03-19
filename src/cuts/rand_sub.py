@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 16:05:09 trottar"
+# Time-stamp: "2024-03-19 16:07:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1448,7 +1448,7 @@ def rand_sub(phi_setting, inpDict):
         P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -background_fit[1])
         P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit[0], -background_fit[1])
         P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit[0], -background_fit[1])
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -background_fit[1] 
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -background_fit[1])
         MM_vs_CoinTime_DATA.Add(background_fit[0], -background_fit[1])
         CoinTime_vs_beta_DATA.Add(background_fit[0], -background_fit[1])
         MM_vs_beta_DATA.Add(background_fit[0], -background_fit[1])
