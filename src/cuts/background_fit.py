@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 16:44:12 trottar"
+# Time-stamp: "2024-03-19 16:44:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,14 +47,13 @@ OUTPATH=lt.OUTPATH
 def constant(x, par):
     return par[0]
 
-def bg_fit(inpDict, hist, fittype):
+def bg_fit(inpDict, hist):
 
     mm_min = inpDict["mm_min"] 
     mm_max = inpDict["mm_max"]
     
-    if fittype == "constant":
-        # Fit the background function to the histogram
-        fit_func = TF1("fit_func", constant, mm_min, mm_max, 1)
+    # Fit the background function to the histogram
+    fit_func = TF1("fit_func", constant, mm_min, mm_max, 1)
 
     hist.Fit("fit_func", "RQ")
     
