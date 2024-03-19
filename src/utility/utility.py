@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-12 05:57:31 trottar"
+# Time-stamp: "2024-03-19 17:31:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -471,4 +471,14 @@ def notify_email(email_address):
     # Run the bash command
     subprocess.call(email_notify, shell=True)
 
+################################################################################################################################################        
+
+# Remove negative histogram events
+def remove_negative_bins(histogram):
+    nbins = histogram.GetNbinsX()
+    for i in range(1, nbins + 1):
+        content = histogram.GetBinContent(i)
+        if content < 0:
+            histogram.SetBinContent(i, 0)
+            
 ################################################################################################################################################        
