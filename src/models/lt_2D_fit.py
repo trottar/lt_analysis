@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 13:45:11 trottar"
+# Time-stamp: "2024-03-19 14:13:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -849,7 +849,7 @@ for i in range(num_events):
     f_lin.Draw("same")
     
     # Create and draw TLegend
-    leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
+    leg = ROOT.TLegend(0.85, 0.85, 0.99, 0.99)
     leg.SetFillColor(0)
     leg.SetMargin(0.4)
     leg.AddEntry(g_hi_event, "t = {:.3f}".format(t_list[i]), "")
@@ -902,7 +902,7 @@ f_exp_l.Draw("same")
 f_exp_t.Draw("same")
 
 # Create and draw TLegend
-leg = ROOT.TLegend(0.7, 0.7, 0.90, 0.90)
+leg = ROOT.TLegend(0.85, 0.85, 0.99, 0.99)
 leg.SetFillColor(0)
 leg.SetMargin(0.4)
 leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L}", "p")
