@@ -665,16 +665,14 @@ if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     #TMAX=0.400 # Center low
 elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     # Q2=3p0, W=2p32
-    #NumtBins=3
-    #NumPhiBins=10
     NumtBins=3
     NumPhiBins=10
-    #TMIN=0.100
-    #TMAX=0.990
+    TMIN=0.100
+    TMAX=1.000
     #TMIN=0.100
     #TMAX=1.200
-    TMIN=0.350
-    TMAX=0.550
+    #TMIN=0.350
+    #TMAX=0.550
     #TMIN=0.450 # Center low
     #TMAX=0.800 # Center low
     #TMIN=0.500 # Max value of tmin across phi settings
