@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 16:07:25 trottar"
+# Time-stamp: "2024-03-19 16:08:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1454,7 +1454,7 @@ def rand_sub(phi_setting, inpDict):
         MM_vs_beta_DATA.Add(background_fit[0], -background_fit[1])
         MM_vs_H_cer_DATA.Add(background_fit[0], -background_fit[1])
         MM_vs_H_cal_DATA.Add(background_fit[0], -background_fit[1])
-        MM_vs_P_cal_DATA.Add(background_fit[0], -background_fit[1] 
+        MM_vs_P_cal_DATA.Add(background_fit[0], -background_fit[1])
         MM_vs_P_hgcer_DATA.Add(background_fit[0], -background_fit[1])
         MM_vs_P_aero_DATA.Add(background_fit[0], -background_fit[1])
         phiq_vs_t_DATA.Add(background_fit[0], -background_fit[1])
@@ -1462,7 +1462,7 @@ def rand_sub(phi_setting, inpDict):
         Q2_vs_t_DATA.Add(background_fit[0], -background_fit[1])
         W_vs_t_DATA.Add(background_fit[0], -background_fit[1])
         EPS_vs_t_DATA.Add(background_fit[0], -background_fit[1])
-        MM_vs_t_DATA.Add(background_fit[0], -background_fit[1] 
+        MM_vs_t_DATA.Add(background_fit[0], -background_fit[1])
         H_ssxfp_DATA.Add(background_fit[0], -background_fit[1])
         H_ssyfp_DATA.Add(background_fit[0], -background_fit[1])
         H_ssxpfp_DATA.Add(background_fit[0], -background_fit[1])
