@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-11 02:52:45 trottar"
+# Time-stamp: "2024-03-19 08:34:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -640,7 +640,19 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         except IOError:
             print("Error writing to file {}.".format(fn_sep))
-        
+
+        fn_unsep = "{}/src/{}/xsects/unsep_Q{}W{}.csv".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))
+        try:
+            mode = 'w' if i == 0 else 'a'
+            with open(fn_unsep, mode) as f:
+                # Write values to output file
+                f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
+                    lo_cross_sec[i], lo_cross_sec_err[i], hi_cross_sec[i], hi_cross_sec_err[i], t_list[i]
+                ))
+
+        except IOError:
+            print("Error writing to file {}.".format(fn_unsep))
+            
         # Delete g_plot_err
         del g_plot_err
         

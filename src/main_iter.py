@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-14 11:14:20 trottar"
+# Time-stamp: "2024-03-19 08:36:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -600,7 +600,9 @@ if EPSSET == "high":
     unsep_lo_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
     output_file_lst.append(unsep_lo_file)
     unsep_hi_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
-    output_file_lst.append(unsep_hi_file)        
+    output_file_lst.append(unsep_hi_file)
+    unsep_file = '{}/xsects/unsep_Q{}W{}.csv'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+    output_file_lst.append(unsep_file)
     avek_file = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
     output_file_lst.append(avek_file)
     aver_lo_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
