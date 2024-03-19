@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 10:15:40 trottar"
+# Time-stamp: "2024-03-19 10:37:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -517,8 +517,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g.Draw("AP")
 
         # Set properties for the TMultiGraph
-        g.GetHistogram().SetMinimum(glo.GetMinimum() * 0.8)
-        g.GetHistogram().SetMaximum(glo.GetMaximum() * 1.2)
+        #g.GetHistogram().SetMinimum(glo.GetMinimum() * 0.8)
+        #g.GetHistogram().SetMaximum(glo.GetMaximum() * 1.2)
         g.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
         g.GetYaxis().CenterTitle()
         g.GetYaxis().SetTitleOffset(1.4)
@@ -575,8 +575,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         leg.SetMargin(0.4)
         leg.AddEntry(glo, "Low #it{#font[120]{e}} data", "p")
         leg.AddEntry(ghi, "High #it{#font[120]{e}} data", "p")
-        leg.AddEntry(flo, "Low #it{#font[120]{e}} fit", "l")
-        leg.AddEntry(fhi, "High #it{#font[120]{e}} fit", "l")
+        #leg.AddEntry(flo, "Low #it{#font[120]{e}} fit", "l")
+        #leg.AddEntry(fhi, "High #it{#font[120]{e}} fit", "l")
         leg.Draw()
 
         # Check the fit status for 'flo'
