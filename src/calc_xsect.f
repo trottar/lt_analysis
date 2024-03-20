@@ -179,15 +179,15 @@ c      pause
          WRITE(*,*) '============'
          WRITE(*,*) 'Values read:'
          WRITE(*,*) '============'         
-         read(52,*) w,dw,q2,dq2,tt,dtt,th_cm
+         read(52,*) w,dw,q2,dq2,tt,dtt,th_pos
          WRITE(*,*) 'Numtbins: ', nt
          WRITE(*,*) 'tbin: ', it
          WRITE(*,*) 'tmin: ', tmn
          WRITE(*,*) 'tmax: ', tmx
          WRITE(*,*) 't: ', tt
-         tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
+         tm=(t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
 *        tm=tmn+(it-0.5)*(tmx-tmn)/nt
-*         th_cm=th_pos
+         th_cm=th_pos
 *         tm = tt
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
