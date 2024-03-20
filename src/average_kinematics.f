@@ -319,7 +319,8 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
      *     '  eps=',eps,'  pol=',pol
 
       do it=1,ntbins
-         tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2         
+*     tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
+         tm=t_bin_boundary(it)
 *         tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
      &        th_mod,eps_mod)
