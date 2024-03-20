@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 20:35:57 trottar"
+# Time-stamp: "2024-03-19 20:45:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,12 +71,11 @@ def bg_fit(phi_setting, inpDict, hist):
     mm_min = inpDict["mm_min"] 
     mm_max = inpDict["mm_max"]
 
-    bin_width = hist.GetXaxis().GetBinWidth(1)
     num_evts = hist.GetEntries()
 
-    print("!!!!!!\n\nbin width: {}, num evts: {}".format(bin_width, num_evts))
-    #sys.exit(2)
-    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*hist.GetEntries()
+    #print("!!!!!!\n\nnum evts: {}".format(num_evts))
+
+    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*num_evts
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
@@ -93,7 +92,10 @@ def bg_fit(phi_setting, inpDict, hist):
 
     canvas.SaveAs("{}/{}_Q{}W{}_{}e.png".format(LTANAPATH, hist.GetName(), Q2, W, EPSSET))
 
-    # Removes function from histogram
-    hist.GetFunction("fit_func").Delete()
+    if num_evts == 0:
+        return fit_func, bg_par
+    else:
+        # Removes function from histogram
+        hist.GetFunction("fit_func").Delete()
     
-    return fit_func, bg_par
+        return fit_func, bg_par
