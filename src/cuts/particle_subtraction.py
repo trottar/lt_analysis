@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 21:41:35 trottar"
+# Time-stamp: "2024-03-19 21:53:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -918,6 +918,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_W_DUMMY_RAND.Scale(1/nWindows)
     #H_ct_DUMMY_RAND.Scale(1/nWindows)
 
+    
     ###
     # Data Random subtraction
     P_hgcer_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_xAtCer_vs_yAtCer_RAND,-1)
@@ -1028,6 +1029,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
+    print("!!!!!!!!!!!!!!!!!!!num_evts:",H_MM_DATA.GetEntries())
+    
     # Scale pion to subtraction proper peak 
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor*P_hgcer_xAtCer_vs_yAtCer_DATA.GetEntries())
     if ParticleType == "kaon":
