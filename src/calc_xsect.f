@@ -198,11 +198,11 @@ c      pause
 
             phi=(ip-0.5)*2.*3.14159/nphi
 
-*            if (phi.le.0.0) then
-*               phi=phi+2.*3.14159
-*            else if (phi.gt.2.*3.14159) then
-*               phi=phi-2.*3.14159
-*            end if
+            if (phi.le.0.0) then
+               phi=phi+2.*3.14159
+            else if (phi.gt.2.*3.14159) then
+               phi=phi-2.*3.14159
+            end if
             
             read(51,*) r,dr
             
