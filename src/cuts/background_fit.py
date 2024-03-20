@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 20:01:25 trottar"
+# Time-stamp: "2024-03-19 20:01:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,7 +72,7 @@ def bg_fit(inpDict, hist):
     num_evts = hist.GetEntries()
 
     print("!!!!!!\n\nbin width: {}, num evts: {}".format(bin_width, num_evts))
-    sys.exit(2)
+    #sys.exit(2)
     bg_factor = bg_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
