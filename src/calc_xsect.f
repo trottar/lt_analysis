@@ -185,7 +185,8 @@ c      pause
          WRITE(*,*) 'tmin: ', tmn
          WRITE(*,*) 'tmax: ', tmx
          WRITE(*,*) 't: ', tt
-         tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
+*     tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
+         tm=t_bin_boundary(it)
 *        tm=tmn+(it-0.5)*(tmx-tmn)/nt
 *         th_cm=th_pos
 *         tm = tt
