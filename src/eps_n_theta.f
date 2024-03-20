@@ -69,7 +69,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
          print*, 'eps_n_theta: tm=',tm,' <  tmin=',tmin
       endif
 
-      t_min = tmin
+*      t_min = tmin
       
       eps=1.+2.*(q2+omega**2)/(4.*Eb*(Eb-omega)-q2)
       eps=1./eps

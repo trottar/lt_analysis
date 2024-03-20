@@ -97,7 +97,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       nphi = phi_bin
       
       read (22, '(A)') line  
-      read(line, *) (t_bin_boundary(j), j = 1, t_bin + 1)      
+      read(line, *) (t_bin_boundary(j), j = 1, t_bin + 1)
 
       close(22)
       
@@ -185,7 +185,7 @@ c      pause
          WRITE(*,*) 'tmin: ', tmn
          WRITE(*,*) 'tmax: ', tmx
          WRITE(*,*) 't: ', tt
-         tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2         
+         tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
 *         tm=tmn+(it-0.5)*(tmx-tmn)/nt
 *         tm = tt
 *     Convert back to radians

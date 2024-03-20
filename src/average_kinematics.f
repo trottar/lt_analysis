@@ -60,6 +60,12 @@ c     enough space for the sets
       real t_min
 
       integer nt,nphi
+
+      real, Dimension(9) :: t_bin_boundary
+
+      character*80:: line
+
+      integer j
       
       real eps_set(2)
 
@@ -78,11 +84,16 @@ c     enough space for the sets
 !     Open the file
       open (unit=22, file=fn_t_bins, action='read')
       read (22, *) q2_bin, w_bin, t_bin, phi_bin
-      
-      close(22)
 
       nt = t_bin
       nphi = phi_bin
+      
+      read (22, '(A)') line  
+      read(line, *) (t_bin_boundary(j), j = 1, t_bin + 1)
+      
+      close(22)
+
+
             
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set
@@ -312,7 +323,8 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
      *     '  eps=',eps,'  pol=',pol
 
       do it=1,ntbins
-         tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
+         tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2         
+*         tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
      &         t_min,th_mod,eps_mod)
          thetacm_only(it)=th_mod*180./3.14159
