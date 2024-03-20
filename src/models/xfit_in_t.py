@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-20 12:40:04 trottar"
+# Time-stamp: "2024-03-20 13:49:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,14 +106,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     tt0, tt1, tt2, tt3 = 0, 0, 0, 0
 
     fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
-    nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:t_min:w:q2:thetacm")
+    nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:w:q2:thetacm")
     nsep.ReadFile(fn_sep)
 
     '''
     print("Reading {}...".format(fn_sep))
     for entry in nsep:
-        print("sigl: {}, sigl_e: {}, sigt: {}, sigt_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, t_min: {}, w: {}, q2: {}, thetacm: {}".format(
-            entry.sigl, entry.sigl_e, entry.sigt, entry.sigt_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.t_min, entry.w, entry.q2, entry.thetacm
+        print("sigl: {}, sigl_e: {}, sigt: {}, sigt_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, w: {}, q2: {}, thetacm: {}".format(
+            entry.sigl, entry.sigl_e, entry.sigt, entry.sigt_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.w, entry.q2, entry.thetacm
         ))
     '''
 
@@ -168,18 +168,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
-    nsep.Draw("t:t_min", "", "goff")
-    #t_tmin_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
-    t_tmin_map = TGraph()
+    nsep.Draw("t", "", "goff")
+    #t_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
+    t_map = TGraph()
     # Use SetPoint to fill the graph
     for i in range(nsep.GetSelectedRows()):
-        if nsep.GetV1()[i] < nsep.GetV2()[i]:
-            print("ERROR: t_bin {}\n\tt={} < tmin={}".format(i+1, nsep.GetV1()[i], nsep.GetV2()[i]))
-            sys.exit(2)
-        t_tmin_map.SetPoint(i, nsep.GetV1()[i], nsep.GetV2()[i])
+        t_map.SetPoint(i, nsep.GetV1()[i])
 
-    t_list = t_tmin_map.GetX()
-    t_min_list = t_tmin_map.GetY()
+    t_list = t_map.GetX()
     
     ########
     # SigL #

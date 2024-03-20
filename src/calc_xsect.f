@@ -65,7 +65,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       integer nt,nphi
 
       real r,dr,w,dw,q2,dq2,tt,dtt,th_cm,th_pos
-      real tm,tmn,tmx,tm_min
+      real tm,tmn,tmx
       real eps_mod,th_mod,x_mod
       real x_real,dx_real
 
@@ -189,7 +189,7 @@ c      pause
          tm=t_bin_boundary(it)
 *        tm=tmn+(it-0.5)*(tmx-tmn)/nt
 *         th_cm=th_pos
-*         tm = tt
+         tm = tt
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
          WRITE(*,*) 't per bin: ', tm
@@ -208,7 +208,7 @@ c      pause
             read(51,*) r,dr
             
             call xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
-     *           w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn,tm_min)
+     *           w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
 
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
@@ -244,7 +244,7 @@ c angle check
             if (isnan(q2)) q2 = 0.0            
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
-     *           th_mod*180./3.14159,phi*180./3.14159,tm,tm_min,w,q2
+     *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
  40         format(3G15.5,f8.5,2f7.2,4f8.5)
 
             print *,""
@@ -267,7 +267,6 @@ c angle check
             print *,"w: ", w
             print *,"q2: ", q2
             print *,"tm: ", tm
-            print *,"tm_min: ", tm_min
             print *,"phi: ", phi
             print *,"eps_mod: ", eps_mod
             print *,"th_mod: ", th_mod

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 15:32:17 trottar"
+# Time-stamp: "2024-03-20 13:47:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,25 +91,25 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     sig_hi = TGraphErrors()
     sig_diff_g = TGraphErrors()
     
-    nlo = TNtuple("nlo", "nlo", "x/F:dx:x_mod:eps:theta:phi:t:t_min:w:Q2")
+    nlo = TNtuple("nlo", "nlo", "x/F:dx:x_mod:eps:theta:phi:t:w:Q2")
     nlo.ReadFile(fn_lo)
     
-    nhi = TNtuple("nhi", "nhi", "x/F:dx:x_mod:eps:theta:phi:t:t_min:w:Q2")
+    nhi = TNtuple("nhi", "nhi", "x/F:dx:x_mod:eps:theta:phi:t:w:Q2")
     nhi.ReadFile(fn_hi)
 
     '''
     # Print values for nlo
     print("Values for nlo:")
     for evt in nlo:
-        print("x: {}, dx: {}, x_mod: {}, eps: {}, theta: {}, phi: {}, t: {}, t_min: {}, w: {}, Q2: {}".format(
-            evt.x, evt.dx, evt.x_mod, evt.eps, evt.theta, evt.phi, evt.t, evt.t_min, evt.w, evt.Q2
+        print("x: {}, dx: {}, x_mod: {}, eps: {}, theta: {}, phi: {}, t: {}, w: {}, Q2: {}".format(
+            evt.x, evt.dx, evt.x_mod, evt.eps, evt.theta, evt.phi, evt.t, evt.w, evt.Q2
         ))
 
     # Print values for nhi
     print("\nValues for nhi:")
     for evt in nhi:
-        print("x: {}, dx: {}, x_mod: {}, eps: {}, theta: {}, phi: {}, t: {}, t_min: {}, w: {}, Q2: {}".format(
-            evt.x, evt.dx, evt.x_mod, evt.eps, evt.theta, evt.phi, evt.t, evt.t_min, evt.w, evt.Q2
+        print("x: {}, dx: {}, x_mod: {}, eps: {}, theta: {}, phi: {}, t: {}, w: {}, Q2: {}".format(
+            evt.x, evt.dx, evt.x_mod, evt.eps, evt.theta, evt.phi, evt.t, evt.w, evt.Q2
         ))
     '''
     
@@ -117,7 +117,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     w_list = []
     theta_list = []
     t_list = []
-    t_min_list = []
     lo_eps_list = []
     hi_eps_list = []
 
@@ -127,7 +126,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             w_list.append(evt.w)
             theta_list.append(evt.theta)
             t_list.append(evt.t)
-            t_min_list.append(evt.t_min)
             lo_eps_list.append(evt.eps)
 
     tmp_t_list = []
@@ -635,10 +633,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             mode = 'w' if i == 0 else 'a'
             with open(fn_sep, mode) as f:
                 # Write values to output file
-                f.write("{} {} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
+                f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
                     sig_l, sig_l_err, sig_t, sig_t_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
 
-                    fff2.GetChisquare(), t_list[i], t_min_list[i], w_list[i], q2_list[i], theta_list[i]
+                    fff2.GetChisquare(), t_list[i], w_list[i], q2_list[i], theta_list[i]
                 ))
 
         except IOError:
