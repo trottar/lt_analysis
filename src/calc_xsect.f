@@ -198,11 +198,11 @@ c      pause
 
             phi=(ip-0.5)*2.*3.14159/nphi
 
-            if (phi.le.0.0) then
-               phi=phi+2.*3.14159
-            else if (phi.gt.2.*3.14159) then
-               phi=phi-2.*3.14159
-            end if
+*            if (phi.le.0.0) then
+*               phi=phi+2.*3.14159
+*            else if (phi.gt.2.*3.14159) then
+*               phi=phi-2.*3.14159
+*            end if
             
             read(51,*) r,dr
             
@@ -212,7 +212,7 @@ c      pause
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
                write(6,*)' Angle error ',th_mod,th_cm
-               stop
+*               stop
             endif
 
 *     Set extreme ratio values to zero
