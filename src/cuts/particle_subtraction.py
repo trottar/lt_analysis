@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 21:56:32 trottar"
+# Time-stamp: "2024-03-19 22:28:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,15 +49,15 @@ OUTPATH=lt.OUTPATH
 
 scale_dict ={
     # Q2=2p1, W=2p95
-    "Q2p1W2p95Right_highe" : 2.75e-2,
+    "Q2p1W2p95Right_highe" : 2.75e-2,  # Pion scaled value divided by number of events
     "Q2p1W2p95Left_highe" : 2.00e-2,
     "Q2p1W2p95Center_highe" : 1.25e-2,
     "Q2p1W2p95Left_lowe" : 0.5e-2,
     "Q2p1W2p95Center_lowe" : 0.5e-2,
     # Q2=3p0, W=2p32
-    "Q3p0W2p32Right_highe" : 0.85e-2/682,
-    "Q3p0W2p32Left_highe" : 0.55e-2/1570,
-    "Q3p0W2p32Center_highe" : 0.50e-2/2829,
+    "Q3p0W2p32Right_highe" : 0.85e-2/51461,
+    "Q3p0W2p32Left_highe" : 0.55e-2/73615,
+    "Q3p0W2p32Center_highe" : 0.50e-2/154282,
     "Q3p0W2p32Left_lowe" : 0.44e-2/69457,
     "Q3p0W2p32Center_lowe" : 0.55e-2/90512,
     # Q2=3p0, W=3p14
