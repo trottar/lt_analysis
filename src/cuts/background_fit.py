@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 20:01:56 trottar"
+# Time-stamp: "2024-03-19 20:32:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,8 +49,11 @@ OUTPATH=lt.OUTPATH
 
 bg_dict ={
     # Q2=3p0, W=2p32
-    "Q3p0W2p32_highe" : 50,
-    "Q3p0W2p32_lowe" : 50,
+    "Q3p0W2p32Right_highe" : 15/682, # Background value divided by number of events
+    "Q3p0W2p32Left_highe" : 50/1570,
+    "Q3p0W2p32Center_highe" : 50/2829,
+    "Q3p0W2p32Left_lowe" : 50/3130,
+    "Q3p0W2p32Center_lowe" : 50/3301,
 }
 
 ##############
@@ -59,7 +62,7 @@ bg_dict ={
 
 ################################################################################################################################################
 
-def bg_fit(inpDict, hist):
+def bg_fit(phi_setting, inpDict, hist):
     
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -73,7 +76,7 @@ def bg_fit(inpDict, hist):
 
     print("!!!!!!\n\nbin width: {}, num evts: {}".format(bin_width, num_evts))
     #sys.exit(2)
-    bg_factor = bg_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]
+    bg_factor = bg_dict["Q{}W{}{}_{}e".format(phi_setting, Q2, W, EPSSET)]*hist.GetEntries()
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
@@ -89,7 +92,8 @@ def bg_fit(inpDict, hist):
     hist.Draw()
 
     canvas.SaveAs("{}/{}_Q{}W{}_{}e.png".format(LTANAPATH, hist.GetName(), Q2, W, EPSSET))
-    
-    hist.GetFunction("fit_func").Delete()  # Delete any previous fit function
+
+    # Removes function from histogram
+    hist.GetFunction("fit_func").Delete()
     
     return fit_func, bg_par
