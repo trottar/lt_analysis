@@ -76,7 +76,9 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       real, Dimension(9) :: t_bin_boundary
 
-      integer i
+      character*80:: line
+      
+      integer i,j
       
       real par(16)
       real p,e
