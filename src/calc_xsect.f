@@ -64,7 +64,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       
       integer nt,nphi
 
-      real r,dr,w,dw,q2,dq2,tt,dtt,th_cm
+      real r,dr,w,dw,q2,dq2,tt,dtt,th_cm,th_pos
       real tm,tmn,tmx,tm_min
       real eps_mod,th_mod,x_mod
       real x_real,dx_real
@@ -186,8 +186,9 @@ c      pause
          WRITE(*,*) 'tmax: ', tmx
          WRITE(*,*) 't: ', tt
          tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
-*         tm=tmn+(it-0.5)*(tmx-tmn)/nt
-*         tm = tt
+*        tm=tmn+(it-0.5)*(tmx-tmn)/nt
+         th_cm=th_pos
+         tm = tt
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
          WRITE(*,*) 't per bin: ', tm
@@ -197,11 +198,11 @@ c      pause
 
             phi=(ip-0.5)*2.*3.14159/nphi
 
-            if (phi.le.0.0) then
-               phi=phi+2.*3.14159
-            else if (phi.gt.2.*3.14159) then
-               phi=phi-2.*3.14159
-            end if
+*            if (phi.le.0.0) then
+*               phi=phi+2.*3.14159
+*            else if (phi.gt.2.*3.14159) then
+*               phi=phi-2.*3.14159
+*            end if
             
             read(51,*) r,dr
             
@@ -214,6 +215,12 @@ c angle check
                stop
             endif
 
+*     Set extreme ratio values to zero
+            if (r.gt.10.0.or.r.le.0.1) then
+               r=0.0
+               dr=0.0
+            endif
+            
 *     Convert from ub/MeV^2 to ub/GeV^2
             x_mod=x_mod*1.d+06
 *     Convert from ub/GeV^2 to nb/GeV^2
@@ -233,7 +240,7 @@ c angle check
             if (isnan(tt)) tt = 0.0
             if (isnan(tm)) tm = 0.0
             if (isnan(w)) w = 0.0
-            if (isnan(q2)) q2 = 0.0
+            if (isnan(q2)) q2 = 0.0            
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
      *           th_mod*180./3.14159,phi*180./3.14159,tm,tm_min,w,q2
