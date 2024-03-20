@@ -1,4 +1,4 @@
-      subroutine eps_n_theta(pid,npol,Eb,w,q2,tm,t_min,thetacm,eps)
+      subroutine eps_n_theta(pid,npol,Eb,w,q2,tm,thetacm,eps)
 
 c     To calculate model theta_pq in CM and epsilon. This subroutine is largely
 c     based on theta_cm.f function, which in turn is based Jochen's script.
@@ -10,7 +10,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       integer npol
       real Eb,w,q2,tm,thetacm,eps
 
-      REAL s,omega,q,tmin,t_min
+      REAL s,omega,q,tmin
       REAL p1cm,p3cm,e1cm,e3cm,p1lab
 
       REAL m2,m3,m4
@@ -68,8 +68,6 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
          thetacm=-1.
          print*, 'eps_n_theta: tm=',tm,' <  tmin=',tmin
       endif
-
-*      t_min = tmin
       
       eps=1.+2.*(q2+omega**2)/(4.*Eb*(Eb-omega)-q2)
       eps=1./eps

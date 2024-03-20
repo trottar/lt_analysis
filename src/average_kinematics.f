@@ -57,8 +57,6 @@ c     enough space for the sets
       real q2_bin, w_bin
       integer t_bin, phi_bin
 
-      real t_min
-
       integer nt,nphi
 
       real, Dimension(9) :: t_bin_boundary
@@ -324,7 +322,7 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
          tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2         
 *         tm=tmin+(it-0.5)*(tmax-tmin)/ntbins
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
-     &         t_min,th_mod,eps_mod)
+     &        th_mod,eps_mod)
          thetacm_only(it)=th_mod*180./3.14159
       end do
 

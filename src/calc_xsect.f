@@ -188,7 +188,7 @@ c      pause
          tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
 *        tm=tmn+(it-0.5)*(tmx-tmn)/nt
          th_cm=th_pos
-         tm = tt
+*         tm = tt
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
          WRITE(*,*) 't per bin: ', tm
