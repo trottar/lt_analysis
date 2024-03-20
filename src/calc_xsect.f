@@ -188,7 +188,7 @@ c      pause
          tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
 *        tm=tmn+(it-0.5)*(tmx-tmn)/nt
 *         th_cm=th_pos
-         tm = tt
+*         tm = tt
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
          WRITE(*,*) 't-bin: ', tm
@@ -207,7 +207,7 @@ c      pause
             read(51,*) r,dr
             
             call xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
-     *           w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn,tm)
+     *           w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
 
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
