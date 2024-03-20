@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 19:41:58 trottar"
+# Time-stamp: "2024-03-19 20:01:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,8 +67,13 @@ def bg_fit(inpDict, hist):
 
     mm_min = inpDict["mm_min"] 
     mm_max = inpDict["mm_max"]
-    
-    bg_factor = bg_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]    
+
+    bin_width = hist.GetXaxis().GetBinWidth(1)
+    num_evts = hist.GetEntries()
+
+    print("!!!!!!\n\nbin width: {}, num evts: {}".format(bin_width, num_evts))
+    sys.exit(2)
+    bg_factor = bg_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
