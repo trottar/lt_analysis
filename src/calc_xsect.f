@@ -74,6 +74,8 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       real phi
 
+      real, Dimension(9) :: t_bin_boundary
+
       integer i
       
       real par(16)
@@ -88,9 +90,12 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 !     Open the file
       open (unit=22, file=fn_t_bins, action='read')
       read (22, *) q2_bin, w_bin, t_bin, phi_bin
-      
+
       nt = t_bin
       nphi = phi_bin
+      
+      read (22, '(A)') line  
+      read(line, *) (t_bin_boundary(j), j = 1, t_bin + 1)      
 
       close(22)
       
@@ -178,8 +183,9 @@ c      pause
          WRITE(*,*) 'tmin: ', tmn
          WRITE(*,*) 'tmax: ', tmx
          WRITE(*,*) 't: ', tt
+         tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2         
 *         tm=tmn+(it-0.5)*(tmx-tmn)/nt
-         tm = tt
+*         tm = tt
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
          WRITE(*,*) 't per bin: ', tm
