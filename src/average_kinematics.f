@@ -92,8 +92,6 @@ c     enough space for the sets
       read(line, *) (t_bin_boundary(j), j = 1, t_bin + 1)
       
       close(22)
-
-
             
       eps_set(1)=eps_lo_set
       eps_set(2)=eps_hi_set
