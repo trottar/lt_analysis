@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 22:28:01 trottar"
+# Time-stamp: "2024-03-20 18:28:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ scale_dict ={
     # Q2=2p1, W=2p95
     "Q2p1W2p95Right_highe" : 2.75e-2,  # Pion scaled value divided by number of events
     "Q2p1W2p95Left_highe" : 2.00e-2,
-    "Q2p1W2p95Center_highe" : 1.25e-2,
+    "Q2p1W2p95Center_highe" : 1.25e-2/314349,
     "Q2p1W2p95Left_lowe" : 0.5e-2,
     "Q2p1W2p95Center_lowe" : 0.5e-2,
     # Q2=3p0, W=2p32
@@ -1029,7 +1029,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
-    print("!!!!!!!!!!!!!!!!!!!num_evts:",H_MM_DATA.GetEntries())
+    print("!!!!!!!!!!!!!!!!!!!subtraction num_evts:",H_MM_DATA.GetEntries())
     
     # Scale pion to subtraction proper peak 
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor*P_hgcer_xAtCer_vs_yAtCer_DATA.GetEntries())

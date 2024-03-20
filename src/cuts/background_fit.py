@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 20:45:37 trottar"
+# Time-stamp: "2024-03-20 18:27:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,6 +54,12 @@ bg_dict ={
     "Q3p0W2p32Center_highe" : 50/2829,
     "Q3p0W2p32Left_lowe" : 50/3130,
     "Q3p0W2p32Center_lowe" : 50/3301,
+    # Q2=3p0, W=3p14
+    "Q3p0W3p14Right_highe" : 15/682, # Background value divided by number of events
+    "Q3p0W3p14Left_highe" : 50/1570,
+    "Q3p0W3p14Center_highe" : 50/2829,
+    "Q3p0W3p14Left_lowe" : 50/3130,
+    "Q3p0W3p14Center_lowe" : 50/3301,    
 }
 
 ##############
@@ -73,7 +79,7 @@ def bg_fit(phi_setting, inpDict, hist):
 
     num_evts = hist.GetEntries()
 
-    #print("!!!!!!\n\nnum evts: {}".format(num_evts))
+    print("!!!!!!\n\nbackground num evts: {}".format(num_evts))
 
     bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*num_evts
 
