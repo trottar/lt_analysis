@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 21:34:30 trottar"
+# Time-stamp: "2024-03-19 21:38:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1029,29 +1029,29 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
     # Scale pion to subtraction proper peak 
-    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor*P_hgcer_xAtCer_vs_yAtCer_DATA.GetEntries())
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor)
     if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(scale_factor*P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.P_hgcer_xAtCer_vs_yAtCer_DATA.GetEntries())
-    P_hgcer_xAtCer_vs_MM_DATA.Scale(scale_factor*P_hgcer_xAtCer_vs_MM_DATA.P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.GetEntries())
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(scale_factor)
+    P_hgcer_xAtCer_vs_MM_DATA.Scale(scale_factor)
     if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(scale_factor*P_hgcer_nohole_xAtCer_vs_MM_DATA.P_hgcer_xAtCer_vs_MM_DATA.GetEntries())
-    P_hgcer_yAtCer_vs_MM_DATA.Scale(scale_factor*P_hgcer_yAtCer_vs_MM_DATA.P_hgcer_nohole_xAtCer_vs_MM_DATA.GetEntries())
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(scale_factor)
+    P_hgcer_yAtCer_vs_MM_DATA.Scale(scale_factor)
     if ParticleType == "kaon":
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(scale_factor*P_hgcer_nohole_yAtCer_vs_MM_DATA.P_hgcer_yAtCer_vs_MM_DATA.GetEntries())
-    MM_vs_CoinTime_DATA.Scale(scale_factor*MM_vs_CoinTime_DATA.P_hgcer_nohole_yAtCer_vs_MM_DATA.GetEntries())
-    CoinTime_vs_beta_DATA.Scale(scale_factor*CoinTime_vs_beta_DATA.MM_vs_CoinTime_DATA.GetEntries())
-    MM_vs_beta_DATA.Scale(scale_factor*MM_vs_beta_DATA.CoinTime_vs_beta_DATA.GetEntries())
-    MM_vs_H_cer_DATA.Scale(scale_factor*MM_vs_H_cer_DATA.MM_vs_beta_DATA.GetEntries())
-    MM_vs_H_cal_DATA.Scale(scale_factor*MM_vs_H_cal_DATA.MM_vs_H_cer_DATA.GetEntries())
-    MM_vs_P_cal_DATA.Scale(scale_factor*MM_vs_P_cal_DATA.MM_vs_H_cal_DATA.GetEntries())
-    MM_vs_P_hgcer_DATA.Scale(scale_factor*MM_vs_P_hgcer_DATA.MM_vs_P_cal_DATA.GetEntries())
-    MM_vs_P_aero_DATA.Scale(scale_factor*MM_vs_P_aero_DATA.MM_vs_P_hgcer_DATA.GetEntries())
-    phiq_vs_t_DATA.Scale(scale_factor*phiq_vs_t_DATA.MM_vs_P_aero_DATA.GetEntries())
-    Q2_vs_W_DATA.Scale(scale_factor*Q2_vs_W_DATA.phiq_vs_t_DATA.GetEntries())
-    Q2_vs_t_DATA.Scale(scale_factor*Q2_vs_t_DATA.Q2_vs_W_DATA.GetEntries())
-    W_vs_t_DATA.Scale(scale_factor*W_vs_t_DATA.Q2_vs_t_DATA.GetEntries())
-    EPS_vs_t_DATA.Scale(scale_factor*EPS_vs_t_DATA.W_vs_t_DATA.GetEntries())
-    MM_vs_t_DATA.Scale(scale_factor*MM_vs_t_DATA.EPS_vs_t_DATA.GetEntries())
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(scale_factor)
+    MM_vs_CoinTime_DATA.Scale(scale_factor)
+    CoinTime_vs_beta_DATA.Scale(scale_factor)
+    MM_vs_beta_DATA.Scale(scale_factor)
+    MM_vs_H_cer_DATA.Scale(scale_factor)
+    MM_vs_H_cal_DATA.Scale(scale_factor)
+    MM_vs_P_cal_DATA.Scale(scale_factor)
+    MM_vs_P_hgcer_DATA.Scale(scale_factor)
+    MM_vs_P_aero_DATA.Scale(scale_factor)
+    phiq_vs_t_DATA.Scale(scale_factor)
+    Q2_vs_W_DATA.Scale(scale_factor)
+    Q2_vs_t_DATA.Scale(scale_factor)
+    W_vs_t_DATA.Scale(scale_factor)
+    EPS_vs_t_DATA.Scale(scale_factor)
+    MM_vs_t_DATA.Scale(scale_factor)
     H_ct_DATA.Scale(scale_factor*H_ct_DATA.MM_vs_t_DATA.GetEntries())
     H_ssxfp_DATA.Scale(scale_factor*H_ssxfp_DATA.H_ct_DATA.GetEntries())
     H_ssyfp_DATA.Scale(scale_factor*H_ssyfp_DATA.H_ssxfp_DATA.GetEntries())
