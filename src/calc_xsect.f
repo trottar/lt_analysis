@@ -187,7 +187,7 @@ c      pause
          WRITE(*,*) 't: ', tt
          tm = (t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
 *        tm=tmn+(it-0.5)*(tmx-tmn)/nt
-         th_cm=th_pos
+*         th_cm=th_pos
 *         tm = tt
 *     Convert back to radians
          th_cm=th_cm*3.14159D0/180.D0
@@ -212,7 +212,7 @@ c      pause
 c angle check
             if (abs(th_mod-th_cm).gt.1.e-4) then
                write(6,*)' Angle error ',th_mod,th_cm
-*               stop
+               stop
             endif
 
 *     Set extreme ratio values to zero
