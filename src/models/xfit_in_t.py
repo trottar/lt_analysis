@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-20 13:49:45 trottar"
+# Time-stamp: "2024-03-20 15:05:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,15 +168,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
-    nsep.Draw("t", "", "goff")
-    #t_map = TGraph(nsep.GetSelectedRows(), nsep.GetV1(), nsep.GetV2())
-    t_map = TGraph()
-    # Use SetPoint to fill the graph
-    for i in range(nsep.GetSelectedRows()):
-        t_map.SetPoint(i, nsep.GetV1()[i])
-
-    t_list = t_map.GetX()
-    
     ########
     # SigL #
     ########
