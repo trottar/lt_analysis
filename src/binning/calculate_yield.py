@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 17:54:16 trottar"
+# Time-stamp: "2024-03-21 18:07:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,6 +62,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
     processed_dict = {}
     
+    OutFilename = inpDict["OutFilename"] 
+
     ParticleType = inpDict["ParticleType"]
 
     tmin = inpDict["tmin"] 
@@ -73,6 +75,12 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
     W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]
 
+    ################################################################################################################################################
+
+    foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
+    fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
+    outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
+    
     ################################################################################################################################################
     # Import function to define cut bools
     from apply_cuts import apply_data_cuts, set_val
@@ -309,7 +317,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
 
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)                            
+    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -355,11 +363,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 val.Draw()
                 val.SetTitle(key)
                 if i==0 and j==0 and k==0:
-                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType))+'(')
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+'(')
                 elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-1 and k==len(phi_bins)-1:
-                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType))+')')
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+')')
                 else:
-                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType)))
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
             
     return processed_dict
 
@@ -538,16 +546,24 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
 
     processed_dict = {}
     
-    Q2 = inpDict["Q2"]
-    W = inpDict["W"]
-    EPSSET = inpDict["EPSSET"]
+    OutFilename = inpDict["OutFilename"] 
+    
+    ParticleType = inpDict["ParticleType"]
 
     tmin = inpDict["tmin"] 
     tmax = inpDict["tmax"] 
     mm_min = inpDict["mm_min"] 
-    mm_max = inpDict["mm_max"]
+    mm_max = inpDict["mm_max"]    
     
-    ParticleType = inpDict["ParticleType"]
+    Q2 = inpDict["Q2"]
+    W = inpDict["W"]
+    EPSSET = inpDict["EPSSET"]    
+
+    ################################################################################################################################################
+
+    foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
+    fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
+    outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -602,6 +618,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                                 hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.Weight)
                             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(evt.missmass)
 
+    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)                            
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -611,7 +628,17 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                 "H_t_SIMC" : hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)],
                 "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Integral(),
             }
-    
+
+            for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+                val.Draw()
+                val.SetTitle(key)
+                if i==0 and j==0 and k==0:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+'(')
+                elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-1 and k==len(phi_bins)-1:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+')')
+                else:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType)))
+            
     return processed_dict
 
 def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration):
