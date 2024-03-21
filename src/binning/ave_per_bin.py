@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 11:31:19 trottar"
+# Time-stamp: "2024-03-21 12:36:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -531,16 +531,20 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 # Calculate the weighted sum of frequencies and divide by the total count
                 weighted_sum = np.sum(sub_val * bin_val_data)
                 total_count = np.sum(sub_val)
-                average = weighted_sum / total_count            
-                ave_hist.append(average)
-                # Calculate the standard deviation of the data points within the bin
-                std_dev = np.std(bin_val_data)
-                # Determine the number of data points within the bin
-                n = len(bin_val_data)
-                # Calculate the standard error of the mean (SEM) for the bin
-                sem = std_dev / np.sqrt(n)
-                # Append the uncertainty (SEM) to the list
-                ave_err_hist.append(sem)
+                average = weighted_sum / total_count
+                if math.isnan(average) or math.isinf(average):
+                    ave_hist.append(0)
+                    ave_err_hist.append(0)
+                else:
+                    ave_hist.append(average)
+                    # Calculate the standard deviation of the data points within the bin
+                    std_dev = np.std(bin_val_data)
+                    # Determine the number of data points within the bin
+                    n = len(bin_val_data)
+                    # Calculate the standard error of the mean (SEM) for the bin
+                    sem = std_dev / np.sqrt(n)
+                    # Append the uncertainty (SEM) to the list
+                    ave_err_hist.append(sem)
                 #print("Weighted Sum:",weighted_sum)
                 #print("Total Count:",total_count)
                 #print("Average for t-bin {}:".format(i+1),average)
