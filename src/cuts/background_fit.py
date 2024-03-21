@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-20 20:05:36 trottar"
+# Time-stamp: "2024-03-21 11:32:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,10 +91,9 @@ def bg_fit(phi_setting, inpDict, hist):
     bg_par = fit_func.GetParameter(0)
     bg_err = fit_func.GetParError(0)
 
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-    hist.Draw()
-
-    canvas.SaveAs("{}/{}_Q{}W{}_{}e.png".format(LTANAPATH, hist.GetName(), Q2, W, EPSSET))
+    #canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+    #hist.Draw()
+    #canvas.SaveAs("{}/{}_Q{}W{}_{}e.png".format(LTANAPATH, hist.GetName(), Q2, W, EPSSET))
 
     if num_evts == 0:
         return fit_func, bg_par
