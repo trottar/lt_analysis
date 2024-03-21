@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-20 20:05:58 trottar"
+# Time-stamp: "2024-03-20 20:06:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,8 +52,8 @@ scale_dict ={
     "Q2p1W2p95Right_highe" : 2.75e-2,  # Pion scaled value divided by number of events
     "Q2p1W2p95Left_highe" : 2.00e-2,
     "Q2p1W2p95Center_highe" : 1.25e-2,
-    "Q2p1W2p95Left_lowe" : 0.5e-2/268741,
-    "Q2p1W2p95Center_lowe" : 0.5e-2/314349,
+    "Q2p1W2p95Left_lowe" : 0.5e-2
+    "Q2p1W2p95Center_lowe" : 0.5e-2,
     # Q2=3p0, W=2p32
     "Q3p0W2p32Right_highe" : 0.85e-2/51461,
     "Q3p0W2p32Left_highe" : 0.55e-2/73615,
@@ -64,8 +64,8 @@ scale_dict ={
     "Q3p0W3p14Right_highe" : 1.25e-2,
     "Q3p0W3p14Left_highe" : 2.75e-2,
     "Q3p0W3p14Center_highe" : 1.00e-2,
-    "Q3p0W3p14Left_lowe" : 1.00e-2,
-    "Q3p0W3p14Center_lowe" : 0.75e-2,
+    "Q3p0W3p14Left_lowe" : 1.00e-2/268741,
+    "Q3p0W3p14Center_lowe" : 0.75e-2/314349,
     # Q2=4p4, W=2p74
     "Q4p4W2p74Right_highe" : 1.25e-2,
     "Q4p4W2p74Left_highe" : 1.25e-2,
