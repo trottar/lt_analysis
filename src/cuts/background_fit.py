@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 11:32:39 trottar"
+# Time-stamp: "2024-03-21 13:37:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,8 +50,8 @@ OUTPATH=lt.OUTPATH
 bg_dict ={
     # Q2=3p0, W=2p32
     "Q3p0W2p32Right_highe" : 15/682, # Background value divided by number of events
-    "Q3p0W2p32Left_highe" : 50/1570,
-    "Q3p0W2p32Center_highe" : 50/2829,
+    "Q3p0W2p32Left_highe" : 15/1570,
+    "Q3p0W2p32Center_highe" : 15/2829,
     "Q3p0W2p32Left_lowe" : 50/3130,
     "Q3p0W2p32Center_lowe" : 50/3301,
     # Q2=3p0, W=3p14

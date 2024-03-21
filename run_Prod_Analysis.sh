@@ -649,8 +649,8 @@ done
 # MM cut
 MissMassMin=1.08
 #MissMassMin=1.10
-#MissMassMax=1.16
-MissMassMax=1.18
+MissMassMax=1.16
+#MissMassMax=1.18
 #MissMassMax=1.24
 
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
@@ -665,7 +665,7 @@ if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     #TMAX=0.400 # Center low
 elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     # Q2=3p0, W=2p32
-    NumtBins=2
+    NumtBins=3
     NumPhiBins=10
     TMIN=0.100
     TMAX=1.000
