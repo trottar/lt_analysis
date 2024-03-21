@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 19:27:09 trottar"
+# Time-stamp: "2024-03-21 19:50:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -739,7 +739,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
             else:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType)))
             del canvas
-        del data_dict
+            del data_dict[key]
             
     return processed_dict                    
         

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 19:27:53 trottar"
+# Time-stamp: "2024-03-21 19:50:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -374,7 +374,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     else:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
                 del canvas
-            del data_dict
+                del data_dict[key]
                         
     return processed_dict
 
@@ -648,7 +648,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                     else:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType)))
                 del canvas
-            del data_dict
+                del data_dict[key]
             
     return processed_dict
 
