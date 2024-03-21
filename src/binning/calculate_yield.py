@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:46:14 trottar"
+# Time-stamp: "2024-03-21 18:57:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -360,17 +360,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             }
 
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
-                if is_hist(val):
+                if is_hist(val) and "DUMMY" not in key:
                     val.Draw()
-                    val.SetTitle(key)
+                    val.SetTitle(val.GetName())
                     if i==0 and j==0 and k==0:
-                        print("!!!!!!!!!! Start",i,j,k)
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+'(')
                     elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
-                        print("!!!!!!!!!! End",i,j,k)
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+')')
                     else:
-                        print("!!!!!!!!!!",i,j,k)
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
             
     return processed_dict
@@ -612,8 +609,8 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
             # Loop through bins in t_simc and identify events in specified bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
-                    if t_bins[j] <= -evt.t <= t_bins[j+1]:
-                        if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                    if t_bins[j]+0.01 <= -evt.t <= t_bins[j+1]+0.01:
+                        if phi_bins[k]+1.0 <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]+1.0:
                             if iteration:
                                 hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
                                 hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.iter_weight)
@@ -634,9 +631,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
             }
 
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
-                if is_hist(val):
+                if is_hist(val) and "DUMMY" not in key:
                     val.Draw()
-                    val.SetTitle(key)
+                    val.SetTitle(val.GetName())
                     if i==0 and j==0 and k==0:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+'(')
                     elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:

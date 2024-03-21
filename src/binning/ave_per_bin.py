@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:46:23 trottar"
+# Time-stamp: "2024-03-21 18:57:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -410,14 +410,15 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         }
 
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
-            val.Draw()
-            val.SetTitle(key)
-            if i==0 and j==0:
-                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+'(')
-            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
-                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+')')
-            else:
-                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
+            if "DUMMY" not in key:
+                val.Draw()
+                val.SetTitle(val.GetName())
+                if i==0 and j==0:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+'(')
+                elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+')')
+                else:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
                 
     return processed_dict
 
@@ -701,7 +702,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
 
             # Loop through bins in t_simc and identify events in specified bins
             for j in range(len(t_bins)-1):            
-                if t_bins[j] <= -evt.t <= t_bins[j+1]:
+                if t_bins[j]+0.01 <= -evt.t <= t_bins[j+1]+0.01:
                     if iteration:
                         hist_bin_dict["H_t_SIMC_{}".format(j)].Fill(-evt.t, evt.iter_weight)
                         hist_bin_dict["H_Q2_SIMC_{}".format(j)].Fill(evt.Q2, evt.iter_weight)
@@ -726,7 +727,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
 
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
             val.Draw()
-            val.SetTitle(key)
+            val.SetTitle(val.GetName())
             if i==0 and j==0:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+'(')
             elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:

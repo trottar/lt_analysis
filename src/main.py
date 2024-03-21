@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:21:36 trottar"
+# Time-stamp: "2024-03-21 18:53:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -522,9 +522,7 @@ plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDic
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
-    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
-output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType)))
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
