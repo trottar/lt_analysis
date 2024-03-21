@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 19:15:23 trottar"
+# Time-stamp: "2024-03-21 19:21:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -359,7 +359,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             }
 
             data_dict = processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].copy()
-            for key,val in data_dict:
+            for key,val in data_dict.items():
                 if "DUMMY" in key:
                     del data_dict[key]
             for i, (key,val) in enumerate(data_dict.items()):

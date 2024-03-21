@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 19:15:40 trottar"
+# Time-stamp: "2024-03-21 19:21:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -725,7 +725,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
         }
 
         data_dict = processed_dict["t_bin{}".format(j+1)].items().copy()
-        for key,val in data_dict:
+        for key,val in data_dict.items():
             if "DUMMY" in key:
                 del data_dict[key]    
         for i, (key,val) in enumerate(data_dict.items()):
