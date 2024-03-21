@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 13:03:48 trottar"
+# Time-stamp: "2024-03-21 17:37:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -227,7 +227,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                if t_bins[j]+0.01 <= -evt.MandelT <= t_bins[j+1]+0.01:
                     hist_bin_dict["H_t_DATA_{}".format(j)].Fill(-evt.MandelT)
                     hist_bin_dict["H_Q2_DATA_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DATA_{}".format(j)].Fill(evt.W)                        
@@ -259,7 +259,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_dummy and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                if t_bins[j]+0.01 <= -evt.MandelT <= t_bins[j+1]+0.01:
                     hist_bin_dict["H_t_DUMMY_{}".format(j)].Fill(-evt.MandelT)
                     hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)                        
@@ -291,7 +291,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_rand and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                if t_bins[j]+0.01 <= -evt.MandelT <= t_bins[j+1]+0.01:
                     hist_bin_dict["H_t_RAND_{}".format(j)].Fill(-evt.MandelT)
                     hist_bin_dict["H_Q2_RAND_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_RAND_{}".format(j)].Fill(evt.W)                        
@@ -323,7 +323,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_dummy_rand and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                if t_bins[j]+0.01 <= -evt.MandelT <= t_bins[j+1]+0.01:
                     hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(-evt.MandelT)
                     hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)                        
