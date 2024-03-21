@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 19:21:09 trottar"
+# Time-stamp: "2024-03-21 19:27:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -374,6 +374,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     else:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
                 del canvas
+            del data_dict
                         
     return processed_dict
 
@@ -624,7 +625,6 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                                 hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.Weight)
                             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(evt.missmass)
 
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)                            
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -638,6 +638,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
             data_dict = processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].copy()
             for i, (key,val) in enumerate(data_dict.items()):
                 if is_hist(val):
+                    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                     val.Draw()
                     val.SetTitle(val.GetName())
                     if i==0 and j==0 and k==0:
@@ -646,6 +647,8 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+')')
                     else:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType)))
+                del canvas
+            del data_dict
             
     return processed_dict
 

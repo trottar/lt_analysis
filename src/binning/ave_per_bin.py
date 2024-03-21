@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 19:21:04 trottar"
+# Time-stamp: "2024-03-21 19:27:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -724,7 +724,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
             "H_epsilon_SIMC" : hist_bin_dict["H_epsilon_SIMC_{}".format(j)],
         }
 
-        data_dict = processed_dict["t_bin{}".format(j+1)].items().copy()
+        data_dict = processed_dict["t_bin{}".format(j+1)].copy()
         for key,val in data_dict.items():
             if "DUMMY" in key:
                 del data_dict[key]    
@@ -739,6 +739,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
             else:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType)))
             del canvas
+        del data_dict
             
     return processed_dict                    
         
