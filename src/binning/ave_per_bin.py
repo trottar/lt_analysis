@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 17:50:31 trottar"
+# Time-stamp: "2024-03-21 17:53:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -330,7 +330,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
                     hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(evt.MM)
                     
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)                    
+    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
                     

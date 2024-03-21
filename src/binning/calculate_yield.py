@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 17:42:27 trottar"
+# Time-stamp: "2024-03-21 17:54:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -308,10 +308,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                             #print(phi_bins[k]," <= ",(evt.ph_q+math.pi)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
-                            
+
+    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)                            
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
-        for k in range(len(phi_bins)-1):                            
+        for k in range(len(phi_bins)-1):
                             
             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
@@ -349,7 +350,17 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 "H_MM_DUMMY" : remove_negative_bins(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]),
                 "H_t_DUMMY" : remove_negative_bins(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]),
             }
-    
+
+            for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+                val.Draw()
+                val.SetTitle(key)
+                if i==0 and j==0 and k==0:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType))+'(')
+                elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-1 and k==len(phi_bins)-1:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType))+')')
+                else:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType)))
+            
     return processed_dict
 
 def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
