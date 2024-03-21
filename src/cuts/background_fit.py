@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-20 18:27:31 trottar"
+# Time-stamp: "2024-03-20 20:05:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,8 +78,6 @@ def bg_fit(phi_setting, inpDict, hist):
     mm_max = inpDict["mm_max"]
 
     num_evts = hist.GetEntries()
-
-    print("!!!!!!\n\nbackground num evts: {}".format(num_evts))
 
     bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*num_evts
 
