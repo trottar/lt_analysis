@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 11:41:33 trottar"
+# Time-stamp: "2024-03-21 11:44:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -248,16 +248,11 @@ if Q2Val == 2.1:
     inpDict["Q2max"] = Q2Val + (2/9)*Q2Val
     inpDict["Wmin"] = WVal - (2/9)*WVal
     inpDict["Wmax"] = WVal + (2/9)*WVal
-elif Q2Val == 3.0 and WVal == 2.32:
-    inpDict["Q2min"] = Q2Val - (2/8)*Q2Val
-    inpDict["Q2max"] = Q2Val + (2/8)*Q2Val
-    inpDict["Wmin"] = WVal - (2/8)*WVal
-    inpDict["Wmax"] = WVal + (2/8)*WVal
-elif Q2Val == 3.0 and WVal == 3.14:
+elif Q2Val == 3.0:
     inpDict["Q2min"] = Q2Val - (3/7)*Q2Val
     inpDict["Q2max"] = Q2Val + (3/7)*Q2Val
     inpDict["Wmin"] = WVal - (3/7)*WVal
-    inpDict["Wmax"] = WVal + (3/7)*WVal    
+    inpDict["Wmax"] = WVal + (3/7)*WVal
 elif Q2Val == 5.5:
     inpDict["Q2min"] = Q2Val - (3/8)*Q2Val
     inpDict["Q2max"] = Q2Val + (3/8)*Q2Val
@@ -340,7 +335,6 @@ for hist in histlist:
 * These bins will also be used of high eps, so check high eps as well.
 '''
 
-'''
 ##############
 # HARD CODED #
 ##############
@@ -355,17 +349,23 @@ if Q2 == "2p1" and W == "2p95":
     inpDict["Wmax"] = WVal + (0.06)*WVal
     inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
     inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
-if Q2 == "5p5" and W == "3p02":
+elif Q2 == "5p5" and W == "3p02":
     inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
     inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
     inpDict["Wmin"] = WVal - (0.06)*WVal
     inpDict["Wmax"] = WVal + (0.06)*WVal
     inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
     inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
+else:
+    inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+    inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+    inpDict["Wmin"] = WVal - (0.06)*WVal
+    inpDict["Wmax"] = WVal + (0.06)*WVal
+    inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
+    inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)    
 ##############
 ##############
 ##############
-'''
 
 ##############
 # HARD CODED #
