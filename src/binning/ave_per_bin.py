@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:57:36 trottar"
+# Time-stamp: "2024-03-21 19:15:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -714,7 +714,6 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
                         hist_bin_dict["H_W_SIMC_{}".format(j)].Fill(evt.W, evt.Weight)
                         hist_bin_dict["H_epsilon_SIMC_{}".format(j)].Fill(evt.epsilon, evt.Weight)                    
 
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)                        
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
                         
@@ -725,16 +724,22 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
             "H_epsilon_SIMC" : hist_bin_dict["H_epsilon_SIMC_{}".format(j)],
         }
 
-        for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
+        data_dict = processed_dict["t_bin{}".format(j+1)].items().copy()
+        for key,val in data_dict:
+            if "DUMMY" in key:
+                del data_dict[key]    
+        for i, (key,val) in enumerate(data_dict.items()):
+            canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
             val.Draw()
             val.SetTitle(val.GetName())
             if i==0 and j==0:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+'(')
-            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
+            elif i==len(data_dict.items())-1 and j==len(t_bins)-2:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+')')
             else:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType)))
-        
+            del canvas
+            
     return processed_dict                    
         
 def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration):

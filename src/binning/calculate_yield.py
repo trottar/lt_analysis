@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:57:40 trottar"
+# Time-stamp: "2024-03-21 19:15:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,7 +317,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
 
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -359,17 +358,23 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 "H_t_DUMMY" : remove_negative_bins(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]),
             }
 
-            for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
-                if is_hist(val) and "DUMMY" not in key:
+            data_dict = processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].copy()
+            for key,val in data_dict:
+                if "DUMMY" in key:
+                    del data_dict[key]
+            for i, (key,val) in enumerate(data_dict.items()):
+                if is_hist(val):
+                    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                     val.Draw()
                     val.SetTitle(val.GetName())
                     if i==0 and j==0 and k==0:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+'(')
-                    elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
+                    elif i==len(data_dict.items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+')')
                     else:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
-            
+                del canvas
+                        
     return processed_dict
 
 def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
@@ -630,13 +635,14 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                 "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Integral(),
             }
 
-            for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
-                if is_hist(val) and "DUMMY" not in key:
+            data_dict = processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].copy()
+            for i, (key,val) in enumerate(data_dict.items()):
+                if is_hist(val):
                     val.Draw()
                     val.SetTitle(val.GetName())
                     if i==0 and j==0 and k==0:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+'(')
-                    elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
+                    elif i==len(data_dict.items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+')')
                     else:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType)))
