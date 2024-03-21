@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 12:36:21 trottar"
+# Time-stamp: "2024-03-21 13:03:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -533,31 +533,25 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 total_count = np.sum(sub_val)
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
-                    ave_hist.append(0)
-                    ave_err_hist.append(0)
-                else:
-                    ave_hist.append(average)
-                    # Calculate the standard deviation of the data points within the bin
-                    std_dev = np.std(bin_val_data)
-                    # Determine the number of data points within the bin
-                    n = len(bin_val_data)
-                    # Calculate the standard error of the mean (SEM) for the bin
-                    sem = std_dev / np.sqrt(n)
-                    # Append the uncertainty (SEM) to the list
-                    ave_err_hist.append(sem)
+                    print("ERROR: Empty binning for {}... ".format(kin_type))
+                    sys.exit(2)
+                ave_hist.append(average)
+                # Calculate the standard deviation of the data points within the bin
+                std_dev = np.std(bin_val_data)
+                # Determine the number of data points within the bin
+                n = len(bin_val_data)
+                # Calculate the standard error of the mean (SEM) for the bin
+                sem = std_dev / np.sqrt(n)
+                # Append the uncertainty (SEM) to the list
+                ave_err_hist.append(sem)
                 #print("Weighted Sum:",weighted_sum)
                 #print("Total Count:",total_count)
                 #print("Average for t-bin {}:".format(i+1),average)
                 binned_sub_data[0].append(bin_val_data)
                 binned_sub_data[1].append(sub_val)
             except ZeroDivisionError:
-                ave_hist.append(0)
-                ave_err_hist.append(0)
-                #print("Weighted Sum: N/A")
-                #print("Total Count: N/A")
-                #print("Average for t-bin {}: 0.0".format(i+1))
-                binned_sub_data[0].append(bin_val_data)
-                binned_sub_data[1].append([0]*len(bin_val_data))
+                print("ERROR: Empty binning for {}... ".format(kin_type))
+                sys.exit(2)
             i+=1
 
         # Print statements to check sizes
@@ -791,7 +785,10 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 # Calculate the weighted sum of frequencies and divide by the total count
                 weighted_sum = np.sum(sub_val * bin_val_simc)
                 total_count = np.sum(sub_val)
-                average = weighted_sum / total_count            
+                average = weighted_sum / total_count
+                if math.isnan(average) or math.isinf(average):
+                    print("ERROR: Empty binning for {}... ".format(kin_type))
+                    sys.exit(2)                
                 ave_hist.append(average)
                 # Calculate the standard deviation of the simc points within the bin
                 std_dev = np.std(bin_val_simc)
@@ -807,13 +804,8 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 binned_sub_simc[0].append(bin_val_simc)
                 binned_sub_simc[1].append(sub_val)
             except ZeroDivisionError:
-                ave_hist.append(0)
-                ave_err_hist.append(0)
-                #print("Weighted Sum: N/A")
-                #print("Total Count: N/A")
-                #print("Average for t-bin {}: 0.0".format(i+1))
-                binned_sub_simc[0].append(bin_val_simc)
-                binned_sub_simc[1].append([0]*len(bin_val_simc))
+                print("ERROR: Empty binning for {}... ".format(kin_type))
+                sys.exit(2)
             i+=1
 
         # Print statements to check sizes
