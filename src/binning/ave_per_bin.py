@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-20 12:55:25 trottar"
+# Time-stamp: "2024-03-21 11:31:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -527,7 +527,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
             bin_val_data, hist_val_data = data
             bin_val_dummy, hist_val_dummy = dummy
             sub_val = np.subtract(hist_val_data, hist_val_dummy)
-            if sub_val.size != 0:
+            try:
                 # Calculate the weighted sum of frequencies and divide by the total count
                 weighted_sum = np.sum(sub_val * bin_val_data)
                 total_count = np.sum(sub_val)
@@ -546,7 +546,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 #print("Average for t-bin {}:".format(i+1),average)
                 binned_sub_data[0].append(bin_val_data)
                 binned_sub_data[1].append(sub_val)
-            else:
+            except ZeroDivisionError:
                 ave_hist.append(0)
                 ave_err_hist.append(0)
                 #print("Weighted Sum: N/A")
@@ -783,7 +783,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
         for simc in binned_hist_simc:
             bin_val_simc, hist_val_simc = simc
             sub_val = np.array(hist_val_simc) # No dummy subtraction for simc
-            if sub_val.size != 0:
+            try:
                 # Calculate the weighted sum of frequencies and divide by the total count
                 weighted_sum = np.sum(sub_val * bin_val_simc)
                 total_count = np.sum(sub_val)
@@ -802,7 +802,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 #print("Average for t-bin {}:".format(i+1),average)
                 binned_sub_simc[0].append(bin_val_simc)
                 binned_sub_simc[1].append(sub_val)
-            else:
+            except ZeroDivisionError:
                 ave_hist.append(0)
                 ave_err_hist.append(0)
                 #print("Weighted Sum: N/A")
