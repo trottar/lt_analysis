@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:39:31 trottar"
+# Time-stamp: "2024-03-21 18:46:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -366,7 +366,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     if i==0 and j==0 and k==0:
                         print("!!!!!!!!!! Start",i,j,k)
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+'(')
-                    elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-2 and j==len(t_bins)-2 and k==len(phi_bins)-2:
+                    elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                         print("!!!!!!!!!! End",i,j,k)
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+')')
                     else:
@@ -639,7 +639,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                     val.SetTitle(key)
                     if i==0 and j==0 and k==0:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+'(')
-                    elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-1 and k==len(phi_bins)-1:
+                    elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+')')
                     else:
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType)))

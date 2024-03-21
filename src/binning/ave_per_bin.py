@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:05:33 trottar"
+# Time-stamp: "2024-03-21 18:46:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -414,7 +414,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             val.SetTitle(key)
             if i==0 and j==0:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+'(')
-            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-1:
+            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+')')
             else:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
@@ -729,7 +729,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
             val.SetTitle(key)
             if i==0 and j==0:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+'(')
-            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-1:
+            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+')')
             else:
                 canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType)))
