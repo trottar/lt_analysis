@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 12:07:03 trottar"
+# Time-stamp: "2024-03-21 12:08:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -298,7 +298,6 @@ for phiset in phisetlist:
 Apply random subtraction to data and dummy.
 '''
 
-'''
 ##############
 # HARD CODED #
 ##############
@@ -313,26 +312,32 @@ if Q2 == "2p1" and W == "2p95":
     inpDict["Wmax"] = WVal + (0.06)*WVal
     inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
     inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
-if Q2 == "5p5" and W == "3p02":
+elif Q2 == "5p5" and W == "3p02":
     inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
     inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
     inpDict["Wmin"] = WVal - (0.06)*WVal
     inpDict["Wmax"] = WVal + (0.06)*WVal
     inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
     inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
+else:    
+    inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+    inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+    inpDict["Wmin"] = WVal - (0.06)*WVal
+    inpDict["Wmax"] = WVal + (0.06)*WVal
+    inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
+    inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)    
 ##############
 ##############
 ##############
-'''
 
 ##############
 # HARD CODED #
 ##############
 # Reset Q2, W, eps TH1F range dynamically
 # Adjust range_factor argument for plot limits (Default=0.005)
-inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist)
-inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist)
-inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist)
+#inpDict["Q2min"], inpDict["Q2max"] = set_dynamic_axis_ranges("Q2", histlist)
+#inpDict["Wmin"], inpDict["Wmax"] = set_dynamic_axis_ranges("W", histlist)
+#inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histlist)
 ##############
 ##############
 ##############
