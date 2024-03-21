@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 14:44:54 trottar"
+# Time-stamp: "2024-03-21 15:10:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,11 +49,18 @@ OUTPATH=lt.OUTPATH
 
 bg_dict ={
     # Q2=3p0, W=2p32
-    "Q3p0W2p32Right_highe" : 15/484, # Background value divided by number of events
-    "Q3p0W2p32Left_highe" : 15/978,
-    "Q3p0W2p32Center_highe" : 15/1594,
-    "Q3p0W2p32Left_lowe" : 50/2508,
-    "Q3p0W2p32Center_lowe" : 50/2734,
+    # t-range = 0.1-1.0 (no MM cut)
+    "Q3p0W2p32Right_highe" : 15/682, # Background value divided by number of events
+    "Q3p0W2p32Left_highe" : 15/1570,
+    "Q3p0W2p32Center_highe" : 15/2829,
+    "Q3p0W2p32Left_lowe" : 50/3130,
+    "Q3p0W2p32Center_lowe" : 50/3301,
+    # t-range = 0.45-1.0 (MM cut)
+    #"Q3p0W2p32Right_highe" : 15/484, # Background value divided by number of events
+    #"Q3p0W2p32Left_highe" : 15/978,
+    #"Q3p0W2p32Center_highe" : 15/1594,
+    #"Q3p0W2p32Left_lowe" : 50/2508,
+    #"Q3p0W2p32Center_lowe" : 50/2734,    
     # Q2=3p0, W=3p14
     "Q3p0W3p14Right_highe" : 15/682, # Background value divided by number of events
     "Q3p0W3p14Left_highe" : 50/1570,
