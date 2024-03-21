@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 17:37:09 trottar"
+# Time-stamp: "2024-03-21 17:50:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -227,7 +227,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j]+0.01 <= -evt.MandelT <= t_bins[j+1]+0.01:
+                if t_bins[j]+0.01 < -evt.MandelT < t_bins[j+1]+0.01:
                     hist_bin_dict["H_t_DATA_{}".format(j)].Fill(-evt.MandelT)
                     hist_bin_dict["H_Q2_DATA_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DATA_{}".format(j)].Fill(evt.W)                        
@@ -259,7 +259,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_dummy and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j]+0.01 <= -evt.MandelT <= t_bins[j+1]+0.01:
+                if t_bins[j]+0.01 < -evt.MandelT < t_bins[j+1]+0.01:
                     hist_bin_dict["H_t_DUMMY_{}".format(j)].Fill(-evt.MandelT)
                     hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)                        
@@ -291,7 +291,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_rand and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j]+0.01 <= -evt.MandelT <= t_bins[j+1]+0.01:
+                if t_bins[j]+0.01 < -evt.MandelT < t_bins[j+1]+0.01:
                     hist_bin_dict["H_t_RAND_{}".format(j)].Fill(-evt.MandelT)
                     hist_bin_dict["H_Q2_RAND_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_RAND_{}".format(j)].Fill(evt.W)                        
@@ -323,13 +323,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_dummy_rand and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j]+0.01 <= -evt.MandelT <= t_bins[j+1]+0.01:
+                if t_bins[j]+0.01 < -evt.MandelT < t_bins[j+1]+0.01:
                     hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(-evt.MandelT)
                     hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
                     hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(evt.MM)
                     
+    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)                    
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
                     
@@ -399,7 +400,17 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             "H_epsilon_DUMMY" : remove_negative_bins(hist_bin_dict["H_epsilon_DUMMY_{}".format(j)]),
             "H_MM_DUMMY" : remove_negative_bins(hist_bin_dict["H_MM_DUMMY_{}".format(j)]),
         }
-    
+
+        for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
+            val.Draw()
+            val.SetTitle(key)
+            if i==0 and j==0:
+                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType))+'(')
+            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-1:
+                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType))+')')
+            else:
+                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_".format(ParticleType)))
+                
     return processed_dict
 
 def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict):
