@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:33:26 trottar"
+# Time-stamp: "2024-03-21 18:39:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -366,7 +366,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     if i==0 and j==0 and k==0:
                         print("!!!!!!!!!! Start",i,j,k)
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+'(')
-                    elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()) and j==len(t_bins) and k==len(phi_bins):
+                    elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-2 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                         print("!!!!!!!!!! End",i,j,k)
                         canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+')')
                     else:
