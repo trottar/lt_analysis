@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 11:52:43 trottar"
+# Time-stamp: "2024-03-21 12:07:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -298,43 +298,6 @@ for phiset in phisetlist:
 Apply random subtraction to data and dummy.
 '''
 
-sys.path.append("cuts")
-from rand_sub import rand_sub
-
-# Call histogram function above to define dictonaries for right, left, center settings
-# Put these all into an array so that if we are missing a setting it is easier to remove
-# Plus it makes the code below less repetitive
-histlist = []
-for phiset in phisetlist:
-    histlist.append(rand_sub(phiset,inpDict))
-    
-print("\n\n")
-
-settingList = []
-for i,hist in enumerate(histlist):
-    if len(hist.keys()) <= 1: # If hist is empty (length of oen for phi setting check)
-        print("No {} setting found...".format(hist["phi_setting"]))
-        phisetlist.remove(hist["phi_setting"])
-        histlist.remove(hist)
-    else:
-        settingList.append(hist["phi_setting"])
-
-if DEBUG:
-    # Show plot pdf for each setting
-    for hist in histlist:        
-        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-for hist in histlist:
-    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-
-##############################
-# Step 4 of the lt_analysis: # Done
-##############################
-'''
-* Combine all settings and choose t/phi bins for low eps.
-
-* These bins will also be used of high eps, so check high eps as well.
-'''
-
 '''
 ##############
 # HARD CODED #
@@ -373,6 +336,43 @@ inpDict["Epsmin"], inpDict["Epsmax"] = set_dynamic_axis_ranges("epsilon", histli
 ##############
 ##############
 ##############
+
+sys.path.append("cuts")
+from rand_sub import rand_sub
+
+# Call histogram function above to define dictonaries for right, left, center settings
+# Put these all into an array so that if we are missing a setting it is easier to remove
+# Plus it makes the code below less repetitive
+histlist = []
+for phiset in phisetlist:
+    histlist.append(rand_sub(phiset,inpDict))
+    
+print("\n\n")
+
+settingList = []
+for i,hist in enumerate(histlist):
+    if len(hist.keys()) <= 1: # If hist is empty (length of oen for phi setting check)
+        print("No {} setting found...".format(hist["phi_setting"]))
+        phisetlist.remove(hist["phi_setting"])
+        histlist.remove(hist)
+    else:
+        settingList.append(hist["phi_setting"])
+
+if DEBUG:
+    # Show plot pdf for each setting
+    for hist in histlist:        
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+for hist in histlist:
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+
+##############################
+# Step 4 of the lt_analysis: # Done
+##############################
+'''
+* Combine all settings and choose t/phi bins for low eps.
+
+* These bins will also be used of high eps, so check high eps as well.
+'''
 
 sys.path.append("binning")
 from find_bins import find_bins, check_bins
