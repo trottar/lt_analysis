@@ -649,8 +649,8 @@ done
 # MM cut
 MissMassMin=1.08
 #MissMassMin=1.10
-MissMassMax=1.16
-#MissMassMax=1.18
+#MissMassMax=1.16
+MissMassMax=1.18
 #MissMassMax=1.24
 
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
