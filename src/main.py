@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 12:34:34 trottar"
+# Time-stamp: "2024-03-21 14:00:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -298,6 +298,7 @@ for phiset in phisetlist:
 Apply random subtraction to data and dummy.
 '''
 
+'''
 ##############
 # HARD CODED #
 ##############
@@ -305,15 +306,24 @@ Apply random subtraction to data and dummy.
 # May need to adjust these for binning
 # Too many zero bins can result in empty bins when t/phi binning
 # Good method is to use std dev around central set value
-inpDict["Q2min"] = Q2Val - (0.09)*Q2Val
-inpDict["Q2max"] = Q2Val + (0.09)*Q2Val
-inpDict["Wmin"] = WVal - (0.09)*WVal
-inpDict["Wmax"] = WVal + (0.09)*WVal
-inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
-inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)    
+if Q2 == "2p1" and W == "2p95":
+    inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+    inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+    inpDict["Wmin"] = WVal - (0.06)*WVal
+    inpDict["Wmax"] = WVal + (0.06)*WVal
+    inpDict["Epsmin"] = float(EPSVAL) - (0.02)*float(EPSVAL)
+    inpDict["Epsmax"] = float(EPSVAL) + (0.02)*float(EPSVAL)
+if Q2 == "5p5" and W == "3p02":
+    inpDict["Q2min"] = Q2Val - (0.24)*Q2Val
+    inpDict["Q2max"] = Q2Val + (0.24)*Q2Val
+    inpDict["Wmin"] = WVal - (0.06)*WVal
+    inpDict["Wmax"] = WVal + (0.06)*WVal
+    inpDict["Epsmin"] = float(EPSVAL) - (0.09)*float(EPSVAL)
+    inpDict["Epsmax"] = float(EPSVAL) + (0.09)*float(EPSVAL)
 ##############
 ##############
 ##############
+
 
 ##############
 # HARD CODED #
