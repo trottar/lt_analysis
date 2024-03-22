@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 21:23:11 trottar"
+# Time-stamp: "2024-03-21 21:29:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -210,7 +210,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
         
-        if(ALLCUTS):                
+        if(ALLCUTS):
 
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):
