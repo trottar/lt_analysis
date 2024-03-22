@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-22 12:54:59 trottar"
+# Time-stamp: "2024-03-22 13:08:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,7 +265,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         avet_err_right_data, aveQ2_err_right_data, aveW_err_right_data = zip(*sorted_data_right_tuples[:len(avet_err_right_data)])        
         
-    if "Left" in phisetlist 
+    if "Left" in phisetlist: 
         # Combine data from different lists into tuples
         data_left_tuples = list(zip(avet_left_data, aveQ2_left_data, aveW_left_data))
         # Sort based on avet data
@@ -280,7 +280,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         avet_err_left_data, aveQ2_err_left_data, aveW_err_left_data = zip(*sorted_data_left_tuples[:len(avet_err_left_data)])
         
-    if "Center" in phisetlist 
+    if "Center" in phisetlist: 
         # Combine data from different lists into tuples
         data_center_tuples = list(zip(avet_center_data, aveQ2_center_data, aveW_center_data))
         # Sort based on avet data
@@ -303,7 +303,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_data_right, phibin_data_right, yield_data_right, yield_data_err_right = zip(*sorted_data_right_tuples[:len(tbin_data_right)])
 
-    if "Left" in phisetlist 
+    if "Left" in phisetlist:
         # Combine data from different lists into tuples
         data_left_tuples = list(zip(tbin_data_left, phibin_data_left, yield_data_left, yield_data_err_left))
         # Sort based on tbin and phibin
@@ -311,7 +311,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_data_left, phibin_data_left, yield_data_left, yield_data_err_left = zip(*sorted_data_left_tuples[:len(tbin_data_left)])
 
-    if "Center" in phisetlist 
+    if "Center" in phisetlist:
         # Combine data from different lists into tuples
         data_center_tuples = list(zip(tbin_data_center, phibin_data_center, yield_data_center, yield_data_err_center))
         # Sort based on tbin and phibin
@@ -327,7 +327,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_simc_right, phibin_simc_right, yield_simc_right, yield_simc_err_right = zip(*sorted_simc_right_tuples[:len(tbin_simc_right)])
 
-    if "Left" in phisetlist 
+    if "Left" in phisetlist:
         # Combine simc from different lists into tuples
         simc_left_tuples = list(zip(tbin_simc_left, phibin_simc_left, yield_simc_left, yield_simc_err_left))
         # Sort based on tbin and phibin
@@ -335,7 +335,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_simc_left, phibin_simc_left, yield_simc_left, yield_simc_err_left = zip(*sorted_simc_left_tuples[:len(tbin_simc_left)])
 
-    if "Center" in phisetlist 
+    if "Center" in phisetlist:
         # Combine simc from different lists into tuples
         simc_center_tuples = list(zip(tbin_simc_center, phibin_simc_center, yield_simc_center, yield_simc_err_center))
         # Sort based on tbin and phibin
@@ -432,7 +432,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
 
-    if "Right" in phisetlist 
+    if "Right" in phisetlist:
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -446,7 +446,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
 
-    if "Left" in phisetlist 
+    if "Left" in phisetlist:
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -460,7 +460,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             if not inLine:
                 write_to_file(f_list_settings, check_line)
 
-    if "Center" in phisetlist 
+    if "Center" in phisetlist:
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
