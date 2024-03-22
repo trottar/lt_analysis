@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-22 13:51:46 trottar"
+# Time-stamp: "2024-03-22 13:54:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -275,14 +275,14 @@ for i,row in file_df_dict['setting_df'].iterrows():
 with PdfPages(outputpdf) as pdf:
     
     # Create a figure and axis objects
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    fig, axes = plt.subplots(NumtBins+1, 1, figsize=(12, 8), sharex=True)
 
     # Define markers and colors
     markers = ['o', 's'] # 'o'->circle, 's'->square
     colors = ['blue', 'orange']
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
@@ -306,7 +306,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
 
         # Create a figure and axis objects
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
@@ -337,7 +337,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
@@ -360,7 +360,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
@@ -383,7 +383,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
@@ -404,7 +404,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
@@ -425,7 +425,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
@@ -447,7 +447,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
@@ -467,7 +467,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
     
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
 
         # Create a figure and axis objects
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
@@ -496,7 +496,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins+1):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
 
