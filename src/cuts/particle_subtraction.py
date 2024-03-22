@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-22 11:45:47 trottar"
+# Time-stamp: "2024-03-22 12:32:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,9 +83,9 @@ scale_dict ={
     # t-range = 0.1-0.3 (MM cut)
     "Q3p0W3p14Right_highe" : 1.25e-2/38806, # Off
     "Q3p0W3p14Left_highe" : 2.75e-2/24437, # Off
-    "Q3p0W3p14Center_highe" : 1.00e-2/52414,
+    "Q3p0W3p14Center_highe" : 1.00e-2/34102,
     "Q3p0W3p14Left_lowe" : 1.00e-2/39466, # Off
-    "Q3p0W3p14Center_lowe" : 0.75e-2/46219,
+    "Q3p0W3p14Center_lowe" : 0.75e-2/33383,
     # Q2=4p4, W=2p74
     "Q4p4W2p74Right_highe" : 1.25e-2,
     "Q4p4W2p74Left_highe" : 1.25e-2,
