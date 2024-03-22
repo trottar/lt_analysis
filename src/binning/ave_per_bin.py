@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 20:39:44 trottar"
+# Time-stamp: "2024-03-21 20:44:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -410,7 +410,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         }
 
         # Sort dictionary keys alphabetically
-        processed_dict["t_bin{}".format(j+1)] = {key : processed_dict["t_bin{}".format(j+1)] \
+        processed_dict["t_bin{}".format(j+1)] = {key : processed_dict["t_bin{}".format(j+1)][key] \
                                                  for key in sorted(processed_dict["t_bin{}".format(j+1)].keys())}
         
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
