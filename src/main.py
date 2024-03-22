@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-22 15:17:50 trottar"
+# Time-stamp: "2024-03-22 15:27:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -271,8 +271,7 @@ inpDict["Epsmin"] = 0.0
 inpDict["Epsmax"] = 1.0
 
 #phisetlist = ["Center","Left","Right"]
-#phisetlist = ["Center"]
-phisetlist = ["Left","Right"]
+phisetlist = ["Center"]
 
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
