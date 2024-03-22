@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-22 13:54:25 trottar"
+# Time-stamp: "2024-03-22 13:55:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -334,7 +334,7 @@ with PdfPages(outputpdf) as pdf:
         pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure and axis objects
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    fig, axes = plt.subplots(NumtBins+1, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -357,7 +357,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
     
     # Create a figure and axis objects
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    fig, axes = plt.subplots(NumtBins+1, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -380,7 +380,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure and axis objects
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    fig, axes = plt.subplots(NumtBins+1, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -401,7 +401,7 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
 
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    fig, axes = plt.subplots(NumtBins+1, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -422,7 +422,7 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    fig, axes = plt.subplots(NumtBins+1, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -444,7 +444,7 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    fig, axes = plt.subplots(NumtBins+1, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -493,7 +493,7 @@ with PdfPages(outputpdf) as pdf:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
     
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    fig, axes = plt.subplots(NumtBins+1, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
