@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 20:44:40 trottar"
+# Time-stamp: "2024-03-21 21:07:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -338,7 +338,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
                     hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(evt.MM)
                     
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
                     
@@ -422,14 +421,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     print("!!!!!!!!!!! Start", i, j)
                     canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+'(')
             elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
-                if "DUMMY" not in key:
-                    print("!!!!!!!!!!! End", i, j)
-                    canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+')')
+                print("!!!!!!!!!!! End", i, j)
+                canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+')')
             else:
                 if "DUMMY" not in key:
                     print("!!!!!!!!!!!", i, j)
                     canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType)))
-                
+            del canvas
+            
     return processed_dict
 
 def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict):
