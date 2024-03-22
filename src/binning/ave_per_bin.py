@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 20:10:54 trottar"
+# Time-stamp: "2024-03-21 20:18:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -415,12 +415,15 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             val.SetTitle(val.GetName())
             if i==0 and j==0:
                 if "DUMMY" not in key:
+                    print("!!!!!!!!!!! Start", i, j)
                     canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+'(')
             elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
                 if "DUMMY" not in key:
+                    print("!!!!!!!!!!! End", i, j)
                     canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+')')
             else:
                 if "DUMMY" not in key:
+                    print("!!!!!!!!!!!", i, j)
                     canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
                 
     return processed_dict
