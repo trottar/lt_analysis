@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-11 02:15:54 trottar"
+# Time-stamp: "2024-03-22 12:54:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,7 +250,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     Need to sort data properly from least to greatest so that the fortran binning stays consistent (ie the lowest tbin corresponds to the first iteration)
     '''
     
-    if float(runNumRight[0]) != 0:
+    if "Right" in phisetlist:
         # Combine data from different lists into tuples
         data_right_tuples = list(zip(avet_right_data, aveQ2_right_data, aveW_right_data))
         # Sort based on avet data
@@ -265,7 +265,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         avet_err_right_data, aveQ2_err_right_data, aveW_err_right_data = zip(*sorted_data_right_tuples[:len(avet_err_right_data)])        
         
-    if float(runNumLeft[0]) != 0:        
+    if "Left" in phisetlist 
         # Combine data from different lists into tuples
         data_left_tuples = list(zip(avet_left_data, aveQ2_left_data, aveW_left_data))
         # Sort based on avet data
@@ -280,7 +280,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         avet_err_left_data, aveQ2_err_left_data, aveW_err_left_data = zip(*sorted_data_left_tuples[:len(avet_err_left_data)])
         
-    if float(runNumCenter[0]) != 0:        
+    if "Center" in phisetlist 
         # Combine data from different lists into tuples
         data_center_tuples = list(zip(avet_center_data, aveQ2_center_data, aveW_center_data))
         # Sort based on avet data
@@ -295,7 +295,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         avet_err_center_data, aveQ2_err_center_data, aveW_err_center_data = zip(*sorted_data_center_tuples[:len(avet_err_center_data)])
         
-    if float(runNumRight[0]) != 0:
+    if "Right" in phisetlist:
         # Combine data from different lists into tuples
         data_right_tuples = list(zip(tbin_data_right, phibin_data_right, yield_data_right, yield_data_err_right))
         # Sort based on tbin and phibin
@@ -303,7 +303,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_data_right, phibin_data_right, yield_data_right, yield_data_err_right = zip(*sorted_data_right_tuples[:len(tbin_data_right)])
 
-    if float(runNumLeft[0]) != 0:        
+    if "Left" in phisetlist 
         # Combine data from different lists into tuples
         data_left_tuples = list(zip(tbin_data_left, phibin_data_left, yield_data_left, yield_data_err_left))
         # Sort based on tbin and phibin
@@ -311,7 +311,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_data_left, phibin_data_left, yield_data_left, yield_data_err_left = zip(*sorted_data_left_tuples[:len(tbin_data_left)])
 
-    if float(runNumCenter[0]) != 0:        
+    if "Center" in phisetlist 
         # Combine data from different lists into tuples
         data_center_tuples = list(zip(tbin_data_center, phibin_data_center, yield_data_center, yield_data_err_center))
         # Sort based on tbin and phibin
@@ -319,7 +319,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_data_center, phibin_data_center, yield_data_center, yield_data_err_center = zip(*sorted_data_center_tuples[:len(tbin_data_center)])
 
-    if float(runNumRight[0]) != 0:
+    if "Right" in phisetlist:
         # Combine simc from different lists into tuples
         simc_right_tuples = list(zip(tbin_simc_right, phibin_simc_right, yield_simc_right, yield_simc_err_right))
         # Sort based on tbin and phibin
@@ -327,7 +327,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_simc_right, phibin_simc_right, yield_simc_right, yield_simc_err_right = zip(*sorted_simc_right_tuples[:len(tbin_simc_right)])
 
-    if float(runNumLeft[0]) != 0:        
+    if "Left" in phisetlist 
         # Combine simc from different lists into tuples
         simc_left_tuples = list(zip(tbin_simc_left, phibin_simc_left, yield_simc_left, yield_simc_err_left))
         # Sort based on tbin and phibin
@@ -335,7 +335,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         # Extract sorted values back into separate lists
         tbin_simc_left, phibin_simc_left, yield_simc_left, yield_simc_err_left = zip(*sorted_simc_left_tuples[:len(tbin_simc_left)])
 
-    if float(runNumCenter[0]) != 0:        
+    if "Center" in phisetlist 
         # Combine simc from different lists into tuples
         simc_center_tuples = list(zip(tbin_simc_center, phibin_simc_center, yield_simc_center, yield_simc_err_center))
         # Sort based on tbin and phibin
@@ -388,7 +388,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     if not os.path.exists(f_beam):
         open(f_beam, "w").close()
 
-    if float(runNumRight[0]) != 0:
+    if "Right" in phisetlist:
         # First check if line exists
         with open(f_beam, 'r') as f:
             lines = f.readlines()
@@ -400,7 +400,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             except ValueError:
                 print("Error: Value not float...",type(ebeam_right), type(Q2), type(W), type(EPSVAL))
 
-    if float(runNumLeft[0]) != 0:
+    if "Left" in phisetlist:
         # First check if line exists
         with open(f_beam, 'r') as f:
             lines = f.readlines()
@@ -412,7 +412,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             except ValueError:
                 print("Error: Value not float...",type(ebeam_left), type(Q2), type(W), type(EPSVAL))
 
-    if float(runNumCenter[0]) != 0:
+    if "Center" in phisetlist:
         # First check if line exists
         with open(f_beam, 'r') as f:
             lines = f.readlines()
@@ -432,7 +432,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     if not os.path.exists(f_list_settings):
         open(f_list_settings, "w").close()
 
-    if float(runNumRight[0]) != 0:    
+    if "Right" in phisetlist 
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -446,7 +446,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             if not inLine:
                 write_to_file(f_list_settings, check_line)                        
 
-    if float(runNumLeft[0]) != 0:    
+    if "Left" in phisetlist 
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -460,7 +460,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             if not inLine:
                 write_to_file(f_list_settings, check_line)
 
-    if float(runNumCenter[0]) != 0:    
+    if "Center" in phisetlist 
         # Save lines in the file
         with open(f_list_settings, 'r') as f:
             lines = f.readlines()
@@ -476,7 +476,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 
     ################################################################################################################################################
 
-    if float(runNumRight[0]) != 0:
+    if "Right" in phisetlist:
         f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
         output_file_lst.append(f_kindata.split('/src/')[1])
@@ -495,7 +495,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
-    if float(runNumLeft[0]) != 0:
+    if "Left" in phisetlist:
         f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
         output_file_lst.append(f_kindata.split('/src/')[1])
@@ -514,7 +514,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 write_to_file(f_kindata,check_line)
                 processed_Q2vals.add(Q2val)
 
-    if float(runNumCenter[0]) != 0:
+    if "Center" in phisetlist:
         f_kindata = '{}/src/{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                   Ws.replace("p",""), float(EPSVAL)*100)
         output_file_lst.append(f_kindata.split('/src/')[1])
@@ -535,7 +535,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
 
     ################################################################################################################################################
 
-    if float(runNumRight[0]) != 0:
+    if "Right" in phisetlist:
         f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
         output_file_lst.append(f_yield.split('/src/')[1])
@@ -549,7 +549,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                                                                                   int(phibin_data_right[i]), int(tbin_data_right[i]))
                 write_to_file(f_yield,check_line)
 
-    if float(runNumLeft[0]) != 0:
+    if "Left" in phisetlist:
         f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
         output_file_lst.append(f_yield.split('/src/')[1])
@@ -563,7 +563,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                                                                                   int(phibin_data_left[i]), int(tbin_data_left[i]))
                 write_to_file(f_yield,check_line)
 
-    if float(runNumCenter[0]) != 0:
+    if "Center" in phisetlist:
         f_yield = '{}/src/{}/yields/yield_data.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                   Ws.replace("p",""), float(EPSVAL)*100)
         output_file_lst.append(f_yield.split('/src/')[1])
@@ -579,7 +579,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
 
     ################################################################################################################################################
     
-    if float(runNumRight[0]) != 0:
+    if "Right" in phisetlist:
         f_yield = '{}/src/{}/yields/yield_simc.{}_Q{}W{}_{:.0f}_-{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))
         output_file_lst.append(f_yield.split('/src/')[1])
@@ -593,7 +593,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                                                                                   int(phibin_simc_right[i]), int(tbin_simc_right[i]))
                 write_to_file(f_yield,check_line)
 
-    if float(runNumLeft[0]) != 0:
+    if "Left" in phisetlist:
         f_yield = '{}/src/{}/yields/yield_simc.{}_Q{}W{}_{:.0f}_+{}.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))
         output_file_lst.append(f_yield.split('/src/')[1])
@@ -607,7 +607,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                                                                                   int(phibin_simc_left[i]), int(tbin_simc_left[i]))
                 write_to_file(f_yield,check_line)
 
-    if float(runNumCenter[0]) != 0:
+    if "Center" in phisetlist:
         f_yield = '{}/src/{}/yields/yield_simc.{}_Q{}W{}_{:.0f}_+0000.dat'.format(LTANAPATH, ParticleType, polID, Qs.replace("p",""), \
                                                                                   Ws.replace("p",""), float(EPSVAL)*100)
         output_file_lst.append(f_yield.split('/src/')[1])
