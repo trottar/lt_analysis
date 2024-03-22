@@ -91,7 +91,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
     if (highe_input == False and mide_input == False and lowe_input == False):
         print("!!!!! ERROR !!!!!\n No valid file found! \n!!!!! ERROR !!!!!")
-        sys.exit(1)
+        #sys.exit(1)
 
     ##############################################################################################################################################
     labelh = ""
