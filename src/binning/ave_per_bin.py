@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 20:18:48 trottar"
+# Time-stamp: "2024-03-21 20:31:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -409,22 +409,25 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             "H_MM_DUMMY" : remove_negative_bins(hist_bin_dict["H_MM_DUMMY_{}".format(j)]),
         }
 
+        # Sort dictionary keys alphabetically
+        processed_dict["t_bin{}".format(j+1)] = sorted(processed_dict["t_bin{}".format(j+1)].keys())
+        
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
             val.Draw()
-            val.SetTitle(val.GetName())
+            val.SetTitle("{} {}".format(phi_setting, val.GetName()))
             if i==0 and j==0:
                 if "DUMMY" not in key:
                     print("!!!!!!!!!!! Start", i, j)
-                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+'(')
+                    canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+'(')
             elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
                 if "DUMMY" not in key:
                     print("!!!!!!!!!!! End", i, j)
-                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType))+')')
+                    canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+')')
             else:
                 if "DUMMY" not in key:
                     print("!!!!!!!!!!!", i, j)
-                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
+                    canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType)))
                 
     return processed_dict
 

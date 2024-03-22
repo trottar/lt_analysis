@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 20:02:17 trottar"
+# Time-stamp: "2024-03-21 20:32:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -358,6 +358,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 "H_t_DUMMY" : remove_negative_bins(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]),
             }
 
+            # Sort dictionary keys alphabetically
+            processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())
+            
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
                 if is_hist(val):
                     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
@@ -365,13 +368,13 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     val.SetTitle(val.GetName())
                     if i==0 and j==0 and k==0:
                         if "DUMMY" not in key:
-                            canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+'(')
+                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
                     elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                         if "DUMMY" not in key:
-                            canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType))+')')
+                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+')')
                     else:
                         if "DUMMY" not in key:
-                            canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
+                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType)))
             
     return processed_dict
 
@@ -639,11 +642,11 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
                     val.Draw()
                     val.SetTitle(val.GetName())
                     if i==0 and j==0 and k==0:
-                        canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+'(')
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
                     elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
-                        canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType))+')')
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+')')
                     else:
-                        canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType)))
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
             
     return processed_dict
 

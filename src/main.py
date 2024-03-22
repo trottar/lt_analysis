@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 18:53:23 trottar"
+# Time-stamp: "2024-03-21 20:29:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -455,7 +455,7 @@ for hist in histlist:
 
 if DEBUG:
     # Show plot pdf for each setting
-    for hist in histlist:        
+    for hist in histlist:
         show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
@@ -521,14 +521,20 @@ plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDic
 #notify_email(email_address="trotta@cua.edu")
 
 if DEBUG:
-    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
-output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_averages_data_".format(ParticleType)))
+    # Show plot pdf for each setting
+    for hist in histlist:
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(hist["phi_setting"], ParticleType)))
+for hist in histlist:
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(hist["phi_setting"], ParticleType)))
 
 if DEBUG:
-    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
-    show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType)))
-output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_yield_data_".format(ParticleType)))
-output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_yield_simc_".format(ParticleType)))
+    # Show plot pdf for each setting
+    for hist in histlist:
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(hist["phi_setting"], ParticleType)))
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(hist["phi_setting"], ParticleType)))
+for hist in histlist:        
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(hist["phi_setting"], ParticleType)))
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(hist["phi_setting"], ParticleType)))
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
