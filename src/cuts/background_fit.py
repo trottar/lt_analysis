@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 17:35:04 trottar"
+# Time-stamp: "2024-03-21 22:04:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,11 +56,11 @@ bg_dict ={
     #"Q3p0W2p32Left_lowe" : 50/3130,
     #"Q3p0W2p32Center_lowe" : 50/3301,
     # t-range = 0.1-1.0 (MM cut)
-    "Q3p0W2p32Right_highe" : 25/517, # Background value divided by number of events
-    "Q3p0W2p32Left_highe" : 25/979,
-    "Q3p0W2p32Center_highe" : 25/1706,
-    "Q3p0W2p32Left_lowe" : 50/2508,
-    "Q3p0W2p32Center_lowe" : 50/2975,    
+    "Q3p0W2p32Right_highe" : 150/517, # Background value divided by number of events
+    "Q3p0W2p32Left_highe" : 150/979,
+    "Q3p0W2p32Center_highe" : 150/1706,
+    "Q3p0W2p32Left_lowe" : 200/2508,
+    "Q3p0W2p32Center_lowe" : 200/2975,    
     # t-range = 0.45-1.0 (MM cut)
     #"Q3p0W2p32Right_highe" : 15/484, # Background value divided by number of events
     #"Q3p0W2p32Left_highe" : 10/978,
@@ -103,10 +103,6 @@ def bg_fit(phi_setting, inpDict, hist):
     # Get the fitted constant value and its uncertainties
     bg_par = fit_func.GetParameter(0)
     bg_err = fit_func.GetParError(0)
-
-    #canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-    #hist.Draw()
-    #canvas.SaveAs("{}/{}_Q{}W{}_{}e.png".format(LTANAPATH, hist.GetName(), Q2, W, EPSSET))
 
     if num_evts == 0:
         return fit_func, bg_par
