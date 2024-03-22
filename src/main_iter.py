@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 23:42:41 trottar"
+# Time-stamp: "2024-03-22 03:11:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -163,8 +163,8 @@ if EPSSET == "low":
     for f in files:
         print("\nCopying {} to {}".format(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType)))
         shutil.copy(prev_iter_dir+'/yields/'+f, '{}/src/{}/yields/'.format(LTANAPATH, ParticleType))
-    print("\nCopying {} to {}".format(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH)))
-    shutil.copy(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH))
+    #print("\nCopying {} to {}".format(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH)))
+    #shutil.copy(prev_iter_dir+'/lt_2D_fit.py', '{}/src/models/lt_2D_fit.py'.format(LTANAPATH))
     print("\nCopying {} to {}".format(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH)))
     shutil.copy(prev_iter_dir+'/lt_kaon_pl.py', '{}/src/models/lt_kaon_pl.py'.format(LTANAPATH))
     print("\nCopying {} to {}".format(prev_iter_dir+'/param_kaon_pl.py', '{}/src/models/param_kaon_pl.py'.format(LTANAPATH)))
@@ -462,6 +462,22 @@ from binned import plot_binned
 
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
 #notify_email(email_address="trotta@cua.edu")
+
+if DEBUG:
+    # Show plot pdf for each setting
+    for hist in histlist:
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(hist["phi_setting"], ParticleType)))
+for hist in histlist:
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(hist["phi_setting"], ParticleType)))
+
+if DEBUG:
+    # Show plot pdf for each setting
+    for hist in histlist:
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(hist["phi_setting"], ParticleType)))
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(hist["phi_setting"], ParticleType)))
+for hist in histlist:        
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(hist["phi_setting"], ParticleType)))
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(hist["phi_setting"], ParticleType)))
 
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))

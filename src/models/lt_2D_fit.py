@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-20 14:02:34 trottar"
+# Time-stamp: "2024-03-22 03:10:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -247,8 +247,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineWidth(2)
         
         # x->phi, y->eps, PI/180 = 0.017453
-        #fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, 0.0, 1.0)
-        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, LOEPS-0.2*LOEPS, HIEPS+0.2*HIEPS)
+        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, 0.0, 1.0)
+        #fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, LOEPS-0.2*LOEPS, HIEPS+0.2*HIEPS)
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
