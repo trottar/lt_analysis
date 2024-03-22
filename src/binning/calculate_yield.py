@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 20:44:33 trottar"
+# Time-stamp: "2024-03-21 20:51:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -550,7 +550,7 @@ def find_yield_data(histlist, inpDict):
 
 ##################################################################################################################################################
 
-def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
+def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
     processed_dict = {}
     
@@ -651,9 +651,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration):
             
     return processed_dict
 
-def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration):
+def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
-    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, inpDict, iteration)
+    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
     
     binned_dict = {}
 
@@ -704,9 +704,10 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration):
 def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
     tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
+    phi_setting = hist["phi_setting"]
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, inpDict, iteration)
+    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
