@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-21 19:50:08 trottar"
+# Time-stamp: "2024-03-21 20:01:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -724,23 +724,20 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
             "H_epsilon_SIMC" : hist_bin_dict["H_epsilon_SIMC_{}".format(j)],
         }
 
-        data_dict = processed_dict["t_bin{}".format(j+1)].copy()
-        for key,val in data_dict.items():
-            if "DUMMY" in key:
-                del data_dict[key]    
-        for i, (key,val) in enumerate(data_dict.items()):
+        for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
             val.Draw()
             val.SetTitle(val.GetName())
             if i==0 and j==0:
-                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+'(')
-            elif i==len(data_dict.items())-1 and j==len(t_bins)-2:
-                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+')')
+                if "DUMMY" not in key:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+'(')
+            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
+                if "DUMMY" not in key:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType))+')')
             else:
-                canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType)))
-            del canvas
-            del data_dict[key]
-            
+                if "DUMMY" not in key:
+                    canvas.Print(outputpdf.replace("{}_".format(ParticleType),"{}_averages_simc_".format(ParticleType)))
+        
     return processed_dict                    
         
 def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration):
