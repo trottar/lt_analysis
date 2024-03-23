@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 11:02:07 trottar"
+# Time-stamp: "2024-03-23 11:04:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -288,8 +288,13 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask = (df['tbin'] == (k+1))
-            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
 
@@ -316,8 +321,13 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask = (df['tbin'] == (k+1))
-            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
 
@@ -343,6 +353,11 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.scatter(df['phi'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
@@ -366,6 +381,11 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.scatter(df['phi'][mask], df['W'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
@@ -389,8 +409,13 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['th_cm'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.errorbar(df['th_cm'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=2)
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_real')
@@ -410,6 +435,11 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.scatter(df['th_cm'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
@@ -431,8 +461,13 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=2)
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_real', fontsize=16)
@@ -453,6 +488,11 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
@@ -477,8 +517,13 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=2)
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key+" Model", facecolors='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
@@ -502,8 +547,13 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=2)
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key+" Model", facecolors='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
@@ -526,6 +576,11 @@ with PdfPages(outputpdf) as pdf:
         ax.set_title("${}$".format(formatted_sig))
         for i, df_key in enumerate(['sep_file']):
             df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
             print("="*50)
             model = []
             # Generate model for comparison
@@ -537,7 +592,7 @@ with PdfPages(outputpdf) as pdf:
             # Check that model sig is not all zeros
             if not all(element == 0 for element in model):
                 ax.plot(df['t'], model, linestyle='-.', color='red', label='Model Fit')
-            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], capsize=5)
+            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], capsize=2)
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.set_xlim(tmin, tmax)
