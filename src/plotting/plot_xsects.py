@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 11:42:18 trottar"
+# Time-stamp: "2024-03-23 11:46:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -284,7 +284,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
@@ -303,7 +303,7 @@ with PdfPages(outputpdf) as pdf:
         #ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
 
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -317,7 +317,7 @@ with PdfPages(outputpdf) as pdf:
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         ax = axes
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
@@ -336,7 +336,7 @@ with PdfPages(outputpdf) as pdf:
         #ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
 
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -349,7 +349,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -364,7 +364,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('$Q^2$', fontsize=16)
         ax.set_xlim(0, 360)
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -377,7 +377,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -392,7 +392,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('W', fontsize=16)
         ax.set_xlim(0, 360)
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -405,7 +405,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -419,7 +419,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_real')
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -431,7 +431,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -445,7 +445,7 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_mod')
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -457,7 +457,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -472,7 +472,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_real', fontsize=16)
         ax.set_xlim(0, 360)
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
 
@@ -484,7 +484,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -499,7 +499,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_mod', fontsize=16)
         ax.set_xlim(0, 360)
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         
@@ -513,7 +513,7 @@ with PdfPages(outputpdf) as pdf:
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         ax = axes
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -529,7 +529,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_real', fontsize=16)
         ax.set_xlim(0, 360)
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         # Set y-axis to logarithmic scale
@@ -543,7 +543,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
+        ax.set_title("t= {:.3f}, $Q^2$ = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -559,7 +559,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_real', fontsize=16)
         ax.set_xlim(0, 360)
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         
@@ -596,7 +596,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.set_xlim(tmin, tmax)
-        ax.legend()
+        ax.legend(fontsize=16)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
     print("="*50)
