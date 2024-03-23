@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 10:49:10 trottar"
+# Time-stamp: "2024-03-23 10:51:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -278,7 +278,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Define markers and colors
-    markers = ['x', 'o', 's', 'd'] # 'x'->x, 'o'->circle, 's'->square, 'd'->diamond
+    markers = ['x', 'o', 's', '^'] # 'x'->x, 'o'->circle, 's'->square, '^'->diamond
     colors = ['black', 'red']
 
     # Loop through t bins and plot data
@@ -289,7 +289,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
             mask = (df['tbin'] == (k+1))
-            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
 
         ax.axhline(1.0, color='gray', linestyle='--')
 
@@ -317,7 +317,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
             mask = (df['tbin'] == (k+1))
-            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
 
         ax.axhline(1.0, color='gray', linestyle='--')
 
@@ -344,7 +344,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['phi'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.scatter(df['phi'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('$Q^2$', fontsize=16)
@@ -367,7 +367,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['phi'][mask], df['W'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.scatter(df['phi'][mask], df['W'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('W', fontsize=16)
@@ -390,7 +390,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['th_cm'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.errorbar(df['th_cm'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_real')
@@ -411,7 +411,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['th_cm'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.scatter(df['th_cm'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_mod')
@@ -432,7 +432,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_real', fontsize=16)
@@ -454,7 +454,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_mod', fontsize=16)
@@ -478,7 +478,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key+" Model", facecolors='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
@@ -503,7 +503,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, markerfacecolor='none' , edgecolors=colors[i])
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key+" Model", facecolors='none' , edgecolors=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
