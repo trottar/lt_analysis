@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 11:47:10 trottar"
+# Time-stamp: "2024-03-23 11:52:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,10 +150,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         tcut = ""
 
         if i == 0:
-            tcut = "t < {0} && x!=0.0 && (phi > 300 || phi < 230)".format(float(t_list[i]+0.01))
+            tcut = "t < {0} && x!=0.0".format(float(t_list[i]+0.01))
             print(tcut)
         else:
-            tcut = "(t > {0} && t < {1}) && x!=0.0 && (phi > 300 || phi < 230)".format(float(t_list[i-1])+0.01, float(t_list[i])+0.01)
+            tcut = "(t > {0} && t < {1}) && x!=0.0".format(float(t_list[i-1])+0.01, float(t_list[i])+0.01)
             print(tcut)
 
         lo_eps = lo_eps_list[i]
@@ -247,8 +247,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineWidth(2)
         
         # x->phi, y->eps, PI/180 = 0.017453
-        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, 0.0, 1.0)
-        #fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, LOEPS-0.2*LOEPS, HIEPS+0.2*HIEPS)
+        #fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, 0.0, 1.0)
+        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, LOEPS-0.2*LOEPS, HIEPS+0.2*HIEPS)
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
@@ -593,7 +593,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Create TText for fit status
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.15, 0.85, "t= {:.3f}, #Q^2 = {:.1f}, W = {:.2f}".format(t_list[i], float(q2_set.replace("p",".")), float(w_set.replace("p","."))))
+        fit_status.DrawTextNDC(0.15, 0.85, "t={:.3f}, #Q^2={:.1f}, W={:.2f}".format(t_list[i], float(q2_set.replace("p",".")), float(w_set.replace("p","."))))
         #fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
         #fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
 
