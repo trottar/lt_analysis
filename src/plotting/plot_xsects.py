@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 11:25:29 trottar"
+# Time-stamp: "2024-03-23 11:42:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -284,7 +284,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
@@ -317,7 +317,7 @@ with PdfPages(outputpdf) as pdf:
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         ax = axes
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
@@ -349,7 +349,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -377,7 +377,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -405,7 +405,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -431,7 +431,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -457,7 +457,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -484,7 +484,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -513,7 +513,7 @@ with PdfPages(outputpdf) as pdf:
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         ax = axes
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -543,7 +543,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
+        ax.set_title("t= {:.3f}, Q2 = {:.1f}, W = {:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=16)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -573,7 +573,7 @@ with PdfPages(outputpdf) as pdf:
         # Use integer division to get the correct subplot position
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
-        ax.set_title("${}$".format(formatted_sig))
+        ax.set_title("${}$".format(formatted_sig), fontsize=16)
         for i, df_key in enumerate(['sep_file']):
             df = file_df_dict[df_key]
             if "hi" in df_key:
