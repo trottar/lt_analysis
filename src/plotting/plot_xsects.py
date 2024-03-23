@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-22 21:42:52 trottar"
+# Time-stamp: "2024-03-23 10:33:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -278,23 +278,23 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Define markers and colors
-    markers = ['o', 's'] # 'o'->circle, 's'->square
-    colors = ['blue', 'orange']
+    markers = ['x', 'o', 's'] # 'x'->x, 'o'->circle, 's'->square
+    colors = ['black', 'red']
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
-        for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
+        for i, df_key in enumerate(['Low $\epsilon$ data', 'High $\epsilon$ data']):
             df = file_df_dict[df_key]
             mask = (df['tbin'] == (k+1))
             ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
         ax.axhline(1.0, color='gray', linestyle='--')
 
-        ax.set_xlabel('$\phi$')
-        ax.set_ylabel('Ratio')
+        ax.set_xlabel('$\phi$', fontsize=16)
+        ax.set_ylabel('Ratio', fontsize=16)
         #ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
 
@@ -312,17 +312,17 @@ with PdfPages(outputpdf) as pdf:
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         ax = axes
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
-        for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
+        for i, df_key in enumerate(['Low $\epsilon$ data', 'High $\epsilon$ data']):
             df = file_df_dict[df_key]
             mask = (df['tbin'] == (k+1))
             ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
         ax.axhline(1.0, color='gray', linestyle='--')
 
-        ax.set_xlabel('$\phi$')
-        ax.set_ylabel('Ratio')
+        ax.set_xlabel('$\phi$', fontsize=16)
+        ax.set_ylabel('Ratio', fontsize=16)
         #ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
 
@@ -339,15 +339,15 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.scatter(df['phi'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
-        ax.set_xlabel('$\phi$')
-        ax.set_ylabel('$Q^2$')
+        ax.set_xlabel('$\phi$', fontsize=16)
+        ax.set_ylabel('$Q^2$', fontsize=16)
         ax.set_xlim(0, 360)
         ax.legend()
         # Add grid
@@ -362,15 +362,15 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.scatter(df['phi'][mask], df['W'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
-        ax.set_xlabel('$\phi$')
-        ax.set_ylabel('W')
+        ax.set_xlabel('$\phi$', fontsize=16)
+        ax.set_ylabel('W', fontsize=16)
         ax.set_xlim(0, 360)
         ax.legend()
         # Add grid
@@ -385,7 +385,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -406,7 +406,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -427,15 +427,15 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
-        ax.set_xlabel('$\phi$')
-        ax.set_ylabel('x_real')
+        ax.set_xlabel('$\phi$', fontsize=16)
+        ax.set_ylabel('x_real', fontsize=16)
         ax.set_xlim(0, 360)
         ax.legend()
         # Add grid to subplot
@@ -449,15 +449,15 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, facecolors='none' , edgecolors=colors[i])
 
-        ax.set_xlabel('$\phi$')
-        ax.set_ylabel('x_mod')
+        ax.set_xlabel('$\phi$', fontsize=16)
+        ax.set_ylabel('x_mod', fontsize=16)
         ax.set_xlim(0, 360)
         ax.legend()
         # Add grid to subplot
@@ -473,7 +473,7 @@ with PdfPages(outputpdf) as pdf:
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         ax = axes
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -481,8 +481,8 @@ with PdfPages(outputpdf) as pdf:
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key+" Model", facecolors='none' , edgecolors=colors[i])
 
-        ax.set_xlabel('$\phi$')
-        ax.set_ylabel('x_real')
+        ax.set_xlabel('$\phi$', fontsize=16)
+        ax.set_ylabel('x_real', fontsize=16)
         ax.set_xlim(0, 360)
         ax.legend()
         # Add grid to subplot
@@ -498,7 +498,7 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         ax = axes[k]
-        ax.set_title("t = {:.2f}".format(t_bin_centers[k]))
+        ax.set_title("t = {:.3f}".format(t_bin_centers[k]))
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -506,8 +506,8 @@ with PdfPages(outputpdf) as pdf:
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key+" Model", facecolors='none' , edgecolors=colors[i])
 
-        ax.set_xlabel('$\phi$')
-        ax.set_ylabel('x_real')
+        ax.set_xlabel('$\phi$', fontsize=16)
+        ax.set_ylabel('x_real', fontsize=16)
         ax.set_xlim(0, 360)
         ax.legend()
         # Add grid to subplot
