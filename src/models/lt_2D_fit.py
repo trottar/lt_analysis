@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 11:08:26 trottar"
+# Time-stamp: "2024-03-23 11:08:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -580,8 +580,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         leg.SetMargin(0.4)
         leg.AddEntry(glo, "Low #it{#font[120]{e}}", "pl")
         leg.AddEntry(ghi, "High #it{#font[120]{e}}", "pl")
-        #leg.AddEntry(flo, "Low #it{#font[120]{e}} fit", "l")
-        #leg.AddEntry(fhi, "High #it{#font[120]{e}} fit", "l")
         leg.Draw()
 
         # Check the fit status for 'flo'

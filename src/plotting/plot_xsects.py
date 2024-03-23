@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 11:08:03 trottar"
+# Time-stamp: "2024-03-23 11:10:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -278,7 +278,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Define markers and colors
-    markers = ['x', 'o', 's', 'D'] # 'x'->x, 'o'->circle, 's'->square, 'D'->diamond
+    markers = ['x', 'o', '*', 'D'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
     colors = ['black', 'red']
 
     # Loop through t bins and plot data
