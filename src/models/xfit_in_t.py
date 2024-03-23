@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-22 18:31:48 trottar"
+# Time-stamp: "2024-03-23 05:59:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,9 +59,9 @@ DEBUG=False
 ##############
 # Limit for finding new parameters (units of percent)
 #par_lim = 0.001 # +/-.1%
-#par_lim = 0.01 # +/-1%
+par_lim = 0.01 # +/-1%
 #par_lim = 0.05 # +/-5%
-par_lim = 0.2 # +/-20%
+#par_lim = 0.2 # +/-20%
 #par_lim = 0.75 # +/-75%
 #par_lim = 10.00 # +/-1000%
 ##############
@@ -210,10 +210,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     else: 
         f_sigL_pre.SetParLimits(3, -1.0, 1.0)       
     # Fixing sigL terms for testing
-    f_sigL_pre.FixParameter(0, l0)
-    f_sigL_pre.FixParameter(1, l1)
-    f_sigL_pre.FixParameter(2, l2)
-    f_sigL_pre.FixParameter(3, l3)
+    #f_sigL_pre.FixParameter(0, l0)
+    #f_sigL_pre.FixParameter(1, l1)
+    #f_sigL_pre.FixParameter(2, l2)
+    #f_sigL_pre.FixParameter(3, l3)
     # Fixing sigL terms to zero
     #f_sigL_pre.FixParameter(0, 0.0)
     #f_sigL_pre.FixParameter(1, 0.0)
@@ -296,10 +296,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     else: 
         f_sigL.SetParLimits(3, -1.0, 1.0)       
     # Fixing sigL terms for testing
-    f_sigL.FixParameter(0, l0)
-    f_sigL.FixParameter(1, l1)
-    f_sigL.FixParameter(2, l2)
-    f_sigL.FixParameter(3, l3)
+    #f_sigL.FixParameter(0, l0)
+    #f_sigL.FixParameter(1, l1)
+    #f_sigL.FixParameter(2, l2)
+    #f_sigL.FixParameter(3, l3)
     # Fixing sigL terms to zero
     #f_sigL.FixParameter(0, 0.0)
     #f_sigL.FixParameter(1, 0.0)
