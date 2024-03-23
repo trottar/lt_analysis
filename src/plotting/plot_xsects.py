@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 10:59:39 trottar"
+# Time-stamp: "2024-03-23 11:02:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -344,7 +344,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['phi'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.scatter(df['phi'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('$Q^2$', fontsize=16)
@@ -367,7 +367,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['phi'][mask], df['W'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.scatter(df['phi'][mask], df['W'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('W', fontsize=16)
@@ -411,7 +411,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['th_cm'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.scatter(df['th_cm'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_mod')
@@ -454,7 +454,7 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=5)
+            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_mod', fontsize=16)
