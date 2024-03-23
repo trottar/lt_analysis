@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 11:23:17 trottar"
+# Time-stamp: "2024-03-23 11:25:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -441,7 +441,7 @@ with PdfPages(outputpdf) as pdf:
                 df_key = "Low $\epsilon$"
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['th_cm'][mask], df['x_mod'][mask], color=colors[i], marker=markers[i+2], linestyle='None', label=df_key, color=colors[i])
+            ax.scatter(df['th_cm'][mask], df['x_mod'][mask], marker=markers[i+2], linestyle='None', label=df_key, color=colors[i])
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_mod')
@@ -494,7 +494,7 @@ with PdfPages(outputpdf) as pdf:
                 df_key = "Low $\epsilon$"
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['phi'][mask], df['x_mod'][mask], color=colors[i], marker=markers[i+2], linestyle='None', label=df_key, color=colors[i])
+            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i+2], linestyle='None', label=df_key, color=colors[i])
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_mod', fontsize=16)
@@ -524,7 +524,7 @@ with PdfPages(outputpdf) as pdf:
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
-            ax.scatter(df['phi'][mask], df['x_mod'][mask], color=colors[i], marker=markers[i+2], linestyle='None', label=df_key+" Model")
+            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i+2], linestyle='None', label=df_key+" Model")
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_real', fontsize=16)
@@ -554,7 +554,7 @@ with PdfPages(outputpdf) as pdf:
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
-            ax.scatter(df['phi'][mask], df['x_mod'][mask], color=colors[i], marker=markers[i+2], linestyle='None', label=df_key+" Model")
+            ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i+2], linestyle='None', label=df_key+" Model")
 
         ax.set_xlabel('$\phi$', fontsize=16)
         ax.set_ylabel('x_real', fontsize=16)
