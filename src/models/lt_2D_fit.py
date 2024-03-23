@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 12:01:01 trottar"
+# Time-stamp: "2024-03-23 12:03:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -593,8 +593,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Create TText for fit status
         fit_status = ROOT.TText()
         fit_status.SetTextSize(0.04)
-        formatted_Q2 = "#it{Q}^2"
-        fit_status.DrawTextNDC(0.15, 0.85, "t={:.3f}, {}={:.1f}, W={:.2f}".format(t_list[i], formatted_Q2, float(q2_set.replace("p",".")), float(w_set.replace("p","."))))
+        formatted_str = "t={:.3f}, Q^2={:.1f}, W={:.2f}".format(t_list[i], float(q2_set.replace("p",".")), float(w_set.replace("p",".")))
+        fit_status.DrawTextNDC(0.15, 0.85, "#it{}".format(formatted_str))
         #fit_status.DrawTextNDC(0.15, 0.80, "Low Fit Status: " + flo_status_message)
         #fit_status.DrawTextNDC(0.15, 0.75, "High Fit Status: " + fhi_status_message)
 
