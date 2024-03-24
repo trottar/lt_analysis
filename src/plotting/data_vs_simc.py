@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 09:47:12 trottar"
+# Time-stamp: "2024-03-24 09:59:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,7 +152,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         ##############
 
         # Scale MC to data for better comparison
-        scale_to_data = hist["normfac_data"]/hist["normfac_simc"]
+        scale_to_data = 0.8
         
         hist["H_hsdelta_SIMC"].Scale(scale_to_data)
         hist["H_hsxptar_SIMC"].Scale(scale_to_data)
