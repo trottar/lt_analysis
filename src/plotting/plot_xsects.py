@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:21:22 trottar"
+# Time-stamp: "2024-03-24 10:22:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -300,11 +300,11 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('Ratio', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
-        
+
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
@@ -335,11 +335,11 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('Ratio', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
-        
+
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
@@ -367,13 +367,13 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('$Q^2$', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 360)
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
-        
+
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
@@ -397,13 +397,13 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('W', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 360)
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
-        
+
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
 
@@ -427,12 +427,12 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_real')
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
-        
+
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
 
@@ -455,12 +455,12 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_mod')
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
-        
+
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
@@ -483,13 +483,13 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('x_real', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 360)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
-        
+
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
     
@@ -512,12 +512,12 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('x_mod', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 360)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -544,15 +544,15 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('x_real', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 360)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         # Set y-axis to logarithmic scale
         ax.set_yscale('log')
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
-        
+
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
     
@@ -576,12 +576,12 @@ with PdfPages(outputpdf) as pdf:
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('x_real', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 360)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -615,13 +615,13 @@ with PdfPages(outputpdf) as pdf:
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(tmin, tmax)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
     print("="*50)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
