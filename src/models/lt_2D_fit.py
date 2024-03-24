@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:37:53 trottar"
+# Time-stamp: "2024-03-24 10:39:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -521,12 +521,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Draw TMultiGraph
         g.Draw("AP")
 
-        # Create a new graph for the error band
-        errorBand = ROOT.TGraphErrors(glo.GetN(), glo.GetX(), glo.GetY(), ROOT.nullptr, errors)
-        errorBand.SetFillColorAlpha(ROOT.kBlue, 0.3)  # Set fill color and transparency (adjust as needed)
+        # Calculate errors based on y-values
+        errors_glo = [abs(y) for y in glo.GetY()]
+        errors_ghi = [abs(y) for y in ghi.GetY()]
 
-        # Draw the error band below the main graph
-        errorBand.Draw("2 same")
+        # Create error bands for glo and ghi
+        errorBand_glo = ROOT.TGraphErrors(glo.GetN(), glo.GetX(), glo.GetY(), ROOT.nullptr, array.array('d', errors_glo))
+        errorBand_glo.SetFillColorAlpha(ROOT.kBlue, 0.3)  # Set fill color and transparency (adjust as needed)
+
+        errorBand_ghi = ROOT.TGraphErrors(ghi.GetN(), ghi.GetX(), ghi.GetY(), ROOT.nullptr, array.array('d', errors_ghi))
+        errorBand_ghi.SetFillColorAlpha(ROOT.kRed, 0.3)  # Set fill color and transparency (adjust as needed)
+
+        # Draw the error bands below the main graphs
+        errorBand_glo.Draw("2 same")
+        errorBand_ghi.Draw("2 same")
         
         # Set properties for the TMultiGraph
         #g.GetHistogram().SetMinimum(glo.GetMinimum() * 0.8)
