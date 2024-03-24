@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 12:03:35 trottar"
+# Time-stamp: "2024-03-24 12:24:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,6 +50,8 @@ OUTPATH=lt.OUTPATH
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
+# Disable statistics box by default
+ROOT.gStyle.SetOptStat(0)
 ################################################################################################################################################
 
 def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
@@ -152,7 +154,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         ##############
 
         # Scale MC to data for better comparison
-        scale_to_data = 0.65
+        scale_to_data = 0.7
         
         hist["H_hsdelta_SIMC"].Scale(scale_to_data)
         hist["H_hsxptar_SIMC"].Scale(scale_to_data)
@@ -330,8 +332,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     eff_plt.Print(outputpdf + '(')
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     # Plot histograms
     c_pid = TCanvas()
 
@@ -373,8 +373,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     c_pid.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     ct = TCanvas()
     
     gPad.SetLogy()
@@ -385,9 +383,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     ct.Print(outputpdf)
     
-
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)
     CQ2 = TCanvas()
     l_Q2 = TLegend(0.1, 0.75, 0.35, 0.95)
     
@@ -403,8 +398,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     l_Q2.Draw()
     CQ2.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     CW = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -416,8 +409,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CW.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Ct = TCanvas()
     l_t = TLegend(0.1, 0.75, 0.35, 0.95)
     l_t.SetTextSize(0.0135)
@@ -465,8 +456,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Ct.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cepsilon = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -478,8 +467,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cepsilon.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     CMM = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -491,8 +478,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CMM.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     xfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -504,8 +489,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         
     xfp.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     yfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -517,8 +500,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     yfp.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     xpfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -530,8 +511,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     xpfp.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     ypfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -543,8 +522,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     ypfp.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     hxfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -556,8 +533,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hxfp.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     hyfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -569,8 +544,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hyfp.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     hxpfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -582,8 +555,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hxpfp.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     hypfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -595,8 +566,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hypfp.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     xptar = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -608,8 +577,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     xptar.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     yptar = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -621,8 +588,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     yptar.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     hxptar = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -634,8 +599,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hxptar.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     hyptar = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -647,8 +610,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hyptar.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Delta = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -660,8 +621,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Delta.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     hDelta = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -673,8 +632,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hDelta.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cph_q = TCanvas()
 
     binmax = []
@@ -702,8 +659,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cph_q.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cth_q = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -715,8 +670,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cth_q.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cph_recoil = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -725,8 +678,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cph_recoil.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cth_recoil = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -735,8 +686,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cth_recoil.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cpmiss = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -748,8 +697,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cpmiss.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cemiss = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -761,8 +708,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cemiss.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cpmiss_x = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -774,8 +719,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cpmiss_x.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cpmiss_y = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -787,8 +730,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cpmiss_y.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cpmiss_z = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
@@ -800,8 +741,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cpmiss_z.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cmmct = TCanvas()
 
     Cmmct.Divide(2,2)
@@ -819,8 +758,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cmmct.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cctbeta = TCanvas()
 
     Cctbeta.Divide(2,2)
@@ -836,8 +773,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cctbeta.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cmmbeta = TCanvas()
 
     Cmmbeta.Divide(2,2)
@@ -853,8 +788,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cmmbeta.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     CmmH_cer = TCanvas()
 
     CmmH_cer.Divide(2,2)
@@ -870,8 +803,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CmmH_cer.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     CmmH_cal = TCanvas()
 
     CmmH_cal.Divide(2,2)
@@ -887,8 +818,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CmmH_cal.Print(outputpdf)    
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     CmmP_cal = TCanvas()
 
     CmmP_cal.Divide(2,2)
@@ -904,9 +833,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CmmP_cal.Print(outputpdf)
     
-
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)
     CmmP_hgcer = TCanvas()
 
     CmmP_hgcer.Divide(2,2)
@@ -922,8 +848,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CmmP_hgcer.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     CmmP_aero = TCanvas()
 
     CmmP_aero.Divide(2,2)
@@ -939,9 +863,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CmmP_aero.Print(outputpdf)
     
-
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)
     Cqw = TCanvas()
 
     Cqw.Divide(2,2)
@@ -957,8 +878,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cqw.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cq2t = TCanvas()
 
     Cq2t.Divide(2,2)
@@ -974,9 +893,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cq2t.Print(outputpdf)    
     
-
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)
     Cwt = TCanvas()
 
     Cwt.Divide(2,2)
@@ -992,8 +908,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cwt.Print(outputpdf)    
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     Cepst = TCanvas()
 
     Cepst.Divide(2,2)
@@ -1009,8 +923,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cepst.Print(outputpdf)
 
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    
     CMMt = TCanvas()
 
     CMMt.Divide(2,2)
@@ -1026,9 +938,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CMMt.Print(outputpdf)
     
-
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)
     Cpht_simc = TCanvas()
 
     # Create a list to store all polar plots
@@ -1049,9 +958,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
     Cpht_simc.Print(outputpdf)
     
-
-    # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)
     Cpht = TCanvas()
 
     # Create a list to store all polar plots
