@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:11:25 trottar"
+# Time-stamp: "2024-03-24 10:12:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -526,7 +526,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         #g.GetHistogram().SetMaximum(glo.GetMaximum() * 1.2)
         g.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
         g.GetYaxis().CenterTitle()
-        g.GetYaxis().SetTitleOffset(1.4)
+        g.GetYaxis().SetTitleOffset(1.2)
         g.GetYaxis().SetTitleSize(0.04)
 
         g.GetXaxis().SetTitle("#it{#phi} [degree]")
@@ -838,9 +838,9 @@ for i in range(num_events):
     
     # Set axis titles and offsets
     g_unsep_mult.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
-    g_unsep_mult.GetYaxis().SetTitleOffset(1.4)
+    g_unsep_mult.GetYaxis().SetTitleOffset(1.2)
     g_unsep_mult.GetXaxis().SetTitle("#epsilon")
-    g_unsep_mult.GetXaxis().SetTitleOffset(1.4)
+    g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
     
     # Fit functions to 'lo' and 'hi' events
     f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
@@ -878,10 +878,10 @@ g_sig_mult.Add(g_sig_t_total)
 g_sig_mult.Draw("AP")
 
 g_sig_mult.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right) [nb/GeV^{2}]")
-g_sig_mult.GetYaxis().SetTitleOffset(1.4)
+g_sig_mult.GetYaxis().SetTitleOffset(1.2)
 
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-g_sig_mult.GetXaxis().SetTitleOffset(1.4)
+g_sig_mult.GetXaxis().SetTitleOffset(1.2)
 
 g_sig_l_total.Fit(f_exp_l, "MRQ")
 g_sig_t_total.Fit(f_exp_t, "MRQ")
