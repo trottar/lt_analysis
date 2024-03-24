@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 11:13:53 trottar"
+# Time-stamp: "2024-03-24 11:16:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -875,8 +875,10 @@ g_sig_mult = ROOT.TMultiGraph()
 g_sig_mult.Add(g_sig_l_total)
 g_sig_mult.Add(g_sig_t_total)
 
-g_sig_mult.GetXaxis().SetRangeUser(0.0,0.4)
-g_sig_mult.GetYaxis().SetRangeUser(-5,30)
+g_sig_l_total.GetXaxis().SetRangeUser(0.0,0.4)
+g_sig_l_total.GetYaxis().SetRangeUser(-5,30)
+g_sig_t_total.GetXaxis().SetRangeUser(0.0,0.4)
+g_sig_t_total.GetYaxis().SetRangeUser(-5,30)
 
 g_sig_mult.Draw("AP")
 
