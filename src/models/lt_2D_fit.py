@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:45:44 trottar"
+# Time-stamp: "2024-03-24 10:46:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -917,22 +917,17 @@ c_total_l_t.Clear()
 
 ROOT.gStyle.SetOptFit(1)
 
-f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
-
 # Set the size of the statbox
-gStyle.SetStatW(0.15)  # Set width of statbox
-gStyle.SetStatH(0.15)  # Set height of statbox
+ROOT.gStyle.SetStatW(0.15)  # Set width of statbox
+ROOT.gStyle.SetStatH(0.15)  # Set height of statbox
+
+f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 
 # Create a canvas
 c_total = TCanvas()
 
-# Create and set up error bands
-error_band = TGraphErrors(n_points, x_values, y_values, x_errors, y_errors)
-error_band.SetFillColorAlpha(kBlue, 0.3)  # Set fill color and transparency
-
 g_sig_l_total.Draw("A*")
 g_sig_l_total.Fit(f_exp, "MRQ")
-error_band.Draw("3")  # Draw error bands below the graph
 c_total.Print(outputpdf)
 c_total.Clear()
 
