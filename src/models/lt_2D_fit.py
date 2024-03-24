@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 11:07:56 trottar"
+# Time-stamp: "2024-03-24 11:10:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -876,6 +876,7 @@ g_sig_mult.Add(g_sig_l_total)
 g_sig_mult.Add(g_sig_t_total)
 
 g_sig_mult.GetYaxis().SetRangeUser(-5,30)
+g_sig_mult.GetXaxis().SetRangeUser(0.1,0.3)
 
 g_sig_mult.Draw("AP")
 
@@ -932,12 +933,14 @@ f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total = TCanvas()
 
 g_sig_l_total.GetYaxis().SetRangeUser(-5,30)
+g_sig_l_total.GetXaxis().SetRangeUser(0.1,0.3)
 g_sig_l_total.Draw("A*")
 g_sig_l_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.GetYaxis().SetRangeUser(-5,30)
+g_sig_t_total.GetXaxis().SetRangeUser(0.1,0.3)
 g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
@@ -946,12 +949,14 @@ c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.GetYaxis().SetRangeUser(-5,30)
+g_sig_lt_total.GetXaxis().SetRangeUser(0.1,0.3)
 g_sig_lt_total.Draw("A*")
 g_sig_lt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.GetYaxis().SetRangeUser(-5,30)
+g_sig_tt_total.GetXaxis().SetRangeUser(0.1,0.3)
 g_sig_tt_total.Draw("A*")
 g_sig_tt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf+')')
