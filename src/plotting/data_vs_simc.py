@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:10:15 trottar"
+# Time-stamp: "2024-03-24 11:39:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,6 +50,8 @@ OUTPATH=lt.OUTPATH
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
+# Disable statistics box by default
+ROOT.gStyle.SetOptStat(0)
 ################################################################################################################################################
 
 def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
