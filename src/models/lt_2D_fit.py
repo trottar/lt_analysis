@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:08:51 trottar"
+# Time-stamp: "2024-03-24 10:11:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -580,7 +580,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         leg = ROOT.TLegend(0.85, 0.85, 0.99, 0.99)
         leg.SetFillColor(0)
         leg.SetMargin(0.4)
-        leg..SetTextSize(0.04)
+        leg.SetTextSize(0.04)
         leg.AddEntry(glo, "Low #it{#font[120]{e}}", "pl")
         leg.AddEntry(ghi, "High #it{#font[120]{e}}", "pl")
         leg.Draw()
