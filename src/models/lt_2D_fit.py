@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:40:53 trottar"
+# Time-stamp: "2024-03-24 10:45:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -521,21 +521,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Draw TMultiGraph
         g.Draw("AP")
 
-        # Calculate errors based on y-values
-        errors_glo = [abs(y) for y in glo.GetY()]
-        errors_ghi = [abs(y) for y in ghi.GetY()]
-
-        # Create error bands for glo and ghi
-        errorBand_glo = ROOT.TGraphErrors(glo.GetN(), glo.GetX(), glo.GetY(), ROOT.nullptr, array('d', errors_glo))
-        errorBand_glo.SetFillColorAlpha(ROOT.kBlue, 0.3)  # Set fill color and transparency (adjust as needed)
-
-        errorBand_ghi = ROOT.TGraphErrors(ghi.GetN(), ghi.GetX(), ghi.GetY(), ROOT.nullptr, array('d', errors_ghi))
-        errorBand_ghi.SetFillColorAlpha(ROOT.kRed, 0.3)  # Set fill color and transparency (adjust as needed)
-
-        # Draw the error bands below the main graphs
-        errorBand_glo.Draw("2 same")
-        errorBand_ghi.Draw("2 same")
-        
         # Set properties for the TMultiGraph
         #g.GetHistogram().SetMinimum(glo.GetMinimum() * 0.8)
         #g.GetHistogram().SetMaximum(glo.GetMaximum() * 1.2)
@@ -934,10 +919,20 @@ ROOT.gStyle.SetOptFit(1)
 
 f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 
+# Set the size of the statbox
+gStyle.SetStatW(0.15)  # Set width of statbox
+gStyle.SetStatH(0.15)  # Set height of statbox
+
+# Create a canvas
 c_total = TCanvas()
+
+# Create and set up error bands
+error_band = TGraphErrors(n_points, x_values, y_values, x_errors, y_errors)
+error_band.SetFillColorAlpha(kBlue, 0.3)  # Set fill color and transparency
 
 g_sig_l_total.Draw("A*")
 g_sig_l_total.Fit(f_exp, "MRQ")
+error_band.Draw("3")  # Draw error bands below the graph
 c_total.Print(outputpdf)
 c_total.Clear()
 
