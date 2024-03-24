@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-23 18:01:46 trottar"
+# Time-stamp: "2024-03-24 10:08:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -527,10 +527,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
         g.GetYaxis().CenterTitle()
         g.GetYaxis().SetTitleOffset(1.4)
+        g.GetYaxis().SetTitleSize(0.04)
 
         g.GetXaxis().SetTitle("#it{#phi} [degree]")
         g.GetXaxis().CenterTitle()
         g.GetXaxis().SetLimits(0, 360)
+        g.GetXaxis().SetTitleSize(0.04)
         
         # Update canvas c2
         c2.Update()
@@ -578,6 +580,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         leg = ROOT.TLegend(0.85, 0.85, 0.99, 0.99)
         leg.SetFillColor(0)
         leg.SetMargin(0.4)
+        leg..SetTextSize(0.04)
         leg.AddEntry(glo, "Low #it{#font[120]{e}}", "pl")
         leg.AddEntry(ghi, "High #it{#font[120]{e}}", "pl")
         leg.Draw()
