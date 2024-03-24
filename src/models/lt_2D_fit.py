@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:40:24 trottar"
+# Time-stamp: "2024-03-24 10:40:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -521,17 +521,15 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Draw TMultiGraph
         g.Draw("AP")
 
-        from array import array
-        
         # Calculate errors based on y-values
         errors_glo = [abs(y) for y in glo.GetY()]
         errors_ghi = [abs(y) for y in ghi.GetY()]
 
         # Create error bands for glo and ghi
-        errorBand_glo = ROOT.TGraphErrors(glo.GetN(), glo.GetX(), glo.GetY(), ROOT.nullptr, array.array('d', errors_glo))
+        errorBand_glo = ROOT.TGraphErrors(glo.GetN(), glo.GetX(), glo.GetY(), ROOT.nullptr, array('d', errors_glo))
         errorBand_glo.SetFillColorAlpha(ROOT.kBlue, 0.3)  # Set fill color and transparency (adjust as needed)
 
-        errorBand_ghi = ROOT.TGraphErrors(ghi.GetN(), ghi.GetX(), ghi.GetY(), ROOT.nullptr, array.array('d', errors_ghi))
+        errorBand_ghi = ROOT.TGraphErrors(ghi.GetN(), ghi.GetX(), ghi.GetY(), ROOT.nullptr, array('d', errors_ghi))
         errorBand_ghi.SetFillColorAlpha(ROOT.kRed, 0.3)  # Set fill color and transparency (adjust as needed)
 
         # Draw the error bands below the main graphs
