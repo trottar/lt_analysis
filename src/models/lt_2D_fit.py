@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:46:36 trottar"
+# Time-stamp: "2024-03-24 10:50:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -921,9 +921,12 @@ ROOT.gStyle.SetOptFit(1)
 ROOT.gStyle.SetStatW(0.15)  # Set width of statbox
 ROOT.gStyle.SetStatH(0.15)  # Set height of statbox
 
+# Set the position of the statbox
+ROOT.gStyle.SetStatX(0.85)  # Set x position of statbox (right edge)
+ROOT.gStyle.SetStatY(0.99)  # Set y position of statbox (top edge)
+
 f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 
-# Create a canvas
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
