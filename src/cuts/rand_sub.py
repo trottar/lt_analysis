@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 20:25:34 trottar"
+# Time-stamp: "2024-03-24 13:12:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,6 +57,8 @@ from utility import remove_negative_bins
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
+# Disable statistics box by default
+ROOT.gStyle.SetOptStat(0)
 ################################################################################################################################################
 
 def rand_sub(phi_setting, inpDict):    
