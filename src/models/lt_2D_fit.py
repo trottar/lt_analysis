@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:54:04 trottar"
+# Time-stamp: "2024-03-24 10:55:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -922,8 +922,8 @@ ROOT.gStyle.SetStatW(0.15)  # Set width of statbox
 ROOT.gStyle.SetStatH(0.15)  # Set height of statbox
 
 # Set the position of the statbox
-ROOT.gStyle.SetStatX(0.99)  # Set x position of statbox (right edge)
-ROOT.gStyle.SetStatY(0.85)  # Set y position of statbox (top edge)
+ROOT.gStyle.SetStatX(0.8)  # Set x position of statbox (right edge)
+ROOT.gStyle.SetStatY(0.8)  # Set y position of statbox (top edge)
 
 f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 
