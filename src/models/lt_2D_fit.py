@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 10:29:57 trottar"
+# Time-stamp: "2024-03-24 10:37:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -521,6 +521,13 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Draw TMultiGraph
         g.Draw("AP")
 
+        # Create a new graph for the error band
+        errorBand = ROOT.TGraphErrors(glo.GetN(), glo.GetX(), glo.GetY(), ROOT.nullptr, errors)
+        errorBand.SetFillColorAlpha(ROOT.kBlue, 0.3)  # Set fill color and transparency (adjust as needed)
+
+        # Draw the error band below the main graph
+        errorBand.Draw("2 same")
+        
         # Set properties for the TMultiGraph
         #g.GetHistogram().SetMinimum(glo.GetMinimum() * 0.8)
         #g.GetHistogram().SetMaximum(glo.GetMaximum() * 1.2)
