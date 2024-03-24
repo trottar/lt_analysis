@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 11:54:41 trottar"
+# Time-stamp: "2024-03-24 12:03:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -387,7 +387,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
 
     # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    CQ2 = TCanvas()
+    ROOT.gStyle.SetOptStat(0)
+    CQ2 = TCanvas()
     l_Q2 = TLegend(0.1, 0.75, 0.35, 0.95)
     
     for i,hist in enumerate(histlist_copy):
@@ -905,7 +906,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
 
     # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    CmmP_hgcer = TCanvas()
+    ROOT.gStyle.SetOptStat(0)
+    CmmP_hgcer = TCanvas()
 
     CmmP_hgcer.Divide(2,2)
 
@@ -939,7 +941,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
 
     # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    Cqw = TCanvas()
+    ROOT.gStyle.SetOptStat(0)
+    Cqw = TCanvas()
 
     Cqw.Divide(2,2)
 
@@ -973,7 +976,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
 
     # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    Cwt = TCanvas()
+    ROOT.gStyle.SetOptStat(0)
+    Cwt = TCanvas()
 
     Cwt.Divide(2,2)
 
@@ -1024,7 +1028,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
 
     # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    Cpht_simc = TCanvas()
+    ROOT.gStyle.SetOptStat(0)
+    Cpht_simc = TCanvas()
 
     # Create a list to store all polar plots
     polar_plots = []
@@ -1046,7 +1051,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
 
     # Disable statistics box by default
-    ROOT.gStyle.SetOptStat(0)    Cpht = TCanvas()
+    ROOT.gStyle.SetOptStat(0)
+    Cpht = TCanvas()
 
     # Create a list to store all polar plots
     polar_plots = []
