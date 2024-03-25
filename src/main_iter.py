@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 20:28:48 trottar"
+# Time-stamp: "2024-03-24 20:30:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -292,7 +292,7 @@ for phiset in phisetlist:
         
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-sys.exit(1)
+
     
 '''
 EXAMPLE: How to get histograms from previous iteration
@@ -435,7 +435,7 @@ output_file_lst.append(outputpdf)
 * The data and SIMC yields are compared and the R value per bin is obtained.
 
 '''
-
+'''
 # ***Grabbing data yield and average values from previous iteration rather than rebinning***
 sys.path.append("binning")
 from calculate_yield import grab_yield_data, find_yield_simc, find_yield_data
@@ -558,7 +558,7 @@ print("="*25)
 print("{} Epsilon Summary...".format(EPSSET.capitalize()),cut_summary_lst)
 print("="*25)
 inpDict["cut_summary_lst"] = cut_summary_lst
-
+'''
 ##############################
 # Step 7 of the lt_analysis: #
 ##############################
