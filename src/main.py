@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 23:00:46 trottar"
+# Time-stamp: "2024-03-24 23:08:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -614,8 +614,8 @@ if not os.path.exists(foutjson):
         json.dump(combineDict, f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
 
-from physics_lists import create_lists
-create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
+#from physics_lists import create_lists
+#create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Copy initial parameterization to specific particle type directory
 shutil.copy('{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")), '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")))
