@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 12:24:17 trottar"
+# Time-stamp: "2024-03-24 20:02:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,39 +154,38 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         ##############
 
         # Scale MC to data for better comparison
-        scale_to_data = 0.7
         
-        hist["H_hsdelta_SIMC"].Scale(scale_to_data)
-        hist["H_hsxptar_SIMC"].Scale(scale_to_data)
-        hist["H_hsyptar_SIMC"].Scale(scale_to_data)
-        hist["H_ssxfp_SIMC"].Scale(scale_to_data)
-        hist["H_ssyfp_SIMC"].Scale(scale_to_data)
-        hist["H_ssxpfp_SIMC"].Scale(scale_to_data)
-        hist["H_ssypfp_SIMC"].Scale(scale_to_data)
-        hist["H_hsxfp_SIMC"].Scale(scale_to_data)
-        hist["H_hsyfp_SIMC"].Scale(scale_to_data)
-        hist["H_hsxpfp_SIMC"].Scale(scale_to_data)
-        hist["H_hsypfp_SIMC"].Scale(scale_to_data)
-        hist["H_ssdelta_SIMC"].Scale(scale_to_data)
-        hist["H_ssxptar_SIMC"].Scale(scale_to_data)
-        hist["H_ssyptar_SIMC"].Scale(scale_to_data)
-        hist["H_q_SIMC"].Scale(scale_to_data)
-        hist["H_Q2_SIMC"].Scale(scale_to_data)
-        hist["H_t_SIMC"].Scale(scale_to_data)
-        hist["H_epsilon_SIMC"].Scale(scale_to_data)
-        hist["H_MM_SIMC"].Scale(scale_to_data)
-        hist["H_th_SIMC"].Scale(scale_to_data)
-        hist["H_ph_SIMC"].Scale(scale_to_data)
-        hist["H_ph_q_SIMC"].Scale(scale_to_data)
-        hist["H_th_q_SIMC"].Scale(scale_to_data)
-        hist["H_ph_recoil_SIMC"].Scale(scale_to_data)
-        hist["H_th_recoil_SIMC"].Scale(scale_to_data)
-        hist["H_pmiss_SIMC"].Scale(scale_to_data)
-        hist["H_emiss_SIMC"].Scale(scale_to_data)
-        hist["H_pmx_SIMC"].Scale(scale_to_data)
-        hist["H_pmy_SIMC"].Scale(scale_to_data)
-        hist["H_pmz_SIMC"].Scale(scale_to_data)
-        hist["H_W_SIMC"].Scale(scale_to_data)
+        hist["H_hsdelta_SIMC"].Scale(hist["H_hsdelta_DATA"].Integral())
+        hist["H_hsxptar_SIMC"].Scale(hist["H_hsxptar_DATA"].Integral())
+        hist["H_hsyptar_SIMC"].Scale(hist["H_hsyptar_DATA"].Integral())
+        hist["H_ssxfp_SIMC"].Scale(hist["H_ssxfp_DATA"].Integral())
+        hist["H_ssyfp_SIMC"].Scale(hist["H_ssyfp_DATA"].Integral())
+        hist["H_ssxpfp_SIMC"].Scale(hist["H_ssxpfp_DATA"].Integral())
+        hist["H_ssypfp_SIMC"].Scale(hist["H_ssypfp_DATA"].Integral())
+        hist["H_hsxfp_SIMC"].Scale(hist["H_hsxfp_DATA"].Integral())
+        hist["H_hsyfp_SIMC"].Scale(hist["H_hsyfp_DATA"].Integral())
+        hist["H_hsxpfp_SIMC"].Scale(hist["H_hsxpfp_DATA"].Integral())
+        hist["H_hsypfp_SIMC"].Scale(hist["H_hsypfp_DATA"].Integral())
+        hist["H_ssdelta_SIMC"].Scale(hist["H_ssdelta_DATA"].Integral())
+        hist["H_ssxptar_SIMC"].Scale(hist["H_ssxptar_DATA"].Integral())
+        hist["H_ssyptar_SIMC"].Scale(hist["H_ssyptar_DATA"].Integral())
+        hist["H_q_SIMC"].Scale(hist["H_q_DATA"].Integral())
+        hist["H_Q2_SIMC"].Scale(hist["H_Q2_DATA"].Integral())
+        hist["H_t_SIMC"].Scale(hist["H_t_DATA"].Integral())
+        hist["H_epsilon_SIMC"].Scale(hist["H_epsilon_DATA"].Integral())
+        hist["H_MM_SIMC"].Scale(hist["H_MM_DATA"].Integral())
+        hist["H_th_SIMC"].Scale(hist["H_th_DATA"].Integral())
+        hist["H_ph_SIMC"].Scale(hist["H_ph_DATA"].Integral())
+        hist["H_ph_q_SIMC"].Scale(hist["H_ph_q_DATA"].Integral())
+        hist["H_th_q_SIMC"].Scale(hist["H_th_q_DATA"].Integral())
+        hist["H_ph_recoil_SIMC"].Scale(hist["H_ph_recoil_DATA"].Integral())
+        hist["H_th_recoil_SIMC"].Scale(hist["H_th_recoil_DATA"].Integral())
+        hist["H_pmiss_SIMC"].Scale(hist["H_pmiss_DATA"].Integral())
+        hist["H_emiss_SIMC"].Scale(hist["H_emiss_DATA"].Integral())
+        hist["H_pmx_SIMC"].Scale(hist["H_pmx_DATA"].Integral())
+        hist["H_pmy_SIMC"].Scale(hist["H_pmy_DATA"].Integral())
+        hist["H_pmz_SIMC"].Scale(hist["H_pmz_DATA"].Integral())
+        hist["H_W_SIMC"].Scale(hist["H_W_DATA"].Integral())
 
         ##############
         ##############
