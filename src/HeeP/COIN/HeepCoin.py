@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 11:30:19 trottar"
+# Time-stamp: "2024-03-26 12:11:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1588,7 +1588,7 @@ G_eff_plt.SetTitle(" ;Run Numbers; Total Efficiency")
 i=0
 while i <= G_eff_plt.GetXaxis().GetXmax():
     bin_ix = G_eff_plt.GetXaxis().FindBin(i)
-    if str(i) in data_runNums.split(" ") or str(i) in dummy_runNums.split(" "): 
+    if str(i) in data_runNums or str(i) in dummy_runNums:
         G_eff_plt.GetXaxis().SetBinLabel(bin_ix,"%d" % i)
     i+=1
 
