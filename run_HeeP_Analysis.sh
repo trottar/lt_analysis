@@ -142,12 +142,12 @@ if [[ $KIN = "10p6" && $s_flag != "true" ]]; then
     file="HeePCoin_10p6_Autumn18"
     echo "Reading in run numbers for file ${file_dummy}..."
     # Converts python output to bash array
-    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    IFS=', ' read -r -a dummy_tmp <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummy_tmp[@]}]"
     echo
     echo "Reading in run numbers for file ${file}..."
-    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Data Run Numbers: [${data[@]}]"
+    IFS=', ' read -r -a data_tmp <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data_tmp[@]}]"
     echo
 elif [[ $KIN = "8p2" && $s_flag != "true" ]]; then
     # Define run list based off kinematics selected
@@ -155,12 +155,12 @@ elif [[ $KIN = "8p2" && $s_flag != "true" ]]; then
     file="HeePCoin_8p2_Spring19"
     echo "Reading in run numbers for file ${file_dummy}..."
     # Converts python output to bash array
-    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    IFS=', ' read -r -a dummy_tmp <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummy_tmp[@]}]"
     echo
     echo "Reading in run numbers for file ${file}..."
-    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Data Run Numbers: [${data[@]}]"
+    IFS=', ' read -r -a data_tmp <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data_tmp[@]}]"
     echo
 elif [[ $KIN = "6p2" && $s_flag != "true" ]]; then
     # Define run list based off kinematics selected
@@ -168,12 +168,12 @@ elif [[ $KIN = "6p2" && $s_flag != "true" ]]; then
     file="HeePCoin_6p2_Spring19"
     echo "Reading in run numbers for file ${file_dummy}..."
     # Converts python output to bash array
-    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    IFS=', ' read -r -a dummy_tmp <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummy_tmp[@]}]"
     echo
     echo "Reading in run numbers for file ${file}..."
-    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Data Run Numbers: [${data[@]}]"
+    IFS=', ' read -r -a data_tmp <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data_tmp[@]}]"
     echo
 elif [[ $KIN = "4p9" && $s_flag != "true" ]]; then
     # Define run list based off kinematics selected
@@ -181,12 +181,12 @@ elif [[ $KIN = "4p9" && $s_flag != "true" ]]; then
     file="HeePCoin_4p9_Autumn18"
     echo "Reading in run numbers for file ${file_dummy}..."
     # Converts python output to bash array
-    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    IFS=', ' read -r -a dummy_tmp <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummy_tmp[@]}]"
     echo
     echo "Reading in run numbers for file ${file}..."
-    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Data Run Numbers: [${data[@]}]"
+    IFS=', ' read -r -a data_tmp <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data_tmp[@]}]"
     echo
 elif [[ $KIN = "3p8" && $s_flag != "true" ]]; then
     # Define run list based off kinematics selected
@@ -194,12 +194,12 @@ elif [[ $KIN = "3p8" && $s_flag != "true" ]]; then
     file="HeePCoin_3p8_Autumn18"
     echo "Reading in run numbers for file ${file_dummy}..."
     # Converts python output to bash array
-    IFS=', ' read -r -a dummydata <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Dummy Run Numbers: [${dummydata[@]}]"
+    IFS=', ' read -r -a dummy_tmp <<< "$( grab_runs ${file_dummy} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Dummy Run Numbers: [${dummy_tmp[@]}]"
     echo
     echo "Reading in run numbers for file ${file}..."
-    IFS=', ' read -r -a data <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
-    echo "Data Run Numbers: [${data[@]}]"
+    IFS=', ' read -r -a data_tmp <<< "$( grab_runs ${file} )"             # RIGHT, Q2=5p5, W=3p02
+    echo "Data Run Numbers: [${data_tmp[@]}]"
     echo
 elif [[ $KIN = "10p6" && $s_flag = "true" ]]; then
     declare -a data=(7974 7975 7976)
@@ -228,7 +228,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Analysing ${SPEC} data..."
 	echo
 
-	for i in "${data[@]}"
+	for i in "${data_tmp[@]}"
 	do
 	    echo
 	    echo "-----------------------------"
@@ -251,7 +251,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Analysing ${SPEC} dummy data..."
 	echo
 
-	for i in "${dummydata[@]}"
+	for i in "${dummy_tmp[@]}"
 	do
 	    echo
 	    echo "-----------------------------------"
@@ -274,7 +274,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Analysing data..."
 	echo
 
-	for i in "${data[@]}"
+	for i in "${data_tmp[@]}"
 	do
 	    echo
 	    echo "-----------------------------"
@@ -297,7 +297,7 @@ if [[ $a_flag = "true" ]]; then
 	echo "Analysing dummy data..."
 	echo
 
-	for i in "${dummydata[@]}"
+	for i in "${dummy_tmp[@]}"
 	do
 	    echo
 	    echo "-----------------------------------"
@@ -320,10 +320,10 @@ fi
 cd "${LTANAPATH}/src/setup"
 
 # Checks that array isn't empty
-if [[ ${#data[@]} -ne 0 ]]; then
+if [[ ${#data_tmp[@]} -ne 0 ]]; then
     echo
     echo "Calculating data total effective charge ..."
-    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data[*]}" "heep")
+    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_tmp[*]}" "heep")
     arr1=()
     arr2=()
     arr3=()
@@ -344,19 +344,34 @@ if [[ ${#data[@]} -ne 0 ]]; then
     DataEffErr=("${arr4[@]}")
     DatapThetaVal=("${arr5[@]}")
     DataEbeamVal=("${arr6[@]}")
+    data=("${arr7[@]}")
     #echo ${DataChargeVal[*]}
     # Sums the array to get the total effective charge
     # Note: this must be done as an array! This is why uC is used at this step
     #       and later converted to C
-    DataChargeSum=$(IFS=+; echo "$((${DataChargeVal[*]}))") # Only works for integers
-    echo "Total Charge : ${DataChargeSum} uC"
+    PYTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataEffChargeVal[*]}" "${DataEffChargeErr[*]}")
+    arr1=()
+    arr2=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$itt=(\"\${line_array[@]}\")"
+    done <<< "$PYTOTEFFCHARGE"
+    TotDataEffChargeVal=("${arr1[@]}")
+    TotDataEffChargeErr=("${arr2[@]}")
+    echo "Total Effective Charge: ${TotDataEffChargeVal} mC"
+    echo "Total Effective Charge Relative Error: ${TotDataEffChargeErr}"
+    echo "Run numbers: [${data[@]}]"
 fi
 
 # Checks that array isn't empty
-if [[ ${#dummydata[@]} -ne 0 ]]; then
+if [[ ${#dummy_tmp[@]} -ne 0 ]]; then
     echo
-    echo "Calculating dummy data total effective charge ..."
-    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummydata[*]}")
+    echo "Calculating dummy total effective charge ..."
+    PYSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_tmp[*]}" "heep")
     arr1=()
     arr2=()
     arr3=()
@@ -377,12 +392,27 @@ if [[ ${#dummydata[@]} -ne 0 ]]; then
     DummyEffErr=("${arr4[@]}")
     DummypThetaVal=("${arr5[@]}")
     DummyEbeamVal=("${arr6[@]}")
+    dummy=("${arr7[@]}")
     #echo ${DummyChargeVal[*]}
     # Sums the array to get the total effective charge
     # Note: this must be done as an array! This is why uC is used at this step
     #       and later converted to C
-    DummyChargeSum=$(IFS=+; echo "$((${DummyChargeVal[*]}))") # Only works for integers
-    echo "Total Charge : ${DummyChargeSum} uC"
+    PYTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyEffChargeVal[*]}" "${DummyEffChargeErr[*]}")
+    arr1=()
+    arr2=()
+    itt=0
+    while read line; do
+	itt=$((itt+1))
+	# split the line into an array based on space
+	IFS=' ' read -ra line_array <<< "$line"
+	# store the elements in the corresponding array
+	eval "arr$itt=(\"\${line_array[@]}\")"
+    done <<< "$PYTOTEFFCHARGE"
+    TotDummyEffChargeVal=("${arr1[@]}")
+    TotDummyEffChargeErr=("${arr2[@]}")
+    echo "Total Effective Charge: ${TotDummyEffChargeVal} mC"
+    echo "Total Effective Charge Relative Error: ${TotDummyEffChargeErr}"
+    echo "Run numbers: [${dummy[@]}]"
 fi
 
 # Finally, run the plotting script
