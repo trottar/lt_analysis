@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 13:30:14 trottar"
+# Time-stamp: "2024-03-26 14:44:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1394,7 +1394,8 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DUMMY.Add(H_pmy_DUMMY_RAND,-1)
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
-
+    
+    '''
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows
@@ -1503,6 +1504,7 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(background_fit[0], -1)
         H_pmz_DATA.Add(background_fit[0], -1)
         H_ct_DATA.Add(background_fit[0], -1)
+    '''
         
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
