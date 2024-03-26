@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 14:47:08 trottar"
+# Time-stamp: "2024-03-26 15:25:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,9 +133,9 @@ def rand_sub(phi_setting, inpDict):
 
     InFile_DATA = TFile.Open(rootFileData, "OPEN")
 
-    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
 
-    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_noRF".format(ParticleType.capitalize()))
 
     ################################################################################################################################################
     # Define dummy root file trees of interest
@@ -147,9 +147,9 @@ def rand_sub(phi_setting, inpDict):
 
     InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
 
-    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+    TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
     
-    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_RF".format(ParticleType.capitalize()))
+    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_noRF".format(ParticleType.capitalize()))
 
     ##############
     # HARD CODED #
@@ -201,7 +201,7 @@ def rand_sub(phi_setting, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_prompt_RF" in line:
+                            if "coin_ek_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break
             else:
@@ -217,7 +217,7 @@ def rand_sub(phi_setting, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_prompt_RF" in line:
+                            if "coin_ek_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break
             else:
@@ -232,7 +232,7 @@ def rand_sub(phi_setting, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_prompt_RF" in line:
+                            if "coin_ek_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break
             else:
@@ -1395,7 +1395,6 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
     
-    '''
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows
@@ -1504,7 +1503,6 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(background_fit[0], -1)
         H_pmz_DATA.Add(background_fit[0], -1)
         H_ct_DATA.Add(background_fit[0], -1)
-    '''
         
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
@@ -1653,10 +1651,10 @@ def rand_sub(phi_setting, inpDict):
 
         histDict["H_MM_nosub_DATA"].SetLineColor(1)
         histDict["H_MM_nosub_DATA"].Draw("same, E1")
-        #histDict["H_MM_SUB_DATA"].SetLineColor(2)
-        #histDict["H_MM_SUB_DATA"].Draw("same, E1")
-        #background_fit[0].SetLineColor(3)
-        #background_fit[0].Draw("same")
+        histDict["H_MM_SUB_DATA"].SetLineColor(2)
+        histDict["H_MM_SUB_DATA"].Draw("same, E1")
+        background_fit[0].SetLineColor(3)
+        background_fit[0].Draw("same")
 
         CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
