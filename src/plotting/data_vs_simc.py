@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 12:50:50 trottar"
+# Time-stamp: "2024-03-26 12:59:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -274,7 +274,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_epsilon_SIMC"].Scale(hist["H_epsilon_DATA"].Integral()/hist["H_epsilon_SIMC"].Integral())
         hist["H_MM_SIMC"].Scale(hist["H_MM_DATA"].Integral()/hist["H_MM_SIMC"].Integral())
         #hist["H_th_SIMC"].Scale(hist["H_th_DATA"].Integral()/hist["H_th_SIMC"].Integral())
-        hist["H_ph_SIMC"].Scale(hist["H_ph_DATA"].Integral()/hist["H_ph_SIMC"].Integral())
+        #hist["H_ph_SIMC"].Scale(hist["H_ph_DATA"].Integral()/hist["H_ph_SIMC"].Integral())
         hist["H_ph_q_SIMC"].Scale(hist["H_ph_q_DATA"].Integral()/hist["H_ph_q_SIMC"].Integral())
         hist["H_th_q_SIMC"].Scale(hist["H_th_q_DATA"].Integral()/hist["H_th_q_SIMC"].Integral())
         hist["H_ph_recoil_SIMC"].Scale(hist["H_ph_recoil_DATA"].Integral()/hist["H_ph_recoil_SIMC"].Integral())
