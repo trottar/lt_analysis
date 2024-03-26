@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 11:25:59 trottar"
+# Time-stamp: "2024-03-26 11:29:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,17 +61,18 @@ efficiency_table = sys.argv[16]
 
 ###############################################################################################################################################
 # Define total efficiency vs run number plots
-# Define total efficiency vs run number plots
+
+data_runNums = np.array([int(x) for x in data_runNums.split(' ')])
 G_data_eff = TGraphErrors(len(InData_efficiency), \
-                          np.array([float(x) for x in runNums]), \
+                          np.array([float(x) for x in data_runNums]), \
                           InData_efficiency, \
                           np.array([0]*len(InData_error_efficiency)), \
                           InData_error_efficiency*InData_efficiency)
 G_data_eff.SetName("G_data_eff")    
 
-# Define total efficiency vs run number plots
+dummy_runNums = np.array([int(x) for x in dummy_runNums.split(' ')])
 G_dummy_eff = TGraphErrors(len(InDummy_efficiency), \
-                          np.array([float(x) for x in runNums]), \
+                          np.array([float(x) for x in dummy_runNums]), \
                           InDummy_efficiency, \
                           np.array([0]*len(InDummy_error_efficiency)), \
                           InDummy_error_efficiency*InDummy_efficiency)
