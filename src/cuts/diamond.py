@@ -190,7 +190,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         infile = TFile.Open(rootName, "READ")
 
 	# Assumes 2021 trees do not have Prompt MM cut, as some do not right now. *** NEED TO BE REPLAYED AGAIN WITH THIS BRANCH ***
-        Cut_Events_all_RF_tree = infile.Get("Cut_{}_Events_prompt_RF".format(ParticleType.capitalize()))
+        Cut_Events_all_noRF_tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
 
 	##############################################################################################################################################
         countB = 0
@@ -198,17 +198,17 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         badfit = True
         if (k==2): # High
             # for event in Cut_Events_Prompt_tree:
-            for event in Cut_Events_all_RF_tree:
+            for event in Cut_Events_all_noRF_tree:
                 Q2vsW_cut.Fill(event.Q2, event.W)
                 Q2vsW_hi_cut.Fill(event.Q2, event.W)
         elif (k==1): # Mid
             # for event in Cut_Events_Prompt_tree:
-            for event in Cut_Events_all_RF_tree:
+            for event in Cut_Events_all_noRF_tree:
                 Q2vsW_mide_cut.Fill(event.Q2, event.W)
                 Q2vsW_mi_cut.Fill(event.Q2, event.W)
         elif (k==0): # Low
             # for event in Cut_Events_Prompt_tree:
-            for event in Cut_Events_all_RF_tree:
+            for event in Cut_Events_all_noRF_tree:
                 Q2vsW_lowe_cut.Fill(event.Q2, event.W)
                 Q2vsW_lo_cut.Fill(event.Q2, event.W)
                 W_cut.Fill(event.W)
@@ -318,7 +318,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     a4 = inpDict["a4"]
                     b4 = inpDict["b4"]                    
 	            
-                for event in Cut_Events_all_RF_tree:
+                for event in Cut_Events_all_noRF_tree:
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                         countA +=1
@@ -336,7 +336,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         if (lowe_input != False and k>0):
             print("\n\n")
             if (k==2):
-                for event in Cut_Events_all_RF_tree:
+                for event in Cut_Events_all_noRF_tree:
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         if (tmax != False):
                             if(-event.MandelT<1):
@@ -346,7 +346,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             print("!!!!! Error! tmax not found! Skipping t-range cut !!!!!")
                             Q2vsW_hilo_cut.Fill(event.Q2, event.W)
             elif (k==1):
-                for event in Cut_Events_all_RF_tree:
+                for event in Cut_Events_all_noRF_tree:
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         if (tmax != False):
                             if(-event.MandelT<tmax):
