@@ -414,7 +414,7 @@ if [[ $s_flag = "true" ]]; then
     python3 HeepSing.py ${KIN} "${OutDATAFilename}.root" $DataChargeSum "${DataEffVal[*]}" "${OutDUMMYFilename}.root" $DummyChargeSum "${DummyEffVal[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData} ${SPEC}
 else
     cd "${LTANAPATH}/src/HeeP/COIN"
-    python3 HeepCoin.py ${KIN} "${OutDATAFilename}.root" ${TotDataEffChargeVal} "${DataEffVal[*]}" "${data[*]}" "${OutDUMMYFilename}.root" ${TotDummyEffChargeVal} "${DummyEffVal[*]}" "${dummy[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData}
+    python3 HeepCoin.py ${KIN} "${OutDATAFilename}.root" ${TotDataEffChargeVal} ${TotDataEffChargeErr} "${DataEffVal[*]}" "${DataEffErr[*]}" "${data[*]}" "${OutDUMMYFilename}.root" ${TotDummyEffChargeVal} ${TotDummyEffChargeErr} "${DummyEffVal[*]}" "${DummyEffErr[*]}" "${dummy[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData}
 fi
 
 cd "${LTANAPATH}"
