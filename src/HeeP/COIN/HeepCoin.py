@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 10:40:10 trottar"
+# Time-stamp: "2024-03-26 11:17:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,11 +44,11 @@ DEBUG = False # Flag for no cut plots
 # Input params
 heep_kinematics = sys.argv[1]
 InDATAFilename = sys.argv[2]
-data_charge = int(sys.argv[3])/1000 # Convert uC to mC
+data_charge = float(sys.argv[3])
 InData_efficiency = sys.argv[4]
 data_runNums = sys.argv[5]
 InDUMMYFilename = sys.argv[6]
-dummy_charge = int(sys.argv[7])/1000 # Convert uC to mC
+dummy_charge = float(sys.argv[7])
 InDummy_efficiency = sys.argv[8]
 dummy_runNums = sys.argv[9]
 InSIMCFilename = sys.argv[10]
