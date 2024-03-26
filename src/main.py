@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 23:08:57 trottar"
+# Time-stamp: "2024-03-25 06:02:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -496,7 +496,7 @@ output_file_lst.append(outputpdf)
 * The data and SIMC yields are compared and the R value per bin is obtained.
 
 '''
-'''
+
 sys.path.append("binning")
 from calculate_yield import find_yield_data, find_yield_simc
 
@@ -541,7 +541,7 @@ for hist in histlist:
 if DEBUG:
     show_pdf_with_evince(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))
-'''
+
 # Save histograms to root file
 # Check that root file doesnt already exist    
 if not os.path.exists(foutroot):
@@ -614,8 +614,8 @@ if not os.path.exists(foutjson):
         json.dump(combineDict, f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
 
-#from physics_lists import create_lists
-#create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
+from physics_lists import create_lists
+create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Copy initial parameterization to specific particle type directory
 shutil.copy('{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")), '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")))

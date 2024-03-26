@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 00:40:41 trottar"
+# Time-stamp: "2024-03-26 10:40:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,8 +73,21 @@ eff_errProp_dummy = sum(tot_effError_dummy) # Error propagation for addition
 
 ###############################################################################################################################################
 # Define total efficiency vs run number plots
-G_data_eff = ROOT.TGraphErrors(len(InData_efficiency.split(' ')), np.array([float(x) for x in data_runNums.split(' ')]),np.array([float(x) for x in InData_efficiency.split(' ')]),np.array([0]*len(tot_effError_data)),np.array(tot_effError_data)*np.array([float(x) for x in InData_efficiency.split(' ')]))
-G_dummy_eff = ROOT.TGraphErrors(len(InDummy_efficiency.split(' ')), np.array([float(x) for x in dummy_runNums.split(' ')]),np.array([float(x) for x in InDummy_efficiency.split(' ')]),np.array([0]*len(tot_effError_dummy)),np.array(tot_effError_dummy)*np.array([float(x) for x in InDummy_efficiency.split(' ')]))
+# Define total efficiency vs run number plots
+G_data_eff = TGraphErrors(len(InData_efficiency), \
+                          np.array([float(x) for x in runNums]), \
+                          InData_efficiency, \
+                          np.array([0]*len(InData_error_efficiency)), \
+                          InData_error_efficiency*InData_efficiency)
+G_data_eff.SetName("G_data_eff")    
+
+# Define total efficiency vs run number plots
+G_dummy_eff = TGraphErrors(len(InDummy_efficiency), \
+                          np.array([float(x) for x in runNums]), \
+                          InDummy_efficiency, \
+                          np.array([0]*len(InDummy_error_efficiency)), \
+                          InDummy_error_efficiency*InDummy_efficiency)
+G_dummy_eff.SetName("G_dummy_eff")    
 
 ###############################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
@@ -625,17 +638,17 @@ for evt in TBRANCH_SIMC:
       H_hsxpfp_SIMC.Fill(evt.hsxpfp, evt.Weight)
       H_hsypfp_SIMC.Fill(evt.hsypfp, evt.Weight)
       H_ssdelta_SIMC.Fill(evt.ssdelta, evt.Weight) 
-      H_hsdelta_SIMC.Fill(evt.hsdelta, evt.Weight)	
+      H_hsdelta_SIMC.Fill(evt.hsdelta, evt.Weight)
       H_ssxptar_SIMC.Fill(evt.ssxptar, evt.Weight)
       H_ssyptar_SIMC.Fill(evt.ssyptar, evt.Weight)
-      H_hsxptar_SIMC.Fill(evt.hsxptar, evt.Weight)	
+      H_hsxptar_SIMC.Fill(evt.hsxptar, evt.Weight)
       H_hsyptar_SIMC.Fill(evt.hsyptar, evt.Weight)
 
       H_ph_q_SIMC.Fill(evt.phipq, evt.Weight)
       H_th_q_SIMC.Fill(evt.thetapq, evt.Weight)
 
-      H_pmiss_SIMC.Fill(evt.Pm, evt.Weight)	
-      H_emiss_SIMC.Fill(evt.Em, evt.Weight)	
+      H_pmiss_SIMC.Fill(evt.Pm, evt.Weight)
+      H_emiss_SIMC.Fill(evt.Em, evt.Weight)
       H_pmx_SIMC.Fill(evt.Pmx, evt.Weight)
       H_pmy_SIMC.Fill(evt.Pmy, evt.Weight)
       H_pmz_SIMC.Fill(evt.Pmz, evt.Weight)
@@ -692,7 +705,7 @@ for evt in TBRANCH_DATA:
       H_hsxpfp_DATA.Fill(evt.hsxpfp)
       H_hsypfp_DATA.Fill(evt.hsypfp)
       H_hsdelta_DATA.Fill(evt.hsdelta)
-      H_hsxptar_DATA.Fill(evt.hsxptar)	
+      H_hsxptar_DATA.Fill(evt.hsxptar)
       H_hsyptar_DATA.Fill(evt.hsyptar)
 
       H_ph_q_DATA.Fill(evt.ph_q)
@@ -700,8 +713,8 @@ for evt in TBRANCH_DATA:
       H_ph_recoil_DATA.Fill(evt.ph_recoil)
       H_th_recoil_DATA.Fill(evt.th_recoil)
       
-      H_pmiss_DATA.Fill(evt.pmiss)	
-      H_emiss_DATA.Fill(evt.emiss)	
+      H_pmiss_DATA.Fill(evt.pmiss)
+      H_emiss_DATA.Fill(evt.emiss)
       #H_emiss_DATA.Fill(evt.emiss_nuc)
       H_pmx_DATA.Fill(evt.pmx)
       H_pmy_DATA.Fill(evt.pmy)
@@ -782,11 +795,11 @@ for evt in TBRANCH_DATA:
       H_hsxpfp_DATA_rand.Fill(evt.hsxpfp)
       H_hsypfp_DATA_rand.Fill(evt.hsypfp)
       H_hsdelta_DATA_rand.Fill(evt.hsdelta)
-      H_hsxptar_DATA_rand.Fill(evt.hsxptar)	
+      H_hsxptar_DATA_rand.Fill(evt.hsxptar)
       H_hsyptar_DATA_rand.Fill(evt.hsyptar)
       
-      H_pmiss_DATA_rand.Fill(evt.pmiss)	
-      H_emiss_DATA_rand.Fill(evt.emiss)	
+      H_pmiss_DATA_rand.Fill(evt.pmiss)
+      H_emiss_DATA_rand.Fill(evt.emiss)
       #H_emiss_DATA_rand.Fill(evt.emiss_nuc)
       H_pmx_DATA_rand.Fill(evt.pmx)
       H_pmy_DATA_rand.Fill(evt.pmy)
@@ -837,7 +850,7 @@ for evt in TBRANCH_DATA_nocut:
   H_hsxpfp_DATA_nocut.Fill(evt.hsxpfp)
   H_hsypfp_DATA_nocut.Fill(evt.hsypfp)
   H_hsdelta_DATA_nocut.Fill(evt.hsdelta)
-  H_hsxptar_DATA_nocut.Fill(evt.hsxptar)	
+  H_hsxptar_DATA_nocut.Fill(evt.hsxptar)
   H_hsyptar_DATA_nocut.Fill(evt.hsyptar)
 
   H_ph_q_DATA_nocut.Fill(evt.ph_q)
@@ -845,8 +858,8 @@ for evt in TBRANCH_DATA_nocut:
   H_ph_recoil_DATA_nocut.Fill(evt.ph_recoil)
   H_th_recoil_DATA_nocut.Fill(evt.th_recoil)
 
-  H_pmiss_DATA_nocut.Fill(evt.pmiss)	
-  H_emiss_DATA_nocut.Fill(evt.emiss)	
+  H_pmiss_DATA_nocut.Fill(evt.pmiss)
+  H_emiss_DATA_nocut.Fill(evt.emiss)
   #H_emiss_DATA_nocut.Fill(evt.emiss_nuc)
   H_pmx_DATA_nocut.Fill(evt.pmx)
   H_pmy_DATA_nocut.Fill(evt.pmy)
@@ -946,7 +959,7 @@ for evt in TBRANCH_DATA_nopid:
       H_hsxpfp_DATA_nopid.Fill(evt.hsxpfp)
       H_hsypfp_DATA_nopid.Fill(evt.hsypfp)
       H_hsdelta_DATA_nopid.Fill(evt.hsdelta)
-      H_hsxptar_DATA_nopid.Fill(evt.hsxptar)	
+      H_hsxptar_DATA_nopid.Fill(evt.hsxptar)
       H_hsyptar_DATA_nopid.Fill(evt.hsyptar)
 
       H_ph_q_DATA_nopid.Fill(evt.ph_q)
@@ -954,8 +967,8 @@ for evt in TBRANCH_DATA_nopid:
       H_ph_recoil_DATA_nopid.Fill(evt.ph_recoil)
       H_th_recoil_DATA_nopid.Fill(evt.th_recoil)
 
-      H_pmiss_DATA_nopid.Fill(evt.pmiss)	
-      H_emiss_DATA_nopid.Fill(evt.emiss)	
+      H_pmiss_DATA_nopid.Fill(evt.pmiss)
+      H_emiss_DATA_nopid.Fill(evt.emiss)
       #H_emiss_DATA_nopid.Fill(evt.emiss_nuc)
       H_pmx_DATA_nopid.Fill(evt.pmx)
       H_pmy_DATA_nopid.Fill(evt.pmy)
@@ -1057,7 +1070,7 @@ for evt in TBRANCH_DUMMY:
       H_hsxpfp_DUMMY.Fill(evt.hsxpfp)
       H_hsypfp_DUMMY.Fill(evt.hsypfp)
       H_hsdelta_DUMMY.Fill(evt.hsdelta)
-      H_hsxptar_DUMMY.Fill(evt.hsxptar)	
+      H_hsxptar_DUMMY.Fill(evt.hsxptar)
       H_hsyptar_DUMMY.Fill(evt.hsyptar)
 
       H_ph_q_DUMMY.Fill(evt.ph_q)
@@ -1065,8 +1078,8 @@ for evt in TBRANCH_DUMMY:
       H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
       H_th_recoil_DUMMY.Fill(evt.th_recoil)
             
-      H_pmiss_DUMMY.Fill(evt.pmiss)	
-      H_emiss_DUMMY.Fill(evt.emiss)	
+      H_pmiss_DUMMY.Fill(evt.pmiss)
+      H_emiss_DUMMY.Fill(evt.emiss)
       #H_emiss_DUMMY.Fill(evt.emiss_nuc)
       H_pmx_DUMMY.Fill(evt.pmx)
       H_pmy_DUMMY.Fill(evt.pmy)
@@ -1094,11 +1107,11 @@ for evt in TBRANCH_DUMMY:
       H_hsxpfp_DUMMY_rand.Fill(evt.hsxpfp)
       H_hsypfp_DUMMY_rand.Fill(evt.hsypfp)
       H_hsdelta_DUMMY_rand.Fill(evt.hsdelta)
-      H_hsxptar_DUMMY_rand.Fill(evt.hsxptar)	
+      H_hsxptar_DUMMY_rand.Fill(evt.hsxptar)
       H_hsyptar_DUMMY_rand.Fill(evt.hsyptar)
       
-      H_pmiss_DUMMY_rand.Fill(evt.pmiss)	
-      H_emiss_DUMMY_rand.Fill(evt.emiss)	
+      H_pmiss_DUMMY_rand.Fill(evt.pmiss)
+      H_emiss_DUMMY_rand.Fill(evt.emiss)
       #H_emiss_DUMMY_rand.Fill(evt.emiss_nuc)
       H_pmx_DUMMY_rand.Fill(evt.pmx)
       H_pmy_DUMMY_rand.Fill(evt.pmy)
@@ -1169,7 +1182,7 @@ for evt in TBRANCH_DUMMY_nocut:
   H_hsxpfp_DUMMY_nocut.Fill(evt.hsxpfp)
   H_hsypfp_DUMMY_nocut.Fill(evt.hsypfp)
   H_hsdelta_DUMMY_nocut.Fill(evt.hsdelta)
-  H_hsxptar_DUMMY_nocut.Fill(evt.hsxptar)	
+  H_hsxptar_DUMMY_nocut.Fill(evt.hsxptar)
   H_hsyptar_DUMMY_nocut.Fill(evt.hsyptar)
 
   H_ph_q_DUMMY_nocut.Fill(evt.ph_q)
@@ -1177,8 +1190,8 @@ for evt in TBRANCH_DUMMY_nocut:
   H_ph_recoil_DUMMY_nocut.Fill(evt.ph_recoil)
   H_th_recoil_DUMMY_nocut.Fill(evt.th_recoil)
 
-  H_pmiss_DUMMY_nocut.Fill(evt.pmiss)	
-  H_emiss_DUMMY_nocut.Fill(evt.emiss)	
+  H_pmiss_DUMMY_nocut.Fill(evt.pmiss)
+  H_emiss_DUMMY_nocut.Fill(evt.emiss)
   #H_emiss_DUMMY_nocut.Fill(evt.emiss_nuc)
   H_pmx_DUMMY_nocut.Fill(evt.pmx)
   H_pmy_DUMMY_nocut.Fill(evt.pmy)
@@ -1261,7 +1274,7 @@ for evt in TBRANCH_DUMMY_nopid:
       H_hsxpfp_DUMMY_nopid.Fill(evt.hsxpfp)
       H_hsypfp_DUMMY_nopid.Fill(evt.hsypfp)
       H_hsdelta_DUMMY_nopid.Fill(evt.hsdelta)
-      H_hsxptar_DUMMY_nopid.Fill(evt.hsxptar)	
+      H_hsxptar_DUMMY_nopid.Fill(evt.hsxptar)
       H_hsyptar_DUMMY_nopid.Fill(evt.hsyptar)
 
       H_ph_q_DUMMY_nopid.Fill(evt.ph_q)
@@ -1269,8 +1282,8 @@ for evt in TBRANCH_DUMMY_nopid:
       H_ph_recoil_DUMMY_nopid.Fill(evt.ph_recoil)
       H_th_recoil_DUMMY_nopid.Fill(evt.th_recoil)
 
-      H_pmiss_DUMMY_nopid.Fill(evt.pmiss)	
-      H_emiss_DUMMY_nopid.Fill(evt.emiss)	
+      H_pmiss_DUMMY_nopid.Fill(evt.pmiss)
+      H_emiss_DUMMY_nopid.Fill(evt.emiss)
       #H_emiss_DUMMY_nopid.Fill(evt.emiss_nuc)
       H_pmx_DUMMY_nopid.Fill(evt.pmx)
       H_pmy_DUMMY_nopid.Fill(evt.pmy)
