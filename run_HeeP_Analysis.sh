@@ -82,14 +82,14 @@ if [[ $s_flag = "true" ]]; then
 	EffData="shms_heep_HeePSing_efficiency_data_2022_07_28.csv"
     fi
     InDATAFilename="Raw_Data_${SPEC}_${KIN}.root"
-    InDUMMYFilename="Raw_DummyData_${SPEC}_${KIN}.root"
+    InDUMMYFilename="Raw_Dummy_${SPEC}_${KIN}.root"
     if [[ $o_flag = "true" ]]; then
 	InSIMCFilename="Heep_${SPEC}_${KIN}_Offset.root"
     else
 	InSIMCFilename="Heep_${SPEC}_${KIN}.root"
     fi
     OutDATAFilename="Analysed_Data_${SPEC}_${KIN}"
-    OutDUMMYFilename="Analysed_DummyData_${SPEC}_${KIN}"
+    OutDUMMYFilename="Analysed_Dummy_${SPEC}_${KIN}"
     if [[ $o_flag = "true" ]]; then
 	OutFullAnalysisFilename="FullAnalysis_${SPEC}_${KIN}_Offset"
     else
@@ -102,16 +102,17 @@ else
     # Defines efficiency table to use
     #EffData="coin_heep_HeePCoin_efficiency_data_2022_09_09.csv"
     #EffData="coin_heep_HeePCoin_efficiency_data_2022_12_02.csv"
-    EffData="coin_heep_HeePCoin_efficiency_data_2023_12_18.csv"
+    #EffData="coin_heep_HeePCoin_efficiency_data_2023_12_18.csv"
+    EffData="coin_heep_HeePCoin_efficiency_data_2024_03_26.csv"
     InDATAFilename="Raw_Data_${KIN}.root"
-    InDUMMYFilename="Raw_DummyData_${KIN}.root"
+    InDUMMYFilename="Raw_Dummy_${KIN}.root"
     if [[ $o_flag = "true" ]]; then
 	InSIMCFilename="Heep_Coin_${KIN}_Offset.root"
     else
 	InSIMCFilename="Heep_Coin_${KIN}.root"
     fi    
     OutDATAFilename="Analysed_Data_${KIN}"
-    OutDUMMYFilename="Analysed_DummyData_${KIN}"
+    OutDUMMYFilename="Analysed_Dummy_${KIN}"
     if [[ $o_flag = "true" ]]; then
 	OutFullAnalysisFilename="FullAnalysis_${KIN}_Offset"
     else
@@ -204,16 +205,16 @@ elif [[ $KIN = "3p8" && $s_flag != "true" ]]; then
 elif [[ $KIN = "10p6" && $s_flag = "true" ]]; then
     declare -a data=(7974 7975 7976)
     #    declare -a data=(7974) # Just one test run
-    declare -a dummydata=(7977)    
+    declare -a dummy=(7977)    
 elif [[ $KIN = "8p2" && $s_flag != "true" ]]; then
     declare -a data=(111)
-    declare -a dummydata=(111)
+    declare -a dummy=(111)
 elif [[ $KIN = "4p9" && $s_flag = "true" ]]; then
     declare -a data=(111)
-    declare -a dummydata=(111)
+    declare -a dummy=(111)
 elif [[ $KIN = "3p8" && $s_flag = "true" ]]; then
     declare -a data=(111)
-    declare -a dummydata=(111)
+    declare -a dummy=(111)
 else
     echo "Invalid kinematic setting, ${KIN}"
     exit 128
@@ -421,7 +422,7 @@ if [[ $s_flag = "true" ]]; then
     python3 HeepSing.py ${KIN} "${OutDATAFilename}.root" $DataChargeSum "${DataEffVal[*]}" "${OutDUMMYFilename}.root" $DummyChargeSum "${DummyEffVal[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData} ${SPEC}
 else
     cd "${LTANAPATH}/src/HeeP/COIN"
-    python3 HeepCoin.py ${KIN} "${OutDATAFilename}.root" $DataChargeSum "${DataEffVal[*]}" "${data[*]}" "${OutDUMMYFilename}.root" $DummyChargeSum "${DummyEffVal[*]}" "${dummydata[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData}
+    python3 HeepCoin.py ${KIN} "${OutDATAFilename}.root" ${TotDataEffChargeVal} "${DataEffVal[*]}" "${data[*]}" "${OutDUMMYFilename}.root" ${TotDummyEffChargeVal} "${DummyEffVal[*]}" "${dummy[*]}" ${InSIMCFilename} ${OutFullAnalysisFilename} ${EffData}
 fi
 
 cd "${LTANAPATH}"
