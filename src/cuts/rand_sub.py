@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 12:14:50 trottar"
+# Time-stamp: "2024-03-26 12:22:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1397,11 +1397,11 @@ def rand_sub(phi_setting, inpDict):
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
+        '''
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
-        '''
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"],-1)
@@ -1451,11 +1451,10 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
         H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
-        '''
+
     # Fit background and subtract
     if ParticleType == "kaon":        
         background_fit = bg_fit(phi_setting, inpDict, H_MM_DATA)
-        '''
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
         P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
