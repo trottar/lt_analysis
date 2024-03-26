@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 14:29:11 trottar"
+# Time-stamp: "2024-03-26 10:52:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,27 +57,47 @@ pTheta_val_lst = ""
 
 for runNum in RUNLIST:
 
-    # Check if run number exists in analysed root files
-    if check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ANATYPE)):
-    
-        efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
-        efficiency_err = getEfficiencyValue(runNum,efficiency_table,"efficiency_err")
-        eff_charge = getEfficiencyValue(runNum,efficiency_table,"eff_charge")
-        eff_charge_err = getEfficiencyValue(runNum,efficiency_table,"eff_charge_err")
+    if ParticleType == "":
 
-        # Run by run list of effective charge
-        eff_charge_lst += " " + str(float(eff_charge))
-        eff_charge_err_lst += " " + str(float(eff_charge_err))
+            efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
+            efficiency_err = getEfficiencyValue(runNum,efficiency_table,"efficiency_err")
+            eff_charge = getEfficiencyValue(runNum,efficiency_table,"eff_charge")
+            eff_charge_err = getEfficiencyValue(runNum,efficiency_table,"eff_charge_err")
 
-        # Calculated run by run total efficiency and efficiency error
-        efficiency_lst += " " + str(efficiency)
-        efficiency_err_lst += " " + str(efficiency_err)
+            # Run by run list of effective charge
+            eff_charge_lst += " " + str(float(eff_charge))
+            eff_charge_err_lst += " " + str(float(eff_charge_err))
 
-        ebeam_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
-        pTheta_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
+            # Calculated run by run total efficiency and efficiency error
+            efficiency_lst += " " + str(efficiency)
+            efficiency_err_lst += " " + str(efficiency_err)
+
+            ebeam_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
+            pTheta_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
         
     else:
-        RUNLIST.remove(runNum)
+    
+        # Check if run number exists in analysed root files
+        if check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ANATYPE)):
+
+            efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
+            efficiency_err = getEfficiencyValue(runNum,efficiency_table,"efficiency_err")
+            eff_charge = getEfficiencyValue(runNum,efficiency_table,"eff_charge")
+            eff_charge_err = getEfficiencyValue(runNum,efficiency_table,"eff_charge_err")
+
+            # Run by run list of effective charge
+            eff_charge_lst += " " + str(float(eff_charge))
+            eff_charge_err_lst += " " + str(float(eff_charge_err))
+
+            # Calculated run by run total efficiency and efficiency error
+            efficiency_lst += " " + str(efficiency)
+            efficiency_err_lst += " " + str(efficiency_err)
+
+            ebeam_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
+            pTheta_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
+
+        else:
+            RUNLIST.remove(runNum)
 
 # Convert back to string        
 RUNLIST = ' '.join(map(str, RUNLIST))        
