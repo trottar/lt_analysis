@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 15:22:21 trottar"
+# Time-stamp: "2024-03-26 18:51:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -513,11 +513,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     ypfp = TCanvas()
 
     for i,hist in enumerate(histlist_copy):
-        hist["H_ssxpfp_DATA"].SetLineColor(i+1)
-        hist["H_ssxpfp_DATA"].Draw("same, E1")
-        hist["H_ssxpfp_SIMC"].SetLineColor(i+(len(phisetlist)+1))
-        hist["H_ssxpfp_SIMC"].Draw("same, E1")
-        hist["H_ssxpfp_SIMC"].Draw("same, HIST")
+        hist["H_ssypfp_DATA"].SetLineColor(i+1)
+        hist["H_ssypfp_DATA"].Draw("same, E1")
+        hist["H_ssypfp_SIMC"].SetLineColor(i+(len(phisetlist)+1))
+        hist["H_ssypfp_SIMC"].Draw("same, E1")
+        hist["H_ssypfp_SIMC"].Draw("same, HIST")
 
     ypfp.Print(outputpdf)
 
