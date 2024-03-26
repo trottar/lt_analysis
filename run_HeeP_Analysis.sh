@@ -368,7 +368,7 @@ fi
 if [[ ${#dummy_tmp[@]} -ne 0 ]]; then
     echo
     echo "Calculating dummy total effective charge ..."
-    PYSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_tmp[*]}" "heep")
+    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_tmp[*]}" "heep")
     arr1=()
     arr2=()
     arr3=()
