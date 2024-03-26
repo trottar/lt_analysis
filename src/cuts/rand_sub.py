@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 12:42:58 trottar"
+# Time-stamp: "2024-03-26 13:30:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1397,7 +1397,6 @@ def rand_sub(phi_setting, inpDict):
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
-        '''
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
@@ -1504,7 +1503,6 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(background_fit[0], -1)
         H_pmz_DATA.Add(background_fit[0], -1)
         H_ct_DATA.Add(background_fit[0], -1)
-        '''
         
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
@@ -1653,10 +1651,10 @@ def rand_sub(phi_setting, inpDict):
 
         histDict["H_MM_nosub_DATA"].SetLineColor(1)
         histDict["H_MM_nosub_DATA"].Draw("same, E1")
-        #histDict["H_MM_SUB_DATA"].SetLineColor(2)
-        #histDict["H_MM_SUB_DATA"].Draw("same, E1")
-        #background_fit[0].SetLineColor(3)
-        #background_fit[0].Draw("same")
+        histDict["H_MM_SUB_DATA"].SetLineColor(2)
+        histDict["H_MM_SUB_DATA"].Draw("same, E1")
+        background_fit[0].SetLineColor(3)
+        background_fit[0].Draw("same")
 
         CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
