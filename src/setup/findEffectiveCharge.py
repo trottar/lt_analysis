@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 10:52:19 trottar"
+# Time-stamp: "2024-03-26 10:53:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,7 +57,7 @@ pTheta_val_lst = ""
 
 for runNum in RUNLIST:
 
-    if ParticleType == "":
+    if ParticleType == "heep":
 
             efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
             efficiency_err = getEfficiencyValue(runNum,efficiency_table,"efficiency_err")
