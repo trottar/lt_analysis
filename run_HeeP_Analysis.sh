@@ -339,17 +339,13 @@ if [[ ${#data_tmp[@]} -ne 0 ]]; then
 	# store the elements in the corresponding array
 	eval "arr$itt=(\"\${line_array[@]}\")"
     done <<< "$PYSTRING"
-    DataChargeVal=("${arr1[@]}")
-    DataChargeErr=("${arr2[@]}")
+    DataEffChargeVal=("${arr1[@]}")
+    DataEffChargeErr=("${arr2[@]}")
     DataEffVal=("${arr3[@]}")
     DataEffErr=("${arr4[@]}")
     DatapThetaVal=("${arr5[@]}")
     DataEbeamVal=("${arr6[@]}")
     data=("${arr7[@]}")
-    #echo ${DataChargeVal[*]}
-    # Sums the array to get the total effective charge
-    # Note: this must be done as an array! This is why uC is used at this step
-    #       and later converted to C
     PYTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataEffChargeVal[*]}" "${DataEffChargeErr[*]}")
     arr1=()
     arr2=()
@@ -372,7 +368,7 @@ fi
 if [[ ${#dummy_tmp[@]} -ne 0 ]]; then
     echo
     echo "Calculating dummy total effective charge ..."
-    PYSTRING=$(python3 findEffectiveCharge.py ${EffDummy} "${dummy_tmp[*]}" "heep")
+    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_tmp[*]}" "heep")
     arr1=()
     arr2=()
     arr3=()
