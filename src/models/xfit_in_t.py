@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 23:40:09 trottar"
+# Time-stamp: "2024-03-26 23:54:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,8 +51,8 @@ m_p = 0.93827231
 m_n = 0.93956541
 mkpl = 0.493677
 
-#DEBUG=False
-DEBUG=True
+DEBUG=False
+#DEBUG=True
 
 ##############
 # HARD CODED #
@@ -60,10 +60,10 @@ DEBUG=True
 # Limit for finding new parameters (units of percent)
 #par_lim = 0.001 # +/-.1%
 #par_lim = 0.01 # +/-1%
-#par_lim = 0.05 # +/-5%
+par_lim = 0.05 # +/-5%
 #par_lim = 0.2 # +/-20%
 #par_lim = 0.75 # +/-75%
-par_lim = 10.00 # +/-1000%
+#par_lim = 10.00 # +/-1000%
 ##############
 ##############
 ##############
