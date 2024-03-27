@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-27 11:08:31 trottar"
+# Time-stamp: "2024-03-27 11:47:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,9 +216,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigL_pre.FixParameter(3, l3)
     # Fixing sigL terms to zero
     #f_sigL_pre.FixParameter(0, 0.0)
-    f_sigL_pre.FixParameter(1, 0.0)
+    #f_sigL_pre.FixParameter(1, 0.0)
     #f_sigL_pre.FixParameter(2, 0.0)
-    f_sigL_pre.FixParameter(3, 0.0)
+    #f_sigL_pre.FixParameter(3, 0.0)
     if DEBUG:
         f_sigL_pre.FixParameter(0, l0)
         f_sigL_pre.FixParameter(1, l1)
@@ -302,9 +302,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigL.FixParameter(3, l3)
     # Fixing sigL terms to zero
     #f_sigL.FixParameter(0, 0.0)
-    f_sigL.FixParameter(1, 0.0)
+    #f_sigL.FixParameter(1, 0.0)
     #f_sigL.FixParameter(2, 0.0)
-    f_sigL.FixParameter(3, 0.0)
+    #f_sigL.FixParameter(3, 0.0)
     if DEBUG:
         f_sigL.FixParameter(0, l0)
         f_sigL.FixParameter(1, l1)
@@ -401,7 +401,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigT_pre.FixParameter(1, t1)
     # Fixing sigT terms to zero
     #f_sigT_pre.FixParameter(0, 0.0)
-    f_sigT_pre.FixParameter(1, 0.0)
+    #f_sigT_pre.FixParameter(1, 0.0)
     if DEBUG:
         f_sigT_pre.FixParameter(0, t0)
         f_sigT_pre.FixParameter(1, t1)
@@ -474,7 +474,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigT.FixParameter(1, t1)
     # Fixing sigT terms to zero
     #f_sigT.FixParameter(0, 0.0)
-    f_sigT.FixParameter(1, 0.0)
+    #f_sigT.FixParameter(1, 0.0)
     if DEBUG:
         f_sigT.FixParameter(0, t0)
         f_sigT.FixParameter(1, t1)
