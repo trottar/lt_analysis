@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-27 12:03:22 trottar"
+# Time-stamp: "2024-03-27 12:23:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,7 +180,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(1).SetLeftMargin(0.12)
     nsep.Draw("sigl:t:sigl_e", "", "goff")
 
-    f_sigL_pre = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigL_pre = TF2("sig_L", fun_Sig_L, 0.0, tmax_range, 0.0, Q2max_range, 4)
     f_sigL_pre.SetParNames("p1","p2","p3","p4")
     f_sigL_pre.SetParameters(l0, l1, l2, l3)
 
@@ -266,7 +266,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
-    f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigL = TF2("sig_L", fun_Sig_L, 0.0, tmax_range, 0.0, Q2max_range, 4)
     f_sigL.SetParNames("p1","p2","p3","p4")
     f_sigL.SetParameters(l0, l1, l2, l3)
 
@@ -375,7 +375,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(2).SetLeftMargin(0.12)
     nsep.Draw("sigt:t:sigt_e", "", "goff")
 
-    f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigT_pre = TF2("sig_T", fun_Sig_T, 0.0, tmax_range, 0.0, Q2max_range, 4)
     f_sigT_pre.SetParNames("p5","p6","p7","p8")
     f_sigT_pre.SetParameters(t0, t1, t2, t3)
 
@@ -448,7 +448,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
-    f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigT = TF2("sig_T", fun_Sig_T, 0.0, tmax_range, 0.0, Q2max_range, 4)
     f_sigT.SetParNames("p5","p6","p7","p8")
     f_sigT.SetParameters(t0, t1, t2, t3)
 
@@ -543,7 +543,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(3).SetLeftMargin(0.12)
     nsep.Draw("siglt:t:siglt_e", "", "goff")
 
-    f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, 0.0, tmax_range, 0.0, Q2max_range, 4)
     f_sigLT_pre.SetParNames("p9","p10","p11","p12")
     f_sigLT_pre.SetParameters(lt0, lt1, lt2, lt3)
 
@@ -628,7 +628,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.SetTitle("Sigma LT Model Fit")
     g_siglt_fit.Draw("A*")
 
-    f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigLT = TF2("sig_LT", fun_Sig_LT, 0.0, tmax_range, 0.0, Q2max_range, 4)
     f_sigLT.SetParNames("p9","p10","p11","p12")
     f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
 
@@ -731,7 +731,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(4).SetLeftMargin(0.12)
     nsep.Draw("sigtt:t:sigtt_e", "", "goff")
     
-    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, 0.0, tmax_range, 0.0, Q2max_range, 4)
     f_sigTT_pre.SetParNames("p13","p14","p15","p16")
     f_sigTT_pre.SetParameters(tt0, tt1, tt2, tt3)
 
@@ -805,7 +805,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
-    f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    f_sigTT = TF2("sig_TT", fun_Sig_TT, 0.0, tmax_range, 0.0, Q2max_range, 4)
     f_sigTT.SetParNames("p13","p14","p15","p16")
     f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
 
