@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-28 13:50:45 trottar"
+# Time-stamp: "2024-03-28 13:53:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1049,8 +1049,9 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, scale_factor
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
-    print("!!!!!!!!!!!!!!!!!!!subtraction num_evts:",H_MM_DATA.GetEntries())
+    print("!!!!!!!!!!!!!!!!!!!subtraction scale_factor:",scale_factor)
     print("!!!!!!!!!!!!!!!!!!!subtraction integral:",H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    print("!!!!!!!!!!!!!!!!!!!subtraction scaled:",scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
     
     # Scale pion to subtraction proper peak 
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
