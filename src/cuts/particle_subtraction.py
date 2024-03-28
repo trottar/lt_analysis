@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-28 10:21:04 trottar"
+# Time-stamp: "2024-03-28 13:50:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,7 +106,7 @@ scale_dict ={
 
 ################################################################################################################################################
 
-def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
+def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, scale_factor, hgcer_cutg=None):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -122,7 +122,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
 
-    scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
+    #scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1053,58 +1053,58 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     print("!!!!!!!!!!!!!!!!!!!subtraction integral:",H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
     
     # Scale pion to subtraction proper peak 
-    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor*P_hgcer_xAtCer_vs_yAtCer_DATA.GetEntries())
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
     if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(scale_factor*P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.GetEntries())
-    P_hgcer_xAtCer_vs_MM_DATA.Scale(scale_factor*P_hgcer_xAtCer_vs_MM_DATA.GetEntries())
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    P_hgcer_xAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
     if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(scale_factor*P_hgcer_nohole_xAtCer_vs_MM_DATA.GetEntries())
-    P_hgcer_yAtCer_vs_MM_DATA.Scale(scale_factor*P_hgcer_yAtCer_vs_MM_DATA.GetEntries())
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    P_hgcer_yAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
     if ParticleType == "kaon":
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(scale_factor*P_hgcer_nohole_yAtCer_vs_MM_DATA.GetEntries())
-    MM_vs_CoinTime_DATA.Scale(scale_factor*MM_vs_CoinTime_DATA.GetEntries())
-    CoinTime_vs_beta_DATA.Scale(scale_factor*CoinTime_vs_beta_DATA.GetEntries())
-    MM_vs_beta_DATA.Scale(scale_factor*MM_vs_beta_DATA.GetEntries())
-    MM_vs_H_cer_DATA.Scale(scale_factor*MM_vs_H_cer_DATA.GetEntries())
-    MM_vs_H_cal_DATA.Scale(scale_factor*MM_vs_H_cal_DATA.GetEntries())
-    MM_vs_P_cal_DATA.Scale(scale_factor*MM_vs_P_cal_DATA.GetEntries())
-    MM_vs_P_hgcer_DATA.Scale(scale_factor*MM_vs_P_hgcer_DATA.GetEntries())
-    MM_vs_P_aero_DATA.Scale(scale_factor*MM_vs_P_aero_DATA.GetEntries())
-    phiq_vs_t_DATA.Scale(scale_factor*phiq_vs_t_DATA.GetEntries())
-    Q2_vs_W_DATA.Scale(scale_factor*Q2_vs_W_DATA.GetEntries())
-    Q2_vs_t_DATA.Scale(scale_factor*Q2_vs_t_DATA.GetEntries())
-    W_vs_t_DATA.Scale(scale_factor*W_vs_t_DATA.GetEntries())
-    EPS_vs_t_DATA.Scale(scale_factor*EPS_vs_t_DATA.GetEntries())
-    MM_vs_t_DATA.Scale(scale_factor*MM_vs_t_DATA.GetEntries())
-    H_ct_DATA.Scale(scale_factor*H_ct_DATA.GetEntries())
-    H_ssxfp_DATA.Scale(scale_factor*H_ssxfp_DATA.GetEntries())
-    H_ssyfp_DATA.Scale(scale_factor*H_ssyfp_DATA.GetEntries())
-    H_ssxpfp_DATA.Scale(scale_factor*H_ssxpfp_DATA.GetEntries())
-    H_ssypfp_DATA.Scale(scale_factor*H_ssypfp_DATA.GetEntries())
-    H_hsxfp_DATA.Scale(scale_factor*H_hsxfp_DATA.GetEntries())
-    H_hsyfp_DATA.Scale(scale_factor*H_hsyfp_DATA.GetEntries())
-    H_hsxpfp_DATA.Scale(scale_factor*H_hsxpfp_DATA.GetEntries())
-    H_hsypfp_DATA.Scale(scale_factor*H_hsypfp_DATA.GetEntries())
-    H_ssxptar_DATA.Scale(scale_factor*H_ssxptar_DATA.GetEntries())
-    H_ssyptar_DATA.Scale(scale_factor*H_ssyptar_DATA.GetEntries())
-    H_hsxptar_DATA.Scale(scale_factor*H_hsxptar_DATA.GetEntries())
-    H_hsyptar_DATA.Scale(scale_factor*H_hsyptar_DATA.GetEntries())
-    H_ssdelta_DATA.Scale(scale_factor*H_ssdelta_DATA.GetEntries())
-    H_hsdelta_DATA.Scale(scale_factor*H_hsdelta_DATA.GetEntries())
-    H_ph_q_DATA.Scale(scale_factor*H_ph_q_DATA.GetEntries())
-    H_th_q_DATA.Scale(scale_factor*H_th_q_DATA.GetEntries())
-    H_ph_recoil_DATA.Scale(scale_factor*H_ph_recoil_DATA.GetEntries())
-    H_th_recoil_DATA.Scale(scale_factor*H_th_recoil_DATA.GetEntries())
-    H_Q2_DATA.Scale(scale_factor*H_Q2_DATA.GetEntries())
-    H_W_DATA.Scale(scale_factor*H_W_DATA.GetEntries())
-    H_t_DATA.Scale(scale_factor*H_t_DATA.GetEntries())
-    H_epsilon_DATA.Scale(scale_factor*H_epsilon_DATA.GetEntries())
-    H_MM_DATA.Scale(scale_factor*H_MM_DATA.GetEntries())
-    H_pmiss_DATA.Scale(scale_factor*H_pmiss_DATA.GetEntries())
-    H_emiss_DATA.Scale(scale_factor*H_emiss_DATA.GetEntries())
-    H_pmx_DATA.Scale(scale_factor*H_pmx_DATA.GetEntries())
-    H_pmy_DATA.Scale(scale_factor*H_pmy_DATA.GetEntries())
-    H_pmz_DATA.Scale(scale_factor*H_pmz_DATA.GetEntries())
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    MM_vs_CoinTime_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    CoinTime_vs_beta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    MM_vs_beta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    MM_vs_H_cer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    MM_vs_H_cal_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    MM_vs_P_cal_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    MM_vs_P_hgcer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    MM_vs_P_aero_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    phiq_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    Q2_vs_W_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    Q2_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    W_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    EPS_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    MM_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ct_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ssxfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ssyfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ssxpfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ssypfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_hsxfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_hsyfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_hsxpfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_hsypfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ssxptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ssyptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_hsxptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_hsyptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ssdelta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_hsdelta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ph_q_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_th_q_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_ph_recoil_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_th_recoil_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_Q2_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_W_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_epsilon_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_pmiss_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_emiss_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_pmx_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_pmy_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    H_pmz_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
 
 ################################################################################################################################################
 

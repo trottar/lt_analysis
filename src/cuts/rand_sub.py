@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 15:25:14 trottar"
+# Time-stamp: "2024-03-28 13:51:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1399,7 +1399,7 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
-        particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
+        particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)), hgcer_cutg)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
