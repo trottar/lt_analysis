@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-28 13:53:10 trottar"
+# Time-stamp: "2024-03-28 14:33:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1109,7 +1109,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, scale_factor
 
 ################################################################################################################################################
 
-def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
+def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, scale_factor, hgcer_cutg=None):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -1125,7 +1125,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
 
-    scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
+    #scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1393,23 +1393,27 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
         hist_dict["H_MM_DUMMY_{}".format(j)].Add(hist_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
 
+        print("!!!!!!!!!!!!!!!!!!!ave subtraction scale_factor:",scale_factor)
+        print("!!!!!!!!!!!!!!!!!!!ave subtraction integral:",hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        print("!!!!!!!!!!!!!!!!!!!ave subtraction scaled:",scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        
         # Scale pion to subtraction proper peak
-        hist_dict["H_Q2_DATA_{}".format(j)].Scale(scale_factor*hist_dict["H_Q2_DATA_{}".format(j)].GetEntries())
-        hist_dict["H_W_DATA_{}".format(j)].Scale(scale_factor*hist_dict["H_W_DATA_{}".format(j)].GetEntries())
-        hist_dict["H_t_DATA_{}".format(j)].Scale(scale_factor*hist_dict["H_t_DATA_{}".format(j)].GetEntries())
-        hist_dict["H_epsilon_DATA_{}".format(j)].Scale(scale_factor*hist_dict["H_epsilon_DATA_{}".format(j)].GetEntries())
-        hist_dict["H_MM_DATA_{}".format(j)].Scale(scale_factor*hist_dict["H_MM_DATA_{}".format(j)].GetEntries())
+        hist_dict["H_Q2_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        hist_dict["H_W_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        hist_dict["H_t_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        hist_dict["H_epsilon_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        hist_dict["H_MM_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
 
         # Scale pion to subtraction proper peak 
-        hist_dict["H_Q2_DUMMY_{}".format(j)].Scale(scale_factor*hist_dict["H_Q2_DUMMY_{}".format(j)].GetEntries())
-        hist_dict["H_W_DUMMY_{}".format(j)].Scale(scale_factor*hist_dict["H_W_DUMMY_{}".format(j)].GetEntries())
-        hist_dict["H_t_DUMMY_{}".format(j)].Scale(scale_factor*hist_dict["H_t_DUMMY_{}".format(j)].GetEntries())
-        hist_dict["H_epsilon_DUMMY_{}".format(j)].Scale(scale_factor*hist_dict["H_epsilon_DUMMY_{}".format(j)].GetEntries())
-        hist_dict["H_MM_DUMMY_{}".format(j)].Scale(scale_factor*hist_dict["H_MM_DUMMY_{}".format(j)].GetEntries())
+        hist_dict["H_Q2_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
+        hist_dict["H_W_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
+        hist_dict["H_t_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
+        hist_dict["H_epsilon_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
+        hist_dict["H_MM_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
         
 ################################################################################################################################################
 
-def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
+def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, scale_factor, hgcer_cutg=None):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -1425,7 +1429,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
 
-    scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
+    #scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1668,10 +1672,14 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
 
+            print("!!!!!!!!!!!!!!!!!!!yield subtraction scale_factor:",scale_factor)
+            print("!!!!!!!!!!!!!!!!!!!yield subtraction integral:",hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+            print("!!!!!!!!!!!!!!!!!!!yield subtraction scaled:",scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+            
             # hist_dict["Scale pion to subtraction proper peak 
-            hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(scale_factor*hist_dict["H_t_DATA_{}_{}".format(j, k)].GetEntries())
-            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(scale_factor*hist_dict["H_MM_DATA_{}_{}".format(j, k)].GetEntries())
+            hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
 
             # hist_dict["Scale pion to subtraction proper peak 
-            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(scale_factor*hist_dict["H_t_DUMMY_{}_{}".format(j, k)].GetEntries())
-            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(scale_factor*hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].GetEntries())
+            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
