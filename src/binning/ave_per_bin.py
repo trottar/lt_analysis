@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-28 15:21:04 trottar"
+# Time-stamp: "2024-03-28 16:22:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -369,8 +369,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
             particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, \
-                                     hist_bin_dict["H_MM_DATA_{}".format(j)].Integral(hist_bin_dict["H_MM_DATA_{}".format(j)].FindBin(0.88), \
-                                                                                      hist_bin_dict["H_MM_DATA_{}".format(j)].FindBin(0.93)), hgcer_cutg)
+                                     hist_bin_dict["H_MM_DATA_{}".format(j)].Integral(hist_bin_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
+                                                                                      hist_bin_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)), hgcer_cutg)
             hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(subDict["H_Q2_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_W_DATA_{}".format(j)].Add(subDict["H_W_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_t_DATA_{}".format(j)].Add(subDict["H_t_SUB_DATA_{}".format(j)],-1)

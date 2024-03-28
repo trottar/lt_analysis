@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-28 15:23:56 trottar"
+# Time-stamp: "2024-03-28 16:37:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1050,62 +1050,62 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, scale_factor
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
     print("!!!!!!!!!!!!!!!!!!!subtraction scale_factor:",scale_factor)
-    print("!!!!!!!!!!!!!!!!!!!subtraction integral:",H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    print("!!!!!!!!!!!!!!!!!!!subtraction scaled:",scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    print("!!!!!!!!!!!!!!!!!!!subtraction integral:",H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    print("!!!!!!!!!!!!!!!!!!!subtraction scaled:",scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
     
     # Scale pion to subtraction proper peak 
-    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
     if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    P_hgcer_xAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    P_hgcer_xAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
     if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    P_hgcer_yAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    P_hgcer_yAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
     if ParticleType == "kaon":
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    MM_vs_CoinTime_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    CoinTime_vs_beta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    MM_vs_beta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    MM_vs_H_cer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    MM_vs_H_cal_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    MM_vs_P_cal_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    MM_vs_P_hgcer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    MM_vs_P_aero_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    phiq_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    Q2_vs_W_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    Q2_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    W_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    EPS_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    MM_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ct_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ssxfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ssyfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ssxpfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ssypfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_hsxfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_hsyfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_hsxpfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_hsypfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ssxptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ssyptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_hsxptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_hsyptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ssdelta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_hsdelta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ph_q_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_th_q_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_ph_recoil_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_th_recoil_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_Q2_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_W_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_epsilon_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_pmiss_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_emiss_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_pmx_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_pmy_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-    H_pmz_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    MM_vs_CoinTime_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    CoinTime_vs_beta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    MM_vs_beta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    MM_vs_H_cer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    MM_vs_H_cal_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    MM_vs_P_cal_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    MM_vs_P_hgcer_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    MM_vs_P_aero_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    phiq_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    Q2_vs_W_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    Q2_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    W_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    EPS_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    MM_vs_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ct_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ssxfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ssyfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ssxpfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ssypfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_hsxfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_hsyfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_hsxpfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_hsypfp_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ssxptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ssyptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_hsxptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_hsyptar_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ssdelta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_hsdelta_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ph_q_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_th_q_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_ph_recoil_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_th_recoil_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_Q2_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_W_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_t_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_epsilon_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_MM_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_pmiss_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_emiss_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_pmx_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_pmy_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
+    H_pmz_DATA.Scale(scale_factor/H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94)))
 
 ################################################################################################################################################
 
@@ -1396,26 +1396,56 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, scale
         print("!!!!!!!!!!!!!!!!!!!ave subtraction scale_factor:",scale_factor)
         print("!!!!!!!!!!!!!!!!!!!ave subtraction integral:",\
               hist_dict["H_MM_DATA_{}".format(j)].Integral(\
-                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.88), \
-                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.93)))
+                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
+                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
         print("!!!!!!!!!!!!!!!!!!!ave subtraction scaled:",\
               scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(\
-                                                                        hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.88), \
-                                                                        hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.93)))
+                                                                        hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
+                                                                        hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
         
         # Scale pion to subtraction proper peak
-        hist_dict["H_Q2_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-        hist_dict["H_W_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-        hist_dict["H_t_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-        hist_dict["H_epsilon_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-        hist_dict["H_MM_DATA_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+        hist_dict["H_Q2_DATA_{}".format(j)].Scale(\
+                                                  scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
+                                                  Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
+                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
+        hist_dict["H_W_DATA_{}".format(j)].Scale(\
+                                                 scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
+                                                 Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
+                                                          hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
+        hist_dict["H_t_DATA_{}".format(j)].Scale(\
+                                                 scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
+                                                 Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
+                                                          hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
+        hist_dict["H_epsilon_DATA_{}".format(j)].Scale(\
+                                                       scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
+                                                       Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
+                                                                hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
+        hist_dict["H_MM_DATA_{}".format(j)].Scale(\
+                                                  scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
+                                                  Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
+                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
 
         # Scale pion to subtraction proper peak 
-        hist_dict["H_Q2_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
-        hist_dict["H_W_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
-        hist_dict["H_t_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
-        hist_dict["H_epsilon_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
-        hist_dict["H_MM_DUMMY_{}".format(j)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
+        hist_dict["H_Q2_DUMMY_{}".format(j)].Scale(\
+                                                  scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
+                                                  Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
+                                                           hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
+        hist_dict["H_W_DUMMY_{}".format(j)].Scale(\
+                                                 scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
+                                                 Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
+                                                          hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
+        hist_dict["H_t_DUMMY_{}".format(j)].Scale(\
+                                                 scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
+                                                 Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
+                                                          hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
+        hist_dict["H_epsilon_DUMMY_{}".format(j)].Scale(\
+                                                       scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
+                                                       Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
+                                                                hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
+        hist_dict["H_MM_DUMMY_{}".format(j)].Scale(\
+                                                  scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
+                                                  Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
+                                                           hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
         
 ################################################################################################################################################
 
@@ -1681,17 +1711,29 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             print("!!!!!!!!!!!!!!!!!!!yield subtraction scale_factor:",scale_factor)
             print("!!!!!!!!!!!!!!!!!!!yield subtraction integral:",\
                   hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(\
-                                                                     hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.88), \
-                                                                     hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.93)))
+                                                                     hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                     hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)))
             print("!!!!!!!!!!!!!!!!!!!yield subtraction scaled:",\
                   scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(\
-                                                                                  hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.88), \
-                                                                                  hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.93)))
+                                                                                  hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                                  hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)))
             
             # hist_dict["Scale pion to subtraction proper peak 
-            hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
-            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)))
+            hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(\
+                                                           scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].\
+                                                           Integral(hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                    hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)))
+            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(\
+                                                            scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].\
+                                                            Integral(hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                     hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)))
 
             # hist_dict["Scale pion to subtraction proper peak 
-            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
-            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(scale_factor/hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Integral(H_MM_DUMMY.FindBin(0.88), H_MM_DUMMY.FindBin(0.93)))
+            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(\
+                                                            scale_factor/hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].\
+                                                            Integral(hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                     hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].FindBin(0.94)))
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(\
+                                                             scale_factor/hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].\
+                                                             Integral(hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                      hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].FindBin(0.94)))
