@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-28 17:37:49 trottar"
+# Time-stamp: "2024-03-29 09:51:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,6 +187,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
+        particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
                 
     print("\nBinning data...")
     for i,evt in enumerate(TBRANCH_DATA):
@@ -335,17 +336,41 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             # Pion subtraction by scaling simc to peak size
             if ParticleType == "kaon":
                 try:
-                    particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, \
-                                               hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(\
-                                                                                                      hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89),\
-                                                                                                      hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)), hgcer_cutg)
+                    scale_factor = hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(\
+                                                                                          hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89),\
+                                                                                          hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94))
                 except ZeroDivisionError:
-                    print("")
+                    scale_factor = 0.0
+
+                # subDict["Scale pion to subtraction proper peak 
+                subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(\
+                                                               scale_factor/subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].\
+                                                               Integral(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                        subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].FindBin(0.94)))
+                subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(\
+                                                                scale_factor/subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].\
+                                                                Integral(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                         subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].FindBin(0.94)))
+
+                    
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
 
-                #hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)],-1)
-                #hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)],-1)
+                '''
+                # subDict["Scale pion to subtraction proper peak 
+                subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)].Scale(\
+                                                                scale_factor/subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)].\
+                                                                Integral(subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                         subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)].FindBin(0.94)))
+                subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)].Scale(\
+                                                                 scale_factor/subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)].\
+                                                                 Integral(subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)].FindBin(0.89), \
+                                                                          subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)].FindBin(0.94)))
+
+                
+                hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)],-1)
+                hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)],-1)
+                '''
 
             # Fit background and subtract
             if ParticleType == "kaon":

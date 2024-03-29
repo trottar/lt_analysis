@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-28 16:37:28 trottar"
+# Time-stamp: "2024-03-29 09:52:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1109,7 +1109,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, scale_factor
 
 ################################################################################################################################################
 
-def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, scale_factor, hgcer_cutg=None):
+def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -1392,64 +1392,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, scale
         hist_dict["H_t_DUMMY_{}".format(j)].Add(hist_dict["H_t_DUMMY_RAND_{}".format(j)],-1)
         hist_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
         hist_dict["H_MM_DUMMY_{}".format(j)].Add(hist_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
-
-        print("!!!!!!!!!!!!!!!!!!!ave subtraction scale_factor:",scale_factor)
-        print("!!!!!!!!!!!!!!!!!!!ave subtraction integral:",\
-              hist_dict["H_MM_DATA_{}".format(j)].Integral(\
-                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
-                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
-        print("!!!!!!!!!!!!!!!!!!!ave subtraction scaled:",\
-              scale_factor/hist_dict["H_MM_DATA_{}".format(j)].Integral(\
-                                                                        hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
-                                                                        hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
-        
-        # Scale pion to subtraction proper peak
-        hist_dict["H_Q2_DATA_{}".format(j)].Scale(\
-                                                  scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
-                                                  Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
-                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
-        hist_dict["H_W_DATA_{}".format(j)].Scale(\
-                                                 scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
-                                                 Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
-                                                          hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
-        hist_dict["H_t_DATA_{}".format(j)].Scale(\
-                                                 scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
-                                                 Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
-                                                          hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
-        hist_dict["H_epsilon_DATA_{}".format(j)].Scale(\
-                                                       scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
-                                                       Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
-                                                                hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
-        hist_dict["H_MM_DATA_{}".format(j)].Scale(\
-                                                  scale_factor/hist_dict["H_MM_DATA_{}".format(j)].\
-                                                  Integral(hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
-                                                           hist_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)))
-
-        # Scale pion to subtraction proper peak 
-        hist_dict["H_Q2_DUMMY_{}".format(j)].Scale(\
-                                                  scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
-                                                  Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
-                                                           hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
-        hist_dict["H_W_DUMMY_{}".format(j)].Scale(\
-                                                 scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
-                                                 Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
-                                                          hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
-        hist_dict["H_t_DUMMY_{}".format(j)].Scale(\
-                                                 scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
-                                                 Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
-                                                          hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
-        hist_dict["H_epsilon_DUMMY_{}".format(j)].Scale(\
-                                                       scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
-                                                       Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
-                                                                hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
-        hist_dict["H_MM_DUMMY_{}".format(j)].Scale(\
-                                                  scale_factor/hist_dict["H_MM_DUMMY_{}".format(j)].\
-                                                  Integral(hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.89), \
-                                                           hist_dict["H_MM_DUMMY_{}".format(j)].FindBin(0.94)))
         
 ################################################################################################################################################
 
-def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, scale_factor, hgcer_cutg=None):
+def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -1706,34 +1652,4 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             ###
             # Dummy Random subtraction
             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
-            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
-
-            print("!!!!!!!!!!!!!!!!!!!yield subtraction scale_factor:",scale_factor)
-            print("!!!!!!!!!!!!!!!!!!!yield subtraction integral:",\
-                  hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(\
-                                                                     hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89), \
-                                                                     hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)))
-            print("!!!!!!!!!!!!!!!!!!!yield subtraction scaled:",\
-                  scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].Integral(\
-                                                                                  hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89), \
-                                                                                  hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)))
-            
-            # hist_dict["Scale pion to subtraction proper peak 
-            hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(\
-                                                           scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].\
-                                                           Integral(hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89), \
-                                                                    hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)))
-            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(\
-                                                            scale_factor/hist_dict["H_MM_DATA_{}_{}".format(j, k)].\
-                                                            Integral(hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.89), \
-                                                                     hist_dict["H_MM_DATA_{}_{}".format(j, k)].FindBin(0.94)))
-
-            # hist_dict["Scale pion to subtraction proper peak 
-            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(\
-                                                            scale_factor/hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].\
-                                                            Integral(hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].FindBin(0.89), \
-                                                                     hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].FindBin(0.94)))
-            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(\
-                                                             scale_factor/hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].\
-                                                             Integral(hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].FindBin(0.89), \
-                                                                      hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].FindBin(0.94)))
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)            
