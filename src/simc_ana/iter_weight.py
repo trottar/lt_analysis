@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-02 13:11:03 trottar"
+# Time-stamp: "2024-04-02 13:59:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,8 +103,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Clone the TTree from the original file
     new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
 
-    # Get the Weight branch from the new tree
-    new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
+    if iter_num > 1:
+        # Get the Weight branch from the new tree
+        new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("iter_weight")
+    else:
+        # Get the Weight branch from the new tree
+        new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
 
     # Get the sig branch from the new tree
     new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sigcm")    
@@ -132,9 +136,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #print("-"*25,"\n",i,"\n",inp_param)
       if iter_num > 1:
-          inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.iter_weight)+' '.join(param_arr)
+          inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.iter_weight)+' '.join(param_arr)
+          #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.iter_weight)+' '.join(param_arr)
       else:
-          inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
       iter_lst = iterWeight(inp_param)
 
