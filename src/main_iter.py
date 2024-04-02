@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:11:48 trottar"
+# Time-stamp: "2024-04-02 13:17:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -126,11 +126,15 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 # Find last iteration, based of closest date
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
-print("\n\nThe last iteration was",closest_date)
+print("\n\n")
+print("="*25)
+print("The last iteration was",closest_date)
 # Get the total number of lines in the file
 with open(f_iter, 'r') as file:
     iter_num = len(file.readlines())
-print("\tThis is iteration number", iter_num)
+print("\n\tIteration number", iter_num)
+print("="*25)
+print("\n\n")
 
 # Save this as the directory to grab further information
 prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
@@ -364,7 +368,7 @@ from compare_simc_iter import compare_simc
 for hist in histlist:
     # SIMC file with weight from last iteration
     if iter_num > 1:
-        old_simc_root = '{}/root/Prod_Coin_{}_iter_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1], iter_num)
+        old_simc_root = '{}/root/Prod_Coin_{}_iter_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1], iter_num-1)
     else:
         old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
     old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
@@ -385,6 +389,8 @@ for hist in histlist:
             # Overwrite root file with updated weight
             #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             # Use newly created simc root and hist file
+            print("!!!",new_simc_root.replace(".root","_iter_{}.root".format(inpDict["iter_num"])))
+            sys.exit(2)
             new_simc_root = new_simc_root.replace(".root","_iter_{}.root".format(inpDict["iter_num"]))
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
