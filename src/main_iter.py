@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 16:57:12 trottar"
+# Time-stamp: "2024-04-02 17:00:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -366,27 +366,28 @@ from compare_simc_iter import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    # SIMC file with weight from last iteration
     if iter_num > 1:
+        # SIMC file with weight from last iteration
         old_simc_root = '{}/root/Prod_Coin_{}_iter_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1], iter_num-1)
         new_simc_root = old_simc_root.replace(closest_date, formatted_date).replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num))
     else:
+        # SIMC file with weight from last iteration
         old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
-        new_simc_root = old_simc_root.replace(closest_date, formatted_date).replace(".root","iter_{}.root".format(iter_num))
+        new_simc_root = old_simc_root.replace(closest_date, formatted_date).replace(".root","_iter_{}.root".format(iter_num))
     old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
     new_simc_hist = old_simc_hist.replace(closest_date, formatted_date)
     # ***Create root directory here since it is used for weight iteration***
     create_dir(new_dir+"/root")
     # Make sure old simc root file exists
     if os.path.exists(old_simc_root):
+        # Copy to new iteration so and then edit the weight
+        print("\nCopying {} to {}".format(old_simc_root, new_simc_root))
+        shutil.copy(old_simc_root,new_simc_root)
+        shutil.copy(old_simc_hist,new_simc_hist)
         # Make sure new simc root file exists
         if os.path.exists(new_simc_root):
             # Function to calculation new weight and apply it to simc root file 
             iter_weight(new_param_file, old_simc_root, inpDict, hist["phi_setting"])
-            # Copy to new iteration so and then edit the weight
-            print("\nCopying {} to {}".format(old_simc_root, new_simc_root))
-            shutil.copy(old_simc_root,new_simc_root)
-            shutil.copy(old_simc_hist,new_simc_hist)            
             #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
