@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:21:42 trottar"
+# Time-stamp: "2024-04-02 13:32:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,13 +127,13 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
 print("\n\n")
-print("="*25)
+print("="*50)
 print("The last iteration was",closest_date)
 # Get the total number of lines in the file
 with open(f_iter, 'r') as file:
     iter_num = len(file.readlines())
 print("\n\tIteration number", iter_num)
-print("="*25)
+print("="*50)
 print("\n\n")
 
 # Save this as the directory to grab further information
@@ -567,9 +567,9 @@ with open(new_param_file, 'r') as file:
         cut_summary_lst += line            
     
 print("\n\n")
-print("="*25)
+print("="*50)
 print("{} Epsilon Summary...".format(EPSSET.capitalize()),cut_summary_lst)
-print("="*25)
+print("="*50)
 inpDict["cut_summary_lst"] = cut_summary_lst
 
 ##############################
