@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 14:15:47 trottar"
+# Time-stamp: "2024-04-02 13:25:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,6 +90,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     efficiency_table = inpDict["efficiency_table"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
+    iter_num = inpDict["iter_num"]
     
     ################################################################################################################################################
 
@@ -130,7 +131,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     ###############################################################################################################################################
 
     # Grabs simc number of events and normalizaton factor
-    simc_hist = rootFileSimc.replace('_iter.root','.hist')
+    simc_hist = rootFileSimc.replace('_iter_{}.root'.format(iter_num),'.hist')
     f_simc = open(simc_hist)
     for line in f_simc:
         #print(line)
