@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-02 17:56:44 trottar"
+# Time-stamp: "2024-04-02 18:03:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,7 +95,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         sig_SIMC  = TBRANCH_SIMC.GetBranch("iter_sig")        
         # Create a new ROOT file for writing        
         new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
-    else:        
+    else:
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
         # Create a new ROOT file for writing
@@ -104,17 +104,28 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Clone the TTree from the original file
     new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
 
-    if iter_num > 1:
-        # Get the Weight branch from the new tree
-        new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("iter_weight")
-        # Get the sig branch from the new tree
-        new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("iter_sig")            
-    else:
-        # Get the Weight branch from the new tree
-        new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
-        # Get the sig branch from the new tree
-        new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sigcm")
+    # Check if the iter_weight branch exists
+    if TBRANCH_SIMC.GetBranch("iter_weight"):
+        # Get the iter_weight branch
+        iter_weight_branch = TBRANCH_SIMC.GetBranch("iter_weight")
 
+        # Get the Weight branch
+        weight_branch = TBRANCH_SIMC.GetBranch("Weight")
+
+        # Get the value of iter_weight for the first entry (assuming it's a double)
+        iter_weight_value = iter_weight_branch.GetValue(0)
+
+        # Set the value of Weight branch to iter_weight value for all entries
+        for i in range(TBRANCH_SIMC.GetEntries()):
+            weight_branch.SetAddress(iter_weight_value)
+            weight_branch.Fill()
+
+        # Delete the iter_weight branch
+        TBRANCH_SIMC.GetListOfBranches().Remove(iter_weight_branch)
+
+        # Write the changes to the new ROOT file
+        new_TBRANCH_SIMC.Write()
+    
     # Get the Weight branch from the new tree
     new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
     # Get the sig branch from the new tree
