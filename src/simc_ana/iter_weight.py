@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-02 18:16:37 trottar"
+# Time-stamp: "2024-04-02 18:18:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,29 +106,35 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     # Check if the iter_weight branch exists
     if TBRANCH_SIMC.GetBranch("iter_weight"):
-        
         # Get the iter_weight branch
         iter_weight_branch = TBRANCH_SIMC.GetBranch("iter_weight")
+
         # Get the Weight branch
         weight_branch = TBRANCH_SIMC.GetBranch("Weight")
-        
-        # Get the value of iter_weight for the first entry (assuming it's a double)
-        iter_weight_values = array('d', [0])
+
+        # Create an array to store the iter_weight values
+        iter_weight_value = array('d', [0])
+
         # Link the iter_weight branch to the array
-        iter_weight_branch.SetAddress(iter_weight_values)
+        iter_weight_branch.SetAddress(iter_weight_value)
+
+        # Create an array to store the Weight values
+        weight_value = array('d', [0])
+
+        # Link the Weight branch to the array
+        weight_branch.SetAddress(weight_value)
 
         # Loop through entries and overwrite Weight with iter_weight
         for i in range(TBRANCH_SIMC.GetEntries()):
             iter_weight_branch.GetEntry(i)
-            weight_branch.SetAddress(iter_weight_values[0])
+            weight_value[0] = iter_weight_value[0]
             weight_branch.Fill()
 
         # Delete the iter_weight branch
         TBRANCH_SIMC.GetListOfBranches().Remove(iter_weight_branch)
 
         # Write the changes to the new ROOT file
-        new_TBRANCH_SIMC.Write()
-            
+        new_TBRANCH_SIMC.Write()            
     
     # Get the Weight branch from the new tree
     new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
