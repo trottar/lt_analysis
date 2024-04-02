@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:10:59 trottar"
+# Time-stamp: "2024-04-02 13:11:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -126,11 +126,11 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 # Find last iteration, based of closest date
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
-print("\n\nThe last iteration was ",closest_date)
+print("\n\nThe last iteration was",closest_date)
 # Get the total number of lines in the file
 with open(f_iter, 'r') as file:
     iter_num = len(file.readlines())
-print("\n\nThis is iteration number ", iter_num)
+print("\tThis is iteration number", iter_num)
 
 # Save this as the directory to grab further information
 prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
