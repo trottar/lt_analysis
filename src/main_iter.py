@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:08:39 trottar"
+# Time-stamp: "2024-04-02 13:10:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -199,8 +199,8 @@ inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
 inpDict["iter_num"] = iter_num
 
-#if EPSSET == "low" and iter_num > 0:
-if EPSSET == "low":
+if EPSSET == "low" and iter_num > 1:
+#if EPSSET == "low":
     # Save python script that contain separated xsect models for xfit script
     py_xfit = 'models/xfit_{}_{}.py'.format(ParticleType, pol_str)
     output_file_lst.append(py_xfit)
@@ -363,7 +363,7 @@ from compare_simc_iter import compare_simc
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     # SIMC file with weight from last iteration
-    if iter_num > 0:
+    if iter_num > 1:
         old_simc_root = '{}/root/Prod_Coin_{}_iter_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1], iter_num)
     else:
         old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
