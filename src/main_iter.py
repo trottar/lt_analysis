@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 17:04:39 trottar"
+# Time-stamp: "2024-04-02 17:53:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -391,10 +391,10 @@ for hist in histlist:
             #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             if iter_num > 1:
                 # SIMC file with weight from last iteration
-                new_simc_root = old_simc_root.replace(closest_date, formatted_date).replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num))
+                new_simc_root = new_simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num))
             else:
                 # SIMC file with weight from last iteration
-                new_simc_root = old_simc_root.replace(closest_date, formatted_date).replace(".root","_iter_{}.root".format(iter_num))            
+                new_simc_root = new_simc_root.replace(".root","_iter_{}.root".format(iter_num))            
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
             print("ERROR: {} not properly copied to {}".format(old_simc_root, new_simc_root))
