@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-02 16:39:28 trottar"
+# Time-stamp: "2024-04-02 17:43:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,7 +53,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def iter_weight(param_file, old_simc_root, inpDict, phi_setting):
+def iter_weight(param_file, simc_root, inpDict, phi_setting):
     
     formatted_date  = inpDict["formatted_date"]
     iter_num = inpDict["iter_num"]
@@ -85,21 +85,21 @@ def iter_weight(param_file, old_simc_root, inpDict, phi_setting):
             columns = line.split()
             param_arr.append(str(columns[0]))    
 
-    if not os.path.isfile(old_simc_root):
-        print("\n\nERROR: No simc file found called {}\n\n".format(old_simc_root))
+    if not os.path.isfile(simc_root):
+        print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))
 
-    InFile_SIMC = TFile.Open(old_simc_root, "OPEN")
+    InFile_SIMC = TFile.Open(simc_root, "OPEN")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
     if iter_num > 1:
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("iter_weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("iter_sig")        
         # Create a new ROOT file for writing        
-        new_InFile_SIMC = ROOT.TFile.Open(old_simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
+        new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
     else:        
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
         # Create a new ROOT file for writing
-        new_InFile_SIMC = ROOT.TFile.Open(old_simc_root.replace(".root","_iter_{}.root".format(iter_num)), "RECREATE")        
+        new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "RECREATE")        
         
     # Clone the TTree from the original file
     new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
