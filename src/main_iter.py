@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 16:39:10 trottar"
+# Time-stamp: "2024-04-02 16:51:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -379,15 +379,14 @@ for hist in histlist:
     create_dir(new_dir+"/root")
     # Make sure old simc root file exists
     if os.path.exists(old_simc_root):
-        # Copy to new iteration so and then edit the weight
-        print("\nCopying {} to {}".format(old_simc_root, new_simc_root))
-        shutil.copy(old_simc_root,new_simc_root)
-        shutil.copy(old_simc_hist,new_simc_hist)        
         # Make sure new simc root file exists
         if os.path.exists(new_simc_root):
             # Function to calculation new weight and apply it to simc root file 
             iter_weight(new_param_file, old_simc_root, inpDict, hist["phi_setting"])
-            # Overwrite root file with updated weight
+            # Copy to new iteration so and then edit the weight
+            print("\nCopying {} to {}".format(old_simc_root, new_simc_root))
+            shutil.copy(old_simc_root,new_simc_root)
+            shutil.copy(old_simc_hist,new_simc_hist)            
             #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
