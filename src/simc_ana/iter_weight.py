@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-02 18:10:06 trottar"
+# Time-stamp: "2024-04-02 18:13:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,15 +104,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Clone the TTree from the original file
     new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
 
-    print("!!!!1")
     # Check if the iter_weight branch exists
     if TBRANCH_SIMC.GetBranch("iter_weight"):
         # Get the iter_weight branch
         iter_weight_branch = TBRANCH_SIMC.GetBranch("iter_weight")
-
         # Get the Weight branch
         weight_branch = TBRANCH_SIMC.GetBranch("Weight")
-
         # Get the value of iter_weight for the first entry (assuming it's a double)
         iter_weight_value = array('d', [0])
 
@@ -120,13 +117,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         for i in range(TBRANCH_SIMC.GetEntries()):
             weight_branch.SetAddress(iter_weight_value)
             weight_branch.Fill()
-        print("!!!!2")
+
         # Delete the iter_weight branch
         TBRANCH_SIMC.GetListOfBranches().Remove(iter_weight_branch)
-        print("!!!!3")
         # Write the changes to the new ROOT file
         new_TBRANCH_SIMC.Write()
-        print("!!!!4")
+            
     
     # Get the Weight branch from the new tree
     new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
@@ -147,7 +143,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       # Progress bar
       Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
-
+      print("!!!!1")
       TBRANCH_SIMC.GetEntry(i)
 
       # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
@@ -165,7 +161,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                       .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           #inp_param = '{} {} {} {} {} {} {} {} {} '\
               #.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
-
+      print("!!!!2")
       iter_lst = iterWeight(inp_param)
 
       # Set the value of iweight
@@ -181,7 +177,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       
       # Fill the new branch with the new value for this entry
       new_sig_branch.Fill()
-          
+      print("!!!!3")
+      
     new_TBRANCH_SIMC.Write()
     
     new_InFile_SIMC.Close()
