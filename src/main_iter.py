@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:07:26 trottar"
+# Time-stamp: "2024-04-02 13:08:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -657,11 +657,7 @@ if EPSSET == "high":
         with open(f_iter, 'x') as file:
             file.write(formatted_date)
 
-    # Get the total number of lines in the file
-    with open(f_iter, 'r') as file:
-        total_lines = len(file.readlines())
-
-    f_iter_new = f_iter.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
+    f_iter_new = f_iter.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(iter_num))
     shutil.copy(f_iter,f_iter_new)
 
 for f in output_file_lst:
