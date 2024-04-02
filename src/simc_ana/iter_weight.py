@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-02 11:43:52 trottar"
+# Time-stamp: "2024-04-02 13:05:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,9 +54,9 @@ OUTPATH=lt.OUTPATH
 ################################################################################################################################################
 
 def iter_weight(param_file, simc_root, inpDict, phi_setting):
-
     
     formatted_date  = inpDict["formatted_date"]
+    iter_num = inpDict["iter_num"]
     ParticleType  = inpDict["ParticleType"]
     Q2 = inpDict["Q2"].replace("p",".")
     POL = inpDict["POL"]
@@ -90,11 +90,15 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     InFile_SIMC = TFile.Open(simc_root, "OPEN")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
-    Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
-    sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")
+    if iter_num > 0:
+        Weight_SIMC  = TBRANCH_SIMC.GetBranch("iter_weight")
+        sig_SIMC  = TBRANCH_SIMC.GetBranch("iter_sig")
+    else:
+        Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
+        sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")
 
     # Create a new ROOT file for writing
-    new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace(".root","_iter.root"), "RECREATE")
+    new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "RECREATE")
 
     # Clone the TTree from the original file
     new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
@@ -127,7 +131,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       #       This goes for Q2i, Wi, and phiqpi as well
       #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #print("-"*25,"\n",i,"\n",inp_param)
-      inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+      if iter_num > 0:
+          inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.iter_weight)+' '.join(param_arr)
+      else:
+          inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
       iter_lst = iterWeight(inp_param)
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-24 20:40:14 trottar"
+# Time-stamp: "2024-04-02 13:02:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,6 +127,10 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
 print("\n\nThe last iteration was ",closest_date)
+# Get the total number of lines in the file
+with open(f_iter, 'r') as file:
+    iter_num = len(file.readlines())
+print("\n\nThis is iteration number ", iter_num)
 
 # Save this as the directory to grab further information
 prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
@@ -193,6 +197,7 @@ histlist = prev_iter_combineDict["histlist"]
 # Add closest and formatted dates to inpDict (used in plot comparison)
 inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
+inpDict["iter_num"] = iter_num
 
 if EPSSET == "low":
     # Save python script that contain separated xsect models for xfit script
@@ -357,7 +362,10 @@ from compare_simc_iter import compare_simc
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     # SIMC file with weight from last iteration
-    old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
+    if iter_num > 0:
+        old_simc_root = '{}/root/Prod_Coin_{}_iter_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1], iter_num)
+    else:
+        old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
     old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
     new_simc_root = old_simc_root.replace(closest_date, formatted_date)
     new_simc_hist = old_simc_hist.replace(closest_date, formatted_date)
@@ -376,7 +384,7 @@ for hist in histlist:
             # Overwrite root file with updated weight
             #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             # Use newly created simc root and hist file
-            new_simc_root = new_simc_root.replace(".root","_iter.root")
+            new_simc_root = new_simc_root.replace(".root","_iter_{}.root".format(inpDict["iter_num"]))
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
             print("ERROR: {} not properly copied to {}".format(old_simc_root, new_simc_root))
@@ -637,23 +645,23 @@ if EPSSET == "high":
 # ***Likewise for SIMC root/hist files***
 
 if EPSSET == "high":
-    f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+
     # Check if the file exists
-    if os.path.exists(f_path):
+    if os.path.exists(f_iter):
         # If it exists, update it with the string
-        with open(f_path, 'a') as file:
+        with open(f_iter, 'a') as file:
             file.write('\n'+formatted_date)
     else:
         # If not, create it and fill it with the string
-        with open(f_path, 'x') as file:
+        with open(f_iter, 'x') as file:
             file.write(formatted_date)
 
     # Get the total number of lines in the file
-    with open(f_path, 'r') as file:
+    with open(f_iter, 'r') as file:
         total_lines = len(file.readlines())
 
-    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
-    shutil.copy(f_path,f_path_new)
+    f_iter_new = f_iter.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
+    shutil.copy(f_iter,f_iter_new)
 
 for f in output_file_lst:
     if OUTPATH in f:
