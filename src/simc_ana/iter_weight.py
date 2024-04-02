@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-02 18:03:31 trottar"
+# Time-stamp: "2024-04-02 18:07:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,7 +113,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         weight_branch = TBRANCH_SIMC.GetBranch("Weight")
 
         # Get the value of iter_weight for the first entry (assuming it's a double)
-        iter_weight_value = iter_weight_branch.GetValue(0)
+        iter_weight_value = array('d', [0])
 
         # Set the value of Weight branch to iter_weight value for all entries
         for i in range(TBRANCH_SIMC.GetEntries()):
