@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:32:28 trottar"
+# Time-stamp: "2024-04-02 14:17:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -390,7 +390,7 @@ for hist in histlist:
             # Overwrite root file with updated weight
             #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             # Use newly created simc root and hist file
-            new_simc_root = new_simc_root.replace(".root","_iter_{}.root".format(inpDict["iter_num"]))
+            #new_simc_root = new_simc_root.replace(".root","_iter_{}.root".format(inpDict["iter_num"]))
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
             print("ERROR: {} not properly copied to {}".format(old_simc_root, new_simc_root))
