@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:25:30 trottar"
+# Time-stamp: "2024-04-02 14:15:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -132,7 +132,11 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
     # Grabs simc number of events and normalizaton factor
     simc_hist = rootFileSimc.replace('_iter_{}.root'.format(iter_num),'.hist')
-    f_simc = open(simc_hist)
+    try:
+        f_simc = open(simc_hist)
+    except FileNotFoundError:
+        print("\n\nERROR: Invalid simc hist file %s\n\n" % simc_hist)
+        sys.exit(2)
     for line in f_simc:
         #print(line)
         if "Ncontribute" in line:
@@ -143,7 +147,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
             simc_normfactor = float(val[1])
     if 'simc_nevents' and 'simc_normfactor' not in locals():
         print("\n\nERROR: Invalid simc hist file %s\n\n" % simc_hist)
-        sys.exit(1)
+        sys.exit(2)
     f_simc.close()    
 
     ################################################################################################################################################
