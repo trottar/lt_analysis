@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 16:51:23 trottar"
+# Time-stamp: "2024-04-02 16:57:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -212,7 +212,7 @@ if EPSSET == "low" and iter_num > 1:
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
     py_xfit_active = 'models/xfit_active.py'
-    # \nCopying content of used models to actively used files
+    # Copying content of used models to actively used files
     print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_xfit, LTANAPATH+"/src/"+py_xfit_active))
     shutil.copy(LTANAPATH+"/src/"+py_xfit, LTANAPATH+"/src/"+py_xfit_active)
     
@@ -372,7 +372,7 @@ for hist in histlist:
         new_simc_root = old_simc_root.replace(closest_date, formatted_date).replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num))
     else:
         old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
-        new_simc_root = old_simc_root.replace(closest_date, formatted_date)
+        new_simc_root = old_simc_root.replace(closest_date, formatted_date).replace(".root","iter_{}.root".format(iter_num))
     old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
     new_simc_hist = old_simc_hist.replace(closest_date, formatted_date)
     # ***Create root directory here since it is used for weight iteration***
