@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:02:28 trottar"
+# Time-stamp: "2024-04-02 13:07:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -199,6 +199,7 @@ inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
 inpDict["iter_num"] = iter_num
 
+#if EPSSET == "low" and iter_num > 0:
 if EPSSET == "low":
     # Save python script that contain separated xsect models for xfit script
     py_xfit = 'models/xfit_{}_{}.py'.format(ParticleType, pol_str)
