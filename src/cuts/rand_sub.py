@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-28 16:42:16 trottar"
+# Time-stamp: "2024-04-01 23:04:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1399,8 +1399,64 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
-        particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, H_MM_DATA.Integral(H_MM_DATA.FindBin(0.88), H_MM_DATA.FindBin(0.93)), hgcer_cutg)
+        particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
+        try:
+            scale_factor = H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94))/subDict["H_MM_SUB_DATA"]\
+                                    .Integral(subDict["H_MM_SUB_DATA"].FindBin(0.89), subDict["H_MM_SUB_DATA"].FindBin(0.94))
+        except ZeroDivisionError:
+            scale_factor = 0.0
+        #Apply scale factor
+        subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_CoinTime_SUB_DATA"].Scale(scale_factor)
+        subDict["CoinTime_vs_beta_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_beta_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_H_cer_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_H_cal_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_P_cal_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_P_hgcer_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_P_aero_SUB_DATA"].Scale(scale_factor)
+        subDict["phiq_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["Q2_vs_W_SUB_DATA"].Scale(scale_factor)
+        subDict["Q2_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["W_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["EPS_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ct_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssxfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssyfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssxpfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssypfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsxfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsyfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsxpfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsypfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssxptar_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssyptar_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsxptar_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsyptar_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssdelta_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsdelta_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ph_q_SUB_DATA"].Scale(scale_factor)
+        subDict["H_th_q_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ph_recoil_SUB_DATA"].Scale(scale_factor)
+        subDict["H_th_recoil_SUB_DATA"].Scale(scale_factor)
+        subDict["H_Q2_SUB_DATA"].Scale(scale_factor)
+        subDict["H_W_SUB_DATA"].Scale(scale_factor)
+        subDict["H_t_SUB_DATA"].Scale(scale_factor)
+        subDict["H_epsilon_SUB_DATA"].Scale(scale_factor)
+        subDict["H_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["H_pmiss_SUB_DATA"].Scale(scale_factor)
+        subDict["H_emiss_SUB_DATA"].Scale(scale_factor)
+        subDict["H_pmx_SUB_DATA"].Scale(scale_factor)
+        subDict["H_pmy_SUB_DATA"].Scale(scale_factor)
+        subDict["H_pmz_SUB_DATA"].Scale(scale_factor)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
+        # Subtract pion
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"],-1)
