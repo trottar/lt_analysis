@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 13:17:20 trottar"
+# Time-stamp: "2024-04-02 13:21:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -369,10 +369,11 @@ for hist in histlist:
     # SIMC file with weight from last iteration
     if iter_num > 1:
         old_simc_root = '{}/root/Prod_Coin_{}_iter_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1], iter_num-1)
+        new_simc_root = old_simc_root.replace(closest_date, formatted_date).replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num))
     else:
         old_simc_root = '{}/root/Prod_Coin_{}.root'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
+        new_simc_root = old_simc_root.replace(closest_date, formatted_date)
     old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
-    new_simc_root = old_simc_root.replace(closest_date, formatted_date)
     new_simc_hist = old_simc_hist.replace(closest_date, formatted_date)
     # ***Create root directory here since it is used for weight iteration***
     create_dir(new_dir+"/root")
@@ -389,8 +390,6 @@ for hist in histlist:
             # Overwrite root file with updated weight
             #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             # Use newly created simc root and hist file
-            print("!!!",new_simc_root.replace(".root","_iter_{}.root".format(inpDict["iter_num"])))
-            sys.exit(2)
             new_simc_root = new_simc_root.replace(".root","_iter_{}.root".format(inpDict["iter_num"]))
             hist.update(compare_simc(new_simc_root, hist, inpDict))
         else:
