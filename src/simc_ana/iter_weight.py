@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 07:08:09 trottar"
+# Time-stamp: "2024-04-03 07:11:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,7 +112,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         TBRANCH_SIMC.GetBranch("iter_sig")
         new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")  # 'D' for double, change if needed        
 
-        new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree()
+        new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
         
     else:
         
