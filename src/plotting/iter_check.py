@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-03 05:20:54 trottar"
+# Time-stamp: "2024-04-03 05:34:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,7 +92,6 @@ def plot_iteration(histlist, phisetlist, inpDict):
     for hist in histlist:
         hist_copy = {}
         hist_copy["InFile_SIMC"] = hist["InFile_SIMC"]
-        print("\n\n\n$$$$$$$$$$$",hist["InFile_SIMC"])
         hist_copy["phi_setting"] = hist["phi_setting"]
         # Append the copied histogram dictionary to the new list
         histlist_copy.append(hist_copy)
