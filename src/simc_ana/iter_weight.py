@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 03:19:28 trottar"
+# Time-stamp: "2024-04-03 03:25:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -157,30 +157,20 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       if iter_num > 1:
           evt.Weight = evt.iter_weight # Test
           evt.iter_weight = iter_lst[0] # Test
-
-          # Fill the new branch with the new value for this entry
-          #new_weight_branch.Fill() # Test, commented
-
-          # Set the value of isig
-          #isig[0] = iter_lst[1]
-          #new_sig_SIMC.SetAddress(isig) # Test, commented
-
           evt.sigcm = evt.iter_sig # Test
           evt.iter_sig = iter_lst[1] # Test
 
-          # Fill the new branch with the new value for this entry
-          #new_sig_branch.Fill() # Test, commented
       else:
-          iter_weight = iter_lst[0] # Test
+          # Set the value of iweight
+          iweight[0] = iter_lst[0]
+          new_sig_SIMC.SetAddress(isig)
 
           # Fill the new branch with the new value for this entry
           new_weight_branch.Fill() # Test, commented
 
           # Set the value of isig
-          #isig[0] = iter_lst[1]
-          #new_sig_SIMC.SetAddress(isig) # Test, commented
-
-          iter_sig = iter_lst[1] # Test
+          isig[0] = iter_lst[1]
+          new_sig_SIMC.SetAddress(isig) # Test, commented
 
           # Fill the new branch with the new value for this entry
           new_sig_branch.Fill() # Test, commented
