@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 01:26:58 trottar"
+# Time-stamp: "2024-04-03 01:30:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -115,7 +115,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Get the sig branch from the new tree
         new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sigcm")
 
-
     '''
     *I want the iter_weight branch of TBRANCH_SIMC to be the Weight branch of new_TBRANCH_SIMC 
     *I want the iter_weight branch of new_TBRANCH_SIMC to be filled in by the loop like is done in my code already
@@ -130,10 +129,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     '''
     # Test
     # Create a new branch with the updated values
-    iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-    new_weight_branch = new_TBRANCH_SIMC.Branch("Weight", iweight, "Weight/D")  # 'D' for double, change if needed
-    isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
-    new_sig_branch = new_TBRANCH_SIMC.Branch("sigcm", isig, "sigcm/D")  # 'D' for double, change if needed
+    #iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+    #new_weight_branch = new_TBRANCH_SIMC.Branch("Weight", iweight, "Weight/D")  # 'D' for double, change if needed
+    #isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+    #new_sig_branch = new_TBRANCH_SIMC.Branch("sigcm", isig, "sigcm/D")  # 'D' for double, change if needed
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
