@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 03:59:29 trottar"
+# Time-stamp: "2024-04-03 04:01:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,12 +93,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     
     if iter_num > 1:
         # Create a new ROOT file for writing        
-        new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
+        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
     else:        
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
         # Create a new ROOT file for writing
-        new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "RECREATE")        
+        new_InFile_SIMC = TFile.Open(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "RECREATE")        
         
     # Clone the TTree from the original file
     new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast") # Test, commented
@@ -129,6 +129,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       if iter_num > 1:
           evt.Weight = evt.iter_weight # Test
           evt.sigcm = evt.iter_sig # Test
+
+          new_TBRANCH_SIMC.Fill()
       
       # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
       #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
