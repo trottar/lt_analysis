@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 06:18:57 trottar"
+# Time-stamp: "2024-04-03 06:24:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -87,19 +87,18 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     if not os.path.isfile(simc_root):
         print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))
-    
+
+    InFile_SIMC = TFile.Open(simc_root, "OPEN")
+    TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+        
     if iter_num > 1:
-        InFile_SIMC = TFile.Open(simc_root, "UPDATE")
-        TBRANCH_SIMC  = InFile_SIMC.Get("h10")
         
         # Create a new ROOT file for writing
-        #new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
+        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "UPDATE")
         # Clone the TTree from the original file
         #new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
-        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))        
+        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
     else:
-        InFile_SIMC = TFile.Open(simc_root, "OPEN")
-        TBRANCH_SIMC  = InFile_SIMC.Get("h10")
         
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
@@ -183,5 +182,5 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           
     new_TBRANCH_SIMC.Write("h10", ROOT.TObject.kOverwrite)
     
-    #new_InFile_SIMC.Close()
+    new_InFile_SIMC.Close()
     InFile_SIMC.Close()
