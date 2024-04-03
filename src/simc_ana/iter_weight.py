@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 05:12:09 trottar"
+# Time-stamp: "2024-04-03 05:15:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -135,19 +135,19 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           evt.Weight = evt.iter_weight
           evt.sigcm = evt.iter_sig
       
-      # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
-      #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
-      #       This goes for Q2i, Wi, and phiqpi as well
-      #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
-      #print("-"*25,"\n",i,"\n",inp_param)
-      inp_param = '{} {} {} {} {} {} {} {} {} '\
-                  .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
-      #inp_param = '{} {} {} {} {} {} {} {} {} '\
-          #.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
+          #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
+          #       This goes for Q2i, Wi, and phiqpi as well
+          #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          #print("-"*25,"\n",i,"\n",inp_param)
+          inp_param = '{} {} {} {} {} {} {} {} {} '\
+                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
+          #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          #inp_param = '{} {} {} {} {} {} {} {} {} '\
+              #.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
-      iter_lst = iterWeight(inp_param)
+          iter_lst = iterWeight(inp_param)
 
-      if iter_num > 1:
           evt.iter_weight = iter_lst[0]
           #print("!!!!!!! evt.Weight 2", evt.Weight)
           #print("!!!!!!! evt.iter_weight 2", evt.iter_weight)
@@ -158,6 +158,19 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           new_TBRANCH_SIMC.Fill()
           
       else:
+
+          # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
+          #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
+          #       This goes for Q2i, Wi, and phiqpi as well
+          #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          #print("-"*25,"\n",i,"\n",inp_param)
+          inp_param = '{} {} {} {} {} {} {} {} {} '\
+                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          #inp_param = '{} {} {} {} {} {} {} {} {} '\
+              #.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+
+          iter_lst = iterWeight(inp_param)
+          
           # Set the value of iweight
           iweight[0] = iter_lst[0]
           new_Weight_SIMC.SetAddress(iweight)
