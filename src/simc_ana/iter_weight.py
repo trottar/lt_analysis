@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 02:25:49 trottar"
+# Time-stamp: "2024-04-03 02:26:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,14 +114,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
         # Get the sig branch from the new tree
         new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sigcm")
-
-    # Create a new branch with the updated values
-    iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-    #new_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed
-    new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed # Test, commented
-    isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
-    #new_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed
-    new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed # Test, commented
+        
+        # Create a new branch with the updated values
+        iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        #new_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed
+        new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed # Test, commented
+        isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        #new_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed
+        new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed # Test, commented
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
