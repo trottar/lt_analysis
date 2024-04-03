@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 01:37:13 trottar"
+# Time-stamp: "2024-04-03 01:54:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,6 +104,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Clone the TTree from the original file
     new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
 
+    '''
     if iter_num > 1:
         # Get the Weight branch from the new tree
         new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("iter_weight")
@@ -114,7 +115,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
         # Get the sig branch from the new tree
         new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sigcm")
+    '''
 
+    # Test
+    # Get the Weight branch from the new tree
+    new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
+    # Get the sig branch from the new tree
+    new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sigcm")
+    
     '''
     *I want the iter_weight branch of TBRANCH_SIMC to be the Weight branch of new_TBRANCH_SIMC 
     *I want the iter_weight branch of new_TBRANCH_SIMC to be filled in by the loop like is done in my code already
