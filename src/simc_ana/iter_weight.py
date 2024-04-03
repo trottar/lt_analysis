@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 08:29:35 trottar"
+# Time-stamp: "2024-04-03 08:34:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,10 +88,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     if not os.path.isfile(simc_root):
         print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))
 
-    InFile_SIMC = TFile.Open(simc_root, "OPEN")
-    TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+
         
     if iter_num > 1:
+
+        InFile_SIMC = TFile.Open(simc_root, "UPDATE")
+        TBRANCH_SIMC  = InFile_SIMC.Get("h10")
         
         b_Weight = TBRANCH_SIMC.GetBranch("Weight")    
         b_sigcm = TBRANCH_SIMC.GetBranch("sigcm")        
@@ -106,19 +108,26 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         
         # Create a new branch with the updated values
         Weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_TBRANCH_SIMC.SetBranchStatus("Weight", 0)  # Disable branch
         new_b_Weight = new_TBRANCH_SIMC.GetBranch("Weight")
         new_Weight = new_TBRANCH_SIMC.Branch("Weight", Weight, "Weight/D")  # 'D' for double, change if needed
         sigcm = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_TBRANCH_SIMC.SetBranchStatus("sigcm", 0)  # Disable branch
         new_b_sigcm = new_TBRANCH_SIMC.GetBranch("sigcm")
         new_sigcm = new_TBRANCH_SIMC.Branch("sigcm", sigcm, "sigcm/D")  # 'D' for double, change if needed
         iter_weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_TBRANCH_SIMC.SetBranchStatus("iter_weight", 0)  # Disable branch
         new_b_iter_weight = new_TBRANCH_SIMC.GetBranch("iter_weight")
         new_iter_weight = new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")  # 'D' for double, change if needed
         iter_sig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_TBRANCH_SIMC.SetBranchStatus("iter_sig", 0)  # Disable branch        
         new_b_iter_sig = new_TBRANCH_SIMC.GetBranch("iter_sig")
         new_iter_sig = new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")  # 'D' for double, change if needed        
         
     else:
+
+        InFile_SIMC = TFile.Open(simc_root, "OPEN")
+        TBRANCH_SIMC  = InFile_SIMC.Get("h10")
         
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
