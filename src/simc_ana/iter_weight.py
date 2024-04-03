@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 07:32:31 trottar"
+# Time-stamp: "2024-04-03 07:37:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,8 +134,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       if iter_num > 1:
 
-          evt.Weight = evt.iter_weight
-          evt.sigcm = evt.iter_sig
+          #evt.Weight = evt.iter_weight
+          #evt.sigcm = evt.iter_sig
+
+          new_TBRANCH_SIMC.SetBranchAddress("Weight", ROOT.AddressOf(evt.iter_weight))
+          new_TBRANCH_SIMC.SetBranchAddress("sigcm", ROOT.AddressOf(evt.iter_sig))
           
           # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
           #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
@@ -149,8 +152,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
           
-          evt.iter_weight = iter_lst[0]
-          evt.iter_sig = iter_lst[1]
+          #evt.iter_weight = iter_lst[0]
+          #evt.iter_sig = iter_lst[1]
+
+          new_TBRANCH_SIMC.SetBranchAddress("iter_weight", ROOT.AddressOf(iter_lst[0]))
+          new_TBRANCH_SIMC.SetBranchAddress("iter_sig", ROOT.AddressOf(iter_lst[1]))
 
           new_TBRANCH_SIMC.Fill()
           
@@ -181,9 +187,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           # Fill the new branch with the new value for this entry
           new_sig_branch.Fill()
-
-    new_InFile_SIMC.cd()  # Move to the correct directory in the output file          
-    new_TBRANCH_SIMC.Write("", ROOT.TObject.kOverwrite)
+          
+    new_TBRANCH_SIMC.Write("h10", ROOT.TObject.kOverwrite)
     
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
