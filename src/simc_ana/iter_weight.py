@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 04:11:22 trottar"
+# Time-stamp: "2024-04-03 04:32:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,7 +92,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
     
     if iter_num > 1:
-        # Create a new ROOT file for writing        
+        # Create a new ROOT file for writing
         new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
     else:        
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
@@ -101,7 +101,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         new_InFile_SIMC = TFile.Open(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "RECREATE")        
         
     # Clone the TTree from the original file
-    new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast") # Test, commented
+    new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
 
     if iter_num <= 1:
         # Get the Weight branch from the new tree
@@ -130,8 +130,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           print("\ti",i)
           print("!!!!!!! evt.Weight", evt.Weight)
           print("!!!!!!! evt.iter_weight", evt.iter_weight)
-          evt.Weight = evt.iter_weight # Test
-          evt.sigcm = evt.iter_sig # Test
+          evt.Weight = evt.iter_weight
+          print("!!!!!!! evt.Weight 2", evt.Weight)
+          evt.sigcm = evt.iter_sig
       
       # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
       #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
@@ -146,8 +147,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       iter_lst = iterWeight(inp_param)
 
       if iter_num > 1:
-          evt.iter_weight = iter_lst[0] # Test
-          evt.iter_sig = iter_lst[1] # Test
+          evt.iter_weight = iter_lst[0]
+          evt.iter_sig = iter_lst[1]
 
           new_TBRANCH_SIMC.Fill()
           
@@ -157,14 +158,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           new_Weight_SIMC.SetAddress(iweight)
 
           # Fill the new branch with the new value for this entry
-          new_weight_branch.Fill() # Test, commented
+          new_weight_branch.Fill()
 
           # Set the value of isig
           isig[0] = iter_lst[1]
-          new_sig_SIMC.SetAddress(isig) # Test, commented
+          new_sig_SIMC.SetAddress(isig)
 
           # Fill the new branch with the new value for this entry
-          new_sig_branch.Fill() # Test, commented
+          new_sig_branch.Fill()
           print("\ti",i)
           print("!!!!!!! evt.Weight", evt.Weight)
           print("!!!!!!! evt.iter_weight", iweight)
