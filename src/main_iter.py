@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 17:53:02 trottar"
+# Time-stamp: "2024-04-03 01:38:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -362,7 +362,8 @@ shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
-from compare_simc_iter import compare_simc
+#from compare_simc_iter import compare_simc # Test, commented
+from compare_simc import compare_simc # Test
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
