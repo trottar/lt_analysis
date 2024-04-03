@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 06:37:13 trottar"
+# Time-stamp: "2024-04-03 06:46:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -143,8 +143,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       if iter_num > 1:
 
-          evt.Weight = evt.iter_weight
-          evt.sigcm = evt.iter_sig
+          #evt.Weight = evt.iter_weight
+          #evt.sigcm = evt.iter_sig
           
           # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
           #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
