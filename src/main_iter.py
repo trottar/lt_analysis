@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-03 03:18:06 trottar"
+# Time-stamp: "2024-04-03 03:30:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -503,7 +503,7 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 for hist in histlist:
-    print("\nUpdating simc {} histograms in {}...\n".format(hist["phi_setting"],foutroot))
+    print("\nUpdating simc {} histograms in {}...".format(hist["phi_setting"],foutroot))
     # Loop through all keys,values of dictionary
     for i, (key, val) in enumerate(hist.items()):
         # Progress bar
