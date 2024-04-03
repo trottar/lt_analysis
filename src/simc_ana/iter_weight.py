@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 06:24:15 trottar"
+# Time-stamp: "2024-04-03 06:29:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,6 +98,13 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Clone the TTree from the original file
         #new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+        
+        # Create a new branch with the updated values
+        iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed
+        isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed        
+        
     else:
         
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
@@ -147,10 +154,24 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
           
-          evt.iter_weight = iter_lst[0]
-          evt.iter_sig = iter_lst[1]
+          #evt.iter_weight = iter_lst[0]
+          #evt.iter_sig = iter_lst[1]
           
-          new_TBRANCH_SIMC.Fill()          
+          # Set the value of iweight
+          iweight[0] = iter_lst[0]
+          new_Weight_SIMC.SetAddress(iweight)
+
+          # Fill the new branch with the new value for this entry
+          new_weight_branch.Fill()
+
+          # Set the value of isig
+          isig[0] = iter_lst[1]
+          new_sig_SIMC.SetAddress(isig)
+
+          # Fill the new branch with the new value for this entry
+          new_sig_branch.Fill()
+
+          new_TBRANCH_SIMC.Fill()
           
       else:
 
