@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 08:15:49 trottar"
+# Time-stamp: "2024-04-03 08:21:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,24 +93,29 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         
     if iter_num > 1:
         
+        b_Weight = TBRANCH_SIMC.GetBranch("Weight")    
+        b_sigcm = TBRANCH_SIMC.GetBranch("sigcm")        
+        b_iter_weight = TBRANCH_SIMC.GetBranch("iter_weight")        
+        b_iter_sig = TBRANCH_SIMC.GetBranch("iter_sig")
+
         # Create a new ROOT file for writing
         new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "UPDATE")
-
+        
         # Clone the TTree from the original file
         new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
         
         # Create a new branch with the updated values
         Weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        new_TBRANCH_SIMC.GetBranch("Weight")
+        new_b_Weight = new_TBRANCH_SIMC.GetBranch("Weight")
         new_TBRANCH_SIMC.Branch("Weight", Weight, "Weight/D")  # 'D' for double, change if needed
         sigcm = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        new_TBRANCH_SIMC.GetBranch("sigcm")
+        new_b_sigcm = new_TBRANCH_SIMC.GetBranch("sigcm")
         new_TBRANCH_SIMC.Branch("sigcm", sigcm, "sigcm/D")  # 'D' for double, change if needed
         iter_weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        new_TBRANCH_SIMC.GetBranch("iter_weight")
+        new_b_iter_weight = new_TBRANCH_SIMC.GetBranch("iter_weight")
         new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")  # 'D' for double, change if needed
         iter_sig = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        new_TBRANCH_SIMC.GetBranch("iter_sig")
+        new_b_iter_sig = new_TBRANCH_SIMC.GetBranch("iter_sig")
         new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")  # 'D' for double, change if needed        
         
     else:
@@ -166,7 +171,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #evt.iter_weight = iter_lst[0]
           #evt.iter_sig = iter_lst[1]
 
-          Weight[0] = evt.iter_weight
+          Weight[0] = evt.iter_weight          
           sigcm[0] = evt.iter_sig
           
           iter_weight[0] = iter_lst[0]
