@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 05:37:00 trottar"
+# Time-stamp: "2024-04-03 05:42:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,19 +92,19 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
     
     if iter_num > 1:
-        print("")
         # Create a new ROOT file for writing
-        #new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
+        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
+        # Clone the TTree from the original file
+        new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
     else:        
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
         # Create a new ROOT file for writing
-        new_InFile_SIMC = TFile.Open(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "RECREATE")        
+        new_InFile_SIMC = TFile.Open(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "RECREATE")
         
-    # Clone the TTree from the original file
-    new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
+        # Clone the TTree from the original file
+        new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
 
-    if iter_num <= 1:
         # Get the Weight branch from the new tree
         new_Weight_SIMC = new_TBRANCH_SIMC.GetBranch("Weight")
         # Get the sig branch from the new tree
@@ -191,5 +191,5 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           
     new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
     
-    #new_InFile_SIMC.Close()
+    new_InFile_SIMC.Close()
     InFile_SIMC.Close()
