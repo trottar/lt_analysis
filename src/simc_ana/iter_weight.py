@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 01:56:51 trottar"
+# Time-stamp: "2024-04-03 02:14:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,7 +161,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       if iter_num > 1:
           # Test
           inp_param = '{} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.Weight)+' '.join(param_arr)
+                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           # Test, commented          
           #inp_param = '{} {} {} {} {} {} {} {} {} '\
               #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
