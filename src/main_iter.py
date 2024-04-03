@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-03 01:40:17 trottar"
+# Time-stamp: "2024-04-03 01:43:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -411,7 +411,7 @@ sys.path.append("plotting")
 from iter_check import plot_iteration
 
 # Comparison plots of 0th to current iteration
-plot_iteration(histlist, phisetlist, inpDict)
+#plot_iteration(histlist, phisetlist, inpDict) # Test, commented
 
 for hist in histlist:
     print("\n\n{} data total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_DATA"]))
@@ -422,8 +422,9 @@ for hist in histlist:
     print("{} dummy normalization: {:.3e}".format(hist["phi_setting"], hist["normfac_dummy"]))
     print("{} simc normalization: {:.3e}".format(hist["phi_setting"], hist["normfac_simc"]))
 
-if DEBUG:
-    show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
+# Test, commented
+#if DEBUG:
+#    show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))
 #show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(ParticleType,formatted_date)))    
 
 from data_vs_simc import plot_data_vs_simc
