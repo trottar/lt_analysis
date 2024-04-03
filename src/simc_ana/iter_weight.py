@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 02:46:05 trottar"
+# Time-stamp: "2024-04-03 02:49:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,12 +116,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sigcm")
                 
         # Create a new branch with the updated values
-        #iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        iter_weight = array('d')  # Assuming 'd' is the data type, change if needed # Test
-        new_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")  # 'D' for double, change if needed
-        #isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        iter_sig = array('d')  # Assuming 'd' is the data type, change if needed # Test
-        new_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")  # 'D' for double, change if needed
+        iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed
+        isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
@@ -156,21 +154,39 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       #iweight[0] = iter_lst[0]
       #new_Weight_SIMC.SetAddress(iweight) # Test, commented
 
-      evt.Weight = evt.iter_weight # Test
-      evt.iter_weight = iter_lst[0] # Test
+      if iter_num > 1:
+          evt.Weight = evt.iter_weight # Test
+          evt.iter_weight = iter_lst[0] # Test
 
-      # Fill the new branch with the new value for this entry
-      #new_weight_branch.Fill() # Test, commented
-      
-      # Set the value of isig
-      #isig[0] = iter_lst[1]
-      #new_sig_SIMC.SetAddress(isig) # Test, commented
+          # Fill the new branch with the new value for this entry
+          #new_weight_branch.Fill() # Test, commented
 
-      evt.sigcm = evt.iter_sig # Test
-      evt.iter_sig = iter_lst[0] # Test
-      
-      # Fill the new branch with the new value for this entry
-      #new_sig_branch.Fill() # Test, commented
+          # Set the value of isig
+          #isig[0] = iter_lst[1]
+          #new_sig_SIMC.SetAddress(isig) # Test, commented
+
+          evt.sigcm = evt.iter_sig # Test
+          evt.iter_sig = iter_lst[0] # Test
+
+          # Fill the new branch with the new value for this entry
+          #new_sig_branch.Fill() # Test, commented
+      else:
+          evt.Weight = iter_weight # Test
+          iter_weight = iter_lst[0] # Test
+
+          # Fill the new branch with the new value for this entry
+          #new_weight_branch.Fill() # Test, commented
+
+          # Set the value of isig
+          #isig[0] = iter_lst[1]
+          #new_sig_SIMC.SetAddress(isig) # Test, commented
+
+          evt.sigcm = iter_sig # Test
+          iter_sig = iter_lst[0] # Test
+
+          # Fill the new branch with the new value for this entry
+          #new_sig_branch.Fill() # Test, commented
+          
           
     new_TBRANCH_SIMC.Write()
     
