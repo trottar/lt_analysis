@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 05:45:35 trottar"
+# Time-stamp: "2024-04-03 05:54:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,6 +134,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #       This goes for Q2i, Wi, and phiqpi as well
           #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           #print("-"*25,"\n",i,"\n",inp_param)
+          print("!!!!!!!!!!!!",param_arr)
           inp_param = '{} {} {} {} {} {} {} {} {} '\
                       .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
           #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
@@ -142,7 +143,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
 
-          evt.Weight = evt.iter_weight          
+          evt.Weight = evt.iter_weight
           evt.iter_weight = iter_lst[0]
           evt.sigcm = evt.iter_sig          
           evt.iter_sig = iter_lst[1]
