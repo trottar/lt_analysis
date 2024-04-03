@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 07:46:36 trottar"
+# Time-stamp: "2024-04-03 07:48:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -94,7 +94,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     if iter_num > 1:
         
         # Create a new ROOT file for writing
-        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "UPDATE")
+        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
         # Clone the TTree from the original file        
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))    
         
@@ -134,11 +134,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       if iter_num > 1:
 
-          #evt.Weight = evt.iter_weight
-          #evt.sigcm = evt.iter_sig
+          evt.Weight = evt.iter_weight
+          evt.sigcm = evt.iter_sig
 
-          new_TBRANCH_SIMC.SetBranchAddress("Weight", evt.iter_weight)
-          new_TBRANCH_SIMC.SetBranchAddress("sigcm", evt.iter_sig)
+          #new_TBRANCH_SIMC.SetBranchAddress("Weight", evt.iter_weight)
+          #new_TBRANCH_SIMC.SetBranchAddress("sigcm", evt.iter_sig)
           
           # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
           #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
@@ -152,11 +152,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
           
-          #evt.iter_weight = iter_lst[0]
-          #evt.iter_sig = iter_lst[1]
+          evt.iter_weight = iter_lst[0]
+          evt.iter_sig = iter_lst[1]
 
-          new_TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_lst[0])
-          new_TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_lst[1])
+          #new_TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_lst[0])
+          #new_TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_lst[1])
 
           new_TBRANCH_SIMC.Fill()
           
