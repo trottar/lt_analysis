@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 05:42:21 trottar"
+# Time-stamp: "2024-04-03 05:45:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -128,13 +128,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       TBRANCH_SIMC.GetEntry(i)
 
       if iter_num > 1:
-          #print("\ti",i)
-          #print("!!!!!!! evt.Weight", evt.Weight)
-          #print("!!!!!!! evt.iter_weight", evt.iter_weight)
-          #print("!!!!!!! evt.sigcm", evt.sigcm)
-          #print("!!!!!!! evt.iter_sig", evt.iter_sig)
-          evt.Weight = evt.iter_weight
-          evt.sigcm = evt.iter_sig
       
           # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
           #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
@@ -149,12 +142,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
 
+          evt.Weight = evt.iter_weight          
           evt.iter_weight = iter_lst[0]
-          #print("!!!!!!! evt.Weight 2", evt.Weight)
-          #print("!!!!!!! evt.iter_weight 2", evt.iter_weight)
+          evt.sigcm = evt.iter_sig          
           evt.iter_sig = iter_lst[1]
-          #print("!!!!!!! evt.sigcm 2", evt.sigcm)
-          #print("!!!!!!! evt.iter_sig 2", evt.iter_sig)          
 
           new_TBRANCH_SIMC.Fill()
           
