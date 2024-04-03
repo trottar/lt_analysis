@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-02 14:15:09 trottar"
+# Time-stamp: "2024-04-03 05:10:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -123,6 +123,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
         return histDict
 
+    print("\n\n\n$$$$$$$$$$$",rootFileSimc)
     # Opening new simc root file with new iteration of weight
     InFile_SIMC = TFile.Open(rootFileSimc, "OPEN")
 
