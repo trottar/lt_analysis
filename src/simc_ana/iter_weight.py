@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 06:11:46 trottar"
+# Time-stamp: "2024-04-03 06:12:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,7 +96,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         #new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
         # Clone the TTree from the original file
         #new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
-        new_InFile_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))        
+        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))        
     else:        
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
@@ -148,8 +148,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           evt.iter_weight = iter_lst[0]
           evt.iter_sig = iter_lst[1]
           
-          #new_TBRANCH_SIMC.Fill()
-          new_InFile_SIMC.Fill()
+          new_TBRANCH_SIMC.Fill()          
           
       else:
 
@@ -178,11 +177,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           # Fill the new branch with the new value for this entry
           new_sig_branch.Fill()
-
-    if iter_num > 1:
-        new_InFile_SIMC.Write("h10", ROOT.TObject.kOverwrite)
-    else:
-        new_TBRANCH_SIMC.Write("h10", ROOT.TObject.kOverwrite)
+          
+    new_TBRANCH_SIMC.Write("h10", ROOT.TObject.kOverwrite)
     
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
