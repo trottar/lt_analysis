@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 06:52:31 trottar"
+# Time-stamp: "2024-04-03 06:57:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,16 +98,20 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Clone the TTree from the original file        
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
 
-        new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
+        #new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
         
         # Create a new branch with the updated values
-        #Weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        #new_TBRANCH_SIMC.Branch("Weight", Weight, "Weight/D")  # 'D' for double, change if needed
-        #sigcm = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        #new_TBRANCH_SIMC.Branch("sigcm", sigcm, "sigcm/D")  # 'D' for double, change if needed        
+        Weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_TBRANCH_SIMC.SetAddress(Weight)
+        new_TBRANCH_SIMC.Branch("Weight", Weight, "Weight/D")  # 'D' for double, change if needed
+        sigcm = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_TBRANCH_SIMC.SetAddress(sigcm)
+        new_TBRANCH_SIMC.Branch("sigcm", sigcm, "sigcm/D")  # 'D' for double, change if needed
         iter_weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_TBRANCH_SIMC.SetAddress(iter_weight)
         new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")  # 'D' for double, change if needed
         iter_sig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        new_TBRANCH_SIMC.SetAddress(iter_sig)
         new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")  # 'D' for double, change if needed        
         
     else:
@@ -144,8 +148,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       if iter_num > 1:
 
-          #evt.Weight = evt.iter_weight
-          #evt.sigcm = evt.iter_sig
+          evt.Weight = evt.iter_weight
+          evt.sigcm = evt.iter_sig
           
           # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
           #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
