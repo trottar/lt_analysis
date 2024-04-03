@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 03:54:31 trottar"
+# Time-stamp: "2024-04-03 03:56:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,28 +127,24 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       TBRANCH_SIMC.GetEntry(i)
 
+      if iter_num > 1:
+          evt.Weight = evt.iter_weight # Test
+          evt.sigcm = evt.iter_sig # Test
+      
       # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
       #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
       #       This goes for Q2i, Wi, and phiqpi as well
       #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
       #print("-"*25,"\n",i,"\n",inp_param)
-      if iter_num > 1:
-          #inp_param = '{} {} {} {} {} {} {} {} {} '\
-              #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
-          inp_param = '{} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
-      else:
-          #inp_param = '{} {} {} {} {} {} {} {} {} '\
-              #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
-          inp_param = '{} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+      #inp_param = '{} {} {} {} {} {} {} {} {} '\
+          #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+      inp_param = '{} {} {} {} {} {} {} {} {} '\
+                  .format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
       iter_lst = iterWeight(inp_param)
 
       if iter_num > 1:
-          evt.Weight = evt.iter_weight # Test
           evt.iter_weight = iter_lst[0] # Test
-          evt.sigcm = evt.iter_sig # Test
           evt.iter_sig = iter_lst[1] # Test
 
           new_TBRANCH_SIMC.Fill()
