@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 04:48:05 trottar"
+# Time-stamp: "2024-04-03 05:12:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,11 +127,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
       TBRANCH_SIMC.GetEntry(i)
 
       if iter_num > 1:
-          print("\ti",i)
-          print("!!!!!!! evt.Weight", evt.Weight)
-          print("!!!!!!! evt.iter_weight", evt.iter_weight)
-          print("!!!!!!! evt.sigcm", evt.sigcm)
-          print("!!!!!!! evt.iter_sig", evt.iter_sig)
+          #print("\ti",i)
+          #print("!!!!!!! evt.Weight", evt.Weight)
+          #print("!!!!!!! evt.iter_weight", evt.iter_weight)
+          #print("!!!!!!! evt.sigcm", evt.sigcm)
+          #print("!!!!!!! evt.iter_sig", evt.iter_sig)
           evt.Weight = evt.iter_weight
           evt.sigcm = evt.iter_sig
       
@@ -149,11 +149,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       if iter_num > 1:
           evt.iter_weight = iter_lst[0]
-          print("!!!!!!! evt.Weight 2", evt.Weight)
-          print("!!!!!!! evt.iter_weight 2", evt.iter_weight)
+          #print("!!!!!!! evt.Weight 2", evt.Weight)
+          #print("!!!!!!! evt.iter_weight 2", evt.iter_weight)
           evt.iter_sig = iter_lst[1]
-          print("!!!!!!! evt.sigcm 2", evt.sigcm)
-          print("!!!!!!! evt.iter_sig 2", evt.iter_sig)          
+          #print("!!!!!!! evt.sigcm 2", evt.sigcm)
+          #print("!!!!!!! evt.iter_sig 2", evt.iter_sig)          
 
           new_TBRANCH_SIMC.Fill()
           
@@ -171,9 +171,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           # Fill the new branch with the new value for this entry
           new_sig_branch.Fill()
-          print("\ti",i)
-          print("!!!!!!! evt.Weight", evt.Weight)
-          print("!!!!!!! evt.iter_weight", iweight)
+          #print("\ti",i)
+          #print("!!!!!!! evt.Weight", evt.Weight)
+          #print("!!!!!!! evt.iter_weight", iweight)
           
     new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
     
