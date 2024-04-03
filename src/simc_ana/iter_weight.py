@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 03:56:31 trottar"
+# Time-stamp: "2024-04-03 03:59:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,9 +90,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     InFile_SIMC = TFile.Open(simc_root, "OPEN")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+    
     if iter_num > 1:
-        Weight_SIMC  = TBRANCH_SIMC.GetBranch("iter_weight")
-        sig_SIMC  = TBRANCH_SIMC.GetBranch("iter_sig")        
         # Create a new ROOT file for writing        
         new_InFile_SIMC = ROOT.TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
     else:        
