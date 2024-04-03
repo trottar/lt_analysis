@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 04:32:27 trottar"
+# Time-stamp: "2024-04-03 04:35:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -148,6 +148,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       if iter_num > 1:
           evt.iter_weight = iter_lst[0]
+          print("!!!!!!! evt.iter_weight 2", evt.iter_weight)
           evt.iter_sig = iter_lst[1]
 
           new_TBRANCH_SIMC.Fill()
