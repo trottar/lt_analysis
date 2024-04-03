@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 07:51:37 trottar"
+# Time-stamp: "2024-04-03 07:53:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,7 +88,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     if not os.path.isfile(simc_root):
         print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))
 
-    InFile_SIMC = TFile.Open(simc_root, "OPEN")
+    InFile_SIMC = TFile.Open(simc_root, "UPDATE")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
         
     if iter_num > 1:
@@ -152,9 +152,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
 
-          print("!!!!!!!!!!! evt.iter_sig", evt.iter_sig)
-          print("!!!!!!!!!!! iter_lst[1]", iter_lst[1])
-          
           evt.iter_weight = iter_lst[0]
           evt.iter_sig = iter_lst[1]
 
