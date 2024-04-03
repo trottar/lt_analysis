@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 07:53:14 trottar"
+# Time-stamp: "2024-04-03 08:01:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,16 +88,30 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     if not os.path.isfile(simc_root):
         print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))
 
-    InFile_SIMC = TFile.Open(simc_root, "UPDATE")
+    InFile_SIMC = TFile.Open(simc_root, "OPEN")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
         
     if iter_num > 1:
         
         # Create a new ROOT file for writing
-        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
+        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "UPDATE")
         # Clone the TTree from the original file        
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))    
         
+        # Create a new branch with the updated values
+        Weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        TBRANCH_SIMC.GetBranch("Weight")
+        new_TBRANCH_SIMC.Branch("Weight", Weight, "Weight/D")  # 'D' for double, change if needed
+        sigcm = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        TBRANCH_SIMC.GetBranch("sigcm")
+        new_TBRANCH_SIMC.Branch("sigcm", sigcm, "sigcm/D")  # 'D' for double, change if needed
+        iter_weight = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        TBRANCH_SIMC.GetBranch("iter_weight")
+        new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")  # 'D' for double, change if needed
+        iter_sig = array('d', [0])  # Assuming 'd' is the data type, change if needed
+        TBRANCH_SIMC.GetBranch("iter_sig")
+        new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")  # 'D' for double, change if needed        
+
         new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
         
     else:
@@ -134,12 +148,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       if iter_num > 1:
 
-          evt.Weight = evt.iter_weight
-          evt.sigcm = evt.iter_sig
+          #evt.Weight = evt.iter_weight
+          #evt.sigcm = evt.iter_sig
 
-          #new_TBRANCH_SIMC.SetBranchAddress("Weight", evt.iter_weight)
-          #new_TBRANCH_SIMC.SetBranchAddress("sigcm", evt.iter_sig)
-          
           # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
           #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
           #       This goes for Q2i, Wi, and phiqpi as well
@@ -151,12 +162,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
               #.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
           iter_lst = iterWeight(inp_param)
+          
+          #evt.iter_weight = iter_lst[0]
+          #evt.iter_sig = iter_lst[1]
 
-          evt.iter_weight = iter_lst[0]
-          evt.iter_sig = iter_lst[1]
-
-          #new_TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_lst[0])
-          #new_TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_lst[1])
+          iter_weight[0] = iter_lst[0]
+          iter_sig[0] = iter_lst[1]
 
           new_TBRANCH_SIMC.Fill()
           
