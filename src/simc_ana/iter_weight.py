@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 04:38:18 trottar"
+# Time-stamp: "2024-04-03 04:48:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -130,6 +130,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           print("\ti",i)
           print("!!!!!!! evt.Weight", evt.Weight)
           print("!!!!!!! evt.iter_weight", evt.iter_weight)
+          print("!!!!!!! evt.sigcm", evt.sigcm)
+          print("!!!!!!! evt.iter_sig", evt.iter_sig)
           evt.Weight = evt.iter_weight
           evt.sigcm = evt.iter_sig
       
@@ -150,6 +152,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           print("!!!!!!! evt.Weight 2", evt.Weight)
           print("!!!!!!! evt.iter_weight 2", evt.iter_weight)
           evt.iter_sig = iter_lst[1]
+          print("!!!!!!! evt.sigcm 2", evt.sigcm)
+          print("!!!!!!! evt.iter_sig 2", evt.iter_sig)          
 
           new_TBRANCH_SIMC.Fill()
           
