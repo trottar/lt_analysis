@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 17:14:27 trottar"
+# Time-stamp: "2024-04-03 20:30:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,22 +108,22 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(-1, "fast")
         
         # Create a new branch with the updated values
-        Weight_1 = array('f', [0])  # Assuming 'f' is the data type, change if needed
-        #new_TBRANCH_SIMC.SetBranchStatus("Weight_1", 0)  # Disable branch
-        new_b_Weight_1 = new_TBRANCH_SIMC.GetBranch("Weight_1")
-        new_Weight_1 = new_TBRANCH_SIMC.Branch("Weight_1", Weight_1, "Weight_1/F")  # 'f' for float, change if needed
-        sigcm_1 = array('f', [0])  # Assuming 'f' is the data type, change if needed
-        #new_TBRANCH_SIMC.SetBranchStatus("sigcm_1", 0)  # Disable branch
-        new_b_sigcm_1 = new_TBRANCH_SIMC.GetBranch("sigcm_1")
-        new_sigcm_1 = new_TBRANCH_SIMC.Branch("sigcm_1", sigcm_1, "sigcm_1/F")  # 'f' for float, change if needed
-        iter_weight_1 = array('f', [0])  # Assuming 'f' is the data type, change if needed
-        #new_TBRANCH_SIMC.SetBranchStatus("iter_weight_1", 0)  # Disable branch
-        new_b_iter_weight_1 = new_TBRANCH_SIMC.GetBranch("iter_weight_1")
-        new_iter_weight_1 = new_TBRANCH_SIMC.Branch("iter_weight_1", iter_weight_1, "iter_weight_1/F")  # 'f' for float, change if needed
-        iter_sig_1 = array('f', [0])  # Assuming 'f' is the data type, change if needed
-        #new_TBRANCH_SIMC.SetBranchStatus("iter_sig_1", 0)  # Disable branch        
-        new_b_iter_sig_1 = new_TBRANCH_SIMC.GetBranch("iter_sig_1")
-        new_iter_sig_1 = new_TBRANCH_SIMC.Branch("iter_sig_1", iter_sig_1, "iter_sig_1/F")  # 'f' for float, change if needed        
+        Weight = array('f', [0])  # Assuming 'f' is the data type, change if needed
+        #new_TBRANCH_SIMC.SetBranchStatus("Weight", 0)  # Disable branch
+        new_b_Weight = new_TBRANCH_SIMC.GetBranch("Weight")
+        new_Weight = new_TBRANCH_SIMC.Branch("Weight", Weight, "Weight/F")  # 'f' for float, change if needed
+        sigcm = array('f', [0])  # Assuming 'f' is the data type, change if needed
+        #new_TBRANCH_SIMC.SetBranchStatus("sigcm", 0)  # Disable branch
+        new_b_sigcm = new_TBRANCH_SIMC.GetBranch("sigcm")
+        new_sigcm = new_TBRANCH_SIMC.Branch("sigcm", sigcm, "sigcm/F")  # 'f' for float, change if needed
+        iter_weight = array('f', [0])  # Assuming 'f' is the data type, change if needed
+        #new_TBRANCH_SIMC.SetBranchStatus("iter_weight", 0)  # Disable branch
+        new_b_iter_weight = new_TBRANCH_SIMC.GetBranch("iter_weight")
+        new_iter_weight = new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/F")  # 'f' for float, change if needed
+        iter_sig = array('f', [0])  # Assuming 'f' is the data type, change if needed
+        #new_TBRANCH_SIMC.SetBranchStatus("iter_sig", 0)  # Disable branch        
+        new_b_iter_sig = new_TBRANCH_SIMC.GetBranch("iter_sig")
+        new_iter_sig = new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/F")  # 'f' for float, change if needed        
 
     else:
 
@@ -182,21 +182,21 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #evt.iter_sig = iter_lst[1]
           #new_TBRANCH_SIMC.Fill()
 
-          Weight_1[0] = evt.iter_weight
-          b_Weight.SetAddress(Weight_1)
-          new_Weight_1.Fill()
+          Weight[0] = evt.iter_weight
+          b_Weight.SetAddress(Weight)
+          new_Weight.Fill()
           
-          sigcm_1[0] = evt.iter_sig
-          b_sigcm.SetAddress(sigcm_1)
-          new_sigcm_1.Fill()          
+          sigcm[0] = evt.iter_sig
+          b_sigcm.SetAddress(sigcm)
+          new_sigcm.Fill()          
           
-          iter_weight_1[0] = iter_lst[0]
-          b_iter_weight.SetAddress(iter_weight_1)
-          new_iter_weight_1.Fill()
+          iter_weight[0] = iter_lst[0]
+          b_iter_weight.SetAddress(iter_weight)
+          new_iter_weight.Fill()
           
-          iter_sig_1[0] = iter_lst[1]
-          b_iter_sig.SetAddress(iter_sig_1)
-          new_iter_sig_1.Fill()          
+          iter_sig[0] = iter_lst[1]
+          b_iter_sig.SetAddress(iter_sig)
+          new_iter_sig.Fill()          
 
           #new_TBRANCH_SIMC.Fill()
           
