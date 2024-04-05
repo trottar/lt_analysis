@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 18:35:35 trottar"
+# Time-stamp: "2024-04-05 18:38:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,7 +102,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Create a new branch with the updated values
         iter_weight = ROOT.Double(0)  # Assuming iter branch is of type float
         new_iter_weight = new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")
-        iter_sig = ROOT.Double()  # Assuming iter branch is of type float
+        iter_sig = ROOT.Double(0)  # Assuming iter branch is of type float
         new_iter_sig = new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")
         
         TBRANCH_SIMC.SetBranchStatus("*", 0) # Disable all branches
