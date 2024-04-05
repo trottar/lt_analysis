@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 19:40:51 trottar"
+# Time-stamp: "2024-04-05 19:43:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,12 +98,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         
         InFile_SIMC = TFile.Open(simc_root, "READ")
         TBRANCH_SIMC  = InFile_SIMC.Get("h10")
-
-        if not TBRANCH_SIMC:
-            raise ValueError("Failed to retrieve tree h10 from the file.")
-
-        if "Weight" not in TBRANCH_SIMC.GetListOfBranches():
-            raise ValueError("The 'weight' branch does not exist in tree h10.")
         
         Weight_root = rnp.tree2array(TBRANCH_SIMC, branches=["Weight"])
         Weight_array = np.array(Weight_root) # Save as array
@@ -207,6 +201,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     if iter_num > 1:
 
+        print("££££££££",iter_weight)
+        print("££££££££",iter_sig)
+        sys.exit(2)
+        
         # Convert array to a branch and add to new iteration root tree
         rnp.array2tree(np.array(iter_weight), tree=new_TBRANCH_SIMC)
         rnp.array2tree(np.array(iter_sig), tree=new_TBRANCH_SIMC)
