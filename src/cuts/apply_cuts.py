@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 15:22:32 trottar"
+# Time-stamp: "2024-04-04 21:13:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,7 +137,8 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     t_RANGE =  (tmin<-evt.t) & (-evt.t<tmax)
 
-    MMCUT =  (mm_min<evt.missmass) & (evt.missmass<mm_max)
+    #MMCUT =  (mm_min<evt.missmass) & (evt.missmass<mm_max)
+    MMCUT =  (mm_min<np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2)))) & (np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2)))<mm_max)
       
     ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
     
