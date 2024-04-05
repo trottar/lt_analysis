@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 19:04:54 trottar"
+# Time-stamp: "2024-04-05 19:10:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,6 +96,15 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         
         InFile_SIMC = TFile.Open(simc_root, "READ")
         TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+
+        Weight_root = rnp.tree2array(TBRANCH_SIMC, branches=["Weight"])
+        Weight_array = np.array(Weight) # Save as array
+        sigcm_root = rnp.tree2array(TBRANCH_SIMC, branches=["sigcm"])
+        sigcm_array = np.array(sigcm) # Save as array
+
+        print("!!!!!!", Weight)
+        print("!!!!!!", sigcm)
+        sys.exit(2)
         
         # Create a new ROOT file for writing
         new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
@@ -104,17 +113,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
         # Create a new branch with the updated values
         iter_weight = ROOT.Double(0)  # Assuming iter branch is of type float
-        new_iter_weight = rnp.array2branch("iter_weight", dtype="double")
+        new_iter_weight = new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")
         iter_sig = ROOT.Double(0)  # Assuming iter branch is of type float
-        new_iter_sig = rnp.array2branch("iter_sig", dtype="double")
-
-        # Add the branch to the tree
-        new_TBRANCH_SIMC.Branch(iter_weight)
-        new_TBRANCH_SIMC.Branch(iter_sig)
-
-        # Load the "weight" branch from the H20 tree into a NumPy array
-        Weight_SIMC = rnp.tree2array(TBRANCH_SIMC, branches="Weight")
-        sigcm_SIMC = rnp.tree2array(TBRANCH_SIMC, branches="sigcm")
+        new_iter_sig = new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")
         
     else:
 
