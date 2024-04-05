@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 18:56:00 trottar"
+# Time-stamp: "2024-04-05 18:57:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,7 +100,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         if not new_InFile_SIMC:
             print("ERROR: Could not create file {}".format(new_InFile_SIMC))
             sys.exit(2)
-        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+        #new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
         if not new_TBRANCH_SIMC:
             print("ERROR: Could not create branch {}".format(new_TBRANCH_SIMC))
 
