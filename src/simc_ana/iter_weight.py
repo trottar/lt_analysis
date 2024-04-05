@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 19:43:01 trottar"
+# Time-stamp: "2024-04-05 19:43:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -203,11 +203,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
         print("££££££££",iter_weight)
         print("££££££££",iter_sig)
-        sys.exit(2)
+
+        iter_branch = np.array(iter_array, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
         
         # Convert array to a branch and add to new iteration root tree
-        rnp.array2tree(np.array(iter_weight), tree=new_TBRANCH_SIMC)
-        rnp.array2tree(np.array(iter_sig), tree=new_TBRANCH_SIMC)
+        rnp.array2tree(iter_weight, tree=new_TBRANCH_SIMC)
+        rnp.array2tree(iter_sig, tree=new_TBRANCH_SIMC)
         
         new_InFile_SIMC.Write()
 
