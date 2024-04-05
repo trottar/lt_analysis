@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 19:11:02 trottar"
+# Time-stamp: "2024-04-05 19:11:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -99,9 +99,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         TBRANCH_SIMC  = InFile_SIMC.Get("h10")
 
         Weight_root = rnp.tree2array(TBRANCH_SIMC, branches=["Weight"])
-        Weight_array = np.array(Weight) # Save as array
+        Weight_array = np.array(Weight_root) # Save as array
         sigcm_root = rnp.tree2array(TBRANCH_SIMC, branches=["sigcm"])
-        sigcm_array = np.array(sigcm) # Save as array
+        sigcm_array = np.array(sigcm_root) # Save as array
 
         print("!!!!!!", Weight)
         print("!!!!!!", sigcm)
