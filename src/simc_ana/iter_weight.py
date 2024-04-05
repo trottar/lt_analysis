@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 18:44:47 trottar"
+# Time-stamp: "2024-04-05 18:50:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,11 +97,16 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         
         # Create a new ROOT file for writing
         new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
+        if not new_InFile_SIMC:
+            print("ERROR: Could not create file {}".format(new_InFile_SIMC))
+            sys.exit(2)
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+        if not new_TBRANCH_SIMC:
+            print("ERROR: Could not create branch {}".format(new_TBRANCH_SIMC))        
 
         # Create a new branch with the updated values
         iter_weight = ROOT.Double(0)  # Assuming iter branch is of type float
-        new_iter_weight = ROOT.TBranch(new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D"))
+        new_iter_weight = new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")
         iter_sig = ROOT.Double(0)  # Assuming iter branch is of type float
         new_iter_sig = new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")
         
