@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 19:11:47 trottar"
+# Time-stamp: "2024-04-05 19:17:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,18 +105,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
         print("!!!!!!", Weight_root)
         print("!!!!!!", sigcm_root)
-        sys.exit(2)
         
         # Create a new ROOT file for writing
         new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
-        #new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
-        new_TBRANCH_SIMC = rnp.array2tree([], tree_name="h10")
+        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
 
         # Create a new branch with the updated values
-        iter_weight = ROOT.Double(0)  # Assuming iter branch is of type float
-        new_iter_weight = new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")
-        iter_sig = ROOT.Double(0)  # Assuming iter branch is of type float
-        new_iter_sig = new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")
+        iter_weight = []
+        iter_sig = []
         
     else:
 
@@ -171,10 +167,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
           
-          iter_weight = iter_lst[0]
-          new_iter_weight.Fill()
-          iter_sig = iter_lst[1]
-          new_iter_sig.Fill()
+          iter_weight.append(iter_lst[0])
+          iter_sig.append(iter_lst[1])
           
       else:
 
@@ -203,8 +197,16 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           # Fill the new branch with the new value for this entry
           new_sig_branch.Fill()
-          
-    new_TBRANCH_SIMC.Write()
-    
-    new_InFile_SIMC.Close()
-    InFile_SIMC.Close()
+
+    if iter_num > 1:
+
+        # Convert array to a branch and add to new iteration root tree
+        rnp.array2tree(np.array(iter_weight), tree=new_TBRANCH_SIMC)
+        rnp.array2tree(np.array(iter_sig), tree=new_TBRANCH_SIMC)
+
+    else:
+        
+        new_TBRANCH_SIMC.Write()
+        
+        new_InFile_SIMC.Close()
+        InFile_SIMC.Close()
