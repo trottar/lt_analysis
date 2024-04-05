@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 18:59:23 trottar"
+# Time-stamp: "2024-04-05 19:04:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,31 +92,30 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         
     if iter_num > 1:
 
+        import root_numpy as rnp
+        
         InFile_SIMC = TFile.Open(simc_root, "READ")
         TBRANCH_SIMC  = InFile_SIMC.Get("h10")
         
         # Create a new ROOT file for writing
         new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
-        if not new_InFile_SIMC:
-            print("ERROR: Could not create file {}".format(new_InFile_SIMC))
-            sys.exit(2)
-        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
-        if not new_TBRANCH_SIMC:
-            print("ERROR: Could not create branch {}".format(new_TBRANCH_SIMC))
-
-        #new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
+        #new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+        new_TBRANCH_SIMC = rnp.array2tree([], tree_name="h10")
 
         # Create a new branch with the updated values
-        #iter_weight = ROOT.Double(0)  # Assuming iter branch is of type float
-        iter_weight = array( 'd', [ 0 ] )
-        new_iter_weight = new_TBRANCH_SIMC.Branch("iter_weight", iter_weight, "iter_weight/D")
+        iter_weight = ROOT.Double(0)  # Assuming iter branch is of type float
+        new_iter_weight = rnp.array2branch("iter_weight", dtype="double")
         iter_sig = ROOT.Double(0)  # Assuming iter branch is of type float
-        new_iter_sig = new_TBRANCH_SIMC.Branch("iter_sig", iter_sig, "iter_sig/D")
-        
-        TBRANCH_SIMC.SetBranchStatus("*", 0) # Disable all branches
-        TBRANCH_SIMC.SetBranchStatus("Weight", 1)
-        TBRANCH_SIMC.SetBranchStatus("sigcm", 1)
+        new_iter_sig = rnp.array2branch("iter_sig", dtype="double")
 
+        # Add the branch to the tree
+        new_TBRANCH_SIMC.Branch(iter_weight)
+        new_TBRANCH_SIMC.Branch(iter_sig)
+
+        # Load the "weight" branch from the H20 tree into a NumPy array
+        Weight_SIMC = rnp.tree2array(TBRANCH_SIMC, branches="Weight")
+        sigcm_SIMC = rnp.tree2array(TBRANCH_SIMC, branches="sigcm")
+        
     else:
 
         InFile_SIMC = TFile.Open(simc_root, "OPEN")
