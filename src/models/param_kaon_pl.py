@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 01:58:28 trottar"
+# Time-stamp: "2024-04-06 02:22:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,8 @@ def iterWeight(arg_str):
     try:
         siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     except OverflowError:
-        siglt = 0.0
+        #siglt = 0.0
+        siglt = (p11 / abs(t_gev)) * math.sin(thetacm_sim)
         print("\n\nWARNING: Overflowerror on sigLT, setting to zero for this event...\n\n")
 
     try:
