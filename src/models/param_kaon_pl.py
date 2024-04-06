@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-03 04:49:47 trottar"
+# Time-stamp: "2024-04-06 00:51:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,12 +53,24 @@ def iterWeight(arg_str):
     #p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12 = params
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
     
-    #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev) - 0.2))
-    # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
-    # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
-    # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
-    #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
-    sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
+    try:
+        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev) - 0.2))
+        # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
+        # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
+        # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
+        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
+        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
+    except OverflowError:
+
+        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev) - 0.2))
+        # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
+        # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
+        # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
+        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
+        p3 = 0 # RLT (4/5/2024): Catching overflowerror in exponential
+        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
+        print("WARNING: Overflowerror on sigL, altering parameterization...")
+
     # RLT (2/15/2024): Removing t dependence from sigT because it seems
     #                  to be driving poor sep xsects results
     # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
@@ -73,6 +85,7 @@ def iterWeight(arg_str):
     #                 Therefore param 12 was also changed to 13    
     sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
 
+        
     # RLT (9/25/2023): There are two tav parameterizations in here.
     #                  I am only using the one above, for now.    
     # tav = (-0.178 + 0.315 * math.log(q2_gev)) * q2_gev
