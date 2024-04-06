@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 00:52:52 trottar"
+# Time-stamp: "2024-04-06 00:58:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,7 +82,7 @@ def iterWeight(arg_str):
     siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
     #                 xfit_in_t.py script to work. LT/TT are zeros
-    #                 Therefore param 12 was also changed to 13    
+    #                 Therefore param 12 was also changed to 13
     sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
         
     # RLT (9/25/2023): There are two tav parameterizations in here.
