@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 22:12:08 trottar"
+# Time-stamp: "2024-04-05 22:20:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,32 +95,188 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         InFile_SIMC = TFile.Open(simc_root, "READ")
         TBRANCH_SIMC  = InFile_SIMC.Get("h10")
         
-        Weight_root = rnp.tree2array(TBRANCH_SIMC, branches=["Weight"])
-        Weight_array = np.array(Weight_root) # Save as array
-        sigcm_root = rnp.tree2array(TBRANCH_SIMC, branches=["sigcm"])
-        sigcm_array = np.array(sigcm_root) # Save as array
-
-        print("!!!!!!", Weight_root)
-        print("!!!!!!", sigcm_root)
-        
         # Create a new ROOT file for writing
         new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "UPDATE")
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
 
-        # Create a new branch with the updated values
-        iter_weight = []
-        iter_sig = []
+        # Grab branches from previous iteration
+        hsdelta_array = array( 'f', [0])
+        hsyptar_array = array( 'f', [0])
+        hsxptar_array = array( 'f', [0])
+        hsytar_array = array( 'f', [0])
+        hsxfp_array = array( 'f', [0])
+        hsxpfp_array = array( 'f', [0])
+        hsyfp_array = array( 'f', [0])
+        hsypfp_array = array( 'f', [0])
+        hsdeltai_array = array( 'f', [0])
+        hsyptari_array = array( 'f', [0])
+        hsxptari_array = array( 'f', [0])
+        hsytari_array = array( 'f', [0])
+        ssdelta_array = array( 'f', [0])
+        ssyptar_array = array( 'f', [0])
+        ssxptar_array = array( 'f', [0])
+        ssytar_array = array( 'f', [0])
+        ssxfp_array = array( 'f', [0])
+        ssxpfp_array = array( 'f', [0])
+        ssyfp_array = array( 'f', [0])
+        ssypfp_array = array( 'f', [0])
+        ssdeltai_array = array( 'f', [0])
+        ssyptari_array = array( 'f', [0])
+        ssxptari_array = array( 'f', [0])
+        ssytari_array = array( 'f', [0])
+        q_array = array( 'f', [0])
+        nu_array = array( 'f', [0])
+        Q2_array = array( 'f', [0])
+        W_array = array( 'f', [0])
+        epsilon_array = array( 'f', [0])
+        epscm_array = array( 'f', [0])
+        Em_array = array( 'f', [0])
+        Pm_array = array( 'f', [0])
+        thetapq_array = array( 'f', [0])
+        thetacm_array = array( 'f', [0])
+        phipq_array = array( 'f', [0])
+        missmass_array = array( 'f', [0])
+        mmnuc_array = array( 'f', [0])
+        phad_array = array( 'f', [0])
+        t_array = array( 'f', [0])
+        pmpar_array = array( 'f', [0])
+        pmper_array = array( 'f', [0])
+        pmoop_array = array( 'f', [0])
+        fry_array = array( 'f', [0])
+        radphot_array = array( 'f', [0])
+        pfermi_array = array( 'f', [0])
+        siglab_array = array( 'f', [0])
+        decdist_array = array( 'f', [0])
+        Mhadron_array = array( 'f', [0])
+        pdotqhat_array = array( 'f', [0])
+        Q2i_array = array( 'f', [0])
+        Wi_array = array( 'f', [0])
+        ti_array = array( 'f', [0])
+        phipqi_array = array( 'f', [0])
+        saghai_array = array( 'f', [0])
+        factor_array = array( 'f', [0])        
+        TBRANCH_SIMC.SetBranchAddress("hsdelta", hsdelta_array);
+        TBRANCH_SIMC.SetBranchAddress("hsyptar", hsyptar_array);
+        TBRANCH_SIMC.SetBranchAddress("hsxptar", hsxptar_array);
+        TBRANCH_SIMC.SetBranchAddress("hsytar", hsytar_array);
+        TBRANCH_SIMC.SetBranchAddress("hsxfp", hsxfp_array);
+        TBRANCH_SIMC.SetBranchAddress("hsxpfp", hsxpfp_array);
+        TBRANCH_SIMC.SetBranchAddress("hsyfp", hsyfp_array);
+        TBRANCH_SIMC.SetBranchAddress("hsypfp", hsypfp_array);
+        TBRANCH_SIMC.SetBranchAddress("hsdeltai", hsdeltai_array);
+        TBRANCH_SIMC.SetBranchAddress("hsyptari", hsyptari_array);
+        TBRANCH_SIMC.SetBranchAddress("hsxptari", hsxptari_array);
+        TBRANCH_SIMC.SetBranchAddress("hsytari", hsytari_array);
+        TBRANCH_SIMC.SetBranchAddress("ssdelta", ssdelta_array);
+        TBRANCH_SIMC.SetBranchAddress("ssyptar", ssyptar_array);
+        TBRANCH_SIMC.SetBranchAddress("ssxptar", ssxptar_array);
+        TBRANCH_SIMC.SetBranchAddress("ssytar", ssytar_array);
+        TBRANCH_SIMC.SetBranchAddress("ssxfp", ssxfp_array);
+        TBRANCH_SIMC.SetBranchAddress("ssxpfp", ssxpfp_array);
+        TBRANCH_SIMC.SetBranchAddress("ssyfp", ssyfp_array);
+        TBRANCH_SIMC.SetBranchAddress("ssypfp", ssypfp_array);
+        TBRANCH_SIMC.SetBranchAddress("ssdeltai", ssdeltai_array);
+        TBRANCH_SIMC.SetBranchAddress("ssyptari", ssyptari_array);
+        TBRANCH_SIMC.SetBranchAddress("ssxptari", ssxptari_array);
+        TBRANCH_SIMC.SetBranchAddress("ssytari", ssytari_array);
+        TBRANCH_SIMC.SetBranchAddress("q", q_array);
+        TBRANCH_SIMC.SetBranchAddress("nu", nu_array);
+        TBRANCH_SIMC.SetBranchAddress("Q2", Q2_array);
+        TBRANCH_SIMC.SetBranchAddress("W", W_array);
+        TBRANCH_SIMC.SetBranchAddress("epsilon", epsilon_array);
+        TBRANCH_SIMC.SetBranchAddress("epscm", epscm_array);  
+        TBRANCH_SIMC.SetBranchAddress("Em", Em_array);
+        TBRANCH_SIMC.SetBranchAddress("Pm", Pm_array);
+        TBRANCH_SIMC.SetBranchAddress("thetapq", thetapq_array);
+        TBRANCH_SIMC.SetBranchAddress("thetacm", thetacm_array);
+        TBRANCH_SIMC.SetBranchAddress("phipq", phipq_array);
+        TBRANCH_SIMC.SetBranchAddress("missmass", missmass_array);
+        TBRANCH_SIMC.SetBranchAddress("mmnuc", mmnuc_array);
+        TBRANCH_SIMC.SetBranchAddress("phad", phad_array);
+        TBRANCH_SIMC.SetBranchAddress("t", t_array);
+        TBRANCH_SIMC.SetBranchAddress("pmpar", pmpar_array);
+        TBRANCH_SIMC.SetBranchAddress("pmper", pmper_array);
+        TBRANCH_SIMC.SetBranchAddress("pmoop", pmoop_array);
+        TBRANCH_SIMC.SetBranchAddress("fry", fry_array);
+        TBRANCH_SIMC.SetBranchAddress("radphot", radphot_array);
+        TBRANCH_SIMC.SetBranchAddress("pfermi", pfermi_array);
+        TBRANCH_SIMC.SetBranchAddress("siglab", siglab_array);
+        TBRANCH_SIMC.SetBranchAddress("decdist", decdist_array);
+        TBRANCH_SIMC.SetBranchAddress("Mhadron", Mhadron_array);
+        TBRANCH_SIMC.SetBranchAddress("pdotqhat", pdotqhat_array);
+        TBRANCH_SIMC.SetBranchAddress("Q2i", Q2i_array);
+        TBRANCH_SIMC.SetBranchAddress("Wi", Wi_array);
+        TBRANCH_SIMC.SetBranchAddress("ti", ti_array);
+        TBRANCH_SIMC.SetBranchAddress("phipqi", phipqi_array);
+        TBRANCH_SIMC.SetBranchAddress("saghai", saghai_array);
+        TBRANCH_SIMC.SetBranchAddress("factor", factor_array);
 
-        Weight_array = array( 'f', [0])
-        sigcm_array = array( 'f', [0])
+        # Define new iteration
+        Weight_array = array( 'f', [0])        
+        sigcm_array = array( 'f', [0])        
         iter_weight_array = array( 'f', [0])
-        iter_sig_array = array( 'f', [0])
-
+        iter_sig_array = array( 'f', [0])        
         TBRANCH_SIMC.SetBranchAddress("Weight", Weight_array)
         TBRANCH_SIMC.SetBranchAddress("sigcm", sigcm_array)
         TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
         TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
-        
+
+        # Create branches for current iteration
+        new_TBRANCH_SIMC.Branch("hsdelta", hsdelta_array, "hsdelta/F");
+        new_TBRANCH_SIMC.Branch("hsyptar", hsyptar_array, "hsyptar/F");
+        new_TBRANCH_SIMC.Branch("hsxptar", hsxptar_array, "hsxptar/F");
+        new_TBRANCH_SIMC.Branch("hsytar", hsytar_array, "hsytar/F");
+        new_TBRANCH_SIMC.Branch("hsxfp", hsxfp_array, "hsxfp/F");
+        new_TBRANCH_SIMC.Branch("hsxpfp", hsxpfp_array, "hsxpfp/F");
+        new_TBRANCH_SIMC.Branch("hsyfp", hsyfp_array, "hsyfp/F");
+        new_TBRANCH_SIMC.Branch("hsypfp", hsypfp_array, "hsypfp/F");
+        new_TBRANCH_SIMC.Branch("hsdeltai", hsdeltai_array, "hsdeltai/F");
+        new_TBRANCH_SIMC.Branch("hsyptari", hsyptari_array, "hsyptari/F");
+        new_TBRANCH_SIMC.Branch("hsxptari", hsxptari_array, "hsxptari/F");
+        new_TBRANCH_SIMC.Branch("hsytari", hsytari_array, "hsytari/F");
+        new_TBRANCH_SIMC.Branch("ssdelta", ssdelta_array, "ssdelta/F");
+        new_TBRANCH_SIMC.Branch("ssyptar", ssyptar_array, "ssyptar/F");
+        new_TBRANCH_SIMC.Branch("ssxptar", ssxptar_array, "ssxptar/F");
+        new_TBRANCH_SIMC.Branch("ssytar", ssytar_array, "ssytar/F");
+        new_TBRANCH_SIMC.Branch("ssxfp", ssxfp_array, "ssxfp/F");
+        new_TBRANCH_SIMC.Branch("ssxpfp", ssxpfp_array, "ssxpfp/F");
+        new_TBRANCH_SIMC.Branch("ssyfp", ssyfp_array, "ssyfp/F");
+        new_TBRANCH_SIMC.Branch("ssypfp", ssypfp_array, "ssypfp/F");
+        new_TBRANCH_SIMC.Branch("ssdeltai", ssdeltai_array, "ssdeltai/F");
+        new_TBRANCH_SIMC.Branch("ssyptari", ssyptari_array, "ssyptari/F");
+        new_TBRANCH_SIMC.Branch("ssxptari", ssxptari_array, "ssxptari/F");
+        new_TBRANCH_SIMC.Branch("ssytari", ssytari_array, "ssytari/F");
+        new_TBRANCH_SIMC.Branch("q", q_array, "q/F");
+        new_TBRANCH_SIMC.Branch("nu", nu_array, "nu/F");
+        new_TBRANCH_SIMC.Branch("Q2", Q2_array, "Q2/F");
+        new_TBRANCH_SIMC.Branch("W", W_array, "W/F");
+        new_TBRANCH_SIMC.Branch("epsilon", epsilon_array, "epsilon/F");
+        new_TBRANCH_SIMC.Branch("epscm", epscm_array, "epscm/F");  
+        new_TBRANCH_SIMC.Branch("Em", Em_array, "Em/F");
+        new_TBRANCH_SIMC.Branch("Pm", Pm_array, "Pm/F");
+        new_TBRANCH_SIMC.Branch("thetapq", thetapq_array, "thetapq/F");
+        new_TBRANCH_SIMC.Branch("thetacm", thetacm_array, "thetacm/F");
+        new_TBRANCH_SIMC.Branch("phipq", phipq_array, "phipq/F");
+        new_TBRANCH_SIMC.Branch("missmass", missmass_array, "missmass/F");
+        new_TBRANCH_SIMC.Branch("mmnuc", mmnuc_array, "mmnuc/F");
+        new_TBRANCH_SIMC.Branch("phad", phad_array, "phad/F");
+        new_TBRANCH_SIMC.Branch("t", t_array, "t/F");
+        new_TBRANCH_SIMC.Branch("pmpar", pmpar_array, "pmpar/F");
+        new_TBRANCH_SIMC.Branch("pmper", pmper_array, "pmper/F");
+        new_TBRANCH_SIMC.Branch("pmoop", pmoop_array, "pmoop/F");
+        new_TBRANCH_SIMC.Branch("fry", fry_array, "fry/F");
+        new_TBRANCH_SIMC.Branch("radphot", radphot_array, "radphot/F");
+        new_TBRANCH_SIMC.Branch("pfermi", pfermi_array, "pfermi/F");
+        new_TBRANCH_SIMC.Branch("siglab", siglab_array, "siglab/F");
+        new_TBRANCH_SIMC.Branch("decdist", decdist_array, "decdist/F");
+        new_TBRANCH_SIMC.Branch("Mhadron", Mhadron_array, "Mhadron/F");
+        new_TBRANCH_SIMC.Branch("pdotqhat", pdotqhat_array, "pdotqhat/F");
+        new_TBRANCH_SIMC.Branch("Q2i", Q2i_array, "Q2i/F");
+        new_TBRANCH_SIMC.Branch("Wi", Wi_array, "Wi/F");
+        new_TBRANCH_SIMC.Branch("ti", ti_array, "ti/F");
+        new_TBRANCH_SIMC.Branch("phipqi", phipqi_array, "phipqi/F");
+        new_TBRANCH_SIMC.Branch("saghai", saghai_array, "saghai/F");
+        new_TBRANCH_SIMC.Branch("factor", factor_array, "factor/F");        
         new_TBRANCH_SIMC.Branch("Weight", Weight_array, "Weight/F")
         new_TBRANCH_SIMC.Branch("sigcm", sigcm_array, "sigcm/F")
         new_TBRANCH_SIMC.Branch("iter_weight", iter_weight_array, "iter_weight/F")
