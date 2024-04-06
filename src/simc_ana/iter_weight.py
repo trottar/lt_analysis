@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:33:57 trottar"
+# Time-stamp: "2024-04-05 21:35:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -222,11 +222,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         
         # Convert the pointer to a void pointer
         import ctypes
-        iter_weight_address_void = ctypes.cast(iter_weight_address, ctypes.c_void_p)
-        iter_sig_address_void = ctypes.cast(iter_sig_address, ctypes.c_void_p)
+        iter_weight_address_void = ctypes.cast(iter_weight_address, ctypes.c_void_p).value
+        iter_sig_address_void = ctypes.cast(iter_sig_address, ctypes.c_void_p).value
         
-        iter_weight_branch.SetAddress(iter_weight_buffer)
-        iter_sig_branch.SetAddress(iter_sig_buffer)
+        iter_weight_branch.SetAddress(iter_weight_address_void)
+        iter_sig_branch.SetAddress(iter_sig_address_void)
         
         for value in iter_weight:
             iter_weight_branch.SetAddress(value)
