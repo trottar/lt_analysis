@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:16:50 trottar"
+# Time-stamp: "2024-04-05 21:18:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,10 +207,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         iter_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", np.zeros(1, dtype=float), "iter_weight/F")  # Create a new branch in h10 tree
         iter_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", np.zeros(1, dtype=float), "iter_sig/F")  # Create a new branch in h10 tree
 
+        # Convert iter_array to a NumPy array
+        iter_weight_np = np.array(iter_weight, dtype=float)
+        iter_sig_np = np.array(iter_sig, dtype=float)
+        
         # Set the branch address to the numpy array
-        iter_weight_address = iter_weight.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_weight.shape))
+        iter_weight_address = iter_weight_np.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_weight_np.shape))
         iter_weight_branch.SetAddress(iter_weight_address)
-        iter_sig_address = iter_sig.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_sig.shape))
+        iter_sig_address = iter_sig_np.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_sig_np.shape))
         iter_sig_branch.SetAddress(iter_sig_address)        
         
         for value in iter_weight:
