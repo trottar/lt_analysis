@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 22:20:06 trottar"
+# Time-stamp: "2024-04-05 22:26:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,7 +154,16 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         ti_array = array( 'f', [0])
         phipqi_array = array( 'f', [0])
         saghai_array = array( 'f', [0])
-        factor_array = array( 'f', [0])        
+        factor_array = array( 'f', [0])
+        paero_z_det_array = array( 'f', [0])
+        paero_x_det_array = array( 'f', [0])
+        paero_y_det_array = array( 'f', [0])
+        phgcer_z_det_array = array( 'f', [0])
+        phgcer_x_det_array = array( 'f', [0])
+        phgcer_y_det_array = array( 'f', [0])
+        pend_z_det_array = array( 'f', [0])
+        pend_x_det_array = array( 'f', [0])
+        pend_y_det_array = array( 'f', [0])
         TBRANCH_SIMC.SetBranchAddress("hsdelta", hsdelta_array);
         TBRANCH_SIMC.SetBranchAddress("hsyptar", hsyptar_array);
         TBRANCH_SIMC.SetBranchAddress("hsxptar", hsxptar_array);
@@ -210,7 +219,16 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         TBRANCH_SIMC.SetBranchAddress("phipqi", phipqi_array);
         TBRANCH_SIMC.SetBranchAddress("saghai", saghai_array);
         TBRANCH_SIMC.SetBranchAddress("factor", factor_array);
-
+        TBRANCH_SIMC.SetBranchAddress("paero_z_det", paero_z_det_array)
+        TBRANCH_SIMC.SetBranchAddress("paero_x_det", paero_x_det_array)
+        TBRANCH_SIMC.SetBranchAddress("paero_y_det", paero_y_det_array)
+        TBRANCH_SIMC.SetBranchAddress("phgcer_z_det", phgcer_z_det_array)
+        TBRANCH_SIMC.SetBranchAddress("phgcer_x_det", phgcer_x_det_array)
+        TBRANCH_SIMC.SetBranchAddress("phgcer_y_det", phgcer_y_det_array)
+        TBRANCH_SIMC.SetBranchAddress("pend_z_det", pend_z_det_array)
+        TBRANCH_SIMC.SetBranchAddress("pend_x_det", pend_x_det_array)
+        TBRANCH_SIMC.SetBranchAddress("pend_y_det", pend_y_det_array)
+        
         # Define new iteration
         Weight_array = array( 'f', [0])        
         sigcm_array = array( 'f', [0])        
@@ -281,11 +299,21 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         new_TBRANCH_SIMC.Branch("sigcm", sigcm_array, "sigcm/F")
         new_TBRANCH_SIMC.Branch("iter_weight", iter_weight_array, "iter_weight/F")
         new_TBRANCH_SIMC.Branch("iter_sig", iter_sig_array, "iter_sig/F")
+        new_TBRANCH_SIMC.Branch("paero_z_det", paero_z_det_array, "paero_z_det/F")
+        new_TBRANCH_SIMC.Branch("paero_x_det", paero_x_det_array, "paero_x_det/F")
+        new_TBRANCH_SIMC.Branch("paero_y_det", paero_y_det_array, "paero_y_det/F")
+        new_TBRANCH_SIMC.Branch("phgcer_z_det", phgcer_z_det_array, "phgcer_z_det/F")
+        new_TBRANCH_SIMC.Branch("phgcer_x_det", phgcer_x_det_array, "phgcer_x_det/F")
+        new_TBRANCH_SIMC.Branch("phgcer_y_det", phgcer_y_det_array, "phgcer_y_det/F")
+        new_TBRANCH_SIMC.Branch("pend_z_det", pend_z_det_array, "pend_z_det/F")
+        new_TBRANCH_SIMC.Branch("pend_x_det", pend_x_det_array, "pend_x_det/F")
+        new_TBRANCH_SIMC.Branch("pend_y_det", pend_y_det_array, "pend_y_det/F")
         
     else:
 
         InFile_SIMC = TFile.Open(simc_root, "OPEN")
         TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+
         
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
