@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 19:58:24 trottar"
+# Time-stamp: "2024-04-05 20:05:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,20 +200,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         print("££££££££",iter_weight)
         print("££££££££",iter_sig)
 
-        #iter_weight_branch = np.array(iter_weight, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
-        #iter_sig_branch = np.array(iter_sig, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
-
-        # Convert array (iter) to a branch and add to h20
-        iter_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", np.zeros(1, dtype=float), "iter_weight/D")  # Create a new branch in h10 tree
-        iter_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", np.zeros(1, dtype=float), "iter_sig/D")  # Create a new branch in h10 tree
-        for value in iter_weight:
-            iter_weight_branch.Fill()  # Fill the branch with values from iter_array
-        for value in iter_sig:
-            iter_sig_branch.Fill()  # Fill the branch with values from iter_array            
+        iter_weight_branch = np.array(iter_weight, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
+        iter_sig_branch = np.array(iter_sig, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
         
         # Convert array to a branch and add to new iteration root tree
-        #rnp.array2tree(iter_weight_branch, tree=new_TBRANCH_SIMC)
-        #rnp.array2tree(iter_sig_branch, tree=new_TBRANCH_SIMC)
+        rnp.array2tree(iter_weight_branch, tree=new_TBRANCH_SIMC)
+        rnp.array2tree(iter_sig_branch, tree=new_TBRANCH_SIMC)
 
         new_TBRANCH_SIMC.Write()
         #new_InFile_SIMC.Write()
