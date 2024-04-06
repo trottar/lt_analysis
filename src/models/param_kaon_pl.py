@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 01:10:23 trottar"
+# Time-stamp: "2024-04-06 01:13:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,7 +62,7 @@ def iterWeight(arg_str):
         sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
     except OverflowError:        
         sigl = 0.0
-        print("\n\nWARNING: Overflowerror on sigL, setting to zero for this event...\n\n")
+        print("WARNING: Overflowerror on sigL, setting to zero for this event...")
 
     try:
         # RLT (2/15/2024): Removing t dependence from sigT because it seems
@@ -75,13 +75,13 @@ def iterWeight(arg_str):
         sigt = p5 / (1 + p6*q2_gev)
     except OverflowError:        
         sigt = 0.0
-        print("\n\nWARNING: Overflowerror on sigL, setting to zero for this event...\n\n")
+        print("WARNING: Overflowerror on sigT, setting to zero for this event...")
 
     try:
         siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     except OverflowError:
         siglt = 0.0
-        print("\n\nWARNING: Overflowerror on sigL, setting to zero for this event...\n\n")
+        print("\n\nWARNING: Overflowerror on sigLT, setting to zero for this event...\n\n")
 
     try:
         # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
@@ -90,8 +90,8 @@ def iterWeight(arg_str):
         sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
     except OverflowError:
         sigtt = 0.0
-        print("\n\nWARNING: Overflowerror on sigL, setting to zero for this event...\n\n")
-                        
+        print("\n\nWARNING: Overflowerror on sigTT, setting to zero for this event...\n\n")
+
     # RLT (9/25/2023): There are two tav parameterizations in here.
     #                  I am only using the one above, for now.    
     # tav = (-0.178 + 0.315 * math.log(q2_gev)) * q2_gev
