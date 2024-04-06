@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:37:26 trottar"
+# Time-stamp: "2024-04-05 21:40:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -228,8 +228,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         #iter_weight_branch.SetAddress(iter_weight_address_void)
         #iter_sig_branch.SetAddress(iter_sig_address_void)
 
-        iter_weight_branch.SetBranchAddress(iter_weight_address_void)
-        iter_sig_branch.SetBranchAddress(iter_sig_address_void)        
+        new_TBRANCH_SIMC.SetBranchAddress(iter_weight_address_void)
+        new_TBRANCH_SIMC.SetBranchAddress(iter_sig_address_void)
         
         for value in iter_weight:
             iter_weight_branch.SetAddress(value)
