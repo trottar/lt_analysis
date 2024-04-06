@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 01:13:41 trottar"
+# Time-stamp: "2024-04-06 01:19:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,6 +52,9 @@ def iterWeight(arg_str):
     #                 xfit_in_t.py script to work. LT/TT are zeros
     #p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12 = params
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
+
+    # RLT (4/5/2024): Added try statments to all sep xsect to suppress any blowing up for some events.
+    #                 Setting bad events to zero
     
     try:
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev) - 0.2))
