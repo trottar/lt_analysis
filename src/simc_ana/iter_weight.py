@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 22:47:38 trottar"
+# Time-stamp: "2024-04-05 22:52:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -230,11 +230,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     # Define new iteration
     Weight_array = array( 'f', [0])        
     sigcm_array = array( 'f', [0])
+    iter_weight_array = array( 'f', [0])
+    iter_sig_array = array( 'f', [0])
     TBRANCH_SIMC.SetBranchAddress("Weight", Weight_array)
     TBRANCH_SIMC.SetBranchAddress("sigcm", sigcm_array)
     if iter_num > 1:
-        iter_weight_array = array( 'f', [0])
-        iter_sig_array = array( 'f', [0])        
         TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
         TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
 
