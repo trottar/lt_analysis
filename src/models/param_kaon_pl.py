@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 00:52:40 trottar"
+# Time-stamp: "2024-04-06 00:52:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,7 +69,7 @@ def iterWeight(arg_str):
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
         p3 = 0 # RLT (4/5/2024): Catching overflowerror in exponential
         sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
-        print("WARNING: Overflowerror on sigL, altering parameterization...")
+        print("\n\nWARNING: Overflowerror on sigL, altering parameterization...\n\n")
 
     # RLT (2/15/2024): Removing t dependence from sigT because it seems
     #                  to be driving poor sep xsects results
