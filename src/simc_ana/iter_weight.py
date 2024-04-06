@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:52:10 trottar"
+# Time-stamp: "2024-04-05 21:54:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,8 +179,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
           
-          evt.iter_weight.append(iter_lst[0])
-          evt.iter_sig.append(iter_lst[1])
+          evt.iter_weight = iter_lst[0]
+          evt.iter_sig = iter_lst[1]
           
       else:
 
@@ -230,12 +230,12 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         #rnp.array2tree(iter_weight_branch, tree=new_TBRANCH_SIMC)
         #rnp.array2tree(iter_sig_branch, tree=new_TBRANCH_SIMC)
 
-        new_TBRANCH_SIMC.Write()
+        new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
         #new_InFile_SIMC.Write()
 
     else:
         
-        new_TBRANCH_SIMC.Write()
+        new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
         
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
