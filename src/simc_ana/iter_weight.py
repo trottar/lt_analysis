@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 22:52:51 trottar"
+# Time-stamp: "2024-04-05 22:56:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,9 +93,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     InFile_SIMC = TFile.Open(simc_root, "READ")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
 
-    # Create a new ROOT file for writing
-    new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "UPDATE")
-    new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+    if iter_num > 1:
+        # Create a new ROOT file for writing
+        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}.root".format(iter_num-1),"iter_{}.root".format(iter_num)), "UPDATE")
+        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+    else:
+        # Create a new ROOT file for writing
+        new_InFile_SIMC = TFile.Open(simc_root.replace(".root","iter_{}.root".format(iter_num)), "UPDATE")
+        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))        
 
     # Grab branches from previous iteration
     hsdelta_array = array( 'f', [0])
