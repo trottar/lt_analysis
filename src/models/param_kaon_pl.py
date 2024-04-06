@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 01:05:33 trottar"
+# Time-stamp: "2024-04-06 01:10:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,32 +60,38 @@ def iterWeight(arg_str):
         # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
         sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
+    except OverflowError:        
+        sigl = 0.0
+        print("\n\nWARNING: Overflowerror on sigL, setting to zero for this event...\n\n")
+
+    try:
+        # RLT (2/15/2024): Removing t dependence from sigT because it seems
+        #                  to be driving poor sep xsects results
+        # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
+        # RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
+        #sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
+        #sigt = p5 + p6 * math.log(q2_gev)
+        #sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
+        sigt = p5 / (1 + p6*q2_gev)
+    except OverflowError:        
+        sigt = 0.0
+        print("\n\nWARNING: Overflowerror on sigL, setting to zero for this event...\n\n")
+
+    try:
+        siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     except OverflowError:
+        siglt = 0.0
+        print("\n\nWARNING: Overflowerror on sigL, setting to zero for this event...\n\n")
 
-        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev) - 0.2))
-        # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
-        # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
-        # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
-        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
-        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
-        # RLT (4/5/2024): Catching overflowerror in exponential, p4 = -p4
-        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 - p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
-        print("\n\nWARNING: Overflowerror on sigL, altering parameterization...\n\n")
-
-    # RLT (2/15/2024): Removing t dependence from sigT because it seems
-    #                  to be driving poor sep xsects results
-    # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
-    # RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
-    #sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
-    #sigt = p5 + p6 * math.log(q2_gev)
-    #sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
-    sigt = p5 / (1 + p6*q2_gev)
-    siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
-    # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
-    #                 xfit_in_t.py script to work. LT/TT are zeros
-    #                 Therefore param 12 was also changed to 13
-    sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
-        
+    try:
+        # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
+        #                 xfit_in_t.py script to work. LT/TT are zeros
+        #                 Therefore param 12 was also changed to 13
+        sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
+    except OverflowError:
+        sigtt = 0.0
+        print("\n\nWARNING: Overflowerror on sigL, setting to zero for this event...\n\n")
+                        
     # RLT (9/25/2023): There are two tav parameterizations in here.
     #                  I am only using the one above, for now.    
     # tav = (-0.178 + 0.315 * math.log(q2_gev)) * q2_gev
