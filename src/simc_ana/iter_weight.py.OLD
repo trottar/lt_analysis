@@ -3,13 +3,15 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-03 06:03:26 trottar"
+# Time-stamp: "2024-04-05 21:45:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
+import numpy as np
+import root_numpy as rnp
 import ROOT
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 from array import array
@@ -87,16 +89,33 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     if not os.path.isfile(simc_root):
         print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))
-
-    InFile_SIMC = TFile.Open(simc_root, "OPEN")
-    TBRANCH_SIMC  = InFile_SIMC.Get("h10")
-    
+        
     if iter_num > 1:
+        
+        InFile_SIMC = TFile.Open(simc_root, "READ")
+        TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+        
+        Weight_root = rnp.tree2array(TBRANCH_SIMC, branches=["Weight"])
+        Weight_array = np.array(Weight_root) # Save as array
+        sigcm_root = rnp.tree2array(TBRANCH_SIMC, branches=["sigcm"])
+        sigcm_array = np.array(sigcm_root) # Save as array
+
+        print("!!!!!!", Weight_root)
+        print("!!!!!!", sigcm_root)
+        
         # Create a new ROOT file for writing
         new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num)), "RECREATE")
-        # Clone the TTree from the original file
-        new_TBRANCH_SIMC = TBRANCH_SIMC.CloneTree(0)
-    else:        
+        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+
+        # Create a new branch with the updated values
+        iter_weight = []
+        iter_sig = []
+        
+    else:
+
+        InFile_SIMC = TFile.Open(simc_root, "OPEN")
+        TBRANCH_SIMC  = InFile_SIMC.Get("h10")
+        
         Weight_SIMC  = TBRANCH_SIMC.GetBranch("Weight")
         sig_SIMC  = TBRANCH_SIMC.GetBranch("sigcm")        
         # Create a new ROOT file for writing
@@ -111,10 +130,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         new_sig_SIMC = new_TBRANCH_SIMC.GetBranch("sigcm")
                 
         # Create a new branch with the updated values
-        iweight = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        new_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/D")  # 'D' for double, change if needed
-        isig = array('d', [0])  # Assuming 'd' is the data type, change if needed
-        new_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/D")  # 'D' for double, change if needed
+        iweight = array('f', [0])  # Assuming 'f' is the data type, change if needed
+        new_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", iweight, "iter_weight/F")  # 'f' for float, change if needed
+        isig = array('f', [0])  # Assuming 'f' is the data type, change if needed
+        new_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", isig, "iter_sig/F")  # 'f' for float, change if needed
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
@@ -129,25 +148,24 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       if iter_num > 1:
 
-          evt.Weight = evt.iter_weight
-          evt.sigcm = evt.iter_sig
-          
+          #evt.Weight = evt.iter_weight
+          #evt.sigcm = evt.iter_sig
+
           # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
           #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
           #       This goes for Q2i, Wi, and phiqpi as well
           #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           #print("-"*25,"\n",i,"\n",inp_param)
           inp_param = '{} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
+          #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           #inp_param = '{} {} {} {} {} {} {} {} {} '\
               #.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
           iter_lst = iterWeight(inp_param)
-
-          evt.iter_weight = iter_lst[0]
-          evt.iter_sig = iter_lst[1]
-
-          #new_TBRANCH_SIMC.Fill()
+          
+          iter_weight.append(iter_lst[0])
+          iter_sig.append(iter_lst[1])
           
       else:
 
@@ -176,11 +194,46 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           # Fill the new branch with the new value for this entry
           new_sig_branch.Fill()
-          #print("\ti",i)
-          #print("!!!!!!! evt.Weight", evt.Weight)
-          #print("!!!!!!! evt.iter_weight", iweight)
-          
-    new_TBRANCH_SIMC.Write("h10", ROOT.TObject.kOverwrite)
-    
+
+    if iter_num > 1:
+
+        print("££££££££",iter_weight)
+        print("££££££££",iter_sig)
+
+        #iter_weight_branch = np.array(iter_weight, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
+        #iter_sig_branch = np.array(iter_sig, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
+
+        # Convert array (iter) to a branch and add to h20
+        iter_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", np.zeros(1, dtype=float), "iter_weight/F")  # Create a new branch in h10 tree
+        iter_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", np.zeros(1, dtype=float), "iter_sig/F")  # Create a new branch in h10 tree
+
+        # Convert iter_array to a NumPy array
+        iter_weight_np = np.array(iter_weight, dtype=float)
+        iter_sig_np = np.array(iter_sig, dtype=float)
+
+        iter_weight_array = array( 'f', [0])
+        iter_sig_array = array( 'f', [0])
+
+        new_TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
+        new_TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
+        
+        for value in iter_weight:
+            #iter_weight_branch.SetAddress(value)
+            iter_weight_branch.Fill()
+        for value in iter_sig:
+            #iter_sig_branch.SetAddress(value)
+            iter_sig_branch.Fill()
+            
+        # Convert array to a branch and add to new iteration root tree
+        #rnp.array2tree(iter_weight_branch, tree=new_TBRANCH_SIMC)
+        #rnp.array2tree(iter_sig_branch, tree=new_TBRANCH_SIMC)
+
+        new_TBRANCH_SIMC.Write()
+        #new_InFile_SIMC.Write()
+
+    else:
+        
+        new_TBRANCH_SIMC.Write()
+        
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()

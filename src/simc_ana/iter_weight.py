@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:43:18 trottar"
+# Time-stamp: "2024-04-05 21:52:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,6 +110,21 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Create a new branch with the updated values
         iter_weight = []
         iter_sig = []
+
+        Weight_array = array( 'f', [0])
+        sigcm_array = array( 'f', [0])
+        iter_weight_array = array( 'f', [0])
+        iter_sig_array = array( 'f', [0])
+
+        TBRANCH_SIMC.SetBranchAddress("Weight", Weight_array)
+        TBRANCH_SIMC.SetBranchAddress("sigcm", sigcm_array)
+        TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
+        TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
+        
+        new_TBRANCH_SIMC.Branch("Weight", Weight_array, "Weight/F")
+        new_TBRANCH_SIMC.Branch("sigcm", sigcm_array, "sigcm/F")
+        new_TBRANCH_SIMC.Branch("iter_weight", iter_weight_array, "iter_weight/F")
+        new_TBRANCH_SIMC.Branch("iter_sig", iter_sig_array, "iter_sig/F")
         
     else:
 
@@ -164,8 +179,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
           
-          iter_weight.append(iter_lst[0])
-          iter_sig.append(iter_lst[1])
+          evt.iter_weight.append(iter_lst[0])
+          evt.iter_sig.append(iter_lst[1])
           
       else:
 
@@ -210,37 +225,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Convert iter_array to a NumPy array
         iter_weight_np = np.array(iter_weight, dtype=float)
         iter_sig_np = np.array(iter_sig, dtype=float)
-
-        # Set the branch address to the numpy array
-        iter_weight_address = iter_weight_np.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_weight_np.shape))
-        iter_sig_address = iter_sig_np.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_sig_np.shape))    
-
-        # Create a buffer object from the NumPy array
-        import ctypes
-        iter_weight_buffer = iter_weight_np.ctypes.data_as(ctypes.c_void_p)
-        iter_sig_buffer = iter_sig_np.ctypes.data_as(ctypes.c_void_p)
-        
-        # Convert the pointer to a void pointer
-        import ctypes
-        iter_weight_address_void = ctypes.cast(iter_weight_address, ctypes.c_void_p)
-        iter_sig_address_void = ctypes.cast(iter_sig_address, ctypes.c_void_p)
-        
-        #iter_weight_branch.SetAddress(iter_weight_address_void)
-        #iter_sig_branch.SetAddress(iter_sig_address_void)
-
-        iter_weight_array = array( 'f', [0])
-        iter_sig_array = array( 'f', [0])
-
-        new_TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
-        new_TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
-        
-        for value in iter_weight:
-            #iter_weight_branch.SetAddress(value)
-            iter_weight_branch.Fill()
-        for value in iter_sig:
-            #iter_sig_branch.SetAddress(value)
-            iter_sig_branch.Fill()
-            
+                    
         # Convert array to a branch and add to new iteration root tree
         #rnp.array2tree(iter_weight_branch, tree=new_TBRANCH_SIMC)
         #rnp.array2tree(iter_sig_branch, tree=new_TBRANCH_SIMC)
