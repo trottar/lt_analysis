@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:12:01 trottar"
+# Time-stamp: "2024-04-05 21:15:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,6 +206,13 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Convert array (iter) to a branch and add to h20
         iter_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", np.zeros(1, dtype=float), "iter_weight/F")  # Create a new branch in h10 tree
         iter_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", np.zeros(1, dtype=float), "iter_sig/F")  # Create a new branch in h10 tree
+
+        # Set the branch address to the numpy array
+        iter_weight_address = iter_weight_array.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_weight_array.shape))
+        iter_weight_branch.SetAddress(iter_weight_address)
+        iter_sig_address = iter_sig_array.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_sig_array.shape))
+        iter_sig_branch.SetAddress(iter_sig_address)        
+        
         for value in iter_weight:
             iter_weight_branch.SetAddress(value)
             iter_weight_branch.Fill()
