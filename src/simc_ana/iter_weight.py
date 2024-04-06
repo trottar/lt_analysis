@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 22:02:41 trottar"
+# Time-stamp: "2024-04-05 22:06:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,6 +179,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           iter_lst = iterWeight(inp_param)
 
+          print("!!!!!!!!", iter_lst)
+          
           Weight_array = evt.iter_weight
           sigcm_array = evt.iter_sig
           
