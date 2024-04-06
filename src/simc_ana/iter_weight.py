@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:41:15 trottar"
+# Time-stamp: "2024-04-05 21:43:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -228,14 +228,17 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         #iter_weight_branch.SetAddress(iter_weight_address_void)
         #iter_sig_branch.SetAddress(iter_sig_address_void)
 
-        new_TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_address_void)
-        new_TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_address_void)
+        iter_weight_array = array( 'f', [0])
+        iter_sig_array = array( 'f', [0])
+
+        new_TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
+        new_TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
         
         for value in iter_weight:
-            iter_weight_branch.SetAddress(value)
+            #iter_weight_branch.SetAddress(value)
             iter_weight_branch.Fill()
         for value in iter_sig:
-            iter_sig_branch.SetAddress(value)
+            #iter_sig_branch.SetAddress(value)
             iter_sig_branch.Fill()
             
         # Convert array to a branch and add to new iteration root tree
