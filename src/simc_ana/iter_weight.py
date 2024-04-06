@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 22:30:16 trottar"
+# Time-stamp: "2024-04-05 22:47:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -329,15 +329,13 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #       This goes for Q2i, Wi, and phiqpi as well
           #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           #print("-"*25,"\n",i,"\n",inp_param)
-          inp_param = '{} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
-          #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           #inp_param = '{} {} {} {} {} {} {} {} {} '\
-              #.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+              #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
+          #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          inp_param = '{} {} {} {} {} {} {} {} {} '\
+                      .format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
           iter_lst = iterWeight(inp_param)
-
-          print("!!!!!!!!", iter_lst)
           
           Weight_array[0] = evt.iter_weight
           sigcm_array[0] = evt.iter_sig
@@ -354,17 +352,17 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #       This goes for Q2i, Wi, and phiqpi as well
           #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           #print("-"*25,"\n",i,"\n",inp_param)
-          inp_param = '{} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           #inp_param = '{} {} {} {} {} {} {} {} {} '\
-              #.format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+              #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          inp_param = '{} {} {} {} {} {} {} {} {} '\
+                      .format(Q2, evt.Q2, evt.W, evt.t, evt.epscm, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
           iter_lst = iterWeight(inp_param)
 
           print("!!!!!!!!", iter_lst)
           
-          Weight_array[0] = evt.iter_weight
-          sigcm_array[0] = evt.iter_sig
+          Weight_array[0] = evt.Weight
+          sigcm_array[0] = evt.sigcm
           
           iter_weight_array[0] = iter_lst[0]
           iter_sig_array[0] = iter_lst[1]
