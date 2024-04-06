@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:25:08 trottar"
+# Time-stamp: "2024-04-05 21:27:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,8 +216,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         iter_sig_address = iter_sig_np.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_sig_np.shape))    
 
         # Create a buffer object from the NumPy array
-        iter_weight_buffer = iter_weight_np.tobytes()
-        iter_sig_buffer = iter_sig_np.tobytes()        
+        iter_weight_buffer = iter_weight_np.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        iter_sig_buffer = iter_sig_np.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
         
         # Convert the pointer to a void pointer
         import ctypes
