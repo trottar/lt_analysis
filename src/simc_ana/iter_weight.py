@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 20:42:17 trottar"
+# Time-stamp: "2024-04-05 20:49:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -218,7 +218,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         #rnp.array2tree(iter_sig_branch, tree=new_TBRANCH_SIMC)
 
         new_TBRANCH_SIMC.Write()
-        new_InFile_SIMC.Write()
+        #new_InFile_SIMC.Write()
 
     else:
         
