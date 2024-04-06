@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 20:57:25 trottar"
+# Time-stamp: "2024-04-05 21:00:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -209,11 +209,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         for value in iter_weight:
             #iter_weight_branch.SetAddress(value)
             iter_weight_branch.Fill()
-            new_TBRANCH_SIMC.Write()
         for value in iter_sig:
             #iter_sig_branch.SetAddress(value)
             iter_sig_branch.Fill()
-            new_TBRANCH_SIMC.Write()
             
         # Convert array to a branch and add to new iteration root tree
         #rnp.array2tree(iter_weight_branch, tree=new_TBRANCH_SIMC)
