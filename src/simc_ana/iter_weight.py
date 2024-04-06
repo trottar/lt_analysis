@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:18:34 trottar"
+# Time-stamp: "2024-04-05 21:22:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -210,12 +210,17 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Convert iter_array to a NumPy array
         iter_weight_np = np.array(iter_weight, dtype=float)
         iter_sig_np = np.array(iter_sig, dtype=float)
+
+        # Convert the pointer to a void pointer
+        import ctypes
+        iter_weight_address_void = ctypes.cast(iter_weight_address, ctypes.c_void_p)
+        iter_sig_address_void = ctypes.cast(iter_sig_address, ctypes.c_void_p)
         
         # Set the branch address to the numpy array
         iter_weight_address = iter_weight_np.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_weight_np.shape))
-        iter_weight_branch.SetAddress(iter_weight_address)
+        iter_weight_branch.SetAddress(iter_weight_address_void)
         iter_sig_address = iter_sig_np.ctypes.data_as(np.ctypeslib.ndpointer(dtype=np.float64, shape=iter_sig_np.shape))
-        iter_sig_branch.SetAddress(iter_sig_address)        
+        iter_sig_branch.SetAddress(iter_sig_address_void)
         
         for value in iter_weight:
             iter_weight_branch.SetAddress(value)
