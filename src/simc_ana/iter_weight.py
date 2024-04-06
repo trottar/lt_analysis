@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-05 21:54:13 trottar"
+# Time-stamp: "2024-04-05 21:58:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -210,32 +210,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           # Fill the new branch with the new value for this entry
           new_sig_branch.Fill()
 
-    if iter_num > 1:
-
-        print("££££££££",iter_weight)
-        print("££££££££",iter_sig)
-
-        #iter_weight_branch = np.array(iter_weight, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
-        #iter_sig_branch = np.array(iter_sig, dtype=np.float64)  # Convert iter_array to numpy array with appropriate data type
-
-        # Convert array (iter) to a branch and add to h20
-        iter_weight_branch = new_TBRANCH_SIMC.Branch("iter_weight", np.zeros(1, dtype=float), "iter_weight/F")  # Create a new branch in h10 tree
-        iter_sig_branch = new_TBRANCH_SIMC.Branch("iter_sig", np.zeros(1, dtype=float), "iter_sig/F")  # Create a new branch in h10 tree
-
-        # Convert iter_array to a NumPy array
-        iter_weight_np = np.array(iter_weight, dtype=float)
-        iter_sig_np = np.array(iter_sig, dtype=float)
-                    
-        # Convert array to a branch and add to new iteration root tree
-        #rnp.array2tree(iter_weight_branch, tree=new_TBRANCH_SIMC)
-        #rnp.array2tree(iter_sig_branch, tree=new_TBRANCH_SIMC)
-
-        new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
-        #new_InFile_SIMC.Write()
-
-    else:
-        
-        new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
+    new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
+    #new_InFile_SIMC.Write()
         
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
