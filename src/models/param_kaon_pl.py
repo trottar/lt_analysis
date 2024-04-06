@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 01:19:13 trottar"
+# Time-stamp: "2024-04-06 01:51:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,8 +63,9 @@ def iterWeight(arg_str):
         # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
         sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
-    except OverflowError:        
-        sigl = 0.0
+    except OverflowError:
+        #sigl = 0.0
+        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 - p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
         print("WARNING: Overflowerror on sigL, setting to zero for this event...")
 
     try:
