@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-01 23:01:33 trottar"
+# Time-stamp: "2024-04-06 17:26:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,69 +43,6 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-##############
-# HARD CODED #
-##############
-
-scale_dict ={
-    # Q2=2p1, W=2p95
-    "Q2p1W2p95Right_highe" : 2.75e-2,  # Pion scaled value divided by number of events
-    "Q2p1W2p95Left_highe" : 2.00e-2,
-    "Q2p1W2p95Center_highe" : 1.25e-2,
-    "Q2p1W2p95Left_lowe" : 0.5e-2,
-    "Q2p1W2p95Center_lowe" : 0.5e-2,
-    # Q2=3p0, W=2p32
-    # t-range = 0.1-1.0 (no MM cut)
-    #"Q3p0W2p32Right_highe" : 0.85e-2/51461,
-    #"Q3p0W2p32Left_highe" : 0.55e-2/73615,
-    #"Q3p0W2p32Center_highe" : 0.50e-2/154282,
-    #"Q3p0W2p32Left_lowe" : 0.44e-2/69457,
-    #"Q3p0W2p32Center_lowe" : 0.55e-2/90512,
-    # t-range = 0.1-1.0 (MM cut)
-    "Q3p0W2p32Right_highe" : 0.85e-2/51461,
-    "Q3p0W2p32Left_highe" : 0.55e-2/14037,
-    "Q3p0W2p32Center_highe" : 0.50e-2/24202,
-    "Q3p0W2p32Left_lowe" : 0.44e-2/12749,
-    "Q3p0W2p32Center_lowe" : 0.55e-2/13734,
-    # t-range = 0.45-1.0 (MM cut)
-    #"Q3p0W2p32Right_highe" : 0.85e-2/7121,
-    #"Q3p0W2p32Left_highe" : 0.55e-2/14028,
-    #"Q3p0W2p32Center_highe" : 0.50e-2/22736,
-    #"Q3p0W2p32Left_lowe" : 0.44e-2/12718,
-    #"Q3p0W2p32Center_lowe" : 0.55e-2/12399,
-    # Q2=3p0, W=3p14
-    # t-range = 0.1-1.0 (MM cut)
-    #"Q3p0W3p14Right_highe" : 1.25e-2/38806,
-    #"Q3p0W3p14Left_highe" : 2.75e-2/24437,
-    #"Q3p0W3p14Center_highe" : 1.00e-2/52414,
-    #"Q3p0W3p14Left_lowe" : 1.00e-2/39466,
-    #"Q3p0W3p14Center_lowe" : 0.75e-2/46219,
-    # t-range = 0.1-0.3 (MM cut)
-    "Q3p0W3p14Right_highe" : 1.25e-2/38806, # Off
-    "Q3p0W3p14Left_highe" : 2.75e-2/24437, # Off
-    "Q3p0W3p14Center_highe" : 1.00e-2/34102,
-    "Q3p0W3p14Left_lowe" : 1.00e-2/39466, # Off
-    "Q3p0W3p14Center_lowe" : 0.75e-2/33383,
-    # Q2=4p4, W=2p74
-    "Q4p4W2p74Right_highe" : 1.25e-2,
-    "Q4p4W2p74Left_highe" : 1.25e-2,
-    "Q4p4W2p74Center_highe" : 0.75e-2,
-    "Q4p4W2p74Left_lowe" : 0.50e-2,
-    "Q4p4W2p74Center_lowe" : 0.25e-2,
-    # Q2=5p5, W=3p02
-    "Q5p5W3p02Right_highe" : 1.75e-2,
-    "Q5p5W3p02Left_highe" : 3.25e-2,
-    "Q5p5W3p02Center_highe" : 1.25e-2,
-    "Q5p5W3p02Left_lowe" : 0.75e-2,
-    "Q5p5W3p02Center_lowe" : 0.75e-2,
-}
-
-##############
-##############
-##############
-
-################################################################################################################################################
-
 def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
 
     W = inpDict["W"] 
@@ -121,8 +58,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
-
-    #scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1066,8 +1001,6 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
-
-    #scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1352,8 +1285,6 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
-
-    #scale_factor = scale_dict["Q{}W{}{}_{}e".format(Q2,W,phi_setting,EPSSET)]
     
     ################################################################################################################################################
     # Import function to define cut bools

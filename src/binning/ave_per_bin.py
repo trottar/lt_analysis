@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-29 12:18:36 trottar"
+# Time-stamp: "2024-04-06 17:28:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -369,7 +369,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
+            
             try:
+                ##############
+                # HARD CODED #
+                ##############
                 scale_factor = hist_bin_dict["H_MM_DATA_{}".format(j)] \
                                .Integral(\
                                          hist_bin_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
@@ -378,6 +382,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                                          Integral(\
                                                   subDict["H_MM_SUB_DATA_{}".format(j)].FindBin(0.89), \
                                                   subDict["H_MM_SUB_DATA_{}".format(j)].FindBin(0.94))
+                ##############
+                ##############
+                ##############                
             except ZeroDivisionError:
                 scale_factor = 0.0
 

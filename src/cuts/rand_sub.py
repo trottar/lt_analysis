@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-01 23:04:55 trottar"
+# Time-stamp: "2024-04-06 17:28:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1400,11 +1400,19 @@ def rand_sub(phi_setting, inpDict):
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
+        
         try:
+        ##############
+        # HARD CODED #
+        ##############            
             scale_factor = H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94))/subDict["H_MM_SUB_DATA"]\
                                     .Integral(subDict["H_MM_SUB_DATA"].FindBin(0.89), subDict["H_MM_SUB_DATA"].FindBin(0.94))
+        ##############
+        ##############
+        ##############            
         except ZeroDivisionError:
             scale_factor = 0.0
+
         #Apply scale factor
         subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
         subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
