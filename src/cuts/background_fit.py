@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 22:13:10 trottar"
+# Time-stamp: "2024-04-07 00:41:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,11 +75,11 @@ bg_dict ={
     #"Q3p0W3p14Left_lowe" : 50/4752,
     #"Q3p0W3p14Center_lowe" : 50/3778,
     # t-range = 0.1-0.3 (MM cut)
-    "Q3p0W3p14Right_highe" : 250/16072,
-    "Q3p0W3p14Left_highe" : 100/7083,
-    "Q3p0W3p14Center_highe" : 850/41758,
-    "Q3p0W3p14Left_lowe" : 100/10484,
-    "Q3p0W3p14Center_lowe" : 850/38776,     
+    "Q3p0W3p14Right_highe" : 250/4572,
+    "Q3p0W3p14Left_highe" : 100/879,
+    "Q3p0W3p14Center_highe" : 850/19952,
+    "Q3p0W3p14Left_lowe" : 100/827,
+    "Q3p0W3p14Center_lowe" : 850/9258,     
 }
 
 ##############
