@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-08 17:46:13 trottar"
+# Time-stamp: "2024-04-08 17:53:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1013,7 +1013,7 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_rand_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt)
             if(NOMMCUTS):
                 H_MM_nosub_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
