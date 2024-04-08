@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-08 17:21:05 trottar"
+# Time-stamp: "2024-04-08 17:46:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,7 +113,7 @@ def rand_sub(phi_setting, inpDict):
 
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
