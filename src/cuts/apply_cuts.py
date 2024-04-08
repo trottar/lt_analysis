@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-07 22:47:49 trottar"
+# Time-stamp: "2024-04-08 14:06:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -128,7 +128,7 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 ###############################################################################################################################################
 
 # Subtraction cuts
-def apply_data_sub_cuts(evt, mm_min=0.7, mm_max=1.5):
+def apply_data_sub_cuts(evt):
 
     ##############
     # HARD CODED #
