@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-06 17:28:49 trottar"
+# Time-stamp: "2024-04-08 17:29:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -160,24 +160,28 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DATA_{}".format(j)]       = TH1D("H_t_DATA_{}".format(j),"-t", 100, inpDict["tmin"], inpDict["tmax"])
         hist_bin_dict["H_epsilon_DATA_{}".format(j)]  = TH1D("H_epsilon_DATA_{}".format(j),"epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         hist_bin_dict["H_MM_DATA_{}".format(j)]       = TH1D("H_MM_DATA_{}".format(j),"MM", 100, 0.7, 1.5)
+        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)]       = TH1D("H_MM_nosub_DATA_{}".format(j),"MM", 100, 0.7, 1.5)
 
         hist_bin_dict["H_Q2_RAND_{}".format(j)]       = TH1D("H_Q2_RAND_{}".format(j),"Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
         hist_bin_dict["H_W_RAND_{}".format(j)]  = TH1D("H_W_RAND_{}".format(j),"W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         hist_bin_dict["H_t_RAND_{}".format(j)]       = TH1D("H_t_RAND_{}".format(j),"-t", 100, inpDict["tmin"], inpDict["tmax"])
         hist_bin_dict["H_epsilon_RAND_{}".format(j)]  = TH1D("H_epsilon_RAND_{}".format(j),"epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         hist_bin_dict["H_MM_RAND_{}".format(j)]       = TH1D("H_MM_RAND_{}".format(j),"MM", 100, 0.7, 1.5)
+        hist_bin_dict["H_MM_nosub_RAND_{}".format(j)]       = TH1D("H_MM_nosub_RAND_{}".format(j),"MM", 100, 0.7, 1.5)        
 
         hist_bin_dict["H_Q2_DUMMY_{}".format(j)]       = TH1D("H_Q2_DUMMY_{}".format(j),"Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
         hist_bin_dict["H_W_DUMMY_{}".format(j)]  = TH1D("H_W_DUMMY_{}".format(j),"W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         hist_bin_dict["H_t_DUMMY_{}".format(j)]       = TH1D("H_t_DUMMY_{}".format(j),"-t", 100, inpDict["tmin"], inpDict["tmax"])
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)]  = TH1D("H_epsilon_DUMMY_{}".format(j),"epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         hist_bin_dict["H_MM_DUMMY_{}".format(j)]       = TH1D("H_MM_DUMMY_{}".format(j),"MM", 100, 0.7, 1.5)
+        hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)]       = TH1D("H_MM_nosub_DUMMY_{}".format(j),"MM", 100, 0.7, 1.5)
 
         hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)]       = TH1D("H_Q2_DUMMY_RAND_{}".format(j),"Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
         hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)]  = TH1D("H_W_DUMMY_RAND_{}".format(j),"W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)]       = TH1D("H_t_DUMMY_RAND_{}".format(j),"-t", 100, inpDict["tmin"], inpDict["tmax"])
         hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)]  = TH1D("H_epsilon_DUMMY_RAND_{}".format(j),"epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)]       = TH1D("H_MM_DUMMY_RAND_{}".format(j),"MM", 100, 0.7, 1.5)
+        hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)]       = TH1D("H_MM_nosub_DUMMY_RAND_{}".format(j),"MM", 100, 0.7, 1.5)
 
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
@@ -230,6 +234,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
 
@@ -262,6 +269,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
 
@@ -294,6 +304,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
 
@@ -326,6 +339,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
 
@@ -348,24 +364,28 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_epsilon_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_MM_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Scale(1/nWindows)        
 
         hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(hist_bin_dict["H_Q2_RAND_{}".format(j)],-1)
         hist_bin_dict["H_W_DATA_{}".format(j)].Add(hist_bin_dict["H_W_RAND_{}".format(j)],-1)
         hist_bin_dict["H_t_DATA_{}".format(j)].Add(hist_bin_dict["H_t_RAND_{}".format(j)],-1)
         hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(hist_bin_dict["H_epsilon_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_nosub_RAND_{}".format(j)],-1)        
 
         hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)    
         hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)        
 
         hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Add(hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_W_DUMMY_{}".format(j)].Add(hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_t_DUMMY_{}".format(j)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)],-1)        
 
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
@@ -374,10 +394,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 ##############
                 # HARD CODED #
                 ##############
-                scale_factor = hist_bin_dict["H_MM_DATA_{}".format(j)] \
+                scale_factor = hist_bin_dict["H_MM_nosub_DATA_{}".format(j)] \
                                .Integral(\
-                                         hist_bin_dict["H_MM_DATA_{}".format(j)].FindBin(0.89), \
-                                         hist_bin_dict["H_MM_DATA_{}".format(j)].FindBin(0.94)) \
+                                         hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].FindBin(0.89), \
+                                         hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].FindBin(0.94)) \
                                          /subDict["H_MM_SUB_DATA_{}".format(j)].\
                                          Integral(\
                                                   subDict["H_MM_SUB_DATA_{}".format(j)].FindBin(0.89), \
@@ -719,7 +739,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
         Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
         if ParticleType == "kaon":
-          ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+            ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
         else:
             ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 

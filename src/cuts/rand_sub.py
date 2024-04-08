@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-07 22:24:01 trottar"
+# Time-stamp: "2024-04-08 17:21:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -814,6 +814,9 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DATA.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -882,7 +885,6 @@ def rand_sub(phi_setting, inpDict):
           H_W_DATA.Fill(evt.W)
           H_epsilon_DATA.Fill(evt.epsilon)
           H_MM_DATA.Fill(evt.MM)
-          H_MM_nosub_DATA.Fill(evt.MM)
           #H_MM_DATA.Fill(pow(evt.MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
           
@@ -915,11 +917,14 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DUMMY.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
-                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
+                P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+                P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.MM)
+                P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
@@ -983,7 +988,6 @@ def rand_sub(phi_setting, inpDict):
           H_W_DUMMY.Fill(evt.W)
           H_epsilon_DUMMY.Fill(evt.epsilon)
           H_MM_DUMMY.Fill(evt.MM)
-          H_MM_nosub_DUMMY.Fill(evt.MM)
           #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
 
@@ -1009,11 +1013,14 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_rand_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
-                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
+                P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+                P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
+                P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
@@ -1076,7 +1083,6 @@ def rand_sub(phi_setting, inpDict):
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(evt.MM)
-          H_MM_nosub_RAND.Fill(evt.MM)
 
     ###################################################################################################################################################    
     # Fill dummy random histograms for various trees called above
@@ -1100,11 +1106,14 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
-                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
-                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
+                P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
+                P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
+                P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
@@ -1166,8 +1175,7 @@ def rand_sub(phi_setting, inpDict):
           H_t_DUMMY_RAND.Fill(-evt.MandelT)
           H_W_DUMMY_RAND.Fill(evt.W)
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-          H_MM_DUMMY_RAND.Fill(evt.MM  )
-          H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
+          H_MM_DUMMY_RAND.Fill(evt.MM)
 
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
@@ -1404,8 +1412,8 @@ def rand_sub(phi_setting, inpDict):
         try:
         ##############
         # HARD CODED #
-        ##############            
-            scale_factor = H_MM_DATA.Integral(H_MM_DATA.FindBin(0.89), H_MM_DATA.FindBin(0.94))/subDict["H_MM_SUB_DATA"]\
+        ##############
+            scale_factor = H_MM_nosub_DATA.Integral(H_MM_nosub_DATA.FindBin(0.89), H_MM_nosub_DATA.FindBin(0.94))/subDict["H_MM_SUB_DATA"]\
                                     .Integral(subDict["H_MM_SUB_DATA"].FindBin(0.89), subDict["H_MM_SUB_DATA"].FindBin(0.94))
         ##############
         ##############
