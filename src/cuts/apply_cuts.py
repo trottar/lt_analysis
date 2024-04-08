@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-07 22:32:22 trottar"
+# Time-stamp: "2024-04-07 22:47:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,10 +151,7 @@ def apply_data_sub_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     t_RANGE =  (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
 
-    #MMCUT =  (mm_min<evt.MM) & (evt.MM<mm_max) No MM cut
-    
-    #ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
-
+    # No MM cut    
     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE
 
     return ALLCUTS

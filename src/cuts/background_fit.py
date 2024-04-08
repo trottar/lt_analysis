@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-07 17:51:05 trottar"
+# Time-stamp: "2024-04-08 00:51:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,7 +101,8 @@ def bg_fit(phi_setting, inpDict, hist):
 
     bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*num_evts
 
-    fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
+    #fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
+    fit_func = TF1("fit_func", "[0]", 0.7, 1.5)
     
     fit_func.FixParameter(0, bg_factor) 
 
