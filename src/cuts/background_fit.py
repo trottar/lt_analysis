@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-08 10:38:05 trottar"
+# Time-stamp: "2024-04-08 14:04:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,11 +69,11 @@ bg_dict ={
     #"Q3p0W2p32Center_lowe" : 50/2734,    
     # Q2=3p0, W=3p14
     # t-range = 0.1-1.0 (MM cut)
-    "Q3p0W3p14Right_highe" : 950/23069,
-    "Q3p0W3p14Left_highe" : 700/15033,
-    "Q3p0W3p14Center_highe" : 1400/31192,
-    "Q3p0W3p14Left_lowe" : 850/19713,
-    "Q3p0W3p14Center_lowe" : 1500/24014,
+    "Q3p0W3p14Right_highe" : 950/8632,
+    "Q3p0W3p14Left_highe" : 700/5656,
+    "Q3p0W3p14Center_highe" : 1400/34366,
+    "Q3p0W3p14Left_lowe" : 850/10763,
+    "Q3p0W3p14Center_lowe" : 1500/16182,
     # t-range = 0.1-0.3 (MM cut)
     #"Q3p0W3p14Right_highe" : 250/4572,
     #"Q3p0W3p14Left_highe" : 100/879,
@@ -101,8 +101,7 @@ def bg_fit(phi_setting, inpDict, hist):
 
     bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*num_evts
 
-    #fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
-    fit_func = TF1("fit_func", "[0]", 0.7, 1.5)
+    fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
     fit_func.FixParameter(0, bg_factor) 
 
