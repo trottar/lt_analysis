@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 11:32:30 trottar"
+# Time-stamp: "2024-04-09 17:01:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -524,7 +524,7 @@ def fit_gaussian(hist, x_min, x_max):
     hist.Fit("gaus", "Q", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
     
-    fit_func.SetLineColor(kBlack)
+    fit_func.SetLineColor(ROOT.kBlack)
     
     mean = fit_func.GetParameter(1)
     mean_err = fit_func.GetParError(1)
