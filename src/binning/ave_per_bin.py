@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 11:45:12 trottar"
+# Time-stamp: "2024-04-09 18:01:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -469,6 +469,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             text = ROOT.TLatex()
             text.SetNDC();
             text.SetTextSize(0.04);
+            text.SetTextAlign(22); # Centered alignment
+            text.SetTextColor(ROOT.kRed); # Set text color to red            
             # Add the centroid value to the plot
             text.DrawLatex(0.7, 0.8, "Centroid: {:.2f}+/-{:.3f}".format(centroid[0], centroid[1]))
             if i==0 and j==0:
