@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-08 17:53:34 trottar"
+# Time-stamp: "2024-04-08 20:47:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -814,7 +814,7 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
                 H_MM_nosub_DATA.Fill(evt.MM)
             if(NOHOLECUTS):
@@ -917,7 +917,7 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
                 H_MM_nosub_DUMMY.Fill(evt.MM)
             if(NOHOLECUTS):
@@ -1013,7 +1013,7 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
                 H_MM_nosub_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
@@ -1106,7 +1106,7 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
                 H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
@@ -1417,7 +1417,7 @@ def rand_sub(phi_setting, inpDict):
                                     .Integral(subDict["H_MM_SUB_DATA"].FindBin(0.89), subDict["H_MM_SUB_DATA"].FindBin(0.94))
         ##############
         ##############
-        ##############            
+        ##############
         except ZeroDivisionError:
             scale_factor = 0.0
 

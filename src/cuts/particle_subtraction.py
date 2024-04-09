@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-08 14:05:42 trottar"
+# Time-stamp: "2024-04-08 20:48:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,9 +49,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     Q2 = inpDict["Q2"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
-
-    mm_min = inpDict["mm_min"] 
-    mm_max = inpDict["mm_max"]
 
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
@@ -992,9 +989,6 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     Q2 = inpDict["Q2"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
-
-    mm_min = inpDict["mm_min"] 
-    mm_max = inpDict["mm_max"]
     
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
@@ -1276,9 +1270,6 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     Q2 = inpDict["Q2"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
-
-    mm_min = inpDict["mm_min"] 
-    mm_max = inpDict["mm_max"]
     
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
