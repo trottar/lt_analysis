@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 13:28:59 trottar"
+# Time-stamp: "2024-04-09 14:04:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1470,6 +1470,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_t_SUB_DATA"].Scale(scale_factor)
         subDict["H_epsilon_SUB_DATA"].Scale(scale_factor)
         subDict["H_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["H_MM_nosub_SUB_DATA"].Scale(scale_factor)
         subDict["H_pmiss_SUB_DATA"].Scale(scale_factor)
         subDict["H_emiss_SUB_DATA"].Scale(scale_factor)
         subDict["H_pmx_SUB_DATA"].Scale(scale_factor)
