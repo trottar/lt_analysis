@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 11:26:28 trottar"
+# Time-stamp: "2024-04-09 11:37:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_negative_bins
+from utility import remove_negative_bins, fit_gaussian
 
 ##################################################################################################################################################
 
@@ -458,11 +458,18 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         processed_dict["t_bin{}".format(j+1)] = {key : processed_dict["t_bin{}".format(j+1)][key] \
                                                  for key in sorted(processed_dict["t_bin{}".format(j+1)].keys())}
 
-        ROOT.gStyle.SetOptFit(1)
+        ROOT.gStyle.SetOptFit(2)
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+            centroid = fit_gaussian(val, val.GetXaxis().GetXmin(), val.GetXaxis().GetXmax())
             val.Draw()
             val.SetTitle("{} {}".format(phi_setting, val.GetName()))
+            # Create a TLatex object to add text to the plot
+            text = ROOT.TLatex()
+            text.SetNDC();
+            text.SetTextSize(0.04);
+            # Add the centroid value to the plot
+            text.DrawLatex(0.7, 0.8, "Centroid: {:.2f}".format(centroid))
             if i==0 and j==0:
                 canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+'(')
             elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:

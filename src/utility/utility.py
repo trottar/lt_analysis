@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 18:02:28 trottar"
+# Time-stamp: "2024-04-09 11:32:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -484,3 +484,51 @@ def remove_negative_bins(histogram):
     return histogram
             
 ################################################################################################################################################        
+
+# Define a function for fitting a Gaussian with dynamically determined FWHM range
+def fit_gaussian(hist, x_min, x_max):
+    
+    # Find the corresponding bin numbers
+    bin_min = hist.GetXaxis().FindBin(x_min)
+    bin_max = hist.GetXaxis().FindBin(x_max)
+    
+    # Find the maximum value within the specified range
+    max_bin = bin_min
+    max_value = hist.GetBinContent(max_bin)
+    for i in range(bin_min, bin_max):
+        if hist.GetBinContent(i) > max_value:
+            max_bin = i
+            max_value = hist.GetBinContent(i)
+
+    # Print the results
+    print("max_bin", max_bin)
+    print("max_value", max_value)
+    print("bin_center",hist.GetBinCenter(max_bin))
+    
+    half_max = max_value*0.75
+    
+    # Find left and right bins closest to half-max value
+    left_bin = max_bin
+    right_bin = max_bin
+    while hist.GetBinContent(left_bin) > half_max and left_bin > 1:
+        left_bin -= 1
+    while hist.GetBinContent(right_bin) > half_max and right_bin < hist.GetNbinsX():
+        right_bin += 1
+
+    #min_range = hist.GetBinCenter(max_bin-100)
+    #max_range = hist.GetBinCenter(max_bin+100)
+
+    min_range = hist.GetBinCenter(left_bin)
+    max_range = hist.GetBinCenter(right_bin)
+
+    hist.Fit("gaus", "Q", "", min_range, max_range)
+    fit_func = hist.GetFunction('gaus')
+    
+    fit_func.SetLineColor(kBlack)
+    
+    mean = fit_func.GetParameter(1)
+    mean_err = fit_func.GetParError(1)
+    
+    return [mean, mean_err]
+
+################################################################################################################################################
