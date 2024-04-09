@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 09:36:42 trottar"
+# Time-stamp: "2024-04-09 11:26:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -457,7 +457,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # Sort dictionary keys alphabetically
         processed_dict["t_bin{}".format(j+1)] = {key : processed_dict["t_bin{}".format(j+1)][key] \
                                                  for key in sorted(processed_dict["t_bin{}".format(j+1)].keys())}
-        
+
+        ROOT.gStyle.SetOptFit(1)
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
             val.Draw()

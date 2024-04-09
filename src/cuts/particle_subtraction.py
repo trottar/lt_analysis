@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 09:35:51 trottar"
+# Time-stamp: "2024-04-09 09:57:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -111,7 +111,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DATA = subDict["H_t_SUB_DATA"]
     H_epsilon_DATA = subDict["H_epsilon_SUB_DATA"]
     H_MM_DATA = subDict["H_MM_SUB_DATA"]
-    H_MM_nosub_DATA = subDict["H_MM_nosub_nSUB_DATA"]    
+    H_MM_nosub_DATA = subDict["H_MM_nosub_SUB_DATA"]
     H_th_DATA = subDict["H_th_SUB_DATA"]
     H_ph_DATA = subDict["H_ph_SUB_DATA"]
     H_ph_q_DATA = subDict["H_ph_q_SUB_DATA"]
@@ -150,7 +150,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY = subDict["H_t_SUB_DUMMY"]
     H_epsilon_DUMMY = subDict["H_epsilon_SUB_DUMMY"]
     H_MM_DUMMY = subDict["H_MM_SUB_DUMMY"]
-    H_MM_nosub_DUMMY = subDict["H_MM_nosub_nSUB_DUMMY"]    
+    H_MM_nosub_DUMMY = subDict["H_MM_nosub_SUB_DUMMY"]    
     H_th_DUMMY = subDict["H_th_SUB_DUMMY"]
     H_ph_DUMMY = subDict["H_ph_SUB_DUMMY"]
     H_ph_q_DUMMY = subDict["H_ph_q_SUB_DUMMY"]
@@ -189,7 +189,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_RAND = subDict["H_t_SUB_RAND"]
     H_epsilon_RAND = subDict["H_epsilon_SUB_RAND"]
     H_MM_RAND = subDict["H_MM_SUB_RAND"]
-    H_MM_nosub_RAND = subDict["H_MM_nosub_nSUB_RAND"]    
+    H_MM_nosub_RAND = subDict["H_MM_nosub_SUB_RAND"]    
     H_th_RAND = subDict["H_th_SUB_RAND"]
     H_ph_RAND = subDict["H_ph_SUB_RAND"]
     H_ph_q_RAND = subDict["H_ph_q_SUB_RAND"]
@@ -228,7 +228,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY_RAND = subDict["H_t_SUB_DUMMY_RAND"]
     H_epsilon_DUMMY_RAND = subDict["H_epsilon_SUB_DUMMY_RAND"]
     H_MM_DUMMY_RAND = subDict["H_MM_SUB_DUMMY_RAND"]
-    H_MM_nosub_DUMMY_RAND = subDict["H_MM_nosub_nSUB_DUMMY_RAND"]    
+    H_MM_nosub_DUMMY_RAND = subDict["H_MM_nosub_SUB_DUMMY_RAND"]    
     H_th_DUMMY_RAND = subDict["H_th_SUB_DUMMY_RAND"]
     H_ph_DUMMY_RAND = subDict["H_ph_SUB_DUMMY_RAND"]
     H_ph_q_DUMMY_RAND = subDict["H_ph_q_SUB_DUMMY_RAND"]
