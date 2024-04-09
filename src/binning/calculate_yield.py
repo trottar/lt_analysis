@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 09:37:40 trottar"
+# Time-stamp: "2024-04-09 12:17:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -407,6 +407,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
             
+            # Include Stat box
+            ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
                 if is_hist(val):
                     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
