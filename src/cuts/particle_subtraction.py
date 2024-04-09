@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-08 20:48:32 trottar"
+# Time-stamp: "2024-04-09 09:35:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -111,6 +111,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DATA = subDict["H_t_SUB_DATA"]
     H_epsilon_DATA = subDict["H_epsilon_SUB_DATA"]
     H_MM_DATA = subDict["H_MM_SUB_DATA"]
+    H_MM_nosub_DATA = subDict["H_MM_nosub_nSUB_DATA"]    
     H_th_DATA = subDict["H_th_SUB_DATA"]
     H_ph_DATA = subDict["H_ph_SUB_DATA"]
     H_ph_q_DATA = subDict["H_ph_q_SUB_DATA"]
@@ -149,6 +150,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY = subDict["H_t_SUB_DUMMY"]
     H_epsilon_DUMMY = subDict["H_epsilon_SUB_DUMMY"]
     H_MM_DUMMY = subDict["H_MM_SUB_DUMMY"]
+    H_MM_nosub_DUMMY = subDict["H_MM_nosub_nSUB_DUMMY"]    
     H_th_DUMMY = subDict["H_th_SUB_DUMMY"]
     H_ph_DUMMY = subDict["H_ph_SUB_DUMMY"]
     H_ph_q_DUMMY = subDict["H_ph_q_SUB_DUMMY"]
@@ -187,6 +189,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_RAND = subDict["H_t_SUB_RAND"]
     H_epsilon_RAND = subDict["H_epsilon_SUB_RAND"]
     H_MM_RAND = subDict["H_MM_SUB_RAND"]
+    H_MM_nosub_RAND = subDict["H_MM_nosub_nSUB_RAND"]    
     H_th_RAND = subDict["H_th_SUB_RAND"]
     H_ph_RAND = subDict["H_ph_SUB_RAND"]
     H_ph_q_RAND = subDict["H_ph_q_SUB_RAND"]
@@ -225,6 +228,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY_RAND = subDict["H_t_SUB_DUMMY_RAND"]
     H_epsilon_DUMMY_RAND = subDict["H_epsilon_SUB_DUMMY_RAND"]
     H_MM_DUMMY_RAND = subDict["H_MM_SUB_DUMMY_RAND"]
+    H_MM_nosub_DUMMY_RAND = subDict["H_MM_nosub_nSUB_DUMMY_RAND"]    
     H_th_DUMMY_RAND = subDict["H_th_SUB_DUMMY_RAND"]
     H_ph_DUMMY_RAND = subDict["H_ph_SUB_DUMMY_RAND"]
     H_ph_q_DUMMY_RAND = subDict["H_ph_q_SUB_DUMMY_RAND"]
@@ -382,9 +386,12 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):
+                H_MM_nosub_DATA.Fill(evt.MM)            
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -392,7 +399,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
 
@@ -482,9 +489,12 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):
+                H_MM_nosub_DUMMY.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -492,7 +502,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
 
@@ -582,9 +592,12 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):
+                H_MM_nosub_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -592,7 +605,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
 
@@ -682,9 +695,12 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOHOLECUTS = apply_data_sub_cuts(evt)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):
+                H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -692,7 +708,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)            
 
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
 
@@ -810,6 +826,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_RAND.Scale(1/nWindows)
     H_epsilon_RAND.Scale(1/nWindows)
     H_MM_RAND.Scale(1/nWindows)
+    H_MM_nosub_RAND.Scale(1/nWindows)    
     H_pmiss_RAND.Scale(1/nWindows)
     H_emiss_RAND.Scale(1/nWindows)
     H_pmx_RAND.Scale(1/nWindows)
@@ -862,6 +879,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY_RAND.Scale(1/nWindows)
     H_epsilon_DUMMY_RAND.Scale(1/nWindows)
     H_MM_DUMMY_RAND.Scale(1/nWindows)
+    H_MM_nosub_DUMMY_RAND.Scale(1/nWindows)    
     H_pmiss_DUMMY_RAND.Scale(1/nWindows)
     H_emiss_DUMMY_RAND.Scale(1/nWindows)
     H_pmx_DUMMY_RAND.Scale(1/nWindows)
@@ -869,7 +887,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_pmz_DUMMY_RAND.Scale(1/nWindows)
     H_W_DUMMY_RAND.Scale(1/nWindows)
     #H_ct_DUMMY_RAND.Scale(1/nWindows)
-
     
     ###
     # Data Random subtraction
@@ -919,6 +936,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DATA.Add(H_t_RAND,-1)
     H_epsilon_DATA.Add(H_epsilon_RAND,-1)
     H_MM_DATA.Add(H_MM_RAND,-1)
+    H_MM_nosub_DATA.Add(H_MM_nosub_RAND,-1)    
     H_pmiss_DATA.Add(H_pmiss_RAND,-1)
     H_emiss_DATA.Add(H_emiss_RAND,-1)
     H_pmx_DATA.Add(H_pmx_RAND,-1)
@@ -973,6 +991,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
     H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
+    H_MM_nosub_DUMMY.Add(H_MM_nosub_DUMMY_RAND,-1)    
     H_pmiss_DUMMY.Add(H_pmiss_DUMMY_RAND,-1)
     H_emiss_DUMMY.Add(H_emiss_DUMMY_RAND,-1)
     H_pmx_DUMMY.Add(H_pmx_DUMMY_RAND,-1)
@@ -1040,24 +1059,28 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_t_DATA_{}".format(j)] = subDict["H_t_SUB_DATA_{}".format(j)]
         hist_dict["H_epsilon_DATA_{}".format(j)] = subDict["H_epsilon_SUB_DATA_{}".format(j)]
         hist_dict["H_MM_DATA_{}".format(j)] = subDict["H_MM_SUB_DATA_{}".format(j)]
+        hist_dict["H_MM_nosub_DATA_{}".format(j)] = subDict["H_MM_nosub_SUB_DATA_{}".format(j)]        
 
         hist_dict["H_Q2_DUMMY_{}".format(j)] = subDict["H_Q2_SUB_DUMMY_{}".format(j)]
         hist_dict["H_W_DUMMY_{}".format(j)] = subDict["H_W_SUB_DUMMY_{}".format(j)]
         hist_dict["H_t_DUMMY_{}".format(j)] = subDict["H_t_SUB_DUMMY_{}".format(j)]
         hist_dict["H_epsilon_DUMMY_{}".format(j)] = subDict["H_epsilon_SUB_DUMMY_{}".format(j)]
         hist_dict["H_MM_DUMMY_{}".format(j)] = subDict["H_MM_SUB_DUMMY_{}".format(j)]
+        hist_dict["H_MM_nosub_DUMMY_{}".format(j)] = subDict["H_MM_nosub_SUB_DUMMY_{}".format(j)]        
 
         hist_dict["H_Q2_RAND_{}".format(j)] = subDict["H_Q2_SUB_RAND_{}".format(j)]
         hist_dict["H_W_RAND_{}".format(j)] = subDict["H_W_SUB_RAND_{}".format(j)]
         hist_dict["H_t_RAND_{}".format(j)] = subDict["H_t_SUB_RAND_{}".format(j)]
         hist_dict["H_epsilon_RAND_{}".format(j)] = subDict["H_epsilon_SUB_RAND_{}".format(j)]
         hist_dict["H_MM_RAND_{}".format(j)] = subDict["H_MM_SUB_RAND_{}".format(j)]
+        hist_dict["H_MM_nosub_RAND_{}".format(j)] = subDict["H_MM_nosub_SUB_RAND_{}".format(j)]        
 
         hist_dict["H_Q2_DUMMY_RAND_{}".format(j)] = subDict["H_Q2_SUB_DUMMY_RAND_{}".format(j)]
         hist_dict["H_W_DUMMY_RAND_{}".format(j)] = subDict["H_W_SUB_DUMMY_RAND_{}".format(j)]
         hist_dict["H_t_DUMMY_RAND_{}".format(j)] = subDict["H_t_SUB_DUMMY_RAND_{}".format(j)]
         hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)] = subDict["H_epsilon_SUB_DUMMY_RAND_{}".format(j)]
         hist_dict["H_MM_DUMMY_RAND_{}".format(j)] = subDict["H_MM_SUB_DUMMY_RAND_{}".format(j)]
+        hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)] = subDict["H_MM_nosub_SUB_DUMMY_RAND_{}".format(j)]        
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
@@ -1114,10 +1137,13 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):            
+                hist_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1148,10 +1174,13 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):            
+                hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1182,10 +1211,13 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):            
+                hist_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1216,10 +1248,13 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):            
+                hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)                                
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1238,6 +1273,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_t_RAND_{}".format(j)].Scale(1/nWindows)
         hist_dict["H_epsilon_RAND_{}".format(j)].Scale(1/nWindows)
         hist_dict["H_MM_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_MM_nosub_RAND_{}".format(j)].Scale(1/nWindows)        
 
         # Data Dummy_Random subtraction window
         hist_dict["H_Q2_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
@@ -1245,6 +1281,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_t_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_dict["H_MM_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)        
 
         ###
         # Data Random subtraction
@@ -1253,6 +1290,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_t_DATA_{}".format(j)].Add(hist_dict["H_t_RAND_{}".format(j)],-1)
         hist_dict["H_epsilon_DATA_{}".format(j)].Add(hist_dict["H_epsilon_RAND_{}".format(j)],-1)
         hist_dict["H_MM_DATA_{}".format(j)].Add(hist_dict["H_MM_RAND_{}".format(j)],-1)
+        hist_dict["H_MM_nosub_DATA_{}".format(j)].Add(hist_dict["H_MM_nosub_RAND_{}".format(j)],-1)        
 
         ###
         # Dummy Random subtraction
@@ -1261,6 +1299,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_t_DUMMY_{}".format(j)].Add(hist_dict["H_t_DUMMY_RAND_{}".format(j)],-1)
         hist_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
         hist_dict["H_MM_DUMMY_{}".format(j)].Add(hist_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
+        hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Add(hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)],-1)        
         
 ################################################################################################################################################
 
@@ -1320,15 +1359,19 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     
             hist_dict["H_t_DATA_{}_{}".format(j, k)] = subDict["H_t_SUB_DATA_{}_{}".format(j, k)]
             hist_dict["H_MM_DATA_{}_{}".format(j, k)] = subDict["H_MM_SUB_DATA_{}_{}".format(j, k)]
+            hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)] = subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)]            
 
             hist_dict["H_t_DUMMY_{}_{}".format(j, k)] = subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)]
             hist_dict["H_MM_DUMMY_{}_{}".format(j, k)] = subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)]
+            hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)] = subDict["H_MM_nosub_SUB_DUMMY_{}_{}".format(j, k)]            
 
             hist_dict["H_t_RAND_{}_{}".format(j, k)] = subDict["H_t_SUB_RAND_{}_{}".format(j, k)]
             hist_dict["H_MM_RAND_{}_{}".format(j, k)] = subDict["H_MM_SUB_RAND_{}_{}".format(j, k)]
+            hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)] = subDict["H_MM_nosub_SUB_RAND_{}_{}".format(j, k)]            
 
             hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_t_SUB_DUMMY_RAND_{}_{}".format(j, k)]
             hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_MM_SUB_DUMMY_RAND_{}_{}".format(j, k)]
+            hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k)]            
     
     # Adjusted HMS delta to fix hsxfp correlation
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
@@ -1385,10 +1428,13 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):            
+                hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(evt.MM)
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):            
             for j in range(len(t_bins)-1):
@@ -1418,10 +1464,13 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):            
+                hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1451,10 +1500,13 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):
+                hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(evt.MM)
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1484,10 +1536,13 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            #ALLCUTS = apply_data_sub_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            #ALLCUTS = apply_data_cuts(evt) and hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if(NOMMCUTS):
+                hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1503,17 +1558,21 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             # Data Random subtraction window    
             hist_dict["H_t_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Scale(1/nWindows)            
 
             # Data Dummy_Random subtraction window
             hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)            
 
             ###
             # Data Random subtraction
             hist_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)],-1)            
 
             ###
             # Dummy Random subtraction
             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
-            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)            
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)],-1)                        
