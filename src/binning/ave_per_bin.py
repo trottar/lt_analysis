@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 19:37:04 trottar"
+# Time-stamp: "2024-04-09 20:44:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -472,7 +472,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             text.SetTextAlign(22); # Centered alignment
             text.SetTextColor(ROOT.kRed); # Set text color to red            
             # Add the centroid value to the plot
-            text.DrawLatex(0.2, 0.8, "Centroid: {:.2f}+/-{:.3f}".format(centroid[0], centroid[1]))
+            text.DrawLatex(0.3, 0.8, "Centroid: {:.2f}+/-{:.3f}".format(centroid[0], centroid[1]))
             if i==0 and j==0:
                 canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+'(')
             elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
