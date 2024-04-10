@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 17:56:32 trottar"
+# Time-stamp: "2024-04-10 10:56:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,7 +256,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
           H_W_SIMC.Fill(evt.W, evt.iter_weight)
           H_t_SIMC.Fill(-evt.t, evt.iter_weight)
           H_epsilon_SIMC.Fill(evt.epsilon, evt.iter_weight)
-          H_MM_SIMC.Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.iter_weight)
+          H_MM_SIMC.Fill(evt.missmass, evt.iter_weight)
           #H_MM_SIMC.Fill(evt.missmass, evt.iter_weight)
           H_MM_unweighted_SIMC.Fill(evt.missmass)
               
