@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 17:56:12 trottar"
+# Time-stamp: "2024-04-09 23:31:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1530,7 +1530,7 @@ def rand_sub(phi_setting, inpDict):
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
 
     # Fit background and subtract
-    if ParticleType == "kaon":        
+    if ParticleType == "kaon":
         background_fit = bg_fit(phi_setting, inpDict, H_MM_DATA)
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
