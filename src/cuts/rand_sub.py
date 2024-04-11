@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 15:36:57 trottar"
+# Time-stamp: "2024-04-11 18:44:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1425,7 +1425,7 @@ def rand_sub(phi_setting, inpDict):
         except ZeroDivisionError:
             scale_factor = 0.0
 
-        #Apply scale factor
+        # Apply scale factor
         subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
         subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
         subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
@@ -1477,7 +1477,8 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_pmy_SUB_DATA"].Scale(scale_factor)
         subDict["H_pmz_SUB_DATA"].Scale(scale_factor)
         histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
-        histDict["H_MM_nosub_SUB_DATA"] = subDict["H_MM_nosub_SUB_DATA"]        
+        histDict["H_MM_nosub_SUB_DATA"] = subDict["H_MM_nosub_SUB_DATA"]
+        
         # Subtract pion
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)

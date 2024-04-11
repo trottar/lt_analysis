@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 16:36:01 trottar"
+# Time-stamp: "2024-04-11 18:46:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -383,10 +383,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 except ZeroDivisionError:
                     scale_factor = 0.0
 
-                # subDict["Scale pion to subtraction proper peak 
+                # Apply scale factor
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                    
+  
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
 
@@ -417,7 +417,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 if is_hist(val):
                     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                     if "MM_DATA" in key:
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(4)
+                        #hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(4)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw("same, E1")
                         #val.SetLineColor(1)
                         #val.Draw("same, E1")
