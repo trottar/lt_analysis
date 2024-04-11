@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-10 10:59:26 trottar"
+# Time-stamp: "2024-04-11 14:13:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,17 +69,17 @@ bg_dict ={
     #"Q3p0W2p32Center_lowe" : 50/2734,    
     # Q2=3p0, W=3p14
     # t-range = 0.1-1.0 (MM cut)
-    "Q3p0W3p14Right_highe" : 950/8632, # Background value divided by number of events, check number of events of MM
-    "Q3p0W3p14Left_highe" : 700/5656,
-    "Q3p0W3p14Center_highe" : 2000/21704,
-    "Q3p0W3p14Left_lowe" : 850/10763,
-    "Q3p0W3p14Center_lowe" : 1500/12573,
+    #"Q3p0W3p14Right_highe" : 950/8632, # Background value divided by number of events, check number of events of MM
+    #"Q3p0W3p14Left_highe" : 700/5656,
+    #"Q3p0W3p14Center_highe" : 2000/21704,
+    #"Q3p0W3p14Left_lowe" : 850/10763,
+    #"Q3p0W3p14Center_lowe" : 1500/12573,
     # t-range = 0.1-0.3 (MM cut)
-    #"Q3p0W3p14Right_highe" : 250/4572,
-    #"Q3p0W3p14Left_highe" : 100/879,
-    #"Q3p0W3p14Center_highe" : 850/19952,
-    #"Q3p0W3p14Left_lowe" : 100/827,
-    #"Q3p0W3p14Center_lowe" : 850/9258,     
+    "Q3p0W3p14Right_highe" : 250/4572,
+    "Q3p0W3p14Left_highe" : 100/879,
+    "Q3p0W3p14Center_highe" : 850/19952,
+    "Q3p0W3p14Left_lowe" : 100/827,
+    "Q3p0W3p14Center_lowe" : 850/9258,     
 }
 
 ##############
