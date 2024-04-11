@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 13:37:41 trottar"
+# Time-stamp: "2024-04-11 13:50:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -434,6 +434,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         text.SetTextColor(ROOT.kBlack)
                         # Add the centroid value to the plot
                         text.DrawLatex(0.7, 0.65, "Num Evts: {:.0f}".format(val.Integral()))
+                        sys.exit(2)
                     else:
                         val.Draw()
                         val.SetTitle(val.GetName())
