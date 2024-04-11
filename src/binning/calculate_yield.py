@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 18:51:24 trottar"
+# Time-stamp: "2024-04-11 19:30:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -419,8 +419,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         canvas2 = ROOT.TCanvas("canvas2", "Canvas2", 800, 600)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw("same, E1")
-                        subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
-                        subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
+                        #subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
+                        #subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
                         background_data_fit[0].SetLineColor(3)
                         background_data_fit[0].Draw("same")
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
@@ -431,7 +431,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         text.SetTextAlign(22); # Centered alignment
                         text.SetTextColor(ROOT.kBlack)
                         # Add the centroid value to the plot
-                        text.DrawLatex(0.7, 0.65, "Num {} Evts: {:.0f}".format(ParticleType, val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
+                        text.DrawLatex(0.7, 0.65, "{} Events: {:.0f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
                         if i==0 and j==0 and k==0:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
                         elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
