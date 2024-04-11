@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 12:59:47 trottar"
+# Time-stamp: "2024-04-11 13:08:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -416,7 +416,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
                 if is_hist(val):
                     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-                    val.Draw()
+                    hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(4)
+                    hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw("same, E1")
+                    val.SetLineColor(1)
+                    val.Draw("same, E1")
+                    subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
+                    subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
+                    background_fit[0].SetLineColor(3)
+                    background_data_fit[0].Draw("same")
                     val.SetTitle(val.GetName())
                     if "MM_DATA" in val.GetName():
                         # Create a TLatex object to add text to the plot
@@ -424,7 +431,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         text.SetNDC();
                         text.SetTextSize(0.04);
                         text.SetTextAlign(22); # Centered alignment
-                        text.SetTextColor(ROOT.kRed); # Set text color to red
+                        text.SetTextColor(ROOT.kBlack)
                         # Add the centroid value to the plot
                         text.DrawLatex(0.7, 0.65, "Num Evts: {:.0f}".format(val.Integral()))
                     if i==0 and j==0 and k==0:
