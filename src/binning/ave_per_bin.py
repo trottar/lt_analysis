@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 21:40:35 trottar"
+# Time-stamp: "2024-04-11 12:57:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_negative_bins, fit_gaussian
+from utility import remove_negative_bins, get_centroid
 
 ##################################################################################################################################################
 
@@ -462,7 +462,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         ROOT.gStyle.SetOptStat(1)
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-            centroid = fit_gaussian(val, val.GetXaxis().GetXmin(), val.GetXaxis().GetXmax()) # [centroid, centroid_error]
+            centroid = get_centroid(val, val.GetXaxis().GetXmin(), val.GetXaxis().GetXmax()) # [centroid, centroid_error]
             val.Draw()
             val.SetTitle("{} {}".format(phi_setting, val.GetName()))
             # Create a TLatex object to add text to the plot

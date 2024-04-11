@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-10 10:57:21 trottar"
+# Time-stamp: "2024-04-11 12:59:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -418,6 +418,15 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                     val.Draw()
                     val.SetTitle(val.GetName())
+                    if "MM_DATA" in val.GetName():
+                        # Create a TLatex object to add text to the plot
+                        text = ROOT.TLatex()
+                        text.SetNDC();
+                        text.SetTextSize(0.04);
+                        text.SetTextAlign(22); # Centered alignment
+                        text.SetTextColor(ROOT.kRed); # Set text color to red
+                        # Add the centroid value to the plot
+                        text.DrawLatex(0.7, 0.65, "Num Evts: {:.0f}".format(val.Integral()))
                     if i==0 and j==0 and k==0:
                         canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
                     elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:

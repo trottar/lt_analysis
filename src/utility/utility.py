@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 18:01:34 trottar"
+# Time-stamp: "2024-04-11 12:57:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -486,7 +486,7 @@ def remove_negative_bins(histogram):
 ################################################################################################################################################        
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
-def fit_gaussian(hist, x_min, x_max):
+def get_centroid(hist, x_min, x_max):
     
     # Find the corresponding bin numbers
     bin_min = hist.GetXaxis().FindBin(x_min)
