@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 14:43:10 trottar"
+# Time-stamp: "2024-04-11 15:24:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -418,11 +418,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                     if "MM_DATA" in key:
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(4)
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw("same, E1")
+                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw("same")
                         val.SetLineColor(1)
-                        val.Draw("same, E1")
+                        val.Draw("same")
                         subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
-                        subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
+                        subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Draw("same")
                         background_data_fit[0].SetLineColor(3)
                         background_data_fit[0].Draw("same")
                         val.SetTitle(val.GetName())
