@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 18:46:19 trottar"
+# Time-stamp: "2024-04-11 18:51:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -414,18 +414,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
-                if is_hist(val):
-                    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+                if is_hist(val):                    
                     if "MM_DATA" in key:
-                        #hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(4)
+                        canvas2 = ROOT.TCanvas("canvas2", "Canvas2", 800, 600)
+                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw("same, E1")
-                        #val.SetLineColor(1)
-                        #val.Draw("same, E1")
                         subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
                         subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
                         background_data_fit[0].SetLineColor(3)
                         background_data_fit[0].Draw("same")
-                        val.SetTitle(val.GetName())
+                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
                         # Create a TLatex object to add text to the plot
                         text = ROOT.TLatex()
                         text.SetNDC();
@@ -433,10 +431,17 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         text.SetTextAlign(22); # Centered alignment
                         text.SetTextColor(ROOT.kBlack)
                         # Add the centroid value to the plot
-                        text.DrawLatex(0.7, 0.65, "Num Evts: {:.0f}".format(val.Integral()))
-                    else:
-                        val.Draw()
-                        val.SetTitle(val.GetName())
+                        text.DrawLatex(0.7, 0.65, "Num {} Evts: {:.0f}".format(ParticleType, val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
+                        if i==0 and j==0 and k==0:
+                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
+                        elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
+                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+')')
+                        else:
+                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType)))
+                        del canvas2                        
+                    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+                    val.Draw()
+                    val.SetTitle(val.GetName())
                     if i==0 and j==0 and k==0:
                         canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
                     elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
