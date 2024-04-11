@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 14:13:42 trottar"
+# Time-stamp: "2024-04-11 15:37:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,11 +75,17 @@ bg_dict ={
     #"Q3p0W3p14Left_lowe" : 850/10763,
     #"Q3p0W3p14Center_lowe" : 1500/12573,
     # t-range = 0.1-0.3 (MM cut)
-    "Q3p0W3p14Right_highe" : 250/4572,
-    "Q3p0W3p14Left_highe" : 100/879,
-    "Q3p0W3p14Center_highe" : 850/19952,
-    "Q3p0W3p14Left_lowe" : 100/827,
-    "Q3p0W3p14Center_lowe" : 850/9258,     
+    #"Q3p0W3p14Right_highe" : 250/4572,
+    #"Q3p0W3p14Left_highe" : 100/879,
+    #"Q3p0W3p14Center_highe" : 850/19952,
+    #"Q3p0W3p14Left_lowe" : 100/827,
+    #"Q3p0W3p14Center_lowe" : 850/9258,
+    # t-range = 0.1-0.3 (MM cut)
+    "Q3p0W3p14Right_highe" : 250,
+    "Q3p0W3p14Left_highe" : 100,
+    "Q3p0W3p14Center_highe" : 850,
+    "Q3p0W3p14Left_lowe" : 100,
+    "Q3p0W3p14Center_lowe" : 850,
 }
 
 ##############
@@ -99,7 +105,9 @@ def bg_fit(phi_setting, inpDict, hist):
 
     num_evts = hist.GetEntries()
 
-    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*num_evts
+    norm_tot_evts = num_evts/inpDict["bg_tot_num_evts_{}".format(phi_setting)]
+
+    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
