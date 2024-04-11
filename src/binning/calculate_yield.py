@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 14:06:37 trottar"
+# Time-stamp: "2024-04-11 14:43:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -423,7 +423,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         val.Draw("same, E1")
                         subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
                         subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
-                        background_fit[0].SetLineColor(3)
+                        background_data_fit[0].SetLineColor(3)
                         background_data_fit[0].Draw("same")
                         val.SetTitle(val.GetName())
                         # Create a TLatex object to add text to the plot
