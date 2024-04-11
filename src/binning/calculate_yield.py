@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 13:50:22 trottar"
+# Time-stamp: "2024-04-11 13:59:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -416,6 +416,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
                 if is_hist(val):
                     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+                    print(key)
                     if "MM_DATA" in key:
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(4)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw("same, E1")
