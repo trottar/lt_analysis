@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 21:40:52 trottar"
+# Time-stamp: "2024-04-11 22:06:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -368,6 +368,15 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     ##############
                     # HARD CODED #
                     ##############
+                    print("!!!!!!!!!!!!",hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)]\
+                                   .Integral(\
+                                             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].FindBin(0.89),\
+                                             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].FindBin(0.94))\
+                                    ,subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)]\
+                                    .Integral(\
+                                              subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].FindBin(0.89),\
+                                              subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].FindBin(0.94))
+)
                     scale_factor = \
                                    hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)]\
                                    .Integral(\
