@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 15:37:40 trottar"
+# Time-stamp: "2024-04-12 11:33:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,12 +80,18 @@ bg_dict ={
     #"Q3p0W3p14Center_highe" : 850/19952,
     #"Q3p0W3p14Left_lowe" : 100/827,
     #"Q3p0W3p14Center_lowe" : 850/9258,
+    # t-range = 0.1-1.0 (MM cut)
+    "Q3p0W3p14Right_highe" : 950, # Background value divided by number of events, check number of events of MM
+    "Q3p0W3p14Left_highe" : 700,
+    "Q3p0W3p14Center_highe" : 2000,
+    "Q3p0W3p14Left_lowe" : 850,
+    "Q3p0W3p14Center_lowe" : 1500,
     # t-range = 0.1-0.3 (MM cut)
-    "Q3p0W3p14Right_highe" : 250,
-    "Q3p0W3p14Left_highe" : 100,
-    "Q3p0W3p14Center_highe" : 850,
-    "Q3p0W3p14Left_lowe" : 100,
-    "Q3p0W3p14Center_lowe" : 850,
+    #"Q3p0W3p14Right_highe" : 250,
+    #"Q3p0W3p14Left_highe" : 100,
+    #"Q3p0W3p14Center_highe" : 850,
+    #"Q3p0W3p14Left_lowe" : 100,
+    #"Q3p0W3p14Center_lowe" : 850,
 }
 
 ##############
