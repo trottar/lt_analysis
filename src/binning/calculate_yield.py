@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 20:26:48 trottar"
+# Time-stamp: "2024-04-11 20:42:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -386,19 +386,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 # Apply scale factor
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
   
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
 
             # Fit background and subtract
             if ParticleType == "kaon":
-                background_data_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_data_fit[0], -1)
-                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_data_fit[0], -1)
-
-                #background_dummy_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)])                
-                #hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(background_dummy_fit[0], -1)
-                #hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(background_dummy_fit[0], -1)
+                background_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
+                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
+                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {
                 "H_MM_DATA" : remove_negative_bins(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]),
@@ -421,8 +418,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
                         #subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
                         #subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
-                        #background_data_fit[0].SetLineColor(3)
-                        #background_data_fit[0].Draw("same")
+                        #background_fit[0].SetLineColor(3)
+                        #background_fit[0].Draw("same")
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
                         # Create a TLatex object to add text to the plot
                         text = ROOT.TLatex()

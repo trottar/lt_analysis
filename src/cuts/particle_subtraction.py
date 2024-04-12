@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-09 16:07:24 trottar"
+# Time-stamp: "2024-04-11 20:32:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -390,7 +390,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = apply_data_sub_cuts(evt)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
                 H_MM_nosub_DATA.Fill(evt.MM)            
@@ -492,7 +492,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = apply_data_sub_cuts(evt)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
                 H_MM_nosub_DUMMY.Fill(evt.MM)
@@ -594,7 +594,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = apply_data_sub_cuts(evt)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
                 H_MM_nosub_RAND.Fill(evt.MM)
@@ -696,7 +696,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            NOHOLECUTS = apply_data_sub_cuts(evt)
+            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
                 H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
