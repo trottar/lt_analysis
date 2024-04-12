@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 20:32:38 trottar"
+# Time-stamp: "2024-04-11 21:13:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1141,8 +1141,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            if(NOMMCUTS):            
-                hist_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        hist_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
@@ -1177,8 +1179,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            if(NOMMCUTS):            
-                hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
@@ -1213,8 +1217,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            if(NOMMCUTS):            
-                hist_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        hist_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
@@ -1249,8 +1255,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            if(NOMMCUTS):            
-                hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)                                
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                        hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)                                
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
@@ -1431,8 +1439,12 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            if(NOMMCUTS):            
-                hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(evt.MM)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    for k in range(len(phi_bins)-1):
+                        if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                            if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
+                                hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
@@ -1440,7 +1452,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:                    
+                        if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                             hist_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(evt.MM)
 
@@ -1466,8 +1478,12 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            if(NOMMCUTS):            
-                hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    for k in range(len(phi_bins)-1):
+                        if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                            if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:                
+                                hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
@@ -1502,7 +1518,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
-                hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                for j in range(len(t_bins)-1):
+                    for k in range(len(phi_bins)-1):
+                        if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                            if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:                
+                                hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
@@ -1537,7 +1557,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             if(NOMMCUTS):
-                hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                for j in range(len(t_bins)-1):
+                    for k in range(len(phi_bins)-1):
+                        if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                            if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:                
+                                hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             
