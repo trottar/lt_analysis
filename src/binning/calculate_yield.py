@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-11 20:42:22 trottar"
+# Time-stamp: "2024-04-11 21:40:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -414,12 +414,12 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 if is_hist(val):                    
                     if "MM_DATA" in key:
                         canvas2 = ROOT.TCanvas("canvas2", "Canvas2", 800, 600)
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
-                        #subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
-                        #subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
-                        #background_fit[0].SetLineColor(3)
-                        #background_fit[0].Draw("same")
+                        #hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
+                        #hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
+                        subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
+                        subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
+                        background_fit[0].SetLineColor(3)
+                        background_fit[0].Draw("same")
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
                         # Create a TLatex object to add text to the plot
                         text = ROOT.TLatex()
