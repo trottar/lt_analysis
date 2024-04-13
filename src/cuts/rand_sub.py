@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-12 23:42:15 trottar"
+# Time-stamp: "2024-04-13 13:19:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -816,9 +816,9 @@ def rand_sub(phi_setting, inpDict):
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and P_hgcer_npeSum == 0.0
             if(NOMMCUTS):
                 H_MM_nosub_DATA.Fill(evt.MM)
             if(NOHOLECUTS):
@@ -919,9 +919,9 @@ def rand_sub(phi_setting, inpDict):
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and P_hgcer_npeSum == 0.0
             if(NOMMCUTS):
                 H_MM_nosub_DUMMY.Fill(evt.MM)
             if(NOHOLECUTS):
@@ -1015,9 +1015,9 @@ def rand_sub(phi_setting, inpDict):
         ##############
 
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and P_hgcer_npeSum == 0.0
             if(NOMMCUTS):
                 H_MM_nosub_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
@@ -1108,9 +1108,9 @@ def rand_sub(phi_setting, inpDict):
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and P_hgcer_npeSum == 0.0
             if(NOMMCUTS):
                 H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
