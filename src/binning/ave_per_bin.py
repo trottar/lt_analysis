@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-13 13:27:47 trottar"
+# Time-stamp: "2024-04-14 12:25:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -428,13 +428,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # Fit background and subtract
         if ParticleType == "kaon":
             background_data_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}".format(j)])
-            '''
             hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(background_data_fit[0], -1)
             hist_bin_dict["H_W_DATA_{}".format(j)].Add(background_data_fit[0], -1)
             hist_bin_dict["H_t_DATA_{}".format(j)].Add(background_data_fit[0], -1)
             hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(background_data_fit[0], -1)
             hist_bin_dict["H_MM_DATA_{}".format(j)].Add(background_data_fit[0], -1)
-            '''
             
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : remove_negative_bins(hist_bin_dict["H_Q2_DATA_{}".format(j)]),

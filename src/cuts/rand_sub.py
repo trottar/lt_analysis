@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-13 13:27:57 trottar"
+# Time-stamp: "2024-04-14 12:25:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1534,7 +1534,6 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":
         inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_nosub_DATA.GetEntries()
         background_fit = bg_fit(phi_setting, inpDict, H_MM_nosub_DATA)
-        '''
         P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
         P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
@@ -1584,7 +1583,6 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(background_fit[0], -1)
         H_pmz_DATA.Add(background_fit[0], -1)
         H_ct_DATA.Add(background_fit[0], -1)
-        '''
         
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
