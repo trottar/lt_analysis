@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-15 14:33:34 trottar"
+# Time-stamp: "2024-04-15 14:53:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,8 +93,8 @@ bg_dict ={
     #"Q3p0W3p14Left_lowe" : 100,
     #"Q3p0W3p14Center_lowe" : 500,
     # t-range = 0.1-0.3 (MM cut, Center only) bg fit test
-    "Q3p0W3p14Center_highe" : 700,
-    "Q3p0W3p14Center_lowe" : 500,
+    "Q3p0W3p14Center_highe" : 1200,
+    "Q3p0W3p14Center_lowe" : 1200,
     
 }
 
