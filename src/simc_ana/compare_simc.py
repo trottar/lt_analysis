@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-10 10:55:53 trottar"
+# Time-stamp: "2024-04-14 23:54:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -177,8 +177,8 @@ def compare_simc(hist, inpDict):
     H_th_q_SIMC  = TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 100, -0.2, 0.2)
     H_ph_recoil_SIMC  = TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
     H_th_recoil_SIMC  = TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 100, -10.0, 10.0)
-    H_pmiss_SIMC  = TH1D("H_pmiss_SIMC","pmiss", 100, 0.0, 1.0)
-    H_emiss_SIMC  = TH1D("H_emiss_SIMC","emiss", 100, 0.0, 2.0)
+    H_pmiss_SIMC  = TH1D("H_pmiss_SIMC","pmiss", 100, 0.3, 0.8)
+    H_emiss_SIMC  = TH1D("H_emiss_SIMC","emiss", 100, 1.0, 1.5)
     H_pmx_SIMC  = TH1D("H_pmx_SIMC","pmx", 100, -10.0, 10.0)
     H_pmy_SIMC  = TH1D("H_pmy_SIMC","pmy ", 100, -10.0, 10.0)
     H_pmz_SIMC  = TH1D("H_pmz_SIMC","pmz", 100, -10.0, 10.0)
