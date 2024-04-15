@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-15 00:26:41 trottar"
+# Time-stamp: "2024-04-15 15:05:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1534,26 +1534,26 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":
         inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_nosub_DATA.GetEntries()
         background_fit = bg_fit(phi_setting, inpDict, H_MM_nosub_DATA)
-        P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
-        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
-        P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-        P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-        MM_vs_CoinTime_DATA.Add(background_fit[0], -1)
-        CoinTime_vs_beta_DATA.Add(background_fit[0], -1)
-        MM_vs_beta_DATA.Add(background_fit[0], -1)
-        MM_vs_H_cer_DATA.Add(background_fit[0], -1)
-        MM_vs_H_cal_DATA.Add(background_fit[0], -1)
-        MM_vs_P_cal_DATA.Add(background_fit[0], -1)
-        MM_vs_P_hgcer_DATA.Add(background_fit[0], -1)
-        MM_vs_P_aero_DATA.Add(background_fit[0], -1)
-        phiq_vs_t_DATA.Add(background_fit[0], -1)
-        Q2_vs_W_DATA.Add(background_fit[0], -1)
-        Q2_vs_t_DATA.Add(background_fit[0], -1)
-        W_vs_t_DATA.Add(background_fit[0], -1)
-        EPS_vs_t_DATA.Add(background_fit[0], -1)
-        MM_vs_t_DATA.Add(background_fit[0], -1)
+        #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
+        #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
+        #P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+        #P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+        #P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+        #P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+        #MM_vs_CoinTime_DATA.Add(background_fit[0], -1)
+        #CoinTime_vs_beta_DATA.Add(background_fit[0], -1)
+        #MM_vs_beta_DATA.Add(background_fit[0], -1)
+        #MM_vs_H_cer_DATA.Add(background_fit[0], -1)
+        #MM_vs_H_cal_DATA.Add(background_fit[0], -1)
+        #MM_vs_P_cal_DATA.Add(background_fit[0], -1)
+        #MM_vs_P_hgcer_DATA.Add(background_fit[0], -1)
+        #MM_vs_P_aero_DATA.Add(background_fit[0], -1)
+        #phiq_vs_t_DATA.Add(background_fit[0], -1)
+        #Q2_vs_W_DATA.Add(background_fit[0], -1)
+        #Q2_vs_t_DATA.Add(background_fit[0], -1)
+        #W_vs_t_DATA.Add(background_fit[0], -1)
+        #EPS_vs_t_DATA.Add(background_fit[0], -1)
+        #MM_vs_t_DATA.Add(background_fit[0], -1)
         H_ssxfp_DATA.Add(background_fit[0], -1)
         H_ssyfp_DATA.Add(background_fit[0], -1)
         H_ssxpfp_DATA.Add(background_fit[0], -1)
