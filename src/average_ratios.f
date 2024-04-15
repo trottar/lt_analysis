@@ -146,7 +146,7 @@ c            pause
                do ip=1,nphi
                   read(66,*) yld,er
 *                  print*,yld,er
-                  ymc(ip,it)=ymc(ip,it)+yld            
+                  ymc(ip,it)=ymc(ip,it)+yld
                   dmc(ip,it)=dmc(ip,it)+er**2
                end do
             end do
@@ -190,7 +190,7 @@ c      pause
             r=0.
             e=0.
             if(ymc(ip,it).ne.0.) then
-               r=(yrd(ip,it))/ymc(ip,it)               
+               r=(yrd(ip,it))/ymc(ip,it)
 *               r=1.0
 *     Calculate ratio error in quadrature (absolute error)
                e=e+(drd(ip,it))/ymc(ip,it)**2

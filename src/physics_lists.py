@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-22 13:08:10 trottar"
+# Time-stamp: "2024-04-15 01:39:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -178,7 +178,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 avet_err_center_data.append(data_nested_dict['t'][data_key_tuple]["t_ave_err"])                
                 
         key_tuples = list(yieldDict["binned_DATA"][phiset]['yield'])
-        for key_tuple in yieldDict["binned_DATA"][phiset]['yield']:
+        for key_tuple in key_tuples:
             # Access the nested dictionary using the tuple key
             nested_dict = yieldDict["binned_DATA"][phiset]
             i = key_tuple[0] # t bin
@@ -212,7 +212,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
                 yield_data_err_center.append(nested_dict['yield'][key_tuple]["yield_err"])
 
         key_tuples = list(yieldDict["binned_SIMC"][phiset]['yield'])
-        for key_tuple in yieldDict["binned_SIMC"][phiset]['yield']:
+        for key_tuple in key_tuples:
             # Access the nested dictionary using the tuple key
             nested_dict = yieldDict["binned_SIMC"][phiset]
             i = key_tuple[0] # t bin
