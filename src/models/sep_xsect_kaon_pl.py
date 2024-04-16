@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 15:10:00 trottar"
+# Time-stamp: "2024-04-16 15:18:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ def import_model(inp_model, arg_str):
             #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
             try:
                 f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
-            except OverflowError:
+            except OverflowError or ValueError:
                 f = 0.0
                 print("WARNING: Overflowerror on sigL, setting to zero for this event...")
             return f
@@ -56,7 +56,7 @@ def import_model(inp_model, arg_str):
             #f = par[0]*math.log(qq)+par[1]/(qq**2)
             try:
                 f = par[0] / (1 + par[1]*qq)
-            except OverflowError:
+            except OverflowError or ValueError:
                 f = 0.0
                 print("WARNING: Overflowerror on sigT, setting to zero for this event...")
             return f
@@ -68,7 +68,7 @@ def import_model(inp_model, arg_str):
             print("Calculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             try:
                 f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
-            except OverflowError:
+            except OverflowError or ValueError:
                 f = 0.0
                 print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
             return f
@@ -81,7 +81,7 @@ def import_model(inp_model, arg_str):
             try:            
                 f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
-            except OverflowError:
+            except OverflowError or ValueError:
                 f = 0.0
                 print("WARNING: Overflowerror on sigTT, setting to zero for this event...")                
             return f
