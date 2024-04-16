@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-19 23:41:12 trottar"
+# Time-stamp: "2024-04-16 15:10:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -34,7 +34,11 @@ def import_model(inp_model, arg_str):
             # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
             # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
             #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
-            f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
+            try:
+                f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
+            except OverflowError:
+                f = 0.0
+                print("WARNING: Overflowerror on sigL, setting to zero for this event...")
             return f
 
     # Function for SigT
@@ -50,7 +54,11 @@ def import_model(inp_model, arg_str):
             #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
             #f = par[0]+par[1]*math.log(qq)
             #f = par[0]*math.log(qq)+par[1]/(qq**2)
-            f = par[0] / (1 + par[1]*qq)
+            try:
+                f = par[0] / (1 + par[1]*qq)
+            except OverflowError:
+                f = 0.0
+                print("WARNING: Overflowerror on sigT, setting to zero for this event...")
             return f
 
     # Function for SigLT
@@ -58,7 +66,11 @@ def import_model(inp_model, arg_str):
     def sig_LT(*par):
         if inp_model == "sigLT":
             print("Calculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
-            f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
+            try:
+                f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
+            except OverflowError:
+                f = 0.0
+                print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
             return f
 
     # Function for SigTT
@@ -66,8 +78,12 @@ def import_model(inp_model, arg_str):
     def sig_TT(*par):
         if inp_model == "sigTT":
             print("Calculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
-            f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-            f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
+            try:            
+                f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
+                f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
+            except OverflowError:
+                f = 0.0
+                print("WARNING: Overflowerror on sigTT, setting to zero for this event...")                
             return f
 
     modelDict = {
