@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:11:53 trottar"
+# Time-stamp: "2024-04-17 17:15:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -338,9 +338,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
 
     ##Testing
-    import math
     import numpy as np
-    from scipy.optimize import curve_fit
+    from scipy.optimize import least_squares
+    import math
     # Initial parameter guesses (you may adjust these based on your data)
     initial_params = [l0, l1, l2, l3]
     t_vec = []
@@ -352,18 +352,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         y_data_err.append(sigl_X_fit_err)
     # Combine tt and qq data as required by curve_fit
     x_data_combined = np.vstack((t_vec, q2_vec))
-    print("£££££££££££",fun_Sig_L_tmp,x_data_combined,y_data)
-    # Fit the function to the data and account for uncertainties
-    optimized_params, covariance = curve_fit(
-        fun_Sig_L_tmp,
-        x_data_combined.T,
-        y_data,
-        p0=initial_params
-    )
 
+    # Function for residuals
+    def residuals(par, x_data, y_data, y_errors):
+        residuals = []
+        for i in range(len(x_data)):
+            x = x_data[i]
+            y = y_data[i]
+            y_err = y_errors[i]
+            predicted_y = fun_Sig_L_tmp(x, par)
+            residual = (predicted_y - y) / y_err
+            residuals.append(residual)
+        return np.array(residuals)
+
+    # Perform optimization
+    result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
+    
     print("\n\n\nsigL")
-    print("Optimized parameters:", optimized_params)
-    print("Covariance of parameters:", covariance)
+    print("Optimized parameters:", result)
     print("\n\n\n")
         
     # Check the fit status for 'f_sigL'
