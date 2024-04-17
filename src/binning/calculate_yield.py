@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 22:30:33 trottar"
+# Time-stamp: "2024-04-17 01:58:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -735,18 +735,23 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                 "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Integral(),
             }
 
+            # Checks for first plots and calls +'(' to Print
+            canvas_iter=0
+            
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
                 if is_hist(val):
                     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                     val.Draw()
                     val.SetTitle(val.GetName())
-                    if i==0 and j==0 and k==0:
+                    #if i==0 and j==0 and k==0:
+                    if canvas_iter == 0:                    
                         canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
                     elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                         canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+')')
                     else:
                         canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
                     del canvas
+                    canvas_iter+=1                    
                 
     return processed_dict
 
