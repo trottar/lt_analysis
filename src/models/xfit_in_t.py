@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:26:46 trottar"
+# Time-stamp: "2024-04-17 16:28:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,6 +350,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     x_data_combined = np.vstack((t_vec, q2_vec))
     y_data  = sigl_X_fit
     y_data_err  = sigl_X_fit_err
+    # Verify that y_data and y_data_err have the same shape
+    assert y_data.shape == y_data_err.shape, "y_data and y_data_err must have the same shape"    
     # Fit the function to the data and account for uncertainties
     optimized_params, covariance = curve_fit(
         fun_Sig_L, x_data_combined, y_data, p0=initial_params, sigma=y_data_err, absolute_sigma=True
