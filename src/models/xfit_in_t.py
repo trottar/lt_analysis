@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 01:13:28 trottar"
+# Time-stamp: "2024-04-17 01:28:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -239,8 +239,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
         g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
-        sigl_X_fit = g_sigl.GetY()[i] / (g_vec[i])
-        sigl_X_fit_err = g_sigl.GetEY()[i] / (g_vec[i])
+        sigl_X_fit = g_sigl.GetY()[i] / (1.0)
+        sigl_X_fit_err = g_sigl.GetEY()[i] / (1.0)
 
         g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
@@ -350,10 +350,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    par_vec.append(f_sigL.GetParameter(0)*g_vec[i])
-    par_vec.append(f_sigL.GetParameter(1)*g_vec[i])
-    par_vec.append(f_sigL.GetParameter(2)*g_vec[i])
-    par_vec.append(f_sigL.GetParameter(3)*g_vec[i])
+    par_vec.append(f_sigL.GetParameter(0))
+    par_vec.append(f_sigL.GetParameter(1))
+    par_vec.append(f_sigL.GetParameter(2))
+    par_vec.append(f_sigL.GetParameter(3))
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
@@ -421,8 +421,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i], q2_vec[i])) * (g_vec[i])
         g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
 
-        sigt_X_fit = (g_sigt.GetY()[i]) / (g_vec[i])
-        sigt_X_fit_err = g_sigt.GetEY()[i] / (g_vec[i])
+        sigt_X_fit = (g_sigt.GetY()[i]) / (1.0)
+        sigt_X_fit_err = g_sigt.GetEY()[i] / (1.0)
 
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
@@ -518,10 +518,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit_tot.SetLineColor(2)
     g_sigt_fit_tot.Draw("LP")
     
-    par_vec.append(f_sigT.GetParameter(0)*g_vec[i])
-    par_vec.append(f_sigT.GetParameter(1)*g_vec[i])
-    par_vec.append(f_sigT.GetParameter(2)*g_vec[i])
-    par_vec.append(f_sigT.GetParameter(3)*g_vec[i])
+    par_vec.append(f_sigT.GetParameter(0))
+    par_vec.append(f_sigT.GetParameter(1))
+    par_vec.append(f_sigT.GetParameter(2))
+    par_vec.append(f_sigT.GetParameter(3))
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
@@ -706,10 +706,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit_tot.SetLineColor(2)
     g_siglt_fit_tot.Draw("LP")
         
-    par_vec.append(f_sigLT.GetParameter(0)*g_vec[i])
-    par_vec.append(f_sigLT.GetParameter(1)*g_vec[i])
-    par_vec.append(f_sigLT.GetParameter(2)*g_vec[i])
-    par_vec.append(f_sigLT.GetParameter(3)*g_vec[i])
+    par_vec.append(f_sigLT.GetParameter(0))
+    par_vec.append(f_sigLT.GetParameter(1))
+    par_vec.append(f_sigLT.GetParameter(2))
+    par_vec.append(f_sigLT.GetParameter(3))
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
@@ -871,10 +871,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit_tot.SetLineColor(2)
     g_sigtt_fit_tot.Draw("LP")
     
-    par_vec.append(f_sigTT.GetParameter(0)*g_vec[i])
-    par_vec.append(f_sigTT.GetParameter(1)*g_vec[i])
-    par_vec.append(f_sigTT.GetParameter(2)*g_vec[i])
-    par_vec.append(f_sigTT.GetParameter(3)*g_vec[i])
+    par_vec.append(f_sigTT.GetParameter(0))
+    par_vec.append(f_sigTT.GetParameter(1))
+    par_vec.append(f_sigTT.GetParameter(2))
+    par_vec.append(f_sigTT.GetParameter(3))
 
     par_err_vec.append(f_sigTT.GetParError(0))
     par_err_vec.append(f_sigTT.GetParError(1))
