@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:47:01 trottar"
+# Time-stamp: "2024-04-17 16:51:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,6 +11,7 @@
 # Copyright (c) trottar
 #
 import math
+import numpy as np
 
 ###############################################################################################################################################
 
@@ -48,8 +49,8 @@ def fun_Sig_L(x, par):
 
 # Function for SigL
 def fun_Sig_L_tmp(x, p0, p1, p2, p3):
-    tt = abs(x[0])
-    qq = abs(x[1])
+    tt = np.abs(x[0])
+    qq = np.abs(x[1])
     f = (p0+p1*math.log(qq)) * math.exp((p2+p3*math.log(qq)) * (abs(tt)+0.2))
     return f
 
