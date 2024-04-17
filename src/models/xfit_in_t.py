@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:43:15 trottar"
+# Time-stamp: "2024-04-17 17:44:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -389,7 +389,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.plot(x1_values, y_pred, label='Optimized function')
 
     # Add labels and legend
-    plt.xlabel('-t')
+    plt.xlabel('X1')
     plt.ylabel('sig')
     plt.legend()
 
