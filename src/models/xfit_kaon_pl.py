@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:58:37 trottar"
+# Time-stamp: "2024-04-17 16:59:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,14 +44,14 @@ def fun_Sig_L(x, par):
     # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
     # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
     #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
-    f = (par[0]+par[1]*np.log(qq)) * np.exp((par[2]+par[3]*np.log(qq)) * (abs(tt)+0.2))
+    f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
     return f
 
 # Function for SigL
 def fun_Sig_L_tmp(x, p0, p1, p2, p3):
     tt = np.abs(x[0])
     qq = np.abs(x[1])
-    f = (p0+p1*math.log(qq)) * math.exp((p2+p3*math.log(qq)) * (abs(tt)+0.2))
+    f = (p0+p1*np.log(qq)) * np.exp((p2+p3*np.log(qq)) * (abs(tt)+0.2))
     return f
 
 ###############################################################################################################################################
