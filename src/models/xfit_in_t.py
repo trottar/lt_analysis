@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:32:41 trottar"
+# Time-stamp: "2024-04-17 17:35:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -353,12 +353,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     x_data_combined = np.vstack((t_vec, q2_vec))
 
     # Function for residuals
-    def residuals(par, x_data, y_data, y_errors):
+    def residuals(par, x_data, y_data, y_data_err):
         residuals = []
         for i in range(len(x_data)):
             x = x_data[i]
             y = y_data[i]
-            y_err = y_errors[i]
+            y_err = y_data_err[i]
             predicted_y = fun_Sig_L(x, par)
             residual = (predicted_y - y) / y_err
             residuals.append(residual)
@@ -375,7 +375,27 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_vec.append(result.x[1])
     par_vec.append(result.x[2])
     par_vec.append(result.x[3])
-        
+
+    import matplotlib.pyplot as plt
+    # Plotting the data points and error bars    
+    x1_values = np.linspace(tmin_range, tmax_range, 100)  # Adjust the range as needed
+    x2_values = np.linspace(Q2min_range, Q2max_range, 100)  # Adjust the range as needed
+    y_pred = [fun_Sig_L((x1, x2), optimized_par) for x1, x2 in zip(x1_values, x2_values)]
+
+    # Plot the original data points with error bars
+    plt.errorbar([x1 for x1, x2 in x_data], y_data, yerr=y_data_err, fmt='o', label='Data')
+
+    # Plot the optimized function
+    plt.plot(x1_values, y_pred, label='Optimized function')
+
+    # Add labels and legend
+    plt.xlabel('X1')
+    plt.ylabel('Y')
+    plt.legend()
+
+    # Display the plot
+    plt.show()
+    
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
@@ -561,12 +581,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     x_data_combined = np.vstack((t_vec, q2_vec))
 
     # Function for residuals
-    def residuals(par, x_data, y_data, y_errors):
+    def residuals(par, x_data, y_data, y_data_err):
         residuals = []
         for i in range(len(x_data)):
             x = x_data[i]
             y = y_data[i]
-            y_err = y_errors[i]
+            y_err = y_data_err[i]
             predicted_y = fun_Sig_T(x, par)
             residual = (predicted_y - y) / y_err
             residuals.append(residual)
@@ -789,12 +809,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     x_data_combined = np.vstack((t_vec, q2_vec))
 
     # Function for residuals
-    def residuals(par, x_data, y_data, y_errors):
+    def residuals(par, x_data, y_data, y_data_err):
         residuals = []
         for i in range(len(x_data)):
             x = x_data[i]
             y = y_data[i]
-            y_err = y_errors[i]
+            y_err = y_data_err[i]
             predicted_y = fun_Sig_LT(x, par)
             residual = (predicted_y - y) / y_err
             residuals.append(residual)
@@ -994,12 +1014,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     x_data_combined = np.vstack((t_vec, q2_vec))
 
     # Function for residuals
-    def residuals(par, x_data, y_data, y_errors):
+    def residuals(par, x_data, y_data, y_data_err):
         residuals = []
         for i in range(len(x_data)):
             x = x_data[i]
             y = y_data[i]
-            y_err = y_errors[i]
+            y_err = y_data_err[i]
             predicted_y = fun_Sig_TT(x, par)
             residual = (predicted_y - y) / y_err
             residuals.append(residual)
