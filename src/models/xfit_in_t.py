@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:50:42 trottar"
+# Time-stamp: "2024-04-17 17:52:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -387,7 +387,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Calculate y values using the optimized function
     y_pred = [fun_Sig_L((x1, x2_constant), optimized_par) for x1 in x1_values]
 
+    print("££££££3",[x1 for x1, x2 in x_data_combined])
     # Plot the original data points with error bars
+    #plt.errorbar([x1 for x1, x2 in x_data_combined], y_data, yerr=y_data_err, fmt='o', label='Data')
     plt.errorbar([x1 for x1, x2 in x_data_combined], y_data, yerr=y_data_err, fmt='o', label='Data')
 
     # Plot the optimized function
