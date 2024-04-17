@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:53:58 trottar"
+# Time-stamp: "2024-04-17 18:08:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,8 +347,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     y_data_err = []
     for i in range(len(w_vec)):
         t_vec.append(g_sigl.GetX()[i])
-        y_data.append(sigl_X_fit)
-        y_data_err.append(sigl_X_fit_err)
+        y_data.append(g_sigl.GetY()[i])
+        y_data_err.append(g_sigl.GetEY()[i])
     # Combine tt and qq data as required by curve_fit
     x_data_combined = np.vstack((t_vec, q2_vec))
 
@@ -580,8 +580,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     y_data_err = []
     for i in range(len(w_vec)):
         t_vec.append(g_sigl.GetX()[i])
-        y_data.append(sigl_X_fit)
-        y_data_err.append(sigl_X_fit_err)
+        y_data.append(g_sigl.GetY()[i])
+        y_data_err.append(g_sigl.GetEY()[i])
     # Combine tt and qq data as required by curve_fit
     x_data_combined = np.vstack((t_vec, q2_vec))
 
@@ -808,8 +808,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     y_data_err = []
     for i in range(len(w_vec)):
         t_vec.append(g_sigl.GetX()[i])
-        y_data.append(sigl_X_fit)
-        y_data_err.append(sigl_X_fit_err)
+        y_data.append(g_sigl.GetY()[i])
+        y_data_err.append(g_sigl.GetEY()[i])
     # Combine tt and qq data as required by curve_fit
     x_data_combined = np.vstack((t_vec, q2_vec))
 
@@ -1013,8 +1013,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     y_data_err = []
     for i in range(len(w_vec)):
         t_vec.append(g_sigl.GetX()[i])
-        y_data.append(sigl_X_fit)
-        y_data_err.append(sigl_X_fit_err)
+        y_data.append(g_sigl.GetY()[i])
+        y_data_err.append(g_sigl.GetEY()[i])
     # Combine tt and qq data as required by curve_fit
     x_data_combined = np.vstack((t_vec, q2_vec))
 
