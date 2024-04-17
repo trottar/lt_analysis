@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:35:52 trottar"
+# Time-stamp: "2024-04-17 17:37:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -366,9 +366,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Perform optimization
     result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
-    
+    optimized_par = result.x    
     print("\n\n\nsigL")
-    print("Optimized parameters:", result.x)
+    print("Optimized parameters:", optimized_par)
     print("\n\n\n")
 
     par_vec.append(result.x[0])
@@ -594,9 +594,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Perform optimization
     result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
-    
+    optimized_par = result.x    
     print("\n\n\nsigT")
-    print("Optimized parameters:", result.x)
+    print("Optimized parameters:", optimized_par)
     print("\n\n\n")
 
     par_vec.append(result.x[0])
@@ -822,9 +822,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Perform optimization
     result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
-    
+    optimized_par = result.x    
     print("\n\n\nsigLT")
-    print("Optimized parameters:", result.x)
+    print("Optimized parameters:", optimized_par)
     print("\n\n\n")
 
     par_vec.append(result.x[0])
@@ -1027,9 +1027,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Perform optimization
     result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
-    
+    optimized_par = result.x    
     print("\n\n\nsigTT")
-    print("Optimized parameters:", result.x)
+    print("Optimized parameters:", optimized_par)
     print("\n\n\n")
 
     par_vec.append(result.x[0])
