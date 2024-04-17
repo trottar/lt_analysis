@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:28:09 trottar"
+# Time-stamp: "2024-04-17 16:29:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -344,12 +344,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Initial parameter guesses (you may adjust these based on your data)
     initial_params = [l0, l1, l2, l3]
     t_vec = []
+    y_data = []
+    y_data_err = []
     for i in range(len(w_vec)):
         t_vec.append(g_sigl.GetX()[i])
+        y_data.append(sigl_X_fit)
+        y_data_err.append(sigl_X_fit_err)
     # Combine tt and qq data as required by curve_fit
-    x_data_combined = np.vstack((t_vec, q2_vec))
-    y_data  = sigl_X_fit
-    y_data_err  = sigl_X_fit_err
+    x_data_combined = np.vstack((t_vec, q2_vec))    
     # Verify that y_data and y_data_err have the same shape
     assert y_data.shape == y_data_err.shape, "y_data and y_data_err must have the same shape"    
     # Fit the function to the data and account for uncertainties
