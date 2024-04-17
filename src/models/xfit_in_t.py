@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 13:51:08 trottar"
+# Time-stamp: "2024-04-17 16:22:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -270,6 +270,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     f_sigL.SetParNames("p1","p2","p3","p4")
     f_sigL.SetParameters(l0, l1, l2, l3)
 
+    
     ##############
     # HARD CODED #
     ##############
@@ -335,6 +336,25 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         g_sigl_fit.Fit(f_sigL_xproj)
 
+
+    ##Testing
+    from scipy.optimize import curve_fit
+    # Initial parameter guesses (you may adjust these based on your data)
+    initial_params = [l0, l1, l2, l3]
+    # Combine tt and qq data as required by curve_fit
+    x_data_combined = np.vstack((g_sigl.GetX(), q2_vec))
+    y_data  = sigl_X_fit
+    y_data_err  = sigl_X_fit_err
+    # Fit the function to the data and account for uncertainties
+    optimized_params, covariance = curve_fit(
+        fun_Sig_L, x_data_combined, y_data, p0=initial_params, sigma=y_data_err, absolute_sigma=True
+    )
+
+    print("\n\n\nsigL")
+    print("Optimized parameters:", optimized_params)
+    print("Covariance of parameters:", covariance)
+    print("\n\n\n")
+        
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
