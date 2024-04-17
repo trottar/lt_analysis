@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:23:41 trottar"
+# Time-stamp: "2024-04-17 16:26:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -343,8 +343,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     from scipy.optimize import curve_fit
     # Initial parameter guesses (you may adjust these based on your data)
     initial_params = [l0, l1, l2, l3]
+    t_vec = []
+    for i in range(len(w_vec)):
+        t_vec.append(g_sigl.GetX()[i])
     # Combine tt and qq data as required by curve_fit
-    x_data_combined = np.vstack((g_sigl.GetX(), q2_vec))
+    x_data_combined = np.vstack((, q2_vec))
     y_data  = sigl_X_fit
     y_data_err  = sigl_X_fit_err
     # Fit the function to the data and account for uncertainties
