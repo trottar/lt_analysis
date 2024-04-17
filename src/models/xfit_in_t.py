@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:15:17 trottar"
+# Time-stamp: "2024-04-17 17:15:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -360,7 +360,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             x = x_data[i]
             y = y_data[i]
             y_err = y_errors[i]
-            predicted_y = fun_Sig_L_tmp(x, par)
+            predicted_y = fun_Sig_L(x, par)
             residual = (predicted_y - y) / y_err
             residuals.append(residual)
         return np.array(residuals)
