@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:18:46 trottar"
+# Time-stamp: "2024-04-17 17:31:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -336,7 +336,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
         g_sigl_fit.Fit(f_sigL_xproj)
 
-
     ##Testing
     import numpy as np
     from scipy.optimize import least_squares
@@ -545,6 +544,46 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigt_fit.Fit(f_sigT_xproj)
 
+    ##Testing
+    import numpy as np
+    from scipy.optimize import least_squares
+    import math
+    # Initial parameter guesses (you may adjust these based on your data)
+    initial_params = [l0, l1, l2, l3]
+    t_vec = []
+    y_data = []
+    y_data_err = []
+    for i in range(len(w_vec)):
+        t_vec.append(g_sigl.GetX()[i])
+        y_data.append(sigl_X_fit)
+        y_data_err.append(sigl_X_fit_err)
+    # Combine tt and qq data as required by curve_fit
+    x_data_combined = np.vstack((t_vec, q2_vec))
+
+    # Function for residuals
+    def residuals(par, x_data, y_data, y_errors):
+        residuals = []
+        for i in range(len(x_data)):
+            x = x_data[i]
+            y = y_data[i]
+            y_err = y_errors[i]
+            predicted_y = fun_Sig_T(x, par)
+            residual = (predicted_y - y) / y_err
+            residuals.append(residual)
+        return np.array(residuals)
+
+    # Perform optimization
+    result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
+    
+    print("\n\n\nsigT")
+    print("Optimized parameters:", result.x)
+    print("\n\n\n")
+
+    par_vec.append(result.x[0])
+    par_vec.append(result.x[1])
+    par_vec.append(result.x[2])
+    par_vec.append(result.x[3])
+        
     # Check the fit status for 'f_sigT'
     f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
@@ -560,10 +599,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit_tot.SetLineColor(2)
     g_sigt_fit_tot.Draw("LP")
     
-    par_vec.append(f_sigT.GetParameter(0))
-    par_vec.append(f_sigT.GetParameter(1))
-    par_vec.append(f_sigT.GetParameter(2))
-    par_vec.append(f_sigT.GetParameter(3))
+    #par_vec.append(f_sigT.GetParameter(0))
+    #par_vec.append(f_sigT.GetParameter(1))
+    #par_vec.append(f_sigT.GetParameter(2))
+    #par_vec.append(f_sigT.GetParameter(3))
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
@@ -733,6 +772,46 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_siglt_fit.Fit(f_sigLT_xproj)
 
+    ##Testing
+    import numpy as np
+    from scipy.optimize import least_squares
+    import math
+    # Initial parameter guesses (you may adjust these based on your data)
+    initial_params = [l0, l1, l2, l3]
+    t_vec = []
+    y_data = []
+    y_data_err = []
+    for i in range(len(w_vec)):
+        t_vec.append(g_sigl.GetX()[i])
+        y_data.append(sigl_X_fit)
+        y_data_err.append(sigl_X_fit_err)
+    # Combine tt and qq data as required by curve_fit
+    x_data_combined = np.vstack((t_vec, q2_vec))
+
+    # Function for residuals
+    def residuals(par, x_data, y_data, y_errors):
+        residuals = []
+        for i in range(len(x_data)):
+            x = x_data[i]
+            y = y_data[i]
+            y_err = y_errors[i]
+            predicted_y = fun_Sig_LT(x, par)
+            residual = (predicted_y - y) / y_err
+            residuals.append(residual)
+        return np.array(residuals)
+
+    # Perform optimization
+    result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
+    
+    print("\n\n\nsigLT")
+    print("Optimized parameters:", result.x)
+    print("\n\n\n")
+
+    par_vec.append(result.x[0])
+    par_vec.append(result.x[1])
+    par_vec.append(result.x[2])
+    par_vec.append(result.x[3])
+        
     # Check the fit status for 'f_sigLT'
     f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
@@ -748,10 +827,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit_tot.SetLineColor(2)
     g_siglt_fit_tot.Draw("LP")
         
-    par_vec.append(f_sigLT.GetParameter(0))
-    par_vec.append(f_sigLT.GetParameter(1))
-    par_vec.append(f_sigLT.GetParameter(2))
-    par_vec.append(f_sigLT.GetParameter(3))
+    #par_vec.append(f_sigLT.GetParameter(0))
+    #par_vec.append(f_sigLT.GetParameter(1))
+    #par_vec.append(f_sigLT.GetParameter(2))
+    #par_vec.append(f_sigLT.GetParameter(3))
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
@@ -898,6 +977,46 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigtt_fit.Fit(f_sigTT_xproj)
 
+    ##Testing
+    import numpy as np
+    from scipy.optimize import least_squares
+    import math
+    # Initial parameter guesses (you may adjust these based on your data)
+    initial_params = [l0, l1, l2, l3]
+    t_vec = []
+    y_data = []
+    y_data_err = []
+    for i in range(len(w_vec)):
+        t_vec.append(g_sigl.GetX()[i])
+        y_data.append(sigl_X_fit)
+        y_data_err.append(sigl_X_fit_err)
+    # Combine tt and qq data as required by curve_fit
+    x_data_combined = np.vstack((t_vec, q2_vec))
+
+    # Function for residuals
+    def residuals(par, x_data, y_data, y_errors):
+        residuals = []
+        for i in range(len(x_data)):
+            x = x_data[i]
+            y = y_data[i]
+            y_err = y_errors[i]
+            predicted_y = fun_Sig_TT(x, par)
+            residual = (predicted_y - y) / y_err
+            residuals.append(residual)
+        return np.array(residuals)
+
+    # Perform optimization
+    result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
+    
+    print("\n\n\nsigTT")
+    print("Optimized parameters:", result.x)
+    print("\n\n\n")
+
+    par_vec.append(result.x[0])
+    par_vec.append(result.x[1])
+    par_vec.append(result.x[2])
+    par_vec.append(result.x[3])
+        
     # Check the fit status for 'f_sigTT'
     f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
@@ -913,10 +1032,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit_tot.SetLineColor(2)
     g_sigtt_fit_tot.Draw("LP")
     
-    par_vec.append(f_sigTT.GetParameter(0))
-    par_vec.append(f_sigTT.GetParameter(1))
-    par_vec.append(f_sigTT.GetParameter(2))
-    par_vec.append(f_sigTT.GetParameter(3))
+    #par_vec.append(f_sigTT.GetParameter(0))
+    #par_vec.append(f_sigTT.GetParameter(1))
+    #par_vec.append(f_sigTT.GetParameter(2))
+    #par_vec.append(f_sigTT.GetParameter(3))
 
     par_err_vec.append(f_sigTT.GetParError(0))
     par_err_vec.append(f_sigTT.GetParError(1))
