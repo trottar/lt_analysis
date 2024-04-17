@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:03:45 trottar"
+# Time-stamp: "2024-04-17 17:10:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -359,8 +359,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         x_data_combined.T,
         y_data,
         p0=initial_params,
-        sigma=y_data_err,
-        absolute_sigma=True
+        sigma=y_data_err
     )
 
     print("\n\n\nsigL")
