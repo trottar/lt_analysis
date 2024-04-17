@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 15:00:06 trottar"
+# Time-stamp: "2024-04-16 20:16:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ def iterWeight(arg_str):
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
         sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
     except OverflowError:
-        sigl = 0.0
+        sigl = -1000.0
         print("WARNING: Overflowerror on sigL, setting to zero for this event...")
 
     try:
@@ -77,13 +77,13 @@ def iterWeight(arg_str):
         #sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
         sigt = p5 / (1 + p6*q2_gev)
     except OverflowError:        
-        sigt = 0.0
+        sigt = -1000.0
         print("WARNING: Overflowerror on sigT, setting to zero for this event...")
 
     try:
         siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
     except OverflowError:
-        siglt = 0.0
+        siglt = -1000.0
         print("\n\nWARNING: Overflowerror on sigLT, setting to zero for this event...\n\n")
 
     try:
@@ -92,7 +92,7 @@ def iterWeight(arg_str):
         #                 Therefore param 12 was also changed to 13
         sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
     except OverflowError:
-        sigtt = 0.0
+        sigtt = -1000.0
         print("\n\nWARNING: Overflowerror on sigTT, setting to zero for this event...\n\n")
 
     # RLT (9/25/2023): There are two tav parameterizations in here.

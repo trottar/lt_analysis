@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 11:52:16 trottar"
+# Time-stamp: "2024-04-16 22:30:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -432,15 +432,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
             # Checks for first plots and calls +'(' to Print
-            canvas_bool = False
+            canvas_iter=0
             
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
-                if i==0:
-                    canvas_bool = True
-                else:
-                    canvas_bool = False
                 if is_hist(val):
                     if "MM_DATA" in key:
                         canvas2 = ROOT.TCanvas("canvas2", "Canvas2", 800, 600)
@@ -460,7 +456,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         # Add the number of mesons to the plot
                         text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
                         #if i==0 and j==0 and k==0:
-                        if canvas_bool:
+                        if canvas_iter == 0:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
                         elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+')')
@@ -471,13 +467,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     val.Draw()
                     val.SetTitle(val.GetName())
                     #if i==0 and j==0 and k==0:
-                    if canvas_bool:
+                    if canvas_iter == 0:
                         canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
                     elif i==len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1 and j==len(t_bins)-2 and k==len(phi_bins)-2:
                         canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+')')
                     else:
                         canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType)))
                     del canvas
+                    canvas_iter+=1
                 
     return processed_dict
 

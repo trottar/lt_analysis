@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 12:59:24 trottar"
+# Time-stamp: "2024-04-16 22:34:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1560,7 +1560,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for j in range(len(t_bins)-1):
                     for k in range(len(phi_bins)-1):
                         if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                            if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:                
+                            if phi_bins[k] <= (evt.ph_q+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
                                 hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
