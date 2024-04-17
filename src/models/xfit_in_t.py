@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:44:49 trottar"
+# Time-stamp: "2024-04-17 16:49:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -351,7 +351,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         y_data.append(sigl_X_fit)
         y_data_err.append(sigl_X_fit_err)
     # Combine tt and qq data as required by curve_fit
-    x_data_combined = np.vstack((t_vec, q2_vec))    
+    x_data_combined = np.vstack((t_vec, q2_vec))
+    print("£££££££££££",fun_Sig_L_tmp,x_data_combined,y_data)
     # Fit the function to the data and account for uncertainties
     optimized_params, covariance = curve_fit(
         fun_Sig_L_tmp,
