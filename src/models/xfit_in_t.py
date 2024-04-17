@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:44:51 trottar"
+# Time-stamp: "2024-04-17 17:50:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -377,19 +377,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_vec.append(result.x[3])
 
     import matplotlib.pyplot as plt
-    # Plotting the data points and error bars    
+    # Plotting the data points and error bars
+    # Set the x2 constant value for the plot
+    x2_constant = float(q2_set.replace("p","."))  # Replace with your desired constant value for x2
+
+    # Generate a range of x1 values to plot
     x1_values = np.linspace(tmin_range, tmax_range, 100)  # Adjust the range as needed
-    x2_values = np.linspace(Q2min_range, Q2max_range, 100)  # Adjust the range as needed
-    y_pred = [fun_Sig_L((x1, x2), optimized_par) for x1, x2 in zip(x1_values, x2_values)]
+
+    # Calculate y values using the optimized function
+    y_pred = [fun_Sig_L((x1, x2_constant), optimized_par) for x1 in x1_values]
 
     # Plot the original data points with error bars
-    plt.errorbar([x1 for x1, x2 in x_data_combined], y_data, yerr=y_data_err, fmt='o', label='Data')
+    plt.errorbar([x1 for x1, x2 in x_data_combined], y_data, yerr=y_errors, fmt='o', label='Data')
 
     # Plot the optimized function
     plt.plot(x1_values, y_pred, label='Optimized function')
 
     # Add labels and legend
-    plt.xlabel('X1')
+    plt.xlabel('-t')
     plt.ylabel('sig')
     plt.legend()
 
