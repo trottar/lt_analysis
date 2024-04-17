@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 01:12:51 trottar"
+# Time-stamp: "2024-04-17 01:13:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,10 +350,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    par_vec.append(f_sigL.GetParameter(0)/g_vec[i])
-    par_vec.append(f_sigL.GetParameter(1)/g_vec[i])
-    par_vec.append(f_sigL.GetParameter(2)/g_vec[i])
-    par_vec.append(f_sigL.GetParameter(3)/g_vec[i])
+    par_vec.append(f_sigL.GetParameter(0)*g_vec[i])
+    par_vec.append(f_sigL.GetParameter(1)*g_vec[i])
+    par_vec.append(f_sigL.GetParameter(2)*g_vec[i])
+    par_vec.append(f_sigL.GetParameter(3)*g_vec[i])
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
@@ -518,10 +518,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit_tot.SetLineColor(2)
     g_sigt_fit_tot.Draw("LP")
     
-    par_vec.append(f_sigT.GetParameter(0)/g_vec[i])
-    par_vec.append(f_sigT.GetParameter(1)/g_vec[i])
-    par_vec.append(f_sigT.GetParameter(2)/g_vec[i])
-    par_vec.append(f_sigT.GetParameter(3)/g_vec[i])
+    par_vec.append(f_sigT.GetParameter(0)*g_vec[i])
+    par_vec.append(f_sigT.GetParameter(1)*g_vec[i])
+    par_vec.append(f_sigT.GetParameter(2)*g_vec[i])
+    par_vec.append(f_sigT.GetParameter(3)*g_vec[i])
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
@@ -706,10 +706,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit_tot.SetLineColor(2)
     g_siglt_fit_tot.Draw("LP")
         
-    par_vec.append(f_sigLT.GetParameter(0)/g_vec[i])
-    par_vec.append(f_sigLT.GetParameter(1)/g_vec[i])
-    par_vec.append(f_sigLT.GetParameter(2)/g_vec[i])
-    par_vec.append(f_sigLT.GetParameter(3)/g_vec[i])
+    par_vec.append(f_sigLT.GetParameter(0)*g_vec[i])
+    par_vec.append(f_sigLT.GetParameter(1)*g_vec[i])
+    par_vec.append(f_sigLT.GetParameter(2)*g_vec[i])
+    par_vec.append(f_sigLT.GetParameter(3)*g_vec[i])
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
@@ -871,10 +871,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit_tot.SetLineColor(2)
     g_sigtt_fit_tot.Draw("LP")
     
-    par_vec.append(f_sigTT.GetParameter(0)/g_vec[i])
-    par_vec.append(f_sigTT.GetParameter(1)/g_vec[i])
-    par_vec.append(f_sigTT.GetParameter(2)/g_vec[i])
-    par_vec.append(f_sigTT.GetParameter(3)/g_vec[i])
+    par_vec.append(f_sigTT.GetParameter(0)*g_vec[i])
+    par_vec.append(f_sigTT.GetParameter(1)*g_vec[i])
+    par_vec.append(f_sigTT.GetParameter(2)*g_vec[i])
+    par_vec.append(f_sigTT.GetParameter(3)*g_vec[i])
 
     par_err_vec.append(f_sigTT.GetParError(0))
     par_err_vec.append(f_sigTT.GetParError(1))
