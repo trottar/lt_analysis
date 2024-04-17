@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:52:28 trottar"
+# Time-stamp: "2024-04-17 16:52:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -356,7 +356,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Fit the function to the data and account for uncertainties
     optimized_params, covariance = curve_fit(
         fun_Sig_L_tmp,
-        np.array(x_data_combined,)
+        np.array(x_data_combined),
         np.array(y_data),
         p0=initial_params,
         sigma=np.array(y_data_err),
