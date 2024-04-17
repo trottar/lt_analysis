@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:22:09 trottar"
+# Time-stamp: "2024-04-17 16:23:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -338,6 +338,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
 
     ##Testing
+    import math
+    import numpy as np
     from scipy.optimize import curve_fit
     # Initial parameter guesses (you may adjust these based on your data)
     initial_params = [l0, l1, l2, l3]
