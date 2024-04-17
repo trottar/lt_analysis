@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 18:08:22 trottar"
+# Time-stamp: "2024-04-17 18:50:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -395,7 +395,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Add labels and legend
     plt.xlabel('-t')
-    plt.ylabel('sig')
+    plt.ylabel('sigL')
     plt.legend()
 
     # Display the plot
@@ -574,7 +574,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     from scipy.optimize import least_squares
     import math
     # Initial parameter guesses (you may adjust these based on your data)
-    initial_params = [l0, l1, l2, l3]
+    initial_params = [t0, t1, t2, t3]
     t_vec = []
     y_data = []
     y_data_err = []
@@ -608,7 +608,32 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_vec.append(result.x[1])
     par_vec.append(result.x[2])
     par_vec.append(result.x[3])
-        
+
+    import matplotlib.pyplot as plt
+    # Plotting the data points and error bars
+    # Set the x2 constant value for the plot
+    x2_constant = float(q2_set.replace("p","."))  # Replace with your desired constant value for x2
+
+    # Generate a range of x1 values to plot
+    x1_values = np.linspace(tmin_range, tmax_range, 100)  # Adjust the range as needed
+
+    # Calculate y values using the optimized function
+    y_pred = [fun_Sig_T((x1, x2_constant), optimized_par) for x1 in x1_values]
+
+    # Plot the original data points with error bars
+    plt.errorbar(t_vec, y_data, yerr=y_data_err, fmt='o', label='Data')
+
+    # Plot the optimized function
+    plt.plot(x1_values, y_pred, label='Optimized function')
+
+    # Add labels and legend
+    plt.xlabel('-t')
+    plt.ylabel('sigT')
+    plt.legend()
+
+    # Display the plot
+    plt.show()
+    
     # Check the fit status for 'f_sigT'
     f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
@@ -802,7 +827,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     from scipy.optimize import least_squares
     import math
     # Initial parameter guesses (you may adjust these based on your data)
-    initial_params = [l0, l1, l2, l3]
+    initial_params = [lt0, lt1, lt2, lt3]
     t_vec = []
     y_data = []
     y_data_err = []
@@ -836,7 +861,33 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_vec.append(result.x[1])
     par_vec.append(result.x[2])
     par_vec.append(result.x[3])
-        
+
+
+    import matplotlib.pyplot as plt
+    # Plotting the data points and error bars
+    # Set the x2 constant value for the plot
+    x2_constant = float(q2_set.replace("p","."))  # Replace with your desired constant value for x2
+
+    # Generate a range of x1 values to plot
+    x1_values = np.linspace(tmin_range, tmax_range, 100)  # Adjust the range as needed
+
+    # Calculate y values using the optimized function
+    y_pred = [fun_Sig_LT((x1, x2_constant), optimized_par) for x1 in x1_values]
+
+    # Plot the original data points with error bars
+    plt.errorbar(t_vec, y_data, yerr=y_data_err, fmt='o', label='Data')
+
+    # Plot the optimized function
+    plt.plot(x1_values, y_pred, label='Optimized function')
+
+    # Add labels and legend
+    plt.xlabel('-t')
+    plt.ylabel('sigLT')
+    plt.legend()
+
+    # Display the plot
+    plt.show()
+    
     # Check the fit status for 'f_sigLT'
     f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
@@ -1007,7 +1058,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     from scipy.optimize import least_squares
     import math
     # Initial parameter guesses (you may adjust these based on your data)
-    initial_params = [l0, l1, l2, l3]
+    initial_params = [tt0, tt1, tt2, tt3]
     t_vec = []
     y_data = []
     y_data_err = []
@@ -1042,6 +1093,31 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_vec.append(result.x[2])
     par_vec.append(result.x[3])
         
+    import matplotlib.pyplot as plt
+    # Plotting the data points and error bars
+    # Set the x2 constant value for the plot
+    x2_constant = float(q2_set.replace("p","."))  # Replace with your desired constant value for x2
+
+    # Generate a range of x1 values to plot
+    x1_values = np.linspace(tmin_range, tmax_range, 100)  # Adjust the range as needed
+
+    # Calculate y values using the optimized function
+    y_pred = [fun_Sig_TT((x1, x2_constant), optimized_par) for x1 in x1_values]
+
+    # Plot the original data points with error bars
+    plt.errorbar(t_vec, y_data, yerr=y_data_err, fmt='o', label='Data')
+
+    # Plot the optimized function
+    plt.plot(x1_values, y_pred, label='Optimized function')
+
+    # Add labels and legend
+    plt.xlabel('-t')
+    plt.ylabel('sigTT')
+    plt.legend()
+
+    # Display the plot
+    plt.show()
+
     # Check the fit status for 'f_sigTT'
     f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
