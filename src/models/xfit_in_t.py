@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:41:02 trottar"
+# Time-stamp: "2024-04-17 17:42:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -383,32 +383,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     y_pred = [fun_Sig_L((x1, x2), optimized_par) for x1, x2 in zip(x1_values, x2_values)]
 
     # Plot the original data points with error bars
-    plt.errorbar([x1 for x1, x2 in x_data_combined], y_data, yerr=y_data_err, fmt='o', label='Data')
+    plt.errorbar([x1 for x1, x2 in x_data], y_data, yerr=y_data_err, fmt='o', label='Data')
 
     # Plot the optimized function
-    # Generate a grid of x1 and x2 values for the plot
-    x1_values = np.linspace(min([x1 for x1, x2 in x_data_combined]), max([x1 for x1, x2 in x_data_combined]), 100)
-    x2_values = np.linspace(min([x2 for x1, x2 in x_data_combined]), max([x2 for x1, x2 in x_data_combined]), 100)
-
-    # Create a meshgrid
-    X1, X2 = np.meshgrid(x1_values, x2_values)
-
-    # Calculate the function values on the meshgrid
-    Z = fun_Sig_L((X1, X2), optimized_par)
-
-    # Plot the optimized function as a contour plot
-    plt.contour(X1, X2, Z, levels=10, cmap='viridis')
-    plt.scatter([x1 for x1, x2 in x_data_combined], [x2 for x1, x2 in x_data_combined], c='red', label='Data points')
+    plt.plot(x1_values, y_pred, label='Optimized function')
 
     # Add labels and legend
-    plt.xlabel('X1')
-    plt.ylabel('X2')
-    plt.title('Contour plot of optimized function with data points')
+    plt.xlabel('-t')
+    plt.ylabel('sig')
     plt.legend()
 
     # Display the plot
     plt.show()
-
+    
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
