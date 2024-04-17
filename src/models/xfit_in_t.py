@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 16:29:48 trottar"
+# Time-stamp: "2024-04-17 16:44:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -71,7 +71,7 @@ par_lim = 0.2 # +/-20%
 ###############################################################################################################################################
 # Import separated xsects models
 
-from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT, set_val
+from xfit_active import fun_Sig_L, fun_Sig_L_tmp, fun_Sig_T, fun_Sig_LT, fun_Sig_TT, set_val
 
 ###############################################################################################################################################
 
@@ -354,7 +354,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     x_data_combined = np.vstack((t_vec, q2_vec))    
     # Fit the function to the data and account for uncertainties
     optimized_params, covariance = curve_fit(
-        fun_Sig_L, x_data_combined, y_data, p0=initial_params, sigma=y_data_err, absolute_sigma=True
+        fun_Sig_L_tmp,
+        x_data_combined,
+        y_data,
+        p0=initial_params,
+        sigma=y_data_err,
+        absolute_sigma=True
     )
 
     print("\n\n\nsigL")
