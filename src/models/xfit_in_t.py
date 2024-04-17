@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:15:50 trottar"
+# Time-stamp: "2024-04-17 17:16:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -369,7 +369,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     result = least_squares(residuals, initial_params, args=(x_data_combined, y_data, y_data_err))
     
     print("\n\n\nsigL")
-    print("Optimized parameters:", result)
+    print("Optimized parameters:", result.x)
     print("\n\n\n")
         
     # Check the fit status for 'f_sigL'
