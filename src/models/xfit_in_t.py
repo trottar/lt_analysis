@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 17:16:34 trottar"
+# Time-stamp: "2024-04-17 17:18:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -371,6 +371,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n\n\nsigL")
     print("Optimized parameters:", result.x)
     print("\n\n\n")
+
+    par_vec.append(result.x[0])
+    par_vec.append(result.x[1])
+    par_vec.append(result.x[2])
+    par_vec.append(result.x[3])
         
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -387,10 +392,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    par_vec.append(f_sigL.GetParameter(0))
-    par_vec.append(f_sigL.GetParameter(1))
-    par_vec.append(f_sigL.GetParameter(2))
-    par_vec.append(f_sigL.GetParameter(3))
+    #par_vec.append(f_sigL.GetParameter(0))
+    #par_vec.append(f_sigL.GetParameter(1))
+    #par_vec.append(f_sigL.GetParameter(2))
+    #par_vec.append(f_sigL.GetParameter(3))
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
