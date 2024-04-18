@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-15 17:31:02 trottar"
+# Time-stamp: "2024-04-18 09:27:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,9 +93,14 @@ bg_dict ={
     #"Q3p0W3p14Left_lowe" : 100,
     #"Q3p0W3p14Center_lowe" : 500,
     # t-range = 0.1-0.3 (MM cut, Center only) bg fit test
+    #"Q3p0W3p14Center_highe" : 500,
+    #"Q3p0W3p14Center_lowe" : 500,
+    # t-range = 0.1-1.0 (MM cut), bg=500
+    "Q3p0W3p14Right_highe" : 500, # Background value divided by number of events, check number of events of MM
+    "Q3p0W3p14Left_highe" : 500,
     "Q3p0W3p14Center_highe" : 500,
+    "Q3p0W3p14Left_lowe" : 500,
     "Q3p0W3p14Center_lowe" : 500,
-    
 }
 
 ##############
