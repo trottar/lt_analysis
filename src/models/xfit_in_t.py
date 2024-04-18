@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-17 21:21:01 trottar"
+# Time-stamp: "2024-04-17 23:24:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -399,7 +399,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.legend()
 
     # Display the plot
-    plt.show()
+    #plt.show()
     
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -632,7 +632,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.legend()
 
     # Display the plot
-    plt.show()
+    #plt.show()
     
     # Check the fit status for 'f_sigT'
     f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -886,7 +886,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.legend()
 
     # Display the plot
-    plt.show()
+    #plt.show()
     
     # Check the fit status for 'f_sigLT'
     f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -1116,7 +1116,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.legend()
 
     # Display the plot
-    plt.show()
+    #plt.show()
 
     # Check the fit status for 'f_sigTT'
     f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
