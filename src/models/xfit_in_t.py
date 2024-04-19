@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-18 15:46:40 trottar"
+# Time-stamp: "2024-04-19 10:09:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,8 +60,8 @@ DEBUG=False
 # Limit for finding new parameters (units of percent)
 #par_lim = 0.001 # +/-.1%
 #par_lim = 0.01 # +/-1%
-#par_lim = 0.05 # +/-5%
-par_lim = 0.2 # +/-20%
+par_lim = 0.05 # +/-5%
+#par_lim = 0.2 # +/-20%
 #par_lim = 0.75 # +/-75%
 #par_lim = 10.00 # +/-1000%
 ##############
@@ -211,9 +211,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigL_pre.SetParLimits(3, -par_lim, par_lim)       
     # Fixing sigL terms for testing
     #f_sigL_pre.FixParameter(0, l0)
-    f_sigL_pre.FixParameter(1, l1)
+    #f_sigL_pre.FixParameter(1, l1)
     #f_sigL_pre.FixParameter(2, l2)
-    f_sigL_pre.FixParameter(3, l3)
+    #f_sigL_pre.FixParameter(3, l3)
     # Fixing sigL terms to zero
     #f_sigL_pre.FixParameter(0, 0.0)
     #f_sigL_pre.FixParameter(1, 0.0)
@@ -298,9 +298,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigL.SetParLimits(3, -par_lim, par_lim)       
     # Fixing sigL terms for testing
     #f_sigL.FixParameter(0, l0)
-    f_sigL.FixParameter(1, l1)
+    #f_sigL.FixParameter(1, l1)
     #f_sigL.FixParameter(2, l2)
-    f_sigL.FixParameter(3, l3)
+    #f_sigL.FixParameter(3, l3)
     # Fixing sigL terms to zero
     #f_sigL.FixParameter(0, 0.0)
     #f_sigL.FixParameter(1, 0.0)
@@ -371,10 +371,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Optimized parameters:", optimized_par)
     print("\n\n\n")
 
-    par_vec.append(result.x[0])
-    par_vec.append(result.x[1])
-    par_vec.append(result.x[2])
-    par_vec.append(result.x[3])
+    #par_vec.append(result.x[0])
+    #par_vec.append(result.x[1])
+    #par_vec.append(result.x[2])
+    #par_vec.append(result.x[3])
 
     import matplotlib.pyplot as plt
     # Plotting the data points and error bars
@@ -399,7 +399,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.legend()
 
     # Display the plot
-    plt.show()
+    #plt.show()
     
     # Check the fit status for 'f_sigL'
     f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -416,10 +416,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    #par_vec.append(f_sigL.GetParameter(0))
-    #par_vec.append(f_sigL.GetParameter(1))
-    #par_vec.append(f_sigL.GetParameter(2))
-    #par_vec.append(f_sigL.GetParameter(3))
+    par_vec.append(f_sigL.GetParameter(0))
+    par_vec.append(f_sigL.GetParameter(1))
+    par_vec.append(f_sigL.GetParameter(2))
+    par_vec.append(f_sigL.GetParameter(3))
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
@@ -441,9 +441,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(2).SetLeftMargin(0.12)
     nsep.Draw("sigt:t:sigt_e", "", "goff")
 
-    f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    f_sigT_pre.SetParNames("p5","p6","p7","p8")
-    f_sigT_pre.SetParameters(t0, t1, t2, t3)
+    #f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    #f_sigT_pre.SetParNames("p5","p6","p7","p8")
+    #f_sigT_pre.SetParameters(t0, t1, t2, t3)
+    f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
+    f_sigT_pre.SetParNames("p5","p6")
+    f_sigT_pre.SetParameters(t0, t1)
+    
 
     ##############
     # HARD CODED #
@@ -451,8 +455,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Fixed unused parameters
     #f_sigT_pre.FixParameter(0, 0)
     #f_sigT_pre.FixParameter(1, 0)
-    f_sigT_pre.FixParameter(2, 0)
-    f_sigT_pre.FixParameter(3, 0)
+    ##f_sigT_pre.FixParameter(2, 0)
+    ##f_sigT_pre.FixParameter(3, 0)
     # Set range limit of used parameters
     if t0 != 0.0:
         f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim), t0+abs(t0*par_lim))
@@ -464,7 +468,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigT_pre.SetParLimits(1, -par_lim, par_lim)
     # Fixing sigT terms for testing
     #f_sigT_pre.FixParameter(0, t0)
-    f_sigT_pre.FixParameter(1, t1)
+    #f_sigT_pre.FixParameter(1, t1)
     # Fixing sigT terms to zero
     #f_sigT_pre.FixParameter(0, 0.0)
     #f_sigT_pre.FixParameter(1, 0.0)
@@ -514,9 +518,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
-    f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    f_sigT.SetParNames("p5","p6","p7","p8")
-    f_sigT.SetParameters(t0, t1, t2, t3)
+    #f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    #f_sigT.SetParNames("p5","p6","p7","p8")
+    #f_sigT.SetParameters(t0, t1, t2, t3)
+    f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
+    f_sigT.SetParNames("p5","p6")
+    f_sigT.SetParameters(t0, t1)
 
     ##############
     # HARD CODED #
@@ -524,8 +531,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Fixed unused parameters
     #f_sigT.FixParameter(0, 0)
     #f_sigT.FixParameter(1, 0)
-    f_sigT.FixParameter(2, 0)
-    f_sigT.FixParameter(3, 0)
+    ##f_sigT.FixParameter(2, 0)
+    ##f_sigT.FixParameter(3, 0)
     # Set range limit of used parameters
     if t0 != 0.0:
         f_sigT.SetParLimits(0, t0-abs(t0*par_lim), t0+abs(t0*par_lim))
@@ -537,7 +544,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigT.SetParLimits(1, -par_lim, par_lim)
     # Fixing sigT terms for testing
     #f_sigT.FixParameter(0, t0)
-    f_sigT.FixParameter(1, t1)
+    #f_sigT.FixParameter(1, t1)
     # Fixing sigT terms to zero
     #f_sigT.FixParameter(0, 0.0)
     #f_sigT.FixParameter(1, 0.0)
@@ -604,10 +611,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Optimized parameters:", optimized_par)
     print("\n\n\n")
 
-    par_vec.append(result.x[0])
-    par_vec.append(result.x[1])
-    par_vec.append(result.x[2])
-    par_vec.append(result.x[3])
+    #par_vec.append(result.x[0])
+    #par_vec.append(result.x[1])
+    #par_vec.append(result.x[2])
+    #par_vec.append(result.x[3])
 
     import matplotlib.pyplot as plt
     # Plotting the data points and error bars
@@ -632,7 +639,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.legend()
 
     # Display the plot
-    plt.show()
+    #plt.show()
     
     # Check the fit status for 'f_sigT'
     f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -649,10 +656,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit_tot.SetLineColor(2)
     g_sigt_fit_tot.Draw("LP")
     
-    #par_vec.append(f_sigT.GetParameter(0))
-    #par_vec.append(f_sigT.GetParameter(1))
-    #par_vec.append(f_sigT.GetParameter(2))
-    #par_vec.append(f_sigT.GetParameter(3))
+    par_vec.append(f_sigT.GetParameter(0))
+    par_vec.append(f_sigT.GetParameter(1))
+    par_vec.append(f_sigT.GetParameter(2))
+    par_vec.append(f_sigT.GetParameter(3))
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
@@ -674,9 +681,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(3).SetLeftMargin(0.12)
     nsep.Draw("siglt:t:siglt_e", "", "goff")
 
-    f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    f_sigLT_pre.SetParNames("p9","p10","p11","p12")
-    f_sigLT_pre.SetParameters(lt0, lt1, lt2, lt3)
+    #f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    #f_sigLT_pre.SetParNames("p9","p10","p11","p12")
+    #f_sigLT_pre.SetParameters(lt0, lt1, lt2, lt3)
+    f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 3)
+    f_sigLT_pre.SetParNames("p9","p10","p11")
+    f_sigLT_pre.SetParameters(lt0, lt1, lt2)    
 
     ##############
     # HARD CODED #
@@ -685,7 +695,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigLT_pre.FixParameter(0, 0)
     #f_sigLT_pre.FixParameter(1, 0)
     #f_sigLT_pre.FixParameter(2, 0)
-    f_sigLT_pre.FixParameter(3, 0)
+    ##f_sigLT_pre.FixParameter(3, 0)
     # Set range limit of used parameters
     if lt0 != 0.0:
         f_sigLT_pre.SetParLimits(0, lt0-abs(lt0*par_lim), lt0+abs(lt0*par_lim))
@@ -701,9 +711,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigLT_pre.SetParLimits(2, -par_lim, par_lim)
     #f_sigLT_pre.SetParLimits(3, lt3-abs(lt3*par_lim), lt3+abs(lt3*par_lim))        
     # Fixing sigLT terms for testing
-    f_sigLT_pre.FixParameter(0, lt0)
-    f_sigLT_pre.FixParameter(1, lt1)
-    f_sigLT_pre.FixParameter(2, lt2)
+    #f_sigLT_pre.FixParameter(0, lt0)
+    #f_sigLT_pre.FixParameter(1, lt1)
+    #f_sigLT_pre.FixParameter(2, lt2)
     # Fixing sigLT terms to zero
     #f_sigLT_pre.FixParameter(0, 0.0)
     #f_sigLT_pre.FixParameter(1, 0.0)
@@ -759,9 +769,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.SetTitle("Sigma LT Model Fit")
     g_siglt_fit.Draw("A*")
 
-    f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    f_sigLT.SetParNames("p9","p10","p11","p12")
-    f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
+    #f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    #f_sigLT.SetParNames("p9","p10","p11","p12")
+    #f_sigLT.SetParameters(lt0, lt1, lt2, lt3)
+    f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 3)
+    f_sigLT.SetParNames("p9","p10","p11")
+    f_sigLT.SetParameters(lt0, lt1, lt2)
 
     ##############
     # HARD CODED #
@@ -770,7 +783,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigLT.FixParameter(0, 0)
     #f_sigLT.FixParameter(1, 0)
     #f_sigLT.FixParameter(2, 0)
-    f_sigLT.FixParameter(3, 0)
+    ##f_sigLT.FixParameter(3, 0)
     # Set range limit of used parameters
     if lt0 != 0.0:
         f_sigLT.SetParLimits(0, lt0-abs(lt0*par_lim), lt0+abs(lt0*par_lim))
@@ -786,9 +799,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigLT.SetParLimits(2, -par_lim, par_lim)
     #f_sigLT.SetParLimits(3, lt3-abs(lt3*par_lim), lt3+abs(lt3*par_lim))
     # Fixing sigLT terms for testing
-    f_sigLT.FixParameter(0, lt0)
-    f_sigLT.FixParameter(1, lt1)
-    f_sigLT.FixParameter(2, lt2)
+    #f_sigLT.FixParameter(0, lt0)
+    #f_sigLT.FixParameter(1, lt1)
+    #f_sigLT.FixParameter(2, lt2)
     # Fixing sigLT terms to zero
     #f_sigLT.FixParameter(0, 0.0)
     #f_sigLT.FixParameter(1, 0.0)
@@ -857,10 +870,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Optimized parameters:", optimized_par)
     print("\n\n\n")
 
-    par_vec.append(result.x[0])
-    par_vec.append(result.x[1])
-    par_vec.append(result.x[2])
-    par_vec.append(result.x[3])
+    #par_vec.append(result.x[0])
+    #par_vec.append(result.x[1])
+    #par_vec.append(result.x[2])
+    #par_vec.append(result.x[3])
 
 
     import matplotlib.pyplot as plt
@@ -886,7 +899,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.legend()
 
     # Display the plot
-    plt.show()
+    #plt.show()
     
     # Check the fit status for 'f_sigLT'
     f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -903,10 +916,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit_tot.SetLineColor(2)
     g_siglt_fit_tot.Draw("LP")
         
-    #par_vec.append(f_sigLT.GetParameter(0))
-    #par_vec.append(f_sigLT.GetParameter(1))
-    #par_vec.append(f_sigLT.GetParameter(2))
-    #par_vec.append(f_sigLT.GetParameter(3))
+    par_vec.append(f_sigLT.GetParameter(0))
+    par_vec.append(f_sigLT.GetParameter(1))
+    par_vec.append(f_sigLT.GetParameter(2))
+    par_vec.append(f_sigLT.GetParameter(3))
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
@@ -928,18 +941,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(4).SetLeftMargin(0.12)
     nsep.Draw("sigtt:t:sigtt_e", "", "goff")
     
-    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    f_sigTT_pre.SetParNames("p13","p14","p15","p16")
-    f_sigTT_pre.SetParameters(tt0, tt1, tt2, tt3)
+    #f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    #f_sigTT_pre.SetParNames("p13","p14","p15","p16")
+    #f_sigTT_pre.SetParameters(tt0, tt1, tt2, tt3)
+    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 1)
+    f_sigTT_pre.SetParNames("p13")
+    f_sigTT_pre.SetParameters(tt0)    
 
     ##############
     # HARD CODED #
     ##############
     # Fixed unused parameters
     #f_sigTT_pre.FixParameter(0, 0)
-    f_sigTT_pre.FixParameter(1, 0)
-    f_sigTT_pre.FixParameter(2, 0)
-    f_sigTT_pre.FixParameter(3, 0)
+    ##f_sigTT_pre.FixParameter(1, 0)
+    ##f_sigTT_pre.FixParameter(2, 0)
+    ##f_sigTT_pre.FixParameter(3, 0)
     # Set range limit of used parameters
     if tt0 != 0.0:
         f_sigTT_pre.SetParLimits(0, tt0-abs(tt0*par_lim), tt0+abs(tt0*par_lim))
@@ -949,7 +965,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigTT_pre.SetParLimits(2, tt2-abs(tt2*par_lim), tt2+abs(tt2*par_lim))
     #f_sigTT_pre.SetParLimits(3, tt3-abs(tt3*par_lim), tt3+abs(tt3*par_lim))
     # Fixing sigTT terms for testing
-    f_sigTT_pre.FixParameter(0, tt0)
+    #f_sigTT_pre.FixParameter(0, tt0)
     # Fixing sigTT terms to zero
     #f_sigTT_pre.FixParameter(0, 0.0)
     if DEBUG:
@@ -1002,18 +1018,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
-    f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
-    f_sigTT.SetParNames("p13","p14","p15","p16")
-    f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
+    #f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 4)
+    #f_sigTT.SetParNames("p13","p14","p15","p16")
+    #f_sigTT.SetParameters(tt0, tt1, tt2, tt3)
+    f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 1)
+    f_sigTT.SetParNames("p13")
+    f_sigTT.SetParameters(tt0)
 
     ##############
     # HARD CODED #
     ##############
     # Fixed unused parameters
     #f_sigTT.FixParameter(0, 0)
-    f_sigTT.FixParameter(1, 0)
-    f_sigTT.FixParameter(2, 0)
-    f_sigTT.FixParameter(3, 0)
+    ##f_sigTT.FixParameter(1, 0)
+    ##f_sigTT.FixParameter(2, 0)
+    ##f_sigTT.FixParameter(3, 0)
     # Set range limit of used parameters
     if tt0 != 0.0:
         f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim), tt0+abs(tt0*par_lim))
@@ -1023,7 +1042,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigTT.SetParLimits(2, tt2-abs(tt2*par_lim), tt2+abs(tt2*par_lim))
     #f_sigTT.SetParLimits(3, tt3-abs(tt3*par_lim), tt3+abs(tt3*par_lim))    
     # Fixing sigTT terms for testing
-    f_sigTT.FixParameter(0, tt0)
+    #f_sigTT.FixParameter(0, tt0)
     # Fixing sigTT terms to zero
     #f_sigTT.FixParameter(0, 0.0)
     if DEBUG:
@@ -1088,10 +1107,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Optimized parameters:", optimized_par)
     print("\n\n\n")
 
-    par_vec.append(result.x[0])
-    par_vec.append(result.x[1])
-    par_vec.append(result.x[2])
-    par_vec.append(result.x[3])
+    #par_vec.append(result.x[0])
+    #par_vec.append(result.x[1])
+    #par_vec.append(result.x[2])
+    #par_vec.append(result.x[3])
         
     import matplotlib.pyplot as plt
     # Plotting the data points and error bars
@@ -1116,7 +1135,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     plt.legend()
 
     # Display the plot
-    plt.show()
+    #plt.show()
 
     # Check the fit status for 'f_sigTT'
     f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -1133,10 +1152,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit_tot.SetLineColor(2)
     g_sigtt_fit_tot.Draw("LP")
     
-    #par_vec.append(f_sigTT.GetParameter(0))
-    #par_vec.append(f_sigTT.GetParameter(1))
-    #par_vec.append(f_sigTT.GetParameter(2))
-    #par_vec.append(f_sigTT.GetParameter(3))
+    par_vec.append(f_sigTT.GetParameter(0))
+    par_vec.append(f_sigTT.GetParameter(1))
+    par_vec.append(f_sigTT.GetParameter(2))
+    par_vec.append(f_sigTT.GetParameter(3))
 
     par_err_vec.append(f_sigTT.GetParError(0))
     par_err_vec.append(f_sigTT.GetParError(1))
