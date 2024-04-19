@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-03 05:34:09 trottar"
+# Time-stamp: "2024-04-19 19:28:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,7 +83,19 @@ def plot_iteration(histlist, phisetlist, inpDict):
     outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
     ################################################################################################################################################
-
+    # Import function to define cut bools
+    sys.path.append("cuts")
+    from apply_cuts import apply_simc_cuts, set_val
+    set_val(inpDict) # Set global variables for optimization
+    
+    ################################################################################################################################################
+    # Define HGCer hole cut for KaonLT 2018-19
+    if ParticleType == "kaon":
+        sys.path.append("cuts")
+        from hgcer_hole import apply_HGCer_hole_cut
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, simc=True)
+    
+    ################################################################################################################################################    
 
     # Create an empty list to store copied histograms
     histlist_copy = []
@@ -172,16 +184,13 @@ def plot_iteration(histlist, phisetlist, inpDict):
             # Progress bar
             Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
-            # Define the acceptance cuts  
-            SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-            HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-            Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
-
-            #........................................
+            if ParticleType == "kaon":                
+                ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+            else:
+                ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 
             #Fill SIMC events
-            if(HMS_Acceptance & SHMS_Acceptance & Diamond):
+            if(ALLCUTS):                
 
                 hist["H_Weight_SIMC"].Fill(evt.iter_weight)
 

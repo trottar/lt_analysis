@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-04-06 15:40:43 trottar"
+# Time-stamp: "2024-04-19 19:29:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,17 +70,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     else:
         print("ERROR: Invalid polarity...must be +1 or -1")
         sys.exit(2)
-    
-    # Define diamond cut parameters
-    a1 = inpDict["a1"]
-    b1 = inpDict["b1"]
-    a2 = inpDict["a2"]
-    b2 = inpDict["b2"]
-    a3 = inpDict["a3"]
-    b3 = inpDict["b3"]
-    a4 = inpDict["a4"]
-    b4 = inpDict["b4"]
-    
+        
     param_arr = []
     with open(param_file, 'r') as f:
         for i, line in enumerate(f):
