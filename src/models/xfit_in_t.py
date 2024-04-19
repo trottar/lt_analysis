@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-19 17:48:44 trottar"
+# Time-stamp: "2024-04-19 18:22:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -740,8 +740,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             siglt_X_fit = 0.0
             siglt_X_fit_err = 1.0
         else:
-            siglt_X_fit = g_siglt.GetY()[i] / ((g_vec[i]) * math.sin(th_vec[i] * PI / 180))
-            siglt_X_fit_err = g_siglt.GetEY()[i] / ((g_vec[i]) * math.sin(th_vec[i] * PI / 180))
+            siglt_X_fit = g_siglt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180))
+            siglt_X_fit_err = g_siglt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180))
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
@@ -989,8 +989,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigtt_X_fit = 0.0
                     sigtt_X_fit_err = 1.0
         else:
-            sigtt_X_fit = g_sigtt.GetY()[i] / ((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
-            sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
+            sigtt_X_fit = g_sigtt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
+            sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
