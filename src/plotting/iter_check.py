@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-19 19:39:54 trottar"
+# Time-stamp: "2024-04-19 19:43:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,7 +60,9 @@ def plot_iteration(histlist, phisetlist, inpDict):
     EPSSET = inpDict["EPSSET"]     
     OutFilename = inpDict["OutFilename"] 
     tmin = inpDict["tmin"] 
-    tmax = inpDict["tmax"] 
+    tmax = inpDict["tmax"]
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]        
     NumtBins = inpDict["NumtBins"] 
     NumPhiBins = inpDict["NumPhiBins"] 
     ParticleType = inpDict["ParticleType"]
