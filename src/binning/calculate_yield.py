@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-19 20:07:54 trottar"
+# Time-stamp: "2024-04-19 20:38:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -719,8 +719,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
                         if phi_bins[k] <= (evt.phipq+math.pi)*(180 / math.pi) <= phi_bins[k+1]:
-                            if iteration:
-                                print("Iteration!!!")
+                            if iteration:                                
                                 hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
                                 hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.iter_weight)
                             else:
@@ -839,13 +838,13 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
             # FIX: Removed norm_fac because shouldn't normalize non-weighted distribution
             yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = yld_err*yld            
+            yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
         if yld < 0.0:
             yld = 0.0
-            yld_err = 0.0            
+            yld_err = 0.0
         if math.isnan(yld) or math.isnan(yld_err):
             yld = 0.0
             yld_err = 0.0

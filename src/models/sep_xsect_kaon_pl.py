@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 20:16:28 trottar"
+# Time-stamp: "2024-04-19 20:10:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,10 +38,10 @@ def import_model(inp_model, arg_str):
                 f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
             except ValueError:
                 f = -1000.0
-                print("WARNING: Overflowerror on sigL, setting to zero for this event...")
+                #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
             except OverflowError:
                 f = -1000.0
-                print("WARNING: Overflowerror on sigL, setting to zero for this event...")
+                #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
             return f
 
     # Function for SigT
@@ -61,10 +61,10 @@ def import_model(inp_model, arg_str):
                 f = par[0] / (1 + par[1]*qq)
             except ValueError:
                 f = -1000.0
-                print("WARNING: Overflowerror on sigT, setting to zero for this event...")
+                #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
             except OverflowError:
                 f = -1000.0
-                print("WARNING: Overflowerror on sigT, setting to zero for this event...")
+                #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
             return f
 
     # Function for SigLT
@@ -76,10 +76,10 @@ def import_model(inp_model, arg_str):
                 f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
             except ValueError:
                 f = -1000.0
-                print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
+                #print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
             except OverflowError:
                 f = -1000.0
-                print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
+                #print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
             return f
 
     # Function for SigTT
@@ -92,10 +92,10 @@ def import_model(inp_model, arg_str):
                 f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
             except ValueError:
                 f = -1000.0
-                print("WARNING: Overflowerror on sigTT, setting to zero for this event...")
+                #print("WARNING: Overflowerror on sigTT, setting to zero for this event...")
             except OverflowError:
                 f = -1000.0
-                print("WARNING: Overflowerror on sigTT, setting to zero for this event...")                
+                #print("WARNING: Overflowerror on sigTT, setting to zero for this event...")                
             return f
 
     modelDict = {
