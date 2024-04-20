@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-20 14:14:56 trottar"
+# Time-stamp: "2024-04-20 17:49:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -63,9 +63,9 @@ def fun_Sig_T(x, par):
     #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
     #f = par[0]+par[1]*math.log(qq)
     #f = par[0]*math.log(qq)+par[1]/(qq**2)
-    f = par[0] / (1 + par[1]*qq)
+    #f = par[0] / (1 + par[1]*qq)
     # RLT (4/20/2024): Adding in t-dependence
-    #f = (par[0] / (1 + par[1]*qq)) * ftav
+    f = (par[0] / (1 + par[1]*qq)) * ftav
     return f
 
 ###############################################################################################################################################
