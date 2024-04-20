@@ -73,8 +73,14 @@ formatted_date=$(date +%Y%B%d_H%HM%MS%S)
 # HARD CODED #
 ##############
 
-#DEBUG="False" # Flag for no plot splash
-DEBUG="True" # Flag for plot splash
+# Clean all untracked files and recreate symlinks
+if [[ $i_flag != "true" ]]; then
+    git clean -fdx
+    ./set_SymLinks.sh
+fi
+
+DEBUG="False" # Flag for no plot splash
+#DEBUG="True" # Flag for plot splash
 
 if [[ $p_flag != "true" ]]; then
     ParticleType="kaon"
