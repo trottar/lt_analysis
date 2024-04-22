@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-21 20:44:31 trottar"
+# Time-stamp: "2024-04-21 23:03:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,7 +182,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
     f_sigL_pre.SetParNames("p1","p2","p3","p4")
-    #f_sigL_pre.SetParameters(l0, l1, l2, l3)
+    f_sigL_pre.SetParameters(l0, l1, l2, l3)
 
     ##############
     # HARD CODED #
