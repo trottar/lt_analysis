@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-22 13:56:02 trottar"
+# Time-stamp: "2024-04-22 19:18:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,7 +78,8 @@ def iterWeight(arg_str):
         #sigt = p5 / (1 + p6*q2_gev)
         # RLT (4/20/2024): Adding in t-dependence
         #sigt = (p5 / (1 + p6*q2_gev)) * ftav
-        sigt = (p5 / (1 + p6*q2_gev)) * abs(t_gev)
+        #sigt = (p5 / (1 + p6*q2_gev)) * abs(t_gev)
+        sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
     except OverflowError:        
         sigt = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")

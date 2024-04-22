@@ -90,13 +90,13 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
 *     RLT (2/21/2024): Using global analysis sig T model and params
 *     (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)       
-*     sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
+      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
 *     sigT=par(5)+par(6)*log(q2)
 *     sigT=par(5)*log(q2)++par(6)/(q2**2)
 *      sigT=par(5)/(1+par(6)*q2)
 *     RLT (4/20/2024): Adding in t-dependence
 *     sigT=(par(5)/(1+par(6)*q2))*f_tav
-      sigT=(par(5)/(1+par(6)*q2))*abs(tm)
+*     sigT=(par(5)/(1+par(6)*q2))*abs(tm)
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
 *     RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
