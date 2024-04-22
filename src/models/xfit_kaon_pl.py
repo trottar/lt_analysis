@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-21 23:37:54 trottar"
+# Time-stamp: "2024-04-21 23:39:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,8 +37,8 @@ def set_val(inp_pol_str, inp_q2_set):
 
 # Function for SigL
 def fun_Sig_L(x, par):
-    tt = abs(x)
-    qq = float(q2_set)
+    tt = abs(x[0])
+    qq = float(q2_set.replace("p","."))
     #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
     # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
@@ -50,8 +50,8 @@ def fun_Sig_L(x, par):
     
 # Function for SigT
 def fun_Sig_T(x, par):
-    tt = abs(x)
-    qq = float(q2_set)
+    tt = abs(x[0])
+    qq = float(q2_set.replace("p","."))
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
     ftav = (abs(tt)-tav)/tav
     #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
@@ -73,8 +73,8 @@ def fun_Sig_T(x, par):
 # Function for SigLT
 # thetacm term is defined on function calling
 def fun_Sig_LT(x, par):
-    tt = abs(x)
-    qq = float(q2_set)
+    tt = abs(x[0])
+    qq = float(q2_set.replace("p","."))
     #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
     return f
@@ -84,8 +84,8 @@ def fun_Sig_LT(x, par):
 # Function for SigTT
 # thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
-    tt = abs(x)
-    qq = float(q2_set)
+    tt = abs(x[0])
+    qq = float(q2_set.replace("p","."))
     if pol_str == "pl":
         f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
     #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
