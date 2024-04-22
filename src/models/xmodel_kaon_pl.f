@@ -95,7 +95,8 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     sigT=par(5)*log(q2)++par(6)/(q2**2)
 *      sigT=par(5)/(1+par(6)*q2)
 *     RLT (4/20/2024): Adding in t-dependence
-      sigT=(par(5)/(1+par(6)*q2))*f_tav
+*     sigT=(par(5)/(1+par(6)*q2))*f_tav
+      sigT=(par(5)/(1+par(6)*q2))*abs(tm)
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
 *     RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
