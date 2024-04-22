@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-21 23:05:49 trottar"
+# Time-stamp: "2024-04-21 23:08:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,7 +13,7 @@
 import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
-from ROOT import TF2, TFitResultPtr
+from ROOT import TF1, TFitResultPtr
 import math
 import os, sys
 
@@ -180,7 +180,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(1).SetLeftMargin(0.12)
     nsep.Draw("sigl:t:sigl_e", "", "goff")
     
-    f_sigL_pre = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
     f_sigL_pre.SetParNames("p1","p2","p3","p4")
     #f_sigL_pre.SetParameters(l0, l1, l2, l3)
 
@@ -236,7 +236,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i])) * (g_vec[i])
+        sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i], q_vec[i])) * (g_vec[i])
         g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
         sigl_X_fit = g_sigl.GetY()[i] / (1.0)
@@ -266,7 +266,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
-    f_sigL = TF2("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
     f_sigL.SetParNames("p1","p2","p3","p4")
     #f_sigL.SetParameters(l0, l1, l2, l3)
     
@@ -318,7 +318,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
-        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
+        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q_vec[i])) * (g_vec[i])
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
     g_q2_sigl_fit.Fit(f_sigL, "SQ")
@@ -363,7 +363,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(2).SetLeftMargin(0.12)
     nsep.Draw("sigt:t:sigt_e", "", "goff")
 
-    f_sigT_pre = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
     f_sigT_pre.SetParNames("p5","p6")
     #f_sigT_pre.SetParameters(t0, t1)    
 
@@ -406,7 +406,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
 
-        sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i])) * (g_vec[i])
+        sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i], q_vec[i])) * (g_vec[i])
         g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
 
         sigt_X_fit = (g_sigt.GetY()[i]) / (1.0)
@@ -436,7 +436,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
-    f_sigT = TF2("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
     f_sigT.SetParNames("p5","p6")
     #f_sigT.SetParameters(t0, t1)
 
@@ -474,7 +474,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_q2_sigt_fit.SetPointError(i, 0.0, sigt_X_fit_err)
-        sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
+        sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q_vec[i])) * (g_vec[i])
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
     g_q2_sigt_fit.Fit(f_sigT, "SQ")
@@ -519,7 +519,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(3).SetLeftMargin(0.12)
     nsep.Draw("siglt:t:siglt_e", "", "goff")
 
-    f_sigLT_pre = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT_pre.SetParNames("p9","p10","p11")
     #f_sigLT_pre.SetParameters(lt0, lt1, lt2)    
 
@@ -570,7 +570,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
+        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i], q_vec[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
 
         if th_vec[i] == 180:
@@ -604,7 +604,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.SetTitle("Sigma LT Model Fit")
     g_siglt_fit.Draw("A*")
 
-    f_sigLT = TF2("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT.SetParNames("p9","p10","p11")
     #f_sigLT.SetParameters(lt0, lt1, lt2)
 
@@ -650,7 +650,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_q2_siglt_fit.SetPointError(i, 0.0, siglt_X_fit_err)
-        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
+        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q_vec[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
     g_q2_siglt_fit.Fit(f_sigLT, "SQ")
@@ -695,7 +695,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(4).SetLeftMargin(0.12)
     nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
-    f_sigTT_pre = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
     f_sigTT_pre.SetParNames("p13")
     #f_sigTT_pre.SetParameters(tt0)    
 
@@ -734,7 +734,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i], q_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
 
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
@@ -769,7 +769,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
-    f_sigTT = TF2("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
     f_sigTT.SetParNames("p13")
     #f_sigTT.SetParameters(tt0)
 
@@ -803,7 +803,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
-        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
