@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 14:57:08 trottar"
+# Time-stamp: "2024-04-23 15:16:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,7 +85,7 @@ def import_model(inp_model, arg_str):
             try:
                 #f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
                 # RLT (4/23/2024): Marco's thesis functional forms
-                f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)/par[2]))
+                f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
@@ -103,7 +103,7 @@ def import_model(inp_model, arg_str):
                 #f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 #f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
                 # RLT (4/23/2024): Marco's thesis functional forms
-                f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)/par[2]))                
+                f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))                
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigTT, setting to zero for this event...")

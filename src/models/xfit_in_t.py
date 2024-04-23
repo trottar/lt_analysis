@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 15:13:13 trottar"
+# Time-stamp: "2024-04-23 15:15:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -626,7 +626,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if lt1 != 0.0:
         f_sigLT.SetParLimits(1, lt1-abs(lt1*par_lim), lt1+abs(lt1*par_lim))
     else: 
-        f_sigLT.SetParLimits(1, -par_lim, par_lim)       
+        f_sigLT.SetParLimits(1, -par_lim, par_lim)
     if lt2 != 0.0:
         f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim), lt2+abs(lt2*par_lim))
     else: 

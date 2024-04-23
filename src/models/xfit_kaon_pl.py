@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 14:56:40 trottar"
+# Time-stamp: "2024-04-23 15:16:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,7 +85,7 @@ def fun_Sig_LT(x, par):
     #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     #f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
     # RLT (4/23/2024): Marco's thesis functional forms
-    f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)/par[2]))
+    f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
     return f
 
 ###############################################################################################################################################
@@ -100,7 +100,7 @@ def fun_Sig_TT(x, par):
     #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     #f = (par[0]*qq*math.exp(-qq))*f_tt
     # RLT (4/23/2024): Marco's thesis functional forms
-    f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)/par[2]))
+    f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
     return f
 
 ###############################################################################################################################################
