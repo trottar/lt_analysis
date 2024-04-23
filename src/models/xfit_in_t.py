@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 15:05:35 trottar"
+# Time-stamp: "2024-04-23 15:10:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -570,15 +570,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
+        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i])) * (g_vec[i])
         g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
 
-        if th_vec[i] == 180:
-            siglt_X_fit = 0.0
-            siglt_X_fit_err = 1.0
-        else:
-            siglt_X_fit = g_siglt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180))
-            siglt_X_fit_err = g_siglt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180))
+        siglt_X_fit = g_siglt.GetY()[i] / (1.0)
+        siglt_X_fit_err = g_siglt.GetEY()[i] / (1.0)
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
@@ -650,7 +646,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_q2_siglt_fit.SetPointError(i, 0.0, siglt_X_fit_err)
-        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
+        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i])) * (g_vec[i])
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
     g_q2_siglt_fit.Fit(f_sigLT, "SQ")
@@ -742,16 +738,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
-
+        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
-        if th_vec[i] == 180:
-                    sigtt_X_fit = 0.0
-                    sigtt_X_fit_err = 1.0
-        else:
-            sigtt_X_fit = g_sigtt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
-            sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
+        sigtt_X_fit = g_sigtt.GetY()[i] / (1.0)
+        sigtt_X_fit_err = g_sigtt.GetEY()[i] / (1.0)
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
@@ -819,7 +810,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
-        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash

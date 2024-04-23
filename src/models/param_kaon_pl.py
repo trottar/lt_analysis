@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 14:56:46 trottar"
+# Time-stamp: "2024-04-23 15:06:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ def iterWeight(arg_str):
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
         # RLT (4/23/2024): Marco's thesis functional forms
-        sigl = p1 * math.exp(p2*abs(t_gev)) * (1.0 / (1.0 + p3*q2_gev))
+        sigl = p1 * math.exp(-p2*abs(t_gev)) * (1.0 / (1.0 + p3*q2_gev))
     except OverflowError:
         sigl = -1000.0
         #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
@@ -84,7 +84,7 @@ def iterWeight(arg_str):
         # RLT (4/23/2024): Exponential t-dependence
         #sigt = (p5 / (1 + p6*q2_gev)) * math.exp(p7*abs(t_gev))
         # RLT (4/23/2024): Marco's thesis functional forms
-        sigt = p5 * math.exp(p6*abs(t_gev)) * (1.0 / (1.0 + p7*q2_gev))        
+        sigt = p5 * math.exp(-p6*abs(t_gev)) * (1.0 / (1.0 + p7*q2_gev))        
     except OverflowError:        
         sigt = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
@@ -92,7 +92,7 @@ def iterWeight(arg_str):
     try:
         #siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
         # RLT (4/23/2024): Marco's thesis functional forms
-        siglt = p9 * math.exp(p10*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)/p11))
+        siglt = p9 * math.exp(-p10*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)/p11))
     except OverflowError:
         siglt = -1000.0
         #print("WARNING: Overflowerror on sigLT, setting to zero for this event...\n\n")
@@ -103,7 +103,7 @@ def iterWeight(arg_str):
         #                 Therefore param 12 was also changed to 13
         #sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
         # RLT (4/23/2024): Marco's thesis functional forms
-        sigtt = p13 * math.exp(p14*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)/p15))        
+        sigtt = p13 * math.exp(-p14*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)/p15))        
     except OverflowError:
         sigtt = -1000.0
         #print("WARNING: Overflowerror on sigTT, setting to zero for this event...\n\n")
