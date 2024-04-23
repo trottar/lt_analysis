@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 02:00:53 trottar"
+# Time-stamp: "2024-04-23 02:02:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ DEBUG=False
 #par_lim = 0.2 # +/-20%
 #par_lim = 0.75 # +/-75%
 par_lim = 10.00 # +/-1000%
-par_lim_TT = 5.00 # +/-1000%
+par_lim_TT = 1.00 # Fixed sigTT param range
 ##############
 ##############
 ##############
@@ -545,7 +545,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigLT_pre.SetParLimits(2, lt2-abs(lt2*par_lim), lt2+abs(lt2*par_lim))
     else: 
         f_sigLT_pre.SetParLimits(2, -par_lim, par_lim)
-    #f_sigLT_pre.SetParLimits(3, lt3-abs(lt3*par_lim_LTTT), lt3+abs(lt3*par_lim_LTTT))        
+    #f_sigLT_pre.SetParLimits(3, lt3-abs(lt3*par_lim_TT), lt3+abs(lt3*par_lim_TT))        
     # Fixing sigLT terms for testing
     #f_sigLT_pre.FixParameter(0, lt0)
     #f_sigLT_pre.FixParameter(1, lt1)
@@ -630,7 +630,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim), lt2+abs(lt2*par_lim))
     else: 
         f_sigLT.SetParLimits(2, -par_lim, par_lim)
-    #f_sigLT.SetParLimits(3, lt3-abs(lt3*par_lim_LTTT), lt3+abs(lt3*par_lim_LTTT))
+    #f_sigLT.SetParLimits(3, lt3-abs(lt3*par_lim_TT), lt3+abs(lt3*par_lim_TT))
     # Fixing sigLT terms for testing
     #f_sigLT.FixParameter(0, lt0)
     #f_sigLT.FixParameter(1, lt1)
@@ -710,12 +710,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##f_sigTT_pre.FixParameter(3, 0)
     # Set range limit of used parameters
     if tt0 != 0.0:
-        f_sigTT_pre.SetParLimits(0, -par_lim_LTTT, par_lim_LTTT)
+        f_sigTT_pre.SetParLimits(0, -par_lim_TT, par_lim_TT)
     else: 
-        f_sigTT_pre.SetParLimits(0, -par_lim_LTTT, par_lim_LTTT)
-    #f_sigTT_pre.SetParLimits(1, tt1-abs(tt1*par_lim_LTTT), tt1+abs(tt1*par_lim_LTTT))
-    #f_sigTT_pre.SetParLimits(2, tt2-abs(tt2*par_lim_LTTT), tt2+abs(tt2*par_lim_LTTT))
-    #f_sigTT_pre.SetParLimits(3, tt3-abs(tt3*par_lim_LTTT), tt3+abs(tt3*par_lim_LTTT))
+        f_sigTT_pre.SetParLimits(0, -par_lim_TT, par_lim_TT)
+    #f_sigTT_pre.SetParLimits(1, tt1-abs(tt1*par_lim_TT), tt1+abs(tt1*par_lim_TT))
+    #f_sigTT_pre.SetParLimits(2, tt2-abs(tt2*par_lim_TT), tt2+abs(tt2*par_lim_TT))
+    #f_sigTT_pre.SetParLimits(3, tt3-abs(tt3*par_lim_TT), tt3+abs(tt3*par_lim_TT))
     # Fixing sigTT terms for testing
     #f_sigTT_pre.FixParameter(0, tt0)
     # Fixing sigTT terms to zero
@@ -784,12 +784,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##f_sigTT.FixParameter(3, 0)
     # Set range limit of used parameters
     if tt0 != 0.0:
-        f_sigTT.SetParLimits(0, -par_lim_LTTT, par_lim_LTTT)
+        f_sigTT.SetParLimits(0, -par_lim_TT, par_lim_TT)
     else: 
-        f_sigTT.SetParLimits(0, -par_lim_LTTT, par_lim_LTTT)
-    #f_sigTT.SetParLimits(1, tt1-abs(tt1*par_lim_LTTT), tt1+abs(tt1*par_lim_LTTT))
-    #f_sigTT.SetParLimits(2, tt2-abs(tt2*par_lim_LTTT), tt2+abs(tt2*par_lim_LTTT))
-    #f_sigTT.SetParLimits(3, tt3-abs(tt3*par_lim_LTTT), tt3+abs(tt3*par_lim_LTTT))    
+        f_sigTT.SetParLimits(0, -par_lim_TT, par_lim_TT)
+    #f_sigTT.SetParLimits(1, tt1-abs(tt1*par_lim_TT), tt1+abs(tt1*par_lim_TT))
+    #f_sigTT.SetParLimits(2, tt2-abs(tt2*par_lim_TT), tt2+abs(tt2*par_lim_TT))
+    #f_sigTT.SetParLimits(3, tt3-abs(tt3*par_lim_TT), tt3+abs(tt3*par_lim_TT))    
     # Fixing sigTT terms for testing
     #f_sigTT.FixParameter(0, tt0)
     # Fixing sigTT terms to zero
