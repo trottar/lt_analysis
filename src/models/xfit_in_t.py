@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 15:15:00 trottar"
+# Time-stamp: "2024-04-23 15:17:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,12 +134,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("File {} not found.".format(para_file_in))
         
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
-
-    # HARD CODED
-    l0, l1, l2, l3 = 0.1, 0.1, 0.1, 0
-    t0, t1, t2, t3 = 0.1, 0.1, 0.1, 0
-    lt0, lt1, lt2, lt3 = 0.1, 0.1, 0.1, 0
-    tt0, tt1, tt2, tt3 = 0.1, 0.1, 0.1, 0
     
     ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     with open(ave_file_in, 'r') as f:
