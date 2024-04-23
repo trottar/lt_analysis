@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 15:17:49 trottar"
+# Time-stamp: "2024-04-23 19:01:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -261,6 +261,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c2.cd(1)
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
+    f_sigL.Draw("same")
 
     f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
     f_sigL.SetParNames("p1","p2","p3")
@@ -431,6 +432,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c2.cd(2)
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
+    f_sigT.Draw("same")
 
     f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT.SetParNames("p5","p6","p7")
@@ -599,6 +601,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c2.cd(3)
     g_siglt_fit.SetTitle("Sigma LT Model Fit")
     g_siglt_fit.Draw("A*")
+    f_sigLT.Draw("same")
 
     f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT.SetParNames("p9","p10","p11")
@@ -767,6 +770,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c2.cd(4)
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
+    f_sigTT.Draw("same")
 
     f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 3)
     f_sigTT.SetParNames("p13","p14","p15")
