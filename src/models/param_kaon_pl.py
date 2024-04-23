@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-22 19:18:08 trottar"
+# Time-stamp: "2024-04-22 21:36:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ def iterWeight(arg_str):
         # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
         # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
         # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
-        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
-        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
+        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
+        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
     except OverflowError:
         sigl = -1000.0
         #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
@@ -75,11 +75,10 @@ def iterWeight(arg_str):
         #sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
         #sigt = p5 + p6 * math.log(q2_gev)
         #sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
-        #sigt = p5 / (1 + p6*q2_gev)
+        sigt = p5 / (1 + p6*q2_gev)
         # RLT (4/20/2024): Adding in t-dependence
         #sigt = (p5 / (1 + p6*q2_gev)) * ftav
         #sigt = (p5 / (1 + p6*q2_gev)) * abs(t_gev)
-        sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
     except OverflowError:        
         sigt = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")

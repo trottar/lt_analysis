@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-22 19:21:07 trottar"
+# Time-stamp: "2024-04-22 21:35:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,8 +42,8 @@ def fun_Sig_L(x, par):
     #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
     # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
-    #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
-    f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
+    f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
+    #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
     return f
 
 ###############################################################################################################################################
@@ -63,11 +63,10 @@ def fun_Sig_T(x, par):
     #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
     #f = par[0]+par[1]*math.log(qq)
     #f = par[0]*math.log(qq)+par[1]/(qq**2)
-    #f = par[0] / (1 + par[1]*qq)
+    f = par[0] / (1 + par[1]*qq)
     # RLT (4/20/2024): Adding in t-dependence
     #f = (par[0] / (1 + par[1]*qq)) * ftav
     #f = (par[0] / (1 + par[1]*qq)) * abs(tt)
-    f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
     return f
 
 ###############################################################################################################################################

@@ -81,19 +81,19 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *                      extreme slope at high t
 *     RLT (3/09/2024): Removing +0.2 term for better parameterization of
 *                      Q2=3.0, W=2.32
-*      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
-*     >     +par(4)*log(q2))*(abs(tm)))
       sigL=(par(1)+par(2)*log(q2))*exp((par(3)
-     >     +par(4)*log(q2))*(abs(tm)+0.2))
+     >     +par(4)*log(q2))*(abs(tm)))
+*      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+*     >     +par(4)*log(q2))*(abs(tm)+0.2))
 *     RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
 *     RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
 *     RLT (2/21/2024): Using global analysis sig T model and params
 *     (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)       
-      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
+*      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
 *     sigT=par(5)+par(6)*log(q2)
 *     sigT=par(5)*log(q2)++par(6)/(q2**2)
-*      sigT=par(5)/(1+par(6)*q2)
+      sigT=par(5)/(1+par(6)*q2)
 *     RLT (4/20/2024): Adding in t-dependence
 *     sigT=(par(5)/(1+par(6)*q2))*f_tav
 *     sigT=(par(5)/(1+par(6)*q2))*abs(tm)
