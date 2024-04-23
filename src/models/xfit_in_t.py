@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 15:10:33 trottar"
+# Time-stamp: "2024-04-23 15:13:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,6 +134,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("File {} not found.".format(para_file_in))
         
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
+
+    # HARD CODED
+    l0, l1, l2, l3 = 0.1, 0.1, 0.1, 0
+    t0, t1, t2, t3 = 0.1, 0.1, 0.1, 0
+    lt0, lt1, lt2, lt3 = 0.1, 0.1, 0.1, 0
+    tt0, tt1, tt2, tt3 = 0.1, 0.1, 0.1, 0
     
     ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     with open(ave_file_in, 'r') as f:
@@ -182,7 +188,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
     f_sigL_pre.SetParNames("p1","p2","p3")
-    f_sigL_pre.SetParameters(0.1, 0.1, 0.1)
+    #f_sigL_pre.SetParameters(0.1, 0.1, 0.1)
 
     ##############
     # HARD CODED #
@@ -264,7 +270,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
     f_sigL.SetParNames("p1","p2","p3")
-    f_sigL.SetParameters(0.1, 0.1, 0.1)
+    #f_sigL.SetParameters(0.1, 0.1, 0.1)
     
     ##############
     # HARD CODED #
@@ -357,7 +363,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT_pre.SetParNames("p5","p6","p7")
-    f_sigT_pre.SetParameters(0.1, 0.1, 0.1)
+    #f_sigT_pre.SetParameters(0.1, 0.1, 0.1)
 
     ##############
     # HARD CODED #
@@ -434,7 +440,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT.SetParNames("p5","p6","p7")
-    f_sigT.SetParameters(0.1, 0.1, 0.1)
+    #f_sigT.SetParameters(0.1, 0.1, 0.1)
 
     ##############
     # HARD CODED #
@@ -521,7 +527,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT_pre.SetParNames("p9","p10","p11")
-    f_sigLT_pre.SetParameters(0.1, 0.1, 0.1)
+    #f_sigLT_pre.SetParameters(0.1, 0.1, 0.1)
 
     ##############
     # HARD CODED #
@@ -602,7 +608,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT.SetParNames("p9","p10","p11")
-    f_sigLT_pre.SetParameters(0.1, 0.1, 0.1)
+    #f_sigLT_pre.SetParameters(0.1, 0.1, 0.1)
 
     ##############
     # HARD CODED #
@@ -693,7 +699,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 3)
     f_sigTT_pre.SetParNames("p13","p14","p15")
-    f_sigTT_pre.SetParameters(0.1, 0.1, 0.1)
+    #f_sigTT_pre.SetParameters(0.1, 0.1, 0.1)
 
     ##############
     # HARD CODED #
@@ -770,7 +776,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 3)
     f_sigTT.SetParNames("p13","p14","p15")
-    f_sigTT.SetParameters(0.1, 0.1, 0.1)
+    #f_sigTT.SetParameters(0.1, 0.1, 0.1)
 
     ##############
     # HARD CODED #
