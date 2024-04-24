@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 14:02:24 trottar"
+# Time-stamp: "2024-04-24 14:11:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -562,10 +562,10 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
-        # Scale the lists before subtraction
-        #print("Y_data = {:.5e}*{:.5e}".format(np.sum(hist_val_data), normfac_data))
+        # Scale the lists before subtraction        
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
+        print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, scaled_hist_val_data))
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
         try:
