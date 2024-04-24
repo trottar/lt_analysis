@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 22:38:05 trottar"
+# Time-stamp: "2024-04-24 00:18:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,7 @@ def fun_Sig_LT(x, par):
     qq = float(q2_set.replace("p","."))
     #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     #f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
-    f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
+    f = (par[0]+par[2]/abs(tt))
     # RLT (4/23/2024): Marco's thesis functional forms
     #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
     return f

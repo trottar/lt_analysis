@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 23:08:36 trottar"
+# Time-stamp: "2024-04-24 00:14:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,7 +90,8 @@ def iterWeight(arg_str):
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
 
     try:
-        siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
+        #siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
+        siglt = (p9 + p11 / abs(t_gev)) * math.sin(thetacm_sim)
         # RLT (4/23/2024): Marco's thesis functional forms
         #siglt = p9 * math.exp(-p10*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)*p11))
     except OverflowError:
@@ -101,8 +102,7 @@ def iterWeight(arg_str):
         # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
         #                 xfit_in_t.py script to work. LT/TT are zeros
         #                 Therefore param 12 was also changed to 13
-        #sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
-        sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim/2)
+        sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
         # RLT (4/23/2024): Marco's thesis functional forms
         #sigtt = p13 * math.exp(-p14*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)*p15))        
     except OverflowError:
