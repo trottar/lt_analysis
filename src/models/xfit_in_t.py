@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 22:43:20 trottar"
+# Time-stamp: "2024-04-23 23:08:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -748,7 +748,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) * math.sin(2 * th_vec[i] * PI / 180)) * (g_vec[i])
+        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / (2*180))) * (g_vec[i])
 
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
@@ -756,8 +756,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigtt_X_fit = 0.0
                     sigtt_X_fit_err = 1.0
         else:
-            sigtt_X_fit = g_sigtt.GetY()[i] / ((1.0) * math.sin(2 * th_vec[i] * PI / 180))
-            sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((1.0) * math.sin(2 * th_vec[i] * PI / 180))
+            sigtt_X_fit = g_sigtt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / (2*180)))
+            sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / (2*180)))
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
@@ -817,7 +817,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
-        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(2 * th_vec[i] * PI / 180)) * (g_vec[i])
+        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / (2*180))) * (g_vec[i])
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash

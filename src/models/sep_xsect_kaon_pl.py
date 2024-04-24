@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 22:42:13 trottar"
+# Time-stamp: "2024-04-23 23:08:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,7 +102,7 @@ def import_model(inp_model, arg_str):
             try:            
                 #f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 #f = (par[0]*qq*math.exp(-qq))*f_tt*math.sin(theta_cm)**2
-                f = (par[0]*qq*math.exp(-qq))*f_tt*math.sin(2*theta_cm)
+                f = (par[0]*qq*math.exp(-qq))*f_tt*math.sin(theta_cm/2)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))                
             except ValueError:
