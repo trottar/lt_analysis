@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 01:24:52 trottar"
+# Time-stamp: "2024-04-24 02:26:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,12 +61,12 @@ def import_model(inp_model, arg_str):
             #f = par[0]+par[1]*math.log(qq)
             #f = par[0]*math.log(qq)+par[1]/(qq**2)
             try:
-                #f = par[0] / (1 + par[1]*qq)
+                f = par[0] / (1 + par[1]*qq)
                 # RLT (4/20/2024): Adding in t-dependence
                 #f = (par[0] / (1 + par[1]*qq)) * ftav
                 #f = (par[0] / (1 + par[1]*qq)) * abs(tt)
                 # RLT (4/20/2024): Exponential t-dependence
-                f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
+                #f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))                    
             except ValueError:
@@ -83,8 +83,8 @@ def import_model(inp_model, arg_str):
         if inp_model == "sigLT":
             print("Calculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             try:
-                #f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
-                f = (par[0]+par[2]/abs(tt))*math.sin(theta_cm)
+                f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
+                #f = (par[0]+par[2]/abs(tt))*math.sin(theta_cm)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
             except ValueError:
