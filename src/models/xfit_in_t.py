@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 21:52:24 trottar"
+# Time-stamp: "2024-04-23 22:43:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -533,7 +533,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT_pre.SetParNames("p9","p10","p11")
-    #f_sigLT_pre.SetParameters(0.1, 0.1, 0.1)
+    #f_sigLT_pre.SetParameters(lt0, lt1, lt2)    
 
     ##############
     # HARD CODED #
@@ -582,11 +582,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i])) * (g_vec[i])
+        siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
 
-        siglt_X_fit = g_siglt.GetY()[i] / (1.0)
-        siglt_X_fit_err = g_siglt.GetEY()[i] / (1.0)
+        if th_vec[i] == 180:
+            siglt_X_fit = 0.0
+            siglt_X_fit_err = 1.0
+        else:
+            siglt_X_fit = g_siglt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180))
+            siglt_X_fit_err = g_siglt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180))
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
@@ -614,7 +618,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT.SetParNames("p9","p10","p11")
-    #f_sigLT_pre.SetParameters(0.1, 0.1, 0.1)
+    #f_sigLT.SetParameters(lt0, lt1, lt2)
 
     ##############
     # HARD CODED #
@@ -632,7 +636,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if lt1 != 0.0:
         f_sigLT.SetParLimits(1, lt1-abs(lt1*par_lim), lt1+abs(lt1*par_lim))
     else: 
-        f_sigLT.SetParLimits(1, -par_lim, par_lim)
+        f_sigLT.SetParLimits(1, -par_lim, par_lim)       
     if lt2 != 0.0:
         f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim), lt2+abs(lt2*par_lim))
     else: 
@@ -658,17 +662,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_q2_siglt_fit.SetPointError(i, 0.0, siglt_X_fit_err)
-        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i])) * (g_vec[i])
+        siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
     g_q2_siglt_fit.Fit(f_sigLT, "SQ")
-
-    f_sigLT.Draw("same")
     
     # Check the fit status for 'f_sigLT'
     f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
 
+    f_sigLT.Draw("same")
+    
     fit_status = TText()
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigLT_status_message))
@@ -705,9 +709,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(4).SetLeftMargin(0.12)
     nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
-    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 3)
-    f_sigTT_pre.SetParNames("p13","p14","p15")
-    #f_sigTT_pre.SetParameters(0.1, 0.1, 0.1)
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+    f_sigTT_pre.SetParNames("p13")
+    #f_sigTT_pre.SetParameters(tt0)    
 
     ##############
     # HARD CODED #
@@ -722,14 +726,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigTT_pre.SetParLimits(0, tt0-abs(tt0*par_lim), tt0+abs(tt0*par_lim))
     else: 
         f_sigTT_pre.SetParLimits(0, -par_lim, par_lim)
-    if tt1 != 0.0:
-        f_sigTT_pre.SetParLimits(1, tt1-abs(tt1*par_lim), tt1+abs(tt1*par_lim))
-    else: 
-        f_sigTT_pre.SetParLimits(1, -par_lim, par_lim)
-    if tt2 != 0.0:
-        f_sigTT_pre.SetParLimits(2, tt2-abs(tt2*par_lim), tt2+abs(tt2*par_lim))
-    else: 
-        f_sigTT_pre.SetParLimits(2, -par_lim, par_lim)               
     #f_sigTT_pre.SetParLimits(1, tt1-abs(tt1*par_lim_LTTT), tt1+abs(tt1*par_lim_LTTT))
     #f_sigTT_pre.SetParLimits(2, tt2-abs(tt2*par_lim_LTTT), tt2+abs(tt2*par_lim_LTTT))
     #f_sigTT_pre.SetParLimits(3, tt3-abs(tt3*par_lim_LTTT), tt3+abs(tt3*par_lim_LTTT))
@@ -752,11 +748,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     for i in range(len(w_vec)):
         
-        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
+        sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) * math.sin(2 * th_vec[i] * PI / 180)) * (g_vec[i])
+
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
-        sigtt_X_fit = g_sigtt.GetY()[i] / (1.0)
-        sigtt_X_fit_err = g_sigtt.GetEY()[i] / (1.0)
+        if th_vec[i] == 180:
+                    sigtt_X_fit = 0.0
+                    sigtt_X_fit_err = 1.0
+        else:
+            sigtt_X_fit = g_sigtt.GetY()[i] / ((1.0) * math.sin(2 * th_vec[i] * PI / 180))
+            sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((1.0) * math.sin(2 * th_vec[i] * PI / 180))
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
@@ -782,9 +783,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
-    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 3)
-    f_sigTT.SetParNames("p13","p14","p15")
-    #f_sigTT.SetParameters(0.1, 0.1, 0.1)
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+    f_sigTT.SetParNames("p13")
+    #f_sigTT.SetParameters(tt0)
 
     ##############
     # HARD CODED #
@@ -799,14 +800,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim), tt0+abs(tt0*par_lim))
     else: 
         f_sigTT.SetParLimits(0, -par_lim, par_lim)
-    if tt1 != 0.0:
-        f_sigTT.SetParLimits(1, tt1-abs(tt1*par_lim), tt1+abs(tt1*par_lim))
-    else: 
-        f_sigTT.SetParLimits(1, -par_lim, par_lim)
-    if tt2 != 0.0:
-        f_sigTT.SetParLimits(2, tt2-abs(tt2*par_lim), tt2+abs(tt2*par_lim))
-    else: 
-        f_sigTT.SetParLimits(2, -par_lim, par_lim)               
     #f_sigTT.SetParLimits(1, tt1-abs(tt1*par_lim_LTTT), tt1+abs(tt1*par_lim_LTTT))
     #f_sigTT.SetParLimits(2, tt2-abs(tt2*par_lim_LTTT), tt2+abs(tt2*par_lim_LTTT))
     #f_sigTT.SetParLimits(3, tt3-abs(tt3*par_lim_LTTT), tt3+abs(tt3*par_lim_LTTT))    
@@ -824,18 +817,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
-        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
+        sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(2 * th_vec[i] * PI / 180)) * (g_vec[i])
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
         print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
     g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
 
-    f_sigTT.Draw("same")
-    
     # Check the fit status for 'f_sigTT'
     f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
 
+    f_sigTT.Draw("same")
+    
     fit_status = TText()
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))

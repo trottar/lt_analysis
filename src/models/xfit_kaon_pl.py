@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 21:49:36 trottar"
+# Time-stamp: "2024-04-23 22:38:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,8 +84,9 @@ def fun_Sig_LT(x, par):
     qq = float(q2_set.replace("p","."))
     #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
     #f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
+    f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
     # RLT (4/23/2024): Marco's thesis functional forms
-    f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
+    #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
     return f
 
 ###############################################################################################################################################
@@ -98,9 +99,9 @@ def fun_Sig_TT(x, par):
     if pol_str == "pl":
         f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
     #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-    #f = (par[0]*qq*math.exp(-qq))*f_tt
+    f = (par[0]*qq*math.exp(-qq))*f_tt
     # RLT (4/23/2024): Marco's thesis functional forms
-    f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
+    #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
     return f
 
 ###############################################################################################################################################
