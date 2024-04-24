@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 14:11:11 trottar"
+# Time-stamp: "2024-04-24 16:28:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -565,13 +565,13 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Scale the lists before subtraction        
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
-        print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, scaled_hist_val_data))
+        print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, np.sum(scaled_hist_val_data)))
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
-            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(sum(hist_val_data)))**2)
+            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
             # Convert to absolute error (required for average_ratio.f)
             yld_err = yld_err*yld
         except ZeroDivisionError:
