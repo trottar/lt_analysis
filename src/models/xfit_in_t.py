@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 12:15:54 trottar"
+# Time-stamp: "2024-04-24 12:21:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,7 +180,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(1).SetLeftMargin(0.12)
     nsep.Draw("sigl:t:sigl_e", "", "goff")
     
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, 0.0, tmax_range, 4)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
     f_sigL_pre.SetParNames("p1","p2","p3","p4")
     #f_sigL_pre.SetParameters(l0, l1, l2, l3)
 
@@ -239,8 +239,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i])) * (g_vec[i])
         g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
-        sigl_X_fit = g_sigl.GetY()[i] / (1.0)
-        sigl_X_fit_err = g_sigl.GetEY()[i] / (1.0)
+        sigl_X_fit = g_sigl.GetY()[i] / (g_vec[i])
+        sigl_X_fit_err = g_sigl.GetEY()[i] / (g_vec[i])
 
         g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
@@ -266,7 +266,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
-    f_sigL = TF1("sig_L", fun_Sig_L, 0.0, tmax_range, 4)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
     f_sigL.SetParNames("p1","p2","p3","p4")
     #f_sigL.SetParameters(l0, l1, l2, l3)
     
@@ -365,7 +365,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(2).SetLeftMargin(0.12)
     nsep.Draw("sigt:t:sigt_e", "", "goff")
 
-    f_sigT_pre = TF1("sig_T", fun_Sig_T, 0.0, tmax_range, 3)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT_pre.SetParNames("p5","p6","p7")
     #f_sigT_pre.SetParameters(t0, t1)    
 
@@ -415,8 +415,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i])) * (g_vec[i])
         g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
 
-        sigt_X_fit = (g_sigt.GetY()[i]) / (1.0)
-        sigt_X_fit_err = g_sigt.GetEY()[i] / (1.0)
+        sigt_X_fit = (g_sigt.GetY()[i]) / (g_vec[i])
+        sigt_X_fit_err = g_sigt.GetEY()[i] / (g_vec[i])
 
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
@@ -442,7 +442,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
-    f_sigT = TF1("sig_T", fun_Sig_T, 0.0, tmax_range, 3)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT.SetParNames("p5","p6","p7")
     #f_sigT.SetParameters(t0, t1)
 
@@ -531,7 +531,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(3).SetLeftMargin(0.12)
     nsep.Draw("siglt:t:siglt_e", "", "goff")
 
-    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, 0.0, tmax_range, 3)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT_pre.SetParNames("p9","p10","p11")
     #f_sigLT_pre.SetParameters(lt0, lt1, lt2)    
 
@@ -589,8 +589,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             siglt_X_fit = 0.0
             siglt_X_fit_err = 1.0
         else:
-            siglt_X_fit = g_siglt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180))
-            siglt_X_fit_err = g_siglt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180))
+            siglt_X_fit = g_siglt.GetY()[i] / ((g_vec[i]) * math.sin(th_vec[i] * PI / 180))
+            siglt_X_fit_err = g_siglt.GetEY()[i] / ((g_vec[i]) * math.sin(th_vec[i] * PI / 180))
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
@@ -616,7 +616,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.SetTitle("Sigma LT Model Fit")
     g_siglt_fit.Draw("A*")
 
-    f_sigLT = TF1("sig_LT", fun_Sig_LT, 0.0, tmax_range, 3)
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT.SetParNames("p9","p10","p11")
     #f_sigLT.SetParameters(lt0, lt1, lt2)
 
@@ -709,7 +709,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(4).SetLeftMargin(0.12)
     nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
-    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, 0.0, tmax_range, 1)
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
     f_sigTT_pre.SetParNames("p13")
     #f_sigTT_pre.SetParameters(tt0)    
 
@@ -756,8 +756,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigtt_X_fit = 0.0
                     sigtt_X_fit_err = 1.0
         else:
-            sigtt_X_fit = g_sigtt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
-            sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
+            sigtt_X_fit = g_sigtt.GetY()[i] / ((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
+            sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
@@ -783,7 +783,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
-    f_sigTT = TF1("sig_TT", fun_Sig_TT, 0.0, tmax_range, 1)
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
     f_sigTT.SetParNames("p13")
     #f_sigTT.SetParameters(tt0)
 
