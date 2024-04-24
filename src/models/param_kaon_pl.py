@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 15:16:46 trottar"
+# Time-stamp: "2024-04-23 21:49:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,9 +62,9 @@ def iterWeight(arg_str):
         # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
         # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
-        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
+        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
         # RLT (4/23/2024): Marco's thesis functional forms
-        sigl = p1 * math.exp(-p2*abs(t_gev)) * (1.0 / (1.0 + p3*q2_gev))
+        #sigl = p1 * math.exp(-p2*abs(t_gev)) * (1.0 / (1.0 + p3*q2_gev))
     except OverflowError:
         sigl = -1000.0
         #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
@@ -82,9 +82,9 @@ def iterWeight(arg_str):
         #sigt = (p5 / (1 + p6*q2_gev)) * ftav
         #sigt = (p5 / (1 + p6*q2_gev)) * abs(t_gev)
         # RLT (4/23/2024): Exponential t-dependence
-        #sigt = (p5 / (1 + p6*q2_gev)) * math.exp(p7*abs(t_gev))
+        sigt = (p5 / (1 + p6*q2_gev)) * math.exp(p7*abs(t_gev))
         # RLT (4/23/2024): Marco's thesis functional forms
-        sigt = p5 * math.exp(-p6*abs(t_gev)) * (1.0 / (1.0 + p7*q2_gev))        
+        #sigt = p5 * math.exp(-p6*abs(t_gev)) * (1.0 / (1.0 + p7*q2_gev))        
     except OverflowError:        
         sigt = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")

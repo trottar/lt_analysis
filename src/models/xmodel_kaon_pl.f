@@ -83,10 +83,10 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *                      Q2=3.0, W=2.32
 *      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
 *     >     +par(4)*log(q2))*(abs(tm)))
-*      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
-*     >     +par(4)*log(q2))*(abs(tm)+0.2))
+      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+     >     +par(4)*log(q2))*(abs(tm)+0.2))
 *     RLT (4/23/2024): Marco's thesis functional forms
-      sigL=par(1)*exp(-par(2)*abs(tm))*(1.0/(1.0+par(3)*q2))
+*      sigL=par(1)*exp(-par(2)*abs(tm))*(1.0/(1.0+par(3)*q2))
 *     RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
 *     RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
@@ -100,9 +100,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     sigT=(par(5)/(1+par(6)*q2))*f_tav
 *     sigT=(par(5)/(1+par(6)*q2))*abs(tm)
 *     RLT (4/20/2024): Exponential t-dependence
-*     sigT=(par(5)/(1+par(6)*q2))*exp(par(7)*abs(tm))
+      sigT=(par(5)/(1+par(6)*q2))*exp(par(7)*abs(tm))
 *     RLT (4/23/2024): Marco's thesis functional forms
-      sigT=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))      
+*      sigT=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))      
 
 *     sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
 *     RLT (4/23/2024): Marco's thesis functional forms

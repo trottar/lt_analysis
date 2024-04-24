@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 19:03:12 trottar"
+# Time-stamp: "2024-04-23 21:52:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,9 +180,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(1).SetLeftMargin(0.12)
     nsep.Draw("sigl:t:sigl_e", "", "goff")
     
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
-    f_sigL_pre.SetParNames("p1","p2","p3")
-    #f_sigL_pre.SetParameters(0.1, 0.1, 0.1)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
+    f_sigL_pre.SetParNames("p1","p2","p3","p4")
+    #f_sigL_pre.SetParameters(l0, l1, l2, l3)
 
     ##############
     # HARD CODED #
@@ -204,7 +204,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if l2 != 0.0:
         f_sigL_pre.SetParLimits(2, l2-abs(l2*par_lim), l2+abs(l2*par_lim))
     else: 
-        f_sigL_pre.SetParLimits(2, -par_lim, par_lim)
+        f_sigL_pre.SetParLimits(2, -par_lim, par_lim)       
+    if l3 != 0.0:
+        f_sigL_pre.SetParLimits(3, l3-abs(l3*par_lim), l3+abs(l3*par_lim))
+    else: 
+        f_sigL_pre.SetParLimits(3, -par_lim, par_lim)       
     # Fixing sigL terms for testing
     #f_sigL_pre.FixParameter(0, l0)
     #f_sigL_pre.FixParameter(1, l1)
@@ -262,9 +266,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
-    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
-    f_sigL.SetParNames("p1","p2","p3")
-    #f_sigL.SetParameters(0.1, 0.1, 0.1)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
+    f_sigL.SetParNames("p1","p2","p3","p4")
+    #f_sigL.SetParameters(l0, l1, l2, l3)
     
     ##############
     # HARD CODED #
@@ -286,7 +290,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if l2 != 0.0:
         f_sigL.SetParLimits(2, l2-abs(l2*par_lim), l2+abs(l2*par_lim))
     else: 
-        f_sigL.SetParLimits(2, -par_lim, par_lim)
+        f_sigL.SetParLimits(2, -par_lim, par_lim)       
+    if l3 != 0.0:
+        f_sigL.SetParLimits(3, l3-abs(l3*par_lim), l3+abs(l3*par_lim))
+    else: 
+        f_sigL.SetParLimits(3, -par_lim, par_lim)       
     # Fixing sigL terms for testing
     #f_sigL.FixParameter(0, l0)
     #f_sigL.FixParameter(1, l1)
@@ -359,7 +367,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT_pre.SetParNames("p5","p6","p7")
-    #f_sigT_pre.SetParameters(0.1, 0.1, 0.1)
+    #f_sigT_pre.SetParameters(t0, t1)    
 
     ##############
     # HARD CODED #
@@ -436,7 +444,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT.SetParNames("p5","p6","p7")
-    #f_sigT.SetParameters(0.1, 0.1, 0.1)
+    #f_sigT.SetParameters(t0, t1)
 
     ##############
     # HARD CODED #
@@ -456,9 +464,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     else: 
         f_sigT.SetParLimits(1, -par_lim, par_lim)
     if t2 != 0.0:
-        f_sigT.SetParLimits(2, t2-abs(t2*par_lim), t2+abs(t2*par_lim))
+        f_sigT_pre.SetParLimits(2, t2-abs(t2*par_lim), t2+abs(t2*par_lim))
     else: 
-        f_sigT.SetParLimits(2, -par_lim, par_lim)        
+        f_sigT_pre.SetParLimits(2, -par_lim, par_lim)        
     # Fixing sigT terms for testing
     #f_sigT.FixParameter(0, t0)
     #f_sigT.FixParameter(1, t1)
@@ -480,13 +488,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
     g_q2_sigt_fit.Fit(f_sigT, "SQ")
-
-    f_sigT.Draw("same")
     
     # Check the fit status for 'f_sigT'
     f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
     f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
 
+    f_sigT.Draw("same")
+    
     fit_status = TText()
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigT_status_message))

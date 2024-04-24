@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 15:16:59 trottar"
+# Time-stamp: "2024-04-23 21:50:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,9 +36,9 @@ def import_model(inp_model, arg_str):
             #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
             try:
                 #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
-                #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
+                f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
                 # RLT (4/23/2024): Marco's thesis functional forms
-                f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))                    
+                #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))                    
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
@@ -66,9 +66,9 @@ def import_model(inp_model, arg_str):
                 #f = (par[0] / (1 + par[1]*qq)) * ftav
                 #f = (par[0] / (1 + par[1]*qq)) * abs(tt)
                 # RLT (4/20/2024): Exponential t-dependence
-                #f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
+                f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
                 # RLT (4/23/2024): Marco's thesis functional forms
-                f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))                    
+                #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))                    
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigT, setting to zero for this event...")

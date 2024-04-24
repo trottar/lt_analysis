@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-23 15:16:33 trottar"
+# Time-stamp: "2024-04-23 21:49:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,9 +43,9 @@ def fun_Sig_L(x, par):
     # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
     # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
     #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
-    #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
+    f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
     # RLT (4/23/2024): Marco's thesis functional forms
-    f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))    
+    #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))    
     return f
 
 ###############################################################################################################################################
@@ -70,9 +70,9 @@ def fun_Sig_T(x, par):
     #f = (par[0] / (1 + par[1]*qq)) * ftav
     #f = (par[0] / (1 + par[1]*qq)) * abs(tt)
     # RLT (4/23/2024): Exponential t-dependence
-    #f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
+    f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
     # RLT (4/23/2024): Marco's thesis functional forms
-    f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
+    #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
     return f
 
 ###############################################################################################################################################
