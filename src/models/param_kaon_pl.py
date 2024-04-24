@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 02:27:40 trottar"
+# Time-stamp: "2024-04-24 03:15:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,12 +77,12 @@ def iterWeight(arg_str):
         #sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
         #sigt = p5 + p6 * math.log(q2_gev)
         #sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
-        sigt = p5 / (1 + p6*q2_gev)
+        #sigt = p5 / (1 + p6*q2_gev)
         # RLT (4/20/2024): Adding in t-dependence
         #sigt = (p5 / (1 + p6*q2_gev)) * ftav
         #sigt = (p5 / (1 + p6*q2_gev)) * abs(t_gev)
         # RLT (4/23/2024): Exponential t-dependence
-        #sigt = (p5 / (1 + p6*q2_gev)) * math.exp(p7*abs(t_gev))
+        sigt = (p5 / (1 + p6*q2_gev)) * math.exp(p7*abs(t_gev))
         # RLT (4/23/2024): Marco's thesis functional forms
         #sigt = p5 * math.exp(-p6*abs(t_gev)) * (1.0 / (1.0 + p7*q2_gev))        
     except OverflowError:        
