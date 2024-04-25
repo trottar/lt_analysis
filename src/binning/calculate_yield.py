@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 03:12:40 trottar"
+# Time-stamp: "2024-04-25 03:15:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -835,7 +835,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         bin_val_simc, hist_val_simc = simc
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         total_count = np.sum(sub_val)
-        print("{}|({}, {})| Y_simc = {:.5e}*{:.5e} = {:.5e}".format(i, binned_tbin_simc[i], binned_phibin_simc[i], np.sum(hist_val_simc), normfac_simc, total_count))
+        print("{}|({}, {})| Y_simc = {:.5e}*{:.5e}".format(i, binned_tbin_simc[i], binned_phibin_simc[i], total_count, normfac_simc))
         try:
             yld = total_count*normfac_simc
             # Calculate simc yield error (relative error)
