@@ -198,7 +198,8 @@ c      pause
                e=sqrt(e)
 *     Set ratio to zero if exceeds 1000
 *     This prevents errors in output file
-               if (r >= 1000.) then
+*     if (r >= 1000.) then
+               if (r >= 10.) then               
                   r=0.0
                   e=0.0
                endif
