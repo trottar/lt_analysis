@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 21:08:05 trottar"
+# Time-stamp: "2024-04-25 03:13:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,8 +51,8 @@ m_p = 0.93827231
 m_n = 0.93956541
 mkpl = 0.493677
 
-DEBUG=False
-#DEBUG=True
+#DEBUG=False
+DEBUG=True
 
 ##############
 # HARD CODED #
@@ -404,6 +404,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if DEBUG:
         f_sigT_pre.FixParameter(0, t0)
         f_sigT_pre.FixParameter(1, t1)
+        f_sigT_pre.FixParameter(2, t2)
     ##############
     ##############
     ##############    
@@ -488,6 +489,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     if DEBUG:
         f_sigT.FixParameter(0, t0)
         f_sigT.FixParameter(1, t1)
+        f_sigT.FixParameter(2, t2)
     ##############
     ##############
     ##############    
