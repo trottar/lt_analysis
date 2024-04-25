@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 23:22:29 trottar"
+# Time-stamp: "2024-04-25 01:12:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,12 +65,12 @@ def fun_Sig_T(x, par):
     #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
     #f = par[0]+par[1]*math.log(qq)
     #f = par[0]*math.log(qq)+par[1]/(qq**2)
-    f = par[0] / (1 + par[1]*qq)
+    #f = par[0] / (1 + par[1]*qq)
     # RLT (4/20/2024): Adding in t-dependence
     #f = (par[0] / (1 + par[1]*qq)) * ftav
     #f = (par[0] / (1 + par[1]*qq)) * abs(tt)
     # RLT (4/23/2024): Exponential t-dependence
-    #f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
+    f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
     # RLT (4/23/2024): Marco's thesis functional forms
     #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
     return f
