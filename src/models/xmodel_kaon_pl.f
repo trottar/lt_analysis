@@ -104,14 +104,14 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     RLT (4/23/2024): Marco's thesis functional forms
 *      sigT=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))      
 
-      sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
+      sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))
 *     sigLT=(par(9)+par(11)/abs(tm))*sin(thetacm)
 *     RLT (4/23/2024): Marco's thesis functional forms
 *      sigLT=par(9)*exp(-par(10)*abs(tm))*(1.0/(1.0+(q2**2)*par(11)))
 *     RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
 *                     the xfit_in_t.py script to work. LT/TT are zeros
 *                     Therefore param 12 was also changed to 13      
-      sigTT=(par(13)*q2*exp(-q2))*f_tm*sin(thetacm)**2
+      sigTT=(par(13)*q2*exp(-q2))*f_tm
 *     RLT (4/23/2024): Marco's thesis functional forms
 *      sigTT=par(13)*exp(-par(14)*abs(tm))*(1.0/(1.0+(q2**2)*par(15)))
 
