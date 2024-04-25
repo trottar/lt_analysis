@@ -79,8 +79,8 @@ if [[ $i_flag != "true" ]]; then
     ./set_SymLinks.sh
 fi
 
-DEBUG="False" # Flag for no plot splash
-#DEBUG="True" # Flag for plot splash
+#DEBUG="False" # Flag for no plot splash
+DEBUG="True" # Flag for plot splash
 
 if [[ $p_flag != "true" ]]; then
     ParticleType="kaon"
