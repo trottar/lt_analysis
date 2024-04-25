@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 03:46:07 trottar"
+# Time-stamp: "2024-04-25 03:48:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -190,7 +190,7 @@ def match_to_bin(data):
     # Sort the dictionary keys in numerical order
     sorted_match_dict = sorted(match_dict.keys())
     # Create a new dictionary with sorted keys
-    sorted_match_dict = {key: my_dict[key] for key in sorted_match_dict}
+    sorted_match_dict = {key: match_dict[key] for key in sorted_match_dict}
     print("!!!!!!!!3",sorted_match_dict)
     # Convert the dictionary to the desired format
     return [[match, np.array(values)] for match, values in sorted_match_dict.items()]
