@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 04:17:34 trottar"
+# Time-stamp: "2024-04-25 04:20:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1018,7 +1018,7 @@ def grab_ave_data(histlist, inpDict):
                 thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
                 ebeam_left = float(EbeamValLeft[i])
                 f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(ParticleType, polID, Q2.replace("p",""), \
-                                                                                 W.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
+                                                                                 W.replace("p",""), float(EPSVAL)*100, int(thpq_left*1000))                
                 break
             else:
                 continue
@@ -1031,7 +1031,7 @@ def grab_ave_data(histlist, inpDict):
                 thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
                 ebeam_center = float(EbeamValCenter[i])
                 f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(ParticleType, polID, Q2.replace("p",""), \
-                                                                                 W.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
+                                                                                 W.replace("p",""), float(EPSVAL)*100, int(thpq_center*1000))                
                 break
             else:
                 continue
