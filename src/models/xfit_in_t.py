@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 06:00:10 trottar"
+# Time-stamp: "2024-04-25 06:14:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,13 +179,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(1).SetLeftMargin(0.12)
     nsep.Draw("sigl:t:sigl_e", "", "goff")
     
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
-    f_sigL_pre.SetParNames("p1","p2","p3","p4")
-    #f_sigL_pre.SetParameters(l0, l1, l2, l3)
-
     ##############
     # HARD CODED #
     ##############
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
+    f_sigL_pre.SetParNames("p1","p2","p3","p4")
+    #f_sigL_pre.SetParameters(l0, l1, l2, l3)    
     # Fixed unused parameters
     #f_sigL_pre.FixParameter(0, 0)
     #f_sigL_pre.FixParameter(1, 0)
@@ -272,14 +271,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.GetYaxis().SetTitleSize(0.035)
     g_sigl_fit.GetYaxis().CenterTitle()
     
-    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
-    f_sigL.SetParNames("p1","p2","p3","p4")
-    #f_sigL.SetParameters(l0, l1, l2, l3)
-    
     ##############
     # HARD CODED #
     ##############
     # Fixed unused parameters
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 4)
+    f_sigL.SetParNames("p1","p2","p3","p4")
+    #f_sigL.SetParameters(l0, l1, l2, l3)        
     #f_sigL.FixParameter(0, 0)
     #f_sigL.FixParameter(1, 0)
     #f_sigL.FixParameter(2, 0)
@@ -371,13 +369,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(2).SetLeftMargin(0.12)
     nsep.Draw("sigt:t:sigt_e", "", "goff")
 
-    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
-    f_sigT_pre.SetParNames("p5","p6","p7")
-    #f_sigT_pre.SetParameters(t0, t1)    
-
     ##############
     # HARD CODED #
     ##############
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
+    f_sigT_pre.SetParNames("p5","p6","p7")
+    #f_sigT_pre.SetParameters(t0, t1)        
     # Fixed unused parameters
     #f_sigT_pre.FixParameter(0, 0)
     #f_sigT_pre.FixParameter(1, 0)
@@ -456,13 +453,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetYaxis().SetTitleSize(0.035)
     g_sigt_fit.GetYaxis().CenterTitle()
     
-    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
-    f_sigT.SetParNames("p5","p6","p7")
-    #f_sigT.SetParameters(t0, t1)
 
     ##############
     # HARD CODED #
     ##############
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
+    f_sigT.SetParNames("p5","p6","p7")
+    #f_sigT.SetParameters(t0, t1)    
     # Fixed unused parameters
     #f_sigT.FixParameter(0, 0)
     #f_sigT.FixParameter(1, 0)
@@ -546,13 +543,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(3).SetLeftMargin(0.12)
     nsep.Draw("siglt:t:siglt_e", "", "goff")
 
-    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
-    f_sigLT_pre.SetParNames("p9","p10","p11")
-    #f_sigLT_pre.SetParameters(lt0, lt1, lt2)    
-
     ##############
     # HARD CODED #
     ##############
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+    f_sigLT_pre.SetParNames("p9","p10","p11")
+    #f_sigLT_pre.SetParameters(lt0, lt1, lt2)        
     # Fixed unused parameters
     #f_sigLT_pre.FixParameter(0, 0)
     #f_sigLT_pre.FixParameter(1, 0)
@@ -638,13 +634,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.GetYaxis().SetTitleSize(0.035)
     g_siglt_fit.GetYaxis().CenterTitle()
     
-    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
-    f_sigLT.SetParNames("p9","p10","p11")
-    #f_sigLT.SetParameters(lt0, lt1, lt2)
-
     ##############
     # HARD CODED #
     ##############
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+    f_sigLT.SetParNames("p9","p10","p11")
+    #f_sigLT.SetParameters(lt0, lt1, lt2)    
     # Fixed unused parameters
     #f_sigLT.FixParameter(0, 0)
     #f_sigLT.FixParameter(1, 0)
@@ -731,13 +726,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1.cd(4).SetLeftMargin(0.12)
     nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
-    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
-    f_sigTT_pre.SetParNames("p13")
-    #f_sigTT_pre.SetParameters(tt0)    
-
     ##############
     # HARD CODED #
     ##############
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+    f_sigTT_pre.SetParNames("p13")
+    #f_sigTT_pre.SetParameters(tt0)        
     # Fixed unused parameters
     #f_sigTT_pre.FixParameter(0, 0)
     ##f_sigTT_pre.FixParameter(1, 0)
@@ -812,13 +806,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
     g_sigtt_fit.GetYaxis().CenterTitle()
     
-    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
-    f_sigTT.SetParNames("p13")
-    #f_sigTT.SetParameters(tt0)
-
     ##############
     # HARD CODED #
     ##############
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+    f_sigTT.SetParNames("p13")
+    #f_sigTT.SetParameters(tt0)    
     # Fixed unused parameters
     #f_sigTT.FixParameter(0, 0)
     ##f_sigTT.FixParameter(1, 0)
