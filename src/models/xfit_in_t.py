@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 20:58:48 trottar"
+# Time-stamp: "2024-04-24 21:00:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,8 +81,6 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     tmax_range = inpDict["tmax"]
     Q2min_range = inpDict["Q2min"]
     Q2max_range = inpDict["Q2max"]
-
-    ROOT.gStyle.SetOptFit(1)
     
     single_setting(ParticleType, pol_str, closest_date, Q2, W, tmin_range, tmax_range, Q2min_range, Q2max_range)
     
@@ -263,6 +261,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_prv.Draw("P")
 
     c2.cd(1)
+    ROOT.gStyle.SetOptFit(1)
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
