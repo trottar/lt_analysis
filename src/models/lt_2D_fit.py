@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 19:32:33 trottar"
+# Time-stamp: "2024-04-25 07:55:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -220,7 +220,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             lo_cross_sec_err[i] += 1 / (g_yy_err**2)
 
             g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, g_yy_err)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, math.sqrt((glo.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
 
         for ii in range(ghi.GetN()):
             
@@ -230,7 +230,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             hi_cross_sec_err[i] += 1 / (g_yy_err**2)
 
             g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, g_yy_err)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, math.sqrt((ghi.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
 
         try:
             lo_cross_sec_err[i] = 1/math.sqrt(lo_cross_sec_err[i])            
