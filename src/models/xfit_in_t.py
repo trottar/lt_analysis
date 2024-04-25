@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 14:04:04 trottar"
+# Time-stamp: "2024-04-24 20:55:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -167,6 +167,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1 = TCanvas("c1", "c1", 800, 800)
     c1.Divide(2, 2)
 
+    ROOT.gStyle.SetOptFit(1)
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
