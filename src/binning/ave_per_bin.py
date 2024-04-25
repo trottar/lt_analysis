@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 04:11:53 trottar"
+# Time-stamp: "2024-04-25 04:14:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -981,6 +981,13 @@ def grab_ave_data(histlist, inpDict):
     runNumRight = inpDict["runNumRight"] 
     runNumLeft = inpDict["runNumLeft"] 
     runNumCenter = inpDict["runNumCenter"]
+
+    pThetaValRight = inpDict["pThetaValRight"]
+    EbeamValRight = inpDict["EbeamValRight"]
+    pThetaValLeft = inpDict["pThetaValLeft"]
+    EbeamValLeft = inpDict["EbeamValLeft"]
+    pThetaValCenter = inpDict["pThetaValCenter"]
+    EbeamValCenter = inpDict["EbeamValCenter"]
     
     for hist in histlist:
         t_bins = hist["t_bins"]
@@ -1030,7 +1037,6 @@ def grab_ave_data(histlist, inpDict):
                 break
             else:
                 continue
-
     
     #f_avek = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
     
@@ -1043,6 +1049,7 @@ def grab_ave_data(histlist, inpDict):
         print("-"*25)
         print("-"*25)
         print("Finding data averages for {}...".format(hist["phi_setting"]))
+        print("\nIteration, therefore grabbing data from {}...".format(f_kindata))        
         print("-"*25)
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
