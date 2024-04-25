@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 03:48:12 trottar"
+# Time-stamp: "2024-04-25 03:51:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -177,7 +177,7 @@ def match_to_bin(data):
 
     # Iterate through the given data
     for item in data:
-        print("!!!!!!!!1",item)
+
         match = item[0][0]  # Extract the match value (e.g., 0.33)
         value = item[1][0]  # Extract the corresponding value
 
@@ -186,12 +186,12 @@ def match_to_bin(data):
             match_dict[match].append(value)
         else:
             match_dict[match] = [value]
-    print("!!!!!!!!2",match_dict)
+
     # Sort the dictionary keys in numerical order
     sorted_match_dict = sorted(match_dict.keys())
     # Create a new dictionary with sorted keys
     sorted_match_dict = {key: match_dict[key] for key in sorted_match_dict}
-    print("!!!!!!!!3",sorted_match_dict)
+
     # Convert the dictionary to the desired format
     return [[match, np.array(values)] for match, values in sorted_match_dict.items()]
 

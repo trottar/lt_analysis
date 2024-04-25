@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 22:36:57 trottar"
+# Time-stamp: "2024-04-25 04:05:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -966,7 +966,21 @@ def grab_ave_data(histlist, inpDict):
     NumtBins = inpDict["NumtBins"]
     W = inpDict["W"]
     Q2 = inpDict["Q2"]
+    Q2 = float(Qs.replace("p","."))
+    W = float(Ws.replace("p","."))
+    EPSVAL = float(inpDict["EPSVAL"] )    
     ParticleType = inpDict["ParticleType"]
+
+    POL = float(inpDict["POL"])
+        
+    if POL > 0:
+        polID = 'pl'
+    else:
+        polID = 'mn'
+    
+    runNumRight = inpDict["runNumRight"] 
+    runNumLeft = inpDict["runNumLeft"] 
+    runNumCenter = inpDict["runNumCenter"]
     
     for hist in histlist:
         t_bins = hist["t_bins"]
@@ -977,7 +991,50 @@ def grab_ave_data(histlist, inpDict):
         "phi_bins" : phi_bins
     }
 
-    f_avek = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+    # Define thpq vector relative to middle setting
+    if hist["phi_setting"] == "Right":
+        runNums = np.array([int(x) for x in runNumRight.split(' ')])
+        for i, run in enumerate(runNums):
+            pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,hist["phi_setting"],ParticleType,run)
+            if os.path.exists(pid_log):
+                thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
+                ebeam_right = float(EbeamValRight[i])
+                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(ParticleType, polID, Qs.replace("p",""), \
+                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
+                break
+            else:
+                continue
+
+    if hist["phi_setting"] == "Left":
+        runNums = np.array([int(x) for x in runNumLeft.split(' ')])
+        for i, run in enumerate(runNums):
+            pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,hist["phi_setting"],ParticleType,run)
+            if os.path.exists(pid_log):
+                thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
+                ebeam_left = float(EbeamValLeft[i])
+                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(ParticleType, polID, Qs.replace("p",""), \
+                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
+                break
+            else:
+                continue
+
+    if hist["phi_setting"] == "Center":
+        runNums = np.array([int(x) for x in runNumCenter.split(' ')])
+        for i, run in enumerate(runNums):
+            pid_log = "{}/log/{}_Analysed_Prod_{}_{}.log".format(LTANAPATH,hist["phi_setting"],ParticleType,run)
+            if os.path.exists(pid_log):
+                thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
+                ebeam_center = float(EbeamValCenter[i])
+                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(ParticleType, polID, Qs.replace("p",""), \
+                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
+                break
+            else:
+                continue
+
+    
+    #f_avek = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+
+
     
     # List of kinematic types
     kinematic_types = ["Q2", "W", "t", "epsilon"]
@@ -993,7 +1050,7 @@ def grab_ave_data(histlist, inpDict):
         aveDict[hist["phi_setting"]] = {}
         group_dict = {}
         for kin_type in kinematic_types:
-            with open(f_avek, 'r') as f:
+            with open(f_kindata, 'r') as f:
                 lines = f.readlines()
             dict_lst = []
             for line in lines:
@@ -1004,7 +1061,7 @@ def grab_ave_data(histlist, inpDict):
                         ave_err_val = float(line_lst[1])                        
                     if kin_type == "Q2":
                         ave_val = float(line_lst[2])
-                        ave_err_val = float(line_lst[3])                        
+                        ave_err_val = float(line_lst[3])
                     if kin_type == "t":
                         ave_val = float(line_lst[4])
                         ave_err_val = float(line_lst[5])                        
