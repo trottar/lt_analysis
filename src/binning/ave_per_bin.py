@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 04:08:42 trottar"
+# Time-stamp: "2024-04-25 04:11:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -966,8 +966,8 @@ def grab_ave_data(histlist, inpDict):
     NumtBins = inpDict["NumtBins"]
     W = inpDict["W"]
     Q2 = inpDict["Q2"]
-    Q2 = float(Qs.replace("p","."))
-    W = float(Ws.replace("p","."))
+    Qs = float(Q2.replace("p","."))
+    Ws = float(W.replace("p","."))
     EPSVAL = float(inpDict["EPSVAL"] )    
     ParticleType = inpDict["ParticleType"]
 
@@ -1033,8 +1033,6 @@ def grab_ave_data(histlist, inpDict):
 
     
     #f_avek = '{}/averages/avek.Q{}W{}.dat'.format(ParticleType, Q2.replace("p",""), W.replace("p",""))
-
-
     
     # List of kinematic types
     kinematic_types = ["Q2", "W", "t", "epsilon"]
