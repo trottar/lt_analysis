@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 06:14:49 trottar"
+# Time-stamp: "2024-04-25 06:55:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,7 +242,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
-        print("!!!!!!!!!!sigl_fit",i, g_sigl.GetX()[i], sigl_X_fit)
         
     g_sigl.SetTitle("Sig L")
 
@@ -325,7 +324,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-    g_sigl_fit.Fit(f_sigL, "SQ")
+    g_sigl_fit.Fit(f_sigL, "SRQ")
 
     f_sigL.Draw("same")
     
@@ -412,7 +411,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(nsep.GetSelectedRows()):
         g_sigt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigt.SetPointError(i, 0, nsep.GetV3()[i])
-        print("!!!!!!!!!!sigt",i, nsep.GetV2()[i], nsep.GetV1()[i])
 
     for i in range(len(w_vec)):
 
@@ -424,7 +422,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
-        print("!!!!!!!!!!sigt_fit",i, g_sigt.GetX()[i], sigt_X_fit)
         
     g_sigt.SetTitle("Sig T")
 
@@ -499,7 +496,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-    g_sigt_fit.Fit(f_sigT, "SQ")
+    g_sigt_fit.Fit(f_sigT, "SRQ")
     
     # Check the fit status for 'f_sigT'
     f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -589,7 +586,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(nsep.GetSelectedRows()):
         g_siglt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_siglt.SetPointError(i, 0, nsep.GetV3()[i])
-        print("!!!!!!!!!!siglt",i, nsep.GetV2()[i], nsep.GetV1()[i])
 
     for i in range(len(w_vec)):
         
@@ -605,7 +601,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
-        print("!!!!!!!!!!siglt_fit",i, g_siglt.GetX()[i], siglt_X_fit)
         
     g_siglt.SetTitle("Sig LT")
 
@@ -682,7 +677,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-    g_siglt_fit.Fit(f_sigLT, "SQ")
+    g_siglt_fit.Fit(f_sigLT, "SRQ")
     
     # Check the fit status for 'f_sigLT'
     f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -760,7 +755,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(nsep.GetSelectedRows()):
         g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
         g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
-        print("!!!!!!!!!!sigtt",i, nsep.GetV2()[i], nsep.GetV1()[i])
 
     for i in range(len(w_vec)):
         
@@ -777,7 +771,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
-        print("!!!!!!!!!!sigtt_fit",i, g_sigtt.GetX()[i], sigtt_X_fit)
         
     g_sigtt.SetTitle("Sig TT")
 
@@ -833,7 +826,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigTT.FixParameter(0, tt0)    
     ##############
     ##############
-    ##############    
+    ##############
     
     g_q2_sigtt_fit = TGraphErrors()
     for i in range(len(w_vec)):
@@ -841,9 +834,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
-        print("$$$$$$$$$$$",i, g_sigtt.GetX()[i], sigtt_X)
     # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-    g_sigtt_fit.Fit(f_sigTT, "SQ")
+    g_sigtt_fit.Fit(f_sigTT, "SRQ")
 
     # Check the fit status for 'f_sigTT'
     f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
