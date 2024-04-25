@@ -146,7 +146,7 @@ c            pause
                do ip=1,nphi
                   read(66,*) yld,er
 *                  print*,yld,er
-                  ymc(ip,it)=ymc(ip,it)+yld
+                  ymc(ip,it)=ymc(ip,it)+yld            
                   dmc(ip,it)=dmc(ip,it)+er**2
                end do
             end do
@@ -198,8 +198,7 @@ c      pause
                e=sqrt(e)
 *     Set ratio to zero if exceeds 1000
 *     This prevents errors in output file
-*     if (r >= 1000.) then
-               if (r >= 2.) then               
+               if (r >= 1000.) then
                   r=0.0
                   e=0.0
                endif
