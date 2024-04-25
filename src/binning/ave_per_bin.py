@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 04:14:59 trottar"
+# Time-stamp: "2024-04-25 04:17:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -966,8 +966,6 @@ def grab_ave_data(histlist, inpDict):
     NumtBins = inpDict["NumtBins"]
     W = inpDict["W"]
     Q2 = inpDict["Q2"]
-    Qs = float(Q2.replace("p","."))
-    Ws = float(W.replace("p","."))
     EPSVAL = float(inpDict["EPSVAL"] )    
     ParticleType = inpDict["ParticleType"]
 
@@ -1006,8 +1004,8 @@ def grab_ave_data(histlist, inpDict):
             if os.path.exists(pid_log):
                 thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
                 ebeam_right = float(EbeamValRight[i])
-                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(ParticleType, polID, Qs.replace("p",""), \
-                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
+                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_-{}.dat'.format(ParticleType, polID, Q2.replace("p",""), \
+                                                                                 W.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
                 break
             else:
                 continue
@@ -1019,8 +1017,8 @@ def grab_ave_data(histlist, inpDict):
             if os.path.exists(pid_log):
                 thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
                 ebeam_left = float(EbeamValLeft[i])
-                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(ParticleType, polID, Qs.replace("p",""), \
-                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
+                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+{}.dat'.format(ParticleType, polID, Q2.replace("p",""), \
+                                                                                 W.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
                 break
             else:
                 continue
@@ -1032,8 +1030,8 @@ def grab_ave_data(histlist, inpDict):
             if os.path.exists(pid_log):
                 thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
                 ebeam_center = float(EbeamValCenter[i])
-                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(ParticleType, polID, Qs.replace("p",""), \
-                                                                                 Ws.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
+                f_kindata = '{}/kindata/kindata.{}_Q{}W{}_{:.0f}_+0000.dat'.format(ParticleType, polID, Q2.replace("p",""), \
+                                                                                 W.replace("p",""), float(EPSVAL)*100, int(thpq_right*1000))                
                 break
             else:
                 continue
