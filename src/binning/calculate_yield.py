@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 03:15:18 trottar"
+# Time-stamp: "2024-04-25 03:18:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -769,6 +769,9 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterat
 
     binned_unweighted_NumEvts_simc = []
 
+    binned_tbin_simc = []
+    binned_phibin_simc = []
+
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -798,14 +801,17 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterat
             
             binned_unweighted_NumEvts_simc.append(NumEvts_bin_MM_SIMC_unweighted)
 
+            binned_tbin_simc.append(j)
+            binned_phibin_simc.append(k)
+
             if j+1 == len(t_bins)-1:
                 binned_dict[kin_type] = {
                     "binned_t_simc" : binned_t_simc,
                     "binned_hist_simc" : binned_hist_simc,
                     "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc,
                     # Testing
-                    "t-bin" : j,
-                    "phi-bin" : k,
+                    "binned_tbin_simc" : binned_tbin_simc,
+                    "binned_phibin_simc" : binned_phibin_simc,
                 }
         
     return binned_dict
@@ -823,8 +829,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
     binned_unweighted_NumEvts_simc = binned_dict[kin_type]["binned_unweighted_NumEvts_simc"]
 
-    binned_tbin_simc = binned_dict[kin_type]["t-bin"]
-    binned_phibin_simc = binned_dict[kin_type]["phi-bin"]
+    binned_tbin_simc = binned_dict[kin_type]["binned_tbin_simc"]
+    binned_phibin_simc = binned_dict[kin_type]["binned_phibin_simc"]
 
     yield_hist = []
     yield_err_hist = []
