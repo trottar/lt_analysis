@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 21:04:10 trottar"
+# Time-stamp: "2024-04-24 21:05:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -260,7 +260,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_prv.SetMarkerStyle(25)
     g_sigl_prv.Draw("P")
 
-    c2.cd(1)
+    c2.cd(1).SetLeftMargin(0.12)
     g_sigl_fit.SetTitle("Sigma L Model Fit")
     g_sigl_fit.Draw("A*")
 
@@ -443,7 +443,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_prv.SetMarkerStyle(25)
     g_sigt_prv.Draw("P")
         
-    c2.cd(2)
+    c2.cd(2).SetLeftMargin(0.12)
     g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
@@ -624,7 +624,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_prv.SetMarkerStyle(25)
     g_siglt_prv.Draw("P")
 
-    c2.cd(3)
+    c2.cd(3).SetLeftMargin(0.12)
     g_siglt_fit.SetTitle("Sigma LT Model Fit")
     g_siglt_fit.Draw("A*")
 
@@ -798,7 +798,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_prv.SetMarkerStyle(25)
     g_sigtt_prv.Draw("P")
 
-    c2.cd(4)
+    c2.cd(4).SetLeftMargin(0.12)
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
