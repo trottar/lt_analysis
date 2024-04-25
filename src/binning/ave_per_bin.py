@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-25 04:05:49 trottar"
+# Time-stamp: "2024-04-25 04:08:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1053,19 +1053,19 @@ def grab_ave_data(histlist, inpDict):
             with open(f_kindata, 'r') as f:
                 lines = f.readlines()
             dict_lst = []
-            for line in lines:
+            for j, line in enumerate(lines): # j is t-bin
                 for k in range(len(phi_bins) - 1):
-                    line_lst = line.split(" ") # aveW, errW, aveQ2, errQ2, avett, errtt, thetacm, tbin
-                    if kin_type == "W":
+                    line_lst = line.split(" ") # aveQ2, errQ2, aveW, errW, avett, errtt
+                    if kin_type == "Q2":
                         ave_val = float(line_lst[0])
                         ave_err_val = float(line_lst[1])                        
-                    if kin_type == "Q2":
+                    if kin_type == "W":
                         ave_val = float(line_lst[2])
                         ave_err_val = float(line_lst[3])
                     if kin_type == "t":
                         ave_val = float(line_lst[4])
-                        ave_err_val = float(line_lst[5])                        
-                    tbin_index = int(line_lst[7])-1
+                        ave_err_val = float(line_lst[5])
+                    tbin_index = j
                     phibin_index = k
                     print("Data average {} for t-bin {} phi-bin {}: {:.3f} +/- {:.3e}".format(kin_type, tbin_index+1, phibin_index+1, ave_val, ave_err_val))
                     dict_lst.append((tbin_index, phibin_index, ave_val, ave_err_val))
