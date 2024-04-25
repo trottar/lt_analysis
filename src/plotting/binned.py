@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-29 16:59:31 trottar"
+# Time-stamp: "2024-04-25 03:23:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,7 +96,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
 
     # Find bin centers
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
-    phi_bin_centers = (phi_bins[:-1] + phi_bins[1:]) / 2    
+    phi_bin_centers = (phi_bins[:-1] + phi_bins[1:]) / 2
 
     for it,phiset in enumerate(phisetlist):
 
