@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-24 20:55:19 trottar"
+# Time-stamp: "2024-04-24 20:57:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,10 +81,10 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     tmax_range = inpDict["tmax"]
     Q2min_range = inpDict["Q2min"]
     Q2max_range = inpDict["Q2max"]
-    
-    single_setting(ParticleType, pol_str, closest_date, Q2, W, tmin_range, tmax_range, Q2min_range, Q2max_range)
 
     ROOT.gStyle.SetOptFit(1)
+    
+    single_setting(ParticleType, pol_str, closest_date, Q2, W, tmin_range, tmax_range, Q2min_range, Q2max_range)
     
 def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range, Q2min_range, Q2max_range):
 
@@ -167,7 +167,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c1 = TCanvas("c1", "c1", 800, 800)
     c1.Divide(2, 2)
 
-    ROOT.gStyle.SetOptFit(1)
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
@@ -315,7 +314,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     ##############    
     
-    g_q2_sigl_fit = ROOT.TGraphErrors()
+    g_q2_sigl_fit = TGraphErrors()
     for i in range(len(w_vec)):
         g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
         g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
@@ -481,7 +480,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     ##############    
     
-    g_q2_sigt_fit = ROOT.TGraphErrors()
+    g_q2_sigt_fit = TGraphErrors()
     for i in range(len(w_vec)):
         g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_q2_sigt_fit.SetPointError(i, 0.0, sigt_X_fit_err)
@@ -659,7 +658,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     ##############    
     
-    g_q2_siglt_fit = ROOT.TGraphErrors()
+    g_q2_siglt_fit = TGraphErrors()
     for i in range(len(w_vec)):
         g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_q2_siglt_fit.SetPointError(i, 0.0, siglt_X_fit_err)
@@ -814,7 +813,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     ##############    
     
-    g_q2_sigtt_fit = ROOT.TGraphErrors()
+    g_q2_sigtt_fit = TGraphErrors()
     for i in range(len(w_vec)):
         g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
