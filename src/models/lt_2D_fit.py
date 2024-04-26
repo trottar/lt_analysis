@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-26 08:24:20 trottar"
+# Time-stamp: "2024-04-26 08:24:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -144,7 +144,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     # TESTING
     t_list = t_list[:-1]
     
-    for i in range(0, t_bin_num):
+    for i in range(0, t_bin_num-1):
 
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
