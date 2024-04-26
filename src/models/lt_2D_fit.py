@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-26 08:21:52 trottar"
+# Time-stamp: "2024-04-26 08:24:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,6 +141,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     lo_cross_sec_err = np.zeros(t_bin_num, dtype=float)
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
+    # TESTING
+    t_list = t_list[:-1]
+    
     for i in range(0, t_bin_num):
 
         print("\n/*--------------------------------------------------*/")
