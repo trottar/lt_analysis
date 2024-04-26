@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-26 00:06:30 trottar"
+# Time-stamp: "2024-04-26 00:11:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -553,6 +553,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT_pre.SetParNames("p9","p10","p11")
+    f_sigLT_pre.SetParameters(0.0, 0.0, 0.0)
     #f_sigLT_pre.SetParameters(lt0, lt1, lt2)        
     # Fixed unused parameters
     #f_sigLT_pre.FixParameter(0, 0)
@@ -638,6 +639,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT.SetParNames("p9","p10","p11")
+    f_sigLT.SetParameters(0.0, 0.0, 0.0)    
     #f_sigLT.SetParameters(lt0, lt1, lt2)    
     # Fixed unused parameters
     #f_sigLT.FixParameter(0, 0)
@@ -730,7 +732,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
     f_sigTT_pre.SetParNames("p13")
-    #f_sigTT_pre.SetParameters(tt0)        
+    f_sigTT_pre.SetParameters(0.0)
+    #f_sigTT_pre.SetParameters(tt0)
     # Fixed unused parameters
     #f_sigTT_pre.FixParameter(0, 0)
     ##f_sigTT_pre.FixParameter(1, 0)
@@ -804,6 +807,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
     f_sigTT.SetParNames("p13")
+    f_sigTT.SetParameters(0.0)    
     #f_sigTT.SetParameters(tt0)    
     # Fixed unused parameters
     #f_sigTT.FixParameter(0, 0)
