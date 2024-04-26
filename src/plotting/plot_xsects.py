@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 18:45:35 trottar"
+# Time-stamp: "2024-04-26 09:08:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -302,8 +302,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('Ratio', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        #ax.set_ylim(0.0, 2.0)
-        ax.set_xlim(0, 360)
+        ax.set_ylim(0.0, 2.0)
+        ax.set_xlim(0, 365)
 
         ax.legend(fontsize=24)
         # Add grid
@@ -337,8 +337,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('Ratio', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        #ax.set_ylim(0.0, 2.0)
-        ax.set_xlim(0, 360)
+        ax.set_ylim(0.0, 2.0)
+        ax.set_xlim(0, 365)
 
         ax.legend(fontsize=24)
         # Add grid
@@ -369,7 +369,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('$Q^2$', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(0, 360)
+        ax.set_xlim(0, 365)
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
@@ -399,7 +399,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('W', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(0, 360)
+        ax.set_xlim(0, 365)
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
@@ -485,7 +485,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('x_real', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(0, 360)
+        ax.set_xlim(0, 365)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
@@ -514,7 +514,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('x_mod', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(0, 360)
+        ax.set_xlim(0, 365)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
@@ -546,7 +546,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('x_real', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(0, 360)
+        ax.set_xlim(0, 365)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
@@ -578,7 +578,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('x_real', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(0, 360)
+        ax.set_xlim(0, 365)
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
