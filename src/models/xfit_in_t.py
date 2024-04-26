@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-26 00:29:26 trottar"
+# Time-stamp: "2024-04-26 01:03:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -553,8 +553,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT_pre.SetParNames("p9","p10","p11")
-    lt0, lt1, lt2 = 0.0, 0.0, 0.0
-    f_sigLT_pre.SetParameters(lt0, lt1, lt2)        
+    #lt0, lt1, lt2 = 0.0, 0.0, 0.0
+    #f_sigLT_pre.SetParameters(lt0, lt1, lt2)        
     # Fixed unused parameters
     #f_sigLT_pre.FixParameter(0, 0)
     #f_sigLT_pre.FixParameter(1, 0)
@@ -601,8 +601,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
 
-        siglt_X_fit = g_siglt.GetY()[i] / (math.sin(th_vec[i] * PI / 180))
-        siglt_X_fit_err = g_siglt.GetEY()[i] / (math.sin(th_vec[i] * PI / 180))
+        siglt_X_fit = g_siglt.GetY()[i] #/ (math.sin(th_vec[i] * PI / 180))
+        siglt_X_fit_err = g_siglt.GetEY()[i] #/ (math.sin(th_vec[i] * PI / 180))
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
@@ -639,8 +639,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT.SetParNames("p9","p10","p11")
-    lt0, lt1, lt2 = 0.0, 0.0, 0.0
-    f_sigLT.SetParameters(lt0, lt1, lt2)    
+    #lt0, lt1, lt2 = 0.0, 0.0, 0.0
+    #f_sigLT.SetParameters(lt0, lt1, lt2)    
     # Fixed unused parameters
     #f_sigLT.FixParameter(0, 0)
     #f_sigLT.FixParameter(1, 0)
@@ -732,8 +732,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
     f_sigTT_pre.SetParNames("p13")
-    tt0 = 0.0
-    f_sigTT_pre.SetParameters(tt0, 0.0)
+    #tt0 = 0.0
+    #f_sigTT_pre.SetParameters(tt0, 0.0)
     # Fixed unused parameters
     #f_sigTT_pre.FixParameter(0, 0)
     ##f_sigTT_pre.FixParameter(1, 0)
@@ -769,8 +769,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
-        sigtt_X_fit = g_sigtt.GetY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
-        sigtt_X_fit_err = g_sigtt.GetEY()[i] / ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
+        sigtt_X_fit = g_sigtt.GetY()[i] #/ ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
+        sigtt_X_fit_err = g_sigtt.GetEY()[i] #/ ((1.0) * math.sin(th_vec[i] * PI / 180)**2)
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
@@ -807,8 +807,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
     f_sigTT.SetParNames("p13")
-    tt0 = 0.0
-    f_sigTT.SetParameters(tt0, 0.0)
+    #tt0 = 0.0
+    #f_sigTT.SetParameters(tt0, 0.0)
     # Fixed unused parameters
     #f_sigTT.FixParameter(0, 0)
     ##f_sigTT.FixParameter(1, 0)
