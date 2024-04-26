@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-26 08:24:46 trottar"
+# Time-stamp: "2024-04-26 08:47:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -950,7 +950,7 @@ c_total.Print(outputpdf)
 c_total.Clear()
 
 #g_sig_lt_total.GetXaxis().SetRangeUser(0.0,0.4)
-#g_sig_lt_total.GetYaxis().SetRangeUser(-5,30)
+g_sig_lt_total.GetYaxis().SetRangeUser(-5,3)
 g_sig_lt_total.Draw("A*")
 g_sig_lt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
