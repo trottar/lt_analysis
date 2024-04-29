@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-26 08:59:50 trottar"
+# Time-stamp: "2024-04-29 13:02:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,8 +141,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     lo_cross_sec_err = np.zeros(t_bin_num, dtype=float)
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
-    # TESTING
-    t_list = t_list[:-1]
+    # Thesis, center only (removed last bin because it sucks)
+    #t_list = t_list[:-1]
     
     for i in range(0, t_bin_num-1):
 
@@ -152,7 +152,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         tcut = ""
 
-        tcut = "t=={0} && x!=0.0 && (phi<190 || phi>210)".format(float(t_list[i]))
+        tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
+        #tcut = "t=={0} && x!=0.0 && (phi<190 || phi>210)".format(float(t_list[i])) #  From thesis, center only
         print(tcut)
         
         lo_eps = lo_eps_list[i]
