@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 16:46:22 trottar"
+# Time-stamp: "2024-04-30 17:20:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -353,14 +353,14 @@ with PdfPages(outputpdf) as pdf:
     ax = axes
     ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
-    for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+    for i, df_key in enumerate(['kindata_loeps_{}'.format('center'), 'kindata_hieps_{}'.format('center')]):
         df = file_df_dict[df_key]
         if "hi" in df_key:
             df_key = "High $\epsilon$"
         else:
             df_key = "Low $\epsilon$"
 
-        ax.errorbar(df['t'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(t_bin_centers[i], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
@@ -380,14 +380,14 @@ with PdfPages(outputpdf) as pdf:
     ax = axes
     ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
-    for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+    for i, df_key in enumerate(['kindata_loeps_{}'.format('center'), 'kindata_hieps_{}'.format('center')]):
         df = file_df_dict[df_key]
         if "hi" in df_key:
             df_key = "High $\epsilon$"
         else:
             df_key = "Low $\epsilon$"
 
-        ax.errorbar(df['t'], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(t_bin_centers[i], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('W', fontsize=24)
