@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 15:26:28 trottar"
+# Time-stamp: "2024-04-30 15:45:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -362,14 +362,13 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['t'][mask], df['Q2'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
+            ax.scatter(df['t'], df['Q2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
         ax.set_xlabel('t', fontsize=24)
         ax.set_ylabel('$Q^2$', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(0, 360)
+        ax.set_xlim(tmin, tmax)
         ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
