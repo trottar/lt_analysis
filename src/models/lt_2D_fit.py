@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-29 20:07:14 trottar"
+# Time-stamp: "2024-04-29 20:09:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -143,7 +143,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
     # Thesis, center only (removed last bin because it sucks)
     #for i in range(0, t_bin_num-1):
-    for i in range(0, t_bin_num-1):    
+    for i in range(0, t_bin_num):    
 
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
