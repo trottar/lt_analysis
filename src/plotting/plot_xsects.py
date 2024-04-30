@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 15:45:33 trottar"
+# Time-stamp: "2024-04-30 16:25:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,28 +350,26 @@ with PdfPages(outputpdf) as pdf:
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
-    # Loop through t bins and plot data
-    for k in range(NumtBins):
-        ax = axes[k]
-        ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+    ax = axes
+    ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
-        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-            df = file_df_dict[df_key]
-            if "hi" in df_key:
-                df_key = "High $\epsilon$"
-            else:
-                df_key = "Low $\epsilon$"
-                
-            ax.scatter(df['t'], df['Q2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
+    for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+        df = file_df_dict[df_key]
+        if "hi" in df_key:
+            df_key = "High $\epsilon$"
+        else:
+            df_key = "Low $\epsilon$"
 
-        ax.set_xlabel('t', fontsize=24)
-        ax.set_ylabel('$Q^2$', fontsize=24)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(tmin, tmax)
-        ax.legend(fontsize=24)
-        # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        ax.errorbar(df['t'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+
+    ax.set_xlabel('-t', fontsize=24)
+    ax.set_ylabel('$Q^2$', fontsize=24)
+    ax.tick_params(axis='x', labelsize=16)
+    ax.tick_params(axis='y', labelsize=16)        
+    ax.set_xlim(tmin, tmax)
+    ax.legend(fontsize=24)
+    # Add grid
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
@@ -379,29 +377,26 @@ with PdfPages(outputpdf) as pdf:
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
-    # Loop through t bins and plot data
-    for k in range(NumtBins):
-        ax = axes[k]
-        ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+    ax = axes
+    ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
-        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-            df = file_df_dict[df_key]
-            if "hi" in df_key:
-                df_key = "High $\epsilon$"
-            else:
-                df_key = "Low $\epsilon$"
-                
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.scatter(df['phi'][mask], df['W'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i])
+    for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+        df = file_df_dict[df_key]
+        if "hi" in df_key:
+            df_key = "High $\epsilon$"
+        else:
+            df_key = "Low $\epsilon$"
 
-        ax.set_xlabel('$\phi$', fontsize=24)
-        ax.set_ylabel('W', fontsize=24)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(0, 360)
-        ax.legend(fontsize=24)
-        # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        ax.errorbar(df['t'], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+
+    ax.set_xlabel('-t', fontsize=24)
+    ax.set_ylabel('W', fontsize=24)
+    ax.tick_params(axis='x', labelsize=16)
+    ax.tick_params(axis='y', labelsize=16)        
+    ax.set_xlim(tmin, tmax)
+    ax.legend(fontsize=24)
+    # Add grid
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
