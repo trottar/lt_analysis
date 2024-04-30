@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 15:23:25 trottar"
+# Time-stamp: "2024-04-30 19:46:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -160,13 +160,15 @@ def find_bins(histlist, inpDict):
                     bin_events += 1  # Add one event to the bin if there are remaining events
 
                 events_counted += bin_events  # Update the total number of events counted
-                indices.append(events_counted)  # Append the index for the next bin
+                # Ensure the index doesn't exceed the maximum index of the array
+                index = min(events_counted, npt - 1)
+                indices.append(index)  # Append the index for the next bin
 
             # Get the values corresponding to the calculated indices
             equalN_values = np.sort(x)[indices]
 
-            return equalN_values        
-        
+            return equalN_values
+
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
         # The bins are determined by a linear interpolation (see function above)
