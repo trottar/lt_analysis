@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-29 13:02:42 trottar"
+# Time-stamp: "2024-04-29 20:07:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -142,9 +142,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
     # Thesis, center only (removed last bin because it sucks)
-    #t_list = t_list[:-1]
-    
-    for i in range(0, t_bin_num-1):
+    #for i in range(0, t_bin_num-1):
+    for i in range(0, t_bin_num-1):    
 
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
