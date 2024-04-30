@@ -282,7 +282,15 @@ if [[ $a_flag = "true" ]]; then
 	    echo "Analysing data run $i..."
 	    echo "-----------------------------"
 	    echo
-	    python3 Analysed_COIN.py "$i" | tee ../../../log/Analysed_HeeP_COIN_$i.log
+	    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${i}_-1.root
+	    # Using the test command with -e option
+	    if test -e $rootfile; then
+		python3 Analysed_COIN.py "$i" | tee ../../../log/Analysed_HeeP_COIN_$i.log
+	    else
+		echo "${rootfile} does not exist! Running jcache..."
+		jcache get $rootfile
+		continue		
+	    fi
 	    #root -l <<EOF 
 	    #.x $LTANAPATH/Analysed_COIN.C("$InDATAFilename","$OutDATAFilename")
 	    #EOF
@@ -305,7 +313,15 @@ if [[ $a_flag = "true" ]]; then
 	    echo "Analysing dummy data run $i..."
 	    echo "-----------------------------------"
 	    echo
-	    python3 Analysed_COIN.py "$i" | tee ../../../log/Analysed_HeeP_COIN_$i.log
+	    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${i}_-1.root
+	    # Using the test command with -e option
+	    if test -e $rootfile; then
+		python3 Analysed_COIN.py "$i" | tee ../../../log/Analysed_HeeP_COIN_$i.log
+	    else
+		echo "${rootfile} does not exist! Running jcache..."
+		jcache get $rootfile
+		continue		
+	    fi
 	    #root -l <<EOF 
 	    #.x $LTANAPATH/Analysed_COIN.C("$InDUMMYFilename","$OutDUMMYFilename")
 	    #EOF
