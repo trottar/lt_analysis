@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:26:54 trottar"
+# Time-stamp: "2024-04-30 15:23:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,12 +134,38 @@ def find_bins(histlist, inpDict):
 
         ################################################################################################################################################
  
+        '''
         def histedges_equalN(x, nbin):
             npt = len(x) - 1  # npt-1 because starting at 0
             indices = np.linspace(0, npt, nbin+1).astype(int)
             sorted_x = np.sort(x)
             equalN_values = sorted_x[indices]
             return equalN_values
+        '''
+
+        def histedges_equalN(x, nbin):
+            npt = len(x)
+            n_per_bin = npt // nbin  # Calculate the number of events per bin
+            remainder = npt % nbin  # Calculate the remainder for distributing the remaining events
+
+            # Initialize indices to split the data into bins with approximately equal events
+            indices = [0]  
+            events_counted = 0
+
+            # Loop through the bins
+            for i in range(nbin):
+                # Calculate the number of events for the current bin
+                bin_events = n_per_bin
+                if i < remainder:
+                    bin_events += 1  # Add one event to the bin if there are remaining events
+
+                events_counted += bin_events  # Update the total number of events counted
+                indices.append(events_counted)  # Append the index for the next bin
+
+            # Get the values corresponding to the calculated indices
+            equalN_values = np.sort(x)[indices]
+
+            return equalN_values        
         
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
