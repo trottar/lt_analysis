@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 17:20:57 trottar"
+# Time-stamp: "2024-04-30 18:21:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -359,7 +359,7 @@ with PdfPages(outputpdf) as pdf:
             df_key = "High $\epsilon$"
         else:
             df_key = "Low $\epsilon$"
-
+        print(i, df_key)
         ax.errorbar(t_bin_centers[i], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
     ax.set_xlabel('-t', fontsize=24)
@@ -386,7 +386,7 @@ with PdfPages(outputpdf) as pdf:
             df_key = "High $\epsilon$"
         else:
             df_key = "Low $\epsilon$"
-
+        
         ax.errorbar(t_bin_centers[i], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
     ax.set_xlabel('-t', fontsize=24)
