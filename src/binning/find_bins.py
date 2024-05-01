@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-01 12:10:39 trottar"
+# Time-stamp: "2024-05-01 12:32:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -144,7 +144,7 @@ def find_bins(histlist, inpDict):
         '''
 
         def histedges_equalN(x, nbin):
-            npt = len(x) -1  # Total number of data points
+            npt = len(x) - 1  # Total number of data points
             n_per_bin = npt // nbin  # Calculate the number of events per bin
             print("Num evts per bin: ", n_per_bin)
             remainder = npt % nbin  # Calculate remainder for uneven division
@@ -152,11 +152,14 @@ def find_bins(histlist, inpDict):
 
             # Calculate indices to split the sorted array
             indices = [0]  # Start with the first index
-            for i in range(1, nbin):
+            for i in range(0, nbin):
+                print("indices[-1] + n_per_bin: \t", indices[-1] + n_per_bin)
                 if i <= remainder:
-                    indices.append(indices[-1] + n_per_bin + 1)  # Add one extra event for the first 'remainder' bins
+                    print("i <= remainder: \t", i, "<=" ,remainder)
+                    indices.append(indices[-1] + n_per_bin)  # Add one extra event for the first 'remainder' bins
                 else:
-                    indices.append(indices[-1] + n_per_bin)  # For the rest of the bins, add n_per_bin events
+                    print("i > remainder: \t", i, ">" ,remainder)
+                    indices.append(indices[-1] + n_per_bin + 1)  # For the rest of the bins, add n_per_bin events
 
             # Ensure the last bin extends to the end of the array
             indices[-1] = npt
