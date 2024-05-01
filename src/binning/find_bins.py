@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-01 14:21:12 trottar"
+# Time-stamp: "2024-05-01 14:32:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -144,6 +144,9 @@ def find_bins(histlist, inpDict):
         '''
 
         def histedges_equalN(x, nbin):
+
+            x = list(x)
+            
             npt = len(x) - 1  # Total number of data points
             n_per_bin = npt // nbin  # Calculate the number of events per bin
             print("Num evts per bin: ", n_per_bin)
