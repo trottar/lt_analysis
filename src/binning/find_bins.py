@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 20:01:11 trottar"
+# Time-stamp: "2024-04-30 20:24:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -155,6 +155,8 @@ def find_bins(histlist, inpDict):
 
             # Calculate the indices to split the data into bins with approximately equal events
             indices = np.cumsum(bin_counts)
+            # Ensure the last index does not exceed the maximum index of the array
+            indices[-1] = min(indices[-1], npt - 1)
 
             # Get the values corresponding to the calculated indices
             equalN_values = np.sort(x)[indices]
