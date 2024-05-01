@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 19:46:04 trottar"
+# Time-stamp: "2024-04-30 20:01:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -148,21 +148,13 @@ def find_bins(histlist, inpDict):
             n_per_bin = npt // nbin  # Calculate the number of events per bin
             remainder = npt % nbin  # Calculate the remainder for distributing the remaining events
 
-            # Initialize indices to split the data into bins with approximately equal events
-            indices = [0]  
-            events_counted = 0
+            # Calculate the number of events in each bin
+            bin_counts = [n_per_bin] * nbin
+            for i in range(remainder):
+                bin_counts[i] += 1  # Distribute the remaining events to the first bins
 
-            # Loop through the bins
-            for i in range(nbin):
-                # Calculate the number of events for the current bin
-                bin_events = n_per_bin
-                if i < remainder:
-                    bin_events += 1  # Add one event to the bin if there are remaining events
-
-                events_counted += bin_events  # Update the total number of events counted
-                # Ensure the index doesn't exceed the maximum index of the array
-                index = min(events_counted, npt - 1)
-                indices.append(index)  # Append the index for the next bin
+            # Calculate the indices to split the data into bins with approximately equal events
+            indices = np.cumsum(bin_counts)
 
             # Get the values corresponding to the calculated indices
             equalN_values = np.sort(x)[indices]
