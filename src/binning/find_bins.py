@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 20:24:07 trottar"
+# Time-stamp: "2024-05-01 06:23:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -144,25 +144,27 @@ def find_bins(histlist, inpDict):
         '''
 
         def histedges_equalN(x, nbin):
-            npt = len(x)
+            npt = len(x)  # Total number of data points
             n_per_bin = npt // nbin  # Calculate the number of events per bin
-            remainder = npt % nbin  # Calculate the remainder for distributing the remaining events
+            remainder = npt % nbin  # Calculate remainder for uneven division
 
-            # Calculate the number of events in each bin
-            bin_counts = [n_per_bin] * nbin
-            for i in range(remainder):
-                bin_counts[i] += 1  # Distribute the remaining events to the first bins
+            # Calculate indices to split the sorted array
+            indices = [0]  # Start with the first index
+            for i in range(1, nbin):
+                if i <= remainder:
+                    indices.append(indices[-1] + n_per_bin + 1)  # Add one extra event for the first 'remainder' bins
+                else:
+                    indices.append(indices[-1] + n_per_bin)  # For the rest of the bins, add n_per_bin events
 
-            # Calculate the indices to split the data into bins with approximately equal events
-            indices = np.cumsum(bin_counts)
-            # Ensure the last index does not exceed the maximum index of the array
-            indices[-1] = min(indices[-1], npt - 1)
+            # Ensure the last bin extends to the end of the array
+            indices[-1] = npt
 
-            # Get the values corresponding to the calculated indices
-            equalN_values = np.sort(x)[indices]
+            # Get the sorted values based on the calculated indices
+            sorted_x = np.sort(x)
+            equalN_values = sorted_x[indices]
 
             return equalN_values
-
+        
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
         # The bins are determined by a linear interpolation (see function above)
