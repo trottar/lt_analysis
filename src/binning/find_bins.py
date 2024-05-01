@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-01 12:32:28 trottar"
+# Time-stamp: "2024-05-01 12:36:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,10 +156,10 @@ def find_bins(histlist, inpDict):
                 print("indices[-1] + n_per_bin: \t", indices[-1] + n_per_bin)
                 if i <= remainder:
                     print("i <= remainder: \t", i, "<=" ,remainder)
-                    indices.append(indices[-1] + n_per_bin)  # Add one extra event for the first 'remainder' bins
+                    indices.append(indices[-1] + n_per_bin + 1)  # Add one extra event for the first 'remainder' bins
                 else:
                     print("i > remainder: \t", i, ">" ,remainder)
-                    indices.append(indices[-1] + n_per_bin + 1)  # For the rest of the bins, add n_per_bin events
+                    indices.append(indices[-1] + n_per_bin)  # For the rest of the bins, add n_per_bin events
 
             # Ensure the last bin extends to the end of the array
             indices[-1] = npt
