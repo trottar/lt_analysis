@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 18:51:43 trottar"
+# Time-stamp: "2024-05-01 14:34:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -421,7 +421,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_t_SIMC"].Draw("same, HIST")
         binmax.append(hist["H_t_DATA"].GetMaximum())
     binmax = max(binmax)
-    '''
+
     t_bins = np.sort(t_bins)
     tBin_line = TLine()
     events_between = []
@@ -452,7 +452,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     tBin_line.DrawLine(b,0,b,binmax)
 
     l_t.Draw()    
-    '''
+
     Ct.Print(outputpdf)
 
     Cepsilon = TCanvas()
