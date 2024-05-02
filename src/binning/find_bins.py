@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-02 13:55:06 trottar"
+# Time-stamp: "2024-05-02 14:07:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -188,7 +188,7 @@ def find_bins(histlist, inpDict):
         # HARD CODED #
         ##############
         # Set custom bins
-        custom_bins = [tmin, 0.2, 0.22, 0.23, 0.24, 0.25, 0.26, 0.3, 0.4, tmax]
+        custom_bins = [tmin, 0.2, 0.22, 0.23, 0.24, 0.25, 0.26, 0.3, tmax]
         n, bins = np.histogram(H_t_BinTest, np.array(custom_bins))
         ##############
         ##############
