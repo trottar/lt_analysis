@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-01 22:51:58 trottar"
+# Time-stamp: "2024-05-02 10:45:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,8 +180,8 @@ def find_bins(histlist, inpDict):
         # Histogram takes the array data set and the bins as input
         # The bins are determined by a linear interpolation (see function above)
         # This returns the binned data with equal number of events per bin
-        print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
-        bin_edges = histedges_equalN(H_t_BinTest, inpDict["NumtBins"])
+        print("H_t_BinTest: ", round(H_t_BinTest, 3), type(H_t_BinTest))
+        bin_edges = histedges_equalN(round(H_t_BinTest, 3), inpDict["NumtBins"])
         n, bins = np.histogram(H_t_BinTest, bin_edges)
         
         for i,val in enumerate(n):
