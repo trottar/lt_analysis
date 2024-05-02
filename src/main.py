@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-30 18:49:56 trottar"
+# Time-stamp: "2024-05-01 22:52:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -270,8 +270,8 @@ else:
 inpDict["Epsmin"] = 0.0
 inpDict["Epsmax"] = 1.0
 
-#phisetlist = ["Center","Left","Right"]
-phisetlist = ["Center"]
+phisetlist = ["Center","Left","Right"]
+#phisetlist = ["Center"]
 
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
@@ -381,7 +381,7 @@ from find_bins import find_bins, check_bins
 
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
-sys.exit(2)
+
 try:
     output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
     with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:

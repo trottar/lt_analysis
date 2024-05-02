@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-01 22:41:54 trottar"
+# Time-stamp: "2024-05-01 22:51:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,16 +134,11 @@ def find_bins(histlist, inpDict):
 
         ################################################################################################################################################
  
-        '''
-        def histedges_equalN(x, nbin):
-            npt = len(x) - 1  # npt-1 because starting at 0
-            indices = np.linspace(0, npt, nbin+1).astype(int)
-            sorted_x = np.sort(x)
-            equalN_values = sorted_x[indices]
-            return equalN_values
-        '''
-
         def histedges_equalN(x, nbin, tolerance=1e-3):
+            '''
+            Calculates equal statistics in each t-bin while keeping the lowest t-bin
+            with the most and the highest with the least if not evenly divisible
+            '''
             nbin = nbin +1 # Account for bin range
             npt = len(x)  # Total number of data points
             n_per_bin = npt // nbin  # Calculate the number of events per bin
