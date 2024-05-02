@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-02 13:38:54 trottar"
+# Time-stamp: "2024-05-02 13:55:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,11 +183,13 @@ def find_bins(histlist, inpDict):
         print("H_t_BinTest: ", np.around(H_t_BinTest, 3), type(H_t_BinTest))
         bin_edges = histedges_equalN(np.around(H_t_BinTest, 3), inpDict["NumtBins"])
         #n, bins = np.histogram(H_t_BinTest, bin_edges)
+        
         ##############
         # HARD CODED #
         ##############
         # Set custom bins
-        n, bins = np.histogram(H_t_BinTest, np.array([tmin, 0.15, 0.175, 0.2, 0.22, 0.24, 0.26, 0.3, tmax]))
+        custom_bins = [tmin, 0.2, 0.22, 0.23, 0.24, 0.25, 0.26, 0.3, 0.4, tmax]
+        n, bins = np.histogram(H_t_BinTest, np.array(custom_bins))
         ##############
         ##############
         ##############
