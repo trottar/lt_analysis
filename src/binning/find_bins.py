@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-01 22:22:52 trottar"
+# Time-stamp: "2024-05-01 22:41:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -143,32 +143,43 @@ def find_bins(histlist, inpDict):
             return equalN_values
         '''
 
-        def histedges_equalN(x, nbin):
-            npt = len(x) - 1  # Total number of data points
+        def histedges_equalN(x, nbin, tolerance=1e-3):
+            nbin = nbin +1 # Account for bin range
+            npt = len(x)  # Total number of data points
             n_per_bin = npt // nbin  # Calculate the number of events per bin
-            print("Num evts per bin: ", n_per_bin)
             remainder = npt % nbin  # Calculate remainder for uneven division
-            print("Remainder: ", remainder)
 
-            # Calculate indices to split the sorted array
+            # Initialize indices and bin edges
             indices = [0]  # Start with the first index
-            for i in range(0, nbin):
-                print("indices[-1] + n_per_bin: \t", indices[-1] + n_per_bin)
-                if i <= remainder:
-                    print("i <= remainder: \t", i, "<=" ,remainder)
-                    indices.append(indices[-1] + n_per_bin + 1)  # Add one extra event for the first 'remainder' bins
-                else:
-                    print("i > remainder: \t", i, ">" ,remainder)
-                    indices.append(indices[-1] + n_per_bin)  # For the rest of the bins, add n_per_bin events
+            bin_edges = []
 
-            # Ensure the last bin extends to the end of the array
-            indices[-1] = npt
+            # Initialize variables for tracking binning
+            count = 0
+            last_index = 0
 
-            # Get the sorted values based on the calculated indices
-            sorted_x = np.sort(x)
-            equalN_values = sorted_x[indices]
+            # Loop through sorted indices of x
+            for i, val in enumerate(np.argsort(x)):
+                # Increment count
+                count += 1
 
-            return equalN_values
+                # Check if current value is within tolerance of last value
+                if i > 0 and abs(x[val] - x[last_index]) > tolerance:
+                    # Check if we need to start a new bin
+                    if count > n_per_bin:
+                        # Add bin edges
+                        bin_edges.append(x[val])
+                        # Update indices
+                        indices.append(i)
+                        # Reset count
+                        count = 0
+                last_index = val
+
+            # Check if the last bin needs to be added
+            if len(bin_edges) < nbin:
+                bin_edges.append(x[-1])
+                indices.append(npt)
+
+            return np.array(bin_edges)
         
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
