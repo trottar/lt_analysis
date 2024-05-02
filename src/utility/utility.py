@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-02 10:47:51 trottar"
+# Time-stamp: "2024-05-02 12:09:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -526,10 +526,14 @@ def get_centroid(hist, x_min, x_max):
         fit_func.SetLineColor(ROOT.kRed)
     except ReferenceError:
         pass
-    
-    mean = fit_func.GetParameter(1)
-    mean_err = fit_func.GetParError(1)
-    
+
+    try:
+        mean = fit_func.GetParameter(1)
+        mean_err = fit_func.GetParError(1)
+    except TypeError:
+        mean = 0.0
+        mean_err = 0.0
+        
     return [mean, mean_err]
 
 ################################################################################################################################################

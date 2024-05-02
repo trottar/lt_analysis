@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-02 11:03:14 trottar"
+# Time-stamp: "2024-05-02 11:57:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,7 +189,16 @@ def find_bins(histlist, inpDict):
 
         # Stripping tmin and tmax
         #bin_centers = bins[1:-1]
-        
+
+        ##############
+        # HARD CODED #
+        ##############
+        # Set custom bins
+        #bins = [tmin, 0.2, 0.25, tmax]
+        ##############
+        ##############
+        ##############
+
         bin_centers = (bins[:-1] + bins[1:]) / 2
         
         print("t_bins = ", bins)
