@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-02 13:11:50 trottar"
+# Time-stamp: "2024-05-02 13:38:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,22 +182,22 @@ def find_bins(histlist, inpDict):
         # This returns the binned data with equal number of events per bin
         print("H_t_BinTest: ", np.around(H_t_BinTest, 3), type(H_t_BinTest))
         bin_edges = histedges_equalN(np.around(H_t_BinTest, 3), inpDict["NumtBins"])
-        n, bins = np.histogram(H_t_BinTest, bin_edges)
+        #n, bins = np.histogram(H_t_BinTest, bin_edges)
+        ##############
+        # HARD CODED #
+        ##############
+        # Set custom bins
+        n, bins = np.histogram(H_t_BinTest, np.array([tmin, 0.15, 0.175, 0.2, 0.22, 0.24, 0.26, 0.3, tmax]))
+        ##############
+        ##############
+        ##############
+
         
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
 
         # Stripping tmin and tmax
         #bin_centers = bins[1:-1]
-
-        ##############
-        # HARD CODED #
-        ##############
-        # Set custom bins
-        bins = [tmin, 0.15, 0.175, 0.2, 0.22, 0.24, 0.26, 0.3, tmax]
-        ##############
-        ##############
-        ##############
 
         bin_centers = (bins[:-1] + bins[1:]) / 2
         
