@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-01 22:06:03 trottar"
+# Time-stamp: "2024-05-01 22:22:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -169,7 +169,7 @@ def find_bins(histlist, inpDict):
             equalN_values = sorted_x[indices]
 
             return equalN_values
-
+        
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
         # The bins are determined by a linear interpolation (see function above)
