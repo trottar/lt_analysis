@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-02 12:09:04 trottar"
+# Time-stamp: "2024-05-02 15:11:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -521,18 +521,11 @@ def get_centroid(hist, x_min, x_max):
 
     hist.Fit("gaus", "Q", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
-
-    try:
-        fit_func.SetLineColor(ROOT.kRed)
-    except ReferenceError:
-        pass
-
-    try:
-        mean = fit_func.GetParameter(1)
-        mean_err = fit_func.GetParError(1)
-    except TypeError:
-        mean = 0.0
-        mean_err = 0.0
+    
+    fit_func.SetLineColor(ROOT.kRed)
+    
+    mean = fit_func.GetParameter(1)
+    mean_err = fit_func.GetParError(1)
         
     return [mean, mean_err]
 
