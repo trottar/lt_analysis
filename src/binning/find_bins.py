@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-02 15:12:32 trottar"
+# Time-stamp: "2024-05-03 14:40:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,73 +134,80 @@ def find_bins(histlist, inpDict):
 
         ################################################################################################################################################
  
-        def histedges_equalN(x, nbin, tolerance=1e-3):
-            '''
-            Calculates equal statistics in each t-bin while keeping the lowest t-bin
-            with the most and the highest with the least if not evenly divisible
-            '''
-            nbin = nbin +1 # Account for bin range
+        '''
+        def histedges_equalN(x, nbin):
+            npt = len(x) - 1  # npt-1 because starting at 0
+            indices = np.linspace(0, npt, nbin+1).astype(int)
+            sorted_x = np.sort(x)
+            equalN_values = sorted_x[indices]
+            return equalN_values
+        '''
+        
+        def histedges_equalN(x, nbin, tolerance=1e-3, max_iterations=10):
+            # Account for bin range
+            nbin += 1
             npt = len(x)  # Total number of data points
             n_per_bin = npt // nbin  # Calculate the number of events per bin
             remainder = npt % nbin  # Calculate remainder for uneven division
 
-            # Initialize indices and bin edges
-            indices = [0]  # Start with the first index
-            bin_edges = []
+            # Initialize bin edges with the minimum and maximum data points
+            bin_edges = [np.min(x)]
+            bin_edges.extend(np.linspace(np.min(x), np.max(x), num=nbin))
 
-            # Initialize variables for tracking binning
-            count = 0
-            last_index = 0
+            # Perform iterations to adjust bin edges
+            for _ in range(max_iterations):
+                # Calculate the number of events in each bin
+                counts, _ = np.histogram(x, bins=bin_edges)
 
-            # Loop through sorted indices of x
-            for i, val in enumerate(np.argsort(x)):
-                # Increment count
-                count += 1
+                # Calculate the cumulative sum of counts
+                cum_counts = np.cumsum(counts)
 
-                # Check if current value is within tolerance of last value
-                if i > 0 and abs(x[val] - x[last_index]) > tolerance:
-                    # Check if we need to start a new bin
-                    if count > n_per_bin:
-                        # Add bin edges
-                        bin_edges.append(x[val])
-                        # Update indices
-                        indices.append(i)
-                        # Reset count
-                        count = 0
-                last_index = val
+                # Calculate the difference between target and actual counts per bin
+                diff_counts = n_per_bin - counts[:-1]
 
-            # Check if the last bin needs to be added
-            if len(bin_edges) < nbin:
-                bin_edges.append(x[-1])
-                indices.append(npt)
+                # Find the bins where the difference exceeds the tolerance
+                exceed_tolerance = np.abs(diff_counts) > tolerance
+
+                # If all differences are within tolerance, break the loop
+                if not np.any(exceed_tolerance):
+                    break
+
+                # Adjust bin edges based on the differences
+                for i, exceed in enumerate(exceed_tolerance):
+                    if exceed:
+                        if diff_counts[i] > 0:
+                            # Increase bin edge
+                            bin_edges[i + 1] += tolerance / 2
+                        else:
+                            # Decrease bin edge
+                            bin_edges[i + 1] -= tolerance / 2
 
             return np.array(bin_edges)
-        
+
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
         # The bins are determined by a linear interpolation (see function above)
         # This returns the binned data with equal number of events per bin
-        print("H_t_BinTest: ", np.around(H_t_BinTest, 3), type(H_t_BinTest))
-        bin_edges = histedges_equalN(np.around(H_t_BinTest, 3), inpDict["NumtBins"])
-        #n, bins = np.histogram(H_t_BinTest, bin_edges)
-        
+        print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
+        bin_edges = histedges_equalN(H_t_BinTest, inpDict["NumtBins"])
+        n, bins = np.histogram(H_t_BinTest, bin_edges)
+
         ##############
         # HARD CODED #
         ##############
         # Set custom bins
-        custom_bins = [tmin, 0.2, 0.23, 0.26, 0.3, tmax]
-        n, bins = np.histogram(H_t_BinTest, np.array(custom_bins))
+        #custom_bins = [tmin, 0.2, 0.23, 0.26, 0.3, tmax]
+        #n, bins = np.histogram(H_t_BinTest, np.array(custom_bins))
         ##############
         ##############
         ##############
-
         
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
 
         # Stripping tmin and tmax
         #bin_centers = bins[1:-1]
-
+        
         bin_centers = (bins[:-1] + bins[1:]) / 2
         
         print("t_bins = ", bins)
