@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-03 14:40:55 trottar"
+# Time-stamp: "2024-05-03 16:02:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -198,9 +198,21 @@ def find_bins(histlist, inpDict):
         # Set custom bins
         #custom_bins = [tmin, 0.2, 0.23, 0.26, 0.3, tmax]
         #n, bins = np.histogram(H_t_BinTest, np.array(custom_bins))
+        bad_bins_threshold = 1000
         ##############
         ##############
         ##############
+
+        # Check for bad bins
+        bad_bins = np.where(n < bad_bins_threshold)[0]
+
+        # Remove empty bins
+        n = np.delete(n, bad_bins)
+        bins = np.delete(bins, bad_bins)
+
+        # Print the updated histogram and bin edges
+        print("Removed bad bins...(threhold = {})".format(bad_bins_threshold))
+        #print("Removed bad bins: {} with {} events".format(bins, n))
         
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
