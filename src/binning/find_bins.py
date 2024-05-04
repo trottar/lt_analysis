@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-03 22:00:58 trottar"
+# Time-stamp: "2024-05-03 22:02:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -218,7 +218,10 @@ def find_bins(histlist, inpDict):
             sys.exit(2)
 
         # Redefine number of bins
-        inpDict["NumtBins"] = len(n)
+
+        if len(n) != inpDict["NumtBins"]:
+            inpDict["NumtBins"] = len(n)
+            print("Number of t-bins changed to: {}".format(inpDict["NumtBins"]))
             
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
