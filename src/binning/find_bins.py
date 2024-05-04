@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-03 16:48:29 trottar"
+# Time-stamp: "2024-05-03 22:00:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,7 +216,10 @@ def find_bins(histlist, inpDict):
         if np.size(n) == 0:
             print("\n\nt-binning Failed: no valid bins avaliable!\nIncrease initial number of t-bins or change t-range...")
             sys.exit(2)
-        
+
+        # Redefine number of bins
+        inpDict["NumtBins"] = len(n)
+            
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
 
