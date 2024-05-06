@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-06 01:02:23 trottar"
+# Time-stamp: "2024-05-06 13:02:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -353,7 +353,6 @@ print("\n\n")
 
 settingList = []
 for i,hist in enumerate(histlist):
-    print(hist["phi_setting"])
     if len(hist.keys()) <= 1: # If hist is empty (length of one for phi setting check)
         print("No {} setting found...".format(hist["phi_setting"]))
         phisetlist.remove(hist["phi_setting"])
