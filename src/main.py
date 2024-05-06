@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-05 12:25:02 trottar"
+# Time-stamp: "2024-05-06 01:02:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -338,6 +338,7 @@ if Q2 == "5p5" and W == "3p02":
 ##############
 ##############
 
+# DATA
 sys.path.append("cuts")
 from rand_sub import rand_sub
 
@@ -367,6 +368,22 @@ if DEBUG:
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
 
+# SIMC
+sys.path.append("simc_ana")    
+from compare_simc import compare_simc
+
+# Upate hist dictionary with effective charge and simc histograms
+for hist in histlist:
+    hist.update(compare_simc(hist, inpDict))    
+
+if DEBUG:
+    # Show plot pdf for each setting
+    for hist in histlist:
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
+for hist in histlist:
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
+
+    
 ##############################
 # Step 4 of the lt_analysis: # Done
 ##############################
@@ -447,20 +464,6 @@ if EPSSET == "high":
 ** Once unseparated cross sections are achieved with good parameterization, cross section separation can be performed.
 
 '''
-
-sys.path.append("simc_ana")    
-from compare_simc import compare_simc
-
-# Upate hist dictionary with effective charge and simc histograms
-for hist in histlist:
-    hist.update(compare_simc(hist, inpDict))    
-
-if DEBUG:
-    # Show plot pdf for each setting
-    for hist in histlist:
-        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
-for hist in histlist:
-    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
 
 sys.path.append("normalize")
 from get_eff_charge import get_eff_charge
