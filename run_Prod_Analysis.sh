@@ -687,10 +687,10 @@ elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     # Q2=3p0, W=3p14
     #NumtBins=5
     #NumPhiBins=16
-    NumtBins=8 # Testing
+    NumtBins=6 # Testing
     #NumtBins=3 # Testing
     NumPhiBins=8 # Testing
-    TMIN=0.100
+    TMIN=0.150
     TMAX=0.500
     #TMIN=0.100 # Testing
     #TMIN=0.150 # Testing
