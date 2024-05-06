@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-06 13:03:57 trottar"
+# Time-stamp: "2024-05-06 13:26:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -181,10 +181,6 @@ def find_bins(histlist, inpDict):
                         else:
                             # Decrease bin edge
                             bin_edges[i + 1] -= tolerance / 2
-
-            # Set first and last elements to tmin and tmax, respectively
-            bin_edges[0] = tmin
-            bin_edges[-1] = tmax
             
             return np.array(bin_edges)
 
@@ -217,6 +213,10 @@ def find_bins(histlist, inpDict):
         print("Removed bad bins...(threhold = {})".format(bad_bins_threshold))
         #print("Removed bad bins: {} with {} events".format(bins, n))
 
+        # Set first and last elements to tmin and tmax, respectively
+        bins[0] = tmin
+        bins[-1] = tmax
+        
         # Check there are good t-bins
         if np.size(n) == 0:
             print("\n\nt-binning Failed: no valid bins avaliable!\nIncrease initial number of t-bins or change t-range...")
