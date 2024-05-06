@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-06 00:45:21 trottar"
+# Time-stamp: "2024-05-06 01:19:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -223,9 +223,9 @@ def find_bins(histlist, inpDict):
             print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(n)))
             inpDict["NumtBins"] = len(n)
             print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(bins)))
-            inpDict["tmin"] = min(n)
+            #inpDict["tmin"] = min(n)
             print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(bins)))
-            inpDict["tmax"] = max(n)
+            #inpDict["tmax"] = max(n)
             
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
@@ -321,10 +321,10 @@ def check_bins(histlist, inpDict):
         if len(t_bins)-1 != inpDict["NumtBins"]:
             print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(t_bins)-1))
             inpDict["NumtBins"] = len(t_bins)-1
-            print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(n)))
-            inpDict["tmin"] = min(n)
-            print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(n)))
-            inpDict["tmax"] = max(n)
+            print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(bins)))
+            #inpDict["tmin"] = min(n)
+            print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(bins)))
+            #inpDict["tmax"] = max(n)
         
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
