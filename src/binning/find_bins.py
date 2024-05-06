@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-06 12:11:45 trottar"
+# Time-stamp: "2024-05-06 12:42:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,6 +182,9 @@ def find_bins(histlist, inpDict):
                             # Decrease bin edge
                             bin_edges[i + 1] -= tolerance / 2
 
+            # Convert bin_edges to a numpy array
+            bin_edges = np.array(bin_edges)
+            # Assign tmax to each element in bin_edges[:-1]                            
             bin_edges[0] = tmin
             bin_edges[:-1] = tmax
             
