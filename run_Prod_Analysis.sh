@@ -661,7 +661,7 @@ MissMassMax=1.16
 
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
-    NumtBins=2
+    NumtBins=10
     NumPhiBins=8
     TMIN=0.100
     TMAX=0.750
