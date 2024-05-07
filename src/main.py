@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-06 20:00:48 trottar"
+# Time-stamp: "2024-05-07 15:35:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -547,48 +547,48 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 
 # Save histograms to root file
 # Check that root file doesnt already exist    
-if not os.path.exists(foutroot):
+#if not os.path.exists(foutroot):
 #if os.path.exists(foutroot):
-    for hist in histlist:
-        print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
-        # Loop through all keggys,values of dictionary
-        for i, (key, val) in enumerate(hist.items()):
-            # Progress bar
-            Misc.progressBar(i, len(hist.items())-1,bar_length=25)
-            if "G_data_eff" in key:
-                hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
-            if is_hist(val):
-                if "SIMC" in key:
-                    if "yield" in key:
-                        continue
-                    elif "bin" in key:
-                        continue
-                    elif "totevts" in key:
-                        continue
-                    else:
-                        hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))                
-                if "DATA" in key:
-                    if "yield" in key:
-                        continue
-                    elif "bin" in key:
-                        continue
-                    elif "totevts" in key:
-                        continue
-                    else:
-                        hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
-                if "DUMMY" in key:
-                    hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
+for hist in histlist:
+    print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
+    # Loop through all keggys,values of dictionary
+    for i, (key, val) in enumerate(hist.items()):
+        # Progress bar
+        Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+        if "G_data_eff" in key:
+            hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
+        if is_hist(val):
+            if "SIMC" in key:
+                if "yield" in key:
+                    continue
+                elif "bin" in key:
+                    continue
+                elif "totevts" in key:
+                    continue
+                else:
+                    hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))                
+            if "DATA" in key:
+                if "yield" in key:
+                    continue
+                elif "bin" in key:
+                    continue
+                elif "totevts" in key:
+                    continue
+                else:
+                    hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
+            if "DUMMY" in key:
+                hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
 
-    # Open the ROOT file
-    root_file = TFile.Open(foutroot, "UPDATE")
+# Open the ROOT file
+root_file = TFile.Open(foutroot, "UPDATE")
 
-    # Check if the file was opened successfully
-    if root_file.IsOpen():
-        # Close the file
-        root_file.Close()
-        print("\nThe root file {} has been successfully closed.".format(foutroot))
-    else:
-        print("\nError: Unable to close the root file {}.".format(foutroot))
+# Check if the file was opened successfully
+if root_file.IsOpen():
+    # Close the file
+    root_file.Close()
+    print("\nThe root file {} has been successfully closed.".format(foutroot))
+else:
+    print("\nError: Unable to close the root file {}.".format(foutroot))
         
 # Add root file with data histograms        
 output_file_lst.append(foutroot)

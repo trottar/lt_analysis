@@ -73,12 +73,6 @@ formatted_date=$(date +%Y%B%d_H%HM%MS%S)
 # HARD CODED #
 ##############
 
-# Clean all untracked files and recreate symlinks
-if [[ $i_flag != "true" ]]; then
-    git clean -fdx
-    ./set_SymLinks.sh
-fi
-
 DEBUG="False" # Flag for no plot splash
 #DEBUG="True" # Flag for plot splash
 
@@ -95,6 +89,13 @@ else
 	    'kaon'|'pion'|'proton') break;; # If a valid option, break the loop and continue
 	esac
     done
+fi
+
+
+# Clean all untracked files and recreate symlinks
+if [[ $i_flag != "true" ]]; then
+    git clean -fdx
+    ./set_SymLinks.sh $ParticleType
 fi
 
 # Efficiency csv file
