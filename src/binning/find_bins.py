@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-06 13:26:24 trottar"
+# Time-stamp: "2024-05-07 11:28:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -196,8 +196,8 @@ def find_bins(histlist, inpDict):
         # HARD CODED #
         ##############
         # Set minimum threhold number of events per bin
-        #bad_bins_threshold = 1000
-        bad_bins_threshold = 2000
+        bad_bins_threshold = 1000
+        #bad_bins_threshold = 2000
         ##############
         ##############
         ##############
