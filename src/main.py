@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-06 13:02:30 trottar"
+# Time-stamp: "2024-05-06 20:00:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -392,6 +392,7 @@ for hist in histlist:
 * These bins will also be used of high eps, so check high eps as well.
 '''
 
+print("\n\n")
 sys.path.append("binning")
 from find_bins import find_bins, check_bins
 
