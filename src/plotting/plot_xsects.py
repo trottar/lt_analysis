@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-05 23:52:55 trottar"
+# Time-stamp: "2024-05-08 21:09:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -184,7 +184,6 @@ except IOError:
     print("Error reading {}...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
 
 t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
-print("\n\n!!!!!!!!!!",t_bins, "\n", t_bin_centers,"!!!!!!!!!!!\n\n\n")
 
 try:
     with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
