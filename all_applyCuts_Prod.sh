@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-20 08:53:26 trottar"
+# Time-stamp: "2024-05-20 09:22:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,7 +78,7 @@ TARGET=("LH2")
 #EPS=("high" "low")
 EPS=("low")
 #PHISET=("center" "left" "right")
-PHISET=("left")
+PHISET=("center")
 
 for t in "${TARGET[@]}"; do
     for e in "${EPS[@]}"; do
