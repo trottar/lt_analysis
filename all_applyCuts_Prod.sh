@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-20 08:53:01 trottar"
+# Time-stamp: "2024-05-20 08:53:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,7 +74,7 @@ W="2p95"
 KIN="Q${Q2}W${W}"
 
 #TARGET=("LH2" "dummy")
-TARGET=("dummy")
+TARGET=("LH2")
 #EPS=("high" "low")
 EPS=("low")
 #PHISET=("center" "left" "right")
