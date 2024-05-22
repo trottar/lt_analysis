@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 14:12:23 trottar"
+# Time-stamp: "2024-05-22 14:14:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -419,6 +419,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
 
     ###
+
         
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
