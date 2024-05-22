@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 14:02:58 trottar"
+# Time-stamp: "2024-05-22 14:12:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -348,6 +348,12 @@ with PdfPages(outputpdf) as pdf:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
 
+    ###
+
+    # Define exponential function
+    def exp_func(t, a, b):
+        return a * np.exp(b * t)
+
     # Create a figure and axis objects for Q2 plot
     fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
@@ -363,10 +369,10 @@ with PdfPages(outputpdf) as pdf:
 
         ax.errorbar(t_bin_centers, df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
-        # Fit the data
-        p = np.polyfit(t_bin_centers, df['Q2'], 1)
-        fit_line = np.polyval(p, t_bin_centers)
-        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label=f"{df_key} Fit: Q(t) = {p[0]:.2f}t + {p[1]:.2f}")
+        # Fit the data using exponential function
+        popt, _ = curve_fit(exp_func, t_bin_centers, df['Q2'])
+        fit_line = exp_func(t_bin_centers, *popt)
+        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label=f"{df_key} Fit: Q(t) = {popt[0]:.2f}e^({popt[1]:.2f}t)")
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
@@ -395,10 +401,10 @@ with PdfPages(outputpdf) as pdf:
 
         ax.errorbar(t_bin_centers, df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
-        # Fit the data
-        p = np.polyfit(t_bin_centers, df['W'], 1)
-        fit_line = np.polyval(p, t_bin_centers)
-        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label=f"{df_key} Fit: W(t) = {p[0]:.2f}t + {p[1]:.2f}")
+        # Fit the data using exponential function
+        popt, _ = curve_fit(exp_func, t_bin_centers, df['W'])
+        fit_line = exp_func(t_bin_centers, *popt)
+        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label=f"{df_key} Fit: W(t) = {popt[0]:.2f}e^({popt[1]:.2f}t)")
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('W', fontsize=24)
@@ -412,6 +418,8 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
 
+    ###
+        
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
