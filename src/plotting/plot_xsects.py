@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 14:26:50 trottar"
+# Time-stamp: "2024-05-22 19:20:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,6 +15,7 @@ import root_pandas as rpd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from scipy.optimize import curve_fit
 import re
 import sys, os
 
