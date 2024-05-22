@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 14:14:37 trottar"
+# Time-stamp: "2024-05-22 14:26:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -372,7 +372,7 @@ with PdfPages(outputpdf) as pdf:
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, t_bin_centers, df['Q2'])
         fit_line = exp_func(t_bin_centers, *popt)
-        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label=f"{df_key} Fit: Q(t) = {popt[0]:.2f}e^({popt[1]:.2f}t)")
+        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
@@ -383,7 +383,7 @@ with PdfPages(outputpdf) as pdf:
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure and axis objects for W plot
@@ -404,7 +404,7 @@ with PdfPages(outputpdf) as pdf:
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, t_bin_centers, df['W'])
         fit_line = exp_func(t_bin_centers, *popt)
-        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label=f"{df_key} Fit: W(t) = {popt[0]:.2f}e^({popt[1]:.2f}t)")
+        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('W', fontsize=24)
@@ -415,7 +415,7 @@ with PdfPages(outputpdf) as pdf:
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
 
     ###
