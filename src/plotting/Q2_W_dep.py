@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 12:50:33 trottar"
+# Time-stamp: "2024-05-23 13:11:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -326,7 +326,7 @@ with PdfPages(outputpdf) as pdf:
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers']['t_bin_centers'], df['Q2'])
         fit_line = exp_func(merged_dict['t_bin_centers']['t_bin_centers'], *popt)
-        ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        #ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
@@ -358,7 +358,7 @@ with PdfPages(outputpdf) as pdf:
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers']['t_bin_centers'], df['W'])
         fit_line = exp_func(merged_dict['t_bin_centers']['t_bin_centers'], *popt)
-        ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        #ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('W', fontsize=24)
