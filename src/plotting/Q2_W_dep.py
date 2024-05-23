@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:21:27 trottar"
+# Time-stamp: "2024-05-23 00:22:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -321,9 +321,9 @@ with PdfPages(outputpdf) as pdf:
         ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers'], df['Q2'])
-        fit_line = exp_func(merged_dict['t_bin_centers'], *popt)
-        ax.plot(merged_dict['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers']['t_bin_centers'], df['Q2'])
+        fit_line = exp_func(merged_dict['t_bin_centers']['t_bin_centers'], *popt)
+        ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
@@ -350,12 +350,12 @@ with PdfPages(outputpdf) as pdf:
         else:
             df_key = "Low $\epsilon$"
 
-        ax.errorbar(merged_dict['t_bin_centers'], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers'], df['W'])
-        fit_line = exp_func(merged_dict['t_bin_centers'], *popt)
-        ax.plot(merged_dict['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers']['t_bin_centers'], df['W'])
+        fit_line = exp_func(merged_dict['t_bin_centers']['t_bin_centers'], *popt)
+        ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('W', fontsize=24)
