@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:43:21 trottar"
+# Time-stamp: "2024-05-22 21:48:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -68,6 +68,9 @@ LOEPS_lst = [0.2477, 0.3935]
 HIEPS_lst = [0.7864, 0.6668]
 
 comb_dict = {}
+
+t_bin_centers = []
+phi_bin_centers = []
 
 for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
@@ -178,7 +181,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     except IOError:
         print("Error reading {}...".format("{}/t_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
-    t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
+    t_bin_centers.append((t_bins[:-1] + t_bins[1:]) / 2)
 
     try:
         with open("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p","")), "r") as file:
@@ -195,8 +198,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     except IOError:
         print("Error reading {}...".format("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
-    #phi_bin_centers = (phi_bins[:-1] + phi_bins[1:]) / 2
-    phi_bin_centers = phi_bins
+    phi_bin_centers.append(phi_bins)
 
     for i,row in file_df_dict['setting_df'].iterrows():
         if row['Q2'] == float(Q2.replace("p",".")):
@@ -266,6 +268,10 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
     comb_dict["Q{}W{}".format(Q2,W)] = file_df_dict
 
+# Flatten
+t_bin_centers = [item for sublist in t_bin_centers for item in sublist]
+phi_bin_centers = [item for sublist in phi_bin_centers for item in sublist]
+    
 print("\n\ncomb_dict")
 print(comb_dict)
 print("\n\n")
