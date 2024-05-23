@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:25:33 trottar"
+# Time-stamp: "2024-05-22 22:27:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -282,7 +282,7 @@ for subdict in comb_dict.values():
 
 # Flatten the merged dictionary
 for key in merged_dict.keys():
-    merged_dict[key] = [item for sublist in merged_dict[key] for item in sublist]
+    merged_dict[key] = pd.concat(merged_dict[key], ignore_index=True)
     print("$$$$$$$", key, merged_dict[key])
     
 print("\n\nmerged_dict")
