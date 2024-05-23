@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:08:05 trottar"
+# Time-stamp: "2024-05-22 22:11:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -284,11 +284,9 @@ for key in all_keys:
     # Sum the values of the current key from all subdictionaries
     for subdict in comb_dict.values():
         if key in subdict:
-            print("!!!!!", key, subdict[key])  # Debug print statement
             merged_value += subdict[key]
     # Store the merged value in the merged_dict
     merged_dict[key] = merged_value
-    print("$$$$$", key, merged_dict[key])  # Debug print statement
     
 print("\n\nmerged_dict")
 #print(merged_dict)
