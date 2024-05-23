@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:12:42 trottar"
+# Time-stamp: "2024-05-22 22:16:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -272,23 +272,14 @@ print("\n\n")
 # Initialize the merged dictionary
 merged_dict = {}
 
-# Determine the union of all keys
-all_keys = set()
-for subdict in comb_dict.values():
-    all_keys.update(subdict.keys())
-
-# Iterate over all keys
-for key in all_keys:
-    # Initialize the merged value for the current key
-    merged_value = 0
-    # Sum the values of the current key from all subdictionaries
-    for subdict in comb_dict.values():
-        if key in subdict:
-            print("!!!!",key, subdict[key])
-            merged_value += subdict[key]
-    # Store the merged value in the merged_dict
-    merged_dict[key] = merged_value
-    print("$$$",key, merged_dict[key])
+# Iterate over all subdictionaries
+for subdict_name, subdict in comb_dict.items():
+    print("Processing {}: {}".format(subdict_name, subdict))  # Debug statement
+    for key, value in subdict.items():
+        if key not in merged_dict:
+            merged_dict[key] = []
+        merged_dict[key].append(value)
+        print("Added {} to key '{}': {}".format(value, key, merged_dict[key]))  # Debug statement
     
 print("\n\nmerged_dict")
 #print(merged_dict)
