@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:14:31 trottar"
+# Time-stamp: "2024-05-22 21:15:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -51,6 +51,8 @@ outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
 '''
 Import separated xsects model
 '''
+
+pol_str = "pl"
 
 sys.path.append("../models")
 if pol_str == "pl" and ParticleType == "kaon":
