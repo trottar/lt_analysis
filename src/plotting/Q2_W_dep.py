@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 23:59:10 trottar"
+# Time-stamp: "2024-05-23 00:00:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -178,7 +178,10 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     except IOError:
         print("Error reading {}...".format("{}/t_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
-    file_df_dict['t_bin_centers'] = pd.DataFrame([{'t_bin_centers' : (t_bins[:-1] + t_bins[1:]) / 2}], columns=['t_bin_centers'])
+
+    t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
+    t_bin_centers = [item for sublist in t_bin_centers for item in (flatten_list(sublist) if isinstance(sublist, list) else [sublist])]
+    file_df_dict['t_bin_centers'] = pd.DataFrame([{'t_bin_centers' : t_bin_centers}], columns=['t_bin_centers'])
     file_df_dict['t_bin_centers'] = file_df_dict['t_bin_centers'].reindex(sorted(file_df_dict['t_bin_centers'].columns), axis=1)
     # Replace zeros with NaN
     file_df_dict['t_bin_centers'].replace(0,np.nan,inplace=True)
