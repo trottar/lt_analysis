@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:24:26 trottar"
+# Time-stamp: "2024-05-22 21:24:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -72,9 +72,9 @@ comb_dict = {}
 for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
     if Q2 == "2p1" and W == "2p95":
-        inp_dir = CACHEPATH+"/Q{}W{}/".format(Q2,W)+"trial_23/2024May06_H23M03S07"        
-    elif Q2 == "3p0" and W == "3p14":
         inp_dir = CACHEPATH+"/Q{}W{}/".format(Q2,W)+"2024May22_H11M45S25"
+    elif Q2 == "3p0" and W == "3p14":
+        inp_dir = CACHEPATH+"/Q{}W{}/".format(Q2,W)+"trial_23/2024May06_H23M03S07"
     else:
         print("Error: No valid path for Q{}W{}...".format(Q2,W))
         sys.exit(2)
