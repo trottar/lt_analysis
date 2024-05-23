@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:48:25 trottar"
+# Time-stamp: "2024-05-22 21:48:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -271,6 +271,8 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 # Flatten
 t_bin_centers = [item for sublist in t_bin_centers for item in sublist]
 phi_bin_centers = [item for sublist in phi_bin_centers for item in sublist]
+
+print(t_bin_centers)
     
 print("\n\ncomb_dict")
 print(comb_dict)
