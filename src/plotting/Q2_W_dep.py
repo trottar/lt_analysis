@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:37:59 trottar"
+# Time-stamp: "2024-05-23 00:38:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -385,17 +385,6 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            print("="*50)
-            model = []
-            # Generate model for comparison
-            for j, row in df.iterrows():
-                print("-"*50)
-                print("Data {} = {:.4e}".format(sig, row[sig]))
-                inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
-                model.append(import_model(sig, inp_param))
-            # Check that model sig is not all zeros
-            if not all(element == 0 for element in model):
-                ax.plot(df['t'], model, linestyle='-.', color='red', label='Model Fit')
             print("\n\n",df_key,"\nt\n",df['t'], "\nQ2\n", df['d{}'.format(sig)])
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         ax.set_xlabel('t')
@@ -406,7 +395,6 @@ with PdfPages(outputpdf) as pdf:
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
-    print("="*50)
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
