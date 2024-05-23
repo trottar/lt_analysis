@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:55:30 trottar"
+# Time-stamp: "2024-05-22 21:57:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -288,6 +288,7 @@ for key in all_keys:
             merged_value += subdict[key]
     # Store the merged value in the merged_dict
     merged_dict[key] = merged_value
+    print("$$$$$",key, merged_dict[key])
     
 print("\n\nmerged_dict")
 #print(merged_dict)
