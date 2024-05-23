@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:49:33 trottar"
+# Time-stamp: "2024-05-22 21:52:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -68,9 +68,6 @@ LOEPS_lst = [0.2477, 0.3935]
 HIEPS_lst = [0.7864, 0.6668]
 
 comb_dict = {}
-
-t_bin_centers = []
-phi_bin_centers = []
 
 for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
@@ -181,7 +178,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     except IOError:
         print("Error reading {}...".format("{}/t_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
-    t_bin_centers.append((t_bins[:-1] + t_bins[1:]) / 2)
+    file_df_dict['t_bin_centers'] = (t_bins[:-1] + t_bins[1:]) / 2
 
     try:
         with open("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p","")), "r") as file:
@@ -198,7 +195,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     except IOError:
         print("Error reading {}...".format("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
-    phi_bin_centers.append(phi_bins)
+    file_df_dict['phi_bin_centers'] = phi_bins
 
     for i,row in file_df_dict['setting_df'].iterrows():
         if row['Q2'] == float(Q2.replace("p",".")):
@@ -267,10 +264,6 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
                                                    , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
 
     comb_dict["Q{}W{}".format(Q2,W)] = file_df_dict
-
-# Flatten
-t_bin_centers = [item for sublist in t_bin_centers for item in sublist]
-phi_bin_centers = [item for sublist in phi_bin_centers for item in sublist]
     
 print("\n\ncomb_dict")
 print(comb_dict)
@@ -299,8 +292,6 @@ print("\n\nmerged_dict")
 #print(merged_dict)
 print("\n\n")
 
-print(t_bin_centers)
-
 # Create a PdfPages object to manage the PDF file
 with PdfPages(outputpdf) as pdf:
 
@@ -327,12 +318,12 @@ with PdfPages(outputpdf) as pdf:
         else:
             df_key = "Low $\epsilon$"
 
-        ax.errorbar(t_bin_centers, df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(df['t_bin_centers'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, t_bin_centers, df['Q2'])
-        fit_line = exp_func(t_bin_centers, *popt)
-        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        popt, _ = curve_fit(exp_func, df['t_bin_centers'], df['Q2'])
+        fit_line = exp_func(df['t_bin_centers'], *popt)
+        ax.plot(df['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
@@ -359,12 +350,12 @@ with PdfPages(outputpdf) as pdf:
         else:
             df_key = "Low $\epsilon$"
 
-        ax.errorbar(t_bin_centers, df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(df['t_bin_centers'], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, t_bin_centers, df['W'])
-        fit_line = exp_func(t_bin_centers, *popt)
-        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        popt, _ = curve_fit(exp_func, df['t_bin_centers'], df['W'])
+        fit_line = exp_func(df['t_bin_centers'], *popt)
+        ax.plot(df['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('W', fontsize=24)
