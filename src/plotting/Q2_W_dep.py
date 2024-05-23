@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:06:22 trottar"
+# Time-stamp: "2024-05-23 00:07:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -180,14 +180,20 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
 
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
+    # Initialize an empty list to store DataFrame objects
+    df_list = []
     for val in t_bin_centers:
-        file_df_dict['t_bin_centers'] = pd.DataFrame([{'t_bin_centers' : val}], columns=['t_bin_centers'])
-        file_df_dict['t_bin_centers'] = file_df_dict['t_bin_centers'].reindex(sorted(file_df_dict['t_bin_centers'].columns), axis=1)
+        # Create a DataFrame for each value of t_bin_centers
+        df = pd.DataFrame({'t_bin_centers': [val]})
         # Replace zeros with NaN
-        file_df_dict['t_bin_centers'].replace(0,np.nan,inplace=True)
+        df.replace(0, np.nan, inplace=True)
         # Replace None with NaN
-        file_df_dict['t_bin_centers'].replace([None],np.nan,inplace=True)
-    
+        df.replace([None], np.nan, inplace=True)
+        df_list.append(df)
+
+    # Concatenate all DataFrames in df_list along the rows axis
+    file_df_dict['t_bin_centers'] = pd.concat(df_list, ignore_index=True)
+
     try:
         with open("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p","")), "r") as file:
             # Read all lines from the file into a list
