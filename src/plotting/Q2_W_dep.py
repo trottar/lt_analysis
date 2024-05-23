@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:14:37 trottar"
+# Time-stamp: "2024-05-23 00:19:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -179,7 +179,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
         print("Error reading {}...".format("{}/t_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2        
-    file_df_dict['t_bin_centers'] = pd.DataFrame(t_bin_centers, index=None)
+    file_df_dict['t_bin_centers'] = pd.DataFrame(t_bin_centers, column=['t_bin_centers'])
     
     try:
         with open("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p","")), "r") as file:
@@ -316,8 +316,8 @@ with PdfPages(outputpdf) as pdf:
         else:
             df_key = "Low $\epsilon$"
 
-        print("\n\n",df_key,"\nt_bin_centers\n",merged_dict['t_bin_centers'], "\nQ2\n", df['Q2'])
-        ax.errorbar(merged_dict['t_bin_centers'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        print("\n\n",df_key,"\nt_bin_centers\n",merged_dict['t_bin_centers']['t_bin_centers'], "\nQ2\n", df['Q2'])
+        ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers'], df['Q2'])
