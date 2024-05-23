@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:00:59 trottar"
+# Time-stamp: "2024-05-23 00:02:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -180,7 +180,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
 
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
-    t_bin_centers = [item for sublist in t_bin_centers for item in (flatten_list(sublist) if isinstance(sublist, list) else [sublist])]
+    t_bin_centers = {i : t_bin_centers[i] for i in sorted(t_bin_centers.keys())}
     file_df_dict['t_bin_centers'] = pd.DataFrame([{'t_bin_centers' : t_bin_centers}], columns=['t_bin_centers'])
     file_df_dict['t_bin_centers'] = file_df_dict['t_bin_centers'].reindex(sorted(file_df_dict['t_bin_centers'].columns), axis=1)
     # Replace zeros with NaN
