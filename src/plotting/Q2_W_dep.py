@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:04:28 trottar"
+# Time-stamp: "2024-05-23 00:05:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -180,11 +180,9 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
 
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
-    # Flatten the list
-    flattened_list = [item for sublist in t_bin_centers for item in sublist]
 
     # Create DataFrame with flattened list
-    file_df_dict['t_bin_centers'] = pd.DataFrame({'t_bin_centers': flattened_list}, columns=['t_bin_centers'])
+    file_df_dict['t_bin_centers'] = pd.DataFrame({'t_bin_centers': t_bin_centers}, columns=['t_bin_centers'])
 
     # Replace zeros with NaN
     file_df_dict['t_bin_centers'].replace(0, np.nan, inplace=True)
