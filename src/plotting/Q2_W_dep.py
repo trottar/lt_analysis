@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:16:12 trottar"
+# Time-stamp: "2024-05-22 22:18:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -274,12 +274,11 @@ merged_dict = {}
 
 # Iterate over all subdictionaries
 for subdict_name, subdict in comb_dict.items():
-    print("Processing {}: {}".format(subdict_name, subdict))  # Debug statement
     for key, value in subdict.items():
         if key not in merged_dict:
             merged_dict[key] = []
         merged_dict[key].append(value)
-        print("Added {} to key '{}': {}".format(value, key, merged_dict[key]))  # Debug statement
+        print("!!!!!!!", key, merged_dict[key])
     
 print("\n\nmerged_dict")
 #print(merged_dict)
