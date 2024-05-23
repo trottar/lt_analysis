@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 23:44:30 trottar"
+# Time-stamp: "2024-05-22 23:46:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -178,7 +178,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     except IOError:
         print("Error reading {}...".format("{}/t_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
-    file_df_dict['t_bin_centers'] = pd.DataFrame((t_bins[:-1] + t_bins[1:]) / 2, columns=[], dtype="float64")
+    file_df_dict['t_bin_centers'] = pd.DataFrame({None:(t_bins[:-1] + t_bins[1:]) / 2}, columns=[None], dtype="float64")
     
     try:
         with open("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p","")), "r") as file:
@@ -195,7 +195,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     except IOError:
         print("Error reading {}...".format("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
-    file_df_dict['phi_bin_centers'] = pd.DataFrame(phi_bins, columns=[], dtype="float64")
+    file_df_dict['phi_bin_centers'] = pd.DataFrame(phi_bins, columns=[None], dtype="float64")
 
     for i,row in file_df_dict['setting_df'].iterrows():
         if row['Q2'] == float(Q2.replace("p",".")):
