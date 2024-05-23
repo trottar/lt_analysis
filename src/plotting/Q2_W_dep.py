@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:41:43 trottar"
+# Time-stamp: "2024-05-22 22:49:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -195,7 +195,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     except IOError:
         print("Error reading {}...".format("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
-    file_df_dict['phi_bin_centers'] = pd.DataFrame(phi_bins, columns=['phi_bin_center'])
+    file_df_dict['phi_bin_centers'] = pd.DataFrame(phi_bins, columns=[None])
 
     for i,row in file_df_dict['setting_df'].iterrows():
         if row['Q2'] == float(Q2.replace("p",".")):
