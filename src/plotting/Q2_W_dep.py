@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:11:46 trottar"
+# Time-stamp: "2024-05-22 21:14:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -24,6 +24,8 @@ import sys, os
 '''
 ltsep package import and pathing definitions
 '''
+
+OutFilename = "Q2_W_dep"
 
 # Import package for cuts
 from ltsep import Root
