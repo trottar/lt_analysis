@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 19:20:56 trottar"
+# Time-stamp: "2024-05-22 20:35:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -284,7 +284,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Loop through t bins and plot data
     for k in range(NumtBins-2):
-        print("!!!!!!!!!!",NumtBins, k)
+        
         ax = axes[k]
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
