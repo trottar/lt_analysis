@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:02:06 trottar"
+# Time-stamp: "2024-05-23 00:04:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -180,14 +180,17 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
 
     t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
-    t_bin_centers = {i : t_bin_centers[i] for i in sorted(t_bin_centers.keys())}
-    file_df_dict['t_bin_centers'] = pd.DataFrame([{'t_bin_centers' : t_bin_centers}], columns=['t_bin_centers'])
-    file_df_dict['t_bin_centers'] = file_df_dict['t_bin_centers'].reindex(sorted(file_df_dict['t_bin_centers'].columns), axis=1)
-    # Replace zeros with NaN
-    file_df_dict['t_bin_centers'].replace(0,np.nan,inplace=True)
-    # Replace None with NaN
-    file_df_dict['t_bin_centers'].replace([None],np.nan,inplace=True)
+    # Flatten the list
+    flattened_list = [item for sublist in t_bin_centers for item in sublist]
 
+    # Create DataFrame with flattened list
+    file_df_dict['t_bin_centers'] = pd.DataFrame({'t_bin_centers': flattened_list}, columns=['t_bin_centers'])
+
+    # Replace zeros with NaN
+    file_df_dict['t_bin_centers'].replace(0, np.nan, inplace=True)
+
+    # Replace None with NaN
+    file_df_dict['t_bin_centers'].replace([None], np.nan, inplace=True)
     
     try:
         with open("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p","")), "r") as file:
