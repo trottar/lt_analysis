@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:24:32 trottar"
+# Time-stamp: "2024-05-23 00:25:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -369,5 +369,45 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
 
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
+
+    for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
+        
+        # Use integer division to get the correct subplot position
+        ax = axes[k // 2, k % 2]
+        formatted_sig = sig.replace("sig", "\sigma_{") + "}"
+        ax.set_title("${}$".format(formatted_sig), fontsize=24)
+        for i, df_key in enumerate(['sep_file']):
+            df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
+            print("="*50)
+            model = []
+            # Generate model for comparison
+            for j, row in df.iterrows():
+                print("-"*50)
+                print("Data {} = {:.4e}".format(sig, row[sig]))
+                inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
+                model.append(import_model(sig, inp_param))
+            # Check that model sig is not all zeros
+            if not all(element == 0 for element in model):
+                ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], model, linestyle='-.', color='red', label='Model Fit')
+            ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.set_xlabel('t')
+        ax.set_ylabel("${}$".format(formatted_sig))
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
+        ax.set_xlim(tmin, tmax)
+        ax.legend(fontsize=24)
+        # Add grid to subplot
+        ax.grid(True, linestyle='--', linewidth=0.5)
+    print("="*50)
+        
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    pdf.savefig(fig, bbox_inches='tight')
+    
     ###
 
