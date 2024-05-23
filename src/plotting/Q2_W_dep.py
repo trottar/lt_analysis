@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:04:34 trottar"
+# Time-stamp: "2024-05-22 22:06:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -284,8 +284,12 @@ for key in all_keys:
     # Sum the values of the current key from all subdictionaries
     for subdict in comb_dict.values():
         if key in subdict:
-            print("!!!!!", key, subdict[key])  # Debug print statement
-            merged_value += subdict[key]
+            value = subdict[key]
+            if isinstance(value, (int, float)) and not math.isnan(value):  # Ensure the value is numeric and not NaN
+                print("!!!!!", key, value)  # Debug print statement
+                merged_value += value
+            else:
+                print("Non-numeric or NaN value found:", key, value)  # Print non-numeric or NaN values
     # Store the merged value in the merged_dict
     merged_dict[key] = merged_value
     print("$$$$$", key, merged_dict[key])  # Debug print statement
