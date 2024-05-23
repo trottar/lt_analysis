@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:39:54 trottar"
+# Time-stamp: "2024-05-22 21:43:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -74,7 +74,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     if Q2 == "2p1" and W == "2p95":
         inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"2024May22_H11M45S25"
     elif Q2 == "3p0" and W == "3p14":
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_21/2024April26_H09M08S50"
+        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_23/2024May06_H23M03S07"
     else:
         print("Error: No valid path for Q{}W{}...".format(Q2,W))
         sys.exit(2)
@@ -273,27 +273,22 @@ print("\n\n")
 # Initialize the merged dictionary
 merged_dict = {}
 
-# Get all the subdictionaries in a list
-subdicts = list(comb_dict.values())
-
 # Determine the union of all keys
 all_keys = set()
-for subdict in subdicts:
-    print("$$$$",subdict.keys())
+for subdict in comb_dict.values():
     all_keys.update(subdict.keys())
 
 # Iterate over all keys
 for key in all_keys:
-    print("!!!!",key)
     # Initialize the merged value for the current key
     merged_value = 0
     # Sum the values of the current key from all subdictionaries
-    for subdict in subdicts:
-        #print("££££",subdict)
-        merged_value += subdict.get(key, 0)
+    for subdict in comb_dict.values():
+        if key in subdict:
+            merged_value += subdict[key]
     # Store the merged value in the merged_dict
     merged_dict[key] = merged_value
-
+    
 print("\n\nmerged_dict")
 #print(merged_dict)
 print("\n\n")
