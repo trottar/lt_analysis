@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:22:43 trottar"
+# Time-stamp: "2024-05-23 00:24:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -308,7 +308,7 @@ with PdfPages(outputpdf) as pdf:
     colors = ['black', 'red']
     
     ax = axes
-    ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+    #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
     for i, df_key in enumerate(['kindata_loeps_{}'.format('center'), 'kindata_hieps_{}'.format('center')]):
         df = merged_dict[df_key]
@@ -341,7 +341,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
     ax = axes
-    ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+    #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
     for i, df_key in enumerate(['kindata_loeps_{}'.format('center'), 'kindata_hieps_{}'.format('center')]):
         df = merged_dict[df_key]
