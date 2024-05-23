@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:33:55 trottar"
+# Time-stamp: "2024-05-22 21:35:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -270,14 +270,19 @@ print("\n\ncomb_dict")
 print(comb_dict)
 print("\n\n")
 
-# Merge dictionaries
+# Initialize the merged dictionary
 merged_dict = {}
 
 # Get all the subdictionaries in a list
 subdicts = list(comb_dict.values())
 
-# Iterate over the keys of the first subdictionary
-for key in subdicts[0]:
+# Determine the union of all keys
+all_keys = set()
+for subdict in subdicts:
+    all_keys.update(subdict.keys())
+
+# Iterate over all keys
+for key in all_keys:
     # Initialize the merged value for the current key
     merged_value = 0
     # Sum the values of the current key from all subdictionaries
