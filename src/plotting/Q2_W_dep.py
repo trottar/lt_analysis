@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:35:38 trottar"
+# Time-stamp: "2024-05-23 00:37:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -72,10 +72,10 @@ comb_dict = {}
 for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
     if Q2 == "2p1" and W == "2p95":
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"2024May22_H11M45S25"
+        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"2024May22_H11M45S25" # Center only
     elif Q2 == "3p0" and W == "3p14":
         #inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_23/2024May06_H23M03S07"
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_21/2024April26_H09M08S50"
+        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_21/2024April26_H09M08S50" # Center only
     else:
         print("Error: No valid path for Q{}W{}...".format(Q2,W))
         sys.exit(2)
@@ -396,6 +396,7 @@ with PdfPages(outputpdf) as pdf:
             # Check that model sig is not all zeros
             if not all(element == 0 for element in model):
                 ax.plot(df['t'], model, linestyle='-.', color='red', label='Model Fit')
+            print("\n\n",df_key,"\nt\n",df['t'], "\nQ2\n", df['d{}'.format(sig)])
             ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
