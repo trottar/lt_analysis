@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:36:44 trottar"
+# Time-stamp: "2024-05-22 21:37:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -288,7 +288,7 @@ for key in all_keys:
     merged_value = 0
     # Sum the values of the current key from all subdictionaries
     for subdict in subdicts:
-        print("££££",subdict)
+        #print("££££",subdict)
         merged_value += subdict.get(key, 0)
     # Store the merged value in the merged_dict
     merged_dict[key] = merged_value
