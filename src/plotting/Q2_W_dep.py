@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:22:37 trottar"
+# Time-stamp: "2024-05-22 22:25:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -281,9 +281,8 @@ for subdict in comb_dict.values():
         print("!!!!!!!", key, merged_dict[key])
 
 # Flatten the merged dictionary
-merged_dict = {key: values[0] if len(values) == 1 else values for key, values in merged_dict.items()}
-
 for key in merged_dict.keys():
+    merged_dict[key] = [item for sublist in merged_dict[key] for item in sublist]
     print("$$$$$$$", key, merged_dict[key])
     
 print("\n\nmerged_dict")
