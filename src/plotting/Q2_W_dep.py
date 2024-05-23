@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:02:15 trottar"
+# Time-stamp: "2024-05-22 22:04:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -284,12 +284,8 @@ for key in all_keys:
     # Sum the values of the current key from all subdictionaries
     for subdict in comb_dict.values():
         if key in subdict:
-            value = subdict[key]
-            if isinstance(value, (int, float)):  # Ensure the value is numeric
-                print("!!!!!", key, value)  # Debug print statement
-                merged_value += value
-            else:
-                print("Non-numeric value found:", key, value)  # Print non-numeric values
+            print("!!!!!", key, subdict[key])  # Debug print statement
+            merged_value += subdict[key]
     # Store the merged value in the merged_dict
     merged_dict[key] = merged_value
     print("$$$$$", key, merged_dict[key])  # Debug print statement
