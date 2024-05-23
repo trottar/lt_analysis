@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:30:24 trottar"
+# Time-stamp: "2024-05-22 21:31:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -297,6 +297,10 @@ with PdfPages(outputpdf) as pdf:
     # Create a figure and axis objects for Q2 plot
     fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
+    # Define markers and colors
+    markers = ['x', 'o', '*', 'D'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
+    colors = ['black', 'red']
+    
     ax = axes
     ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
