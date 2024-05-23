@@ -664,7 +664,7 @@ if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
     NumtBins=6
     NumPhiBins=8
-    TMIN=0.100
+    TMIN=0.150
     TMAX=0.300
     #TMIN=0.100
     #TMAX=0.600
