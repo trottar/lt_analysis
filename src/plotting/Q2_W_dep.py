@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 00:31:57 trottar"
+# Time-stamp: "2024-05-23 00:33:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -74,8 +74,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
     if Q2 == "2p1" and W == "2p95":
         inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"2024May22_H11M45S25"
     elif Q2 == "3p0" and W == "3p14":
-        #inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_23/2024May06_H23M03S07"
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_21/2024April26_H09M08S50"
+        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_23/2024May06_H23M03S07"
     else:
         print("Error: No valid path for Q{}W{}...".format(Q2,W))
         sys.exit(2)
@@ -385,7 +384,18 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            print("="*50)
+            model = []
+            # Generate model for comparison
+            for j, row in df.iterrows():
+                print("-"*50)
+                print("Data {} = {:.4e}".format(sig, row[sig]))
+                inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
+                model.append(import_model(sig, inp_param))
+            # Check that model sig is not all zeros
+            if not all(element == 0 for element in model):
+                ax.plot(df['t'], model, linestyle='-.', color='red', label='Model Fit')
+            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
@@ -394,6 +404,7 @@ with PdfPages(outputpdf) as pdf:
         ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
+    print("="*50)
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
