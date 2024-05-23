@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 23:26:41 trottar"
+# Time-stamp: "2024-05-22 23:31:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -179,9 +179,8 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
         print("Error reading {}...".format("{}/t_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
     file_df_dict['t_bin_centers'] = pd.DataFrame((t_bins[:-1] + t_bins[1:]) / 2, columns=[None])
-    file_df_dict['t_bin_centers'].reset_index(drop=True, inplace=True)
-    file_df_dict['t_bin_centers'] = file_df_dict['t_bin_centers'].iloc[1:]
-    
+    file_df_dict['t_bin_centers'].columns = [None]
+
     try:
         with open("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p","")), "r") as file:
             # Read all lines from the file into a list
@@ -198,7 +197,6 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
         print("Error reading {}...".format("{}/phi_bin_interval_Q{}W{}".format(inp_dir, Q2.replace("p",""), W.replace("p",""))))    
 
     file_df_dict['phi_bin_centers'] = pd.DataFrame(phi_bins, columns=[None])
-    file_df_dict['phi_bin_centers'].reset_index(drop=True, inplace=True)
 
     for i,row in file_df_dict['setting_df'].iterrows():
         if row['Q2'] == float(Q2.replace("p",".")):
