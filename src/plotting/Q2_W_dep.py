@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:29:59 trottar"
+# Time-stamp: "2024-05-22 21:30:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -268,7 +268,7 @@ for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
 
 
 # Merge dictionaries
-merge_dict = {}
+merged_dict = {}
 
 # Get all the subdictionaries in a list
 subdicts = list(comb_dict.values())
