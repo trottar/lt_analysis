@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 21:23:58 trottar"
+# Time-stamp: "2024-05-22 21:24:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -40,6 +40,7 @@ HOST=lt.HOST
 REPLAYPATH=lt.REPLAYPATH
 UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
+CACHEPATH=lt.CACHEPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
