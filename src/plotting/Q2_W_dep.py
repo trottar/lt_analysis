@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 22:31:17 trottar"
+# Time-stamp: "2024-05-22 22:31:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -315,7 +315,7 @@ with PdfPages(outputpdf) as pdf:
         else:
             df_key = "Low $\epsilon$"
 
-        print("\n\n",df_key,"\nt_bin_centers",merged_dict['t_bin_centers'], "\nQ2", df['Q2'])
+        print("\n\n",df_key,"\nt_bin_centers\n",merged_dict['t_bin_centers'], "\nQ2\n", df['Q2'])
         ax.errorbar(merged_dict['t_bin_centers'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         # Fit the data using exponential function
