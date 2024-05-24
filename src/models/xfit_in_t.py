@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-23 17:19:20 trottar"
+# Time-stamp: "2024-05-24 00:45:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -583,9 +583,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigLT_pre.FixParameter(1, lt1)
     #f_sigLT_pre.FixParameter(2, lt2)
     # Fixing sigLT terms to zero
-    f_sigLT_pre.FixParameter(0, 0.0)
-    f_sigLT_pre.FixParameter(1, 0.0)
-    f_sigLT_pre.FixParameter(2, 0.0)
+    #f_sigLT_pre.FixParameter(0, 0.0)
+    #f_sigLT_pre.FixParameter(1, 0.0)
+    #f_sigLT_pre.FixParameter(2, 0.0)
     if DEBUG:
         f_sigLT_pre.FixParameter(0, lt0)
         f_sigLT_pre.FixParameter(1, lt1)
@@ -669,9 +669,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigLT.FixParameter(1, lt1)
     #f_sigLT.FixParameter(2, lt2)
     # Fixing sigLT terms to zero
-    f_sigLT.FixParameter(0, 0.0)
-    f_sigLT.FixParameter(1, 0.0)
-    f_sigLT.FixParameter(2, 0.0)
+    #f_sigLT.FixParameter(0, 0.0)
+    #f_sigLT.FixParameter(1, 0.0)
+    #f_sigLT.FixParameter(2, 0.0)
     if DEBUG:
         f_sigLT.FixParameter(0, lt0)
         f_sigLT.FixParameter(1, lt1)
@@ -751,7 +751,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Fixing sigTT terms for testing
     #f_sigTT_pre.FixParameter(0, tt0)
     # Fixing sigTT terms to zero
-    f_sigTT_pre.FixParameter(0, 0.0)
+    #f_sigTT_pre.FixParameter(0, 0.0)
     if DEBUG:
         f_sigTT_pre.FixParameter(0, tt0)
     ##############
@@ -823,7 +823,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Fixing sigTT terms for testing
     #f_sigTT.FixParameter(0, tt0)
     # Fixing sigTT terms to zero
-    f_sigTT.FixParameter(0, 0.0)
+    #f_sigTT.FixParameter(0, 0.0)
     if DEBUG:
         f_sigTT.FixParameter(0, tt0)    
     ##############
