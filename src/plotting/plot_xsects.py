@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-28 17:21:18 trottar"
+# Time-stamp: "2024-05-28 17:37:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -295,7 +295,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask = (df['tbin'] == (k))
+            mask = (df['tbin'] == (k+1))
             ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
@@ -330,7 +330,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask = (df['tbin'] == (k))
+            mask = (df['tbin'] == (k+1))
             ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
