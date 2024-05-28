@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-22 20:35:59 trottar"
+# Time-stamp: "2024-05-28 17:21:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -283,7 +283,7 @@ with PdfPages(outputpdf) as pdf:
     colors = ['black', 'red']
 
     # Loop through t bins and plot data
-    for k in range(NumtBins-2):
+    for k in range(NumtBins):
         
         ax = axes[k]
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
@@ -295,7 +295,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask = (df['tbin'] == (k+1))
+            mask = (df['tbin'] == (k))
             ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
@@ -315,7 +315,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
 
     # Loop through t bins and plot data
-    for k in range(NumtBins-2):
+    for k in range(NumtBins):
 
         # Create a figure and axis objects
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
@@ -330,7 +330,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask = (df['tbin'] == (k+1))
+            mask = (df['tbin'] == (k))
             ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
@@ -426,7 +426,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins-2):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
@@ -454,7 +454,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins-2):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
@@ -482,7 +482,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins-2):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
@@ -511,7 +511,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins-2):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
@@ -538,7 +538,7 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
     
     # Loop through t bins and plot data
-    for k in range(NumtBins-2):
+    for k in range(NumtBins):
 
         # Create a figure and axis objects
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
@@ -574,7 +574,7 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
     # Loop through t bins and plot data
-    for k in range(NumtBins-2):
+    for k in range(NumtBins):
         ax = axes[k]
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
