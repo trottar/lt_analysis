@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-18 15:48:16 trottar"
+# Time-stamp: "2024-05-28 23:18:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,6 +48,13 @@ OUTPATH=lt.OUTPATH
 ##############
 
 bg_dict ={
+    # Q2=2p1, W=2p95
+    # t-range = 0.150-0.250 (MM cut)
+    "Q2p1W2p95Right_highe" : 150, # Background value divided by number of events, check number of events of MM
+    "Q2p1W2p95Left_highe" : 50,
+    "Q2p1W2p95Center_highe" : 300,
+    "Q2p1W2p95Left_lowe" : 25,
+    "Q2p1W2p95Center_lowe" : 100,
     # Q2=3p0, W=2p32
     # t-range = 0.1-1.0 (no MM cut)
     #"Q3p0W2p32Right_highe" : 15/682, # Background value divided by number of events
@@ -56,11 +63,11 @@ bg_dict ={
     #"Q3p0W2p32Left_lowe" : 50/3130,
     #"Q3p0W2p32Center_lowe" : 50/3301,
     # t-range = 0.1-1.0 (MM cut)
-    "Q3p0W2p32Right_highe" : 25/517, # Background value divided by number of events
-    "Q3p0W2p32Left_highe" : 25/979,
-    "Q3p0W2p32Center_highe" : 60/1706,
-    "Q3p0W2p32Left_lowe" : 50/2508,
-    "Q3p0W2p32Center_lowe" : 50/2975,    
+    #"Q3p0W2p32Right_highe" : 25/517, # Background value divided by number of events
+    #"Q3p0W2p32Left_highe" : 25/979,
+    #"Q3p0W2p32Center_highe" : 60/1706,
+    #"Q3p0W2p32Left_lowe" : 50/2508,
+    #"Q3p0W2p32Center_lowe" : 50/2975,    
     # t-range = 0.45-1.0 (MM cut)
     #"Q3p0W2p32Right_highe" : 15/484, # Background value divided by number of events
     #"Q3p0W2p32Left_highe" : 10/978,
@@ -96,11 +103,11 @@ bg_dict ={
     #"Q3p0W3p14Center_highe" : 500,
     #"Q3p0W3p14Center_lowe" : 500,
     # t-range = 0.1-1.0 (MM cut), bg=500
-    "Q3p0W3p14Right_highe" : 500, # Background value divided by number of events, check number of events of MM
-    "Q3p0W3p14Left_highe" : 500,
-    "Q3p0W3p14Center_highe" : 500,
-    "Q3p0W3p14Left_lowe" : 500,
-    "Q3p0W3p14Center_lowe" : 500,
+    #"Q3p0W3p14Right_highe" : 500, # Background value divided by number of events, check number of events of MM
+    #"Q3p0W3p14Left_highe" : 500,
+    #"Q3p0W3p14Center_highe" : 500,
+    #"Q3p0W3p14Left_lowe" : 500,
+    #"Q3p0W3p14Center_lowe" : 500,
 }
 
 ##############
@@ -122,8 +129,9 @@ def bg_fit(phi_setting, inpDict, hist):
 
     norm_tot_evts = num_evts/inpDict["bg_tot_num_evts_{}".format(phi_setting)]
 
-    #bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
-    bg_factor = 0.0
+    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
+    # No background fit
+    #bg_factor = 0.0
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
