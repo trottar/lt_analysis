@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-30 13:52:22 trottar"
+# Time-stamp: "2024-05-30 13:57:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -323,10 +323,21 @@ def check_bins(histlist, inpDict):
         print("\nFinding t bins...")
         n, bins = np.histogram(H_t_BinTest, t_bins)
 
+        '''
         # Redefine number of t-bins
-        if len(n)-1 != inpDict["NumtBins"]:
+        if len(t_bins)-1 != inpDict["NumtBins"]:
             print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(t_bins)-1))
             inpDict["NumtBins"] = len(t_bins)-1
+            #print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(bins)))
+            #inpDict["tmin"] = min(n)
+            #print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(bins)))
+            #inpDict["tmax"] = max(n)
+        '''
+
+        # Redefine number of t-bins
+        if len(n) != inpDict["NumtBins"]:
+            print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(n)))
+            inpDict["NumtBins"] = len(n)
             #print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(bins)))
             #inpDict["tmin"] = min(n)
             #print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(bins)))
