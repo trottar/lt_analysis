@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-29 21:25:29 trottar"
+# Time-stamp: "2024-05-29 23:02:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,9 +80,9 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
         #par_lim = 0.001 # +/-.1%
         #par_lim = 0.01 # +/-1%
         #par_lim = 0.05 # +/-5%
-        #par_lim = 0.2 # +/-20%
+        par_lim = 0.2 # +/-20%
         #par_lim = 0.75 # +/-75%
-        par_lim = 10.00 # +/-1000%        
+        #par_lim = 10.00 # +/-1000%        
     ##############
     ##############
     ##############
