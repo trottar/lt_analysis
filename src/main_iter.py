@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-30 21:07:43 trottar"
+# Time-stamp: "2024-05-30 21:31:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -586,10 +586,6 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 
 if EPSSET == "high":
 
-    print("\n\n")
-    print("!!!!!!!!!!!!!!!!inpDict",inpDict["NumtBins"])
-    print("\n\n")
-    
     # ***param python script is moved from main.py location to before weight iteration***
     
     # Save fortran scripts that contain iteration functional form of parameterization
@@ -617,8 +613,12 @@ if EPSSET == "high":
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
     # if still iterating weights
 
+    print("\n\n")
+    print("!!!!!!!!!!!!!!!!inpDict",inpDict["NumtBins"])
+    print("\n\n")
+    
     try:
-        subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(NumtBins), str(NumPhiBins)])
+        subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"])])
     except Exception as e:
         print("1 ERROR: {}".format(e))
         sys.exit(2)
