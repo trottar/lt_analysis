@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-30 20:23:59 trottar"
+# Time-stamp: "2024-05-30 20:52:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -293,6 +293,10 @@ for hist in histlist:
     hist["phi_bins"] = phi_bins
 
 check_bins(histlist, inpDict)
+
+print("\n\n")
+print("!!!!!!!!!!!!!!!!inpDict",inpDict["NumtBins"])
+print("\n\n")
 
 phisetlist = []
 for hist in histlist:
