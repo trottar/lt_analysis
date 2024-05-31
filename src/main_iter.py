@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-30 20:52:37 trottar"
+# Time-stamp: "2024-05-30 21:07:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -293,10 +293,6 @@ for hist in histlist:
     hist["phi_bins"] = phi_bins
 
 check_bins(histlist, inpDict)
-
-print("\n\n")
-print("!!!!!!!!!!!!!!!!inpDict",inpDict["NumtBins"])
-print("\n\n")
 
 phisetlist = []
 for hist in histlist:
@@ -590,6 +586,10 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 
 if EPSSET == "high":
 
+    print("\n\n")
+    print("!!!!!!!!!!!!!!!!inpDict",inpDict["NumtBins"])
+    print("\n\n")
+    
     # ***param python script is moved from main.py location to before weight iteration***
     
     # Save fortran scripts that contain iteration functional form of parameterization
