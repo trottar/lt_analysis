@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-30 13:32:36 trottar"
+# Time-stamp: "2024-05-30 20:23:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -612,9 +612,7 @@ if EPSSET == "high":
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
     # if still iterating weights
-    print("!!!!!!!!!!!\n\nNumtBins",NumtBins)
 
-    print("!!!!!!!!!!!\n\n")
     try:
         subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(NumtBins), str(NumPhiBins)])
     except Exception as e:

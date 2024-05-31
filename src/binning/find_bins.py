@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-30 19:27:13 trottar"
+# Time-stamp: "2024-05-30 20:24:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -334,12 +334,10 @@ def check_bins(histlist, inpDict):
             #inpDict["tmax"] = max(n)
         '''
 
-        print("$$$$$$$$len(n)",len(n))
         # Redefine number of t-bins
         if len(t_bins) != inpDict["NumtBins"]:
             print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(n)))
             inpDict["NumtBins"] = len(n)
-            print("$$$$$$$$inpDict[NumtBins]",inpDict["NumtBins"])
             #print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(bins)))
             #inpDict["tmin"] = min(n)
             #print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(bins)))
