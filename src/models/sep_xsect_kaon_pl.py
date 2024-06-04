@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-04 11:08:20 trottar"
+# Time-stamp: "2024-06-04 14:45:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,7 +72,7 @@ def import_model(inp_model, arg_str):
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
                 # RLT (6/04/2024): Testing simplier exp form for L+T
-                f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[2] * (abs(tt)))
+                f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigT, setting to zero for this event...")

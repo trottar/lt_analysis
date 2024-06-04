@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-04 11:07:10 trottar"
+# Time-stamp: "2024-06-04 14:45:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,7 +76,7 @@ def fun_Sig_T(x, par):
     # RLT (4/23/2024): Marco's thesis functional forms
     #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
     # RLT (6/04/2024): Testing simplier exp form for L+T
-    f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[2] * (abs(tt)))
+    f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
     return f
 
 ###############################################################################################################################################
