@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-04 11:16:10 trottar"
+# Time-stamp: "2024-06-04 11:20:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -359,13 +359,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     # HARD CODED #
     ##############
-    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
-    f_sigT_pre.SetParNames("p5","p6","p7")
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+    f_sigT_pre.SetParNames("p5","p6")
     #f_sigT_pre.SetParameters(t0, t1)        
     # Fixed unused parameters
     #f_sigT_pre.FixParameter(0, 0)
     #f_sigT_pre.FixParameter(1, 0)
-    ##f_sigT_pre.FixParameter(2, 0)
     # Set range limit of used parameters
     if t0 != 0.0:
         f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim), t0+abs(t0*par_lim))
@@ -375,21 +374,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigT_pre.SetParLimits(1, t1-abs(t1*par_lim), t1+abs(t1*par_lim))
     else: 
         f_sigT_pre.SetParLimits(1, -par_lim, par_lim)
-    if t2 != 0.0:
-        f_sigT_pre.SetParLimits(2, t2-abs(t2*par_lim), t2+abs(t2*par_lim))
-    else: 
-        f_sigT_pre.SetParLimits(2, -par_lim, par_lim)
     # Fixing sigT terms for testing
     #f_sigT_pre.FixParameter(0, t0)
     #f_sigT_pre.FixParameter(1, t1)
-    #f_sigT_pre.FixParameter(2, t2)
     # Fixing sigT terms to zero
     #f_sigT_pre.FixParameter(0, 0.0)
     #f_sigT_pre.FixParameter(1, 0.0)
     if DEBUG:
         f_sigT_pre.FixParameter(0, t0)
         f_sigT_pre.FixParameter(1, t1)
-        f_sigT_pre.FixParameter(2, t2)
     ##############
     ##############
     ##############    
@@ -442,13 +435,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ##############
     # HARD CODED #
     ##############
-    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
-    f_sigT.SetParNames("p5","p6","p7")
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+    f_sigT.SetParNames("p5","p6")
     #f_sigT.SetParameters(t0, t1)    
     # Fixed unused parameters
     #f_sigT.FixParameter(0, 0)
     #f_sigT.FixParameter(1, 0)
-    ##f_sigT.FixParameter(2, 0)
     # Set range limit of used parameters
     if t0 != 0.0:
         f_sigT.SetParLimits(0, t0-abs(t0*par_lim), t0+abs(t0*par_lim))
@@ -458,21 +450,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         f_sigT.SetParLimits(1, t1-abs(t1*par_lim), t1+abs(t1*par_lim))
     else: 
         f_sigT.SetParLimits(1, -par_lim, par_lim)
-    if t2 != 0.0:
-        f_sigT_pre.SetParLimits(2, t2-abs(t2*par_lim), t2+abs(t2*par_lim))
-    else: 
-        f_sigT_pre.SetParLimits(2, -par_lim, par_lim)
     # Fixing sigT terms for testing
     #f_sigT.FixParameter(0, t0)
     #f_sigT.FixParameter(1, t1)
-    #f_sigT.FixParameter(2, t2)
     # Fixing sigT terms to zero
     #f_sigT.FixParameter(0, 0.0)
     #f_sigT.FixParameter(1, 0.0)
     if DEBUG:
         f_sigT.FixParameter(0, t0)
         f_sigT.FixParameter(1, t1)
-        f_sigT.FixParameter(2, t2)
     ##############
     ##############
     ##############    
