@@ -665,7 +665,7 @@ if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     NumtBins=3
     NumPhiBins=6
     TMIN=0.200
-    TMAX=0.450
+    TMAX=0.400
     #TMIN=0.100
     #TMAX=0.600
     #TMIN=0.150 # Center low
