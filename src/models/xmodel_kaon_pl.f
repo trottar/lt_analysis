@@ -81,22 +81,23 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *                      extreme slope at high t
 *     RLT (3/09/2024): Removing +0.2 term for better parameterization of
 *                      Q2=3.0, W=2.32
-*      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
-*     >     +par(4)*log(q2))*(abs(tm)))
-*     RLT (6/04/2024): Testing simplier exp form for L+T
-      sigL=(par(1)+par(2)*log(q2))*exp(par(3)*(abs(tm)))
+**      
+      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+     >     +par(4)*log(q2))*(abs(tm)))
 *      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
 *     >     +par(4)*log(q2))*(abs(tm)+0.2))
 *     RLT (4/23/2024): Marco's thesis functional forms
-*      sigL=par(1)*exp(-par(2)*abs(tm))*(1.0/(1.0+par(3)*q2))
+*     sigL=par(1)*exp(-par(2)*abs(tm))*(1.0/(1.0+par(3)*q2))
+*     RLT (6/04/2024): Testing simplier exp form for L+T
+**      sigL=(par(1)+par(2)*log(q2))*exp(par(3)*(abs(tm)))      
+      
 *     RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
 *     RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
 *     RLT (2/21/2024): Using global analysis sig T model and params
-*     (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)       
-*      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
-*     RLT (6/04/2024): Testing simplier exp form for L+T
-      sigT=(par(5)*((abs(tm)/q2)-1))*exp(par(6)*(abs(tm)))
+*     (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
+**      
+      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
 *     sigT=par(5)+par(6)*log(q2)
 *     sigT=par(5)*log(q2)++par(6)/(q2**2)
 *      sigT=par(5)/(1+par(6)*q2)
@@ -106,7 +107,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     RLT (4/20/2024): Exponential t-dependence
 *      sigT=(par(5)/(1+par(6)*q2))*exp(par(7)*abs(tm))
 *     RLT (4/23/2024): Marco's thesis functional forms
-*      sigT=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))      
+*     sigT=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))
+*     RLT (6/04/2024): Testing simplier exp form for L+T
+**      sigT=(par(5)*((abs(tm)/q2)-1))*exp(par(6)*(abs(tm)))      
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
 *     sigLT=(par(9)+par(11)/abs(tm))*sin(thetacm)
