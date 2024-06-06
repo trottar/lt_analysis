@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-05 22:25:09 trottar"
+# Time-stamp: "2024-06-05 23:00:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -247,7 +247,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         # x->phi, y->eps, PI/180 = 0.017453
         #fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, 0.0, 1.0)
-        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos((x*0.017453-3.14159))*[2] + y*cos(2*(x*0.017453-3.14159))*[3]", 0, 360, LOEPS-0.2*LOEPS, HIEPS+0.2*HIEPS)
+        fff2 = TF2("fff2", "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]", 0, 360, LOEPS-0.2*LOEPS, HIEPS+0.2*HIEPS)
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
