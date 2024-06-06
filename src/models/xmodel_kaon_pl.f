@@ -141,8 +141,8 @@ c     Correct for W.
 c      sigL=sigL*0.90-0.1
 *     RLT (2/16/2024): Moved the unsep xsect down here so that the weight
 *                      factor is included in calculation
-      sig=sigT+eps_mod*sigL+eps_mod*cos(2.*phi)*sigTT
-     >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sigLT
+      sig=sigT+eps_mod*sigL+eps_mod*cos(2.*(phi-180))*sigTT
+     >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos((phi-180))*sigLT
 
       sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 *     sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad      

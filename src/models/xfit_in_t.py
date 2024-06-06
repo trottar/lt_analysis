@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-05 10:57:13 trottar"
+# Time-stamp: "2024-06-05 22:17:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -429,8 +429,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
     g_sigt_fit.GetYaxis().SetTitleOffset(1.5)
     g_sigt_fit.GetYaxis().SetTitleSize(0.035)
-    g_sigt_fit.GetYaxis().CenterTitle()
-    
+    g_sigt_fit.GetYaxis().CenterTitle()    
 
     ##############
     # HARD CODED #
