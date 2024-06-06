@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-06 02:31:52 trottar"
+# Time-stamp: "2024-06-06 02:47:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -726,8 +726,8 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
         #Fill SIMC events
         if(ALLCUTS):
             
-        # Phase shift to right setting
-        phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+            # Phase shift to right setting
+            phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
             
             # Loop through bins in t_simc and identify events in specified bins
             for j in range(len(t_bins)-1):
