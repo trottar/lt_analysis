@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-16 11:51:59 trottar"
+# Time-stamp: "2024-06-06 02:26:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -837,6 +837,9 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
           P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
+          # Phase shift to right setting
+          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
@@ -846,13 +849,13 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_P_hgcer_DATA.Fill(evt.MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DATA.Fill(evt.MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DATA.Fill(evt.ph_q+math.pi, -evt.MandelT)
+          phiq_vs_t_DATA.Fill(phi_shift, -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
           Q2_vs_t_DATA.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DATA.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DATA.Fill(evt.epsilon, -evt.MandelT)
           MM_vs_t_DATA.Fill(evt.MM, -evt.MandelT)
-          polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
+          polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (phi_shift)*(180/math.pi), -evt.MandelT)
           
           H_ct_DATA.Fill(evt.CTime_ROC1)
 
@@ -873,7 +876,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsyptar_DATA.Fill(evt.hsyptar)
 
           # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DATA.Fill((evt.ph_q+math.pi))
+          H_ph_q_DATA.Fill((phi_shift))
           H_th_q_DATA.Fill(evt.th_q)
           H_ph_recoil_DATA.Fill(evt.ph_recoil)
           H_th_recoil_DATA.Fill(evt.th_recoil)
@@ -940,6 +943,10 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.MM)
           P_hgcer_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
+
+          # Phase shift to right setting
+          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY.Fill(evt.MM,evt.P_gtr_beta)
@@ -949,13 +956,13 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_P_hgcer_DUMMY.Fill(evt.MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DUMMY.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DUMMY.Fill(evt.ph_q+math.pi, -evt.MandelT)
+          phiq_vs_t_DUMMY.Fill(phi_shift, -evt.MandelT)
           Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
           Q2_vs_t_DUMMY.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DUMMY.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DUMMY.Fill(evt.epsilon, -evt.MandelT)
           MM_vs_t_DUMMY.Fill(evt.MM, -evt.MandelT)
-          polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (evt.ph_q+math.pi)*(180/math.pi), -evt.MandelT)
+          polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (phi_shift)*(180/math.pi), -evt.MandelT)
 
           H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
@@ -976,7 +983,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsyptar_DUMMY.Fill(evt.hsyptar)
 
           # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DUMMY.Fill((evt.ph_q+math.pi))
+          H_ph_q_DUMMY.Fill((phi_shift))
           H_th_q_DUMMY.Fill(evt.th_q)
           H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
           H_th_recoil_DUMMY.Fill(evt.th_recoil)
@@ -1036,6 +1043,10 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
           P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
+
+          # Phase shift to right setting
+          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_RAND.Fill(evt.MM,evt.P_gtr_beta)
@@ -1045,7 +1056,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_P_hgcer_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_RAND.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
+          phiq_vs_t_RAND.Fill(phi_shift, -evt.MandelT)
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
           Q2_vs_t_RAND.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_RAND.Fill(evt.W, -evt.MandelT)
@@ -1071,7 +1082,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsyptar_RAND.Fill(evt.hsyptar)
 
           # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_RAND.Fill((evt.ph_q+math.pi))
+          H_ph_q_RAND.Fill((phi_shift))
           H_th_q_RAND.Fill(evt.th_q)
           H_ph_recoil_RAND.Fill(evt.ph_recoil)
           H_th_recoil_RAND.Fill(evt.th_recoil)
@@ -1129,6 +1140,10 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
           P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
+
+          # Phase shift to right setting
+          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
           MM_vs_beta_DUMMY_RAND.Fill(evt.MM,evt.P_gtr_beta)
@@ -1138,7 +1153,7 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_P_hgcer_DUMMY_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DUMMY_RAND.Fill(evt.MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DUMMY_RAND.Fill(evt.ph_q+math.pi, -evt.MandelT)
+          phiq_vs_t_DUMMY_RAND.Fill(phi_shift, -evt.MandelT)
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
           Q2_vs_t_DUMMY_RAND.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DUMMY_RAND.Fill(evt.W, -evt.MandelT)
@@ -1164,7 +1179,7 @@ def rand_sub(phi_setting, inpDict):
           H_hsyptar_DUMMY_RAND.Fill(evt.hsyptar)
 
           # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DUMMY_RAND.Fill((evt.ph_q+math.pi))
+          H_ph_q_DUMMY_RAND.Fill((phi_shift))
           H_th_q_DUMMY_RAND.Fill(evt.th_q)
           H_ph_recoil_DUMMY_RAND.Fill(evt.ph_recoil)
           H_th_recoil_DUMMY_RAND.Fill(evt.th_recoil)

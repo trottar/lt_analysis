@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-14 23:54:56 trottar"
+# Time-stamp: "2024-06-06 02:25:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -218,9 +218,12 @@ def compare_simc(hist, inpDict):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
+
+          # Phase shift to right setting
+          phi_shift = ((evt.phipq+math.pi)+math.pi) % (2*math.pi)
           
           # SIMC goes from 0 to 2pi so no need for +pi/2
-          polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (evt.phipq+math.pi)*(180/math.pi), -evt.t)
+          polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (phi_shift)*(180/math.pi), -evt.t)
           
           H_Weight_SIMC.Fill(evt.Weight)
 
@@ -240,7 +243,7 @@ def compare_simc(hist, inpDict):
           H_hsyptar_SIMC.Fill(evt.hsyptar, evt.Weight)
 
           # SIMC goes from 0 to 2pi so no need for +pi/2
-          H_ph_q_SIMC.Fill((evt.phipq+math.pi), evt.Weight)
+          H_ph_q_SIMC.Fill((phi_shift), evt.Weight)
           H_th_q_SIMC.Fill(evt.thetapq, evt.Weight)
 
           H_pmiss_SIMC.Fill(evt.Pm, evt.Weight)	

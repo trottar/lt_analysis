@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-19 19:43:09 trottar"
+# Time-stamp: "2024-06-06 02:34:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -212,7 +212,10 @@ def plot_iteration(histlist, phisetlist, inpDict):
                 hist["H_hsxptar_SIMC"].Fill(evt.hsxptar, evt.iter_weight)	
                 hist["H_hsyptar_SIMC"].Fill(evt.hsyptar, evt.iter_weight)
 
-                hist["H_ph_q_SIMC"].Fill((evt.phipq+math.pi), evt.iter_weight)
+                # Phase shift to right setting
+                phi_shift = ((evt.phipq+math.pi)+math.pi) % (2*math.pi)
+                
+                hist["H_ph_q_SIMC"].Fill((phi_shift), evt.iter_weight)
                 hist["H_th_q_SIMC"].Fill(evt.thetapq, evt.iter_weight)
 
                 hist["H_pmiss_SIMC"].Fill(evt.Pm, evt.iter_weight)	
@@ -244,7 +247,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
                 hist["H_hsxptar_SIMC_OLD"].Fill(evt.hsxptar, evt.Weight)	
                 hist["H_hsyptar_SIMC_OLD"].Fill(evt.hsyptar, evt.Weight)
 
-                hist["H_ph_q_SIMC_OLD"].Fill((evt.phipq+math.pi), evt.Weight)
+                hist["H_ph_q_SIMC_OLD"].Fill((phi_shift), evt.Weight)
                 hist["H_th_q_SIMC_OLD"].Fill(evt.thetapq, evt.Weight)
 
                 hist["H_pmiss_SIMC_OLD"].Fill(evt.Pm, evt.Weight)	
