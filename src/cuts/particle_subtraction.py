@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-06 02:27:23 trottar"
+# Time-stamp: "2024-06-06 02:41:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1449,7 +1449,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+        phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
