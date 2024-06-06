@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-06 02:41:54 trottar"
+# Time-stamp: "2024-06-06 14:31:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -411,7 +411,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -516,7 +516,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           P_hgcer_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -621,7 +621,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -726,7 +726,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -1449,7 +1449,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
         
         # Phase shift to right setting
-        phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+        phi_shift = (evt.ph_q+math.pi)
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
@@ -1491,7 +1491,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
 
         # Phase shift to right setting
-        phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+        phi_shift = (evt.ph_q+math.pi)
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
@@ -1533,7 +1533,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
 
         # Phase shift to right setting
-        phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+        phi_shift = (evt.ph_q+math.pi)
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
@@ -1576,7 +1576,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
 
         # Phase shift to right setting
-        phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+        phi_shift = (evt.ph_q+math.pi)
         
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0

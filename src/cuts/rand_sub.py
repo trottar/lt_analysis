@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-06 02:26:56 trottar"
+# Time-stamp: "2024-06-06 14:31:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -838,7 +838,7 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -945,7 +945,7 @@ def rand_sub(phi_setting, inpDict):
 
 
           # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -1045,7 +1045,7 @@ def rand_sub(phi_setting, inpDict):
 
 
           # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -1142,7 +1142,7 @@ def rand_sub(phi_setting, inpDict):
 
 
           # Phase shift to right setting
-          phi_shift = ((evt.ph_q+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)

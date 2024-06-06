@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-06 02:34:34 trottar"
+# Time-stamp: "2024-06-06 14:31:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -213,7 +213,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
                 hist["H_hsyptar_SIMC"].Fill(evt.hsyptar, evt.iter_weight)
 
                 # Phase shift to right setting
-                phi_shift = ((evt.phipq+math.pi)+math.pi) % (2*math.pi)
+                phi_shift = (evt.phipq+math.pi)
                 
                 hist["H_ph_q_SIMC"].Fill((phi_shift), evt.iter_weight)
                 hist["H_th_q_SIMC"].Fill(evt.thetapq, evt.iter_weight)

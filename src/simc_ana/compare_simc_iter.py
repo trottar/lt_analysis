@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-06 02:26:29 trottar"
+# Time-stamp: "2024-06-06 14:32:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -225,7 +225,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
           P_hgcer_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
 
           # Phase shift to right setting
-          phi_shift = ((evt.phipq+math.pi)+math.pi) % (2*math.pi)
+          phi_shift = (evt.phipq+math.pi)
           
           polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (phi_shift)*(180/math.pi), -evt.t)
           
