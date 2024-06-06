@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-20 09:22:05 trottar"
+# Time-stamp: "2024-06-06 16:32:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,13 +52,13 @@ grab_runs () {
     fi
 }
 
-#
+# ONGOING
 #Q2="0p5"
 #W="2p40"
 # DONE (pi+k)
-Q2="2p1"
-W="2p95"
-# DONE (pi+k)
+#Q2="2p1"
+#W="2p95"
+# ONGOING
 #Q2="3p0"
 #W="2p32"
 # DONE (pi+k)
@@ -68,17 +68,18 @@ W="2p95"
 #Q2="4p4"
 #W="2p74"
 # ONGOING
-#Q2="5p5"
-#W="3p02"
+Q2="5p5"
+W="3p02"
 
 KIN="Q${Q2}W${W}"
 
-#TARGET=("LH2" "dummy")
-TARGET=("LH2")
-#EPS=("high" "low")
-EPS=("low")
-#PHISET=("center" "left" "right")
-PHISET=("center")
+TARGET=("LH2" "dummy")
+EPS=("high" "low")
+PHISET=("center" "left" "right")
+
+#TARGET=("LH2")
+#EPS=("low")
+#PHISET=("center")
 
 for t in "${TARGET[@]}"; do
     for e in "${EPS[@]}"; do
