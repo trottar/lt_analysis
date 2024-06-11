@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-28 23:18:03 trottar"
+# Time-stamp: "2024-06-11 15:50:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,6 +108,12 @@ bg_dict ={
     #"Q3p0W3p14Center_highe" : 500,
     #"Q3p0W3p14Left_lowe" : 500,
     #"Q3p0W3p14Center_lowe" : 500,
+    # t-range = 0.1-1.0 (MM cut), bg=500
+    #"Q3p0W3p14Right_highe" : 500, # Background value divided by number of events, check number of events of MM
+    #"Q3p0W3p14Left_highe" : 500,
+    #"Q3p0W3p14Center_highe" : 500,
+    #"Q3p0W3p14Left_lowe" : 500,
+    #"Q3p0W3p14Center_lowe" : 500,    
 }
 
 ##############
@@ -129,9 +135,9 @@ def bg_fit(phi_setting, inpDict, hist):
 
     norm_tot_evts = num_evts/inpDict["bg_tot_num_evts_{}".format(phi_setting)]
 
-    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
+    #bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
     # No background fit
-    #bg_factor = 0.0
+    bg_factor = 0.0
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
