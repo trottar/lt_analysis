@@ -403,20 +403,28 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *                        extreme slope at high t
 *       RLT (3/09/2024): Removing +0.2 term for better parameterization of
 *                        Q2=3.0, W=2.32	   
-	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
-     1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)))
+**	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
+**     1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)))
 *       sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
 *       1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)+0.2))
+*     RLT (6/04/2024): Testing simplier exp form for L+T
+**
+	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
+     1           *exp(fitpar(3)*(abs(t_gev)))
 *       RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
 *       RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
 *       RLT (2/21/2024): Using global analysis sig T model and params
 *       (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
-	   sigt=fitpar(5)+fitpar(6)*log(Q2_g)
-     1           +(fitpar(7)+fitpar(8)*log(Q2_g))*ftav
+**	   sigt=fitpar(5)+fitpar(6)*log(Q2_g)
+**     1           +(fitpar(7)+fitpar(8)*log(Q2_g))*ftav
 *       sigt=fitpar(5)+fitpar(6)*log(Q2_g)
 *       sigt=fitpar(5)*log(Q2_g)+fitpar(6)/(Q2_g**2)
 *	   sigt=fitpar(5)/(1+fitpar(6)*Q2_g)
+*     RLT (6/04/2024): Testing simplier exp form for L+T
+**
+	   sigt=(fitpar(5)*((abs(t_gev)/Q2_g)-1))
+     1           exp(fitpar(6)*(abs(t_gev)))
 
 	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
      1           +fitpar(11)/abs(t_gev))*sin(thetacm)
