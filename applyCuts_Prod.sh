@@ -558,10 +558,9 @@ if [[ $p_flag = "true" ]]; then
     fi
 
 else
-    declare -a ParticleTypes=("kaon" "pion" "proton")
+    declare -a ParticleTypes=("kaon" "pion")
     for i in "${ParticleTypes[@]}"
-    do
-
+    do 
 	# Define input and output file names
 	InDATAFilename="Proc_Data_${i}_${KIN}.root"
 	OutDATAFilename="Analysed_Data_${i}_${KIN}"
@@ -574,7 +573,7 @@ else
 	    echo
 	    echo
 	    echo "------------------------------------------------------"
-	    echo "Analysing right data ${ParticleType} run ${RUNNUM}..."
+	    echo "Analysing right data ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
@@ -598,7 +597,7 @@ else
 	    echo
 	    echo
 	    echo "------------------------------------------------------"
-	    echo "Analysing left data ${ParticleType} run ${RUNNUM}..."
+	    echo "Analysing left data ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
@@ -621,7 +620,7 @@ else
 	    echo
 	    echo
 	    echo "------------------------------------------------------"
-	    echo "Analysing center data ${ParticleType} run ${RUNNUM}..."
+	    echo "Analysing center data ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
 	    cd "${LTANAPATH}/src/setup"
