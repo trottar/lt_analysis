@@ -231,7 +231,7 @@ else
     echo
     echo "Creating analysis root file for Q2=${Q2}, W=${W}, EPSILON=${EPSILON}, PHIVAL=${PHIVAL} setting..."
     echo 
-    echo "Running for kaon, pion, proton"    
+    echo "Running for kaon and pion"
     echo
     echo "---------------------------------------------------------"
     echo
