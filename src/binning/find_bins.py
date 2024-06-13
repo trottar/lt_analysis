@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-13 08:50:53 trottar"
+# Time-stamp: "2024-06-13 11:33:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -112,6 +112,44 @@ def find_bins(histlist, inpDict):
         bin_edges = np.linspace(0.0, 360.0, inpDict["NumPhiBins"]+1)
         n, bins = np.histogram(H_phi_BinTest, bin_edges)
 
+        ##############
+        # HARD CODED #
+        ##############
+        # Set minimum threhold number of events per bin
+        # Aim for >100 events
+        bad_bins_threshold = 100
+        ##############
+        ##############
+        ##############
+
+        # Check for bad bins
+        bad_bins = np.where(n < bad_bins_threshold)[0]
+
+        # Remove bad bins
+        n = np.delete(n, bad_bins)
+        bins = np.delete(bins, bad_bins)
+
+        # Print the updated histogram and bin edges
+        print("Removed bad bins...(threhold = {})".format(bad_bins_threshold))
+        #print("Removed bad bins: {} with {} events".format(bins, n))
+
+        # Set first and last elements to tmin and tmax, respectively
+        bins[0] = 0
+        bins[-1] = 360
+        
+        # Check there are good t-bins
+        if np.size(n) == 0:
+            print("\n\nphi-binning Failed: no valid bins avaliable!\nIncrease initial number of phi-bins...")
+            sys.exit(2)
+
+        # Redefine number of t-bins
+        if len(n) != inpDict["NumPhiBins"]:
+            print("Number of phi-bins changed from {} to: {}".format(inpDict["NumPhiBins"], len(n)))
+            inpDict["NumPhiBins"] = len(n)
+            if len(n) <= 1:
+                print("ERROR: Only {} bins achieve a minimum of {} events! Try decreasing minimum number of events per bin.".format(len(n), bad_bins_threshold))
+
+        
         for i,val in enumerate(n):
             print("Bin {} from {:.1f} to {:.1f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
         
@@ -229,10 +267,8 @@ def find_bins(histlist, inpDict):
         if len(n) != inpDict["NumtBins"]:
             print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(n)))
             inpDict["NumtBins"] = len(n)
-            #print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(bins)))
-            #inpDict["tmin"] = min(n)
-            #print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(bins)))
-            #inpDict["tmax"] = max(n)
+            if len(n) <= 1:
+                print("ERROR: Only {} bins achieve a minimum of {} events! Try decreasing minimum number of events per bin.".format(len(n), bad_bins_threshold))
             
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
@@ -314,6 +350,11 @@ def check_bins(histlist, inpDict):
         print("\nFinding phi bins...")
         n, bins = np.histogram(H_phi_BinTest, phi_bins)
 
+        # Redefine number of t-bins
+        if len(phi_bins) != inpDict["NumPhiBins"]:
+            print("Number of phi-bins changed from {} to: {}".format(inpDict["NumPhiBins"], len(n)))
+            inpDict["NumPhiBins"] = len(n)
+
         for i,val in enumerate(n):
             print("Bin {} from {:.1f} to {:.1f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
         
@@ -339,10 +380,6 @@ def check_bins(histlist, inpDict):
         if len(t_bins) != inpDict["NumtBins"]:
             print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(n)))
             inpDict["NumtBins"] = len(n)
-            #print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(bins)))
-            #inpDict["tmin"] = min(n)
-            #print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(bins)))
-            #inpDict["tmax"] = max(n)
         
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
