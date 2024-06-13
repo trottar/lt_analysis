@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-13 01:07:12 trottar"
+# Time-stamp: "2024-06-13 14:46:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -43,13 +43,13 @@ def fun_Sig_L(x, par):
     # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
     # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
     ##
-    f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
+    ##f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
     #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
     # RLT (4/23/2024): Marco's thesis functional forms
     #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
     # RLT (6/04/2024): Testing simplier exp form for L+T
     ##
-    ##f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+    f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
     return f
 
 ###############################################################################################################################################
@@ -67,7 +67,7 @@ def fun_Sig_T(x, par):
     # RLT (2/21/2024): Reintroducing t-dependence
     # RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
     ##
-    f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
+    ##f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
     #f = par[0]+par[1]*math.log(qq)
     #f = par[0]*math.log(qq)+par[1]/(qq**2)
     #f = par[0] / (1 + par[1]*qq)
@@ -80,7 +80,7 @@ def fun_Sig_T(x, par):
     #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
     # RLT (6/04/2024): Testing simplier exp form for L+T
     ##
-    ##f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+    f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
     return f
 
 ###############################################################################################################################################
