@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-13 14:46:29 trottar"
+# Time-stamp: "2024-06-13 19:57:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,13 +36,13 @@ def import_model(inp_model, arg_str):
             #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
             try:
                 ##
-                ##f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
+                f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
                 #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
                 # RLT (6/04/2024): Testing simplier exp form for L+T
                 ##
-                f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+                ##f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
@@ -63,7 +63,7 @@ def import_model(inp_model, arg_str):
                 # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
                 # RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
                 ##
-                ##f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
+                f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
                 #f = par[0]+par[1]*math.log(qq)
                 #f = par[0]*math.log(qq)+par[1]/(qq**2)
                 #f = par[0] / (1 + par[1]*qq)
@@ -76,7 +76,7 @@ def import_model(inp_model, arg_str):
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
                 # RLT (6/04/2024): Testing simplier exp form for L+T
                 ##
-                f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+                ##f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
