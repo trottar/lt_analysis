@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-13 19:58:11 trottar"
+# Time-stamp: "2024-06-13 21:24:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,7 +137,7 @@ def find_bins(histlist, inpDict):
         bins[0] = 0
         bins[-1] = 360
         
-        # Check there are good t-bins
+        # Check there are good phi-bins
         if np.size(n) == 0:
             print("\n\nphi-binning Failed: no valid bins avaliable!\nIncrease initial number of phi-bins...")
             sys.exit(2)
@@ -146,8 +146,9 @@ def find_bins(histlist, inpDict):
         if len(n) != inpDict["NumPhiBins"]:
             print("Number of phi-bins changed from {} to: {}".format(inpDict["NumPhiBins"], len(n)))
             inpDict["NumPhiBins"] = len(n)
-            if len(n) <= 1:
+            if len(n) <= 4:
                 print("ERROR: Only {} bins achieve a minimum of {} events! Try decreasing minimum number of events per bin.".format(len(n), bad_bins_threshold))
+                sys.exit(2)
 
         
         for i,val in enumerate(n):
@@ -269,6 +270,7 @@ def find_bins(histlist, inpDict):
             inpDict["NumtBins"] = len(n)
             if len(n) <= 1:
                 print("ERROR: Only {} bins achieve a minimum of {} events! Try decreasing minimum number of events per bin.".format(len(n), bad_bins_threshold))
+                sys.exit(2)
             
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
