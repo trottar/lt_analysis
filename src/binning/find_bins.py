@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 16:18:59 trottar"
+# Time-stamp: "2024-06-17 16:24:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,8 +81,6 @@ def find_bins(histlist, inpDict):
         
         t = flatten_hist(hist["H_t_DATA"])
         phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
-
-        print("!!!!!!!!!",len(t),len(phi_deg))
         
         if hist["phi_setting"] == 'Right':
             H_t_Right = np.append(H_t_Right, t)
@@ -245,6 +243,7 @@ def find_bins(histlist, inpDict):
         # Keep track of merged bins
         merged = np.copy(n)
 
+        # Loop through bad bins and merge them with good bins
         for i in bad_bins:
             # If the bad bin is in first bin
             if i==0:
@@ -263,8 +262,7 @@ def find_bins(histlist, inpDict):
 
         n = merged[merged!=0][:-1]
                     
-        # Remove bad bins
-        #n = np.delete(n, bad_bins)
+        # Remove bad bin edges that have been merged
         bins = np.delete(bins, bad_bins)
 
         # Set first and last elements to tmin and tmax, respectively
