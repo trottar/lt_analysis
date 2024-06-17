@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 13:07:26 trottar"
+# Time-stamp: "2024-06-17 14:12:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,7 +180,8 @@ def find_bins(histlist, inpDict):
 
             # Initialize bin edges with the minimum and maximum data points
             bin_edges = [np.min(x)]
-            bin_edges.extend(np.linspace(np.min(x), np.max(x), num=nbin))
+            #bin_edges.extend(np.linspace(np.min(x), np.max(x), num=nbin))
+            bin_edges.extend(np.linspace(tmin, tmax, num=nbin))
 
             # Perform iterations to adjust bin edges
             for _ in range(max_iterations):
@@ -242,8 +243,8 @@ def find_bins(histlist, inpDict):
         #print("Removed bad bins: {} with {} events".format(bins, n))
 
         # Set first and last elements to tmin and tmax, respectively
-        bins[0] = tmin
-        bins[-1] = tmax
+        #bins[0] = tmin
+        #bins[-1] = tmax
         
         # Check there are good t-bins
         if np.size(n) == 0:

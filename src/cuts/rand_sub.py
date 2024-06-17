@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 10:14:37 trottar"
+# Time-stamp: "2024-06-17 14:04:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -837,7 +837,7 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
           P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
-          # Phase shift to right setting
+          # Phase shift to fix polar plots
           phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
@@ -944,7 +944,7 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
 
-          # Phase shift to right setting
+          # Phase shift to fix polar plots
           phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
@@ -1043,8 +1043,7 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
           P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
-
-          # Phase shift to right setting
+          # Phase shift to fix polar plots
           phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
@@ -1140,8 +1139,7 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM)
           P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
-
-          # Phase shift to right setting
+          # Phase shift to fix polar plots
           phi_shift = (evt.ph_q+math.pi)
           
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)

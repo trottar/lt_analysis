@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 10:14:51 trottar"
+# Time-stamp: "2024-06-17 13:15:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,7 +224,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
 
-          # Phase shift to right setting
+          # Phase shift to fix polar plots
           phi_shift = (evt.phipq+math.pi)
           
           polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (phi_shift)*(180/math.pi), -evt.t)
