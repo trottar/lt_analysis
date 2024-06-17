@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 14:22:37 trottar"
+# Time-stamp: "2024-06-17 14:28:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,6 +81,8 @@ def find_bins(histlist, inpDict):
         
         t = flatten_hist(hist["H_t_DATA"])
         phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
+
+        print("!!!!!!!!!",len(t),len(phi_deg))
         
         if hist["phi_setting"] == 'Right':
             H_t_Right = np.append(H_t_Right, t)
@@ -239,8 +241,6 @@ def find_bins(histlist, inpDict):
         # Remove bad bins
         n = np.delete(n, bad_bins)
         bins = np.delete(bins, bad_bins)
-
-        print("Removed bad bins: {} with {} events".format(bins, n))
 
         # Set first and last elements to tmin and tmax, respectively
         bins[0] = tmin
