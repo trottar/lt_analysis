@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 12:34:11 trottar"
+# Time-stamp: "2024-06-17 12:40:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,7 +182,7 @@ def find_bins(histlist, inpDict):
         '''
         
         #def histedges_equalN(x, nbin, tolerance=1e-3, max_iterations=10):
-        def histedges_equalN(x, nbin, tolerance=1e+3, max_iterations=10):
+        def histedges_equalN(x, nbin, tolerance=1e-1, max_iterations=10):
             # Account for bin range
             nbin += 1
             npt = len(x)  # Total number of data points
