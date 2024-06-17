@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 15:07:11 trottar"
+# Time-stamp: "2024-06-17 15:13:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,12 +102,9 @@ def find_bins(histlist, inpDict):
     H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
 
     # Apply proper boundaries for t
-    #H_t_BinTest = np.append(H_t_BinTest, tmin)
-    #H_t_BinTest = np.append(H_t_BinTest, tmax)
     # Find indices of min and max values
     min_index = np.argmin(H_t_BinTest)
     max_index = np.argmax(H_t_BinTest)
-
     # Replace min and max values with tmin and tmax
     H_t_BinTest[min_index] = tmin
     H_t_BinTest[max_index] = tmax
@@ -250,8 +247,8 @@ def find_bins(histlist, inpDict):
         bins = np.delete(bins, bad_bins)
 
         # Set first and last elements to tmin and tmax, respectively
-        bins[0] = tmin
-        bins[-1] = tmax
+        #bins[0] = tmin
+        #bins[-1] = tmax
         
         # Check there are good t-bins
         if np.size(n) == 0:
