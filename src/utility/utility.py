@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-03 15:27:48 trottar"
+# Time-stamp: "2024-06-17 14:59:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,7 +165,7 @@ def flatten_hist(histogram):
     edges = [histogram.GetXaxis().GetBinLowEdge(i) for i in range(1, histogram.GetNbinsX()+2)]
 
     # Flatten the histogram
-    flattened_histogram = [edge for edge, count in zip(edges, contents) for _ in range(int(count))]
+    flattened_histogram = [edge for edge, count in zip(edges, contents) for _ in range(int(count)) if count > 0.0]
 
     return flattened_histogram
 
