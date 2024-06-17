@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-14 10:25:30 trottar"
+# Time-stamp: "2024-06-17 10:54:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -122,39 +122,36 @@ def find_bins(histlist, inpDict):
         ##############
         ##############
 
-        # Check for bad bins
-        bad_bins = np.where(n < bad_bins_threshold)[0]
+        num_phi_bins = inpDict["NumPhiBins"]
+        bin_edges = np.linspace(0.0, 360.0, num_phi_bins + 1)
 
-        # Remove bad bins
-        n = np.delete(n, bad_bins)
-        bins = np.delete(bins, bad_bins)
+        while True:
+            n, bins = np.histogram(H_phi_BinTest, bin_edges)
 
-        # Print the updated histogram and bin edges
-        print("Removed bad bins...(threhold = {})".format(bad_bins_threshold))
-        #print("Removed bad bins: {} with {} events".format(bins, n))
+            # Check for bad bins
+            bad_bins = np.where(n < bad_bins_threshold)[0]
 
-        # Set first and last elements to tmin and tmax, respectively
-        bins[0] = 0
-        bins[-1] = 360
-        
-        # Check there are good phi-bins
-        if np.size(n) == 0:
-            print("\n\nphi-binning Failed: no valid bins avaliable!\nIncrease initial number of phi-bins...")
-            sys.exit(2)
+            # If no bad bins, we are done
+            if len(bad_bins) == 0:
+                break
 
-        # Redefine number of t-bins
-        if len(n) != inpDict["NumPhiBins"]:
-            print("Number of phi-bins changed from {} to: {}".format(inpDict["NumPhiBins"], len(n)))
-            inpDict["NumPhiBins"] = len(n)
-            bin_edges = np.linspace(0.0, 360.0, inpDict["NumPhiBins"]+1)
-            n, bins = np.histogram(H_phi_BinTest, bin_edges)            
-            if len(n) <= 4:
-                print("ERROR: Only {} bins achieve a minimum of {} events! Try decreasing minimum number of events per bin.".format(len(n), bad_bins_threshold))
+            # Adjust the number of bins by reducing it
+            num_phi_bins -= 1
+            if num_phi_bins <= 4:  # Ensure there are at least 4 bins
+                print("ERROR: Only {} bins achieve a minimum of {} events! Try decreasing the minimum number of events per bin.".format(num_phi_bins, bad_bins_threshold))
                 sys.exit(2)
 
-        
-        for i,val in enumerate(n):
-            print("Bin {} from {:.1f} to {:.1f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
+            bin_edges = np.linspace(0.0, 360.0, num_phi_bins + 1)
+
+        print("Removed bad bins... (threshold = {})".format(bad_bins_threshold))
+        bins[0] = 0
+        bins[-1] = 360
+
+        # Redefine number of phi-bins
+        if num_phi_bins != inpDict["NumPhiBins"]:
+            print("Number of phi-bins changed from {} to: {}".format(inpDict["NumPhiBins"], num_phi_bins))
+            inpDict["NumPhiBins"] = num_phi_bins
+            n, bins = np.histogram(H_phi_BinTest, bin_edges)
         
         bin_centers = (bins[:-1] + bins[1:]) / 2
 
@@ -238,9 +235,9 @@ def find_bins(histlist, inpDict):
         ##############
         # Set minimum threhold number of events per bin
         # Aim for >1000 events
-        bad_bins_threshold = 200
+        #bad_bins_threshold = 200
         #bad_bins_threshold = 500
-        #bad_bins_threshold = 1000
+        bad_bins_threshold = 1000
         #bad_bins_threshold = 2000
         ##############
         ##############
