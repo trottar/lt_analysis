@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 15:13:23 trottar"
+# Time-stamp: "2024-06-17 15:39:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -240,15 +240,15 @@ def find_bins(histlist, inpDict):
         ##############
 
         # Check for bad bins
-        bad_bins = np.where(n < bad_bins_threshold)[0]
+        #bad_bins = np.where(n < bad_bins_threshold)[0]
 
         # Remove bad bins
-        n = np.delete(n, bad_bins)
-        bins = np.delete(bins, bad_bins)
+        #n = np.delete(n, bad_bins)
+        #bins = np.delete(bins, bad_bins)
 
         # Set first and last elements to tmin and tmax, respectively
-        #bins[0] = tmin
-        #bins[-1] = tmax
+        bins[0] = tmin
+        bins[-1] = tmax
         
         # Check there are good t-bins
         if np.size(n) == 0:
