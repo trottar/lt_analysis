@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 14:35:21 trottar"
+# Time-stamp: "2024-06-17 14:38:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -117,7 +117,7 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-    t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<=tmax)
+    t_RANGE =  (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
 
     MMCUT =  (mm_min<evt.MM) & (evt.MM<mm_max)
     
@@ -149,7 +149,7 @@ def apply_data_sub_cuts(evt):
 
     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-    t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<=tmax)
+    t_RANGE =  (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
 
     # No MM cut    
     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE
@@ -166,7 +166,7 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
       
     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-    t_RANGE =  (tmin<=-evt.t) & (-evt.t<=tmax)
+    t_RANGE =  (tmin<-evt.t) & (-evt.t<tmax)
 
     MMCUT =  (mm_min<evt.missmass) & (evt.missmass<mm_max)
       
