@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 12:54:22 trottar"
+# Time-stamp: "2024-06-17 13:03:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -139,7 +139,7 @@ def find_bins(histlist, inpDict):
             # Adjust the number of bins by reducing it
             num_phi_bins -= 1
             if num_phi_bins <= 4:  # Ensure there are at least 4 bins
-                print("ERROR: Only {} bins achieve a minimum of {} events! Try decreasing the minimum number of events per bin.".format(num_phi_bins, bad_bins_threshold))
+                print("ERROR: Only {} phi-bins achieve a minimum of {} events!\nTry decreasing the minimum number of events per bin.".format(num_phi_bins, bad_bins_threshold))
                 sys.exit(2)
 
             bin_edges = np.linspace(0.0, 360.0, num_phi_bins + 1)
@@ -169,20 +169,8 @@ def find_bins(histlist, inpDict):
 
     def find_tbins(H_t_BinTest):
 
-
-        ################################################################################################################################################
- 
-        '''
-        def histedges_equalN(x, nbin):
-            npt = len(x) - 1  # npt-1 because starting at 0
-            indices = np.linspace(0, npt, nbin+1).astype(int)
-            sorted_x = np.sort(x)
-            equalN_values = sorted_x[indices]
-            return equalN_values
-        '''
-
         # Tolerance is determined by the number of sigfigs for |-t|
-        def histedges_equalN(x, nbin, tolerance=1e-3, max_iterations=10):
+        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=20):
             
             # Account for bin range
             nbin += 1
@@ -226,10 +214,9 @@ def find_bins(histlist, inpDict):
 
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
-        # The bins are determined by a linear interpolation (see function above)
-        # This returns the binned data with equal number of events per bin
-        print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
-        bin_edges = histedges_equalN(H_t_BinTest, inpDict["NumtBins"])
+        # The bins are determined by an iterative algorithm (see function above)
+        #print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
+        bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"])
         n, bins = np.histogram(H_t_BinTest, bin_edges)
 
         ##############
@@ -252,8 +239,6 @@ def find_bins(histlist, inpDict):
         n = np.delete(n, bad_bins)
         bins = np.delete(bins, bad_bins)
 
-        # Print the updated histogram and bin edges
-        print("Removed bad bins...(threhold = {})".format(bad_bins_threshold))
         #print("Removed bad bins: {} with {} events".format(bins, n))
 
         # Set first and last elements to tmin and tmax, respectively
@@ -267,12 +252,12 @@ def find_bins(histlist, inpDict):
 
         # Redefine number of t-bins
         if len(n) != inpDict["NumtBins"]:
-            print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(n)))
+            print("Number of t-bins changed from {} to: {} (threhold = {})".format(inpDict["NumtBins"], len(n), bad_bins_threshold))
             inpDict["NumtBins"] = len(n)
             if len(n) <= 1:
-                print("ERROR: Only {} bins achieve a minimum of {} events! Try decreasing minimum number of events per bin.".format(len(n), bad_bins_threshold))
+                print("ERROR: Only {} t-bin achieved a minimum of {} events!\nTry decreasing minimum number of events per bin.".format(len(n), bad_bins_threshold))
                 sys.exit(2)
-            
+
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
 
