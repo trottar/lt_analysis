@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 16:13:24 trottar"
+# Time-stamp: "2024-06-17 16:18:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -261,7 +261,7 @@ def find_bins(histlist, inpDict):
                     merged[i+1] += merged[i]
                 merged[i] = 0
 
-        n = merged[merged!=0]
+        n = merged[merged!=0][:-1]
                     
         # Remove bad bins
         #n = np.delete(n, bad_bins)
