@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 15:52:59 trottar"
+# Time-stamp: "2024-06-17 15:58:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,7 +242,7 @@ def find_bins(histlist, inpDict):
         # Check for bad bins
         bad_bins = np.where(n < bad_bins_threshold)[0]
 
-        print("$$$$$$$$",np.where(n < bad_bins_threshold))
+        n[bad_bins+1] = n[bad_bins]+n[bad_bins+1]
         
         # Remove bad bins
         n = np.delete(n, bad_bins)
