@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 12:45:23 trottar"
+# Time-stamp: "2024-06-17 12:49:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,9 +180,9 @@ def find_bins(histlist, inpDict):
             equalN_values = sorted_x[indices]
             return equalN_values
         '''
-        
-        #def histedges_equalN(x, nbin, tolerance=1e-3, max_iterations=10):
-        def histedges_equalN(x, nbin, tolerance=1e-2, max_iterations=10):
+
+        # Tolerance is determined by the number of sigfigs for |-t|
+        def histedges_equalN(x, nbin, tolerance=1e-3, max_iterations=10):
             # Account for bin range
             nbin += 1
             npt = len(x)  # Total number of data points
