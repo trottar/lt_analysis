@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 11:15:24 trottar"
+# Time-stamp: "2024-06-17 12:34:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -144,13 +144,9 @@ def find_bins(histlist, inpDict):
 
             bin_edges = np.linspace(0.0, 360.0, num_phi_bins + 1)
 
-        print("Removed bad bins... (threshold = {})".format(bad_bins_threshold))
-        bins[0] = 0
-        bins[-1] = 360
-
         # Redefine number of phi-bins
         if num_phi_bins != inpDict["NumPhiBins"]:
-            print("Number of phi-bins changed from {} to: {}".format(inpDict["NumPhiBins"], num_phi_bins))
+            print("Number of phi-bins changed from {} to: {} (threshold = {})".format(inpDict["NumPhiBins"], num_phi_bins, bad_bins_threshold))
             inpDict["NumPhiBins"] = num_phi_bins
             n, bins = np.histogram(H_phi_BinTest, bin_edges)
         
@@ -185,7 +181,8 @@ def find_bins(histlist, inpDict):
             return equalN_values
         '''
         
-        def histedges_equalN(x, nbin, tolerance=1e-3, max_iterations=10):
+        #def histedges_equalN(x, nbin, tolerance=1e-3, max_iterations=10):
+        def histedges_equalN(x, nbin, tolerance=1e+3, max_iterations=10):
             # Account for bin range
             nbin += 1
             npt = len(x)  # Total number of data points
