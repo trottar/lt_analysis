@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 14:17:00 trottar"
+# Time-stamp: "2024-06-17 14:22:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -240,7 +240,7 @@ def find_bins(histlist, inpDict):
         n = np.delete(n, bad_bins)
         bins = np.delete(bins, bad_bins)
 
-        #print("Removed bad bins: {} with {} events".format(bins, n))
+        print("Removed bad bins: {} with {} events".format(bins, n))
 
         # Set first and last elements to tmin and tmax, respectively
         bins[0] = tmin
