@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 15:58:26 trottar"
+# Time-stamp: "2024-06-17 16:08:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,10 +242,29 @@ def find_bins(histlist, inpDict):
         # Check for bad bins
         bad_bins = np.where(n < bad_bins_threshold)[0]
 
-        n[bad_bins+1] = n[bad_bins]+n[bad_bins+1]
-        
+        # Keep track of merged bins
+        merged = np.copy(n)
+
+        for i in bad_bins:
+            # If the bad bin is in first bin
+            if i==0:
+                merged[i+1] += merged[i]
+                merged[i] = 0
+            # If the bad bin is in last bin
+            elif i==len(n)-1:
+                merged[i-1] += merged[i]
+            # For bins in middle
+            else:
+                if merged[i-1]>=merged[i+1]:
+                    merged[i-1] += merged[i]
+                else:
+                    merged[i+1] += merged[i]
+                merged[i] = 0
+
+        n = merged[merged!=0]
+                    
         # Remove bad bins
-        n = np.delete(n, bad_bins)
+        #n = np.delete(n, bad_bins)
         bins = np.delete(bins, bad_bins)
 
         # Set first and last elements to tmin and tmax, respectively
