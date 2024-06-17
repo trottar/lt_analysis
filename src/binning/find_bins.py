@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 11:04:32 trottar"
+# Time-stamp: "2024-06-17 11:15:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,6 +153,9 @@ def find_bins(histlist, inpDict):
             print("Number of phi-bins changed from {} to: {}".format(inpDict["NumPhiBins"], num_phi_bins))
             inpDict["NumPhiBins"] = num_phi_bins
             n, bins = np.histogram(H_phi_BinTest, bin_edges)
+        
+        for i,val in enumerate(n):
+            print("Bin {} from {:.1f} to {:.1f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
         
         bin_centers = (bins[:-1] + bins[1:]) / 2
 
