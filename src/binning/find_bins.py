@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 16:08:42 trottar"
+# Time-stamp: "2024-06-17 16:13:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -270,6 +270,8 @@ def find_bins(histlist, inpDict):
         # Set first and last elements to tmin and tmax, respectively
         bins[0] = tmin
         bins[-1] = tmax
+
+        print("$$$$$$$$",n,bins)
         
         # Check there are good t-bins
         if np.size(n) == 0:
