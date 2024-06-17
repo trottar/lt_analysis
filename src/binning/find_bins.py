@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 17:07:17 trottar"
+# Time-stamp: "2024-06-17 17:41:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,14 +161,6 @@ def find_bins(histlist, inpDict):
 
         print("phi_bins = ", bins)
         
-        # Write phibin_interval for lt_analysis scripts
-        lines = []
-        with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, inpDict["Q2"].replace("p",""), inpDict["W"].replace("p","")), "w") as file:
-            file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))            
-            for i,phi in enumerate(bins):
-                lines.append("\t{}".format(float(phi)))
-            file.writelines(lines)
-
         return [n,bins]
 
     def find_tbins(H_t_BinTest):
@@ -268,8 +260,6 @@ def find_bins(histlist, inpDict):
         # Set first and last elements to tmin and tmax, respectively
         bins[0] = tmin
         bins[-1] = tmax
-
-        print("$$$$$$$$",n,bins)
         
         # Check there are good t-bins
         if np.size(n) == 0:
@@ -287,24 +277,33 @@ def find_bins(histlist, inpDict):
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
 
-        # Stripping tmin and tmax
-        #bin_centers = bins[1:-1]
-        
         bin_centers = (bins[:-1] + bins[1:]) / 2
         
         print("t_bins = ", bins)
         
-        # Write t_bin_interval for lt_analysis scripts
-        lines = []
-        with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, inpDict["Q2"].replace("p",""), inpDict["W"].replace("p","")), "w") as file:
-            file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
-            for i,t in enumerate(bins):
-                lines.append("\t{:.2f}".format(float(t)))
-            file.writelines(lines)
-
         return [n,bins]
+
+    new_phi_bin = find_phibins(H_phi_BinTest)
+    new_t_bin = find_tbins(H_t_BinTest)
     
-    return [find_phibins(H_phi_BinTest), find_tbins(H_t_BinTest)]
+    # Write phibin_interval for lt_analysis scripts
+    lines = []
+    with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, inpDict["Q2"].replace("p",""), inpDict["W"].replace("p","")), "w") as file:
+        file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))            
+        for i,phi in enumerate(new_phi_bin):
+            lines.append("\t{}".format(float(phi)))
+        file.writelines(lines)
+
+    # Write t_bin_interval for lt_analysis scripts
+    lines = []
+    with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, inpDict["Q2"].replace("p",""), inpDict["W"].replace("p","")), "w") as file:
+        file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
+        for i,t in enumerate(new_t_bin):
+            lines.append("\t{:.2f}".format(float(t)))
+        file.writelines(lines)
+        
+    
+    return []
 
 def check_bins(histlist, inpDict):
 
@@ -353,8 +352,12 @@ def check_bins(histlist, inpDict):
     H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
 
     # Apply proper boundaries for t
-    H_t_BinTest = np.append(H_t_BinTest, tmin)
-    H_t_BinTest = np.append(H_t_BinTest, tmax)
+    # Find indices of min and max values
+    min_index = np.argmin(H_t_BinTest)
+    max_index = np.argmax(H_t_BinTest)
+    # Replace min and max values with tmin and tmax
+    H_t_BinTest[min_index] = tmin
+    H_t_BinTest[max_index] = tmax
 
     # Concatenate the H_phi arrays for Right, Left, and Center
     H_phi_BinTest = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
@@ -379,17 +382,6 @@ def check_bins(histlist, inpDict):
         print("\nFinding t bins...")
         n, bins = np.histogram(H_t_BinTest, t_bins)
 
-        '''
-        # Redefine number of t-bins
-        if len(t_bins)-1 != inpDict["NumtBins"]:
-            print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(t_bins)-1))
-            inpDict["NumtBins"] = len(t_bins)-1
-            #print("\t -> tmin changed from {} to: {}".format(inpDict["tmin"], min(bins)))
-            #inpDict["tmin"] = min(n)
-            #print("\t -> tmax changed from {} to: {}".format(inpDict["tmax"], max(bins)))
-            #inpDict["tmax"] = max(n)
-        '''
-
         # Redefine number of t-bins
         if len(t_bins) != inpDict["NumtBins"]:
             print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(n)))
@@ -398,8 +390,7 @@ def check_bins(histlist, inpDict):
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
         
-        print("t_bins = ", bins)
-    
+        print("t_bins = ", bins)    
 
     find_phibins(H_phi_BinTest)
     find_tbins(H_t_BinTest)
