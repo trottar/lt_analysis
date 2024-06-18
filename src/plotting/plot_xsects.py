@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-18 10:33:48 trottar"
+# Time-stamp: "2024-06-18 11:51:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,6 +186,7 @@ except IOError:
 
 t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
 
+print("!!!!!!!!!!NumtBins",NumtBins)
 print("!!!!!!!!!!1",len(t_bins),t_bins)
 print("!!!!!!!!!!2",len(t_bin_centers),t_bin_centers)
 
