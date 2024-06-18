@@ -655,10 +655,7 @@ done
 #MissMassMax=1.5
 # MM cut
 MissMassMin=1.08
-#MissMassMin=1.10
 MissMassMax=1.16
-#MissMassMax=1.18
-#MissMassMax=1.24
 
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
@@ -686,22 +683,10 @@ elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     #TMAX=0.950 # Max value of tmax across phi settings
 elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     # Q2=3p0, W=3p14
-    #NumtBins=5
-    #NumPhiBins=16
-    NumtBins=6 # Testing
-    #NumtBins=3 # Testing
-    NumPhiBins=8 # Testing
+    NumtBins=6
+    NumPhiBins=8
     TMIN=0.150
     TMAX=0.500
-    #TMIN=0.100 # Testing
-    #TMIN=0.150 # Testing
-    #TMAX=0.350 # Testing
-    #TMIN=0.200 # Testing
-    #TMAX=0.300 # Testing
-    #TMIN=0.150
-    #TMAX=0.650
-    #TMIN=0.150 # Center low
-    #TMAX=0.450 # Center low
 elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     # Q2=4p4, W=2p74
     NumtBins=3
@@ -712,8 +697,8 @@ elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     #TMAX=0.750    
 elif [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     # Q2=5p5, W=3p02
-    NumtBins=4
-    NumPhiBins=8
+    NumtBins=3
+    NumPhiBins=6
     TMIN=0.400
     TMAX=1.000
 else
