@@ -424,7 +424,7 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *     RLT (6/04/2024): Testing simplier exp form for L+T
 **
 	   sigt=(fitpar(5)*((abs(t_gev)/Q2_g)-1))
-     1           exp(fitpar(6)*(abs(t_gev)))
+     1           *exp(fitpar(6)*(abs(t_gev)))
 
 	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
      1           +fitpar(11)/abs(t_gev))*sin(thetacm)
