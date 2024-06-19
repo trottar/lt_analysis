@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 18:01:22 trottar"
+# Time-stamp: "2024-06-19 16:05:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,7 +161,7 @@ def find_bins(histlist, inpDict):
 
         print("phi_bins = ", bins)
         
-        return [n,bins]
+        return bins
 
     def find_tbins(H_t_BinTest):
 
@@ -281,7 +281,7 @@ def find_bins(histlist, inpDict):
         
         print("t_bins = ", bins)
         
-        return [n,bins]
+        return bins
 
     new_phi_bin = find_phibins(H_phi_BinTest)
     new_t_bin = find_tbins(H_t_BinTest)
@@ -291,7 +291,7 @@ def find_bins(histlist, inpDict):
     with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, inpDict["Q2"].replace("p",""), inpDict["W"].replace("p","")), "w") as file:
         file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
         # Loop over phi-bin edges
-        for i,phi in enumerate(new_phi_bin[1]):
+        for i,phi in enumerate(new_phi_bin):
             lines.append("\t{}".format(float(phi)))
         file.writelines(lines)
 
@@ -300,12 +300,10 @@ def find_bins(histlist, inpDict):
     with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, inpDict["Q2"].replace("p",""), inpDict["W"].replace("p","")), "w") as file:
         file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
         # Loop over t-bin edges
-        for i,t in enumerate(new_t_bin[1]):
+        for i,t in enumerate(new_t_bin):
             lines.append("\t{:.2f}".format(float(t)))
         file.writelines(lines)
             
-    return [new_phi_bin, new_t_bin]
-
 def check_bins(histlist, inpDict):
 
     ################################################################################################################################################
@@ -391,7 +389,7 @@ def check_bins(histlist, inpDict):
         for i,val in enumerate(n):
             print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
         
-        print("t_bins = ", bins)    
+        print("t_bins = ", bins)
 
-    find_phibins(H_phi_BinTest)
-    find_tbins(H_t_BinTest)        
+    new_phi_bin = find_phibins(H_phi_BinTest)
+    new_t_bin = find_tbins(H_t_BinTest)
