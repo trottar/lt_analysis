@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 16:42:47 trottar"
+# Time-stamp: "2024-06-19 16:49:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,13 +250,15 @@ def find_bins(histlist, inpDict):
                     merged[i+1] += merged[i]
                 merged[i] = 0
 
-        # Remove merged bins and corresponding bin edges
-        merged = merged[merged != 0]
-        bins = np.array([bins[i] for i in range(len(bins)) if n[i] >= bad_bins_threshold])
+        # Create a mask to keep only the bins that are not merged
+        valid_bins_mask = merged != 0
 
-        # Set first and last elements to tmin and tmax, respectively
-        bins[0] = tmin
-        bins[-1] = tmax
+        # Apply mask to merged bins and original bins
+        merged = merged[valid_bins_mask]
+        bins = bins[:-1][valid_bins_mask]  # Remove last bin edge since it's not a bin
+
+        # Ensure the first and last elements are tmin and tmax, respectively
+        bins = np.concatenate(([tmin], bins, [tmax]))
 
         print("Merged bin counts:", merged)
         print("New bin edges:", bins)
