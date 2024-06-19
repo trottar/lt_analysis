@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 16:14:25 trottar"
+# Time-stamp: "2024-06-19 16:26:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -166,7 +166,7 @@ def find_bins(histlist, inpDict):
     def find_tbins(H_t_BinTest):
 
         # Tolerance is determined by the number of sigfigs for |-t|
-        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=10):
+        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=30):
             
             # Account for bin range
             nbin += 1
