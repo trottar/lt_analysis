@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 16:34:01 trottar"
+# Time-stamp: "2024-06-19 16:42:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -232,35 +232,35 @@ def find_bins(histlist, inpDict):
         # Check for bad bins
         bad_bins = np.where(n < bad_bins_threshold)[0]
 
-        # Keep track of merged bins
+        # Make a copy of the original bin counts
         merged = np.copy(n)
 
-        # Loop through bad bins and merge them with good bins
+        # Loop through bad bins and merge them with the closest good bin
         for i in bad_bins:
-            # If the bad bin is in first bin
-            if i==0:
+            if i == 0:
                 merged[i+1] += merged[i]
                 merged[i] = 0
-            # If the bad bin is in last bin
-            elif i==len(n)-1:
+            elif i == len(n) - 1:
                 merged[i-1] += merged[i]
-            # For bins in middle
+                merged[i] = 0
             else:
-                if merged[i-1]>=merged[i+1]:
+                if merged[i-1] >= merged[i+1]:
                     merged[i-1] += merged[i]
                 else:
                     merged[i+1] += merged[i]
                 merged[i] = 0
 
-        n = merged[merged!=0][:-1]
-                    
-        # Remove bad bin edges that have been merged
-        bins = np.delete(bins, bad_bins)
+        # Remove merged bins and corresponding bin edges
+        merged = merged[merged != 0]
+        bins = np.array([bins[i] for i in range(len(bins)) if n[i] >= bad_bins_threshold])
 
         # Set first and last elements to tmin and tmax, respectively
         bins[0] = tmin
         bins[-1] = tmax
-        
+
+        print("Merged bin counts:", merged)
+        print("New bin edges:", bins)
+
         # Check there are good t-bins
         if np.size(n) == 0:
             print("\n\nt-binning Failed: no valid bins avaliable!\nIncrease initial number of t-bins or change t-range...")
