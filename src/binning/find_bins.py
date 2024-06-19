@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 17:57:41 trottar"
+# Time-stamp: "2024-06-19 18:01:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -234,7 +234,6 @@ def find_bins(histlist, inpDict):
             bin_edges = []
             bin_edges.extend(np.linspace(tmin, tmax, num=nbin))
 
-            '''
             # Perform iterations to adjust bin edges
             for _ in range(max_iterations):
                 # Calculate the number of events in each bin
@@ -243,7 +242,8 @@ def find_bins(histlist, inpDict):
                 # Check if any bin has fewer events than the threshold
                 if np.any(counts < bad_bins_threshold):
                     # Adjust bin edges to ensure each bin has at least bad_bins_threshold events
-                    for i in range(1, len(bin_edges) - 1):
+                    #for i in range(1, len(bin_edges) - 1):
+                    for i in range(1, len(bin_edges)):
                         if counts[i - 1] < bad_bins_threshold:
                             # Increase bin edge to meet minimum events
                             bin_edges[i] += tolerance / 2
@@ -253,22 +253,6 @@ def find_bins(histlist, inpDict):
                 else:
                     # If all bins have enough events, break the loop
                     break
-            '''
-
-            # Calculate the number of events in each bin
-            counts, _ = np.histogram(x, bins=bin_edges)
-            
-            # Perform iterations to adjust bin edges
-            while np.any(counts < bad_bins_threshold):
-
-                # Adjust bin edges to ensure each bin has at least bad_bins_threshold events
-                for i in range(1, len(bin_edges) - 1):
-                    if counts[i - 1] < bad_bins_threshold:
-                        # Increase bin edge to meet minimum events
-                        bin_edges[i] += tolerance / 2
-                    elif counts[i] < bad_bins_threshold:
-                        # Decrease bin edge to meet minimum events
-                        bin_edges[i] -= tolerance / 2            
 
             return np.array(bin_edges)
         
