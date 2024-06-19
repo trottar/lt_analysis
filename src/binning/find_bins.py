@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 17:36:38 trottar"
+# Time-stamp: "2024-06-19 17:39:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,7 +224,7 @@ def find_bins(histlist, inpDict):
         ##############
         ##############
         
-        def adjust_bins(x, nbin, tmin, tmax, tolerance=1e-3, max_iterations=30, bad_bins_threshold=10):
+        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=30, bad_bins_threshold=10):
             # Account for bin range
             nbin += 1
             npt = len(x)  # Total number of data points
