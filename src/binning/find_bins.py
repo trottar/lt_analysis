@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 16:49:11 trottar"
+# Time-stamp: "2024-06-19 17:20:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -260,7 +260,14 @@ def find_bins(histlist, inpDict):
         # Ensure the first and last elements are tmin and tmax, respectively
         bins = np.concatenate(([tmin], bins, [tmax]))
 
-        print("Merged bin counts:", merged)
+        # Adjust bin widths and update the number of events per bin
+        new_bin_widths = np.diff(bins)
+        old_bin_widths = np.diff(np.concatenate(([tmin], bins[:-1], [tmax])))
+
+        # Proportionally distribute events based on bin width ratios
+        new_merged = merged * (new_bin_widths / old_bin_widths[:-1])
+
+        print("Merged bin counts:", new_merged)
         print("New bin edges:", bins)
 
         # Check there are good t-bins
