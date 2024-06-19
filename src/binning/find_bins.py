@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 17:46:30 trottar"
+# Time-stamp: "2024-06-19 17:49:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -227,13 +227,13 @@ def find_bins(histlist, inpDict):
         def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=30, bad_bins_threshold=10):
             # Account for bin range
             #nbin += 1
-            nbin -= 1
             npt = len(x)  # Total number of data points
             n_per_bin = npt // nbin  # Calculate the number of events per bin
             remainder = npt % nbin  # Calculate remainder for uneven division
 
             # Initialize bin edges with the minimum and maximum data points
-            bin_edges = [np.min(x)]
+            #bin_edges = [np.min(x)]
+            bin_edges = []
             bin_edges.extend(np.linspace(tmin, tmax, num=nbin))
 
             # Perform iterations to adjust bin edges
