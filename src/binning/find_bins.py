@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 18:01:37 trottar"
+# Time-stamp: "2024-06-19 18:03:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,7 +224,7 @@ def find_bins(histlist, inpDict):
         ##############
         ##############
         
-        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=30, bad_bins_threshold=10):
+        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=30):
             # Account for bin range
             npt = len(x)  # Total number of data points
             n_per_bin = npt // nbin  # Calculate the number of events per bin
@@ -242,8 +242,7 @@ def find_bins(histlist, inpDict):
                 # Check if any bin has fewer events than the threshold
                 if np.any(counts < bad_bins_threshold):
                     # Adjust bin edges to ensure each bin has at least bad_bins_threshold events
-                    #for i in range(1, len(bin_edges) - 1):
-                    for i in range(1, len(bin_edges)):
+                    for i in range(1, len(bin_edges) - 1):
                         if counts[i - 1] < bad_bins_threshold:
                             # Increase bin edge to meet minimum events
                             bin_edges[i] += tolerance / 2
