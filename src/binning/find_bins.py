@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 17:29:29 trottar"
+# Time-stamp: "2024-06-19 17:36:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,6 +165,7 @@ def find_bins(histlist, inpDict):
 
     def find_tbins(H_t_BinTest):
 
+        '''
         # Tolerance is determined by the number of sigfigs for |-t|
         def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=30):
             
@@ -208,13 +209,7 @@ def find_bins(histlist, inpDict):
                             bin_edges[i + 1] -= tolerance / 2
             
             return np.array(bin_edges)
-
-        print("\nFinding t bins...")
-        # Histogram takes the array data set and the bins as input
-        # The bins are determined by an iterative algorithm (see function above)
-        #print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
-        bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"])
-        n, bins = np.histogram(H_t_BinTest, bin_edges)
+        '''
 
         ##############
         # HARD CODED #
@@ -228,58 +223,45 @@ def find_bins(histlist, inpDict):
         ##############
         ##############
         ##############
+        
+        def adjust_bins(x, nbin, tmin, tmax, tolerance=1e-3, max_iterations=30, bad_bins_threshold=10):
+            # Account for bin range
+            nbin += 1
+            npt = len(x)  # Total number of data points
+            n_per_bin = npt // nbin  # Calculate the number of events per bin
+            remainder = npt % nbin  # Calculate remainder for uneven division
 
-        # Check for bad bins
-        bad_bins = np.where(n < bad_bins_threshold)[0]
+            # Initialize bin edges with the minimum and maximum data points
+            bin_edges = [np.min(x)]
+            bin_edges.extend(np.linspace(tmin, tmax, num=nbin))
 
-        # Make a copy of the original bin counts
-        merged = np.copy(n)
+            # Perform iterations to adjust bin edges
+            for _ in range(max_iterations):
+                # Calculate the number of events in each bin
+                counts, _ = np.histogram(x, bins=bin_edges)
 
-        # Loop through bad bins and merge them with the closest good bin
-        for i in bad_bins:
-            if i == 0:
-                merged[i+1] += merged[i]
-                merged[i] = 0
-            elif i == len(n) - 1:
-                merged[i-1] += merged[i]
-                merged[i] = 0
-            else:
-                if merged[i-1] >= merged[i+1]:
-                    merged[i-1] += merged[i]
+                # Check if any bin has fewer events than the threshold
+                if np.any(counts < bad_bins_threshold):
+                    # Adjust bin edges to ensure each bin has at least bad_bins_threshold events
+                    for i in range(1, len(bin_edges) - 1):
+                        if counts[i - 1] < bad_bins_threshold:
+                            # Increase bin edge to meet minimum events
+                            bin_edges[i] += tolerance / 2
+                        elif counts[i] < bad_bins_threshold:
+                            # Decrease bin edge to meet minimum events
+                            bin_edges[i] -= tolerance / 2
                 else:
-                    merged[i+1] += merged[i]
-                merged[i] = 0
+                    # If all bins have enough events, break the loop
+                    break
 
-        # Create a mask to keep only the bins that are not merged
-        valid_bins_mask = merged != 0
-
-        # Apply mask to merged bins and original bins
-        merged = merged[valid_bins_mask]
-        bins = bins[:-1][valid_bins_mask]  # Remove last bin edge since it's not a bin
-
-        # Ensure the first and last elements are tmin and tmax, respectively
-        bins = np.concatenate(([tmin], bins, [tmax]))
-
-        # Adjust bin widths and update the number of events per bin
-        new_bin_widths = np.diff(bins)
-
-        # Initialize a new array to store redistributed counts
-        new_merged = np.zeros_like(merged)
-
-        # Loop through new bins and redistribute events without proportionality
-        current_event_index = 0
-        for i in range(len(new_bin_widths)):
-            bin_start = bins[i]
-            bin_end = bins[i + 1]
-            bin_width = new_bin_widths[i]
-
-            while current_event_index < len(n) and bins[current_event_index] < bin_end:
-                if bins[current_event_index] >= bin_start:
-                    new_merged[i] += merged[current_event_index]
-                current_event_index += 1
-
-        print("Merged bin counts:", new_merged)
-        print("New bin edges:", bins)
+            return np.array(bin_edges)
+        
+        print("\nFinding t bins...")
+        # Histogram takes the array data set and the bins as input
+        # The bins are determined by an iterative algorithm (see function above)
+        #print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
+        bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"])
+        n, bins = np.histogram(H_t_BinTest, bin_edges)
 
         # Check there are good t-bins
         if np.size(n) == 0:
