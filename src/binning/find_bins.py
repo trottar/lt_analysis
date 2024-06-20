@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-20 16:00:19 trottar"
+# Time-stamp: "2024-06-20 16:07:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -270,19 +270,20 @@ def find_bins(histlist, inpDict):
                             break
 
                         # Adjust bin edges based on the differences
-                        for i, exceed in enumerate(exceed_tolerance):
+                        for j, exceed in enumerate(exceed_tolerance):
                             if exceed:
-                                if diff_counts[i] > 0:
+                                if diff_counts[j] > 0:
                                     # Increase bin edge
-                                    bin_edges[i + 1] += tolerance / 2
+                                    bin_edges[j + 1] += tolerance / 2
                                 else:
                                     # Decrease bin edge
-                                    bin_edges[i + 1] -= tolerance / 2
+                                    bin_edges[j + 1] -= tolerance / 2
                         
                 # Decrease the number of bins by one
                 nbin -= 1
                 if nbin <= 1:
-                    break  # Ensure there is at least one bin left
+                    print("ERROR: Only {} t-bin achieved a minimum of {} events!\nTry decreasing minimum number of events per bin.".format(nbin, bad_bins_threshold))
+                    sys.exit(2)
 
                 # Recalculate bin edges and counts with the new number of bins
                 bin_edges = np.linspace(tmin, tmax, num=nbin)
