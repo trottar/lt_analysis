@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-20 10:54:56 trottar"
+# Time-stamp: "2024-06-20 11:47:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,11 +256,11 @@ def find_bins(histlist, inpDict):
                     # If all bins have enough events, break the loop
                     break
             '''
-            
+
+            # Calculate the number of events in each bin
+            counts, _ = np.histogram(x, bins=bin_edges)            
             # Check if any bin has fewer events than the threshold
             while np.any(counts < bad_bins_threshold):
-                # Calculate the number of events in each bin
-                counts, _ = np.histogram(x, bins=bin_edges)
                 
                 # Adjust bin edges to ensure each bin has at least bad_bins_threshold events
                 for i in range(1, len(bin_edges) - 1):
