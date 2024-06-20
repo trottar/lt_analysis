@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-20 15:48:18 trottar"
+# Time-stamp: "2024-06-20 15:52:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -269,13 +269,15 @@ def find_bins(histlist, inpDict):
                         if not np.any(exceed_tolerance):
                             break
 
-                        if exceed:
-                            if diff_counts[i] > 0:
-                                # Increase bin edge
-                                bin_edges[i + 1] += tolerance / 2
-                            else:
-                                # Decrease bin edge
-                                bin_edges[i + 1] -= tolerance / 2
+                        # Adjust bin edges based on the differences
+                        for i, exceed in enumerate(exceed_tolerance):
+                            if exceed:
+                                if diff_counts[i] > 0:
+                                    # Increase bin edge
+                                    bin_edges[i + 1] += tolerance / 2
+                                else:
+                                    # Decrease bin edge
+                                    bin_edges[i + 1] -= tolerance / 2
                         
                 # recalculate the number of events in each bin
                 counts, _ = np.histogram(x, bins=bin_edges)
