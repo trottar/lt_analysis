@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-19 15:55:42 trottar"
+# Time-stamp: "2024-06-20 16:56:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -184,8 +184,8 @@ except FileNotFoundError:
 except IOError:
     print("Error reading {}...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
 
-#t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
-t_bin_centers = t_bins
+t_bin_centers = (t_bins[:-1] + t_bins[1:]) / 2
+#t_bin_centers = t_bins
 print("!!!!!!!!!!NumtBins",NumtBins)
 print("!!!!!!!!!!1",len(t_bins),t_bins)
 print("!!!!!!!!!!2",len(t_bin_centers),t_bin_centers)
