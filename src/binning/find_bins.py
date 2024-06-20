@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-20 11:56:16 trottar"
+# Time-stamp: "2024-06-20 12:36:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -235,28 +235,6 @@ def find_bins(histlist, inpDict):
             bin_edges = []
             bin_edges.extend(np.linspace(tmin, tmax, num=nbin+1))
 
-            '''
-            # Perform iterations to adjust bin edges
-            for _ in range(max_iterations):
-                # Calculate the number of events in each bin
-                counts, _ = np.histogram(x, bins=bin_edges)
-
-                # Check if any bin has fewer events than the threshold
-                if np.any(counts < bad_bins_threshold):
-                    # Adjust bin edges to ensure each bin has at least bad_bins_threshold events
-                    for i in range(1, len(bin_edges) - 1):
-                        print("!!!!!!!", bin_edges[i] , counts[i])
-                        if counts[i - 1] < bad_bins_threshold:
-                            # Increase bin edge to meet minimum events
-                            bin_edges[i] += tolerance / 2
-                        elif counts[i] < bad_bins_threshold:
-                            # Decrease bin edge to meet minimum events
-                            bin_edges[i] -= tolerance / 2
-                else:
-                    # If all bins have enough events, break the loop
-                    break
-            '''
-
             # Calculate the number of events in each bin
             counts, _ = np.histogram(x, bins=bin_edges)
             # Check if any bin has fewer events than the threshold
@@ -271,6 +249,35 @@ def find_bins(histlist, inpDict):
                     elif counts[i] < bad_bins_threshold:
                         # Decrease bin edge to meet minimum events
                         bin_edges[i] -= tolerance / 2
+
+                    # Perform iterations to adjust bin edges
+                    for _ in range(max_iterations):
+                        # Calculate the number of events in each bin
+                        counts, _ = np.histogram(x, bins=bin_edges)
+
+                        # Calculate the cumulative sum of counts
+                        cum_counts = np.cumsum(counts)
+
+                        # Calculate the difference between target and actual counts per bin
+                        diff_counts = n_per_bin - counts[:-1]
+
+                        # Find the bins where the difference exceeds the tolerance
+                        exceed_tolerance = np.abs(diff_counts) > tolerance
+
+                        # If all differences are within tolerance, break the loop
+                        if not np.any(exceed_tolerance):
+                            break
+
+                        # Adjust bin edges based on the differences
+                        for i, exceed in enumerate(exceed_tolerance):
+                            if exceed:
+                                if diff_counts[i] > 0:
+                                    # Increase bin edge
+                                    bin_edges[i + 1] += tolerance / 2
+                                else:
+                                    # Decrease bin edge
+                                    bin_edges[i + 1] -= tolerance / 2
+                        
                 # recalculate the number of events in each bin
                 counts, _ = np.histogram(x, bins=bin_edges)
 
