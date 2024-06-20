@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-20 10:33:40 trottar"
+# Time-stamp: "2024-06-20 10:41:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -233,7 +233,7 @@ def find_bins(histlist, inpDict):
 
             # Initialize bin edges with the minimum and maximum data points
             bin_edges = []
-            bin_edges.extend(np.linspace(tmin, tmax, num=nbin-1))
+            bin_edges.extend(np.linspace(tmin, tmax, num=nbin+1))
 
             # Perform iterations to adjust bin edges
             for _ in range(max_iterations):
