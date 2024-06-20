@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-20 15:52:56 trottar"
+# Time-stamp: "2024-06-20 16:00:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -279,9 +279,15 @@ def find_bins(histlist, inpDict):
                                     # Decrease bin edge
                                     bin_edges[i + 1] -= tolerance / 2
                         
-                # recalculate the number of events in each bin
-                counts, _ = np.histogram(x, bins=bin_edges)
+                # Decrease the number of bins by one
+                nbin -= 1
+                if nbin <= 1:
+                    break  # Ensure there is at least one bin left
 
+                # Recalculate bin edges and counts with the new number of bins
+                bin_edges = np.linspace(tmin, tmax, num=nbin)
+                counts, _ = np.histogram(x, bins=bin_edges)
+                
             return np.array(bin_edges)
         
         print("\nFinding t bins...")
