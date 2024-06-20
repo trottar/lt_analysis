@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-20 10:41:30 trottar"
+# Time-stamp: "2024-06-20 10:54:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,7 +224,7 @@ def find_bins(histlist, inpDict):
         ##############
         ##############
         
-        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=3):
+        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=30):
             # Account for bin range
             #nbin += 1
             #npt = len(x)  # Total number of data points
@@ -235,6 +235,7 @@ def find_bins(histlist, inpDict):
             bin_edges = []
             bin_edges.extend(np.linspace(tmin, tmax, num=nbin+1))
 
+            '''
             # Perform iterations to adjust bin edges
             for _ in range(max_iterations):
                 # Calculate the number of events in each bin
@@ -254,6 +255,22 @@ def find_bins(histlist, inpDict):
                 else:
                     # If all bins have enough events, break the loop
                     break
+            '''
+            
+            # Check if any bin has fewer events than the threshold
+            while np.any(counts < bad_bins_threshold):
+                # Calculate the number of events in each bin
+                counts, _ = np.histogram(x, bins=bin_edges)
+                
+                # Adjust bin edges to ensure each bin has at least bad_bins_threshold events
+                for i in range(1, len(bin_edges) - 1):
+                    print("!!!!!!!", bin_edges[i] , counts[i])
+                    if counts[i - 1] < bad_bins_threshold:
+                        # Increase bin edge to meet minimum events
+                        bin_edges[i] += tolerance / 2
+                    elif counts[i] < bad_bins_threshold:
+                        # Decrease bin edge to meet minimum events
+                        bin_edges[i] -= tolerance / 2            
 
             return np.array(bin_edges)
         
