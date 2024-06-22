@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 14:04:00 trottar"
+# Time-stamp: "2024-06-22 11:41:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1744,11 +1744,13 @@ def rand_sub(phi_setting, inpDict):
         CMMsub = TCanvas()
 
         histDict["H_MM_nosub_DATA"].SetLineColor(1)
+        histDict["H_MM_nosub_DATA"].SetFillStyle(3001)  # Set fill style to dots
+        histDict["H_MM_nosub_DATA"].SetFillColor(kBlack)  # Set fill color to black
         histDict["H_MM_nosub_DATA"].Draw("same, E1")
         histDict["H_MM_nosub_SUB_DATA"].SetLineColor(2)
         histDict["H_MM_nosub_SUB_DATA"].Draw("same, E1")
-        background_fit[0].SetLineColor(3)
-        background_fit[0].Draw("same")
+        #background_fit[0].SetLineColor(3)
+        #background_fit[0].Draw("same")
 
         CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-20 16:11:58 trottar"
+# Time-stamp: "2024-06-22 11:03:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -121,7 +121,8 @@ def find_bins(histlist, inpDict):
         ##############
         # Set minimum threhold number of events per bin
         # Aim for >100 events
-        bad_bins_threshold = 50
+        bad_bins_threshold = 25
+        #bad_bins_threshold = 50
         #bad_bins_threshold = 75
         ##############
         ##############
@@ -165,65 +166,20 @@ def find_bins(histlist, inpDict):
 
     def find_tbins(H_t_BinTest):
 
-        '''
-        # Tolerance is determined by the number of sigfigs for |-t|
-        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=30):
-            
-            # Account for bin range
-            nbin += 1
-            npt = len(x)  # Total number of data points
-            n_per_bin = npt // nbin  # Calculate the number of events per bin
-            remainder = npt % nbin  # Calculate remainder for uneven division
-
-            # Initialize bin edges with the minimum and maximum data points
-            bin_edges = [np.min(x)]
-            #bin_edges.extend(np.linspace(np.min(x), np.max(x), num=nbin))
-            bin_edges.extend(np.linspace(tmin, tmax, num=nbin))
-
-            # Perform iterations to adjust bin edges
-            for _ in range(max_iterations):
-                # Calculate the number of events in each bin
-                counts, _ = np.histogram(x, bins=bin_edges)
-
-                # Calculate the cumulative sum of counts
-                cum_counts = np.cumsum(counts)
-
-                # Calculate the difference between target and actual counts per bin
-                diff_counts = n_per_bin - counts[:-1]
-
-                # Find the bins where the difference exceeds the tolerance
-                exceed_tolerance = np.abs(diff_counts) > tolerance
-
-                # If all differences are within tolerance, break the loop
-                if not np.any(exceed_tolerance):
-                    break
-
-                # Adjust bin edges based on the differences
-                for i, exceed in enumerate(exceed_tolerance):
-                    if exceed:
-                        if diff_counts[i] > 0:
-                            # Increase bin edge
-                            bin_edges[i + 1] += tolerance / 2
-                        else:
-                            # Decrease bin edge
-                            bin_edges[i + 1] -= tolerance / 2
-            
-            return np.array(bin_edges)
-        '''
-
         ##############
         # HARD CODED #
         ##############
         # Set minimum threhold number of events per bin
         # Aim for >1000 events
         #bad_bins_threshold = 200
-        bad_bins_threshold = 500
-        #bad_bins_threshold = 1000
+        #bad_bins_threshold = 500
+        bad_bins_threshold = 1000
         #bad_bins_threshold = 2000
         ##############
         ##############
         ##############
-        
+
+        # Tolerance is determined by the number of sigfigs for |-t|
         def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=10):
             # Account for bin range
             nbin += 1
