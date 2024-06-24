@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-24 12:42:38 trottar"
+# Time-stamp: "2024-06-24 12:51:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,7 +93,7 @@ def iterWeight(arg_str):
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
         #sigt = (p5 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p6 * (abs(t_gev)))
-        sigl = (p5 + p6 * math.log(q2_gev)) * math.exp(p7 * (abs(t_gev)))
+        sigt = (p5 + p6 * math.log(q2_gev)) * math.exp(p7 * (abs(t_gev)))
     except OverflowError:        
         sigt = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
