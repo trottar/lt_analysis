@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-24 20:11:08 trottar"
+# Time-stamp: "2024-06-25 12:13:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,7 +68,8 @@ def iterWeight(arg_str):
         #sigl = p1 * math.exp(-p2*abs(t_gev)) * (1.0 / (1.0 + p3*q2_gev))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp(p3 * (abs(t_gev)))
+        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp(p3 * (abs(t_gev)))
+        sigt = (p1 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p2 * (abs(t_gev)))
     except OverflowError:
         sigl = -1000.0
         #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
@@ -92,8 +93,8 @@ def iterWeight(arg_str):
         #sigt = p5 * math.exp(-p6*abs(t_gev)) * (1.0 / (1.0 + p7*q2_gev))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        #sigt = (p5 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p6 * (abs(t_gev)))
-        sigt = (p5 + p6 * math.log(q2_gev)) * math.exp(p7 * (abs(t_gev)))
+        sigt = (p5 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p6 * (abs(t_gev)))
+        #sigt = (p5 + p6 * math.log(q2_gev)) * math.exp(p7 * (abs(t_gev)))
     except OverflowError:        
         sigt = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
