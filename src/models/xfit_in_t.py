@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-25 13:51:06 trottar"
+# Time-stamp: "2024-06-25 13:56:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -315,20 +315,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    par_vec.append(f_sigL.GetParameter(0))
-    par_vec.append(f_sigL.GetParameter(1))
-    par_vec.append(f_sigL.GetParameter(2))
-    par_vec.append(f_sigL.GetParameter(3))
+    par_vec.append(f_sigT.GetParameter(0))
+    par_vec.append(f_sigT.GetParameter(1))
+    par_vec.append(f_sigT.GetParameter(2))
+    par_vec.append(f_sigT.GetParameter(3))
 
-    par_err_vec.append(f_sigL.GetParError(0))
-    par_err_vec.append(f_sigL.GetParError(1))
-    par_err_vec.append(f_sigL.GetParError(2))
-    par_err_vec.append(f_sigL.GetParError(3))
+    par_err_vec.append(f_sigT.GetParError(0))
+    par_err_vec.append(f_sigT.GetParError(1))
+    par_err_vec.append(f_sigT.GetParError(2))
+    par_err_vec.append(f_sigT.GetParError(3))
 
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
 
     ########
     # SigT #
