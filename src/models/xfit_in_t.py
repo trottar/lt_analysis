@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-25 14:20:56 trottar"
+# Time-stamp: "2024-06-25 14:53:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -359,8 +359,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     else: 
         f_sigL_pre.SetParLimits(1, -par_lim, par_lim)       
     # Fixing sigL terms for testing
-    f_sigL_pre.FixParameter(0, t0)
-    f_sigL_pre.FixParameter(1, t1)
+    f_sigL_pre.FixParameter(0, -t0)
+    f_sigL_pre.FixParameter(1, -t1)
     # Fixing sigL terms to zero
     #f_sigL_pre.FixParameter(0, 0.0)
     #f_sigL_pre.FixParameter(1, 0.0)
@@ -434,8 +434,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     else: 
         f_sigL.SetParLimits(1, -par_lim, par_lim)       
     # Fixing sigL terms for testing
-    f_sigL.FixParameter(0, t0)
-    f_sigL.FixParameter(1, t1)
+    f_sigL.FixParameter(0, -t0)
+    f_sigL.FixParameter(1, -t1)
     # Fixing sigL terms to zero
     #f_sigL.FixParameter(0, 0.0)
     #f_sigL.FixParameter(1, 0.0)
@@ -472,10 +472,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit_tot.SetLineColor(2)
     g_sigl_fit_tot.Draw("LP")
 
-    par_vec.append(f_sigT.GetParameter(0))
-    par_vec.append(f_sigT.GetParameter(1))
-    par_vec.append(f_sigT.GetParameter(2))
-    par_vec.append(f_sigT.GetParameter(3))
+    par_vec.append(-f_sigT.GetParameter(0))
+    par_vec.append(-f_sigT.GetParameter(1))
+    par_vec.append(-f_sigT.GetParameter(2))
+    par_vec.append(-f_sigT.GetParameter(3))
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
