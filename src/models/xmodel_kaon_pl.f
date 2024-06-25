@@ -111,8 +111,8 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     sigT=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))
 *     RLT (6/04/2024): Testing simplier exp form for L+T
 **      
-      sigT=(par(5)*((abs(tm)/q2)-1))*exp(par(6)*(abs(tm)))
-*      sigT=(par(5)+par(6)*log(q2))*exp(par(7)*(abs(tm)))            
+*     sigT=(par(5)*((abs(tm)/q2)-1))*exp(par(6)*(abs(tm)))
+      sigT=(par(5)+par(6)*log(q2))*exp(par(7)*(abs(tm)))            
 
       sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
 *     sigLT=(par(9)+par(11)/abs(tm))*sin(thetacm)
