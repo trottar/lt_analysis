@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-25 15:07:25 trottar"
+# Time-stamp: "2024-06-25 15:11:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -202,10 +202,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     else: 
         f_sigL_pre.SetParLimits(1, -par_lim, par_lim)       
     # Fixing sigL terms for testing
-    #f_sigL_pre.FixParameter(0, l0)
-    #f_sigL_pre.FixParameter(1, l1)
+    f_sigL_pre.FixParameter(0, l0)
+    f_sigL_pre.FixParameter(1, l1)
     # Fixing sigL terms to zero
-    f_sigL_pre.FixParameter(0, 1.0)
+    #f_sigL_pre.FixParameter(0, 0.0)
     #f_sigL_pre.FixParameter(1, 0.0)
     if DEBUG:
         f_sigL_pre.FixParameter(0, l0)
@@ -277,10 +277,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     else: 
         f_sigL.SetParLimits(1, -par_lim, par_lim)       
     # Fixing sigL terms for testing
-    #f_sigL.FixParameter(0, l0)
-    #f_sigL.FixParameter(1, l1)
+    f_sigL.FixParameter(0, l0)
+    f_sigL.FixParameter(1, l1)
     # Fixing sigL terms to zero
-    f_sigL.FixParameter(0, 1.0)
+    #f_sigL.FixParameter(0, 0.0)
     #f_sigL.FixParameter(1, 0.0)
     if DEBUG:
         f_sigL.FixParameter(0, l0)
@@ -362,7 +362,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigT_pre.FixParameter(0, t0)
     #f_sigT_pre.FixParameter(1, t1)
     # Fixing sigT terms to zero
-    f_sigT_pre.FixParameter(0, 0.1)
+    #f_sigT_pre.FixParameter(0, 0.0)
     #f_sigT_pre.FixParameter(1, 0.0)
     if DEBUG:
         f_sigT_pre.FixParameter(0, t0)
@@ -437,7 +437,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #f_sigT.FixParameter(0, t0)
     #f_sigT.FixParameter(1, t1)
     # Fixing sigT terms to zero
-    f_sigT.FixParameter(0, 0.1)
+    #f_sigT.FixParameter(0, 0.0)
     #f_sigT.FixParameter(1, 0.0)
     if DEBUG:
         f_sigT.FixParameter(0, t0)
