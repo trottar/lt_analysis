@@ -700,7 +700,7 @@ elif [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     NumtBins=2
     NumPhiBins=8
     TMIN=0.400
-    TMAX=0.650
+    TMAX=0.550
 else
     # For testing
     NumtBins=1
