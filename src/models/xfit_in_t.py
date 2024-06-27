@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 17:50:26 trottar"
+# Time-stamp: "2024-06-27 17:54:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -347,21 +347,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetLineColor(2)
         g_sigl_fit_tot.Draw("LP")
 
-        par_vec.append(f_sigL.GetParameter(0))
-        par_vec.append(f_sigL.GetParameter(1))
-        par_vec.append(f_sigL.GetParameter(2))
-        par_vec.append(f_sigL.GetParameter(3))
-
-        par_err_vec.append(f_sigL.GetParError(0))
-        par_err_vec.append(f_sigL.GetParError(1))
-        par_err_vec.append(f_sigL.GetParError(2))
-        par_err_vec.append(f_sigL.GetParError(3))
-
-        par_chi2_vec.append(f_sigL.GetChisquare())
-        par_chi2_vec.append(f_sigL.GetChisquare())
-        par_chi2_vec.append(f_sigL.GetChisquare())
-        par_chi2_vec.append(f_sigL.GetChisquare())
-
         if f_sigL_status_message == "Fit Successful":
             break
 
@@ -371,6 +356,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
         iteration += 1
 
+    par_vec.append(f_sigL.GetParameter(0))
+    par_vec.append(f_sigL.GetParameter(1))
+    par_vec.append(f_sigL.GetParameter(2))
+    par_vec.append(f_sigL.GetParameter(3))
+
+    par_err_vec.append(f_sigL.GetParError(0))
+    par_err_vec.append(f_sigL.GetParError(1))
+    par_err_vec.append(f_sigL.GetParError(2))
+    par_err_vec.append(f_sigL.GetParError(3))
+
+    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(f_sigL.GetChisquare())
+        
     ########
     # SigT #
     ########
@@ -519,21 +519,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit_tot.SetLineColor(2)
         g_sigt_fit_tot.Draw("LP")
 
-        par_vec.append(f_sigT.GetParameter(0))
-        par_vec.append(f_sigT.GetParameter(1))
-        par_vec.append(f_sigT.GetParameter(2))
-        par_vec.append(f_sigT.GetParameter(3))
-
-        par_err_vec.append(f_sigT.GetParError(0))
-        par_err_vec.append(f_sigT.GetParError(1))
-        par_err_vec.append(f_sigT.GetParError(2))
-        par_err_vec.append(f_sigT.GetParError(3))
-
-        par_chi2_vec.append(f_sigT.GetChisquare())
-        par_chi2_vec.append(f_sigT.GetChisquare())
-        par_chi2_vec.append(f_sigT.GetChisquare())
-        par_chi2_vec.append(f_sigT.GetChisquare())
-
         if f_sigT_status_message == "Fit Successful":
             break
 
@@ -541,7 +526,22 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
         par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigT_status_message == "Fit Successful")
         iteration += 1
-    
+
+    par_vec.append(f_sigT.GetParameter(0))
+    par_vec.append(f_sigT.GetParameter(1))
+    par_vec.append(f_sigT.GetParameter(2))
+    par_vec.append(f_sigT.GetParameter(3))
+
+    par_err_vec.append(f_sigT.GetParError(0))
+    par_err_vec.append(f_sigT.GetParError(1))
+    par_err_vec.append(f_sigT.GetParError(2))
+    par_err_vec.append(f_sigT.GetParError(3))
+
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(f_sigT.GetChisquare())
+        
     #########
     # SigLT #
     #########
@@ -713,21 +713,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_siglt_fit_tot.SetLineColor(2)
         g_siglt_fit_tot.Draw("LP")
 
-        par_vec.append(f_sigLT.GetParameter(0))
-        par_vec.append(f_sigLT.GetParameter(1))
-        par_vec.append(f_sigLT.GetParameter(2))
-        par_vec.append(f_sigLT.GetParameter(3))
-
-        par_err_vec.append(f_sigLT.GetParError(0))
-        par_err_vec.append(f_sigLT.GetParError(1))
-        par_err_vec.append(f_sigLT.GetParError(2))
-        par_err_vec.append(f_sigLT.GetParError(3))
-
-        par_chi2_vec.append(f_sigLT.GetChisquare())
-        par_chi2_vec.append(f_sigLT.GetChisquare())
-        par_chi2_vec.append(f_sigLT.GetChisquare())
-        par_chi2_vec.append(f_sigLT.GetChisquare())
-
         if f_sigLT_status_message == "Fit Successful":
             break
 
@@ -737,6 +722,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_sigLT_status_message == "Fit Successful")
         iteration += 1
 
+    par_vec.append(f_sigLT.GetParameter(0))
+    par_vec.append(f_sigLT.GetParameter(1))
+    par_vec.append(f_sigLT.GetParameter(2))
+    par_vec.append(f_sigLT.GetParameter(3))
+
+    par_err_vec.append(f_sigLT.GetParError(0))
+    par_err_vec.append(f_sigLT.GetParError(1))
+    par_err_vec.append(f_sigLT.GetParError(2))
+    par_err_vec.append(f_sigLT.GetParError(3))
+
+    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(f_sigLT.GetChisquare())
+        
     #########
     # SigTT #
     #########
@@ -877,27 +877,27 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigtt_fit_tot.SetLineColor(2)
         g_sigtt_fit_tot.Draw("LP")
 
-        par_vec.append(f_sigTT.GetParameter(0))
-        par_vec.append(f_sigTT.GetParameter(1))
-        par_vec.append(f_sigTT.GetParameter(2))
-        par_vec.append(f_sigTT.GetParameter(3))
-
-        par_err_vec.append(f_sigTT.GetParError(0))
-        par_err_vec.append(f_sigTT.GetParError(1))
-        par_err_vec.append(f_sigTT.GetParError(2))
-        par_err_vec.append(f_sigTT.GetParError(3))
-
-        par_chi2_vec.append(f_sigTT.GetChisquare())
-        par_chi2_vec.append(f_sigTT.GetChisquare())
-        par_chi2_vec.append(f_sigTT.GetChisquare())
-        par_chi2_vec.append(f_sigTT.GetChisquare())
-
         if f_sigTT_status_message == "Fit Successful":
             break
 
         # Adaptively adjust parameter limits for the next iteration
         par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigTT_status_message == "Fit Successful")
         iteration += 1
+
+    par_vec.append(f_sigTT.GetParameter(0))
+    par_vec.append(f_sigTT.GetParameter(1))
+    par_vec.append(f_sigTT.GetParameter(2))
+    par_vec.append(f_sigTT.GetParameter(3))
+
+    par_err_vec.append(f_sigTT.GetParError(0))
+    par_err_vec.append(f_sigTT.GetParError(1))
+    par_err_vec.append(f_sigTT.GetParError(2))
+    par_err_vec.append(f_sigTT.GetParError(3))
+
+    par_chi2_vec.append(f_sigTT.GetChisquare())
+    par_chi2_vec.append(f_sigTT.GetChisquare())
+    par_chi2_vec.append(f_sigTT.GetChisquare())
+    par_chi2_vec.append(f_sigTT.GetChisquare())        
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
