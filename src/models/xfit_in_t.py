@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 17:54:40 trottar"
+# Time-stamp: "2024-06-27 17:55:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -80,7 +80,7 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    max_iterations = 50
+    max_iterations = 1e6
     # Limit for finding new parameters (units of percent)
     if iter_num == 2:
         par_lim = 100.00 # +/-10000%
