@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 18:27:40 trottar"
+# Time-stamp: "2024-06-27 18:35:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -331,13 +331,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
                 g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            g_sigl_fit.Fit(f_sigL, "SM")
+            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM")
 
             f_sigL.Draw("same")
 
             # Check the fit status for 'f_sigL'
-            f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
+            #f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            f_sigL_status = r_sigl_fit
+            f_sigL_status_message = "Not Fitted" if !f_sigL_status else "Fit Successful"
 
             fit_status = TText()
             fit_status.SetTextSize(0.04)
@@ -350,7 +351,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigl_fit_tot.SetLineColor(2)
             g_sigl_fit_tot.Draw("LP")
 
-            if f_sigL_status != 0:
+            if f_sigL_status:
                 break
 
             # Adjust parameter limits within a random number
@@ -514,11 +515,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
                 g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            g_sigt_fit.Fit(f_sigT, "SM")
+            r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SM")
 
             # Check the fit status for 'f_sigT'
-            f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
+            #f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            f_sigT_status = r_sigt_fit
+            f_sigT_status_message = "Not Fitted" if !f_sigT_status else "Fit Successful"
 
             f_sigT.Draw("same")
 
@@ -533,7 +535,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_fit_tot.SetLineColor(2)
             g_sigt_fit_tot.Draw("LP")
 
-            if f_sigT_status != 0:
+            if f_sigT_status:
                 break
 
             # Adjust parameter limits within a random number
@@ -718,11 +720,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
                 g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            g_siglt_fit.Fit(f_sigLT, "SM")
+            r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SM")
 
             # Check the fit status for 'f_sigLT'
-            f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
+            #f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            f_sigLT_status = r_siglt_fit
+            f_sigLT_status_message = "Not Fitted" if !f_sigLT_status else "Fit Successful"
 
             f_sigLT.Draw("same")
 
@@ -737,7 +740,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_fit_tot.SetLineColor(2)
             g_siglt_fit_tot.Draw("LP")
 
-            if f_sigLT_status != 0:
+            if f_sigLT_status:
                 break
 
             # Adjust parameter limits within a random number
@@ -893,11 +896,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                 g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            g_sigtt_fit.Fit(f_sigTT, "SM")
+            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SM")
 
             # Check the fit status for 'f_sigTT'
-            f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
+            #f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            f_sigTT_status = r_sigtt_fit
+            f_sigTT_status_message = "Not Fitted" if !f_sigTT_status else "Fit Successful"
 
             f_sigTT.Draw("same")
 
@@ -912,7 +916,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit_tot.SetLineColor(2)
             g_sigtt_fit_tot.Draw("LP")
 
-            if f_sigTT_status != 0:
+            if f_sigTT_status:
                 break
 
             # Adjust parameter limits within a random number
