@@ -3,13 +3,14 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 18:20:00 trottar"
+# Time-stamp: "2024-06-27 18:25:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
 # Copyright (c) trottar
 #
+import random
 import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
@@ -352,7 +353,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigL_status_message == "Fit Successful":
                 break
 
-            # Adaptively adjust parameter limits for the next iteration
+            # Adjust parameter limits within a random number
             par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
             par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
             par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
@@ -360,10 +361,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         except TypeError:
             print("TypeError encountered. Adjusting parameter limits and retrying...")
 
-            # Adaptively adjust parameter limits for the next iteration
-            par_lim_sigl_0 = par_lim
-            par_lim_sigl_1 = par_lim
-            par_lim_sigl_2 = par_lim
+            # Adjust parameter limits within a random number
+            par_lim_sigl_0 = random.uniform(0, 100)
+            par_lim_sigl_1 = random.uniform(0, 100)
+            par_lim_sigl_2 = random.uniform(0, 100)
 
         iteration += 1            
 
@@ -535,16 +536,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigT_status_message == "Fit Successful":
                 break
 
-            # Adaptively adjust parameter limits for the next iteration
+            # Adjust parameter limits within a random number
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigt_status_message == "Fit Successful")
             par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigt_status_message == "Fit Successful")
 
         except TypeError:
             print("TypeError encountered. Adjusting parameter limits and retrying...")
 
-            # Adaptively adjust parameter limits for the next iteration
-            par_lim_sigt_0 = par_lim
-            par_lim_sigt_1 = par_lim
+            # Adjust parameter limits within a random number
+            par_lim_sigt_0 = random.uniform(0, 100)
+            par_lim_sigt_1 = random.uniform(0, 100)
 
         iteration += 1
             
@@ -739,7 +740,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigLT_status_message == "Fit Successful":
                 break
 
-            # Adaptively adjust parameter limits for the next iteration
+            # Adjust parameter limits within a random number
             par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, f_siglt_status_message == "Fit Successful")
             par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, f_siglt_status_message == "Fit Successful")
             par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_siglt_status_message == "Fit Successful")
@@ -747,10 +748,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         except TypeError:
             print("TypeError encountered. Adjusting parameter limits and retrying...")
 
-            # Adaptively adjust parameter limits for the next iteration
-            par_lim_siglt_0 = par_lim
-            par_lim_siglt_1 = par_lim
-            par_lim_siglt_2 = par_lim
+            # Adjust parameter limits within a random number
+            par_lim_siglt_0 = random.uniform(0, 100)
+            par_lim_siglt_1 = random.uniform(0, 100)
+            par_lim_siglt_2 = random.uniform(0, 100)
 
         iteration += 1
             
@@ -914,14 +915,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigTT_status_message == "Fit Successful":
                 break
 
-            # Adaptively adjust parameter limits for the next iteration
+            # Adjust parameter limits within a random number
             par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigtt_status_message == "Fit Successful")
 
         except TypeError:
             print("TypeError encountered. Adjusting parameter limits and retrying...")
 
-            # Adaptively adjust parameter limits for the next iteration
-            par_lim_sigtt_0 = par_lim
+            # Adjust parameter limits within a random number
+            par_lim_sigtt_0 = random.uniform(0, 100)
 
         iteration += 1
             
