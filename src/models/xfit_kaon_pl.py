@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 17:56:47 trottar"
+# Time-stamp: "2024-06-27 18:02:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,10 +54,10 @@ def fun_Sig_L(x, par):
         #f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
     except ValueError:
         f = 0.0
-        #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
+        print("WARNING: ValueError on sigL, setting to zero for this event...")
     except OverflowError:
         f = 0.0
-        #print("WARNING: Overflowerror on sigL, setting to zero for this event...")        
+        print("WARNING: OverflowError on sigL, setting to zero for this event...")        
     return f
 
 ###############################################################################################################################################
@@ -93,10 +93,10 @@ def fun_Sig_T(x, par):
         #f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
     except ValueError:
         f = 0.0
-        #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
+        print("WARNING: ValueError on sigT, setting to zero for this event...")
     except OverflowError:
         f = 0.0
-        #print("WARNING: Overflowerror on sigT, setting to zero for this event...")                
+        print("WARNING: OverflowError on sigT, setting to zero for this event...")                
     return f
 
 ###############################################################################################################################################
@@ -114,10 +114,10 @@ def fun_Sig_LT(x, par):
         #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
     except ValueError:
         f = 0.0
-        #print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
+        print("WARNING: ValueError on sigLT, setting to zero for this event...")
     except OverflowError:
         f = 0.0
-        #print("WARNING: Overflowerror on sigLT, setting to zero for this event...")                
+        print("WARNING: OverflowError on sigLT, setting to zero for this event...")                
     return f
 
 ###############################################################################################################################################
@@ -136,10 +136,10 @@ def fun_Sig_TT(x, par):
         #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
     except ValueError:
         f = 0.0
-        #print("WARNING: Overflowerror on sigTT, setting to zero for this event...")
+        print("WARNING: ValueError on sigTT, setting to zero for this event...")
     except OverflowError:
         f = 0.0
-        #print("WARNING: Overflowerror on sigTT, setting to zero for this event...")                
+        print("WARNING: OverflowError on sigTT, setting to zero for this event...")                
     return f
 
 ###############################################################################################################################################
