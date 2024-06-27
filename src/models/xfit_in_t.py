@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-26 23:34:36 trottar"
+# Time-stamp: "2024-06-27 14:14:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -566,8 +566,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
 
-        siglt_X_fit = g_siglt.GetY()[i] / (math.sin(th_vec[i] * PI / 180)) #* (g_vec[i]))
-        siglt_X_fit_err = g_siglt.GetEY()[i] / (math.sin(th_vec[i] * PI / 180)) #* (g_vec[i]))
+        siglt_X_fit = g_siglt.GetY()[i] #/ (math.sin(th_vec[i] * PI / 180)) #* (g_vec[i]))
+        siglt_X_fit_err = g_siglt.GetEY()[i] #/ (math.sin(th_vec[i] * PI / 180)) #* (g_vec[i]))
 
         g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
         g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
@@ -731,8 +731,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
-        sigtt_X_fit = g_sigtt.GetY()[i] / (math.sin(th_vec[i] * PI / 180)**2) #((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
-        sigtt_X_fit_err = g_sigtt.GetEY()[i] / (math.sin(th_vec[i] * PI / 180)**2)#((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
+        sigtt_X_fit = g_sigtt.GetY()[i] #/ (math.sin(th_vec[i] * PI / 180)**2) #((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
+        sigtt_X_fit_err = g_sigtt.GetEY()[i] #/ (math.sin(th_vec[i] * PI / 180)**2)#((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
 
         g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
         g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
