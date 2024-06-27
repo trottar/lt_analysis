@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 18:25:35 trottar"
+# Time-stamp: "2024-06-27 18:27:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,7 +350,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigl_fit_tot.SetLineColor(2)
             g_sigl_fit_tot.Draw("LP")
 
-            if f_sigL_status_message == "Fit Successful":
+            if f_sigL_status != 0:
                 break
 
             # Adjust parameter limits within a random number
@@ -533,7 +533,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_fit_tot.SetLineColor(2)
             g_sigt_fit_tot.Draw("LP")
 
-            if f_sigT_status_message == "Fit Successful":
+            if f_sigT_status != 0:
                 break
 
             # Adjust parameter limits within a random number
@@ -737,7 +737,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_fit_tot.SetLineColor(2)
             g_siglt_fit_tot.Draw("LP")
 
-            if f_sigLT_status_message == "Fit Successful":
+            if f_sigLT_status != 0:
                 break
 
             # Adjust parameter limits within a random number
@@ -912,7 +912,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit_tot.SetLineColor(2)
             g_sigtt_fit_tot.Draw("LP")
 
-            if f_sigTT_status_message == "Fit Successful":
+            if f_sigTT_status != 0:
                 break
 
             # Adjust parameter limits within a random number
