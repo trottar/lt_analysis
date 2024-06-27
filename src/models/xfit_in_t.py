@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 17:55:42 trottar"
+# Time-stamp: "2024-06-27 18:11:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -199,162 +199,173 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
 
-        ##############
-        # HARD CODED #
-        ##############
-        f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
-        f_sigL_pre.SetParNames("p1","p2","p3")
-        #f_sigL_pre.SetParameters(l0, l1, l2)
-        # Fixed unused parameters
-        #f_sigL_pre.FixParameter(0, 0)
-        #f_sigL_pre.FixParameter(1, 0)
-        #f_sigL_pre.FixParameter(2, 0)
-        # Set range limit of used parameters
-        if l0 != 0.0:
-            f_sigL_pre.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
-        else:
-            f_sigL_pre.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
-        if l1 != 0.0:
-            f_sigL_pre.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
-        else: 
-            f_sigL_pre.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
-        if l2 != 0.0:
-            f_sigL_pre.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
-        else: 
-            f_sigL_pre.SetParLimits(2, -par_lim_sigl_2, par_lim_sig_2)
-        # Fixing sigL terms for testing
-        #f_sigL_pre.FixParameter(0, l0)
-        #f_sigL_pre.FixParameter(1, l1)
-        #f_sigL_pre.FixParameter(2, l2)
-        # Fixing sigL terms to zero
-        #f_sigL_pre.FixParameter(0, 0.0)
-        #f_sigL_pre.FixParameter(1, 0.0)
-        #f_sigL_pre.FixParameter(2, 0.0)
-        if DEBUG:
-            f_sigL_pre.FixParameter(0, l0)
-            f_sigL_pre.FixParameter(1, l1)
-            f_sigL_pre.FixParameter(2, l2)
-        ##############
-        ##############
-        ##############
+        try:
+        
+            ##############
+            # HARD CODED #
+            ##############
+            f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+            f_sigL_pre.SetParNames("p1","p2","p3")
+            #f_sigL_pre.SetParameters(l0, l1, l2)
+            # Fixed unused parameters
+            #f_sigL_pre.FixParameter(0, 0)
+            #f_sigL_pre.FixParameter(1, 0)
+            #f_sigL_pre.FixParameter(2, 0)
+            # Set range limit of used parameters
+            if l0 != 0.0:
+                f_sigL_pre.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
+            else:
+                f_sigL_pre.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
+            if l1 != 0.0:
+                f_sigL_pre.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
+            else: 
+                f_sigL_pre.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
+            if l2 != 0.0:
+                f_sigL_pre.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
+            else: 
+                f_sigL_pre.SetParLimits(2, -par_lim_sigl_2, par_lim_sig_2)
+            # Fixing sigL terms for testing
+            #f_sigL_pre.FixParameter(0, l0)
+            #f_sigL_pre.FixParameter(1, l1)
+            #f_sigL_pre.FixParameter(2, l2)
+            # Fixing sigL terms to zero
+            #f_sigL_pre.FixParameter(0, 0.0)
+            #f_sigL_pre.FixParameter(1, 0.0)
+            #f_sigL_pre.FixParameter(2, 0.0)
+            if DEBUG:
+                f_sigL_pre.FixParameter(0, l0)
+                f_sigL_pre.FixParameter(1, l1)
+                f_sigL_pre.FixParameter(2, l2)
+            ##############
+            ##############
+            ##############
 
-        #g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
-        g_sigl = TGraphErrors()
-        for i in range(nsep.GetSelectedRows()):
-            g_sigl.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-            g_sigl.SetPointError(i, 0, nsep.GetV3()[i])
+            #g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
+            g_sigl = TGraphErrors()
+            for i in range(nsep.GetSelectedRows()):
+                g_sigl.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                g_sigl.SetPointError(i, 0, nsep.GetV3()[i])
 
-        for i in range(len(w_vec)):
+            for i in range(len(w_vec)):
 
-            sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i])) * (g_vec[i])
-            g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
+                sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i])) * (g_vec[i])
+                g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
-            sigl_X_fit = g_sigl.GetY()[i] #/ (g_vec[i])
-            sigl_X_fit_err = g_sigl.GetEY()[i] #/ (g_vec[i])
+                sigl_X_fit = g_sigl.GetY()[i] #/ (g_vec[i])
+                sigl_X_fit_err = g_sigl.GetEY()[i] #/ (g_vec[i])
 
-            g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
-            g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
+                g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
+                g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
-        g_sigl.SetTitle("Sig L")
+            g_sigl.SetTitle("Sig L")
 
-        g_sigl.SetMarkerStyle(5)
-        g_sigl.Draw("AP")
+            g_sigl.SetMarkerStyle(5)
+            g_sigl.Draw("AP")
 
-        g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_sigl.GetXaxis().CenterTitle()
-        g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
-        g_sigl.GetYaxis().SetTitleOffset(1.5)
-        g_sigl.GetYaxis().SetTitleSize(0.035)
-        g_sigl.GetYaxis().CenterTitle()
+            g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_sigl.GetXaxis().CenterTitle()
+            g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+            g_sigl.GetYaxis().SetTitleOffset(1.5)
+            g_sigl.GetYaxis().SetTitleSize(0.035)
+            g_sigl.GetYaxis().CenterTitle()
 
-        g_sigl_prv.SetMarkerColor(4)
-        g_sigl_prv.SetMarkerStyle(25)
-        g_sigl_prv.Draw("P")
+            g_sigl_prv.SetMarkerColor(4)
+            g_sigl_prv.SetMarkerStyle(25)
+            g_sigl_prv.Draw("P")
 
-        c2.cd(1).SetLeftMargin(0.12)
-        g_sigl_fit.SetTitle("Sigma L Model Fit")
-        g_sigl_fit.Draw("A*")
+            c2.cd(1).SetLeftMargin(0.12)
+            g_sigl_fit.SetTitle("Sigma L Model Fit")
+            g_sigl_fit.Draw("A*")
 
-        g_sigl_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_sigl_fit.GetXaxis().CenterTitle()
-        g_sigl_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
-        g_sigl_fit.GetYaxis().SetTitleOffset(1.5)
-        g_sigl_fit.GetYaxis().SetTitleSize(0.035)
-        g_sigl_fit.GetYaxis().CenterTitle()
+            g_sigl_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_sigl_fit.GetXaxis().CenterTitle()
+            g_sigl_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+            g_sigl_fit.GetYaxis().SetTitleOffset(1.5)
+            g_sigl_fit.GetYaxis().SetTitleSize(0.035)
+            g_sigl_fit.GetYaxis().CenterTitle()
 
-        ##############
-        # HARD CODED #
-        ##############
-        # Fixed unused parameters
-        f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
-        f_sigL.SetParNames("p1","p2","p3")
-        #f_sigL.SetParameters(l0, l1, l2)        
-        #f_sigL.FixParameter(0, 0)
-        #f_sigL.FixParameter(1, 0)
-        #f_sigL.FixParameter(2, 0)
-        # Set range limit of used parameters
-        if l0 != 0.0:
-            f_sigL.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
-        else: 
-            f_sigL.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
-        if l1 != 0.0:
-            f_sigL.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
-        else: 
-            f_sigL.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
-        if l2 != 0.0:
-            f_sigL.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
-        else: 
-            f_sigL.SetParLimits(2, -par_lim_sigl_2, par_lim_sigl_2)
-        # Fixing sigL terms for testing
-        #f_sigL.FixParameter(0, l0)
-        #f_sigL.FixParameter(1, l1)
-        #f_sigL.FixParameter(2, l2)
-        # Fixing sigL terms to zero
-        #f_sigL.FixParameter(0, 0.0)
-        #f_sigL.FixParameter(1, 0.0)
-        #f_sigL.FixParameter(2, 0.0)
-        if DEBUG:
-            f_sigL.FixParameter(0, l0)
-            f_sigL.FixParameter(1, l1)
-            f_sigL.FixParameter(2, l2)
-        ##############
-        ##############
-        ##############    
+            ##############
+            # HARD CODED #
+            ##############
+            # Fixed unused parameters
+            f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+            f_sigL.SetParNames("p1","p2","p3")
+            #f_sigL.SetParameters(l0, l1, l2)        
+            #f_sigL.FixParameter(0, 0)
+            #f_sigL.FixParameter(1, 0)
+            #f_sigL.FixParameter(2, 0)
+            # Set range limit of used parameters
+            if l0 != 0.0:
+                f_sigL.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
+            else: 
+                f_sigL.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
+            if l1 != 0.0:
+                f_sigL.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
+            else: 
+                f_sigL.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
+            if l2 != 0.0:
+                f_sigL.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
+            else: 
+                f_sigL.SetParLimits(2, -par_lim_sigl_2, par_lim_sigl_2)
+            # Fixing sigL terms for testing
+            #f_sigL.FixParameter(0, l0)
+            #f_sigL.FixParameter(1, l1)
+            #f_sigL.FixParameter(2, l2)
+            # Fixing sigL terms to zero
+            #f_sigL.FixParameter(0, 0.0)
+            #f_sigL.FixParameter(1, 0.0)
+            #f_sigL.FixParameter(2, 0.0)
+            if DEBUG:
+                f_sigL.FixParameter(0, l0)
+                f_sigL.FixParameter(1, l1)
+                f_sigL.FixParameter(2, l2)
+            ##############
+            ##############
+            ##############    
 
-        g_q2_sigl_fit = TGraphErrors()
-        for i in range(len(w_vec)):
-            g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
-            g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
-            sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
-            g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
-        # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-        g_sigl_fit.Fit(f_sigL, "SM")
+            g_q2_sigl_fit = TGraphErrors()
+            for i in range(len(w_vec)):
+                g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
+                g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
+                sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
+                g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
+            # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+            g_sigl_fit.Fit(f_sigL, "SM")
 
-        f_sigL.Draw("same")
+            f_sigL.Draw("same")
 
-        # Check the fit status for 'f_sigL'
-        f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
-        f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
+            # Check the fit status for 'f_sigL'
+            f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            f_sigL_status_message = "Not Fitted" if f_sigL_status == 0 else "Fit Successful"
 
-        fit_status = TText()
-        fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
+            fit_status = TText()
+            fit_status.SetTextSize(0.04)
+            fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
 
-        c1.cd(1)
+            c1.cd(1)
 
-        g_sigl_fit_tot.SetMarkerStyle(26)
-        g_sigl_fit_tot.SetMarkerColor(2)
-        g_sigl_fit_tot.SetLineColor(2)
-        g_sigl_fit_tot.Draw("LP")
+            g_sigl_fit_tot.SetMarkerStyle(26)
+            g_sigl_fit_tot.SetMarkerColor(2)
+            g_sigl_fit_tot.SetLineColor(2)
+            g_sigl_fit_tot.Draw("LP")
 
-        if f_sigL_status_message == "Fit Successful":
-            break
+            if f_sigL_status_message == "Fit Successful":
+                break
 
-        # Adaptively adjust parameter limits for the next iteration
-        par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
-        par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
-        par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
-        iteration += 1
+            # Adaptively adjust parameter limits for the next iteration
+            par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
+            par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
+            par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
+
+        except OverflowError:
+            print("OverflowError encountered. Adjusting parameter limits and retrying...")
+
+            # Adaptively adjust parameter limits for the next iteration
+            par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, False, factor=1.5)
+            par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, False, factor=1.5)
+            par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, False, factor=1.5)
+
+        iteration += 1            
 
     par_vec.append(f_sigL.GetParameter(0))
     par_vec.append(f_sigL.GetParameter(1))
@@ -387,146 +398,156 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         c1.cd(2).SetLeftMargin(0.12)
         nsep.Draw("sigt:t:sigt_e", "", "goff")
 
-        ##############
-        # HARD CODED #
-        ##############
-        f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
-        f_sigT_pre.SetParNames("p5","p6")
-        #f_sigT_pre.SetParameters(t0, t1)        
-        # Fixed unused parameters
-        #f_sigT_pre.FixParameter(0, 0)
-        #f_sigT_pre.FixParameter(1, 0)
-        # Set range limit of used parameters
-        if t0 != 0.0:
-            f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
-        else: 
-            f_sigT_pre.SetParLimits(0, -par_lim_sigt_0, par_lim_sigt_0)
-        if t1 != 0.0:
-            f_sigT_pre.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
-        else: 
-            f_sigT_pre.SetParLimits(1, -par_lim_sigt_1, par_lim_sigt_1)
-        # Fixing sigT terms for testing
-        #f_sigT_pre.FixParameter(0, t0)
-        #f_sigT_pre.FixParameter(1, t1)
-        # Fixing sigT terms to zero
-        #f_sigT_pre.FixParameter(0, 0.0)
-        #f_sigT_pre.FixParameter(1, 0.0)
-        if DEBUG:
-            f_sigT_pre.FixParameter(0, t0)
-            f_sigT_pre.FixParameter(1, t1)
-        ##############
-        ##############
-        ##############    
+        try:
 
-        #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
-        g_sigt = TGraphErrors()
-        for i in range(nsep.GetSelectedRows()):
-            g_sigt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-            g_sigt.SetPointError(i, 0, nsep.GetV3()[i])
+            ##############
+            # HARD CODED #
+            ##############
+            f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+            f_sigT_pre.SetParNames("p5","p6")
+            #f_sigT_pre.SetParameters(t0, t1)        
+            # Fixed unused parameters
+            #f_sigT_pre.FixParameter(0, 0)
+            #f_sigT_pre.FixParameter(1, 0)
+            # Set range limit of used parameters
+            if t0 != 0.0:
+                f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
+            else: 
+                f_sigT_pre.SetParLimits(0, -par_lim_sigt_0, par_lim_sigt_0)
+            if t1 != 0.0:
+                f_sigT_pre.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
+            else: 
+                f_sigT_pre.SetParLimits(1, -par_lim_sigt_1, par_lim_sigt_1)
+            # Fixing sigT terms for testing
+            #f_sigT_pre.FixParameter(0, t0)
+            #f_sigT_pre.FixParameter(1, t1)
+            # Fixing sigT terms to zero
+            #f_sigT_pre.FixParameter(0, 0.0)
+            #f_sigT_pre.FixParameter(1, 0.0)
+            if DEBUG:
+                f_sigT_pre.FixParameter(0, t0)
+                f_sigT_pre.FixParameter(1, t1)
+            ##############
+            ##############
+            ##############    
 
-        for i in range(len(w_vec)):
+            #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
+            g_sigt = TGraphErrors()
+            for i in range(nsep.GetSelectedRows()):
+                g_sigt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                g_sigt.SetPointError(i, 0, nsep.GetV3()[i])
 
-            sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i])) * (g_vec[i])
-            g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
+            for i in range(len(w_vec)):
 
-            sigt_X_fit = (g_sigt.GetY()[i]) #/ (g_vec[i])
-            sigt_X_fit_err = g_sigt.GetEY()[i] #/ (g_vec[i])
+                sigt_X_pre = (f_sigT_pre.Eval(g_sigt.GetX()[i])) * (g_vec[i])
+                g_sigt_prv.SetPoint(i, g_sigt.GetX()[i], sigt_X_pre)
 
-            g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
-            g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
+                sigt_X_fit = (g_sigt.GetY()[i]) #/ (g_vec[i])
+                sigt_X_fit_err = g_sigt.GetEY()[i] #/ (g_vec[i])
 
-        g_sigt.SetTitle("Sig T")
+                g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
+                g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-        g_sigt.SetMarkerStyle(5)
-        g_sigt.Draw("AP")
+            g_sigt.SetTitle("Sig T")
 
-        g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_sigt.GetXaxis().CenterTitle()
-        g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [nb/GeV^{2}]")
-        g_sigt.GetYaxis().SetTitleOffset(1.5)
-        g_sigt.GetYaxis().SetTitleSize(0.035)
-        g_sigt.GetYaxis().CenterTitle()
+            g_sigt.SetMarkerStyle(5)
+            g_sigt.Draw("AP")
 
-        g_sigt_prv.SetMarkerColor(4)
-        g_sigt_prv.SetMarkerStyle(25)
-        g_sigt_prv.Draw("P")
+            g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_sigt.GetXaxis().CenterTitle()
+            g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [nb/GeV^{2}]")
+            g_sigt.GetYaxis().SetTitleOffset(1.5)
+            g_sigt.GetYaxis().SetTitleSize(0.035)
+            g_sigt.GetYaxis().CenterTitle()
 
-        c2.cd(2).SetLeftMargin(0.12)
-        g_sigt_fit.SetTitle("Sigma T Model Fit")
-        g_sigt_fit.Draw("A*")
+            g_sigt_prv.SetMarkerColor(4)
+            g_sigt_prv.SetMarkerStyle(25)
+            g_sigt_prv.Draw("P")
 
-        g_sigt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_sigt_fit.GetXaxis().CenterTitle()
-        g_sigt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
-        g_sigt_fit.GetYaxis().SetTitleOffset(1.5)
-        g_sigt_fit.GetYaxis().SetTitleSize(0.035)
-        g_sigt_fit.GetYaxis().CenterTitle()    
+            c2.cd(2).SetLeftMargin(0.12)
+            g_sigt_fit.SetTitle("Sigma T Model Fit")
+            g_sigt_fit.Draw("A*")
 
-        ##############
-        # HARD CODED #
-        ##############
-        f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
-        f_sigT.SetParNames("p5","p6")
-        #f_sigT.SetParameters(t0, t1)    
-        # Fixed unused parameters
-        #f_sigT.FixParameter(0, 0)
-        #f_sigT.FixParameter(1, 0)
-        # Set range limit of used parameters
-        if t0 != 0.0:
-            f_sigT.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
-        else: 
-            f_sigT.SetParLimits(0, -par_lim_sigt_0, par_lim_sigt_0)
-        if t1 != 0.0:
-            f_sigT.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
-        else: 
-            f_sigT.SetParLimits(1, -par_lim_sigt_1, par_lim_sigt_1)
-        # Fixing sigT terms for testing
-        #f_sigT.FixParameter(0, t0)
-        #f_sigT.FixParameter(1, t1)
-        # Fixing sigT terms to zero
-        #f_sigT.FixParameter(0, 0.0)
-        #f_sigT.FixParameter(1, 0.0)  
-        if DEBUG:
-            f_sigT.FixParameter(0, t0)
-            f_sigT.FixParameter(1, t1)
-        ##############
-        ##############
-        ##############    
+            g_sigt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_sigt_fit.GetXaxis().CenterTitle()
+            g_sigt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
+            g_sigt_fit.GetYaxis().SetTitleOffset(1.5)
+            g_sigt_fit.GetYaxis().SetTitleSize(0.035)
+            g_sigt_fit.GetYaxis().CenterTitle()    
 
-        g_q2_sigt_fit = TGraphErrors()
-        for i in range(len(w_vec)):
-            g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
-            g_q2_sigt_fit.SetPointError(i, 0.0, sigt_X_fit_err)
-            sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
-            g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
-        # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-        g_sigt_fit.Fit(f_sigT, "SM")
+            ##############
+            # HARD CODED #
+            ##############
+            f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+            f_sigT.SetParNames("p5","p6")
+            #f_sigT.SetParameters(t0, t1)    
+            # Fixed unused parameters
+            #f_sigT.FixParameter(0, 0)
+            #f_sigT.FixParameter(1, 0)
+            # Set range limit of used parameters
+            if t0 != 0.0:
+                f_sigT.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
+            else: 
+                f_sigT.SetParLimits(0, -par_lim_sigt_0, par_lim_sigt_0)
+            if t1 != 0.0:
+                f_sigT.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
+            else: 
+                f_sigT.SetParLimits(1, -par_lim_sigt_1, par_lim_sigt_1)
+            # Fixing sigT terms for testing
+            #f_sigT.FixParameter(0, t0)
+            #f_sigT.FixParameter(1, t1)
+            # Fixing sigT terms to zero
+            #f_sigT.FixParameter(0, 0.0)
+            #f_sigT.FixParameter(1, 0.0)  
+            if DEBUG:
+                f_sigT.FixParameter(0, t0)
+                f_sigT.FixParameter(1, t1)
+            ##############
+            ##############
+            ##############    
 
-        # Check the fit status for 'f_sigT'
-        f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-        f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
+            g_q2_sigt_fit = TGraphErrors()
+            for i in range(len(w_vec)):
+                g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
+                g_q2_sigt_fit.SetPointError(i, 0.0, sigt_X_fit_err)
+                sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
+                g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
+            # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+            g_sigt_fit.Fit(f_sigT, "SM")
 
-        f_sigT.Draw("same")
+            # Check the fit status for 'f_sigT'
+            f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            f_sigT_status_message = "Not Fitted" if f_sigT_status == 0 else "Fit Successful"
 
-        fit_status = TText()
-        fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigT_status_message))
+            f_sigT.Draw("same")
 
-        c1.cd(2)
+            fit_status = TText()
+            fit_status.SetTextSize(0.04)
+            fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigT_status_message))
 
-        g_sigt_fit_tot.SetMarkerStyle(26)
-        g_sigt_fit_tot.SetMarkerColor(2)
-        g_sigt_fit_tot.SetLineColor(2)
-        g_sigt_fit_tot.Draw("LP")
+            c1.cd(2)
 
-        if f_sigT_status_message == "Fit Successful":
-            break
+            g_sigt_fit_tot.SetMarkerStyle(26)
+            g_sigt_fit_tot.SetMarkerColor(2)
+            g_sigt_fit_tot.SetLineColor(2)
+            g_sigt_fit_tot.Draw("LP")
 
-        # Adaptively adjust parameter limits for the next iteration
-        par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
-        par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigT_status_message == "Fit Successful")
+            if f_sigT_status_message == "Fit Successful":
+                break
+
+            # Adaptively adjust parameter limits for the next iteration
+            par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigt_status_message == "Fit Successful")
+            par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigt_status_message == "Fit Successful")
+
+        except OverflowError:
+            print("OverflowError encountered. Adjusting parameter limits and retrying...")
+
+            # Adaptively adjust parameter limits for the next iteration
+            par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, False, factor=1.5)
+            par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, False, factor=1.5)
+
         iteration += 1
-
+            
     par_vec.append(f_sigT.GetParameter(0))
     par_vec.append(f_sigT.GetParameter(1))
     par_vec.append(f_sigT.GetParameter(2))
@@ -559,169 +580,180 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         c1.cd(3).SetLeftMargin(0.12)
         nsep.Draw("siglt:t:siglt_e", "", "goff")
 
-        ##############
-        # HARD CODED #
-        ##############
-        f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
-        f_sigLT_pre.SetParNames("p9","p10","p11")
-        #lt0, lt1, lt2 = 0.0, 0.0, 0.0
-        #f_sigLT_pre.SetParameters(lt0, lt1, lt2)        
-        # Fixed unused parameters
-        #f_sigLT_pre.FixParameter(0, 0)
-        #f_sigLT_pre.FixParameter(1, 0)
-        #f_sigLT_pre.FixParameter(2, 0)
-        ##f_sigLT_pre.FixParameter(3, 0)
-        # Set range limit of used parameters
-        if lt0 != 0.0:
-            f_sigLT_pre.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
-        else: 
-            f_sigLT_pre.SetParLimits(0, -par_lim_siglt_0, par_lim_siglt_0)
-        if lt1 != 0.0:
-            f_sigLT_pre.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
-        else: 
-            f_sigLT_pre.SetParLimits(1, -par_lim_siglt_1, par_lim_siglt_1)
-        if lt2 != 0.0:
-            f_sigLT_pre.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
-        else: 
-            f_sigLT_pre.SetParLimits(2, -par_lim_siglt_2, par_lim_siglt_2)
-        #f_sigLT_pre.SetParLimits(3, lt3-abs(lt3*par_lim_siglt_LTTT), lt3+abs(lt3*par_lim_siglt_LTTT))        
-        # Fixing sigLT terms for testing
-        #f_sigLT_pre.FixParameter(0, lt0)
-        #f_sigLT_pre.FixParameter(1, lt1)
-        #f_sigLT_pre.FixParameter(2, lt2)
-        # Fixing sigLT terms to zero
-        f_sigLT_pre.FixParameter(0, 0.0)
-        f_sigLT_pre.FixParameter(1, 0.0)
-        f_sigLT_pre.FixParameter(2, 0.0)
-        if DEBUG:
-            f_sigLT_pre.FixParameter(0, lt0)
-            f_sigLT_pre.FixParameter(1, lt1)
-            f_sigLT_pre.FixParameter(2, lt2)
-        ##############
-        ##############
-        ##############    
+        try:
 
-        #g_siglt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), ROOT.nullptr, nsep.GetV3())
-        g_siglt = TGraphErrors()
-        for i in range(nsep.GetSelectedRows()):
-            g_siglt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-            g_siglt.SetPointError(i, 0, nsep.GetV3()[i])
+            ##############
+            # HARD CODED #
+            ##############
+            f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+            f_sigLT_pre.SetParNames("p9","p10","p11")
+            #lt0, lt1, lt2 = 0.0, 0.0, 0.0
+            #f_sigLT_pre.SetParameters(lt0, lt1, lt2)        
+            # Fixed unused parameters
+            #f_sigLT_pre.FixParameter(0, 0)
+            #f_sigLT_pre.FixParameter(1, 0)
+            #f_sigLT_pre.FixParameter(2, 0)
+            ##f_sigLT_pre.FixParameter(3, 0)
+            # Set range limit of used parameters
+            if lt0 != 0.0:
+                f_sigLT_pre.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
+            else: 
+                f_sigLT_pre.SetParLimits(0, -par_lim_siglt_0, par_lim_siglt_0)
+            if lt1 != 0.0:
+                f_sigLT_pre.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
+            else: 
+                f_sigLT_pre.SetParLimits(1, -par_lim_siglt_1, par_lim_siglt_1)
+            if lt2 != 0.0:
+                f_sigLT_pre.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
+            else: 
+                f_sigLT_pre.SetParLimits(2, -par_lim_siglt_2, par_lim_siglt_2)
+            #f_sigLT_pre.SetParLimits(3, lt3-abs(lt3*par_lim_siglt_LTTT), lt3+abs(lt3*par_lim_siglt_LTTT))        
+            # Fixing sigLT terms for testing
+            #f_sigLT_pre.FixParameter(0, lt0)
+            #f_sigLT_pre.FixParameter(1, lt1)
+            #f_sigLT_pre.FixParameter(2, lt2)
+            # Fixing sigLT terms to zero
+            f_sigLT_pre.FixParameter(0, 0.0)
+            f_sigLT_pre.FixParameter(1, 0.0)
+            f_sigLT_pre.FixParameter(2, 0.0)
+            if DEBUG:
+                f_sigLT_pre.FixParameter(0, lt0)
+                f_sigLT_pre.FixParameter(1, lt1)
+                f_sigLT_pre.FixParameter(2, lt2)
+            ##############
+            ##############
+            ##############    
 
-        for i in range(len(w_vec)):
+            #g_siglt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), ROOT.nullptr, nsep.GetV3())
+            g_siglt = TGraphErrors()
+            for i in range(nsep.GetSelectedRows()):
+                g_siglt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                g_siglt.SetPointError(i, 0, nsep.GetV3()[i])
 
-            siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
-            g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
+            for i in range(len(w_vec)):
 
-            siglt_X_fit = g_siglt.GetY()[i] #/ (math.sin(th_vec[i] * PI / 180)) #* (g_vec[i]))
-            siglt_X_fit_err = g_siglt.GetEY()[i] #/ (math.sin(th_vec[i] * PI / 180)) #* (g_vec[i]))
+                siglt_X_pre = (f_sigLT_pre.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
+                g_siglt_prv.SetPoint(i, g_sigl.GetX()[i], siglt_X_pre)
 
-            g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
-            g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
+                siglt_X_fit = g_siglt.GetY()[i] #/ (math.sin(th_vec[i] * PI / 180)) #* (g_vec[i]))
+                siglt_X_fit_err = g_siglt.GetEY()[i] #/ (math.sin(th_vec[i] * PI / 180)) #* (g_vec[i]))
 
-        g_siglt.SetTitle("Sig LT")
+                g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
+                g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
-        g_siglt.SetMarkerStyle(5)
-        g_siglt.Draw("AP")
+            g_siglt.SetTitle("Sig LT")
 
-        g_siglt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_siglt.GetXaxis().CenterTitle()
-        g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
-        g_siglt.GetYaxis().SetTitleOffset(1.5)
-        g_siglt.GetYaxis().SetTitleSize(0.035)
-        g_siglt.GetYaxis().CenterTitle()
+            g_siglt.SetMarkerStyle(5)
+            g_siglt.Draw("AP")
 
-        g_siglt_prv.SetMarkerColor(4)
-        g_siglt_prv.SetMarkerStyle(25)
-        g_siglt_prv.Draw("P")
+            g_siglt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_siglt.GetXaxis().CenterTitle()
+            g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
+            g_siglt.GetYaxis().SetTitleOffset(1.5)
+            g_siglt.GetYaxis().SetTitleSize(0.035)
+            g_siglt.GetYaxis().CenterTitle()
 
-        c2.cd(3).SetLeftMargin(0.12)
-        g_siglt_fit.SetTitle("Sigma LT Model Fit")
-        g_siglt_fit.Draw("A*")
+            g_siglt_prv.SetMarkerColor(4)
+            g_siglt_prv.SetMarkerStyle(25)
+            g_siglt_prv.Draw("P")
 
-        g_siglt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_siglt_fit.GetXaxis().CenterTitle()
-        g_siglt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
-        g_siglt_fit.GetYaxis().SetTitleOffset(1.5)
-        g_siglt_fit.GetYaxis().SetTitleSize(0.035)
-        g_siglt_fit.GetYaxis().CenterTitle()
+            c2.cd(3).SetLeftMargin(0.12)
+            g_siglt_fit.SetTitle("Sigma LT Model Fit")
+            g_siglt_fit.Draw("A*")
 
-        ##############
-        # HARD CODED #
-        ##############
-        f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
-        f_sigLT.SetParNames("p9","p10","p11")
-        #lt0, lt1, lt2 = 0.0, 0.0, 0.0
-        #f_sigLT.SetParameters(lt0, lt1, lt2)    
-        # Fixed unused parameters
-        #f_sigLT.FixParameter(0, 0)
-        #f_sigLT.FixParameter(1, 0)
-        #f_sigLT.FixParameter(2, 0)
-        ##f_sigLT.FixParameter(3, 0)
-        # Set range limit of used parameters
-        if lt0 != 0.0:
-            f_sigLT.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
-        else: 
-            f_sigLT.SetParLimits(0, -par_lim_siglt_0, par_lim_siglt_0)
-        if lt1 != 0.0:
-            f_sigLT.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
-        else: 
-            f_sigLT.SetParLimits(1, -par_lim_siglt_1, par_lim_siglt_1)
-        if lt2 != 0.0:
-            f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
-        else: 
-            f_sigLT.SetParLimits(2, -par_lim_siglt_2, par_lim_siglt_2)
-        #f_sigLT.SetParLimits(3, lt3-abs(lt3*par_lim_siglt_LTTT), lt3+abs(lt3*par_lim_siglt_LTTT))
-        # Fixing sigLT terms for testing
-        #f_sigLT.FixParameter(0, lt0)
-        #f_sigLT.FixParameter(1, lt1)
-        #f_sigLT.FixParameter(2, lt2)
-        # Fixing sigLT terms to zero
-        f_sigLT.FixParameter(0, 0.0)
-        f_sigLT.FixParameter(1, 0.0)
-        f_sigLT.FixParameter(2, 0.0)
-        if DEBUG:
-            f_sigLT.FixParameter(0, lt0)
-            f_sigLT.FixParameter(1, lt1)
-            f_sigLT.FixParameter(2, lt2)
-        ##############
-        ##############
-        ##############    
+            g_siglt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_siglt_fit.GetXaxis().CenterTitle()
+            g_siglt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
+            g_siglt_fit.GetYaxis().SetTitleOffset(1.5)
+            g_siglt_fit.GetYaxis().SetTitleSize(0.035)
+            g_siglt_fit.GetYaxis().CenterTitle()
 
-        g_q2_siglt_fit = TGraphErrors()
-        for i in range(len(w_vec)):
-            g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
-            g_q2_siglt_fit.SetPointError(i, 0.0, siglt_X_fit_err)
-            siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
-            g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
-        # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-        g_siglt_fit.Fit(f_sigLT, "SM")
+            ##############
+            # HARD CODED #
+            ##############
+            f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+            f_sigLT.SetParNames("p9","p10","p11")
+            #lt0, lt1, lt2 = 0.0, 0.0, 0.0
+            #f_sigLT.SetParameters(lt0, lt1, lt2)    
+            # Fixed unused parameters
+            #f_sigLT.FixParameter(0, 0)
+            #f_sigLT.FixParameter(1, 0)
+            #f_sigLT.FixParameter(2, 0)
+            ##f_sigLT.FixParameter(3, 0)
+            # Set range limit of used parameters
+            if lt0 != 0.0:
+                f_sigLT.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
+            else: 
+                f_sigLT.SetParLimits(0, -par_lim_siglt_0, par_lim_siglt_0)
+            if lt1 != 0.0:
+                f_sigLT.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
+            else: 
+                f_sigLT.SetParLimits(1, -par_lim_siglt_1, par_lim_siglt_1)
+            if lt2 != 0.0:
+                f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
+            else: 
+                f_sigLT.SetParLimits(2, -par_lim_siglt_2, par_lim_siglt_2)
+            #f_sigLT.SetParLimits(3, lt3-abs(lt3*par_lim_siglt_LTTT), lt3+abs(lt3*par_lim_siglt_LTTT))
+            # Fixing sigLT terms for testing
+            #f_sigLT.FixParameter(0, lt0)
+            #f_sigLT.FixParameter(1, lt1)
+            #f_sigLT.FixParameter(2, lt2)
+            # Fixing sigLT terms to zero
+            f_sigLT.FixParameter(0, 0.0)
+            f_sigLT.FixParameter(1, 0.0)
+            f_sigLT.FixParameter(2, 0.0)
+            if DEBUG:
+                f_sigLT.FixParameter(0, lt0)
+                f_sigLT.FixParameter(1, lt1)
+                f_sigLT.FixParameter(2, lt2)
+            ##############
+            ##############
+            ##############    
 
-        # Check the fit status for 'f_sigLT'
-        f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-        f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
+            g_q2_siglt_fit = TGraphErrors()
+            for i in range(len(w_vec)):
+                g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
+                g_q2_siglt_fit.SetPointError(i, 0.0, siglt_X_fit_err)
+                siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
+                g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
+            # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+            g_siglt_fit.Fit(f_sigLT, "SM")
 
-        f_sigLT.Draw("same")
+            # Check the fit status for 'f_sigLT'
+            f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            f_sigLT_status_message = "Not Fitted" if f_sigLT_status == 0 else "Fit Successful"
 
-        fit_status = TText()
-        fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigLT_status_message))
+            f_sigLT.Draw("same")
 
-        c1.cd(3)
+            fit_status = TText()
+            fit_status.SetTextSize(0.04)
+            fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigLT_status_message))
 
-        g_siglt_fit_tot.SetMarkerStyle(26)
-        g_siglt_fit_tot.SetMarkerColor(2)
-        g_siglt_fit_tot.SetLineColor(2)
-        g_siglt_fit_tot.Draw("LP")
+            c1.cd(3)
 
-        if f_sigLT_status_message == "Fit Successful":
-            break
+            g_siglt_fit_tot.SetMarkerStyle(26)
+            g_siglt_fit_tot.SetMarkerColor(2)
+            g_siglt_fit_tot.SetLineColor(2)
+            g_siglt_fit_tot.Draw("LP")
 
-        # Adaptively adjust parameter limits for the next iteration
-        par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, f_sigLT_status_message == "Fit Successful")
-        par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, f_sigLT_status_message == "Fit Successful")
-        par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_sigLT_status_message == "Fit Successful")
+            if f_sigLT_status_message == "Fit Successful":
+                break
+
+            # Adaptively adjust parameter limits for the next iteration
+            par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, f_siglt_status_message == "Fit Successful")
+            par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, f_siglt_status_message == "Fit Successful")
+            par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_siglt_status_message == "Fit Successful")
+
+        except OverflowError:
+            print("OverflowError encountered. Adjusting parameter limits and retrying...")
+
+            # Adaptively adjust parameter limits for the next iteration
+            par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, False, factor=1.5)
+            par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, False, factor=1.5)
+            par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, False, factor=1.5)
+
         iteration += 1
-
+            
     par_vec.append(f_sigLT.GetParameter(0))
     par_vec.append(f_sigLT.GetParameter(1))
     par_vec.append(f_sigLT.GetParameter(2))
@@ -752,138 +784,147 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
-        ##############
-        # HARD CODED #
-        ##############
-        f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
-        f_sigTT_pre.SetParNames("p13")
-        #tt0 = 0.0
-        #f_sigTT_pre.SetParameters(tt0, 0.0)
-        # Fixed unused parameters
-        #f_sigTT_pre.FixParameter(0, 0)
-        ##f_sigTT_pre.FixParameter(1, 0)
-        ##f_sigTT_pre.FixParameter(2, 0)
-        ##f_sigTT_pre.FixParameter(3, 0)
-        # Set range limit of used parameters
-        if tt0 != 0.0:
-            f_sigTT_pre.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
-        else: 
-            f_sigTT_pre.SetParLimits(0, -par_lim_sigtt_0, par_lim_sigtt_0)
-        # Fixing sigTT terms for testing
-        #f_sigTT_pre.FixParameter(0, tt0)
-        # Fixing sigTT terms to zero
-        f_sigTT_pre.FixParameter(0, 0.0)
-        if DEBUG:
-            f_sigTT_pre.FixParameter(0, tt0)
-        ##############
-        ##############
-        ##############    
+        try:
 
-        #g_sigtt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0]*nsep.GetSelectedRows(), nsep.GetV3())
-        g_sigtt = TGraphErrors()
-        for i in range(nsep.GetSelectedRows()):
-            g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-            g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
+            ##############
+            # HARD CODED #
+            ##############
+            f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+            f_sigTT_pre.SetParNames("p13")
+            #tt0 = 0.0
+            #f_sigTT_pre.SetParameters(tt0, 0.0)
+            # Fixed unused parameters
+            #f_sigTT_pre.FixParameter(0, 0)
+            ##f_sigTT_pre.FixParameter(1, 0)
+            ##f_sigTT_pre.FixParameter(2, 0)
+            ##f_sigTT_pre.FixParameter(3, 0)
+            # Set range limit of used parameters
+            if tt0 != 0.0:
+                f_sigTT_pre.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
+            else: 
+                f_sigTT_pre.SetParLimits(0, -par_lim_sigtt_0, par_lim_sigtt_0)
+            # Fixing sigTT terms for testing
+            #f_sigTT_pre.FixParameter(0, tt0)
+            # Fixing sigTT terms to zero
+            f_sigTT_pre.FixParameter(0, 0.0)
+            if DEBUG:
+                f_sigTT_pre.FixParameter(0, tt0)
+            ##############
+            ##############
+            ##############    
 
-        for i in range(len(w_vec)):
+            #g_sigtt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0]*nsep.GetSelectedRows(), nsep.GetV3())
+            g_sigtt = TGraphErrors()
+            for i in range(nsep.GetSelectedRows()):
+                g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
 
-            sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+            for i in range(len(w_vec)):
 
-            g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
+                sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
 
-            sigtt_X_fit = g_sigtt.GetY()[i] #/ (math.sin(th_vec[i] * PI / 180)**2) #((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
-            sigtt_X_fit_err = g_sigtt.GetEY()[i] #/ (math.sin(th_vec[i] * PI / 180)**2)#((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
+                g_sigtt_prv.SetPoint(i, nsep.GetV2()[i], sigtt_X_pre)
 
-            g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
-            g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
+                sigtt_X_fit = g_sigtt.GetY()[i] #/ (math.sin(th_vec[i] * PI / 180)**2) #((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
+                sigtt_X_fit_err = g_sigtt.GetEY()[i] #/ (math.sin(th_vec[i] * PI / 180)**2)#((g_vec[i]) * math.sin(th_vec[i] * PI / 180)**2)
 
-        g_sigtt.SetTitle("Sig TT")
+                g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+                g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
-        g_sigtt.SetMarkerStyle(5)
-        g_sigtt.Draw("AP")
+            g_sigtt.SetTitle("Sig TT")
 
-        g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_sigtt.GetXaxis().CenterTitle()
-        g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
-        g_sigtt.GetYaxis().SetTitleOffset(1.5)
-        g_sigtt.GetYaxis().SetTitleSize(0.035)
-        g_sigtt.GetYaxis().CenterTitle()
+            g_sigtt.SetMarkerStyle(5)
+            g_sigtt.Draw("AP")
 
-        g_sigtt_prv.SetMarkerColor(4)
-        g_sigtt_prv.SetMarkerStyle(25)
-        g_sigtt_prv.Draw("P")
+            g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_sigtt.GetXaxis().CenterTitle()
+            g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
+            g_sigtt.GetYaxis().SetTitleOffset(1.5)
+            g_sigtt.GetYaxis().SetTitleSize(0.035)
+            g_sigtt.GetYaxis().CenterTitle()
 
-        c2.cd(4).SetLeftMargin(0.12)
-        g_sigtt_fit.SetTitle("Sigma TT Model Fit")
-        g_sigtt_fit.Draw("A*")
+            g_sigtt_prv.SetMarkerColor(4)
+            g_sigtt_prv.SetMarkerStyle(25)
+            g_sigtt_prv.Draw("P")
 
-        g_sigtt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_sigtt_fit.GetXaxis().CenterTitle()
-        g_sigtt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
-        g_sigtt_fit.GetYaxis().SetTitleOffset(1.5)
-        g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
-        g_sigtt_fit.GetYaxis().CenterTitle()
+            c2.cd(4).SetLeftMargin(0.12)
+            g_sigtt_fit.SetTitle("Sigma TT Model Fit")
+            g_sigtt_fit.Draw("A*")
 
-        ##############
-        # HARD CODED #
-        ##############
-        f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
-        f_sigTT.SetParNames("p13")
-        #tt0 = 0.0
-        #f_sigTT.SetParameters(tt0, 0.0)
-        # Fixed unused parameters
-        #f_sigTT.FixParameter(0, 0)
-        ##f_sigTT.FixParameter(1, 0)
-        ##f_sigTT.FixParameter(2, 0)
-        ##f_sigTT.FixParameter(3, 0)
-        # Set range limit of used parameters
-        if tt0 != 0.0:
-            f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
-        else: 
-            f_sigTT.SetParLimits(0, -par_lim_sigtt_0, par_lim_sigtt_0)
-        # Fixing sigTT terms for testing
-        #f_sigTT.FixParameter(0, tt0)
-        # Fixing sigTT terms to zero
-        f_sigTT.FixParameter(0, 0.0)
-        if DEBUG:
-            f_sigTT.FixParameter(0, tt0)    
-        ##############
-        ##############
-        ##############
+            g_sigtt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_sigtt_fit.GetXaxis().CenterTitle()
+            g_sigtt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
+            g_sigtt_fit.GetYaxis().SetTitleOffset(1.5)
+            g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
+            g_sigtt_fit.GetYaxis().CenterTitle()
 
-        g_q2_sigtt_fit = TGraphErrors()
-        for i in range(len(w_vec)):
-            g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
-            g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
-            sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
-            g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
-        # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-        g_sigtt_fit.Fit(f_sigTT, "SM")
+            ##############
+            # HARD CODED #
+            ##############
+            f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+            f_sigTT.SetParNames("p13")
+            #tt0 = 0.0
+            #f_sigTT.SetParameters(tt0, 0.0)
+            # Fixed unused parameters
+            #f_sigTT.FixParameter(0, 0)
+            ##f_sigTT.FixParameter(1, 0)
+            ##f_sigTT.FixParameter(2, 0)
+            ##f_sigTT.FixParameter(3, 0)
+            # Set range limit of used parameters
+            if tt0 != 0.0:
+                f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
+            else: 
+                f_sigTT.SetParLimits(0, -par_lim_sigtt_0, par_lim_sigtt_0)
+            # Fixing sigTT terms for testing
+            #f_sigTT.FixParameter(0, tt0)
+            # Fixing sigTT terms to zero
+            f_sigTT.FixParameter(0, 0.0)
+            if DEBUG:
+                f_sigTT.FixParameter(0, tt0)    
+            ##############
+            ##############
+            ##############
 
-        # Check the fit status for 'f_sigTT'
-        f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-        f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
+            g_q2_sigtt_fit = TGraphErrors()
+            for i in range(len(w_vec)):
+                g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+                g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
+                sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+                g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
+            # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
+            g_sigtt_fit.Fit(f_sigTT, "SM")
 
-        f_sigTT.Draw("same")
+            # Check the fit status for 'f_sigTT'
+            f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            f_sigTT_status_message = "Not Fitted" if f_sigTT_status == 0 else "Fit Successful"
 
-        fit_status = TText()
-        fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
+            f_sigTT.Draw("same")
 
-        c1.cd(4)
+            fit_status = TText()
+            fit_status.SetTextSize(0.04)
+            fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
 
-        g_sigtt_fit_tot.SetMarkerStyle(26)
-        g_sigtt_fit_tot.SetMarkerColor(2)
-        g_sigtt_fit_tot.SetLineColor(2)
-        g_sigtt_fit_tot.Draw("LP")
+            c1.cd(4)
 
-        if f_sigTT_status_message == "Fit Successful":
-            break
+            g_sigtt_fit_tot.SetMarkerStyle(26)
+            g_sigtt_fit_tot.SetMarkerColor(2)
+            g_sigtt_fit_tot.SetLineColor(2)
+            g_sigtt_fit_tot.Draw("LP")
 
-        # Adaptively adjust parameter limits for the next iteration
-        par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigTT_status_message == "Fit Successful")
+            if f_sigTT_status_message == "Fit Successful":
+                break
+
+            # Adaptively adjust parameter limits for the next iteration
+            par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigtt_status_message == "Fit Successful")
+
+        except OverflowError:
+            print("OverflowError encountered. Adjusting parameter limits and retrying...")
+
+            # Adaptively adjust parameter limits for the next iteration
+            par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, False, factor=1.5)
+
         iteration += 1
-
+            
     par_vec.append(f_sigTT.GetParameter(0))
     par_vec.append(f_sigTT.GetParameter(1))
     par_vec.append(f_sigTT.GetParameter(2))
