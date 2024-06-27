@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 17:30:57 trottar"
+# Time-stamp: "2024-06-27 17:36:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -184,7 +184,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     ########
     # SigL #
     ########
-    
+
+    print("/*--------------------------------------------------*/")
     iteration = 0
     # Initialize adaptive parameter limits
     par_lim_sigl_0 = par_lim
@@ -192,7 +193,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigl_2 = par_lim
     while iteration < max_iterations:
     
-        print("/*--------------------------------------------------*/")
         print("Iteration {}\nFit for Sig L".format(iteration))
 
         c1.cd(1).SetLeftMargin(0.12)
@@ -374,13 +374,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # SigT #
     ########
 
+    print("/*--------------------------------------------------*/")    
     iteration = 0
     # Initialize adaptive parameter limits
     par_lim_sigt_0 = par_lim
     par_lim_sigt_1 = par_lim
     while iteration < max_iterations:
 
-        print("/*--------------------------------------------------*/")
         print("Iteration {}\nFit for Sig T".format(iteration))
 
         c1.cd(2).SetLeftMargin(0.12)
@@ -545,6 +545,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # SigLT #
     #########
 
+    print("/*--------------------------------------------------*/")
     iteration = 0
     # Initialize adaptive parameter limits
     par_lim_siglt_0 = par_lim
@@ -552,7 +553,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_siglt_2 = par_lim
     while iteration < max_iterations:
 
-        print("/*--------------------------------------------------*/")
         print("Iteration {}\nFit for Sig LT".format(iteration))
 
         c1.cd(3).SetLeftMargin(0.12)
@@ -740,12 +740,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # SigTT #
     #########
 
+    print("/*--------------------------------------------------*/")    
     iteration = 0
     # Initialize adaptive parameter limits
     par_lim_sigtt_0 = par_lim
     while iteration < max_iterations:    
 
-        print("/*--------------------------------------------------*/")
         print("Iteration {}\nFit for Sig L".format(iteration))
 
         c1.cd(4).SetLeftMargin(0.12)
