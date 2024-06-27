@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 18:11:39 trottar"
+# Time-stamp: "2024-06-27 18:14:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,8 +357,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
             par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
 
-        except OverflowError:
-            print("OverflowError encountered. Adjusting parameter limits and retrying...")
+        except TypeError:
+            print("TypeError encountered. Adjusting parameter limits and retrying...")
 
             # Adaptively adjust parameter limits for the next iteration
             par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, False, factor=1.5)
@@ -539,8 +539,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigt_status_message == "Fit Successful")
             par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigt_status_message == "Fit Successful")
 
-        except OverflowError:
-            print("OverflowError encountered. Adjusting parameter limits and retrying...")
+        except TypeError:
+            print("TypeError encountered. Adjusting parameter limits and retrying...")
 
             # Adaptively adjust parameter limits for the next iteration
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, False, factor=1.5)
@@ -744,8 +744,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, f_siglt_status_message == "Fit Successful")
             par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_siglt_status_message == "Fit Successful")
 
-        except OverflowError:
-            print("OverflowError encountered. Adjusting parameter limits and retrying...")
+        except TypeError:
+            print("TypeError encountered. Adjusting parameter limits and retrying...")
 
             # Adaptively adjust parameter limits for the next iteration
             par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, False, factor=1.5)
@@ -917,8 +917,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Adaptively adjust parameter limits for the next iteration
             par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigtt_status_message == "Fit Successful")
 
-        except OverflowError:
-            print("OverflowError encountered. Adjusting parameter limits and retrying...")
+        except TypeError:
+            print("TypeError encountered. Adjusting parameter limits and retrying...")
 
             # Adaptively adjust parameter limits for the next iteration
             par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, False, factor=1.5)
