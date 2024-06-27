@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 18:19:01 trottar"
+# Time-stamp: "2024-06-27 18:20:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -361,9 +361,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("TypeError encountered. Adjusting parameter limits and retrying...")
 
             # Adaptively adjust parameter limits for the next iteration
-            par_lim_sigl_0 *= 1.5
-            par_lim_sigl_1 *= 1.5
-            par_lim_sigl_2 *= 1.5
+            par_lim_sigl_0 = par_lim
+            par_lim_sigl_1 = par_lim
+            par_lim_sigl_2 = par_lim
 
         iteration += 1            
 
@@ -543,8 +543,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("TypeError encountered. Adjusting parameter limits and retrying...")
 
             # Adaptively adjust parameter limits for the next iteration
-            par_lim_sigt_0 *= 1.5
-            par_lim_sigt_1 *= 1.5
+            par_lim_sigt_0 = par_lim
+            par_lim_sigt_1 = par_lim
 
         iteration += 1
             
@@ -748,9 +748,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("TypeError encountered. Adjusting parameter limits and retrying...")
 
             # Adaptively adjust parameter limits for the next iteration
-            par_lim_siglt_0 *= 1.5
-            par_lim_siglt_1 *= 1.5
-            par_lim_siglt_2 *= 1.5
+            par_lim_siglt_0 = par_lim
+            par_lim_siglt_1 = par_lim
+            par_lim_siglt_2 = par_lim
 
         iteration += 1
             
@@ -921,7 +921,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("TypeError encountered. Adjusting parameter limits and retrying...")
 
             # Adaptively adjust parameter limits for the next iteration
-            par_lim_sigtt_0 *= 1.5
+            par_lim_sigtt_0 = par_lim
 
         iteration += 1
             
