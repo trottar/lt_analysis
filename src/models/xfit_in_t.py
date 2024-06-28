@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 20:46:17 trottar"
+# Time-stamp: "2024-06-27 20:47:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -539,8 +539,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 break
 
             # Adjust parameter limits within a random number
-            par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigt_status_message == "Fit Successful")
-            par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigt_status_message == "Fit Successful")
+            par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
+            par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigT_status_message == "Fit Successful")
 
         except TypeError:
             print("TypeError encountered. Adjusting parameter limits and retrying...")
