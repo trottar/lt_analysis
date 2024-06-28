@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:29:01 trottar"
+# Time-stamp: "2024-06-28 14:31:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,7 +206,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
         
-        sys.stdout.write("Iteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
+        print("Iteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
         sys.stdout.flush()
 
         c1.cd(1).SetLeftMargin(0.12)
@@ -323,7 +323,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             iteration += 1
             
         except TypeError:
-            sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
+            print("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
 
             # Store the parameter values and chi-square values for each iteration
@@ -382,7 +382,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_fit_sigL_status.SetLineColor(ROOT.kMagenta)
     graph_fit_sigL_status.Draw("ALP same")
 
-    sys.stdout.write("\n")    
+    print("\n")    
     
     ########
     # SigT #
@@ -407,7 +407,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        sys.stdout.write("Iteration {}\nFit for Sig T\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
+        print("Iteration {}\nFit for Sig T\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
         sys.stdout.flush()
 
         c1.cd(2).SetLeftMargin(0.12)
@@ -518,7 +518,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             iteration += 1
             
         except TypeError:
-            sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
+            print("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
 
             # Store the parameter values and chi-square values for each iteration
@@ -573,7 +573,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_fit_sigT_status.SetLineColor(ROOT.kMagenta)
     graph_fit_sigT_status.Draw("ALP same")
     
-    sys.stdout.write("\n")    
+    print("\n")    
     
     #########
     # SigLT #
@@ -600,7 +600,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
 
-        sys.stdout.write("Iteration {}\nFit for Sig LT\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
+        print("Iteration {}\nFit for Sig LT\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
         sys.stdout.flush()
 
         c1.cd(3).SetLeftMargin(0.12)
@@ -716,7 +716,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             iteration += 1
             
         except TypeError:
-            sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
+            print("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
 
             # Store the parameter values and chi-square values for each iteration
@@ -775,7 +775,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_fit_sigLT_status.SetLineColor(ROOT.kMagenta)
     graph_fit_sigLT_status.Draw("ALP same")
     
-    sys.stdout.write("\n")    
+    print("\n")    
     
     #########
     # SigTT #
@@ -798,7 +798,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")        
     while iteration < max_iterations:    
 
-        sys.stdout.write("Iteration {}\nFit for Sig TT\np13 = {}".format(iteration, par_lim_sigtt_0))
+        print("Iteration {}\nFit for Sig TT\np13 = {}".format(iteration, par_lim_sigtt_0))
         sys.stdout.flush()
 
         c1.cd(4).SetLeftMargin(0.12)
@@ -905,7 +905,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             iteration += 1
 
         except TypeError:
-            sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
+            print("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
 
             # Store the parameter values and chi-square values for each iteration
@@ -956,7 +956,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_fit_sigTT_status.SetLineColor(ROOT.kMagenta)
     graph_fit_sigTT_status.Draw("ALP same")
     
-    sys.stdout.write("\n")    
+    print("\n")    
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
