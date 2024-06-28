@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:31:37 trottar"
+# Time-stamp: "2024-06-28 14:35:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,6 +15,7 @@ import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
+from io import StringIO
 import math
 import os, sys
 
@@ -206,8 +207,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
         
+        # Save original stdout
+        original_stdout = sys.stdout
+        # Redirect stdout to a StringIO object
+        sys.stdout = StringIO()
+        
         print("Iteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
-        sys.stdout.flush()
 
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
@@ -313,6 +318,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
 
             if f_sigL_status:
+                # Get the output from StringIO
+                splash_output = sys.stdout.getvalue()
+                # Restore original stdout
+                sys.stdout = original_stdout
+                print(splash_output)
                 break
             
             # Adjust parameter limits within a random number
@@ -324,7 +334,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
         except TypeError:
             print("\rTypeError encountered. Adjusting parameter limits and retrying...")
-            sys.stdout.flush()
 
             # Store the parameter values and chi-square values for each iteration
             params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -408,7 +417,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     while iteration < max_iterations:
 
         print("Iteration {}\nFit for Sig T\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
-        sys.stdout.flush()
 
         c1.cd(2).SetLeftMargin(0.12)
         nsep.Draw("sigt:t:sigt_e", "", "goff")
@@ -519,7 +527,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
         except TypeError:
             print("\rTypeError encountered. Adjusting parameter limits and retrying...")
-            sys.stdout.flush()
 
             # Store the parameter values and chi-square values for each iteration
             params_sigT_history = {'p5': [], 'p6': []}
@@ -601,7 +608,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     while iteration < max_iterations:
 
         print("Iteration {}\nFit for Sig LT\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
-        sys.stdout.flush()
 
         c1.cd(3).SetLeftMargin(0.12)
         nsep.Draw("siglt:t:siglt_e", "", "goff")
@@ -717,7 +723,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
         except TypeError:
             print("\rTypeError encountered. Adjusting parameter limits and retrying...")
-            sys.stdout.flush()
 
             # Store the parameter values and chi-square values for each iteration
             params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -799,7 +804,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     while iteration < max_iterations:    
 
         print("Iteration {}\nFit for Sig TT\np13 = {}".format(iteration, par_lim_sigtt_0))
-        sys.stdout.flush()
 
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
@@ -906,7 +910,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         except TypeError:
             print("\rTypeError encountered. Adjusting parameter limits and retrying...")
-            sys.stdout.flush()
 
             # Store the parameter values and chi-square values for each iteration
             params_sigTT_history = {'p13': []}
