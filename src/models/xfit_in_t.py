@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:19:32 trottar"
+# Time-stamp: "2024-06-28 14:21:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,9 +187,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigl_0 = random.uniform(0, 1e6)
-    par_lim_sigl_1 = random.uniform(0, 1e6)
-    par_lim_sigl_2 = random.uniform(0, 1e6)
+    par_lim_sigl_0 = random.uniform(0, 1e3)
+    par_lim_sigl_1 = random.uniform(0, 1e3)
+    par_lim_sigl_2 = random.uniform(0, 1e3)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -284,9 +284,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check the fit status for 'f_sigL'
             #f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
-            f_sigL_status = (f_sigL.GetNDF() != 0)
-            print("$$$$$$$$$$$$$$$$$", f_sigL.GetNDF())
+            f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
+            print("!!!!!!!!!!!!!!",r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
+            #f_sigL_status = (f_sigL.GetNDF() != 0)
             f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
             fit_status = TText()
@@ -340,9 +340,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status = TGraph()
             
             # Adjust parameter limits within a random number
-            par_lim_sigl_0 = random.uniform(0, 1e6)
-            par_lim_sigl_1 = random.uniform(0, 1e6)
-            par_lim_sigl_2 = random.uniform(0, 1e6)
+            par_lim_sigl_0 = random.uniform(0, 1e3)
+            par_lim_sigl_1 = random.uniform(0, 1e3)
+            par_lim_sigl_2 = random.uniform(0, 1e3)
 
             iteration = 0
 
@@ -391,8 +391,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigt_0 = random.uniform(0, 1e6)
-    par_lim_sigt_1 = random.uniform(0, 1e6)
+    par_lim_sigt_0 = random.uniform(0, 1e3)
+    par_lim_sigt_1 = random.uniform(0, 1e3)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
@@ -534,8 +534,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigT_status = TGraph()                
             
             # Adjust parameter limits within a random number
-            par_lim_sigt_0 = random.uniform(0, 1e6)
-            par_lim_sigt_1 = random.uniform(0, 1e6)
+            par_lim_sigt_0 = random.uniform(0, 1e3)
+            par_lim_sigt_1 = random.uniform(0, 1e3)
 
             iteration = 0
             
@@ -582,9 +582,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_siglt_0 = random.uniform(0, 1e6)
-    par_lim_siglt_1 = random.uniform(0, 1e6)
-    par_lim_siglt_2 = random.uniform(0, 1e6)
+    par_lim_siglt_0 = random.uniform(0, 1e3)
+    par_lim_siglt_1 = random.uniform(0, 1e3)
+    par_lim_siglt_2 = random.uniform(0, 1e3)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -733,9 +733,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigLT_status = TGraph()                
             
             # Adjust parameter limits within a random number
-            par_lim_siglt_0 = random.uniform(0, 1e6)
-            par_lim_siglt_1 = random.uniform(0, 1e6)
-            par_lim_siglt_2 = random.uniform(0, 1e6)
+            par_lim_siglt_0 = random.uniform(0, 1e3)
+            par_lim_siglt_1 = random.uniform(0, 1e3)
+            par_lim_siglt_2 = random.uniform(0, 1e3)
 
             iteration = 0
             
@@ -784,7 +784,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigtt_0 = random.uniform(0, 1e6)
+    par_lim_sigtt_0 = random.uniform(0, 1e3)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
@@ -920,7 +920,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigTT_status = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigtt_0 = random.uniform(0, 1e6)
+            par_lim_sigtt_0 = random.uniform(0, 1e3)
 
             iteration = 0
             
