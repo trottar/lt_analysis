@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 12:51:53 trottar"
+# Time-stamp: "2024-06-28 12:54:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -319,6 +319,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
             par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
 
+            iteration += 1
+            
         except TypeError:
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
@@ -328,7 +330,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigl_1 = random.uniform(0, max_iterations)
             par_lim_sigl_2 = random.uniform(0, max_iterations)
 
-        iteration += 1
+            iteration = 0
 
     par_vec.append(f_sigL.GetParameter(0))
     par_vec.append(f_sigL.GetParameter(1))
@@ -503,6 +505,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
             par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigT_status_message == "Fit Successful")
 
+            iteration += 1
+            
         except TypeError:
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
@@ -511,7 +515,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigt_0 = random.uniform(0, max_iterations)
             par_lim_sigt_1 = random.uniform(0, max_iterations)
 
-        iteration += 1
+            iteration = 0
             
     par_vec.append(f_sigT.GetParameter(0))
     par_vec.append(f_sigT.GetParameter(1))
@@ -690,6 +694,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, f_sigLT_status_message == "Fit Successful")
             par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_sigLT_status_message == "Fit Successful")
 
+            iteration += 1
+            
         except TypeError:
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
@@ -699,7 +705,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_siglt_1 = random.uniform(0, max_iterations)
             par_lim_siglt_2 = random.uniform(0, max_iterations)
 
-        iteration += 1
+            iteration = 0
             
     par_vec.append(f_sigLT.GetParameter(0))
     par_vec.append(f_sigLT.GetParameter(1))
@@ -867,6 +873,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigTT_status_message == "Fit Successful")
 
+            iteration += 1
+
         except TypeError:
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
@@ -874,7 +882,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = random.uniform(0, max_iterations)
 
-        iteration += 1
+            iteration = 0
             
     par_vec.append(f_sigTT.GetParameter(0))
     par_vec.append(f_sigTT.GetParameter(1))
