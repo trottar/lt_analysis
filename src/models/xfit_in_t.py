@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 12:54:34 trottar"
+# Time-stamp: "2024-06-28 12:57:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -924,7 +924,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     sys.stdout.write("\n")    
     
     c1.Print(outputpdf+'(')
-    c2.Print(outputpdf+')')
+    c2.Print(outputpdf)
+    c3.Print(outputpdf)
+    c4.Print(outputpdf)
+    c5.Print(outputpdf+')')
     
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
