@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 13:09:19 trottar"
+# Time-stamp: "2024-06-28 13:12:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -298,9 +298,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigl_fit_tot.SetLineColor(2)
             g_sigl_fit_tot.Draw("LP")
 
-            if f_sigL_status:
-                break
-
             params_sigL_history['p1'].append(f_sigL.GetParameter(0))
             params_sigL_history['p2'].append(f_sigL.GetParameter(1))
             params_sigL_history['p3'].append(f_sigL.GetParameter(2))
@@ -313,6 +310,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
             graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
             graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
+
+            if f_sigL_status:
+                break
             
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
@@ -486,9 +486,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_fit_tot.SetLineColor(2)
             g_sigt_fit_tot.Draw("LP")
 
-            if f_sigT_status:
-                break
-
             params_sigT_history['p5'].append(f_sigT.GetParameter(0))
             params_sigT_history['p6'].append(f_sigT.GetParameter(1))
             chi2_sigT_history.append(f_sigT.GetChisquare())
@@ -499,6 +496,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_p6.SetPoint(iteration, iteration, f_sigT.GetParameter(1))
             graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
             graph_fit_sigT_status.SetPoint(iteration, iteration, 1 if f_sigT_status else 0)
+
+            if f_sigT_status:
+                break
             
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
@@ -672,9 +672,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_fit_tot.SetLineColor(2)
             g_siglt_fit_tot.Draw("LP")
 
-            if f_sigLT_status:
-                break
-
             params_sigLT_history['p9'].append(f_sigLT.GetParameter(0))
             params_sigLT_history['p10'].append(f_sigLT.GetParameter(1))
             params_sigLT_history['p11'].append(f_sigLT.GetParameter(2))
@@ -687,6 +684,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_p11.SetPoint(iteration, iteration, f_sigLT.GetParameter(2))
             graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
             graph_fit_sigLT_status.SetPoint(iteration, iteration, 1 if f_sigLT_status else 0)
+
+            if f_sigLT_status:
+                break
             
             # Adjust parameter limits within a random number
             par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, f_sigLT_status_message == "Fit Successful")
@@ -857,9 +857,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit_tot.SetLineColor(2)
             g_sigtt_fit_tot.Draw("LP")
 
-            if f_sigTT_status:
-                break
-
             params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
             chi2_sigTT_history.append(f_sigTT.GetChisquare())
             fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
@@ -868,6 +865,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
             graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
             graph_fit_sigTT_status.SetPoint(iteration, iteration, 1 if f_sigTT_status else 0)
+
+            if f_sigTT_status:
+                break
             
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigTT_status_message == "Fit Successful")
