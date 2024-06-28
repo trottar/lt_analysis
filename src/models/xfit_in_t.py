@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 18:40:22 trottar"
+# Time-stamp: "2024-06-27 20:46:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -337,7 +337,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check the fit status for 'f_sigL'
             #f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            f_sigL_status = r_sigl_fit == 0
+            f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
             f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
             fit_status = TText()
@@ -519,7 +519,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check the fit status for 'f_sigT'
             #f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            f_sigT_status = r_sigt_fit == 0
+            f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
             f_sigT_status_message = "Fit Successful" if f_sigT_status else "Fit Failed"
 
             f_sigT.Draw("same")
@@ -724,7 +724,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check the fit status for 'f_sigLT'
             #f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            f_sigLT_status = r_siglt_fit == 0
+            f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
             f_sigLT_status_message = "Fit Successful" if f_sigLT_status else "Fit Failed"
 
             f_sigLT.Draw("same")
@@ -900,7 +900,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check the fit status for 'f_sigTT'
             #f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            f_sigTT_status = r_sigtt_fit == 0
+            f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
             f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
 
             f_sigTT.Draw("same")
