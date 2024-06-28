@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:37:14 trottar"
+# Time-stamp: "2024-06-28 15:01:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,7 +206,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
         
-        print("Iteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
+        print("Iteration {}\nFit for Sig L".format(iteration))
 
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
@@ -405,7 +405,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}\nFit for Sig T\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
+        print("Iteration {}\nFit for Sig T".format(iteration))
 
         c1.cd(2).SetLeftMargin(0.12)
         nsep.Draw("sigt:t:sigt_e", "", "goff")
@@ -596,7 +596,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
 
-        print("Iteration {}\nFit for Sig LT\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
+        print("Iteration {}\nFit for Sig LT".format(iteration))
 
         c1.cd(3).SetLeftMargin(0.12)
         nsep.Draw("siglt:t:siglt_e", "", "goff")
@@ -792,7 +792,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")        
     while iteration < max_iterations:    
 
-        print("Iteration {}\nFit for Sig TT\np13 = {}".format(iteration, par_lim_sigtt_0))
+        print("Iteration {}\nFit for Sig TT".format(iteration))
 
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
