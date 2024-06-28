@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:23:27 trottar"
+# Time-stamp: "2024-06-28 14:24:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -480,8 +480,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check the fit status for 'f_sigT'
             #f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
-            f_sigT_status = (f_sigT.GetNDF() != 0)
+            f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
+            #f_sigT_status = (f_sigT.GetNDF() != 0)
             f_sigT_status_message = "Fit Successful" if f_sigT_status else "Fit Failed"
 
             f_sigT.Draw("same")
