@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 13:56:07 trottar"
+# Time-stamp: "2024-06-28 13:56:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,9 +206,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
 
-        sys.stdout.write("Fit for Sig L")
-        sys.stdout.write("Iteration {}".format(iteration))
-        sys.stdout.write("p1 = {}, p2 = {}, p3 = {}".format(par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))        
+        sys.stdout.write("\rFit for Sig L")
+        sys.stdout.write("\rIteration {}".format(iteration))
+        sys.stdout.write("\rp1 = {}, p2 = {}, p3 = {}".format(par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))        
         sys.stdout.flush()
 
         c1.cd(1).SetLeftMargin(0.12)
