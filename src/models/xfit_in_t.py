@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:35:56 trottar"
+# Time-stamp: "2024-06-28 14:37:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,7 +15,6 @@ import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
-from io import StringIO
 import math
 import os, sys
 
@@ -207,11 +206,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
         
-        # Save original stdout
-        original_stdout = sys.stdout
-        # Redirect stdout to a StringIO object
-        sys.stdout = StringIO()
-        
         print("Iteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
 
         c1.cd(1).SetLeftMargin(0.12)
@@ -318,11 +312,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
 
             if f_sigL_status:
-                # Get the output from StringIO
-                splash_output = sys.stdout.getvalue()
-                # Restore original stdout
-                sys.stdout = original_stdout
-                print(splash_output)
                 break
             
             # Adjust parameter limits within a random number
