@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 11:03:50 trottar"
+# Time-stamp: "2024-06-28 11:06:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -195,7 +195,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigl_2 = par_lim
     while iteration < max_iterations:
     
-        sys.stdout.write(f"\rIteration {}\nFit for Sig L".format(iteration))
+        sys.stdout.write(f"\rIteration {iteration}\nFit for Sig L")
         sys.stdout.flush()
 
         c1.cd(1).SetLeftMargin(0.12)
@@ -369,7 +369,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigl_1 = random.uniform(0, 100)
             par_lim_sigl_2 = random.uniform(0, 100)
 
-        iteration += 1            
+        iteration +=             
 
     par_vec.append(f_sigL.GetParameter(0))
     par_vec.append(f_sigL.GetParameter(1))
@@ -385,7 +385,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
-        
+
+    sys.stdout.write("\n")    
+    
     ########
     # SigT #
     ########
@@ -397,7 +399,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigt_1 = par_lim
     while iteration < max_iterations:
 
-        sys.stdout.write(f"\rIteration {}\nFit for Sig T".format(iteration))
+        sys.stdout.write(f"\rIteration {iteration}\nFit for Sig T")
         sys.stdout.flush()
 
         c1.cd(2).SetLeftMargin(0.12)
@@ -569,7 +571,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigT.GetChisquare())
     par_chi2_vec.append(f_sigT.GetChisquare())
     par_chi2_vec.append(f_sigT.GetChisquare())
-        
+
+    sys.stdout.write("\n")    
+    
     #########
     # SigLT #
     #########
@@ -582,7 +586,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_siglt_2 = par_lim
     while iteration < max_iterations:
 
-        sys.stdout.write(f"\rIteration {}\nFit for Sig LT".format(iteration))
+        sys.stdout.write(f"\rIteration {iteration}\nFit for Sig LT")
         sys.stdout.flush()
 
         c1.cd(3).SetLeftMargin(0.12)
@@ -778,7 +782,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
-        
+
+    sys.stdout.write("\n")    
+    
     #########
     # SigTT #
     #########
@@ -789,7 +795,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigtt_0 = par_lim
     while iteration < max_iterations:    
 
-        sys.stdout.write(f"\rIteration {}\nFit for Sig TT".format(iteration))
+        sys.stdout.write(f"\rIteration {iteration}\nFit for Sig TT")
         sys.stdout.flush()
 
         c1.cd(4).SetLeftMargin(0.12)
@@ -952,6 +958,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigTT.GetChisquare())
     par_chi2_vec.append(f_sigTT.GetChisquare())
     par_chi2_vec.append(f_sigTT.GetChisquare())        
+
+    sys.stdout.write("\n")    
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf+')')
