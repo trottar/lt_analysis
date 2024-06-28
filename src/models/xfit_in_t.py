@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:24:36 trottar"
+# Time-stamp: "2024-06-28 14:25:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -509,8 +509,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigT_status.SetPoint(iteration, iteration, 1 if f_sigT_status else 0)
 
             if f_sigT_status:
-                #break
-                sys.exit(2)            
+                break
             
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
@@ -676,8 +675,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check the fit status for 'f_sigLT'
             #f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
-            f_sigLT_status = (f_sigLT.GetNDF() != 0)
+            f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
+            #f_sigLT_status = (f_sigLT.GetNDF() != 0)
             f_sigLT_status_message = "Fit Successful" if f_sigLT_status else "Fit Failed"
 
             f_sigLT.Draw("same")
@@ -871,8 +870,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check the fit status for 'f_sigTT'
             #f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
-            #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
-            f_sigTT_status = (f_sigTT.GetNDF() != 0)
+            f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
+            #f_sigTT_status = (f_sigTT.GetNDF() != 0)
             f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
 
             f_sigTT.Draw("same")
