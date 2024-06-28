@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 00:40:25 trottar"
+# Time-stamp: "2024-06-28 11:03:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -195,7 +195,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigl_2 = par_lim
     while iteration < max_iterations:
     
-        print("Iteration {}\nFit for Sig L".format(iteration))
+        sys.stdout.write(f"\rIteration {}\nFit for Sig L".format(iteration))
+        sys.stdout.flush()
 
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
@@ -360,7 +361,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
 
         except TypeError:
-            print("TypeError encountered. Adjusting parameter limits and retrying...")
+            sys.stdout.write(f"\rTypeError encountered. Adjusting parameter limits and retrying...")
+            sys.stdout.flush()
 
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = random.uniform(0, 100)
@@ -395,7 +397,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigt_1 = par_lim
     while iteration < max_iterations:
 
-        print("Iteration {}\nFit for Sig T".format(iteration))
+        sys.stdout.write(f"\rIteration {}\nFit for Sig T".format(iteration))
+        sys.stdout.flush()
 
         c1.cd(2).SetLeftMargin(0.12)
         nsep.Draw("sigt:t:sigt_e", "", "goff")
@@ -543,7 +546,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigT_status_message == "Fit Successful")
 
         except TypeError:
-            print("TypeError encountered. Adjusting parameter limits and retrying...")
+            sys.stdout.write(f"\rTypeError encountered. Adjusting parameter limits and retrying...")
+            sys.stdout.flush()
 
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = random.uniform(0, 100)
@@ -578,7 +582,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_siglt_2 = par_lim
     while iteration < max_iterations:
 
-        print("Iteration {}\nFit for Sig LT".format(iteration))
+        sys.stdout.write(f"\rIteration {}\nFit for Sig LT".format(iteration))
+        sys.stdout.flush()
 
         c1.cd(3).SetLeftMargin(0.12)
         nsep.Draw("siglt:t:siglt_e", "", "goff")
@@ -749,7 +754,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_sigLT_status_message == "Fit Successful")
 
         except TypeError:
-            print("TypeError encountered. Adjusting parameter limits and retrying...")
+            sys.stdout.write(f"\rTypeError encountered. Adjusting parameter limits and retrying...")
+            sys.stdout.flush()
 
             # Adjust parameter limits within a random number
             par_lim_siglt_0 = random.uniform(0, 100)
@@ -783,7 +789,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigtt_0 = par_lim
     while iteration < max_iterations:    
 
-        print("Iteration {}\nFit for Sig TT".format(iteration))
+        sys.stdout.write(f"\rIteration {}\nFit for Sig TT".format(iteration))
+        sys.stdout.flush()
 
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
@@ -923,7 +930,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigTT_status_message == "Fit Successful")
 
         except TypeError:
-            print("TypeError encountered. Adjusting parameter limits and retrying...")
+            sys.stdout.write(f"\rTypeError encountered. Adjusting parameter limits and retrying...")
+            sys.stdout.flush()
 
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = random.uniform(0, 100)
