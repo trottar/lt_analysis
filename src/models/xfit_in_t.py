@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:08:42 trottar"
+# Time-stamp: "2024-06-28 14:10:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -205,8 +205,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
-    
-        sys.stdout.write(" \rIteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
+
+        # Clear previous output
+        sys.stdout.write('\r' + '\n' * (num_lines - 1))
+        sys.stdout.write('\r')
+        
+        sys.stdout.write("Iteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
         sys.stdout.flush()
 
         c1.cd(1).SetLeftMargin(0.12)
@@ -407,7 +411,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        sys.stdout.write(" \rIteration {}\nFit for Sig T\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
+        sys.stdout.write("Iteration {}\nFit for Sig T\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
         sys.stdout.flush()
 
         c1.cd(2).SetLeftMargin(0.12)
@@ -600,7 +604,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
 
-        sys.stdout.write(" \rIteration {}\nFit for Sig LT\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
+        sys.stdout.write("Iteration {}\nFit for Sig LT\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
         sys.stdout.flush()
 
         c1.cd(3).SetLeftMargin(0.12)
@@ -798,7 +802,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")        
     while iteration < max_iterations:    
 
-        sys.stdout.write(" \rIteration {}\nFit for Sig TT\np13 = {}".format(iteration, par_lim_sigtt_0))
+        sys.stdout.write("Iteration {}\nFit for Sig TT\np13 = {}".format(iteration, par_lim_sigtt_0))
         sys.stdout.flush()
 
         c1.cd(4).SetLeftMargin(0.12)
