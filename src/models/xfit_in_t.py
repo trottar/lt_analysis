@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 11:08:38 trottar"
+# Time-stamp: "2024-06-28 12:33:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,16 +82,6 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     ##############
     # Maximum iterations before ending loop
     max_iterations = 1e6
-    # Limit for finding new parameters (units of percent)
-    if iter_num == 2:
-        par_lim = 100.00 # +/-10000%
-    else:
-        #par_lim = 0.001 # +/-.1%
-        #par_lim = 0.01 # +/-1%
-        #par_lim = 0.05 # +/-5%
-        par_lim = 0.2 # +/-20%
-        #par_lim = 0.75 # +/-75%
-        #par_lim = 10.00 # +/-1000%        
     ##############
     ##############
     ##############
@@ -145,7 +135,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
 
-    if iter_num == 2:
+    if iter_num > 2:
         l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     
     ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
@@ -183,16 +173,25 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
+    # Create ROOT canvases for additional plots
+    c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
+    c3.Divide(2, 2)
+    c4 = TCanvas("c4", "Chi-Square Convergence", 800, 800)
+    c4.Divide(2, 2)
+    c5 = TCanvas("c5", "Fit Status Over Iterations", 800, 800)
+    c5.Divide(2, 2)
+
     ########
     # SigL #
     ########
 
-    print("/*--------------------------------------------------*/")
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigl_0 = par_lim
-    par_lim_sigl_1 = par_lim
-    par_lim_sigl_2 = par_lim
+    par_lim_sigl_0 = random.uniform(0, max_iterations)
+    par_lim_sigl_1 = random.uniform(0, max_iterations)
+    par_lim_sigl_2 = random.uniform(0, max_iterations)
+        
+    print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
     
         sys.stdout.write("\rIteration {}\nFit for Sig L".format(iteration))
@@ -202,45 +201,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         nsep.Draw("sigl:t:sigl_e", "", "goff")
 
         try:
+
+            # Store the parameter values and chi-square values for each iteration
+            params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
+            chi2_sigL_history = []
+            fit_sigL_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigL_p1 = TGraph()
+            graph_sigL_p2 = TGraph()
+            graph_sigL_p3 = TGraph()
+            graph_sigL_chi2 = TGraph()
+            graph_fit_sigL_status = TGraph()                
         
-            ##############
-            # HARD CODED #
-            ##############
             f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigL_pre.SetParNames("p1","p2","p3")
-            #f_sigL_pre.SetParameters(l0, l1, l2)
-            # Fixed unused parameters
-            #f_sigL_pre.FixParameter(0, 0)
-            #f_sigL_pre.FixParameter(1, 0)
-            #f_sigL_pre.FixParameter(2, 0)
-            # Set range limit of used parameters
-            if l0 != 0.0:
-                f_sigL_pre.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
-            else:
-                f_sigL_pre.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
-            if l1 != 0.0:
-                f_sigL_pre.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
-            else: 
-                f_sigL_pre.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
-            if l2 != 0.0:
-                f_sigL_pre.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
-            else: 
-                f_sigL_pre.SetParLimits(2, -par_lim_sigl_2, par_lim_sigl_2)
-            # Fixing sigL terms for testing
-            #f_sigL_pre.FixParameter(0, l0)
-            #f_sigL_pre.FixParameter(1, l1)
-            #f_sigL_pre.FixParameter(2, l2)
-            # Fixing sigL terms to zero
-            #f_sigL_pre.FixParameter(0, 0.0)
-            #f_sigL_pre.FixParameter(1, 0.0)
-            #f_sigL_pre.FixParameter(2, 0.0)
-            if DEBUG:
-                f_sigL_pre.FixParameter(0, l0)
-                f_sigL_pre.FixParameter(1, l1)
-                f_sigL_pre.FixParameter(2, l2)
-            ##############
-            ##############
-            ##############
+            f_sigL_pre.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
+            f_sigL_pre.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
+            f_sigL_pre.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
 
             #g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
             g_sigl = TGraphErrors()
@@ -286,44 +264,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigl_fit.GetYaxis().SetTitleSize(0.035)
             g_sigl_fit.GetYaxis().CenterTitle()
 
-            ##############
-            # HARD CODED #
-            ##############
             # Fixed unused parameters
             f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigL.SetParNames("p1","p2","p3")
-            #f_sigL.SetParameters(l0, l1, l2)        
-            #f_sigL.FixParameter(0, 0)
-            #f_sigL.FixParameter(1, 0)
-            #f_sigL.FixParameter(2, 0)
-            # Set range limit of used parameters
-            if l0 != 0.0:
-                f_sigL.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
-            else: 
-                f_sigL.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
-            if l1 != 0.0:
-                f_sigL.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
-            else: 
-                f_sigL.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
-            if l2 != 0.0:
-                f_sigL.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
-            else: 
-                f_sigL.SetParLimits(2, -par_lim_sigl_2, par_lim_sigl_2)
-            # Fixing sigL terms for testing
-            #f_sigL.FixParameter(0, l0)
-            #f_sigL.FixParameter(1, l1)
-            #f_sigL.FixParameter(2, l2)
-            # Fixing sigL terms to zero
-            #f_sigL.FixParameter(0, 0.0)
-            #f_sigL.FixParameter(1, 0.0)
-            #f_sigL.FixParameter(2, 0.0)
-            if DEBUG:
-                f_sigL.FixParameter(0, l0)
-                f_sigL.FixParameter(1, l1)
-                f_sigL.FixParameter(2, l2)
-            ##############
-            ##############
-            ##############    
+            f_sigL.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
+            f_sigL.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
+            f_sigL.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
 
             g_q2_sigl_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -355,6 +301,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigL_status:
                 break
 
+            params_sigL_history['p1'].append(f_sigL.GetParameter(0))
+            params_sigL_history['p2'].append(f_sigL.GetParameter(1))
+            params_sigL_history['p3'].append(f_sigL.GetParameter(2))
+            chi2_sigL_history.append(f_sigL.GetChisquare())
+            fit_sigL_status_history.append(1 if f_sigL_status != 0 else 0)
+
+            # Update ROOT TGraphs for plotting
+            graph_sigL_p1.SetPoint(iteration, iteration, f_sigL.GetParameter(0))
+            graph_sigL_p2.SetPoint(iteration, iteration, f_sigL.GetParameter(1))
+            graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
+            graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
+            graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status != 0 else 0)
+            
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
             par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
@@ -365,9 +324,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.flush()
 
             # Adjust parameter limits within a random number
-            par_lim_sigl_0 = random.uniform(0, 100)
-            par_lim_sigl_1 = random.uniform(0, 100)
-            par_lim_sigl_2 = random.uniform(0, 100)
+            par_lim_sigl_0 = random.uniform(0, max_iterations)
+            par_lim_sigl_1 = random.uniform(0, max_iterations)
+            par_lim_sigl_2 = random.uniform(0, max_iterations)
 
         iteration += 1
 
@@ -392,11 +351,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # SigT #
     ########
 
-    print("/*--------------------------------------------------*/")    
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigt_0 = par_lim
-    par_lim_sigt_1 = par_lim
+    par_lim_sigt_0 = random.uniform(0, max_iterations)
+    par_lim_sigt_1 = random.uniform(0, max_iterations)
+
+    print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
         sys.stdout.write("\rIteration {}\nFit for Sig T".format(iteration))
@@ -407,36 +367,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         try:
 
-            ##############
-            # HARD CODED #
-            ##############
+            # Store the parameter values and chi-square values for each iteration
+            params_sigT_history = {'p5': [], 'p6': []}
+            chi2_sigT_history = []
+            fit_sigT_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigT_p5 = TGraph()
+            graph_sigT_p6 = TGraph()
+            graph_sigT_chi2 = TGraph()
+            graph_fit_sigT_status = TGraph()                
+            
             f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
             f_sigT_pre.SetParNames("p5","p6")
-            #f_sigT_pre.SetParameters(t0, t1)        
-            # Fixed unused parameters
-            #f_sigT_pre.FixParameter(0, 0)
-            #f_sigT_pre.FixParameter(1, 0)
-            # Set range limit of used parameters
-            if t0 != 0.0:
-                f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
-            else: 
-                f_sigT_pre.SetParLimits(0, -par_lim_sigt_0, par_lim_sigt_0)
-            if t1 != 0.0:
-                f_sigT_pre.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
-            else: 
-                f_sigT_pre.SetParLimits(1, -par_lim_sigt_1, par_lim_sigt_1)
-            # Fixing sigT terms for testing
-            #f_sigT_pre.FixParameter(0, t0)
-            #f_sigT_pre.FixParameter(1, t1)
-            # Fixing sigT terms to zero
-            #f_sigT_pre.FixParameter(0, 0.0)
-            #f_sigT_pre.FixParameter(1, 0.0)
-            if DEBUG:
-                f_sigT_pre.FixParameter(0, t0)
-                f_sigT_pre.FixParameter(1, t1)
-            ##############
-            ##############
-            ##############    
+            f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
+            f_sigT_pre.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
 
             #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
             g_sigt = TGraphErrors()
@@ -482,36 +427,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_fit.GetYaxis().SetTitleSize(0.035)
             g_sigt_fit.GetYaxis().CenterTitle()    
 
-            ##############
-            # HARD CODED #
-            ##############
             f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
             f_sigT.SetParNames("p5","p6")
-            #f_sigT.SetParameters(t0, t1)    
-            # Fixed unused parameters
-            #f_sigT.FixParameter(0, 0)
-            #f_sigT.FixParameter(1, 0)
-            # Set range limit of used parameters
-            if t0 != 0.0:
-                f_sigT.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
-            else: 
-                f_sigT.SetParLimits(0, -par_lim_sigt_0, par_lim_sigt_0)
-            if t1 != 0.0:
-                f_sigT.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
-            else: 
-                f_sigT.SetParLimits(1, -par_lim_sigt_1, par_lim_sigt_1)
-            # Fixing sigT terms for testing
-            #f_sigT.FixParameter(0, t0)
-            #f_sigT.FixParameter(1, t1)
-            # Fixing sigT terms to zero
-            #f_sigT.FixParameter(0, 0.0)
-            #f_sigT.FixParameter(1, 0.0)  
-            if DEBUG:
-                f_sigT.FixParameter(0, t0)
-                f_sigT.FixParameter(1, t1)
-            ##############
-            ##############
-            ##############    
+            f_sigT.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
+            f_sigT.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
 
             g_q2_sigt_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -543,6 +462,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigT_status:
                 break
 
+            params_sigT_history['p5'].append(f_sigT.GetParameter(0))
+            params_sigT_history['p6'].append(f_sigT.GetParameter(1))
+            chi2_sigT_history.append(f_sigT.GetChisquare())
+            fit_sigT_status_history.append(1 if f_sigT_status != 0 else 0)
+
+            # Update ROOT TGraphs for plotting
+            graph_sigT_p5.SetPoint(iteration, iteration, f_sigT.GetParameter(0))
+            graph_sigT_p6.SetPoint(iteration, iteration, f_sigT.GetParameter(1))
+            graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
+            graph_fit_sigT_status.SetPoint(iteration, iteration, 1 if f_sigT_status != 0 else 0)
+            
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
             par_lim_sigt_1 = adaptive_parameter_adjustment(par_lim_sigt_1, f_sigT_status_message == "Fit Successful")
@@ -552,8 +482,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.flush()
 
             # Adjust parameter limits within a random number
-            par_lim_sigt_0 = random.uniform(0, 100)
-            par_lim_sigt_1 = random.uniform(0, 100)
+            par_lim_sigt_0 = random.uniform(0, max_iterations)
+            par_lim_sigt_1 = random.uniform(0, max_iterations)
 
         iteration += 1
             
@@ -581,9 +511,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_siglt_0 = par_lim
-    par_lim_siglt_1 = par_lim
-    par_lim_siglt_2 = par_lim
+    par_lim_siglt_0 = random.uniform(0, max_iterations)
+    par_lim_siglt_1 = random.uniform(0, max_iterations)
+    par_lim_siglt_2 = random.uniform(0, max_iterations)
     while iteration < max_iterations:
 
         sys.stdout.write("\rIteration {}\nFit for Sig LT".format(iteration))
@@ -594,47 +524,23 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         try:
 
-            ##############
-            # HARD CODED #
-            ##############
+            # Store the parameter values and chi-square values for each iteration
+            params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
+            chi2_sigLT_history = []
+            fit_sigLT_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigLT_p9 = TGraph()
+            graph_sigLT_p10 = TGraph()
+            graph_sigLT_p11 = TGraph()
+            graph_sigLT_chi2 = TGraph()
+            graph_fit_sigLT_status = TGraph()                
+
             f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
             f_sigLT_pre.SetParNames("p9","p10","p11")
-            #lt0, lt1, lt2 = 0.0, 0.0, 0.0
-            #f_sigLT_pre.SetParameters(lt0, lt1, lt2)        
-            # Fixed unused parameters
-            #f_sigLT_pre.FixParameter(0, 0)
-            #f_sigLT_pre.FixParameter(1, 0)
-            #f_sigLT_pre.FixParameter(2, 0)
-            ##f_sigLT_pre.FixParameter(3, 0)
-            # Set range limit of used parameters
-            if lt0 != 0.0:
-                f_sigLT_pre.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
-            else: 
-                f_sigLT_pre.SetParLimits(0, -par_lim_siglt_0, par_lim_siglt_0)
-            if lt1 != 0.0:
-                f_sigLT_pre.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
-            else: 
-                f_sigLT_pre.SetParLimits(1, -par_lim_siglt_1, par_lim_siglt_1)
-            if lt2 != 0.0:
-                f_sigLT_pre.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
-            else: 
-                f_sigLT_pre.SetParLimits(2, -par_lim_siglt_2, par_lim_siglt_2)
-            #f_sigLT_pre.SetParLimits(3, lt3-abs(lt3*par_lim_siglt_LTTT), lt3+abs(lt3*par_lim_siglt_LTTT))        
-            # Fixing sigLT terms for testing
-            #f_sigLT_pre.FixParameter(0, lt0)
-            #f_sigLT_pre.FixParameter(1, lt1)
-            #f_sigLT_pre.FixParameter(2, lt2)
-            # Fixing sigLT terms to zero
-            #f_sigLT_pre.FixParameter(0, 0.0)
-            #f_sigLT_pre.FixParameter(1, 0.0)
-            #f_sigLT_pre.FixParameter(2, 0.0)
-            if DEBUG:
-                f_sigLT_pre.FixParameter(0, lt0)
-                f_sigLT_pre.FixParameter(1, lt1)
-                f_sigLT_pre.FixParameter(2, lt2)
-            ##############
-            ##############
-            ##############    
+            f_sigLT_pre.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
+            f_sigLT_pre.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
+            f_sigLT_pre.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
 
             #g_siglt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), ROOT.nullptr, nsep.GetV3())
             g_siglt = TGraphErrors()
@@ -680,47 +586,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_fit.GetYaxis().SetTitleSize(0.035)
             g_siglt_fit.GetYaxis().CenterTitle()
 
-            ##############
-            # HARD CODED #
-            ##############
             f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
             f_sigLT.SetParNames("p9","p10","p11")
-            #lt0, lt1, lt2 = 0.0, 0.0, 0.0
-            #f_sigLT.SetParameters(lt0, lt1, lt2)    
-            # Fixed unused parameters
-            #f_sigLT.FixParameter(0, 0)
-            #f_sigLT.FixParameter(1, 0)
-            #f_sigLT.FixParameter(2, 0)
-            ##f_sigLT.FixParameter(3, 0)
-            # Set range limit of used parameters
-            if lt0 != 0.0:
-                f_sigLT.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
-            else: 
-                f_sigLT.SetParLimits(0, -par_lim_siglt_0, par_lim_siglt_0)
-            if lt1 != 0.0:
-                f_sigLT.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
-            else: 
-                f_sigLT.SetParLimits(1, -par_lim_siglt_1, par_lim_siglt_1)
-            if lt2 != 0.0:
-                f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
-            else: 
-                f_sigLT.SetParLimits(2, -par_lim_siglt_2, par_lim_siglt_2)
-            #f_sigLT.SetParLimits(3, lt3-abs(lt3*par_lim_siglt_LTTT), lt3+abs(lt3*par_lim_siglt_LTTT))
-            # Fixing sigLT terms for testing
-            #f_sigLT.FixParameter(0, lt0)
-            #f_sigLT.FixParameter(1, lt1)
-            #f_sigLT.FixParameter(2, lt2)
-            # Fixing sigLT terms to zero
-            #f_sigLT.FixParameter(0, 0.0)
-            #f_sigLT.FixParameter(1, 0.0)
-            #f_sigLT.FixParameter(2, 0.0)
-            if DEBUG:
-                f_sigLT.FixParameter(0, lt0)
-                f_sigLT.FixParameter(1, lt1)
-                f_sigLT.FixParameter(2, lt2)
-            ##############
-            ##############
-            ##############    
+            f_sigLT.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
+            f_sigLT.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
+            f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
 
             g_q2_siglt_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -752,6 +622,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigLT_status:
                 break
 
+            params_sigLT_history['p9'].append(f_sigLT.GetParameter(0))
+            params_sigLT_history['p10'].append(f_sigLT.GetParameter(1))
+            params_sigLT_history['p11'].append(f_sigLT.GetParameter(2))
+            chi2_sigLT_history.append(f_sigLT.GetChisquare())
+            fit_sigLT_status_history.append(1 if f_sigLT_status != 0 else 0)
+
+            # Update ROOT TGraphs for plotting
+            graph_sigLT_p9.SetPoint(iteration, iteration, f_sigLT.GetParameter(0))
+            graph_sigLT_p10.SetPoint(iteration, iteration, f_sigLT.GetParameter(1))
+            graph_sigLT_p11.SetPoint(iteration, iteration, f_sigLT.GetParameter(2))
+            graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
+            graph_fit_sigLT_status.SetPoint(iteration, iteration, 1 if f_sigLT_status != 0 else 0)
+            
             # Adjust parameter limits within a random number
             par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, f_sigLT_status_message == "Fit Successful")
             par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, f_sigLT_status_message == "Fit Successful")
@@ -762,9 +645,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.flush()
 
             # Adjust parameter limits within a random number
-            par_lim_siglt_0 = random.uniform(0, 100)
-            par_lim_siglt_1 = random.uniform(0, 100)
-            par_lim_siglt_2 = random.uniform(0, 100)
+            par_lim_siglt_0 = random.uniform(0, max_iterations)
+            par_lim_siglt_1 = random.uniform(0, max_iterations)
+            par_lim_siglt_2 = random.uniform(0, max_iterations)
 
         iteration += 1
             
@@ -792,7 +675,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigtt_0 = par_lim
+    par_lim_sigtt_0 = random.uniform(0, max_iterations)
     while iteration < max_iterations:    
 
         sys.stdout.write("\rIteration {}\nFit for Sig TT".format(iteration))
@@ -803,32 +686,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         try:
 
-            ##############
-            # HARD CODED #
-            ##############
+            # Store the parameter values and chi-square values for each iteration
+            params_sigTT_history = {'p13': []}
+            chi2_sigTT_history = []
+            fit_sigTT_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigTT_p13 = TGraph()
+            graph_sigTT_chi2 = TGraph()
+            graph_fit_sigTT_status = TGraph()
+            
             f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
             f_sigTT_pre.SetParNames("p13")
-            #tt0 = 0.0
-            #f_sigTT_pre.SetParameters(tt0, 0.0)
-            # Fixed unused parameters
-            #f_sigTT_pre.FixParameter(0, 0)
-            ##f_sigTT_pre.FixParameter(1, 0)
-            ##f_sigTT_pre.FixParameter(2, 0)
-            ##f_sigTT_pre.FixParameter(3, 0)
-            # Set range limit of used parameters
-            if tt0 != 0.0:
-                f_sigTT_pre.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
-            else: 
-                f_sigTT_pre.SetParLimits(0, -par_lim_sigtt_0, par_lim_sigtt_0)
-            # Fixing sigTT terms for testing
-            #f_sigTT_pre.FixParameter(0, tt0)
-            # Fixing sigTT terms to zero
-            #f_sigTT_pre.FixParameter(0, 0.0)
-            if DEBUG:
-                f_sigTT_pre.FixParameter(0, tt0)
-            ##############
-            ##############
-            ##############    
+            f_sigTT_pre.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
 
             #g_sigtt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0]*nsep.GetSelectedRows(), nsep.GetV3())
             g_sigtt = TGraphErrors()
@@ -875,32 +745,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
             g_sigtt_fit.GetYaxis().CenterTitle()
 
-            ##############
-            # HARD CODED #
-            ##############
             f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
             f_sigTT.SetParNames("p13")
-            #tt0 = 0.0
-            #f_sigTT.SetParameters(tt0, 0.0)
-            # Fixed unused parameters
-            #f_sigTT.FixParameter(0, 0)
-            ##f_sigTT.FixParameter(1, 0)
-            ##f_sigTT.FixParameter(2, 0)
-            ##f_sigTT.FixParameter(3, 0)
-            # Set range limit of used parameters
-            if tt0 != 0.0:
-                f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
-            else: 
-                f_sigTT.SetParLimits(0, -par_lim_sigtt_0, par_lim_sigtt_0)
-            # Fixing sigTT terms for testing
-            #f_sigTT.FixParameter(0, tt0)
-            # Fixing sigTT terms to zero
-            #f_sigTT.FixParameter(0, 0.0)
-            if DEBUG:
-                f_sigTT.FixParameter(0, tt0)    
-            ##############
-            ##############
-            ##############
+            f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
 
             g_q2_sigtt_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -932,6 +779,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigTT_status:
                 break
 
+            params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
+            chi2_sigTT_history.append(f_sigTT.GetChisquare())
+            fit_sigTT_status_history.append(1 if f_sigTT_status != 0 else 0)
+
+            # Update ROOT TGraphs for plotting
+            graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
+            graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
+            graph_fit_sigTT_status.SetPoint(iteration, iteration, 1 if f_sigTT_status != 0 else 0)
+            
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigTT_status_message == "Fit Successful")
 
@@ -940,7 +796,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.flush()
 
             # Adjust parameter limits within a random number
-            par_lim_sigtt_0 = random.uniform(0, 100)
+            par_lim_sigtt_0 = random.uniform(0, max_iterations)
 
         iteration += 1
             
