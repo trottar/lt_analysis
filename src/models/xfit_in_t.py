@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:22:22 trottar"
+# Time-stamp: "2024-06-28 14:23:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -285,7 +285,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Check the fit status for 'f_sigL'
             #f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
             f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
-            print("!!!!!!!!!!!!!!",r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
             #f_sigL_status = (f_sigL.GetNDF() != 0)
             f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
@@ -314,8 +313,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
 
             if f_sigL_status:
-                #break
-                sys.exit(2)
+                break
             
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
@@ -511,7 +509,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigT_status.SetPoint(iteration, iteration, 1 if f_sigT_status else 0)
 
             if f_sigT_status:
-                break
+                #break
+                sys.exit(2)            
             
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
