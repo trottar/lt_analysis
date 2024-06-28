@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 20:47:00 trottar"
+# Time-stamp: "2024-06-27 20:47:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -744,9 +744,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 break
 
             # Adjust parameter limits within a random number
-            par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, f_siglt_status_message == "Fit Successful")
-            par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, f_siglt_status_message == "Fit Successful")
-            par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_siglt_status_message == "Fit Successful")
+            par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, f_sigLT_status_message == "Fit Successful")
+            par_lim_siglt_1 = adaptive_parameter_adjustment(par_lim_siglt_1, f_sigLT_status_message == "Fit Successful")
+            par_lim_siglt_2 = adaptive_parameter_adjustment(par_lim_siglt_2, f_sigLT_status_message == "Fit Successful")
 
         except TypeError:
             print("TypeError encountered. Adjusting parameter limits and retrying...")
@@ -920,7 +920,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 break
 
             # Adjust parameter limits within a random number
-            par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigtt_status_message == "Fit Successful")
+            par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigTT_status_message == "Fit Successful")
 
         except TypeError:
             print("TypeError encountered. Adjusting parameter limits and retrying...")
