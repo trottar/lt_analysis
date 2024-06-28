@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:01:38 trottar"
+# Time-stamp: "2024-06-28 14:04:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,11 +206,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
     
-        sys.stdout.write("\r"+"Iteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
+        sys.stdout.write("\rIteration {}\r\nFit for Sig L\r\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
         sys.stdout.flush()
-        # Clear the rest of the line (in case the new message is shorter than the previous one)
-        sys.stdout.write("\033[K")        
-        
+
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
 
@@ -327,8 +325,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         except TypeError:
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
-            # Clear the rest of the line (in case the new message is shorter than the previous one)
-            sys.stdout.write("\033[K")            
 
             # Store the parameter values and chi-square values for each iteration
             params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -411,10 +407,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        sys.stdout.write("\r"+"Iteration {}\nFit for Sig T\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
+        sys.stdout.write("\rIteration {}\r\nFit for Sig T\r\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
         sys.stdout.flush()
-        # Clear the rest of the line (in case the new message is shorter than the previous one)
-        sys.stdout.write("\033[K")        
 
         c1.cd(2).SetLeftMargin(0.12)
         nsep.Draw("sigt:t:sigt_e", "", "goff")
@@ -526,8 +520,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         except TypeError:
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
-            # Clear the rest of the line (in case the new message is shorter than the previous one)
-            sys.stdout.write("\033[K")            
 
             # Store the parameter values and chi-square values for each iteration
             params_sigT_history = {'p5': [], 'p6': []}
@@ -608,10 +600,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
 
-        sys.stdout.write("\r"+"Iteration {}\nFit for Sig LT\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
+        sys.stdout.write("\rIteration {}\r\nFit for Sig LT\r\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
         sys.stdout.flush()
-        # Clear the rest of the line (in case the new message is shorter than the previous one)
-        sys.stdout.write("\033[K")        
 
         c1.cd(3).SetLeftMargin(0.12)
         nsep.Draw("siglt:t:siglt_e", "", "goff")
@@ -728,8 +718,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         except TypeError:
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
-            # Clear the rest of the line (in case the new message is shorter than the previous one)
-            sys.stdout.write("\033[K")            
 
             # Store the parameter values and chi-square values for each iteration
             params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -810,10 +798,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")        
     while iteration < max_iterations:    
 
-        sys.stdout.write("\r"+"Iteration {}\nFit for Sig TT\np13 = {}".format(iteration, par_lim_sigtt_0))
+        sys.stdout.write("\rIteration {}\r\nFit for Sig TT\r\np13 = {}".format(iteration, par_lim_sigtt_0))
         sys.stdout.flush()
-        # Clear the rest of the line (in case the new message is shorter than the previous one)
-        sys.stdout.write("\033[K")        
 
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
@@ -921,8 +907,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         except TypeError:
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
-            # Clear the rest of the line (in case the new message is shorter than the previous one)
-            sys.stdout.write("\033[K")            
 
             # Store the parameter values and chi-square values for each iteration
             params_sigTT_history = {'p13': []}
