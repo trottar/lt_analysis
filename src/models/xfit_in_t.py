@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 13:26:17 trottar"
+# Time-stamp: "2024-06-28 13:30:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -325,6 +325,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
 
+            # Store the parameter values and chi-square values for each iteration
+            params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
+            chi2_sigL_history = []
+            fit_sigL_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigL_p1 = TGraph()
+            graph_sigL_p2 = TGraph()
+            graph_sigL_p3 = TGraph()
+            graph_sigL_chi2 = TGraph()
+            graph_fit_sigL_status = TGraph()
+            
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = random.uniform(0, max_iterations)
             par_lim_sigl_1 = random.uniform(0, max_iterations)
@@ -349,7 +361,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(1).SetLeftMargin(0.12)
-    graph_sigL_p1.SetTitle("Parameter Convergence;Parameter;Iteration")
+    graph_sigL_p1.SetTitle("Parameter Convergence;Iteration;Parameter")
     graph_sigL_p1.SetLineColor(ROOT.kRed)
     graph_sigL_p2.SetLineColor(ROOT.kBlue)
     graph_sigL_p3.SetLineColor(ROOT.kGreen)
@@ -507,6 +519,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
 
+            # Store the parameter values and chi-square values for each iteration
+            params_sigT_history = {'p5': [], 'p6': []}
+            chi2_sigT_history = []
+            fit_sigT_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigT_p5 = TGraph()
+            graph_sigT_p6 = TGraph()
+            graph_sigT_chi2 = TGraph()
+            graph_fit_sigT_status = TGraph()                
+            
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = random.uniform(0, max_iterations)
             par_lim_sigt_1 = random.uniform(0, max_iterations)
@@ -530,7 +553,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(2).SetLeftMargin(0.12)
-    graph_sigT_p5.SetTitle("Parameter Convergence;Parameter;Iteration")
+    graph_sigT_p5.SetTitle("Parameter Convergence;Iteration;Parameter")
     graph_sigT_p5.SetLineColor(ROOT.kRed)
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
     graph_sigT_p5.Draw("ALP")
@@ -693,6 +716,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
 
+            # Store the parameter values and chi-square values for each iteration
+            params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
+            chi2_sigLT_history = []
+            fit_sigLT_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigLT_p9 = TGraph()
+            graph_sigLT_p10 = TGraph()
+            graph_sigLT_p11 = TGraph()
+            graph_sigLT_chi2 = TGraph()
+            graph_fit_sigLT_status = TGraph()                
+            
             # Adjust parameter limits within a random number
             par_lim_siglt_0 = random.uniform(0, max_iterations)
             par_lim_siglt_1 = random.uniform(0, max_iterations)
@@ -717,7 +752,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(3).SetLeftMargin(0.12)
-    graph_sigLT_p9.SetTitle("Parameter Convergence;Parameter;Iteration")
+    graph_sigLT_p9.SetTitle("Parameter Convergence;Iteration;Parameter")
     graph_sigLT_p9.SetLineColor(ROOT.kRed)
     graph_sigLT_p10.SetLineColor(ROOT.kBlue)
     graph_sigLT_p11.SetLineColor(ROOT.kGreen)
@@ -869,6 +904,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.write("\rTypeError encountered. Adjusting parameter limits and retrying...")
             sys.stdout.flush()
 
+            # Store the parameter values and chi-square values for each iteration
+            params_sigTT_history = {'p13': []}
+            chi2_sigTT_history = []
+            fit_sigTT_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigTT_p13 = TGraph()
+            graph_sigTT_chi2 = TGraph()
+            graph_fit_sigTT_status = TGraph()
+
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = random.uniform(0, max_iterations)
 
@@ -891,7 +936,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(4).SetLeftMargin(0.12)
-    graph_sigTT_p13.SetTitle("Parameter Convergence;Parameter;Iteration")
+    graph_sigTT_p13.SetTitle("Parameter Convergence;Iteration;Parameter")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
     graph_sigTT_p13.Draw("ALP")
 
