@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 12:36:29 trottar"
+# Time-stamp: "2024-06-28 12:44:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -194,7 +194,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
     
-        sys.stdout.write("\rIteration {}\nFit for Sig L".format(iteration))
+        sys.stdout.write("\rIteration {}\nFit for Sig L\np1 = {}, p2 = {}, p3 = {}".format(iteration, par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2))
         sys.stdout.flush()
 
         c1.cd(1).SetLeftMargin(0.12)
@@ -278,7 +278,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
                 g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM")
+            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "S")
 
             f_sigL.Draw("same")
 
@@ -305,7 +305,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             params_sigL_history['p2'].append(f_sigL.GetParameter(1))
             params_sigL_history['p3'].append(f_sigL.GetParameter(2))
             chi2_sigL_history.append(f_sigL.GetChisquare())
-            fit_sigL_status_history.append(1 if f_sigL_status != 0 else 0)
+            fit_sigL_status_history.append(1 if f_sigL_status else 0)
 
             # Update ROOT TGraphs for plotting
             graph_sigL_p1.SetPoint(iteration, iteration, f_sigL.GetParameter(0))
@@ -359,7 +359,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        sys.stdout.write("\rIteration {}\nFit for Sig T".format(iteration))
+        sys.stdout.write("\rIteration {}\nFit for Sig T\np5 = {}, p6 = {}".format(iteration, par_lim_sigt_0, par_lim_sigt_1))
         sys.stdout.flush()
 
         c1.cd(2).SetLeftMargin(0.12)
@@ -439,7 +439,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
                 g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SM")
+            r_sigt_fit = g_sigt_fit.Fit(f_sigT, "S")
 
             # Check the fit status for 'f_sigT'
             #f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -465,7 +465,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             params_sigT_history['p5'].append(f_sigT.GetParameter(0))
             params_sigT_history['p6'].append(f_sigT.GetParameter(1))
             chi2_sigT_history.append(f_sigT.GetChisquare())
-            fit_sigT_status_history.append(1 if f_sigT_status != 0 else 0)
+            fit_sigT_status_history.append(1 if f_sigT_status else 0)
 
             # Update ROOT TGraphs for plotting
             graph_sigT_p5.SetPoint(iteration, iteration, f_sigT.GetParameter(0))
@@ -516,7 +516,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_siglt_2 = random.uniform(0, max_iterations)
     while iteration < max_iterations:
 
-        sys.stdout.write("\rIteration {}\nFit for Sig LT".format(iteration))
+        sys.stdout.write("\rIteration {}\nFit for Sig LT\np9 = {}, p10 = {}, p11 = {}".format(iteration, par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2))
         sys.stdout.flush()
 
         c1.cd(3).SetLeftMargin(0.12)
@@ -599,7 +599,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
                 g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SM")
+            r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "S")
 
             # Check the fit status for 'f_sigLT'
             #f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -626,7 +626,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             params_sigLT_history['p10'].append(f_sigLT.GetParameter(1))
             params_sigLT_history['p11'].append(f_sigLT.GetParameter(2))
             chi2_sigLT_history.append(f_sigLT.GetChisquare())
-            fit_sigLT_status_history.append(1 if f_sigLT_status != 0 else 0)
+            fit_sigLT_status_history.append(1 if f_sigLT_status else 0)
 
             # Update ROOT TGraphs for plotting
             graph_sigLT_p9.SetPoint(iteration, iteration, f_sigLT.GetParameter(0))
@@ -678,7 +678,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigtt_0 = random.uniform(0, max_iterations)
     while iteration < max_iterations:    
 
-        sys.stdout.write("\rIteration {}\nFit for Sig TT".format(iteration))
+        sys.stdout.write("\rIteration {}\nFit for Sig TT\np13 = {}".format(iteration, par_lim_sigtt_0))
         sys.stdout.flush()
 
         c1.cd(4).SetLeftMargin(0.12)
@@ -756,7 +756,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                 g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SM")
+            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "S")
 
             # Check the fit status for 'f_sigTT'
             #f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -781,7 +781,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
             chi2_sigTT_history.append(f_sigTT.GetChisquare())
-            fit_sigTT_status_history.append(1 if f_sigTT_status != 0 else 0)
+            fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
 
             # Update ROOT TGraphs for plotting
             graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
