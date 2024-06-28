@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 14:16:36 trottar"
+# Time-stamp: "2024-06-28 14:17:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -278,7 +278,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
                 g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM"))
+            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM")
 
             f_sigL.Draw("same")
 
@@ -477,7 +477,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
                 g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SM"))
+            r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SM")
 
             # Check the fit status for 'f_sigT'
             #f_sigT_status = f_sigT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -672,7 +672,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
                 g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SM"))
+            r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SM")
 
             # Check the fit status for 'f_sigLT'
             #f_sigLT_status = f_sigLT.GetNDF()  # GetNDF() returns the number of degrees of freedom
@@ -867,7 +867,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                 g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
             # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SM"))
+            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SM")
 
             # Check the fit status for 'f_sigTT'
             #f_sigTT_status = f_sigTT.GetNDF()  # GetNDF() returns the number of degrees of freedom
