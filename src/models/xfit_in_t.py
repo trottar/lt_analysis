@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 22:41:04 trottar"
+# Time-stamp: "2024-06-28 00:40:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -783,7 +783,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigtt_0 = par_lim
     while iteration < max_iterations:    
 
-        print("Iteration {}\nFit for Sig L".format(iteration))
+        print("Iteration {}\nFit for Sig TT".format(iteration))
 
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
