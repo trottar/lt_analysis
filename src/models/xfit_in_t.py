@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 13:03:19 trottar"
+# Time-stamp: "2024-06-28 13:05:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -312,7 +312,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_p2.SetPoint(iteration, iteration, f_sigL.GetParameter(1))
             graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
             graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
-            graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status != 0 else 0)
+            graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
             
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
@@ -356,7 +356,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p1.Draw("ALP")
     graph_sigL_p2.Draw("LP SAME")
     graph_sigL_p3.Draw("LP SAME")
-    c3.BuildLegend()
     c3.Update()
 
     # Plot chi-square convergence
@@ -499,7 +498,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_p5.SetPoint(iteration, iteration, f_sigT.GetParameter(0))
             graph_sigT_p6.SetPoint(iteration, iteration, f_sigT.GetParameter(1))
             graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
-            graph_fit_sigT_status.SetPoint(iteration, iteration, 1 if f_sigT_status != 0 else 0)
+            graph_fit_sigT_status.SetPoint(iteration, iteration, 1 if f_sigT_status else 0)
             
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = adaptive_parameter_adjustment(par_lim_sigt_0, f_sigT_status_message == "Fit Successful")
@@ -539,7 +538,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
     graph_sigT_p5.Draw("ALP")
     graph_sigT_p6.Draw("LP SAME")
-    c3.BuildLegend()
     c3.Update()
 
     # Plot chi-square convergence
@@ -688,7 +686,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_p10.SetPoint(iteration, iteration, f_sigLT.GetParameter(1))
             graph_sigLT_p11.SetPoint(iteration, iteration, f_sigLT.GetParameter(2))
             graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
-            graph_fit_sigLT_status.SetPoint(iteration, iteration, 1 if f_sigLT_status != 0 else 0)
+            graph_fit_sigLT_status.SetPoint(iteration, iteration, 1 if f_sigLT_status else 0)
             
             # Adjust parameter limits within a random number
             par_lim_siglt_0 = adaptive_parameter_adjustment(par_lim_siglt_0, f_sigLT_status_message == "Fit Successful")
@@ -732,7 +730,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_p9.Draw("ALP")
     graph_sigLT_p10.Draw("LP SAME")
     graph_sigLT_p11.Draw("LP SAME")
-    c3.BuildLegend()
     c3.Update()
 
     # Plot chi-square convergence
@@ -870,7 +867,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Update ROOT TGraphs for plotting
             graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
             graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
-            graph_fit_sigTT_status.SetPoint(iteration, iteration, 1 if f_sigTT_status != 0 else 0)
+            graph_fit_sigTT_status.SetPoint(iteration, iteration, 1 if f_sigTT_status else 0)
             
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = adaptive_parameter_adjustment(par_lim_sigtt_0, f_sigTT_status_message == "Fit Successful")
@@ -906,7 +903,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_p13.SetTitle("Parameter Convergence;p13")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
     graph_sigTT_p13.Draw("ALP")
-    c3.BuildLegend()
     c3.Update()
 
     # Plot chi-square convergence
