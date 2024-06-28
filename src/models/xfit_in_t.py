@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 13:30:44 trottar"
+# Time-stamp: "2024-06-28 13:35:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -361,7 +361,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(1).SetLeftMargin(0.12)
-    graph_sigL_p1.SetTitle("Parameter Convergence;Iteration;Parameter")
+    graph_sigL_p1.SetTitle("Sig L Parameter Convergence;Iteration;Parameter")
     graph_sigL_p1.SetLineColor(ROOT.kRed)
     graph_sigL_p2.SetLineColor(ROOT.kBlue)
     graph_sigL_p3.SetLineColor(ROOT.kGreen)
@@ -371,13 +371,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot chi-square convergence
     c4.cd(1).SetLeftMargin(0.12)
-    graph_sigL_chi2.SetTitle("Chi-Square Convergence;Iteration;Chi-Square")
+    graph_sigL_chi2.SetTitle("Sig L Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigL_chi2.SetLineColor(ROOT.kBlack)
     graph_sigL_chi2.Draw("ALP")
 
     # Plot fit status
     c5.cd(1).SetLeftMargin(0.12)
-    graph_fit_sigL_status.SetTitle("Fit Status Over Iterations;Iteration;Fit Status")
+    graph_fit_sigL_status.SetTitle("Sig L Fit Status Over Iterations;Iteration;Fit Status")
     graph_fit_sigL_status.SetLineColor(ROOT.kMagenta)
     graph_fit_sigL_status.Draw("ALP")
 
@@ -553,7 +553,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(2).SetLeftMargin(0.12)
-    graph_sigT_p5.SetTitle("Parameter Convergence;Iteration;Parameter")
+    graph_sigT_p5.SetTitle("Sig T Parameter Convergence;Iteration;Parameter")
     graph_sigT_p5.SetLineColor(ROOT.kRed)
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
     graph_sigT_p5.Draw("ALP")
@@ -561,13 +561,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot chi-square convergence
     c4.cd(2).SetLeftMargin(0.12)
-    graph_sigT_chi2.SetTitle("Chi-Square Convergence;Iteration;Chi-Square")
+    graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigT_chi2.Draw("ALP")
 
     # Plot fit status
     c5.cd(2).SetLeftMargin(0.12)
-    graph_fit_sigT_status.SetTitle("Fit Status Over Iterations;Iteration;Fit Status")
+    graph_fit_sigT_status.SetTitle("Sig T Fit Status Over Iterations;Iteration;Fit Status")
     graph_fit_sigT_status.SetLineColor(ROOT.kMagenta)
     graph_fit_sigT_status.Draw("ALP")
     
@@ -752,7 +752,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(3).SetLeftMargin(0.12)
-    graph_sigLT_p9.SetTitle("Parameter Convergence;Iteration;Parameter")
+    graph_sigLT_p9.SetTitle("Sig LT Parameter Convergence;Iteration;Parameter")
     graph_sigLT_p9.SetLineColor(ROOT.kRed)
     graph_sigLT_p10.SetLineColor(ROOT.kBlue)
     graph_sigLT_p11.SetLineColor(ROOT.kGreen)
@@ -762,13 +762,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot chi-square convergence
     c4.cd(3).SetLeftMargin(0.12)
-    graph_sigLT_chi2.SetTitle("Chi-Square Convergence;Iteration;Chi-Square")
+    graph_sigLT_chi2.SetTitle("Sig LT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigLT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigLT_chi2.Draw("ALP")
 
     # Plot fit status
     c5.cd(3).SetLeftMargin(0.12)
-    graph_fit_sigLT_status.SetTitle("Fit Status Over Iterations;Iteration;Fit Status")
+    graph_fit_sigLT_status.SetTitle("Sig LT Fit Status Over Iterations;Iteration;Fit Status")
     graph_fit_sigLT_status.SetLineColor(ROOT.kMagenta)
     graph_fit_sigLT_status.Draw("ALP")
     
@@ -936,19 +936,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(4).SetLeftMargin(0.12)
-    graph_sigTT_p13.SetTitle("Parameter Convergence;Iteration;Parameter")
+    graph_sigTT_p13.SetTitle("Sig TT Parameter Convergence;Iteration;Parameter")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
     graph_sigTT_p13.Draw("ALP")
 
     # Plot chi-square convergence
     c4.cd(4).SetLeftMargin(0.12)
-    graph_sigTT_chi2.SetTitle("Chi-Square Convergence;Iteration;Chi-Square")
+    graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigTT_chi2.Draw("ALP")
 
     # Plot fit status
     c5.cd(4).SetLeftMargin(0.12)
-    graph_fit_sigTT_status.SetTitle("Fit Status Over Iterations;Iteration;Fit Status")
+    graph_fit_sigTT_status.SetTitle("Sig TT Fit Status Over Iterations;Iteration;Fit Status")
     graph_fit_sigTT_status.SetLineColor(ROOT.kMagenta)
     graph_fit_sigTT_status.Draw("ALP")
     
