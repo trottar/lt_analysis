@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 16:44:01 trottar"
+# Time-stamp: "2024-06-30 16:45:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1052,19 +1052,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c3.cd(4).SetLeftMargin(0.12)
     graph_sigTT_p13.SetTitle("Sig TT Parameter Convergence;Iteration;Parameter")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
-    graph_sigTT_p13.Draw("ALP")
+    graph_sigTT_p13.Draw("ALP same")
 
     # Plot chi-square convergence
     c4.cd(4).SetLeftMargin(0.12)
     graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigTT_chi2.Draw("ALP")
+    graph_sigTT_chi2.Draw("ALP same")
 
     # Plot fit status
     c5.cd(4).SetLeftMargin(0.12)
     graph_fit_sigTT_status.SetTitle("Sig TT Fit Status Over Iterations;Iteration;Fit Status")
     graph_fit_sigTT_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigTT_status.Draw("ALP")
+    graph_fit_sigTT_status.Draw("ALP same")
     
     print("\n")    
     
@@ -1090,3 +1090,5 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("\n\nDEBUG ENABLED: No changes to previous iteration...")
         for i,par in enumerate(prv_par_vec):
             print("par{} = {:.3f}".format(i+1, par))
+
+    sys.exit(2)            
