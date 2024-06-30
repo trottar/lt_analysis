@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:41:23 trottar"
+# Time-stamp: "2024-06-30 18:44:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -372,6 +372,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if unchanged_iterations >= max_unchanged_iterations:
                 #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
                 #unchanged_iterations = 0
+                f_sigL_status = True
+                f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"                
                 break
 
             previous_params = current_params[:]
@@ -629,6 +631,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if unchanged_iterations >= max_unchanged_iterations:
                 #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
                 #unchanged_iterations = 0
+                f_sigT_status = True
+                f_sigT_status_message = "Fit Successful" if f_sigT_status else "Fit Failed"                
                 break
 
             previous_params = current_params[:]                
@@ -891,6 +895,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if unchanged_iterations >= max_unchanged_iterations:
                 #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
                 #unchanged_iterations = 0
+                f_sigLT_status = True
+                f_sigLT_status_message = "Fit Successful" if f_sigLT_status else "Fit Failed"                
                 break
 
             previous_params = current_params[:]                
@@ -1139,6 +1145,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if unchanged_iterations >= max_unchanged_iterations:
                 #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
                 #unchanged_iterations = 0
+                f_sigTT_status = True
+                f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"                
                 break
 
             previous_params = current_params[:]                
