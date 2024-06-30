@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 14:56:50 trottar"
+# Time-stamp: "2024-06-30 15:01:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -44,7 +44,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_parameter_adjustment, simulated_annealing
+from utility import adaptive_parameter_adjustment, simulated_annealing, acceptance_probability
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -302,10 +302,36 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             f_sigL.Draw("same")
 
-            # Check the fit status for 'f_sigL'
-            #f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
+            old_chi2 = f_sigL.GetChisquare()
+
+            # Perturb parameters using simulated annealing
+            new_par_lim_sigl_0 = simulated_annealing(par_lim_sigl_0, temperature)
+            new_par_lim_sigl_1 = simulated_annealing(par_lim_sigl_1, temperature)
+            new_par_lim_sigl_2 = simulated_annealing(par_lim_sigl_2, temperature)
+
+            # Apply new parameter limits
+            if l0 != 0:
+                f_sigL.SetParLimits(0, l0-abs(l0*new_par_lim_sigl_0), l0+abs(l0*new_par_lim_sigl_0))
+            else:
+                f_sigL.SetParLimits(0, -new_par_lim_sigl_0, new_par_lim_sigl_0)
+            if l1 != 0:
+                f_sigL.SetParLimits(1, l1-abs(l1*new_par_lim_sigl_1), l1+abs(l1*new_par_lim_sigl_1))
+            else:
+                f_sigL.SetParLimits(1, -new_par_lim_sigl_1, new_par_lim_sigl_1)
+            if l2 != 0:
+                f_sigL.SetParLimits(2, l2-abs(l2*new_par_lim_sigl_2), l2+abs(l2*new_par_lim_sigl_2))
+            else:
+                f_sigL.SetParLimits(2, -new_par_lim_sigl_2, new_par_lim_sigl_2)
+
+            new_chi2 = f_sigL.GetChisquare()
+
+            # Check acceptance probability
+            if acceptance_probability(old_chi2, new_chi2, temperature) > random.random():
+                par_lim_sigl_0 = new_par_lim_sigl_0
+                par_lim_sigl_1 = new_par_lim_sigl_1
+                par_lim_sigl_2 = new_par_lim_sigl_2
+
             f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
-            #f_sigL_status = (f_sigL.GetNDF() != 0)
             f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
             fit_status = TText()
@@ -333,20 +359,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
 
             if f_sigL_status:
-                #break
-                sys.exit(2)
-            
-            # Adjust parameter limits within a random number
-            #par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
-            #par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
-            #par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
-            # Adjust parameter limits with simulated annealing
-            par_lim_sigl_0 = simulated_annealing(par_lim_sigl_0, f_sigL_status, temperature)
-            par_lim_sigl_1 = simulated_annealing(par_lim_sigl_1, f_sigL_status, temperature)
-            par_lim_sigl_2 = simulated_annealing(par_lim_sigl_2, f_sigL_status, temperature)
+                break
 
             # Update the temperature
-            temperature *= cooling_rate            
+            temperature *= cooling_rate
 
             iteration += 1
             
