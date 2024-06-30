@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:05:36 trottar"
+# Time-stamp: "2024-06-30 18:05:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,7 +357,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if current_params == f_previous_params:
+            if current_params == previous_params:
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -610,7 +610,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if current_params == f_previous_params:
+            if current_params == previous_params:
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -866,7 +866,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if current_params == f_previous_params:
+            if current_params == previous_params:
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -1112,7 +1112,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if current_params == f_previous_params:
+            if current_params == previous_params:
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
