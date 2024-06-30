@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 14:48:12 trottar"
+# Time-stamp: "2024-06-30 14:48:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -355,9 +355,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status = TGraph()
             
             # Adjust parameter limits within a random number
-            par_lim_sigl_0 = 100
-            par_lim_sigl_1 = 100
-            par_lim_sigl_2 = 100
+            par_lim_sigl_0 = random.uniform(0, max_iterations)
+            par_lim_sigl_1 = random.uniform(0, max_iterations)
+            par_lim_sigl_2 = random.uniform(0, max_iterations)
 
             iteration = 0
 
@@ -559,8 +559,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigT_status = TGraph()                
             
             # Adjust parameter limits within a random number
-            par_lim_sigt_0 = 100
-            par_lim_sigt_1 = 100
+            par_lim_sigt_0 = random.uniform(0, max_iterations)
+            par_lim_sigt_1 = random.uniform(0, max_iterations)
 
             iteration = 0
             
@@ -774,9 +774,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigLT_status = TGraph()                
             
             # Adjust parameter limits within a random number
-            par_lim_siglt_0 = 100
-            par_lim_siglt_1 = 100
-            par_lim_siglt_2 = 100
+            par_lim_siglt_0 = random.uniform(0, max_iterations)
+            par_lim_siglt_1 = random.uniform(0, max_iterations)
+            par_lim_siglt_2 = random.uniform(0, max_iterations)
 
             iteration = 0
             
@@ -965,7 +965,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigTT_status = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigtt_0 = 100
+            par_lim_sigtt_0 = random.uniform(0, max_iterations)
 
             iteration = 0
             
