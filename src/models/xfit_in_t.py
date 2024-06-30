@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:12:18 trottar"
+# Time-stamp: "2024-06-30 15:13:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,6 +317,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             if f_sigL_status:
                 #break
+                print(f_sigL.GetParameter(0))
+                print(f_sigL.GetParameter(1))
+                print(f_sigL.GetParameter(2))
+                print(f_sigL.GetParameter(3))
+                
                 sys.exit(2)
 
             # Calculate the cost (chi-square value) for the current parameters
