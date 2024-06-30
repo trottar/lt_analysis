@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:08:30 trottar"
+# Time-stamp: "2024-06-30 15:14:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -536,12 +536,6 @@ def get_centroid(hist, x_min, x_max):
     return [mean, mean_err]
 
 ################################################################################################################################################
-
-def adaptive_parameter_adjustment(param, success, factor=1.1):
-    if success:
-        return param / factor
-    else:
-        return param * factor
 
 def simulated_annealing(param, temperature):
     # Perturb the parameter based on the temperature
