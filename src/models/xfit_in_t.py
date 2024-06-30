@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 17:30:04 trottar"
+# Time-stamp: "2024-06-30 17:40:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -215,10 +215,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_cost = float('inf')
     previous_params = best_params[:]
 
-    print("/*--------------------------------------------------*/")
+    print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}\nFit for Sig L".format(iteration))
+        print("Iteration {}/{}\nFit for Sig L".format(iteration, max_iterations))
 
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
@@ -377,8 +377,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             iteration += 1
 
-        except TypeError or ZeroDivisionError:
-            print("WARNING: Adjusting parameter limits and retrying...")
+        except (TypeError or ZeroDivisionError) as e:
+            print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
             # Store the parameter values and chi-square values for each iteration
             params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -473,10 +473,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_cost = float('inf')
     previous_params = best_params[:]
     
-    print("/*--------------------------------------------------*/")
+    print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}\nFit for Sig T".format(iteration))
+        print("Iteration {}/{}\nFit for Sig T".format(iteration, max_iterations))
 
         c1.cd(2).SetLeftMargin(0.12)
         nsep.Draw("sigt:t:sigt_e", "", "goff")
@@ -630,8 +630,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             iteration += 1
 
-        except TypeError or ZeroDivisionError:
-            print("WARNING: Adjusting parameter limits and retrying...")
+        except (TypeError or ZeroDivisionError) as e:
+            print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
             # Store the parameter values and chi-square values for each iteration
             params_sigT_history = {'p5': [], 'p6': []}
@@ -724,10 +724,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_cost = float('inf')
     previous_params = best_params[:]
     
-    print("/*--------------------------------------------------*/")
+    print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}\nFit for Sig LT".format(iteration))
+        print("Iteration {}/{}\nFit for Sig LT".format(iteration, max_iterations))
 
         c1.cd(3).SetLeftMargin(0.12)
         nsep.Draw("siglt:t:siglt_e", "", "goff")
@@ -886,8 +886,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             iteration += 1
 
-        except TypeError or ZeroDivisionError:
-            print("WARNING: Adjusting parameter limits and retrying...")
+        except (TypeError or ZeroDivisionError) as e:
+            print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
             # Store the parameter values and chi-square values for each iteration
             params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -980,10 +980,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_cost = float('inf')
     previous_params = best_params[:]
     
-    print("/*--------------------------------------------------*/")
+    print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}\nFit for Sig TT".format(iteration))
+        print("Iteration {}/{}\nFit for Sig TT".format(iteration, max_iterations))
 
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
@@ -1132,8 +1132,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             iteration += 1
 
-        except TypeError or ZeroDivisionError:
-            print("WARNING: Adjusting parameter limits and retrying...")
+        except (TypeError or ZeroDivisionError) as e:
+            print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
             # Store the parameter values and chi-square values for each iteration
             params_sigTT_history = {'p13': []}
