@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 17:55:33 trottar"
+# Time-stamp: "2024-06-30 17:56:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -550,7 +550,8 @@ def acceptance_probability(old_cost, new_cost, temperature):
         try:
             return math.exp((old_cost - new_cost) / temperature)
         except ZeroDivisionError:
-            return math.exp((old_cost - new_cost) / 1.0)
+            temperature = 1.0
+            return math.exp((old_cost - new_cost) / temperature)
 
 ################################################################################################################################################
 
