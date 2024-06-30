@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 14:40:14 trottar"
+# Time-stamp: "2024-06-30 14:41:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,10 +104,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_err_vec = []
     par_chi2_vec = []
 
-    l0, l1, l2, l3 = random.uniform(0, max_iterations), random.uniform(0, max_iterations), random.uniform(0, max_iterations), random.uniform(0, max_iterations)
-    t0, t1, t2, t3 = random.uniform(0, max_iterations), random.uniform(0, max_iterations), random.uniform(0, max_iterations), random.uniform(0, max_iterations)
-    lt0, lt1, lt2, lt3 = random.uniform(0, max_iterations), random.uniform(0, max_iterations), random.uniform(0, max_iterations), random.uniform(0, max_iterations)
-    tt0, tt1, tt2, tt3 = random.uniform(0, max_iterations), random.uniform(0, max_iterations), random.uniform(0, max_iterations), random.uniform(0, max_iterations)
+    l0, l1, l2, l3 = 0, 0, 0, 0
+    t0, t1, t2, t3 = 0, 0, 0, 0
+    lt0, lt1, lt2, lt3 = 0, 0, 0, 0
+    tt0, tt1, tt2, tt3 = 0, 0, 0, 0
 
     fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:w:q2:thetacm")
@@ -135,8 +135,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
 
-    if iter_num > 2:
-        l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
+    #if iter_num > 2:
+    l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     
     ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     with open(ave_file_in, 'r') as f:
@@ -187,9 +187,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigl_0 = random.uniform(0, 1)
-    par_lim_sigl_1 = random.uniform(0, 1)
-    par_lim_sigl_2 = random.uniform(0, 1)
+    par_lim_sigl_0 = random.uniform(0, max_iterations)
+    par_lim_sigl_1 = random.uniform(0, max_iterations)
+    par_lim_sigl_2 = random.uniform(0, max_iterations)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -355,9 +355,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status = TGraph()
             
             # Adjust parameter limits within a random number
-            par_lim_sigl_0 = random.uniform(0, 1)
-            par_lim_sigl_1 = random.uniform(0, 1)
-            par_lim_sigl_2 = random.uniform(0, 1)
+            par_lim_sigl_0 = random.uniform(0, max_iterations)
+            par_lim_sigl_1 = random.uniform(0, max_iterations)
+            par_lim_sigl_2 = random.uniform(0, max_iterations)
 
             iteration = 0
 
@@ -406,8 +406,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigt_0 = random.uniform(0, 1)
-    par_lim_sigt_1 = random.uniform(0, 1)
+    par_lim_sigt_0 = random.uniform(0, max_iterations)
+    par_lim_sigt_1 = random.uniform(0, max_iterations)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
@@ -559,8 +559,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigT_status = TGraph()                
             
             # Adjust parameter limits within a random number
-            par_lim_sigt_0 = random.uniform(0, 1)
-            par_lim_sigt_1 = random.uniform(0, 1)
+            par_lim_sigt_0 = random.uniform(0, max_iterations)
+            par_lim_sigt_1 = random.uniform(0, max_iterations)
 
             iteration = 0
             
@@ -607,9 +607,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_siglt_0 = random.uniform(0, 1)
-    par_lim_siglt_1 = random.uniform(0, 1)
-    par_lim_siglt_2 = random.uniform(0, 1)
+    par_lim_siglt_0 = random.uniform(0, max_iterations)
+    par_lim_siglt_1 = random.uniform(0, max_iterations)
+    par_lim_siglt_2 = random.uniform(0, max_iterations)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -774,9 +774,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigLT_status = TGraph()                
             
             # Adjust parameter limits within a random number
-            par_lim_siglt_0 = random.uniform(0, 1)
-            par_lim_siglt_1 = random.uniform(0, 1)
-            par_lim_siglt_2 = random.uniform(0, 1)
+            par_lim_siglt_0 = random.uniform(0, max_iterations)
+            par_lim_siglt_1 = random.uniform(0, max_iterations)
+            par_lim_siglt_2 = random.uniform(0, max_iterations)
 
             iteration = 0
             
@@ -825,7 +825,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     iteration = 0
     # Initialize adaptive parameter limits
-    par_lim_sigtt_0 = random.uniform(0, 1)
+    par_lim_sigtt_0 = random.uniform(0, max_iterations)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
@@ -965,7 +965,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigTT_status = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigtt_0 = random.uniform(0, 1)
+            par_lim_sigtt_0 = random.uniform(0, max_iterations)
 
             iteration = 0
             
