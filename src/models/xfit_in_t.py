@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:32:11 trottar"
+# Time-stamp: "2024-06-30 15:33:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -428,7 +428,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         print("Iteration {}\nFit for Sig T".format(iteration))
 
-        c1.cd(1).SetLeftMargin(0.12)
+        c1.cd(2).SetLeftMargin(0.12)
         nsep.Draw("sigt:t:sigt_e", "", "goff")
 
         try:
@@ -472,7 +472,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_prv.SetMarkerStyle(25)
             g_sigt_prv.Draw("P")
 
-            c2.cd(1).SetLeftMargin(0.12)
+            c2.cd(2).SetLeftMargin(0.12)
             g_sigt_fit.SetTitle("Sigma L Model Fit")
             g_sigt_fit.Draw("A*")
 
@@ -505,7 +505,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigT_status_message))
 
-            c1.cd(1)
+            c1.cd(2)
             g_sigt_fit_tot.SetMarkerStyle(26)
             g_sigt_fit_tot.SetMarkerColor(2)
             g_sigt_fit_tot.SetLineColor(2)
@@ -633,7 +633,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         print("Iteration {}\nFit for Sig L".format(iteration))
 
-        c1.cd(1).SetLeftMargin(0.12)
+        c1.cd(3).SetLeftMargin(0.12)
         nsep.Draw("siglt:t:siglt_e", "", "goff")
 
         try:
@@ -679,7 +679,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_prv.SetMarkerStyle(25)
             g_siglt_prv.Draw("P")
 
-            c2.cd(1).SetLeftMargin(0.12)
+            c2.cd(3).SetLeftMargin(0.12)
             g_siglt_fit.SetTitle("Sigma L Model Fit")
             g_siglt_fit.Draw("A*")
 
@@ -713,7 +713,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigLT_status_message))
 
-            c1.cd(1)
+            c1.cd(3)
             g_siglt_fit_tot.SetMarkerStyle(26)
             g_siglt_fit_tot.SetMarkerColor(2)
             g_siglt_fit_tot.SetLineColor(2)
@@ -843,7 +843,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         print("Iteration {}\nFit for Sig TT".format(iteration))
 
-        c1.cd(1).SetLeftMargin(0.12)
+        c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
         try:
@@ -885,7 +885,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_prv.SetMarkerStyle(25)
             g_sigtt_prv.Draw("P")
 
-            c2.cd(1).SetLeftMargin(0.12)
+            c2.cd(4).SetLeftMargin(0.12)
             g_sigtt_fit.SetTitle("Sigma L Model Fit")
             g_sigtt_fit.Draw("A*")
 
@@ -917,7 +917,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
 
-            c1.cd(1)
+            c1.cd(4)
             g_sigtt_fit_tot.SetMarkerStyle(26)
             g_sigtt_fit_tot.SetMarkerColor(2)
             g_sigtt_fit_tot.SetLineColor(2)
