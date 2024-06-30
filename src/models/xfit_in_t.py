@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 16:53:01 trottar"
+# Time-stamp: "2024-06-30 16:56:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -276,6 +276,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigl_fit.GetYaxis().SetTitleSize(0.035)
             g_sigl_fit.GetYaxis().CenterTitle()
 
+            # Set axis limits to ensure everything is shown
+            x_min = min(g_sigl_fit.GetX())
+            x_max = max(g_sigl_fit.GetX())
+            y_min = min(g_sigl_fit.GetY())
+            y_max = max(g_sigl_fit.GetY())
+
+            # You can also set a margin to ensure all points are visible
+            margin = 0.1
+            g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+
             f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigL.SetParNames("p1", "p2", "p3")
             f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
@@ -502,6 +513,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_fit.GetYaxis().SetTitleSize(0.035)
             g_sigt_fit.GetYaxis().CenterTitle()
 
+            # Set axis limits to ensure everything is shown
+            x_min = min(g_sigt_fit.GetX())
+            x_max = max(g_sigt_fit.GetX())
+            y_min = min(g_sigt_fit.GetY())
+            y_max = max(g_sigt_fit.GetY())
+
+            # You can also set a margin to ensure all points are visible
+            margin = 0.1
+            g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+
             f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
             f_sigT.SetParNames("p5", "p6")
             f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
@@ -725,6 +747,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_fit.GetYaxis().SetTitleSize(0.035)
             g_siglt_fit.GetYaxis().CenterTitle()
 
+            # Set axis limits to ensure everything is shown
+            x_min = min(g_siglt_fit.GetX())
+            x_max = max(g_siglt_fit.GetX())
+            y_min = min(g_siglt_fit.GetY())
+            y_max = max(g_siglt_fit.GetY())
+
+            # You can also set a margin to ensure all points are visible
+            margin = 0.1
+            g_siglt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            g_siglt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+            
             f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
             f_sigLT.SetParNames("p9", "p10", "p11")
             f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
@@ -947,6 +980,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
             g_sigtt_fit.GetYaxis().CenterTitle()
 
+            # Set axis limits to ensure everything is shown
+            x_min = min(g_sigtt_fit.GetX())
+            x_max = max(g_sigtt_fit.GetX())
+            y_min = min(g_sigtt_fit.GetY())
+            y_max = max(g_sigtt_fit.GetY())
+
+            # You can also set a margin to ensure all points are visible
+            margin = 0.1
+            g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+            
             f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
             f_sigTT.SetParNames("p13")
             f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
