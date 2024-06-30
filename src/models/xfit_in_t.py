@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 17:53:59 trottar"
+# Time-stamp: "2024-06-30 17:58:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -358,7 +358,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             unchanged_iterations += 1
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(round_to_sig_figs(current_params[i], 5) == round_to_sig_figs(previous_params[i], 5) for i in range(3)):
+            if all(round(current_params[i], 5) == round(previous_params[i], 5) for i in range(3)):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
