@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:38:07 trottar"
+# Time-stamp: "2024-06-30 18:39:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -370,7 +370,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Adjust the cooling rate if parameters haven't changed for 3 iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                cooling_rate = 0.9  # Adjust cooling rate to encourage more exploration
                 unchanged_iterations = 0
 
             previous_params = current_params[:]
