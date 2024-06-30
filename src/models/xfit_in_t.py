@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:05:59 trottar"
+# Time-stamp: "2024-06-30 18:15:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -355,9 +355,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if acceptance_probability(best_cost, current_cost, temperature) > random.random():
                 best_params = current_params
                 best_cost = current_cost
-
+                
             # Check if current parameters haven't changed for the past 3 iterations
-            if current_params == previous_params:
+            if all(par == params_sigL_history['p1'][-1] for par in params_sigL_history['p1']) and \
+               all(par == params_sigL_history['p2'][-1] for par in params_sigL_history['p2']) and \
+               all(par == params_sigL_history['p3'][-1] for par in params_sigL_history['p3']):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -370,7 +372,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             previous_params = current_params[:]
 
             # Update parameter limits
-            par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params                
+            par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params
 
             # Update the temperature
             temperature *= cooling_rate
@@ -610,7 +612,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if current_params == previous_params:
+            if all(par == params_sigL_history['p5'][-1] for par in params_sigL_history['p5']) and \
+               all(par == params_sigL_history['p6'][-1] for par in params_sigL_history['p6']):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -866,7 +869,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if current_params == previous_params:
+            if all(par == params_sigL_history['p9'][-1] for par in params_sigL_history['p9']) and \
+               all(par == params_sigL_history['p11'][-1] for par in params_sigL_history['p11']) and \
+               all(par == params_sigL_history['p12'][-1] for par in params_sigL_history['p12']):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -1112,7 +1117,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if current_params == previous_params:
+            if all(par == params_sigL_history['p13'][-1] for par in params_sigL_history['p13']):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
