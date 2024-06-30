@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 17:21:28 trottar"
+# Time-stamp: "2024-06-30 17:29:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -378,7 +378,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             iteration += 1
 
         except TypeError or ZeroDivisionError:
-            print("\rError encountered. Adjusting parameter limits and retrying...")
+            print("WARNING: Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
             params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -393,11 +393,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigl_0 = random.uniform(0, 1)
-            par_lim_sigl_1 = random.uniform(0, 1)
-            par_lim_sigl_2 = random.uniform(0, 1)
+            par_lim_sigl_0 = random.uniform(par_lim_sigl_0, par_lim_sigl_0*10)
+            par_lim_sigl_1 = random.uniform(par_lim_sigl_1, par_lim_sigl_1*10)
+            par_lim_sigl_2 = random.uniform(par_lim_sigl_2, par_lim_sigl_2*10)
 
             iteration += 1
+
+    if iteration == max_iterations:
+        print("ERROR: Sig L failed to converge!")
+        sys.exit(2)
         
     par_vec.append(f_sigL.GetParameter(0))
     par_vec.append(f_sigL.GetParameter(1))
@@ -627,7 +631,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             iteration += 1
 
         except TypeError or ZeroDivisionError:
-            print("\rError encountered. Adjusting parameter limits and retrying...")
+            print("WARNING: Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
             params_sigT_history = {'p5': [], 'p6': []}
@@ -641,10 +645,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigT_status = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigt_0 = random.uniform(0, 1)
-            par_lim_sigt_1 = random.uniform(0, 1)
+            par_lim_sigt_0 = random.uniform(par_lim_sigt_0, par_lim_sigt_0*10)
+            par_lim_sigt_1 = random.uniform(par_lim_sigt_1, par_lim_sigt_1*10)
 
             iteration += 1
+
+    if iteration == max_iterations:
+        print("ERROR: Sig T failed to converge!")
+        sys.exit(2)
             
     par_vec.append(f_sigT.GetParameter(0))
     par_vec.append(f_sigT.GetParameter(1))
@@ -879,7 +887,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             iteration += 1
 
         except TypeError or ZeroDivisionError:
-            print("\rError encountered. Adjusting parameter limits and retrying...")
+            print("WARNING: Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
             params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -894,11 +902,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigLT_status = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_siglt_0 = random.uniform(0, 1)
-            par_lim_siglt_1 = random.uniform(0, 1)
-            par_lim_siglt_2 = random.uniform(0, 1)
+            par_lim_siglt_0 = random.uniform(par_lim_siglt_0, par_lim_siglt_0*10)
+            par_lim_siglt_1 = random.uniform(par_lim_siglt_1, par_lim_siglt_1*10)
+            par_lim_siglt_2 = random.uniform(par_lim_siglt_2, par_lim_siglt_2*10)
 
             iteration += 1
+
+    if iteration == max_iterations:
+        print("ERROR: Sig LT failed to converge!")
+        sys.exit(2)
     
     par_vec.append(f_sigLT.GetParameter(0))
     par_vec.append(f_sigLT.GetParameter(1))
@@ -1121,7 +1133,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             iteration += 1
 
         except TypeError or ZeroDivisionError:
-            print("\rError encountered. Adjusting parameter limits and retrying...")
+            print("WARNING: Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
             params_sigTT_history = {'p13': []}
@@ -1134,9 +1146,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigTT_status = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigtt_0 = random.uniform(0, 1)
+            par_lim_sigtt_0 = random.uniform(par_lim_sigtt_0, par_lim_sigtt_0*10)
 
             iteration += 1
+
+    if iteration == max_iterations:
+        print("ERROR: Sig TT failed to converge!")
+        sys.exit(2)
             
     par_vec.append(f_sigTT.GetParameter(0))
     par_vec.append(f_sigTT.GetParameter(1))
