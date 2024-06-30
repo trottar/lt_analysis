@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 16:52:33 trottar"
+# Time-stamp: "2024-06-30 16:53:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,8 +50,6 @@ from utility import simulated_annealing, acceptance_probability
 # Suppressing the terminal splash of Print()
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
-# Suppress the warnings by adjusting the print level of Minuit
-ROOT.gMinuit.SetPrintLevel(-1)  # -1 to suppress most warnings
 ##################################################################################################################################################
 
 # Define constants
