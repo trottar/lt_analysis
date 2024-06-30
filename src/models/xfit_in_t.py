@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:15:35 trottar"
+# Time-stamp: "2024-06-30 18:20:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,9 +357,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
                 
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(par == params_sigL_history['p1'][-1] for par in params_sigL_history['p1']) and \
-               all(par == params_sigL_history['p2'][-1] for par in params_sigL_history['p2']) and \
-               all(par == params_sigL_history['p3'][-1] for par in params_sigL_history['p3']):
+            if all(round(par, 5) == round(params_sigL_history['p1'][-1], 5) for par in params_sigL_history['p1']) and \
+               all(round(par, 5) == round(params_sigL_history['p2'][-1], 5) for par in params_sigL_history['p2']) and \
+               all(round(par, 5) == round(params_sigL_history['p3'][-1], 5) for par in params_sigL_history['p3']):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -612,8 +612,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(par == params_sigL_history['p5'][-1] for par in params_sigL_history['p5']) and \
-               all(par == params_sigL_history['p6'][-1] for par in params_sigL_history['p6']):
+            if all(round(par, 5) == round(params_sigL_history['p5'][-1], 5) for par in params_sigL_history['p5']) and \
+               all(round(par, 5) == round(params_sigL_history['p6'][-1], 5) for par in params_sigL_history['p6']):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -869,9 +869,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(par == params_sigL_history['p9'][-1] for par in params_sigL_history['p9']) and \
-               all(par == params_sigL_history['p11'][-1] for par in params_sigL_history['p11']) and \
-               all(par == params_sigL_history['p12'][-1] for par in params_sigL_history['p12']):
+            if all(round(par, 5) == round(params_sigL_history['p9'][-1], 5) for par in params_sigL_history['p9']) and \
+               all(round(par, 5) == round(params_sigL_history['p11'][-1], 5) for par in params_sigL_history['p11']) and \
+               all(round(par, 5) == round(params_sigL_history['p12'][-1], 5) for par in params_sigL_history['p12']):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -1117,7 +1117,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(par == params_sigL_history['p13'][-1] for par in params_sigL_history['p13']):
+            if all(round(par, 5) == round(params_sigL_history['p13'][-1], 5) for par in params_sigL_history['p13']):
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
