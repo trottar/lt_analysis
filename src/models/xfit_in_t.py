@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-28 23:03:52 trottar"
+# Time-stamp: "2024-06-30 14:33:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -215,9 +215,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
             f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigL_pre.SetParNames("p1","p2","p3")
-            f_sigL_pre.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
-            f_sigL_pre.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
-            f_sigL_pre.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
+            if l0 != 0:
+                f_sigL_pre.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
+            else:
+                f_sigL_pre.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
+            if l1 != 0:
+                f_sigL_pre.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
+            else:
+                f_sigL_pre.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
+            if l2 != 0:
+                f_sigL_pre.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
+            else:
+                f_sigL_pre.SetParLimits(2, -par_lim_sigl_2, par_lim_sigl_2)
 
             #g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
             g_sigl = TGraphErrors()
@@ -266,9 +275,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Fixed unused parameters
             f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigL.SetParNames("p1","p2","p3")
-            f_sigL.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
-            f_sigL.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
-            f_sigL.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
+            if l0 != 0:
+                f_sigL.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
+            else:
+                f_sigL.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
+            if l1 != 0:
+                f_sigL.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
+            else:
+                f_sigL.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
+            if l2 != 0:
+                f_sigL.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
+            else:
+                f_sigL.SetParLimits(2, -par_lim_sigl_2, par_lim_sigl_2)
 
             g_q2_sigl_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -414,8 +432,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
             f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
             f_sigT_pre.SetParNames("p5","p6")
-            f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
-            f_sigT_pre.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
+            if t0 != 0:
+                f_sigT_pre.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
+            else:
+                f_sigT_pre.SetParLimits(0, -par_lim_sigt_0, par_lim_sigt_0)
+            if t1 != 0:
+                f_sigT_pre.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
+            else:
+                f_sigT_pre.SetParLimits(1, -par_lim_sigt_1, par_lim_sigt_1)
 
             #g_sigt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0] * nsep.GetSelectedRows(), nsep.GetV3())
             g_sigt = TGraphErrors()
@@ -463,8 +487,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
             f_sigT.SetParNames("p5","p6")
-            f_sigT.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
-            f_sigT.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
+            if t0 != 0:
+                f_sigT.SetParLimits(0, t0-abs(t0*par_lim_sigt_0), t0+abs(t0*par_lim_sigt_0))
+            else:
+                f_sigT.SetParLimits(0, -par_lim_sigt_0, par_lim_sigt_0)
+            if t1 != 0:
+                f_sigT.SetParLimits(1, t1-abs(t1*par_lim_sigt_1), t1+abs(t1*par_lim_sigt_1))
+            else:
+                f_sigT.SetParLimits(1, -par_lim_sigt_1, par_lim_sigt_1)
 
             g_q2_sigt_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -605,9 +635,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
             f_sigLT_pre.SetParNames("p9","p10","p11")
-            f_sigLT_pre.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
-            f_sigLT_pre.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
-            f_sigLT_pre.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
+            if lt0 != 0:
+                f_sigLT_pre.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
+            else:
+                f_sigLT_pre.SetParLimits(0, -par_lim_siglt_0, par_lim_siglt_0)
+            if lt1 != 0:
+                f_sigLT_pre.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
+            else:
+                f_sigLT_pre.SetParLimits(1, -par_lim_siglt_1, par_lim_siglt_1)
+            if lt2 != 0:
+                f_sigLT_pre.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
+            else:
+                f_sigLT_pre.SetParLimits(2, -par_lim_siglt_2, par_lim_siglt_2)
 
             #g_siglt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), ROOT.nullptr, nsep.GetV3())
             g_siglt = TGraphErrors()
@@ -655,9 +694,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
             f_sigLT.SetParNames("p9","p10","p11")
-            f_sigLT.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
-            f_sigLT.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
-            f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
+            if lt0 != 0:
+                f_sigLT.SetParLimits(0, lt0-abs(lt0*par_lim_siglt_0), lt0+abs(lt0*par_lim_siglt_0))
+            else:
+                f_sigLT.SetParLimits(0, -par_lim_siglt_0, par_lim_siglt_0)
+            if lt1 != 0:
+                f_sigLT.SetParLimits(1, lt1-abs(lt1*par_lim_siglt_1), lt1+abs(lt1*par_lim_siglt_1))
+            else:
+                f_sigLT.SetParLimits(1, -par_lim_siglt_1, par_lim_siglt_1)
+            if lt2 != 0:
+                f_sigLT.SetParLimits(2, lt2-abs(lt2*par_lim_siglt_2), lt2+abs(lt2*par_lim_siglt_2))
+            else:
+                f_sigLT.SetParLimits(2, -par_lim_siglt_2, par_lim_siglt_2)
 
             g_q2_siglt_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -801,7 +849,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
             f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
             f_sigTT_pre.SetParNames("p13")
-            f_sigTT_pre.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
+            if tt0 != 0:
+                f_sigTT_pre.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
+            else:
+                f_sigTT_pre.SetParLimits(0, -par_lim_sigtt_0, par_lim_sigtt_0)
 
             #g_sigtt = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), [0]*nsep.GetSelectedRows(), nsep.GetV3())
             g_sigtt = TGraphErrors()
@@ -850,7 +901,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
             f_sigTT.SetParNames("p13")
-            f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
+            if tt0 != 0:
+                f_sigTT.SetParLimits(0, tt0-abs(tt0*par_lim_sigtt_0), tt0+abs(tt0*par_lim_sigtt_0))
+            else:
+                f_sigTT.SetParLimits(0, -par_lim_sigtt_0, par_lim_sigtt_0)
 
             g_q2_sigtt_fit = TGraphErrors()
             for i in range(len(w_vec)):
