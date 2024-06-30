@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 17:40:29 trottar"
+# Time-stamp: "2024-06-30 17:41:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -377,7 +377,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             iteration += 1
 
-        except (TypeError or ZeroDivisionError) as e:
+        except (TypeError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
             # Store the parameter values and chi-square values for each iteration
@@ -630,7 +630,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             iteration += 1
 
-        except (TypeError or ZeroDivisionError) as e:
+        except (TypeError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
             # Store the parameter values and chi-square values for each iteration
@@ -886,7 +886,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             iteration += 1
 
-        except (TypeError or ZeroDivisionError) as e:
+        except (TypeError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
             # Store the parameter values and chi-square values for each iteration
@@ -1132,7 +1132,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             iteration += 1
 
-        except (TypeError or ZeroDivisionError) as e:
+        except (TypeError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
             # Store the parameter values and chi-square values for each iteration
