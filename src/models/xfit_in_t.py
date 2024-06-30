@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:24:45 trottar"
+# Time-stamp: "2024-06-30 15:26:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -438,7 +438,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 simulated_annealing(par_lim_sigt_1, temperature)
             ]
 
-            f_sigT_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
+            f_sigT_pre = TF1("sig_T", fun_Sig_L, tmin_range, tmax_range, 2)
             f_sigT_pre.SetParNames("p5", "p6")
             f_sigT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
             f_sigT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
@@ -483,7 +483,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_fit.GetYaxis().SetTitleSize(0.035)
             g_sigt_fit.GetYaxis().CenterTitle()
 
-            f_sigT = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
+            f_sigT = TF1("sig_T", fun_Sig_L, tmin_range, tmax_range, 2)
             f_sigT.SetParNames("p5", "p6")
             f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
             f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
@@ -644,7 +644,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 simulated_annealing(par_lim_siglt_2, temperature)
             ]
 
-            f_sigLT_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+            f_sigLT_pre = TF1("sig_LT", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigLT_pre.SetParNames("p9", "p10", "p11")
             f_sigLT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
             f_sigLT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
@@ -690,7 +690,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_fit.GetYaxis().SetTitleSize(0.035)
             g_siglt_fit.GetYaxis().CenterTitle()
 
-            f_sigLT = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+            f_sigLT = TF1("sig_LT", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigLT.SetParNames("p9", "p10", "p11")
             f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
             f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
@@ -852,7 +852,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 simulated_annealing(par_lim_sigtt_0, temperature)
             ]
 
-            f_sigTT_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 1)
+            f_sigTT_pre = TF1("sig_TT", fun_Sig_L, tmin_range, tmax_range, 1)
             f_sigTT_pre.SetParNames("p9")
             f_sigTT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
 
@@ -896,7 +896,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
             g_sigtt_fit.GetYaxis().CenterTitle()
 
-            f_sigTT = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 1)
+            f_sigTT = TF1("sig_TT", fun_Sig_L, tmin_range, tmax_range, 1)
             f_sigTT.SetParNames("p9")
             f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
 
