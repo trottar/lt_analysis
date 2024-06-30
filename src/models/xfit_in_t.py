@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 16:39:15 trottar"
+# Time-stamp: "2024-06-30 16:44:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -477,12 +477,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
                 g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-            g_sigt.SetTitle("Sig L")
+            g_sigt.SetTitle("Sig T")
             g_sigt.SetMarkerStyle(5)
             g_sigt.Draw("AP")
             g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sigt.GetXaxis().CenterTitle()
-            g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+            g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [nb/GeV^{2}]")
             g_sigt.GetYaxis().SetTitleOffset(1.5)
             g_sigt.GetYaxis().SetTitleSize(0.035)
             g_sigt.GetYaxis().CenterTitle()
@@ -492,12 +492,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_prv.Draw("P")
 
             c2.cd(2).SetLeftMargin(0.12)
-            g_sigt_fit.SetTitle("Sigma L Model Fit")
+            g_sigt_fit.SetTitle("Sigma T Model Fit")
             g_sigt_fit.Draw("A*")
 
             g_sigt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sigt_fit.GetXaxis().CenterTitle()
-            g_sigt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+            g_sigt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [nb/GeV^{2}]")
             g_sigt_fit.GetYaxis().SetTitleOffset(1.5)
             g_sigt_fit.GetYaxis().SetTitleSize(0.035)
             g_sigt_fit.GetYaxis().CenterTitle()
@@ -700,12 +700,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
                 g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
-            g_siglt.SetTitle("Sig L")
+            g_siglt.SetTitle("Sig LT")
             g_siglt.SetMarkerStyle(5)
             g_siglt.Draw("AP")
             g_siglt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_siglt.GetXaxis().CenterTitle()
-            g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+            g_siglt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
             g_siglt.GetYaxis().SetTitleOffset(1.5)
             g_siglt.GetYaxis().SetTitleSize(0.035)
             g_siglt.GetYaxis().CenterTitle()
@@ -715,12 +715,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_prv.Draw("P")
 
             c2.cd(3).SetLeftMargin(0.12)
-            g_siglt_fit.SetTitle("Sigma L Model Fit")
+            g_siglt_fit.SetTitle("Sigma LT Model Fit")
             g_siglt_fit.Draw("A*")
 
             g_siglt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_siglt_fit.GetXaxis().CenterTitle()
-            g_siglt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+            g_siglt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{LT} [nb/GeV^{2}]")
             g_siglt_fit.GetYaxis().SetTitleOffset(1.5)
             g_siglt_fit.GetYaxis().SetTitleSize(0.035)
             g_siglt_fit.GetYaxis().CenterTitle()
@@ -922,12 +922,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
                 g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
-            g_sigtt.SetTitle("Sig L")
+            g_sigtt.SetTitle("Sig TT")
             g_sigtt.SetMarkerStyle(5)
             g_sigtt.Draw("AP")
             g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sigtt.GetXaxis().CenterTitle()
-            g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+            g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
             g_sigtt.GetYaxis().SetTitleOffset(1.5)
             g_sigtt.GetYaxis().SetTitleSize(0.035)
             g_sigtt.GetYaxis().CenterTitle()
@@ -937,12 +937,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_prv.Draw("P")
 
             c2.cd(4).SetLeftMargin(0.12)
-            g_sigtt_fit.SetTitle("Sigma L Model Fit")
+            g_sigtt_fit.SetTitle("Sigma TT Model Fit")
             g_sigtt_fit.Draw("A*")
 
             g_sigtt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sigtt_fit.GetXaxis().CenterTitle()
-            g_sigtt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+            g_sigtt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
             g_sigtt_fit.GetYaxis().SetTitleOffset(1.5)
             g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
             g_sigtt_fit.GetYaxis().CenterTitle()
