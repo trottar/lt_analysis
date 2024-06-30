@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:01:34 trottar"
+# Time-stamp: "2024-06-30 15:01:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -359,7 +359,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
 
             if f_sigL_status:
-                break
+                #break
+                sys.exit(2)
 
             # Update the temperature
             temperature *= cooling_rate
