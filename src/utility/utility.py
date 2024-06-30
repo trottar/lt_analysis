@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-27 16:38:23 trottar"
+# Time-stamp: "2024-06-30 14:54:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -541,4 +541,19 @@ def adaptive_parameter_adjustment(param, success, factor=1.1):
     else:
         return param * factor
 
+def simulated_annealing(param, success, temperature):
+    # If success, keep the parameter, otherwise perturb it based on temperature
+    if success:
+        return param
+    else:
+        perturbation = random.uniform(-1, 1) * temperature
+        return param + perturbation
+
+def acceptance_probability(old_cost, new_cost, temperature):
+    # Calculate the probability of accepting a worse solution
+    if new_cost < old_cost:
+        return 1.0
+    else:
+        return math.exp((old_cost - new_cost) / temperature)
+    
 ################################################################################################################################################
