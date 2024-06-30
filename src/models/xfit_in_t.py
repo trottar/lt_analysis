@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:28:28 trottar"
+# Time-stamp: "2024-06-30 15:29:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -830,7 +830,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     fit_sigTT_status_history = []
 
     # Create TGraphs for parameter convergence
-    graph_sigTT_p9 = TGraph()
+    graph_sigTT_p13 = TGraph()
     graph_sigTT_chi2 = TGraph()
     graph_fit_sigTT_status = TGraph()
 
@@ -853,7 +853,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             ]
 
             f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
-            f_sigTT_pre.SetParNames("p9")
+            f_sigTT_pre.SetParNames("p13")
             f_sigTT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
 
             g_sigtt = TGraphErrors()
@@ -897,7 +897,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit.GetYaxis().CenterTitle()
 
             f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
-            f_sigTT.SetParNames("p9")
+            f_sigTT.SetParNames("p13")
             f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
 
             g_q2_sigtt_fit = TGraphErrors()
@@ -923,12 +923,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit_tot.SetLineColor(2)
             g_sigtt_fit_tot.Draw("LP")
 
-            params_sigTT_history['p9'].append(f_sigTT.GetParameter(0))
+            params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
             chi2_sigTT_history.append(f_sigTT.GetChisquare())
             fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
 
             # Update ROOT TGraphs for plotting
-            graph_sigTT_p9.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
+            graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
             graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
             graph_fit_sigTT_status.SetPoint(iteration, iteration, 1 if f_sigTT_status else 0)
 
@@ -955,12 +955,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("\rTypeError encountered. Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
-            params_sigTT_history = {'p9': []}
+            params_sigTT_history = {'p13': []}
             chi2_sigTT_history = []
             fit_sigTT_status_history = []
 
             # Create TGraphs for parameter convergence
-            graph_sigTT_p9 = TGraph()
+            graph_sigTT_p13 = TGraph()
             graph_sigTT_chi2 = TGraph()
             graph_fit_sigTT_status = TGraph()
 
