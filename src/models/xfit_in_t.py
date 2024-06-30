@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 16:56:48 trottar"
+# Time-stamp: "2024-06-30 17:03:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -293,6 +293,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
             f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
 
+            # Evaluate the fit function at several points to determine its range
+            n_points = 100  # Number of points to evaluate the fit function
+            fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
+
+            # Extend the y-axis range to include the fit function range
+            y_min = min(y_min, fit_y_min)
+            y_max = max(y_max, fit_y_max)
+
+            # Set a margin to ensure all points are visible
+            margin = 0.1 * (y_max - y_min)
+            g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            
             g_q2_sigl_fit = TGraphErrors()
             for i in range(len(w_vec)):
                 g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
@@ -529,6 +543,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
             f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
 
+            # Evaluate the fit function at several points to determine its range
+            n_points = 100  # Number of points to evaluate the fit function
+            fit_y_values = [f_sigt.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
+
+            # Extend the y-axis range to include the fit function range
+            y_min = min(y_min, fit_y_min)
+            y_max = max(y_max, fit_y_max)
+
+            # Set a margin to ensure all points are visible
+            margin = 0.1 * (y_max - y_min)
+            g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            
             g_q2_sigt_fit = TGraphErrors()
             for i in range(len(w_vec)):
                 g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
@@ -764,6 +792,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
             f_sigLT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
 
+            # Evaluate the fit function at several points to determine its range
+            n_points = 100  # Number of points to evaluate the fit function
+            fit_y_values = [f_siglt.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
+
+            # Extend the y-axis range to include the fit function range
+            y_min = min(y_min, fit_y_min)
+            y_max = max(y_max, fit_y_max)
+
+            # Set a margin to ensure all points are visible
+            margin = 0.1 * (y_max - y_min)
+            g_siglt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            
             g_q2_siglt_fit = TGraphErrors()
             for i in range(len(w_vec)):
                 g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
@@ -994,6 +1036,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
             f_sigTT.SetParNames("p13")
             f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
+
+            # Evaluate the fit function at several points to determine its range
+            n_points = 100  # Number of points to evaluate the fit function
+            fit_y_values = [f_sigtt.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
+
+            # Extend the y-axis range to include the fit function range
+            y_min = min(y_min, fit_y_min)
+            y_max = max(y_max, fit_y_max)
+
+            # Set a margin to ensure all points are visible
+            margin = 0.1 * (y_max - y_min)
+            g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
             g_q2_sigtt_fit = TGraphErrors()
             for i in range(len(w_vec)):
