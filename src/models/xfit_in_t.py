@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 16:36:21 trottar"
+# Time-stamp: "2024-06-30 16:37:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -198,9 +198,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigl_2 = random.uniform(0, 1)
 
     # Store the parameter values and chi-square values for each iteration
-    params_sigL_history = {'p1': [0.0], 'p2': [0.0], 'p3': [0.0]}
-    chi2_sigL_history = [0.0]
-    fit_sigL_status_history = [0.0]
+    params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
+    chi2_sigL_history = []
+    fit_sigL_status_history = []
 
     # Create TGraphs for parameter convergence
     graph_sigL_p1 = TGraph()
@@ -354,9 +354,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("\rError encountered. Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
-            params_sigL_history = {'p1': [0.0], 'p2': [0.0], 'p3': [0.0]}
-            chi2_sigL_history = [0.0]
-            fit_sigL_status_history = [0.0]
+            params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
+            chi2_sigL_history = []
+            fit_sigL_status_history = []
 
             # Create TGraphs for parameter convergence
             graph_sigL_p1 = TGraph()
@@ -427,9 +427,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigt_1 = random.uniform(0, 1)
 
     # Store the parameter values and chi-square values for each iteration
-    params_sigT_history = {'p5': [0.0], 'p6': [0.0]}
-    chi2_sigT_history = [0.0]
-    fit_sigT_status_history = [0.0]
+    params_sigT_history = {'p5': [], 'p6': []}
+    chi2_sigT_history = []
+    fit_sigT_status_history = []
 
     # Create TGraphs for parameter convergence
     graph_sigT_p5 = TGraph()
@@ -577,9 +577,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("\rError encountered. Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
-            params_sigT_history = {'p5': [0.0], 'p6': [0.0]}
-            chi2_sigT_history = [0.0]
-            fit_sigT_status_history = [0.0]
+            params_sigT_history = {'p5': [], 'p6': []}
+            chi2_sigT_history = []
+            fit_sigT_status_history = []
 
             # Create TGraphs for parameter convergence
             graph_sigT_p5 = TGraph()
@@ -647,9 +647,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_siglt_2 = random.uniform(0, 1)
 
     # Store the parameter values and chi-square values for each iteration
-    params_sigLT_history = {'p9': [0.0], 'p10': [0.0], 'p11': [0.0]}
-    chi2_sigLT_history = [0.0]
-    fit_sigLT_status_history = [0.0]
+    params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
+    chi2_sigLT_history = []
+    fit_sigLT_status_history = []
 
     # Create TGraphs for parameter convergence
     graph_sigLT_p9 = TGraph()
@@ -803,9 +803,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("\rError encountered. Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
-            params_sigLT_history = {'p9': [0.0], 'p10': [0.0], 'p11': [0.0]}
-            chi2_sigLT_history = [0.0]
-            fit_sigLT_status_history = [0.0]
+            params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
+            chi2_sigLT_history = []
+            fit_sigLT_status_history = []
 
             # Create TGraphs for parameter convergence
             graph_sigLT_p9= TGraph()
@@ -875,9 +875,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigtt_0 = random.uniform(0, 1)
 
     # Store the parameter values and chi-square values for each iteration
-    params_sigTT_history = {'p13': [0.0]}
-    chi2_sigTT_history = [0.0]
-    fit_sigTT_status_history = [0.0]
+    params_sigTT_history = {'p13': []}
+    chi2_sigTT_history = []
+    fit_sigTT_status_history = []
 
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
@@ -1019,9 +1019,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("\rError encountered. Adjusting parameter limits and retrying...")
 
             # Store the parameter values and chi-square values for each iteration
-            params_sigTT_history = {'p13': [0.0]}
-            chi2_sigTT_history = [0.0]
-            fit_sigTT_status_history = [0.0]
+            params_sigTT_history = {'p13': []}
+            chi2_sigTT_history = []
+            fit_sigTT_status_history = []
 
             # Create TGraphs for parameter convergence
             graph_sigTT_p13 = TGraph()
