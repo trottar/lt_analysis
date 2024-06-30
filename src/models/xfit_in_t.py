@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:36:23 trottar"
+# Time-stamp: "2024-06-30 15:46:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,6 +189,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     initial_temperature = 1.0
     cooling_rate = 0.99
     temperature = initial_temperature
+    unchanged_iterations = 0
+    max_unchanged_iterations = 3
 
     # Initialize adaptive parameter limits
     par_lim_sigl_0 = random.uniform(0, 1)
@@ -326,8 +328,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_params = current_params
                 best_cost = current_cost
 
-            # Update parameters with the best found so far
-            par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params
+            # Check if current parameters haven't changed for the past 3 iterations
+            if current_params == previous_params:
+                unchanged_iterations += 1
+            else:
+                unchanged_iterations = 0
+
+            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            if unchanged_iterations >= max_unchanged_iterations:
+                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                unchanged_iterations = 0
+
+            previous_params = current_params[:]
+
+            # Update parameter limits
+            par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params                
 
             # Update the temperature
             temperature *= cooling_rate
@@ -403,6 +418,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     initial_temperature = 1.0
     cooling_rate = 0.99
     temperature = initial_temperature
+    unchanged_iterations = 0
+    max_unchanged_iterations = 3
 
     # Initialize adaptive parameter limits
     par_lim_sigt_0 = random.uniform(0, 1)
@@ -533,6 +550,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_params = current_params
                 best_cost = current_cost
 
+            # Check if current parameters haven't changed for the past 3 iterations
+            if current_params == previous_params:
+                unchanged_iterations += 1
+            else:
+                unchanged_iterations = 0
+
+            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            if unchanged_iterations >= max_unchanged_iterations:
+                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                unchanged_iterations = 0
+
+            previous_params = current_params[:]                
+
             # Update parameters with the best found so far
             par_lim_sigt_0, par_lim_sigt_1 = best_params
 
@@ -606,6 +636,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     initial_temperature = 1.0
     cooling_rate = 0.99
     temperature = initial_temperature
+    unchanged_iterations = 0
+    max_unchanged_iterations = 3
 
     # Initialize adaptive parameter limits
     par_lim_siglt_0 = random.uniform(0, 1)
@@ -743,6 +775,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_params = current_params
                 best_cost = current_cost
 
+            # Check if current parameters haven't changed for the past 3 iterations
+            if current_params == previous_params:
+                unchanged_iterations += 1
+            else:
+                unchanged_iterations = 0
+
+            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            if unchanged_iterations >= max_unchanged_iterations:
+                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                unchanged_iterations = 0
+
+            previous_params = current_params[:]                
+
             # Update parameters with the best found so far
             par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2 = best_params
 
@@ -820,6 +865,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     initial_temperature = 1.0
     cooling_rate = 0.99
     temperature = initial_temperature
+    unchanged_iterations = 0
+    max_unchanged_iterations = 3
 
     # Initialize adaptive parameter limits
     par_lim_sigtt_0 = random.uniform(0, 1)
@@ -942,6 +989,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if acceptance_probability(best_cost, current_cost, temperature) > random.random():
                 best_params = current_params
                 best_cost = current_cost
+
+            # Check if current parameters haven't changed for the past 3 iterations
+            if current_params == previous_params:
+                unchanged_iterations += 1
+            else:
+                unchanged_iterations = 0
+
+            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            if unchanged_iterations >= max_unchanged_iterations:
+                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                unchanged_iterations = 0
+
+            previous_params = current_params[:]                
 
             # Update parameters with the best found so far
             par_lim_sigtt_0 = best_params
