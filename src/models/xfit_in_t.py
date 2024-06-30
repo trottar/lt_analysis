@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:01:52 trottar"
+# Time-stamp: "2024-06-30 15:07:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -204,7 +204,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p2 = TGraph()
     graph_sigL_p3 = TGraph()
     graph_sigL_chi2 = TGraph()
-    graph_fit_sigL_status = TGraph()                
+    graph_fit_sigL_status = TGraph()
+
+    # Track the best solution
+    best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
+    best_cost = float('inf')
     
     print("/*--------------------------------------------------*/")    
     while iteration < max_iterations:
@@ -215,21 +219,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         nsep.Draw("sigl:t:sigl_e", "", "goff")
 
         try:
-        
+
+            # Perturb parameters
+            current_params = [
+                simulated_annealing(par_lim_sigl_0, temperature),
+                simulated_annealing(par_lim_sigl_1, temperature),
+                simulated_annealing(par_lim_sigl_2, temperature)
+            ]
+
             f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
-            f_sigL_pre.SetParNames("p1","p2","p3")
-            if l0 != 0:
-                f_sigL_pre.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
-            else:
-                f_sigL_pre.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
-            if l1 != 0:
-                f_sigL_pre.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
-            else:
-                f_sigL_pre.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
-            if l2 != 0:
-                f_sigL_pre.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
-            else:
-                f_sigL_pre.SetParLimits(2, -par_lim_sigl_2, par_lim_sigl_2)
+            f_sigL_pre.SetParNames("p1", "p2", "p3")
+            f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
+            f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
+            f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
 
             #g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
             g_sigl = TGraphErrors()
@@ -275,22 +277,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigl_fit.GetYaxis().SetTitleSize(0.035)
             g_sigl_fit.GetYaxis().CenterTitle()
 
-            # Fixed unused parameters
             f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
-            f_sigL.SetParNames("p1","p2","p3")
-            if l0 != 0:
-                f_sigL.SetParLimits(0, l0-abs(l0*par_lim_sigl_0), l0+abs(l0*par_lim_sigl_0))
-            else:
-                f_sigL.SetParLimits(0, -par_lim_sigl_0, par_lim_sigl_0)
-            if l1 != 0:
-                f_sigL.SetParLimits(1, l1-abs(l1*par_lim_sigl_1), l1+abs(l1*par_lim_sigl_1))
-            else:
-                f_sigL.SetParLimits(1, -par_lim_sigl_1, par_lim_sigl_1)
-            if l2 != 0:
-                f_sigL.SetParLimits(2, l2-abs(l2*par_lim_sigl_2), l2+abs(l2*par_lim_sigl_2))
-            else:
-                f_sigL.SetParLimits(2, -par_lim_sigl_2, par_lim_sigl_2)
-
+            f_sigL.SetParNames("p1", "p2", "p3")
+            f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
+            f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
+            f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+            
             g_q2_sigl_fit = TGraphErrors()
             for i in range(len(w_vec)):
                 g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
@@ -302,36 +294,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             f_sigL.Draw("same")
 
-            old_chi2 = f_sigL.GetChisquare()
-
-            # Perturb parameters using simulated annealing
-            new_par_lim_sigl_0 = simulated_annealing(par_lim_sigl_0, temperature)
-            new_par_lim_sigl_1 = simulated_annealing(par_lim_sigl_1, temperature)
-            new_par_lim_sigl_2 = simulated_annealing(par_lim_sigl_2, temperature)
-
-            # Apply new parameter limits
-            if l0 != 0:
-                f_sigL.SetParLimits(0, l0-abs(l0*new_par_lim_sigl_0), l0+abs(l0*new_par_lim_sigl_0))
-            else:
-                f_sigL.SetParLimits(0, -new_par_lim_sigl_0, new_par_lim_sigl_0)
-            if l1 != 0:
-                f_sigL.SetParLimits(1, l1-abs(l1*new_par_lim_sigl_1), l1+abs(l1*new_par_lim_sigl_1))
-            else:
-                f_sigL.SetParLimits(1, -new_par_lim_sigl_1, new_par_lim_sigl_1)
-            if l2 != 0:
-                f_sigL.SetParLimits(2, l2-abs(l2*new_par_lim_sigl_2), l2+abs(l2*new_par_lim_sigl_2))
-            else:
-                f_sigL.SetParLimits(2, -new_par_lim_sigl_2, new_par_lim_sigl_2)
-
-            new_chi2 = f_sigL.GetChisquare()
-
-            # Check acceptance probability
-            if acceptance_probability(old_chi2, new_chi2, temperature) > random.random():
-                par_lim_sigl_0 = new_par_lim_sigl_0
-                par_lim_sigl_1 = new_par_lim_sigl_1
-                par_lim_sigl_2 = new_par_lim_sigl_2
-
+            # Check the fit status for 'f_sigL'
+            #f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
             f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
+            #f_sigL_status = (f_sigL.GetNDF() != 0)
             f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
             fit_status = TText()
@@ -361,6 +327,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigL_status:
                 #break
                 sys.exit(2)
+            
+            # Adjust parameter limits within a random number
+            #par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
+            #par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
+            #par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
+            # Calculate the cost (chi-square value) for the current parameters
+            current_cost = f_sigL.GetChisquare()
+
+            # If the new cost is better or accepted by the acceptance probability, update the best parameters
+            if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                best_params = current_params
+                best_cost = current_cost
+
+            # Update parameters with the best found so far
+            par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params
 
             # Update the temperature
             temperature *= cooling_rate
