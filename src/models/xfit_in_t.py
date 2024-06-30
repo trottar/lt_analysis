@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:46:02 trottar"
+# Time-stamp: "2024-06-30 15:47:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -212,6 +212,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Track the best solution
     best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
     best_cost = float('inf')
+    previous_params = best_params[:]
 
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
@@ -439,7 +440,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Track the best solution
     best_params = [par_lim_sigt_0, par_lim_sigt_1]
     best_cost = float('inf')
-
+    previous_params = best_params[:]
+    
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
@@ -659,7 +661,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Track the best solution
     best_params = [par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2]
     best_cost = float('inf')
-
+    previous_params = best_params[:]
+    
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
@@ -884,7 +887,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Track the best solution
     best_params = [par_lim_sigtt_0]
     best_cost = float('inf')
-
+    previous_params = best_params[:]
+    
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
