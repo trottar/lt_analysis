@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:29:04 trottar"
+# Time-stamp: "2024-06-30 15:29:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -825,7 +825,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_lim_sigtt_0 = random.uniform(0, 1)
 
     # Store the parameter values and chi-square values for each iteration
-    params_sigTT_history = {'p1': [], 'p2': [], 'p3': []}
+    params_sigTT_history = {'p13': []}
     chi2_sigTT_history = []
     fit_sigTT_status_history = []
 
