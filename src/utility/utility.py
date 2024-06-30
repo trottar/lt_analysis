@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:14:06 trottar"
+# Time-stamp: "2024-06-30 17:52:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -548,5 +548,12 @@ def acceptance_probability(old_cost, new_cost, temperature):
         return 1.0
     else:
         return math.exp((old_cost - new_cost) / temperature)
+
+################################################################################################################################################
+
+def round_to_sig_figs(num, sig_figs):
+    if num == 0:
+        return 0
+    return round(num, sig_figs - int(math.floor(math.log10(abs(num)))) - 1)
 
 ################################################################################################################################################
