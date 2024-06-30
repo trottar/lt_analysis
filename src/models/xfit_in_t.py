@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:35:46 trottar"
+# Time-stamp: "2024-06-30 18:36:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,9 +357,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
                 
             # Check if current parameters haven't changed for the past 3 iterations
-            if params_sigL_history['p1'] >= 3  and \
-               params_sigL_history['p2'] >= 3  and \
-               params_sigL_history['p3'] >= 3:
+            if len(params_sigL_history['p1']) >= 3  and \
+               len(params_sigL_history['p2']) >= 3  and \
+               len(params_sigL_history['p3']) >= 3:
                 if round(params_sigL_history['p1'][-2], 3) == round(params_sigL_history['p1'][-1], 3) and \
                    round(params_sigL_history['p2'][-2], 3) == round(params_sigL_history['p2'][-1], 3) and \
                    round(params_sigL_history['p3'][-2], 3) == round(params_sigL_history['p3'][-1], 3):
@@ -616,8 +616,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if params_sigL_history['p5'] >= 3  and \
-               params_sigL_history['p6'] >= 3:
+            if len(params_sigL_history['p5']) >= 3  and \
+               len(params_sigL_history['p6']) >= 3:
                 if round(params_sigL_history['p5'][-2], 3) == round(params_sigL_history['p5'][-1], 3) and \
                    round(params_sigL_history['p6'][-2], 3) == round(params_sigL_history['p6'][-1], 3):
                     unchanged_iterations += 1
@@ -875,9 +875,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if params_sigL_history['p9'] >= 3  and \
-               params_sigL_history['p10'] >= 3  and \
-               params_sigL_history['p11'] >= 3:
+            if len(params_sigL_history['p9']) >= 3  and \
+               len(params_sigL_history['p10']) >= 3  and \
+               len(params_sigL_history['p11']) >= 3:
                 if round(params_sigL_history['p9'][-2], 3) == round(params_sigL_history['p9'][-1], 3) and \
                    round(params_sigL_history['p10'][-2], 3) == round(params_sigL_history['p10'][-1], 3) and \
                    round(params_sigL_history['p11'][-2], 3) == round(params_sigL_history['p11'][-1], 3):
@@ -1126,7 +1126,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if params_sigL_history['p13'] >= 3:
+            if len(params_sigL_history['p13']) >= 3:
                 if round(params_sigL_history['p3'][-2], 3) == round(params_sigL_history['p13'][-1], 3):
                     unchanged_iterations += 1
                 else:
