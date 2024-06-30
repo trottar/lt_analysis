@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:02:07 trottar"
+# Time-stamp: "2024-06-30 18:05:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -356,11 +356,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_params = current_params
                 best_cost = current_cost
 
-            unchanged_iterations += 1
             # Check if current parameters haven't changed for the past 3 iterations
-            for i in range(3):
-                print("!!!!!!!!!!!!!!!",round(current_params[i], 5), "==" ,round(previous_params[i], 5))
-            if any(round(current_params[i], 5) == round(previous_params[i], 5) for i in range(3)):
+            if current_params == f_previous_params:
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -613,7 +610,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if any(round(current_params[i], 5) == round(previous_params[i], 5) for i in range(3)):
+            if current_params == f_previous_params:
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -869,7 +866,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if any(round(current_params[i], 5) == round(previous_params[i], 5) for i in range(3)):
+            if current_params == f_previous_params:
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
@@ -1115,7 +1112,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if any(round(current_params[i], 5) == round(previous_params[i], 5) for i in range(3)):
+            if current_params == f_previous_params:
                 unchanged_iterations += 1
             else:
                 unchanged_iterations = 0
