@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 15:07:00 trottar"
+# Time-stamp: "2024-06-30 15:12:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,10 +189,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     initial_temperature = 1.0
     cooling_rate = 0.99
     temperature = initial_temperature
+
     # Initialize adaptive parameter limits
-    par_lim_sigl_0 = random.uniform(0, max_iterations)
-    par_lim_sigl_1 = random.uniform(0, max_iterations)
-    par_lim_sigl_2 = random.uniform(0, max_iterations)
+    par_lim_sigl_0 = random.uniform(0, 1)
+    par_lim_sigl_1 = random.uniform(0, 1)
+    par_lim_sigl_2 = random.uniform(0, 1)
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -209,17 +210,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Track the best solution
     best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
     best_cost = float('inf')
-    
-    print("/*--------------------------------------------------*/")    
+
+    print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
-        
+
         print("Iteration {}\nFit for Sig L".format(iteration))
 
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
 
         try:
-
             # Perturb parameters
             current_params = [
                 simulated_annealing(par_lim_sigl_0, temperature),
@@ -233,28 +233,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
             f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
 
-            #g_sigl = TGraphErrors(nsep.GetSelectedRows(), nsep.GetV2(), nsep.GetV1(), 0, nsep.GetV3())
             g_sigl = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
                 g_sigl.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
                 g_sigl.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-
                 sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i])) * (g_vec[i])
                 g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
-                sigl_X_fit = g_sigl.GetY()[i] #/ (g_vec[i])
-                sigl_X_fit_err = g_sigl.GetEY()[i] #/ (g_vec[i])
+                sigl_X_fit = g_sigl.GetY()[i]
+                sigl_X_fit_err = g_sigl.GetEY()[i]
 
                 g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
                 g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
             g_sigl.SetTitle("Sig L")
-
             g_sigl.SetMarkerStyle(5)
             g_sigl.Draw("AP")
-
             g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sigl.GetXaxis().CenterTitle()
             g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
@@ -282,22 +278,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
             f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
             f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
-            
+
             g_q2_sigl_fit = TGraphErrors()
             for i in range(len(w_vec)):
                 g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
                 g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
                 sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
                 g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
-            # Options: S-> Simultaneous fit, M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
-            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM")
 
+            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM")
             f_sigL.Draw("same")
 
-            # Check the fit status for 'f_sigL'
-            #f_sigL_status = f_sigL.GetNDF()  # GetNDF() returns the number of degrees of freedom
             f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
-            #f_sigL_status = (f_sigL.GetNDF() != 0)
             f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
             fit_status = TText()
@@ -305,7 +297,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
 
             c1.cd(1)
-
             g_sigl_fit_tot.SetMarkerStyle(26)
             g_sigl_fit_tot.SetMarkerColor(2)
             g_sigl_fit_tot.SetLineColor(2)
@@ -327,11 +318,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             if f_sigL_status:
                 #break
                 sys.exit(2)
-            
-            # Adjust parameter limits within a random number
-            #par_lim_sigl_0 = adaptive_parameter_adjustment(par_lim_sigl_0, f_sigL_status_message == "Fit Successful")
-            #par_lim_sigl_1 = adaptive_parameter_adjustment(par_lim_sigl_1, f_sigL_status_message == "Fit Successful")
-            #par_lim_sigl_2 = adaptive_parameter_adjustment(par_lim_sigl_2, f_sigL_status_message == "Fit Successful")
+
             # Calculate the cost (chi-square value) for the current parameters
             current_cost = f_sigL.GetChisquare()
 
@@ -347,7 +334,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             temperature *= cooling_rate
 
             iteration += 1
-            
+
         except TypeError:
             print("\rTypeError encountered. Adjusting parameter limits and retrying...")
 
@@ -362,14 +349,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_p3 = TGraph()
             graph_sigL_chi2 = TGraph()
             graph_fit_sigL_status = TGraph()
-            
+
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = random.uniform(0, max_iterations)
             par_lim_sigl_1 = random.uniform(0, max_iterations)
             par_lim_sigl_2 = random.uniform(0, max_iterations)
 
             iteration = 0
-
+        
     par_vec.append(f_sigL.GetParameter(0))
     par_vec.append(f_sigL.GetParameter(1))
     par_vec.append(f_sigL.GetParameter(2))
