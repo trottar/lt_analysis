@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 14:33:08 trottar"
+# Time-stamp: "2024-06-30 14:36:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,10 +104,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_err_vec = []
     par_chi2_vec = []
 
-    l0, l1, l2, l3 = 1, 1, 1, 1
-    t0, t1, t2, t3 = 1, 1, 1, 1
-    lt0, lt1, lt2, lt3 = 1, 1, 1, 1
-    tt0, tt1, tt2, tt3 = 1, 1, 1, 1
+    l0, l1, l2, l3 = 0, 0, 0, 0
+    t0, t1, t2, t3 = 0, 0, 0, 0
+    lt0, lt1, lt2, lt3 = 0, 0, 0, 0
+    tt0, tt1, tt2, tt3 = 0, 0, 0, 0
 
     fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:w:q2:thetacm")
