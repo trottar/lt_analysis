@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 17:45:55 trottar"
+# Time-stamp: "2024-06-30 17:47:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -223,182 +223,159 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
 
-        try:
-            # Perturb parameters
-            current_params = [
-                simulated_annealing(par_lim_sigl_0, temperature),
-                simulated_annealing(par_lim_sigl_1, temperature),
-                simulated_annealing(par_lim_sigl_2, temperature)
-            ]
+        # Perturb parameters
+        current_params = [
+            simulated_annealing(par_lim_sigl_0, temperature),
+            simulated_annealing(par_lim_sigl_1, temperature),
+            simulated_annealing(par_lim_sigl_2, temperature)
+        ]
 
-            f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
-            f_sigL_pre.SetParNames("p1", "p2", "p3")
-            f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
-            f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
-            f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+        f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+        f_sigL_pre.SetParNames("p1", "p2", "p3")
+        f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
+        f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
+        f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
 
-            g_sigl = TGraphErrors()
-            for i in range(nsep.GetSelectedRows()):
-                g_sigl.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                g_sigl.SetPointError(i, 0, nsep.GetV3()[i])
+        g_sigl = TGraphErrors()
+        for i in range(nsep.GetSelectedRows()):
+            g_sigl.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+            g_sigl.SetPointError(i, 0, nsep.GetV3()[i])
 
-            for i in range(len(w_vec)):
-                sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i])) * (g_vec[i])
-                g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
+        for i in range(len(w_vec)):
+            sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i])) * (g_vec[i])
+            g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
 
-                sigl_X_fit = g_sigl.GetY()[i]
-                sigl_X_fit_err = g_sigl.GetEY()[i]
+            sigl_X_fit = g_sigl.GetY()[i]
+            sigl_X_fit_err = g_sigl.GetEY()[i]
 
-                g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
-                g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
+            g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
+            g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
-            g_sigl.SetTitle("Sig L")
-            g_sigl.SetMarkerStyle(5)
-            g_sigl.Draw("AP")
-            g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sigl.GetXaxis().CenterTitle()
-            g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
-            g_sigl.GetYaxis().SetTitleOffset(1.5)
-            g_sigl.GetYaxis().SetTitleSize(0.035)
-            g_sigl.GetYaxis().CenterTitle()
+        g_sigl.SetTitle("Sig L")
+        g_sigl.SetMarkerStyle(5)
+        g_sigl.Draw("AP")
+        g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        g_sigl.GetXaxis().CenterTitle()
+        g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+        g_sigl.GetYaxis().SetTitleOffset(1.5)
+        g_sigl.GetYaxis().SetTitleSize(0.035)
+        g_sigl.GetYaxis().CenterTitle()
 
-            g_sigl_prv.SetMarkerColor(4)
-            g_sigl_prv.SetMarkerStyle(25)
-            g_sigl_prv.Draw("P")
+        g_sigl_prv.SetMarkerColor(4)
+        g_sigl_prv.SetMarkerStyle(25)
+        g_sigl_prv.Draw("P")
 
-            c2.cd(1).SetLeftMargin(0.12)
-            g_sigl_fit.SetTitle("Sigma L Model Fit")
-            g_sigl_fit.Draw("A*")
+        c2.cd(1).SetLeftMargin(0.12)
+        g_sigl_fit.SetTitle("Sigma L Model Fit")
+        g_sigl_fit.Draw("A*")
 
-            g_sigl_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sigl_fit.GetXaxis().CenterTitle()
-            g_sigl_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
-            g_sigl_fit.GetYaxis().SetTitleOffset(1.5)
-            g_sigl_fit.GetYaxis().SetTitleSize(0.035)
-            g_sigl_fit.GetYaxis().CenterTitle()
+        g_sigl_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        g_sigl_fit.GetXaxis().CenterTitle()
+        g_sigl_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+        g_sigl_fit.GetYaxis().SetTitleOffset(1.5)
+        g_sigl_fit.GetYaxis().SetTitleSize(0.035)
+        g_sigl_fit.GetYaxis().CenterTitle()
 
-            # Set axis limits to ensure everything is shown
-            x_min = min(g_sigl_fit.GetX())
-            x_max = max(g_sigl_fit.GetX())
-            y_min = min(g_sigl_fit.GetY())
-            y_max = max(g_sigl_fit.GetY())
+        # Set axis limits to ensure everything is shown
+        x_min = min(g_sigl_fit.GetX())
+        x_max = max(g_sigl_fit.GetX())
+        y_min = min(g_sigl_fit.GetY())
+        y_max = max(g_sigl_fit.GetY())
 
-            # You can also set a margin to ensure all points are visible
-            margin = 0.1
-            g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+        # You can also set a margin to ensure all points are visible
+        margin = 0.1
+        g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+        g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-            f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
-            f_sigL.SetParNames("p1", "p2", "p3")
-            f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
-            f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
-            f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+        f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+        f_sigL.SetParNames("p1", "p2", "p3")
+        f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
+        f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
+        f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
 
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
+        # Evaluate the fit function at several points to determine its range
+        n_points = 100  # Number of points to evaluate the fit function
+        fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+        fit_y_min = min(fit_y_values)
+        fit_y_max = max(fit_y_values)
 
-            # Extend the y-axis range to include the fit function range
-            y_min = min(y_min, fit_y_min)
-            y_max = max(y_max, fit_y_max)
+        # Extend the y-axis range to include the fit function range
+        y_min = min(y_min, fit_y_min)
+        y_max = max(y_max, fit_y_max)
 
-            # Set a margin to ensure all points are visible
-            margin = 0.1 * (y_max - y_min)
-            g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-            
-            g_q2_sigl_fit = TGraphErrors()
-            for i in range(len(w_vec)):
-                g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
-                g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
-                sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
-                g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
+        # Set a margin to ensure all points are visible
+        margin = 0.1 * (y_max - y_min)
+        g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
-            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM")
-            f_sigL.Draw("same")
+        g_q2_sigl_fit = TGraphErrors()
+        for i in range(len(w_vec)):
+            g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
+            g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
+            sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
+            g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-            #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
-            f_sigL_status = f_sigL.GetNDF() != 0
-            f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
+        r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM")
+        f_sigL.Draw("same")
 
-            fit_status = TText()
-            fit_status.SetTextSize(0.04)
-            fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
+        #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
+        f_sigL_status = f_sigL.GetNDF() != 0
+        f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
-            c1.cd(1)
-            g_sigl_fit_tot.SetMarkerStyle(26)
-            g_sigl_fit_tot.SetMarkerColor(2)
-            g_sigl_fit_tot.SetLineColor(2)
-            g_sigl_fit_tot.Draw("LP")
+        fit_status = TText()
+        fit_status.SetTextSize(0.04)
+        fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
 
-            params_sigL_history['p1'].append(f_sigL.GetParameter(0))
-            params_sigL_history['p2'].append(f_sigL.GetParameter(1))
-            params_sigL_history['p3'].append(f_sigL.GetParameter(2))
-            chi2_sigL_history.append(f_sigL.GetChisquare())
-            fit_sigL_status_history.append(1 if f_sigL_status else 0)
+        c1.cd(1)
+        g_sigl_fit_tot.SetMarkerStyle(26)
+        g_sigl_fit_tot.SetMarkerColor(2)
+        g_sigl_fit_tot.SetLineColor(2)
+        g_sigl_fit_tot.Draw("LP")
 
-            # Update ROOT TGraphs for plotting
-            graph_sigL_p1.SetPoint(iteration, iteration, f_sigL.GetParameter(0))
-            graph_sigL_p2.SetPoint(iteration, iteration, f_sigL.GetParameter(1))
-            graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
-            graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
-            graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
+        params_sigL_history['p1'].append(f_sigL.GetParameter(0))
+        params_sigL_history['p2'].append(f_sigL.GetParameter(1))
+        params_sigL_history['p3'].append(f_sigL.GetParameter(2))
+        chi2_sigL_history.append(f_sigL.GetChisquare())
+        fit_sigL_status_history.append(1 if f_sigL_status else 0)
 
-            if f_sigL_status:
-                break
+        # Update ROOT TGraphs for plotting
+        graph_sigL_p1.SetPoint(iteration, iteration, f_sigL.GetParameter(0))
+        graph_sigL_p2.SetPoint(iteration, iteration, f_sigL.GetParameter(1))
+        graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
+        graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
+        graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
 
-            # Calculate the cost (chi-square value) for the current parameters
-            current_cost = f_sigL.GetChisquare()
+        if f_sigL_status:
+            break
 
-            # If the new cost is better or accepted by the acceptance probability, update the best parameters
-            if acceptance_probability(best_cost, current_cost, temperature) > random.random():
-                best_params = current_params
-                best_cost = current_cost
+        # Calculate the cost (chi-square value) for the current parameters
+        current_cost = f_sigL.GetChisquare()
 
-            # Check if current parameters haven't changed for the past 3 iterations
-            f_previous_params = float("{:.5f}".format(previous_params))
-            if current_params == f_previous_params:
-                unchanged_iterations += 1
-            else:
-                unchanged_iterations = 0
+        # If the new cost is better or accepted by the acceptance probability, update the best parameters
+        if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+            best_params = current_params
+            best_cost = current_cost
 
-            # Adjust the cooling rate if parameters haven't changed for 3 iterations
-            if unchanged_iterations >= max_unchanged_iterations:
-                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-                unchanged_iterations = 0
+        # Check if current parameters haven't changed for the past 3 iterations
+        f_previous_params = round(previous_params, 5)
+        if current_params == f_previous_params:
+            unchanged_iterations += 1
+        else:
+            unchanged_iterations = 0
 
-            previous_params = current_params[:]
+        # Adjust the cooling rate if parameters haven't changed for 3 iterations
+        if unchanged_iterations >= max_unchanged_iterations:
+            cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+            unchanged_iterations = 0
 
-            # Update parameter limits
-            par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params                
+        previous_params = current_params[:]
 
-            # Update the temperature
-            temperature *= cooling_rate
+        # Update parameter limits
+        par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params                
 
-            iteration += 1
+        # Update the temperature
+        temperature *= cooling_rate
 
-        except (TypeError or ZeroDivisionError) as e:
-            print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-
-            # Store the parameter values and chi-square values for each iteration
-            params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
-            chi2_sigL_history = []
-            fit_sigL_status_history = []
-
-            # Create TGraphs for parameter convergence
-            graph_sigL_p1 = TGraph()
-            graph_sigL_p2 = TGraph()
-            graph_sigL_p3 = TGraph()
-            graph_sigL_chi2 = TGraph()
-            graph_fit_sigL_status = TGraph()
-
-            # Adjust parameter limits within a random number
-            par_lim_sigl_0 = random.uniform(0, max_iterations)
-            par_lim_sigl_1 = random.uniform(0, max_iterations)
-            par_lim_sigl_2 = random.uniform(0, max_iterations)
-
-            iteration += 1
+        iteration += 1
 
     if iteration == max_iterations:
         print("ERROR: Sig L failed to converge!")
@@ -611,7 +588,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            f_previous_params = float("{:.5f}".format(previous_params))
+            f_previous_params = round(previous_params, 5)
             if current_params == f_previous_params:
                 unchanged_iterations += 1
             else:
@@ -868,7 +845,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            f_previous_params = float("{:.5f}".format(previous_params))
+            f_previous_params = round(previous_params, 5)
             if current_params == f_previous_params:
                 unchanged_iterations += 1
             else:
@@ -1115,7 +1092,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            f_previous_params = float("{:.5f}".format(previous_params))
+            f_previous_params = round(previous_params, 5)
             if current_params == f_previous_params:
                 unchanged_iterations += 1
             else:
