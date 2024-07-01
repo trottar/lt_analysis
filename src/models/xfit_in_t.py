@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 09:38:10 trottar"
+# Time-stamp: "2024-07-01 12:34:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -401,17 +401,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima.count([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]) > 100:
                     print("\n\n END: Local minima p1={:3e}, p2={:3e}, p3={:3e} chosen...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
                     break
-                    
-                # Store the parameter values and chi-square values for each iteration
-                params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
-                chi2_sigL_history = []
-                fit_sigL_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigL_p1 = TGraph()
-                graph_sigL_p2 = TGraph()
-                graph_sigL_p3 = TGraph()
-                graph_sigL_chi2 = TGraph()
 
                 # Adjust parameter limits within a random number
                 if f_sigL.GetParameter(0) > 0:
@@ -716,16 +705,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima.count([f_sigT.GetParameter(0), f_sigT.GetParameter(1)]) > 100:
                     print("\n\n END: Local minima p5={:3e}, p6={:3e} chosen...".format(f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
                     break
-                
-                # Store the parameter values and chi-square values for each iteration
-                params_sigT_history = {'p5': [], 'p6': []}
-                chi2_sigT_history = []
-                fit_sigT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigT_p5 = TGraph()
-                graph_sigT_p6 = TGraph()
-                graph_sigT_chi2 = TGraph()
 
                 # Adjust parameter limits within a random number
                 if f_sigT.GetParameter(0) > 0:
@@ -1032,17 +1011,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima.count([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]) > 100:
                     print("\n\n END: Local minima p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
                     break
-                    
-                # Store the parameter values and chi-square values for each iteration
-                params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
-                chi2_sigLT_history = []
-                fit_sigLT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigLT_p9 = TGraph()
-                graph_sigLT_p10 = TGraph()
-                graph_sigLT_p11 = TGraph()
-                graph_sigLT_chi2 = TGraph()
 
                 # Adjust parameter limits within a random number
                 if f_sigLT.GetParameter(0) > 0:
@@ -1335,15 +1303,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima.count([f_sigTT.GetParameter(0)]) > 100:
                     print("\n\n END: Local minima p13={:3e} chosen...".format(f_sigTT.GetParameter(0)))
                     break
-                    
-                # Store the parameter values and chi-square values for each iteration
-                params_sigTT_history = {'p13': []}
-                chi2_sigTT_history = []
-                fit_sigTT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigTT_p13 = TGraph()
-                graph_sigTT_chi2 = TGraph()
 
                 # Adjust parameter limits within a random number
                 if f_sigTT.GetParameter(0) > 0:
