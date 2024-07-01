@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 17:59:25 trottar"
+# Time-stamp: "2024-06-30 21:33:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -539,8 +539,12 @@ def get_centroid(hist, x_min, x_max):
 
 def simulated_annealing(param, temperature):
     # Perturb the parameter based on the temperature
-    perturbation = random.uniform(-1, 1) * temperature
-    return param + perturbation
+    if isinstance(param, list):
+        perturbation = [random.uniform(-1, 1) * temperature for _ in param]
+        return [p + perturbation[i] for i, p in enumerate(param)]
+    else:
+        perturbation = random.uniform(-1, 1) * temperature
+        return param + perturbation
 
 def acceptance_probability(old_cost, new_cost, temperature):
     # Calculate the probability of accepting a worse solution
