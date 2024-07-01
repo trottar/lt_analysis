@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 21:48:05 trottar"
+# Time-stamp: "2024-06-30 21:52:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1025,7 +1025,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Track the best solution
     best_params = [par_lim_sigtt_0]
     best_cost = float('inf')
-    previous_params = best_params[:]
+    previous_params = best_params
     
     print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
