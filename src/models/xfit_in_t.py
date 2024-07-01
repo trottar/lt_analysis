@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 02:18:14 trottar"
+# Time-stamp: "2024-07-01 02:39:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -396,8 +396,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima == [f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]:
                     local_iterations += 1
 
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if local_iterations > 100:
+                    # If local minima occurs more than 75 times, it's likely the true minima
+                    if local_iterations > 75:
                         break
                 else:
                     local_iterations = 0
@@ -711,8 +711,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima == [f_sigT.GetParameter(0), f_sigT.GetParameter(1)]:
                     local_iterations += 1
 
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if local_iterations > 100:
+                    # If local minima occurs more than 75 times, it's likely the true minima
+                    if local_iterations > 75:
                         break
                 else:
                     local_iterations = 0
@@ -1027,8 +1027,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima == [f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]:
                     local_iterations += 1
 
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if local_iterations > 100:
+                    # If local minima occurs more than 75 times, it's likely the true minima
+                    if local_iterations > 75:
                         break
                 else:
                     local_iterations = 0
@@ -1330,8 +1330,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima == [f_sigTT.GetParameter(0)]:
                     local_iterations += 1
 
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if local_iterations > 100:
+                    # If local minima occurs more than 75 times, it's likely the true minima
+                    if local_iterations > 75:
                         break
                 else:
                     local_iterations = 0
