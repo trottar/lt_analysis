@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 00:17:58 trottar"
+# Time-stamp: "2024-07-01 00:21:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -228,11 +228,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 simulated_annealing(par_lim_sigl_1, temperature),
                 simulated_annealing(par_lim_sigl_2, temperature)
             ]
-
-            # Check if current_params are close to any local minimum
-            if any(np.allclose(current_params, minima, atol=1e-3) for minima in local_minima):
-                iteration += 1
-                continue
             
             f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigL_pre.SetParNames("p1", "p2", "p3")
@@ -329,6 +324,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
 
+            # Check if current_params are close to any local minimum
+            if any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
+                print("WARNING: Parameters {} are a local minima...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
+                iteration += 1
+                continue
+            
             c1.cd(1)
             g_sigl_fit_tot.SetMarkerStyle(26)
             g_sigl_fit_tot.SetMarkerColor(2)
