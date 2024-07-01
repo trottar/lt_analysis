@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 01:42:23 trottar"
+# Time-stamp: "2024-07-01 01:49:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,7 +317,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
                 g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SM")
+            r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
             f_sigL.Draw("same")
 
             #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
