@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 12:34:32 trottar"
+# Time-stamp: "2024-07-01 12:36:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,7 +350,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
 
             if f_sigL_status:
-                print("\n\n END: Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
+                print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
                 break
 
             # Calculate the cost (chi-square value) for the current parameters
@@ -399,7 +399,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 last_minima.append([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)])                
                 # If local minima occurs more than 100 times, it's likely the true minima
                 if last_minima.count([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]) > 100:
-                    print("\n\n END: Local minima p1={:3e}, p2={:3e}, p3={:3e} chosen...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
+                    print("\n\n END: [i={}] Local minima p1={:3e}, p2={:3e}, p3={:3e} chosen...".format(iteration, f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
                     break
 
                 # Adjust parameter limits within a random number
@@ -657,7 +657,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
 
             if f_sigT_status:
-                print("\n\n END: Fit converged, p5={:3e}, p6={:3e} chosen...".format(f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
+                print("\n\n END: [i={}] Fit converged, p5={:3e}, p6={:3e} chosen...".format(iteration, f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
                 break
 
             # Calculate the cost (chi-square value) for the current parameters
@@ -703,7 +703,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 last_minima.append([f_sigT.GetParameter(0), f_sigT.GetParameter(1)])                
                 # If local minima occurs more than 100 times, it's likely the true minima
                 if last_minima.count([f_sigT.GetParameter(0), f_sigT.GetParameter(1)]) > 100:
-                    print("\n\n END: Local minima p5={:3e}, p6={:3e} chosen...".format(f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
+                    print("\n\n END: [i={}] Local minima p5={:3e}, p6={:3e} chosen...".format(iteration, f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
                     break
 
                 # Adjust parameter limits within a random number
@@ -960,7 +960,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
 
             if f_sigLT_status:
-                print("\n\n END: Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
+                print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
                 break
 
             # Calculate the cost (chi-square value) for the current parameters
@@ -1009,7 +1009,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 last_minima.append([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)])                
                 # If local minima occurs more than 100 times, it's likely the true minima
                 if last_minima.count([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]) > 100:
-                    print("\n\n END: Local minima p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
+                    print("\n\n END: [i={}] Local minima p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
                     break
 
                 # Adjust parameter limits within a random number
@@ -1258,7 +1258,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
 
             if f_sigTT_status:
-                print("\n\n END: Fit converged, p13={:3e} chosen...".format(f_sigTT.GetParameter(0)))
+                print("\n\n END: [i={}] Fit converged, p13={:3e} chosen...".format(iteration, f_sigTT.GetParameter(0)))
                 break
 
             # Calculate the cost (chi-square value) for the current parameters
@@ -1301,7 +1301,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 last_minima.append([f_sigTT.GetParameter(0)])
                 # If local minima occurs more than 100 times, it's likely the true minima
                 if last_minima.count([f_sigTT.GetParameter(0)]) > 100:
-                    print("\n\n END: Local minima p13={:3e} chosen...".format(f_sigTT.GetParameter(0)))
+                    print("\n\n END: [i={}] Local minima p13={:3e} chosen...".format(iteration, f_sigTT.GetParameter(0)))
                     break
 
                 # Adjust parameter limits within a random number
