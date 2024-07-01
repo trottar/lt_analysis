@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 22:08:04 trottar"
+# Time-stamp: "2024-06-30 22:09:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1170,7 +1170,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"                
                 break
 
-            previous_params = current_params
+            previous_params = current_params                
 
             # Update parameters with the best found so far
             par_lim_sigtt_0 = best_params
