@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 21:37:04 trottar"
+# Time-stamp: "2024-06-30 21:42:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -540,6 +540,7 @@ def get_centroid(hist, x_min, x_max):
 def simulated_annealing(param, temperature):
     # Perturb the parameter based on the temperature
     if isinstance(param, list):
+        print("!!!!!!!!!!!!!!!!!!1")
         perturbation = [random.uniform(-1, 1) * temperature for _ in param]
         return [p + perturbation[i] for i, p in enumerate(param)]
     else:
