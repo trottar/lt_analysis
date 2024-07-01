@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 22:03:05 trottar"
+# Time-stamp: "2024-06-30 22:07:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1023,9 +1023,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_chi2 = TGraph()
 
     # Track the best solution
-    best_params = [par_lim_sigtt_0]
+    best_params = par_lim_sigtt_0]
     best_cost = float('inf')
-    previous_params = best_params[0]
+    previous_params = best_params
     
     print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
@@ -1037,9 +1037,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         try:
             # Perturb parameters
-            current_params = [
-                simulated_annealing(par_lim_sigtt_0, temperature)
-            ]
+            current_params = simulated_annealing(par_lim_sigtt_0, temperature)
 
             f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
             f_sigTT_pre.SetParNames("p13")
@@ -1172,7 +1170,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"                
                 break
 
-            previous_params = current_params[0]                
+            previous_params = current_params
 
             # Update parameters with the best found so far
             par_lim_sigtt_0 = best_params
