@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 21:58:08 trottar"
+# Time-stamp: "2024-06-30 22:01:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1035,153 +1035,169 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
+        try:
+            # Perturb parameters
+            current_params = [
+                simulated_annealing(par_lim_sigtt_0, temperature)
+            ]
 
-        print("!!!!!!!!!!!",par_lim_sigtt_0, temperature)
-        # Perturb parameters
-        current_params = [
-            simulated_annealing(par_lim_sigtt_0, temperature)
-        ]
+            f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+            f_sigTT_pre.SetParNames("p13")
+            f_sigTT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
 
-        f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
-        f_sigTT_pre.SetParNames("p13")
-        f_sigTT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
+            g_sigtt = TGraphErrors()
+            for i in range(nsep.GetSelectedRows()):
+                g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
 
-        g_sigtt = TGraphErrors()
-        for i in range(nsep.GetSelectedRows()):
-            g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-            g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
+            for i in range(len(w_vec)):
+                sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
+                g_sigtt_prv.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_pre)
 
-        for i in range(len(w_vec)):
-            sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
-            g_sigtt_prv.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_pre)
+                sigtt_X_fit = g_sigtt.GetY()[i]
+                sigtt_X_fit_err = g_sigtt.GetEY()[i]
 
-            sigtt_X_fit = g_sigtt.GetY()[i]
-            sigtt_X_fit_err = g_sigtt.GetEY()[i]
+                g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+                g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
-            g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
-            g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
+            g_sigtt.SetTitle("Sig TT")
+            g_sigtt.SetMarkerStyle(5)
+            g_sigtt.Draw("AP")
+            g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_sigtt.GetXaxis().CenterTitle()
+            g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
+            g_sigtt.GetYaxis().SetTitleOffset(1.5)
+            g_sigtt.GetYaxis().SetTitleSize(0.035)
+            g_sigtt.GetYaxis().CenterTitle()
 
-        g_sigtt.SetTitle("Sig TT")
-        g_sigtt.SetMarkerStyle(5)
-        g_sigtt.Draw("AP")
-        g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_sigtt.GetXaxis().CenterTitle()
-        g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
-        g_sigtt.GetYaxis().SetTitleOffset(1.5)
-        g_sigtt.GetYaxis().SetTitleSize(0.035)
-        g_sigtt.GetYaxis().CenterTitle()
+            g_sigtt_prv.SetMarkerColor(4)
+            g_sigtt_prv.SetMarkerStyle(25)
+            g_sigtt_prv.Draw("P")
 
-        g_sigtt_prv.SetMarkerColor(4)
-        g_sigtt_prv.SetMarkerStyle(25)
-        g_sigtt_prv.Draw("P")
+            c2.cd(4).SetLeftMargin(0.12)
+            g_sigtt_fit.SetTitle("Sigma TT Model Fit")
+            g_sigtt_fit.Draw("A*")
 
-        c2.cd(4).SetLeftMargin(0.12)
-        g_sigtt_fit.SetTitle("Sigma TT Model Fit")
-        g_sigtt_fit.Draw("A*")
+            g_sigtt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            g_sigtt_fit.GetXaxis().CenterTitle()
+            g_sigtt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
+            g_sigtt_fit.GetYaxis().SetTitleOffset(1.5)
+            g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
+            g_sigtt_fit.GetYaxis().CenterTitle()
 
-        g_sigtt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        g_sigtt_fit.GetXaxis().CenterTitle()
-        g_sigtt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
-        g_sigtt_fit.GetYaxis().SetTitleOffset(1.5)
-        g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
-        g_sigtt_fit.GetYaxis().CenterTitle()
+            # Set axis limits to ensure everything is shown
+            x_min = min(g_sigtt_fit.GetX())
+            x_max = max(g_sigtt_fit.GetX())
+            y_min = min(g_sigtt_fit.GetY())
+            y_max = max(g_sigtt_fit.GetY())
 
-        # Set axis limits to ensure everything is shown
-        x_min = min(g_sigtt_fit.GetX())
-        x_max = max(g_sigtt_fit.GetX())
-        y_min = min(g_sigtt_fit.GetY())
-        y_max = max(g_sigtt_fit.GetY())
+            # You can also set a margin to ensure all points are visible
+            margin = 0.1
+            g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+            
+            f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+            f_sigTT.SetParNames("p13")
+            f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
 
-        # You can also set a margin to ensure all points are visible
-        margin = 0.1
-        g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-        g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+            # Evaluate the fit function at several points to determine its range
+            n_points = 100  # Number of points to evaluate the fit function
+            fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
 
-        f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
-        f_sigTT.SetParNames("p13")
-        f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
+            # Extend the y-axis range to include the fit function range
+            y_min = min(y_min, fit_y_min)
+            y_max = max(y_max, fit_y_max)
 
-        # Evaluate the fit function at several points to determine its range
-        n_points = 100  # Number of points to evaluate the fit function
-        fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-        fit_y_min = min(fit_y_values)
-        fit_y_max = max(fit_y_values)
+            # Set a margin to ensure all points are visible
+            margin = 0.1 * (y_max - y_min)
+            g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
-        # Extend the y-axis range to include the fit function range
-        y_min = min(y_min, fit_y_min)
-        y_max = max(y_max, fit_y_max)
+            g_q2_sigtt_fit = TGraphErrors()
+            for i in range(len(w_vec)):
+                g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+                g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
+                sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
+                g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
-        # Set a margin to ensure all points are visible
-        margin = 0.1 * (y_max - y_min)
-        g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SM")
+            f_sigTT.Draw("same")
 
-        g_q2_sigtt_fit = TGraphErrors()
-        for i in range(len(w_vec)):
-            g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
-            g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
-            sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
-            g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
+            #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
+            f_sigTT_status = f_sigTT.GetNDF() != 0
+            f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
 
-        r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SM")
-        f_sigTT.Draw("same")
+            fit_status = TText()
+            fit_status.SetTextSize(0.04)
+            fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
 
-        #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
-        f_sigTT_status = f_sigTT.GetNDF() != 0
-        f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
+            c1.cd(4)
+            g_sigtt_fit_tot.SetMarkerStyle(26)
+            g_sigtt_fit_tot.SetMarkerColor(2)
+            g_sigtt_fit_tot.SetLineColor(2)
+            g_sigtt_fit_tot.Draw("LP")
 
-        fit_status = TText()
-        fit_status.SetTextSize(0.04)
-        fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
+            params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
+            chi2_sigTT_history.append(f_sigTT.GetChisquare())
+            fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
 
-        c1.cd(4)
-        g_sigtt_fit_tot.SetMarkerStyle(26)
-        g_sigtt_fit_tot.SetMarkerColor(2)
-        g_sigtt_fit_tot.SetLineColor(2)
-        g_sigtt_fit_tot.Draw("LP")
+            # Update ROOT TGraphs for plotting
+            graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
+            graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
 
-        params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
-        chi2_sigTT_history.append(f_sigTT.GetChisquare())
-        fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
+            if f_sigTT_status:
+                break
 
-        # Update ROOT TGraphs for plotting
-        graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
-        graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
+            # Calculate the cost (chi-square value) for the current parameters
+            current_cost = f_sigTT.GetChisquare()
 
-        if f_sigTT_status:
-            break
+            # If the new cost is better or accepted by the acceptance probability, update the best parameters
+            if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                best_params = current_params
+                best_cost = current_cost
 
-        # Calculate the cost (chi-square value) for the current parameters
-        current_cost = f_sigTT.GetChisquare()
+            # Check if current parameters haven't changed for the past 3 iterations
+            if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
+                if round(params_sigTT_history['p3'][-2], 3) == round(params_sigTT_history['p13'][-1], 3):
+                    unchanged_iterations += 1
+                else:
+                    unchanged_iterations = 0
 
-        # If the new cost is better or accepted by the acceptance probability, update the best parameters
-        if acceptance_probability(best_cost, current_cost, temperature) > random.random():
-            best_params = current_params
-            best_cost = current_cost
+            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            if unchanged_iterations >= max_unchanged_iterations:
+                #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                #unchanged_iterations = 0
+                f_sigTT_status = True
+                f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"                
+                break
 
-        # Check if current parameters haven't changed for the past 3 iterations
-        if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
-            if round(params_sigTT_history['p3'][-2], 3) == round(params_sigTT_history['p13'][-1], 3):
-                unchanged_iterations += 1
-            else:
-                unchanged_iterations = 0
+            previous_params = current_params[0]                
 
-        # Adjust the cooling rate if parameters haven't changed for 3 iterations
-        if unchanged_iterations >= max_unchanged_iterations:
-            #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-            #unchanged_iterations = 0
-            f_sigTT_status = True
-            f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"                
-            break
+            # Update parameters with the best found so far
+            par_lim_sigtt_0 = best_params
 
-        previous_params = current_params[:]                
+            # Update the temperature
+            temperature *= cooling_rate
 
-        # Update parameters with the best found so far
-        par_lim_sigtt_0 = best_params
+            iteration += 1
 
-        # Update the temperature
-        temperature *= cooling_rate
+        except (TypeError or ZeroDivisionError) as e:
+            print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
-        iteration += 1
+            # Store the parameter values and chi-square values for each iteration
+            params_sigTT_history = {'p13': []}
+            chi2_sigTT_history = []
+            fit_sigTT_status_history = []
+
+            # Create TGraphs for parameter convergence
+            graph_sigTT_p13 = TGraph()
+            graph_sigTT_chi2 = TGraph()
+
+            # Adjust parameter limits within a random number
+            par_lim_sigtt_0 = random.uniform(0, max_iterations)
+
+            iteration += 1
 
     if iteration == max_iterations:
         print("ERROR: Sig TT failed to converge!")
