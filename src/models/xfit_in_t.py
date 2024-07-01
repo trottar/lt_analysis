@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 22:07:01 trottar"
+# Time-stamp: "2024-06-30 22:08:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1023,7 +1023,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_chi2 = TGraph()
 
     # Track the best solution
-    best_params = par_lim_sigtt_0]
+    best_params = par_lim_sigtt_0
     best_cost = float('inf')
     previous_params = best_params
     
