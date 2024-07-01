@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 20:38:38 trottar"
+# Time-stamp: "2024-06-30 20:44:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -702,6 +702,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigT.GetChisquare())
     par_chi2_vec.append(f_sigT.GetChisquare())
 
+    # Calculate the minimum and maximum values from the graphs
+    min_sigT_y = float('inf')
+    max_sigT_y = float('-inf')
+
+    # Update min_sigT_y and max_sigT_y based on each graph's values
+    for graph in [graph_sigT_p5, graph_sigT_p6]:
+        n_points = graph.GetN()
+        for i in range(n_points):
+            y = graph.GetY()[i]
+            if y < min_sigT_y:
+                min_sigT_y = y
+            if y > max_sigT_y:
+                max_sigT_y = y
+
+    # Scale the y-axis
+    graph_sigT_p5.SetMinimum(min_sigT_y * 0.9)
+    graph_sigT_p6.SetMaximum(max_sigT_y * 1.1)    
+    
     # Plot parameter convergence
     c3.cd(2).SetLeftMargin(0.12)
     graph_sigT_p5.SetTitle("Sig T Parameter Convergence;Iteration;Parameter")
@@ -968,6 +986,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
 
+    # Calculate the minimum and maximum values from the graphs
+    min_sigLT_y = float('inf')
+    max_sigLT_y = float('-inf')
+
+    # Update min_sigLT_y and max_sigLT_y based on each graph's values
+    for graph in [graph_sigLT_p9, graph_sigLT_p10, graph_sigLT_p11]:
+        n_points = graph.GetN()
+        for i in range(n_points):
+            y = graph.GetY()[i]
+            if y < min_sigLT_y:
+                min_sigLT_y = y
+            if y > max_sigLT_y:
+                max_sigLT_y = y
+
+    # Scale the y-axis
+    graph_sigLT_p9.SetMinimum(min_sigLT_y * 0.9)
+    graph_sigLT_p9.SetMaximum(max_sigLT_y * 1.1)    
+    
     # Plot parameter convergence
     c3.cd(3).SetLeftMargin(0.12)
     graph_sigLT_p9.SetTitle("Sig LT Parameter Convergence;Iteration;Parameter")
@@ -1213,6 +1249,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigTT.GetChisquare())
     par_chi2_vec.append(f_sigTT.GetChisquare())
     par_chi2_vec.append(f_sigTT.GetChisquare())        
+
+    # Calculate the minimum and maximum values from the graphs
+    min_sigTT_y = float('inf')
+    max_sigTT_y = float('-inf')
+
+    # Update min_sigTT_y and max_sigTT_y based on each graph's values
+    for graph in [graph_sigTT_p3]:
+        n_points = graph.GetN()
+        for i in range(n_points):
+            y = graph.GetY()[i]
+            if y < min_sigTT_y:
+                min_sigTT_y = y
+            if y > max_sigTT_y:
+                max_sigTT_y = y
+
+    # Scale the y-axis
+    graph_sigTT_p13.SetMinimum(min_sigTT_y * 0.9)
+    graph_sigTT_p13.SetMaximum(max_sigTT_y * 1.1)    
 
     # Plot parameter convergence
     c3.cd(4).SetLeftMargin(0.12)
