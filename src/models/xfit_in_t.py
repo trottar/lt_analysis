@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 00:21:46 trottar"
+# Time-stamp: "2024-07-01 00:23:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -326,7 +326,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Check if current_params are close to any local minimum
             if any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
-                print("WARNING: Parameters {} are a local minima...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
+                print("WARNING: Parameters p1={:.3f}, p2={:.3f}, p3={:.3f} are a local minima...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
                 iteration += 1
                 continue
             
