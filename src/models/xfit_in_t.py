@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 22:01:14 trottar"
+# Time-stamp: "2024-06-30 22:03:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1029,7 +1029,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
-
+        print("!!!!!!!!!!!!!!",par_lim_sigtt_0)
         print("Iteration {}/{}\nFit for Sig TT".format(iteration, max_iterations))
 
         c1.cd(4).SetLeftMargin(0.12)
