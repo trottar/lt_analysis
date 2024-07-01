@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 09:28:34 trottar"
+# Time-stamp: "2024-07-01 09:29:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -222,8 +222,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}/{}".format())
-        sys.stdout.write(" \r{0}/{1}\r{2}".format(iteration, max_iterations, ''))
+        sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
         sys.stdout.flush()
 
 
