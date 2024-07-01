@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:46:25 trottar"
+# Time-stamp: "2024-06-30 20:05:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -191,7 +191,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 10
 
     # Initialize adaptive parameter limits
     par_lim_sigl_0 = random.uniform(0, 1)
@@ -460,7 +460,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 10
 
     # Initialize adaptive parameter limits
     par_lim_sigt_0 = random.uniform(0, 1)
@@ -715,7 +715,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 10
 
     # Initialize adaptive parameter limits
     par_lim_siglt_0 = random.uniform(0, 1)
@@ -983,7 +983,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 10
 
     # Initialize adaptive parameter limits
     par_lim_sigtt_0 = random.uniform(0, 1)
