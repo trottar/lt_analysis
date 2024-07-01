@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 21:45:00 trottar"
+# Time-stamp: "2024-06-30 21:48:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1035,6 +1035,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
+
+        print("!!!!!!!!!!!",par_lim_sigtt_0, temperature)
         # Perturb parameters
         current_params = [
             simulated_annealing(par_lim_sigtt_0, temperature)
