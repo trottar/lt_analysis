@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 22:25:03 trottar"
+# Time-stamp: "2024-06-30 22:28:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -446,7 +446,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p1.SetLineColor(ROOT.kRed)
     graph_sigL_p2.SetLineColor(ROOT.kBlue)
     graph_sigL_p3.SetLineColor(ROOT.kGreen)
-    graph_sigL_p1.Draw("ALP same")
+    graph_sigL_p1.Draw("ALP")
     graph_sigL_p2.Draw("LP SAME")
     graph_sigL_p3.Draw("LP SAME")
 
@@ -454,7 +454,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c4.cd(1).SetLeftMargin(0.12)
     graph_sigL_chi2.SetTitle("Sig L Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigL_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigL_chi2.Draw("ALP same")
+    graph_sigL_chi2.Draw("ALP")
 
     print("\n")    
     
@@ -711,14 +711,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p5.SetTitle("Sig T Parameter Convergence;Iteration;Parameter")
     graph_sigT_p5.SetLineColor(ROOT.kRed)
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
-    graph_sigT_p5.Draw("ALP same")
+    graph_sigT_p5.Draw("ALP")
     graph_sigT_p6.Draw("LP SAME")
 
     # Plot chi-square convergence
     c4.cd(2).SetLeftMargin(0.12)
     graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigT_chi2.Draw("ALP same")
+    graph_sigT_chi2.Draw("ALP")
     
     print("\n")    
     
@@ -987,7 +987,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_p9.SetLineColor(ROOT.kRed)
     graph_sigLT_p10.SetLineColor(ROOT.kBlue)
     graph_sigLT_p11.SetLineColor(ROOT.kGreen)
-    graph_sigLT_p9.Draw("ALP same")
+    graph_sigLT_p9.Draw("ALP")
     graph_sigLT_p10.Draw("LP SAME")
     graph_sigLT_p11.Draw("LP SAME")
 
@@ -995,7 +995,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c4.cd(3).SetLeftMargin(0.12)
     graph_sigLT_chi2.SetTitle("Sig LT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigLT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigLT_chi2.Draw("ALP same")
+    graph_sigLT_chi2.Draw("ALP")
     
     print("\n")    
     
@@ -1238,13 +1238,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c3.cd(4).SetLeftMargin(0.12)
     graph_sigTT_p13.SetTitle("Sig TT Parameter Convergence;Iteration;Parameter")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
-    graph_sigTT_p13.Draw("ALP same")
+    graph_sigTT_p13.Draw("ALP")
 
     # Plot chi-square convergence
     c4.cd(4).SetLeftMargin(0.12)
     graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigTT_chi2.Draw("ALP same")
+    graph_sigTT_chi2.Draw("ALP")
     
     print("\n")    
     
