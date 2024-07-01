@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 20:19:07 trottar"
+# Time-stamp: "2024-06-30 20:38:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -426,6 +426,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
+
+    # Calculate the minimum and maximum values from the graphs
+    min_sigL_y = float('inf')
+    max_sigL_y = float('-inf')
+
+    # Update min_sigL_y and max_sigL_y based on each graph's values
+    for graph in [graph_sigL_p1, graph_sigL_p2, graph_sigL_p3]:
+        n_points = graph.GetN()
+        for i in range(n_points):
+            y = graph.GetY()[i]
+            if y < min_sigL_y:
+                min_sigL_y = y
+            if y > max_sigL_y:
+                max_sigL_y = y
+
+    # Scale the y-axis
+    graph_sigL_p1.SetMinimum(min_sigL_y * 0.9)
+    graph_sigL_p1.SetMaximum(max_sigL_y * 1.1)    
 
     # Plot parameter convergence
     c3.cd(1).SetLeftMargin(0.12)
