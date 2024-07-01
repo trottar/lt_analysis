@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 01:49:58 trottar"
+# Time-stamp: "2024-07-01 01:58:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,6 +216,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Check for local minima
     local_minima = []
     local_iterations = 0
+    last_minima = []
     
     print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
@@ -371,18 +372,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                if any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
-                    local_iterations += 1
-                    print(local_iterations,"!!!!!!!!!",f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2))
-
-                    print(local_iterations,"$$$$$$$$$$$")
-
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if local_iterations > 5:
-                        break
-                    
-                else:
-                    
+                if !any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):                    
                     local_minima.append([
                         f_sigL.GetParameter(0),
                         f_sigL.GetParameter(1),
@@ -406,7 +396,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Check if current_params are close to any local minimum
             if any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
                 print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
-                
+
+                if last_minima == [f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]:
+                    local_iterations += 1
+                    print(local_iterations,"!!!!!!!!!",f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2))
+
+                    print(local_iterations,"$$$$$$$$$$$")
+
+                    # If local minima occurs more than 100 times, it's likely the true minima
+                    if local_iterations > 5:
+                        break                    
+                else:
+                    last_minima = [f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]
+                    
                 # Store the parameter values and chi-square values for each iteration
                 params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
                 chi2_sigL_history = []
