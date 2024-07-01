@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 02:01:31 trottar"
+# Time-stamp: "2024-07-01 02:04:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -408,6 +408,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         #break
                         sys.exit(2)
                 else:
+                    local_iterations = 0
                     last_minima = [f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]
                     
                 # Store the parameter values and chi-square values for each iteration
