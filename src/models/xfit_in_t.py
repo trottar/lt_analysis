@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 20:50:31 trottar"
+# Time-stamp: "2024-06-30 21:23:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,8 +179,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c3.Divide(2, 2)
     c4 = TCanvas("c4", "Chi-Square Convergence", 800, 800)
     c4.Divide(2, 2)
-    c5 = TCanvas("c5", "Fit Status Over Iterations", 800, 800)
-    c5.Divide(2, 2)
 
     ########
     # SigL #
@@ -208,7 +206,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p2 = TGraph()
     graph_sigL_p3 = TGraph()
     graph_sigL_chi2 = TGraph()
-    graph_fit_sigL_status = TGraph()
 
     # Track the best solution
     best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
@@ -343,7 +340,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_p2.SetPoint(iteration, iteration, f_sigL.GetParameter(1))
             graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
             graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
-            graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
 
             if f_sigL_status:
                 break
@@ -399,7 +395,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_p2 = TGraph()
             graph_sigL_p3 = TGraph()
             graph_sigL_chi2 = TGraph()
-            graph_fit_sigL_status = TGraph()
 
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = random.uniform(0, max_iterations)
@@ -461,12 +456,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_chi2.SetLineColor(ROOT.kBlack)
     graph_sigL_chi2.Draw("ALP same")
 
-    # Plot fit status
-    c5.cd(1).SetLeftMargin(0.12)
-    graph_fit_sigL_status.SetTitle("Sig L Fit Status Over Iterations;Iteration;Fit Status")
-    graph_fit_sigL_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigL_status.Draw("ALP same")
-
     print("\n")    
     
     ########
@@ -493,7 +482,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p5 = TGraph()
     graph_sigT_p6 = TGraph()
     graph_sigT_chi2 = TGraph()
-    graph_fit_sigT_status = TGraph()
 
     # Track the best solution
     best_params = [par_lim_sigt_0, par_lim_sigt_1]
@@ -623,7 +611,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_p5.SetPoint(iteration, iteration, f_sigT.GetParameter(0))
             graph_sigT_p6.SetPoint(iteration, iteration, f_sigT.GetParameter(1))
             graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
-            graph_fit_sigT_status.SetPoint(iteration, iteration, 1 if f_sigT_status else 0)
 
             if f_sigT_status:
                 break
@@ -675,7 +662,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_p5 = TGraph()
             graph_sigT_p6 = TGraph()
             graph_sigT_chi2 = TGraph()
-            graph_fit_sigT_status = TGraph()
 
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = random.uniform(0, max_iterations)
@@ -733,12 +719,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigT_chi2.Draw("ALP same")
-
-    # Plot fit status
-    c5.cd(2).SetLeftMargin(0.12)
-    graph_fit_sigT_status.SetTitle("Sig T Fit Status Over Iterations;Iteration;Fit Status")
-    graph_fit_sigT_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigT_status.Draw("ALP same")
     
     print("\n")    
     
@@ -768,7 +748,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_p10 = TGraph()
     graph_sigLT_p11 = TGraph()
     graph_sigLT_chi2 = TGraph()
-    graph_fit_sigLT_status = TGraph()
 
     # Track the best solution
     best_params = [par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2]
@@ -903,7 +882,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_p10.SetPoint(iteration, iteration, f_sigLT.GetParameter(1))
             graph_sigLT_p11.SetPoint(iteration, iteration, f_sigLT.GetParameter(2))
             graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
-            graph_fit_sigLT_status.SetPoint(iteration, iteration, 1 if f_sigLT_status else 0)
 
             if f_sigLT_status:
                 break
@@ -958,7 +936,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_p10 = TGraph()
             graph_sigLT_p11 = TGraph()
             graph_sigLT_chi2 = TGraph()
-            graph_fit_sigLT_status = TGraph()
 
             # Adjust parameter limits within a random number
             par_lim_siglt_0 = random.uniform(0, max_iterations)
@@ -1019,12 +996,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_chi2.SetTitle("Sig LT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigLT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigLT_chi2.Draw("ALP same")
-
-    # Plot fit status
-    c5.cd(3).SetLeftMargin(0.12)
-    graph_fit_sigLT_status.SetTitle("Sig LT Fit Status Over Iterations;Iteration;Fit Status")
-    graph_fit_sigLT_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigLT_status.Draw("ALP same")
     
     print("\n")    
     
@@ -1050,7 +1021,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
     graph_sigTT_chi2 = TGraph()
-    graph_fit_sigTT_status = TGraph()
 
     # Track the best solution
     best_params = [par_lim_sigtt_0]
@@ -1071,7 +1041,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 simulated_annealing(par_lim_sigtt_0, temperature)
             ]
 
-            f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+            f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
             f_sigTT_pre.SetParNames("p13")
             f_sigTT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
 
@@ -1126,7 +1096,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
             g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
             
-            f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+            f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
             f_sigTT.SetParNames("p13")
             f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
 
@@ -1175,7 +1145,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Update ROOT TGraphs for plotting
             graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
             graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
-            graph_fit_sigTT_status.SetPoint(iteration, iteration, 1 if f_sigTT_status else 0)
 
             if f_sigTT_status:
                 break
@@ -1224,7 +1193,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Create TGraphs for parameter convergence
             graph_sigTT_p13 = TGraph()
             graph_sigTT_chi2 = TGraph()
-            graph_fit_sigTT_status = TGraph()
 
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = random.uniform(0, max_iterations)
@@ -1279,20 +1247,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigTT_chi2.Draw("ALP same")
-
-    # Plot fit status
-    c5.cd(4).SetLeftMargin(0.12)
-    graph_fit_sigTT_status.SetTitle("Sig TT Fit Status Over Iterations;Iteration;Fit Status")
-    graph_fit_sigTT_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigTT_status.Draw("ALP same")
     
     print("\n")    
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
     c3.Print(outputpdf)
-    c4.Print(outputpdf)
-    c5.Print(outputpdf+')')
+    c4.Print(outputpdf+')')
     
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
