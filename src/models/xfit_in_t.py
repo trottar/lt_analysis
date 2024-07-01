@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 09:29:32 trottar"
+# Time-stamp: "2024-07-01 09:31:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,7 +224,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
         sys.stdout.flush()
-
 
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
@@ -540,9 +539,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     last_minima = []
     
     print("\n/*--------------------------------------------------*/")
+    print("Fit for Sig T")
+    print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}/{}\nFit for Sig T".format(iteration, max_iterations))
+        sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+        sys.stdout.flush()
 
         c1.cd(2).SetLeftMargin(0.12)
         nsep.Draw("sigt:t:sigt_e", "", "goff")
@@ -843,9 +845,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     last_minima = []
     
     print("\n/*--------------------------------------------------*/")
+    print("Fit for Sig LT")
+    print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}/{}\nFit for Sig LT".format(iteration, max_iterations))
+        sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+        sys.stdout.flush()
 
         c1.cd(3).SetLeftMargin(0.12)
         nsep.Draw("siglt:t:siglt_e", "", "goff")
@@ -1159,9 +1164,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     last_minima = []
     
     print("\n/*--------------------------------------------------*/")
+    print("Fit for Sig TT")
+    print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}/{}\nFit for Sig TT".format(iteration, max_iterations))
+        sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+        sys.stdout.flush()
 
         c1.cd(4).SetLeftMargin(0.12)
         nsep.Draw("sigtt:t:sigtt_e", "", "goff")
