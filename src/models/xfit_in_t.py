@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 00:40:44 trottar"
+# Time-stamp: "2024-07-01 00:45:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,7 +189,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 25
 
     # Initialize adaptive parameter limits
     par_lim_sigl_0 = random.uniform(0, 1)
@@ -354,7 +354,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_params = current_params
                 best_cost = current_cost
                 
-            # Check if current parameters haven't changed for the past 3 iterations
+            # Check if current parameters haven't changed for the past N iterations
             if len(params_sigL_history['p1']) >= max_unchanged_iterations  and \
                len(params_sigL_history['p2']) >= max_unchanged_iterations  and \
                len(params_sigL_history['p3']) >= max_unchanged_iterations:
@@ -365,7 +365,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 else:
                     unchanged_iterations = 0
 
-            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
                 local_minima.append([
                     f_sigL.GetParameter(0),
@@ -491,7 +491,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 25
 
     # Initialize adaptive parameter limits
     par_lim_sigt_0 = random.uniform(0, 1)
@@ -647,7 +647,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_params = current_params
                 best_cost = current_cost
 
-            # Check if current parameters haven't changed for the past 3 iterations
+            # Check if current parameters haven't changed for the past N iterations
             if len(params_sigT_history['p5']) >= max_unchanged_iterations  and \
                len(params_sigT_history['p6']) >= max_unchanged_iterations:
                 if round(params_sigT_history['p5'][-2], 3) == round(params_sigT_history['p5'][-1], 3) and \
@@ -656,7 +656,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 else:
                     unchanged_iterations = 0
 
-            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
                 #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
                 #unchanged_iterations = 0
@@ -755,7 +755,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 25
 
     # Initialize adaptive parameter limits
     par_lim_siglt_0 = random.uniform(0, 1)
@@ -918,7 +918,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_params = current_params
                 best_cost = current_cost
 
-            # Check if current parameters haven't changed for the past 3 iterations
+            # Check if current parameters haven't changed for the past N iterations
             if len(params_sigLT_history['p9']) >= max_unchanged_iterations  and \
                len(params_sigLT_history['p10']) >= max_unchanged_iterations  and \
                len(params_sigLT_history['p11']) >= max_unchanged_iterations:
@@ -929,7 +929,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 else:
                     unchanged_iterations = 0
 
-            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
                 #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
                 #unchanged_iterations = 0
@@ -1032,7 +1032,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 25
 
     # Initialize adaptive parameter limits
     par_lim_sigtt_0 = random.uniform(0, 1)
@@ -1179,14 +1179,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_params = current_params
                 best_cost = current_cost
 
-            # Check if current parameters haven't changed for the past 3 iterations
+            # Check if current parameters haven't changed for the past N iterations
             if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
                 if round(params_sigTT_history['p13'][-2], 3) == round(params_sigTT_history['p13'][-1], 3):
                     unchanged_iterations += 1
                 else:
                     unchanged_iterations = 0
 
-            # Adjust the cooling rate if parameters haven't changed for 3 iterations
+            # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
                 #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
                 #unchanged_iterations = 0
