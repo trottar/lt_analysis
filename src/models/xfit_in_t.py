@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 01:38:44 trottar"
+# Time-stamp: "2024-07-01 01:39:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -375,7 +375,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     local_iterations += 1
                     print(local_iterations,"!!!!!!!!!",f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2))
 
-                print(local_iterations,"$$$$$$$$$$$"
+                print(local_iterations,"$$$$$$$$$$$")
 
                 # If local minima occurs more than 100 times, it's likely the true minima
                 if local_iterations > 5:
