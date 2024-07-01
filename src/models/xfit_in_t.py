@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 01:58:36 trottar"
+# Time-stamp: "2024-07-01 02:01:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -404,7 +404,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print(local_iterations,"$$$$$$$$$$$")
 
                     # If local minima occurs more than 100 times, it's likely the true minima
-                    if local_iterations > 5:
+                    if local_iterations > 100:
                         break                    
                 else:
                     last_minima = [f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]
@@ -438,8 +438,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(2)*10, f_sigL.GetParameter(2)) # Re-randomize
                     
                 temperature *= 0.95  # Increase randomness in case of error
-                
-                #continue
 
         except (TypeError or ZeroDivisionError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
