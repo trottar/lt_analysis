@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 00:45:26 trottar"
+# Time-stamp: "2024-07-01 00:58:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,7 +82,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    max_iterations = 10000
+    #max_iterations = 10000
+    max_iterations = 1e6
     ##############
     ##############
     ##############
@@ -400,9 +401,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_chi2 = TGraph()
 
                 # Adjust parameter limits within a random number
-                par_lim_sigl_0 = random.uniform(0, 1)
-                par_lim_sigl_1 = random.uniform(0, 1)
-                par_lim_sigl_2 = random.uniform(0, 1)
+                par_lim_sigl_0 = random.uniform(0, 100)
+                par_lim_sigl_1 = random.uniform(0, 100)
+                par_lim_sigl_2 = random.uniform(0, 100)
                 
                 continue
 
@@ -421,9 +422,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigl_0 = random.uniform(0, 1)
-            par_lim_sigl_1 = random.uniform(0, 1)
-            par_lim_sigl_2 = random.uniform(0, 1)
+            par_lim_sigl_0 = random.uniform(0, 100)
+            par_lim_sigl_1 = random.uniform(0, 100)
+            par_lim_sigl_2 = random.uniform(0, 100)
 
             iteration += 1
 
@@ -688,8 +689,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigt_0 = random.uniform(0, 1)
-            par_lim_sigt_1 = random.uniform(0, 1)
+            par_lim_sigt_0 = random.uniform(0, 100)
+            par_lim_sigt_1 = random.uniform(0, 100)
 
             iteration += 1
 
@@ -962,9 +963,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_siglt_0 = random.uniform(0, 1)
-            par_lim_siglt_1 = random.uniform(0, 1)
-            par_lim_siglt_2 = random.uniform(0, 1)
+            par_lim_siglt_0 = random.uniform(0, 100)
+            par_lim_siglt_1 = random.uniform(0, 100)
+            par_lim_siglt_2 = random.uniform(0, 100)
 
             iteration += 1
 
@@ -1217,7 +1218,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigTT_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigtt_0 = random.uniform(0, 1)
+            par_lim_sigtt_0 = random.uniform(0, 100)
 
             iteration += 1
 
