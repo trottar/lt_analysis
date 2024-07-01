@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 09:21:09 trottar"
+# Time-stamp: "2024-07-01 09:28:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -218,9 +218,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     last_minima = []
     
     print("\n/*--------------------------------------------------*/")
+    print("Fit for Sig L")
+    print("/*--------------------------------------------------*/")
     while iteration < max_iterations:
 
-        print("Iteration {}/{}\nFit for Sig L".format(iteration, max_iterations))
+        print("Iteration {}/{}".format())
+        sys.stdout.write(" \r{0}/{1}\r{2}".format(iteration, max_iterations, ''))
+        sys.stdout.flush()
+
 
         c1.cd(1).SetLeftMargin(0.12)
         nsep.Draw("sigl:t:sigl_e", "", "goff")
@@ -393,8 +398,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
 
                 last_minima.append([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)])                
-                # If local minima occurs more than 75 times, it's likely the true minima
-                if last_minima.count([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]) > 75:
+                # If local minima occurs more than 100 times, it's likely the true minima
+                if last_minima.count([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]) > 100:
                         break
                     
                 # Store the parameter values and chi-square values for each iteration
@@ -703,8 +708,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
 
                 last_minima.append([f_sigT.GetParameter(0), f_sigT.GetParameter(1)])                
-                # If local minima occurs more than 75 times, it's likely the true minima
-                if last_minima.count([f_sigT.GetParameter(0), f_sigT.GetParameter(1)]) > 75:
+                # If local minima occurs more than 100 times, it's likely the true minima
+                if last_minima.count([f_sigT.GetParameter(0), f_sigT.GetParameter(1)]) > 100:
                         break
                 
                 # Store the parameter values and chi-square values for each iteration
@@ -991,7 +996,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                if not any(np.allclose([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1)], minima, atol=1e-3) for minima in local_minima):                    
+                if not any(np.allclose([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):                    
                     local_minima.append([
                         f_sigLT.GetParameter(0),
                         f_sigLT.GetParameter(1),
@@ -1014,8 +1019,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
 
                 last_minima.append([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)])                
-                # If local minima occurs more than 75 times, it's likely the true minima
-                if last_minima.count([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]) > 75:
+                # If local minima occurs more than 100 times, it's likely the true minima
+                if last_minima.count([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]) > 100:
                         break
                     
                 # Store the parameter values and chi-square values for each iteration
@@ -1312,8 +1317,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigTT.GetParameter(0)))
 
                 last_minima.append([f_sigTT.GetParameter(0)])
-                # If local minima occurs more than 75 times, it's likely the true minima
-                if last_minima.count([f_sigTT.GetParameter(0)]) > 75:
+                # If local minima occurs more than 100 times, it's likely the true minima
+                if last_minima.count([f_sigTT.GetParameter(0)]) > 100:
                         break
                     
                 # Store the parameter values and chi-square values for each iteration
