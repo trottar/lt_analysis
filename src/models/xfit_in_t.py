@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 02:17:39 trottar"
+# Time-stamp: "2024-07-01 02:18:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -638,7 +638,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
                 g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
-            r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SM")
+            r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
             f_sigT.Draw("same")
 
             #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
@@ -949,7 +949,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i])) * (g_vec[i])
                 g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
-            r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SM")
+            r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
             f_sigLT.Draw("same")
 
             #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
@@ -1262,7 +1262,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
                 g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
-            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SM")
+            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
             f_sigTT.Draw("same")
 
             #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
