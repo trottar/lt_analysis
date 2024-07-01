@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 01:32:28 trottar"
+# Time-stamp: "2024-07-01 01:35:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -430,7 +430,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     
                 temperature *= 0.95  # Increase randomness in case of error
                 
-                continue
+                #continue
 
         except (TypeError or ZeroDivisionError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
