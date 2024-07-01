@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 18:25:49 trottar"
+# Time-stamp: "2024-06-30 22:28:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,8 +179,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c3.Divide(2, 2)
     c4 = TCanvas("c4", "Chi-Square Convergence", 800, 800)
     c4.Divide(2, 2)
-    c5 = TCanvas("c5", "Fit Status Over Iterations", 800, 800)
-    c5.Divide(2, 2)
 
     ########
     # SigL #
@@ -191,7 +189,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 10
 
     # Initialize adaptive parameter limits
     par_lim_sigl_0 = random.uniform(0, 1)
@@ -208,7 +206,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p2 = TGraph()
     graph_sigL_p3 = TGraph()
     graph_sigL_chi2 = TGraph()
-    graph_fit_sigL_status = TGraph()
 
     # Track the best solution
     best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
@@ -343,7 +340,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_p2.SetPoint(iteration, iteration, f_sigL.GetParameter(1))
             graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
             graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
-            graph_fit_sigL_status.SetPoint(iteration, iteration, 1 if f_sigL_status else 0)
 
             if f_sigL_status:
                 break
@@ -357,18 +353,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
                 
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(round(par, 3) == round(params_sigL_history['p1'][-1], 3) for par in params_sigL_history['p1']) and \
-               all(round(par, 3) == round(params_sigL_history['p2'][-1], 3) for par in params_sigL_history['p2']) and \
-               all(round(par, 3) == round(params_sigL_history['p3'][-1], 3) for par in params_sigL_history['p3']):
-                unchanged_iterations += 1
-                print("!!!!!!!!Same value...")
-            else:
-                unchanged_iterations = 0
+            if len(params_sigL_history['p1']) >= max_unchanged_iterations  and \
+               len(params_sigL_history['p2']) >= max_unchanged_iterations  and \
+               len(params_sigL_history['p3']) >= max_unchanged_iterations:
+                if round(params_sigL_history['p1'][-2], 3) == round(params_sigL_history['p1'][-1], 3) and \
+                   round(params_sigL_history['p2'][-2], 3) == round(params_sigL_history['p2'][-1], 3) and \
+                   round(params_sigL_history['p3'][-2], 3) == round(params_sigL_history['p3'][-1], 3):
+                    unchanged_iterations += 1
+                    print("!!!!!!!!Same value...{}/{}".format(unchanged_iterations, max_unchanged_iterations))
+                else:
+                    unchanged_iterations = 0
 
             # Adjust the cooling rate if parameters haven't changed for 3 iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-                unchanged_iterations = 0
+                #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                #unchanged_iterations = 0
+                f_sigL_status = True
+                f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"                
+                break
 
             previous_params = current_params[:]
 
@@ -393,7 +395,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_p2 = TGraph()
             graph_sigL_p3 = TGraph()
             graph_sigL_chi2 = TGraph()
-            graph_fit_sigL_status = TGraph()
 
             # Adjust parameter limits within a random number
             par_lim_sigl_0 = random.uniform(0, max_iterations)
@@ -421,13 +422,31 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigL.GetChisquare())
     par_chi2_vec.append(f_sigL.GetChisquare())
 
+    # Calculate the minimum and maximum values from the graphs
+    min_sigL_y = float('inf')
+    max_sigL_y = float('-inf')
+
+    # Update min_sigL_y and max_sigL_y based on each graph's values
+    for graph in [graph_sigL_p1, graph_sigL_p2, graph_sigL_p3]:
+        n_points = graph.GetN()
+        for i in range(n_points):
+            y = graph.GetY()[i]
+            if y < min_sigL_y:
+                min_sigL_y = y
+            if y > max_sigL_y:
+                max_sigL_y = y
+
+    # Scale the y-axis
+    graph_sigL_p1.SetMinimum(min_sigL_y * 0.9)
+    graph_sigL_p1.SetMaximum(max_sigL_y * 1.1)    
+
     # Plot parameter convergence
     c3.cd(1).SetLeftMargin(0.12)
     graph_sigL_p1.SetTitle("Sig L Parameter Convergence;Iteration;Parameter")
     graph_sigL_p1.SetLineColor(ROOT.kRed)
     graph_sigL_p2.SetLineColor(ROOT.kBlue)
     graph_sigL_p3.SetLineColor(ROOT.kGreen)
-    graph_sigL_p1.Draw("ALP same")
+    graph_sigL_p1.Draw("ALP")
     graph_sigL_p2.Draw("LP SAME")
     graph_sigL_p3.Draw("LP SAME")
 
@@ -435,13 +454,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c4.cd(1).SetLeftMargin(0.12)
     graph_sigL_chi2.SetTitle("Sig L Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigL_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigL_chi2.Draw("ALP same")
-
-    # Plot fit status
-    c5.cd(1).SetLeftMargin(0.12)
-    graph_fit_sigL_status.SetTitle("Sig L Fit Status Over Iterations;Iteration;Fit Status")
-    graph_fit_sigL_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigL_status.Draw("ALP same")
+    graph_sigL_chi2.Draw("ALP")
 
     print("\n")    
     
@@ -454,7 +467,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 10
 
     # Initialize adaptive parameter limits
     par_lim_sigt_0 = random.uniform(0, 1)
@@ -469,7 +482,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p5 = TGraph()
     graph_sigT_p6 = TGraph()
     graph_sigT_chi2 = TGraph()
-    graph_fit_sigT_status = TGraph()
 
     # Track the best solution
     best_params = [par_lim_sigt_0, par_lim_sigt_1]
@@ -599,7 +611,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_p5.SetPoint(iteration, iteration, f_sigT.GetParameter(0))
             graph_sigT_p6.SetPoint(iteration, iteration, f_sigT.GetParameter(1))
             graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
-            graph_fit_sigT_status.SetPoint(iteration, iteration, 1 if f_sigT_status else 0)
 
             if f_sigT_status:
                 break
@@ -613,16 +624,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(round(par, 3) == round(params_sigL_history['p5'][-1], 3) for par in params_sigL_history['p5']) and \
-               all(round(par, 3) == round(params_sigL_history['p6'][-1], 3) for par in params_sigL_history['p6']):
-                unchanged_iterations += 1
-            else:
-                unchanged_iterations = 0
+            if len(params_sigT_history['p5']) >= max_unchanged_iterations  and \
+               len(params_sigT_history['p6']) >= max_unchanged_iterations:
+                if round(params_sigT_history['p5'][-2], 3) == round(params_sigT_history['p5'][-1], 3) and \
+                   round(params_sigT_history['p6'][-2], 3) == round(params_sigT_history['p6'][-1], 3):
+                    unchanged_iterations += 1
+                else:
+                    unchanged_iterations = 0
 
             # Adjust the cooling rate if parameters haven't changed for 3 iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-                unchanged_iterations = 0
+                #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                #unchanged_iterations = 0
+                f_sigT_status = True
+                f_sigT_status_message = "Fit Successful" if f_sigT_status else "Fit Failed"                
+                break
 
             previous_params = current_params[:]                
 
@@ -646,7 +662,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_p5 = TGraph()
             graph_sigT_p6 = TGraph()
             graph_sigT_chi2 = TGraph()
-            graph_fit_sigT_status = TGraph()
 
             # Adjust parameter limits within a random number
             par_lim_sigt_0 = random.uniform(0, max_iterations)
@@ -673,25 +688,37 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigT.GetChisquare())
     par_chi2_vec.append(f_sigT.GetChisquare())
 
+    # Calculate the minimum and maximum values from the graphs
+    min_sigT_y = float('inf')
+    max_sigT_y = float('-inf')
+
+    # Update min_sigT_y and max_sigT_y based on each graph's values
+    for graph in [graph_sigT_p5, graph_sigT_p6]:
+        n_points = graph.GetN()
+        for i in range(n_points):
+            y = graph.GetY()[i]
+            if y < min_sigT_y:
+                min_sigT_y = y
+            if y > max_sigT_y:
+                max_sigT_y = y
+
+    # Scale the y-axis
+    graph_sigT_p5.SetMinimum(min_sigT_y * 0.9)
+    graph_sigT_p6.SetMaximum(max_sigT_y * 1.1)    
+    
     # Plot parameter convergence
     c3.cd(2).SetLeftMargin(0.12)
     graph_sigT_p5.SetTitle("Sig T Parameter Convergence;Iteration;Parameter")
     graph_sigT_p5.SetLineColor(ROOT.kRed)
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
-    graph_sigT_p5.Draw("ALP same")
+    graph_sigT_p5.Draw("ALP")
     graph_sigT_p6.Draw("LP SAME")
 
     # Plot chi-square convergence
     c4.cd(2).SetLeftMargin(0.12)
     graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigT_chi2.Draw("ALP same")
-
-    # Plot fit status
-    c5.cd(2).SetLeftMargin(0.12)
-    graph_fit_sigT_status.SetTitle("Sig T Fit Status Over Iterations;Iteration;Fit Status")
-    graph_fit_sigT_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigT_status.Draw("ALP same")
+    graph_sigT_chi2.Draw("ALP")
     
     print("\n")    
     
@@ -704,7 +731,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 10
 
     # Initialize adaptive parameter limits
     par_lim_siglt_0 = random.uniform(0, 1)
@@ -721,7 +748,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_p10 = TGraph()
     graph_sigLT_p11 = TGraph()
     graph_sigLT_chi2 = TGraph()
-    graph_fit_sigLT_status = TGraph()
 
     # Track the best solution
     best_params = [par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2]
@@ -856,7 +882,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_p10.SetPoint(iteration, iteration, f_sigLT.GetParameter(1))
             graph_sigLT_p11.SetPoint(iteration, iteration, f_sigLT.GetParameter(2))
             graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
-            graph_fit_sigLT_status.SetPoint(iteration, iteration, 1 if f_sigLT_status else 0)
 
             if f_sigLT_status:
                 break
@@ -870,17 +895,23 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(round(par, 3) == round(params_sigL_history['p9'][-1], 3) for par in params_sigL_history['p9']) and \
-               all(round(par, 3) == round(params_sigL_history['p11'][-1], 3) for par in params_sigL_history['p11']) and \
-               all(round(par, 3) == round(params_sigL_history['p12'][-1], 3) for par in params_sigL_history['p12']):
-                unchanged_iterations += 1
-            else:
-                unchanged_iterations = 0
+            if len(params_sigLT_history['p9']) >= max_unchanged_iterations  and \
+               len(params_sigLT_history['p10']) >= max_unchanged_iterations  and \
+               len(params_sigLT_history['p11']) >= max_unchanged_iterations:
+                if round(params_sigLT_history['p9'][-2], 3) == round(params_sigLT_history['p9'][-1], 3) and \
+                   round(params_sigLT_history['p10'][-2], 3) == round(params_sigLT_history['p10'][-1], 3) and \
+                   round(params_sigLT_history['p11'][-2], 3) == round(params_sigLT_history['p11'][-1], 3):
+                    unchanged_iterations += 1
+                else:
+                    unchanged_iterations = 0
 
             # Adjust the cooling rate if parameters haven't changed for 3 iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-                unchanged_iterations = 0
+                #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                #unchanged_iterations = 0
+                f_sigLT_status = True
+                f_sigLT_status_message = "Fit Successful" if f_sigLT_status else "Fit Failed"                
+                break
 
             previous_params = current_params[:]                
 
@@ -905,7 +936,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_p10 = TGraph()
             graph_sigLT_p11 = TGraph()
             graph_sigLT_chi2 = TGraph()
-            graph_fit_sigLT_status = TGraph()
 
             # Adjust parameter limits within a random number
             par_lim_siglt_0 = random.uniform(0, max_iterations)
@@ -933,13 +963,31 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigLT.GetChisquare())
     par_chi2_vec.append(f_sigLT.GetChisquare())
 
+    # Calculate the minimum and maximum values from the graphs
+    min_sigLT_y = float('inf')
+    max_sigLT_y = float('-inf')
+
+    # Update min_sigLT_y and max_sigLT_y based on each graph's values
+    for graph in [graph_sigLT_p9, graph_sigLT_p10, graph_sigLT_p11]:
+        n_points = graph.GetN()
+        for i in range(n_points):
+            y = graph.GetY()[i]
+            if y < min_sigLT_y:
+                min_sigLT_y = y
+            if y > max_sigLT_y:
+                max_sigLT_y = y
+
+    # Scale the y-axis
+    graph_sigLT_p9.SetMinimum(min_sigLT_y * 0.9)
+    graph_sigLT_p9.SetMaximum(max_sigLT_y * 1.1)    
+    
     # Plot parameter convergence
     c3.cd(3).SetLeftMargin(0.12)
     graph_sigLT_p9.SetTitle("Sig LT Parameter Convergence;Iteration;Parameter")
     graph_sigLT_p9.SetLineColor(ROOT.kRed)
     graph_sigLT_p10.SetLineColor(ROOT.kBlue)
     graph_sigLT_p11.SetLineColor(ROOT.kGreen)
-    graph_sigLT_p9.Draw("ALP same")
+    graph_sigLT_p9.Draw("ALP")
     graph_sigLT_p10.Draw("LP SAME")
     graph_sigLT_p11.Draw("LP SAME")
 
@@ -947,13 +995,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c4.cd(3).SetLeftMargin(0.12)
     graph_sigLT_chi2.SetTitle("Sig LT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigLT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigLT_chi2.Draw("ALP same")
-
-    # Plot fit status
-    c5.cd(3).SetLeftMargin(0.12)
-    graph_fit_sigLT_status.SetTitle("Sig LT Fit Status Over Iterations;Iteration;Fit Status")
-    graph_fit_sigLT_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigLT_status.Draw("ALP same")
+    graph_sigLT_chi2.Draw("ALP")
     
     print("\n")    
     
@@ -966,7 +1008,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     cooling_rate = 0.99
     temperature = initial_temperature
     unchanged_iterations = 0
-    max_unchanged_iterations = 3
+    max_unchanged_iterations = 10
 
     # Initialize adaptive parameter limits
     par_lim_sigtt_0 = random.uniform(0, 1)
@@ -979,12 +1021,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
     graph_sigTT_chi2 = TGraph()
-    graph_fit_sigTT_status = TGraph()
 
     # Track the best solution
-    best_params = [par_lim_sigtt_0]
+    best_params = par_lim_sigtt_0
     best_cost = float('inf')
-    previous_params = best_params[:]
+    previous_params = best_params
     
     print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
@@ -996,13 +1037,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         try:
             # Perturb parameters
-            current_params = [
-                simulated_annealing(par_lim_sigtt_0, temperature)
-            ]
+            current_params = simulated_annealing(par_lim_sigtt_0, temperature)
 
-            f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+            f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
             f_sigTT_pre.SetParNames("p13")
-            f_sigTT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
+            f_sigTT_pre.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
 
             g_sigtt = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -1055,9 +1094,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
             g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
             
-            f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 1)
+            f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
             f_sigTT.SetParNames("p13")
-            f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigtt_0), current_params[0] + abs(current_params[0] * par_lim_sigtt_0))
+            f_sigTT.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
 
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
@@ -1104,7 +1143,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Update ROOT TGraphs for plotting
             graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
             graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
-            graph_fit_sigTT_status.SetPoint(iteration, iteration, 1 if f_sigTT_status else 0)
 
             if f_sigTT_status:
                 break
@@ -1118,17 +1156,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_cost = current_cost
 
             # Check if current parameters haven't changed for the past 3 iterations
-            if all(round(par, 3) == round(params_sigL_history['p13'][-1], 3) for par in params_sigL_history['p13']):
-                unchanged_iterations += 1
-            else:
-                unchanged_iterations = 0
+            if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
+                if round(params_sigTT_history['p13'][-2], 3) == round(params_sigTT_history['p13'][-1], 3):
+                    unchanged_iterations += 1
+                else:
+                    unchanged_iterations = 0
 
             # Adjust the cooling rate if parameters haven't changed for 3 iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-                unchanged_iterations = 0
+                #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
+                #unchanged_iterations = 0
+                f_sigTT_status = True
+                f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"                
+                break
 
-            previous_params = current_params[:]                
+            previous_params = current_params                
 
             # Update parameters with the best found so far
             par_lim_sigtt_0 = best_params
@@ -1149,7 +1191,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Create TGraphs for parameter convergence
             graph_sigTT_p13 = TGraph()
             graph_sigTT_chi2 = TGraph()
-            graph_fit_sigTT_status = TGraph()
 
             # Adjust parameter limits within a random number
             par_lim_sigtt_0 = random.uniform(0, max_iterations)
@@ -1175,31 +1216,42 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(f_sigTT.GetChisquare())
     par_chi2_vec.append(f_sigTT.GetChisquare())        
 
+    # Calculate the minimum and maximum values from the graphs
+    min_sigTT_y = float('inf')
+    max_sigTT_y = float('-inf')
+
+    # Update min_sigTT_y and max_sigTT_y based on each graph's values
+    for graph in [graph_sigTT_p13]:
+        n_points = graph.GetN()
+        for i in range(n_points):
+            y = graph.GetY()[i]
+            if y < min_sigTT_y:
+                min_sigTT_y = y
+            if y > max_sigTT_y:
+                max_sigTT_y = y
+
+    # Scale the y-axis
+    graph_sigTT_p13.SetMinimum(min_sigTT_y * 0.9)
+    graph_sigTT_p13.SetMaximum(max_sigTT_y * 1.1)    
+
     # Plot parameter convergence
     c3.cd(4).SetLeftMargin(0.12)
     graph_sigTT_p13.SetTitle("Sig TT Parameter Convergence;Iteration;Parameter")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
-    graph_sigTT_p13.Draw("ALP same")
+    graph_sigTT_p13.Draw("ALP")
 
     # Plot chi-square convergence
     c4.cd(4).SetLeftMargin(0.12)
     graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigTT_chi2.Draw("ALP same")
-
-    # Plot fit status
-    c5.cd(4).SetLeftMargin(0.12)
-    graph_fit_sigTT_status.SetTitle("Sig TT Fit Status Over Iterations;Iteration;Fit Status")
-    graph_fit_sigTT_status.SetLineColor(ROOT.kMagenta)
-    graph_fit_sigTT_status.Draw("ALP same")
+    graph_sigTT_chi2.Draw("ALP")
     
     print("\n")    
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
     c3.Print(outputpdf)
-    c4.Print(outputpdf)
-    c5.Print(outputpdf+')')
+    c4.Print(outputpdf+')')
     
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
@@ -1218,4 +1270,5 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         for i,par in enumerate(prv_par_vec):
             print("par{} = {:.3f}".format(i+1, par))
 
-    sys.exit(2)            
+    # Testing
+    #sys.exit(2)            
