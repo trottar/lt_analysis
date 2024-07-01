@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 02:04:30 trottar"
+# Time-stamp: "2024-07-01 02:17:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -348,8 +348,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
 
             if f_sigL_status:
-                #break
-                sys.exit(2)
+                break
 
             # Calculate the cost (chi-square value) for the current parameters
             current_cost = f_sigL.GetChisquare()
@@ -377,10 +376,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         f_sigL.GetParameter(0),
                         f_sigL.GetParameter(1),
                         f_sigL.GetParameter(2)
-                    ])
-
-                    print("%%%%%%%%%%",local_minima)
-                    
+                    ])                    
                 unchanged_iterations = 0
 
             previous_params = current_params[:]
@@ -399,14 +395,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 if last_minima == [f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]:
                     local_iterations += 1
-                    print(local_iterations,"!!!!!!!!!",f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2))
-
-                    print(local_iterations,"$$$$$$$$$$$")
 
                     # If local minima occurs more than 100 times, it's likely the true minima
                     if local_iterations > 100:
-                        #break
-                        sys.exit(2)
+                        break
                 else:
                     local_iterations = 0
                     last_minima = [f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]
@@ -423,9 +415,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_chi2 = TGraph()
 
                 # Adjust parameter limits within a random number
-                #par_lim_sigl_0 = random.uniform(0, 1) # Re-randomize
-                #par_lim_sigl_1 = random.uniform(0, 1) # Re-randomize
-                #par_lim_sigl_2 = random.uniform(0, 1) # Re-randomize
                 if f_sigL.GetParameter(0) > 0:
                     par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(0), f_sigL.GetParameter(0)*10) # Re-randomize
                 else:
@@ -546,6 +535,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_params = [par_lim_sigt_0, par_lim_sigt_1]
     best_cost = float('inf')
     previous_params = best_params[:]
+
+    # Check for local minima
+    local_minima = []
+    local_iterations = 0
+    last_minima = []
     
     print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
@@ -693,11 +687,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-                #unchanged_iterations = 0
-                f_sigT_status = True
-                f_sigT_status_message = "Fit Successful" if f_sigT_status else "Fit Failed"                
-                break
+                if not any(np.allclose([f_sigT.GetParameter(0), f_sigT.GetParameter(1)], minima, atol=1e-3) for minima in local_minima):                    
+                    local_minima.append([
+                        f_sigT.GetParameter(0),
+                        f_sigT.GetParameter(1)
+                    ])                    
+                unchanged_iterations = 0
 
             previous_params = current_params[:]                
 
@@ -708,7 +703,43 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             temperature *= cooling_rate
 
             iteration += 1
+            
+            # Check if current_params are close to any local minimum
+            if any(np.allclose([f_sigT.GetParameter(0), f_sigT.GetParameter(1)], minima, atol=1e-3) for minima in local_minima):
+                print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
 
+                if last_minima == [f_sigT.GetParameter(0), f_sigT.GetParameter(1)]:
+                    local_iterations += 1
+
+                    # If local minima occurs more than 100 times, it's likely the true minima
+                    if local_iterations > 100:
+                        break
+                else:
+                    local_iterations = 0
+                    last_minima = [f_sigT.GetParameter(0), f_sigT.GetParameter(1)]
+                    
+                # Store the parameter values and chi-square values for each iteration
+                params_sigT_history = {'p5': [], 'p6': []}
+                chi2_sigT_history = []
+                fit_sigT_status_history = []
+
+                # Create TGraphs for parameter convergence
+                graph_sigT_p5 = TGraph()
+                graph_sigT_p6 = TGraph()
+                graph_sigT_chi2 = TGraph()
+
+                # Adjust parameter limits within a random number
+                if f_sigT.GetParameter(0) > 0:
+                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(0), f_sigT.GetParameter(0)*10) # Re-randomize
+                else:
+                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(0)*10, f_sigT.GetParameter(0)) # Re-randomize
+                if f_sigT.GetParameter(1) > 0:
+                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(1), f_sigT.GetParameter(1)*10) # Re-randomize
+                else:
+                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(1)*10, f_sigT.GetParameter(1)) # Re-randomize
+                    
+                temperature *= 0.95  # Increase randomness in case of error
+            
         except (TypeError or ZeroDivisionError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -812,6 +843,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_params = [par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2]
     best_cost = float('inf')
     previous_params = best_params[:]
+
+    # Check for local minima
+    local_minima = []
+    local_iterations = 0
+    last_minima = []
     
     print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
@@ -966,11 +1002,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-                #unchanged_iterations = 0
-                f_sigLT_status = True
-                f_sigLT_status_message = "Fit Successful" if f_sigLT_status else "Fit Failed"                
-                break
+                if not any(np.allclose([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1)], minima, atol=1e-3) for minima in local_minima):                    
+                    local_minima.append([
+                        f_sigLT.GetParameter(0),
+                        f_sigLT.GetParameter(1),
+                        f_sigLT.GetParameter(2)
+                    ])                    
+                unchanged_iterations = 0
 
             previous_params = current_params[:]                
 
@@ -981,6 +1019,47 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             temperature *= cooling_rate
 
             iteration += 1
+            
+            # Check if current_params are close to any local minimum
+            if any(np.allclose([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
+                print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
+
+                if last_minima == [f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]:
+                    local_iterations += 1
+
+                    # If local minima occurs more than 100 times, it's likely the true minima
+                    if local_iterations > 100:
+                        break
+                else:
+                    local_iterations = 0
+                    last_minima = [f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]
+                    
+                # Store the parameter values and chi-square values for each iteration
+                params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
+                chi2_sigLT_history = []
+                fit_sigLT_status_history = []
+
+                # Create TGraphs for parameter convergence
+                graph_sigLT_p9 = TGraph()
+                graph_sigLT_p10 = TGraph()
+                graph_sigLT_p11 = TGraph()
+                graph_sigLT_chi2 = TGraph()
+
+                # Adjust parameter limits within a random number
+                if f_sigLT.GetParameter(0) > 0:
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(0), f_sigLT.GetParameter(0)*10) # Re-randomize
+                else:
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(0)*10, f_sigLT.GetParameter(0)) # Re-randomize
+                if f_sigLT.GetParameter(1) > 0:
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(1), f_sigLT.GetParameter(1)*10) # Re-randomize
+                else:
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(1)*10, f_sigLT.GetParameter(1)) # Re-randomize
+                if f_sigLT.GetParameter(2) > 0:
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(2), f_sigLT.GetParameter(2)*10) # Re-randomize
+                else:
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(2)*10, f_sigLT.GetParameter(2)) # Re-randomize
+                    
+                temperature *= 0.95  # Increase randomness in case of error
 
         except (TypeError or ZeroDivisionError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1085,6 +1164,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_params = par_lim_sigtt_0
     best_cost = float('inf')
     previous_params = best_params
+
+    # Check for local minima
+    local_minima = []
+    local_iterations = 0
+    last_minima = []
     
     print("\n/*--------------------------------------------------*/")
     while iteration < max_iterations:
@@ -1223,11 +1307,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             # Adjust the cooling rate if parameters haven't changed for N iterations
             if unchanged_iterations >= max_unchanged_iterations:
-                #cooling_rate *= 0.9  # Adjust cooling rate to encourage more exploration
-                #unchanged_iterations = 0
-                f_sigTT_status = True
-                f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"                
-                break
+                if not any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):                    
+                    local_minima.append([
+                        f_sigTT.GetParameter(0)
+                    ])                    
+                unchanged_iterations = 0
 
             previous_params = current_params                
 
@@ -1238,6 +1322,37 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             temperature *= cooling_rate
 
             iteration += 1
+            
+            # Check if current_params are close to any local minimum
+            if any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):
+                print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigTT.GetParameter(0)))
+
+                if last_minima == [f_sigTT.GetParameter(0)]:
+                    local_iterations += 1
+
+                    # If local minima occurs more than 100 times, it's likely the true minima
+                    if local_iterations > 100:
+                        break
+                else:
+                    local_iterations = 0
+                    last_minima = [f_sigTT.GetParameter(0)]
+                    
+                # Store the parameter values and chi-square values for each iteration
+                params_sigTT_history = {'p13': []}
+                chi2_sigTT_history = []
+                fit_sigTT_status_history = []
+
+                # Create TGraphs for parameter convergence
+                graph_sigTT_p13 = TGraph()
+                graph_sigTT_chi2 = TGraph()
+
+                # Adjust parameter limits within a random number
+                if f_sigTT.GetParameter(0) > 0:
+                    par_lim_sigl_0 = random.uniform(f_sigTT.GetParameter(0), f_sigTT.GetParameter(0)*10) # Re-randomize
+                else:
+                    par_lim_sigl_0 = random.uniform(f_sigTT.GetParameter(0)*10, f_sigTT.GetParameter(0)) # Re-randomize
+                    
+                temperature *= 0.95  # Increase randomness in case of error
 
         except (TypeError or ZeroDivisionError) as e:
             print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
