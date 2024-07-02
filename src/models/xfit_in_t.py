@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 01:07:34 trottar"
+# Time-stamp: "2024-07-02 01:08:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1552,6 +1552,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
 
+    best_overall_params = [best_overall_params]
+    
     while len(best_overall_params) < 4:
         best_overall_params.append(0.0)
             
