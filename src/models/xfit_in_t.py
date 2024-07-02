@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 10:52:12 trottar"
+# Time-stamp: "2024-07-02 10:55:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,6 +250,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
+        c1.Clear()
+        c2.Clear()
+    
         iteration = 1
         
         initial_temperature = 1.0
@@ -626,7 +629,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
-        
+
+        c1.Clear()
+        c2.Clear()
+    
         iteration = 1
         
         initial_temperature = 1.0
@@ -991,6 +997,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
+        c1.Clear()
+        c2.Clear()
+    
         iteration = 1
     
         initial_temperature = 1.0
@@ -1365,6 +1374,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
+        c1.Clear()
+        c2.Clear()
+    
         iteration = 1
         
         initial_temperature = 1.0
