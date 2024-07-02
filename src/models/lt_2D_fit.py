@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 12:17:28 trottar"
+# Time-stamp: "2024-07-02 12:24:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,8 +65,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Constants
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
-#pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
-pt_to_pt_systematic_error = 0.0
+pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
 
 ###############################################################################################################################################
@@ -149,31 +148,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
-
-        '''
+        
         tcut = ""
 
-        tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
-        #tcut = "t=={0} && x!=0.0 && (phi<190 || phi>210)".format(float(t_list[i])) #  From thesis, center only
+        #tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
+        tcut = "t=={0} && x!=0.0 && (phi<190 || phi>210)".format(float(t_list[i])) #  From thesis, center only
         print(tcut)
-        '''
-
-        tcut_lo = ""
-
-        tcut_lo = "t=={0} && x!=0.0".format(float(t_list[i]))
-        #tcut_lo = "t=={0} && x!=0.0 && (phi<125 || phi>225)".format(float(t_list[i]))
-        print(tcut_lo)
-
-        tcut_hi = ""
-
-        tcut_hi = "t=={0} && x!=0.0".format(float(t_list[i]))
-        #tcut_hi = "t=={0} && x!=0.0 && (phi>50 && phi<300)".format(float(t_list[i]))
-        print(tcut_hi)
         
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        nlo.Draw("x:phi:dx", tcut_lo, "goff")
+        nlo.Draw("x:phi:dx", tcut, "goff")
 
         #glo_tmp = TGraphErrors(nlo.GetSelectedRows(), nlo.GetV2(), nlo.GetV1(), [0]*nlo.GetSelectedRows(), nlo.GetV3())
         glo_tmp = TGraphErrors()
@@ -198,7 +183,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
         
-        nhi.Draw("x:phi:dx", tcut_hi, "goff")
+        nhi.Draw("x:phi:dx", tcut, "goff")
 
         #ghi_tmp = TGraphErrors(nhi.GetSelectedRows(), nhi.GetV2(), nhi.GetV1(), 0, nhi.GetV3())
         ghi_tmp = TGraphErrors()
