@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:54:30 trottar"
+# Time-stamp: "2024-07-02 00:55:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1353,8 +1353,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             current_params = simulated_annealing(par_lim_sigtt_0, temperature)
 
             # Insert tabu list check here
-            if tuple(current_params) not in tabu_list:
-                tabu_list.add(tuple(current_params))
+            if current_params not in tabu_list:
+                tabu_list.add(current_params)
                 # Proceed with evaluation
             else:
                 # Restart from a new random point
