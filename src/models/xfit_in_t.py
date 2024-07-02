@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 01:00:57 trottar"
+# Time-stamp: "2024-07-02 01:02:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1267,7 +1267,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
 
-    def local_search(params, f_sigTT):
+    def local_search(param, f_sigTT):
         minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
         minimizer.SetMaxFunctionCalls(1000000)
         minimizer.SetMaxIterations(100000)
