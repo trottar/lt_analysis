@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:24:12 trottar"
+# Time-stamp: "2024-07-02 00:29:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,6 +15,7 @@ import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
+from ROOT import Math
 import numpy as np
 import math
 import os, sys
@@ -45,7 +46,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search
+from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -188,6 +189,42 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig L")
     print("/*--------------------------------------------------*/")
+
+    def local_search(params, f_sigL):
+        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+        minimizer.SetMaxFunctionCalls(1000000)
+        minimizer.SetMaxIterations(100000)
+        minimizer.SetTolerance(0.001)
+        minimizer.SetPrintLevel(0)
+
+        # Create a wrapper function that can be called by the minimizer
+        def chi2_func(par):
+            for i in range(3):
+                f_sigL.SetParameter(i, par[i])
+            return f_sigL.GetChisquare()
+
+        # Create a PyROOT callable object
+        class PyFunc:
+            def __call__(self, par):
+                return chi2_func(par)
+
+        py_func = PyFunc()
+
+        # Create the functor
+        func = Math.Functor(py_func, 3)  # 3 is the number of parameters
+        minimizer.SetFunction(func)
+
+        # Set initial values and step sizes
+        for i, param in enumerate(params):
+            minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+
+        # Perform the minimization
+        minimizer.Minimize()
+
+        # Get the improved parameters
+        improved_params = [minimizer.X()[i] for i in range(3)]
+
+        return improved_params    
 
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
@@ -530,6 +567,42 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig T")
     print("/*--------------------------------------------------*/")
 
+    def local_search(params, f_sigT):
+        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+        minimizer.SetMaxFunctionCalls(1000000)
+        minimizer.SetMaxIterations(100000)
+        minimizer.SetTolerance(0.001)
+        minimizer.SetPrintLevel(0)
+
+        # Create a wrapper function that can be called by the minimizer
+        def chi2_func(par):
+            for i in range(2):
+                f_sigT.SetParameter(i, par[i])
+            return f_sigT.GetChisquare()
+
+        # Create a PyROOT callable object
+        class PyFunc:
+            def __call__(self, par):
+                return chi2_func(par)
+
+        py_func = PyFunc()
+
+        # Create the functor
+        func = Math.Functor(py_func, 2)  # 2 is the number of parameters
+        minimizer.SetFunction(func)
+
+        # Set initial values and step sizes
+        for i, param in enumerate(params):
+            minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+
+        # Perform the minimization
+        minimizer.Minimize()
+
+        # Get the improved parameters
+        improved_params = [minimizer.X()[i] for i in range(2)]
+
+        return improved_params
+
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
@@ -852,6 +925,42 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig LT")
     print("/*--------------------------------------------------*/")
+    
+    def local_search(params, f_sigLT):
+        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+        minimizer.SetMaxFunctionCalls(1000000)
+        minimizer.SetMaxIterations(100000)
+        minimizer.SetTolerance(0.001)
+        minimizer.SetPrintLevel(0)
+
+        # Create a wrapper function that can be called by the minimizer
+        def chi2_func(par):
+            for i in range(3):
+                f_sigLT.SetParameter(i, par[i])
+            return f_sigLT.GetChisquare()
+
+        # Create a PyROOT callable object
+        class PyFunc:
+            def __call__(self, par):
+                return chi2_func(par)
+
+        py_func = PyFunc()
+
+        # Create the functor
+        func = Math.Functor(py_func, 3)  # 3 is the number of parameters
+        minimizer.SetFunction(func)
+
+        # Set initial values and step sizes
+        for i, param in enumerate(params):
+            minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+
+        # Perform the minimization
+        minimizer.Minimize()
+
+        # Get the improved parameters
+        improved_params = [minimizer.X()[i] for i in range(3)]
+
+        return improved_params
 
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
@@ -1192,6 +1301,42 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
 
+    def local_search(params, f_sigTT):
+        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+        minimizer.SetMaxFunctionCalls(1000000)
+        minimizer.SetMaxIterations(100000)
+        minimizer.SetTolerance(0.001)
+        minimizer.SetPrintLevel(0)
+
+        # Create a wrapper function that can be called by the minimizer
+        def chi2_func(par):
+            for i in range(1):
+                f_sigTT.SetParameter(i, par[i])
+            return f_sigTT.GetChisquare()
+
+        # Create a PyROOT callable object
+        class PyFunc:
+            def __call__(self, par):
+                return chi2_func(par)
+
+        py_func = PyFunc()
+
+        # Create the functor
+        func = Math.Functor(py_func, 1)  # 1 is the number of parameters
+        minimizer.SetFunction(func)
+
+        # Set initial values and step sizes
+        for i, param in enumerate(params):
+            minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+
+        # Perform the minimization
+        minimizer.Minimize()
+
+        # Get the improved parameters
+        improved_params = [minimizer.X()[i] for i in range(1)]
+
+        return improved_params
+    
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')

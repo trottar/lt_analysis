@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:26:12 trottar"
+# Time-stamp: "2024-07-02 00:27:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,7 +11,6 @@
 # Copyright (c) trottar
 #
 import ROOT
-from ROOT import Math
 from array import array
 import numpy as np
 from datetime import datetime
@@ -559,41 +558,5 @@ def acceptance_probability(old_cost, new_cost, temperature):
 
 def adjust_params(params, adjustment_factor=0.1):
     return [p + random.uniform(-adjustment_factor, adjustment_factor) * p for p in params]        
-
-def local_search(params, inp_func):
-    minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-    minimizer.SetMaxFunctionCalls(1000000)
-    minimizer.SetMaxIterations(100000)
-    minimizer.SetTolerance(0.001)
-    minimizer.SetPrintLevel(0)
-    
-    # Create a wrapper function that can be called by the minimizer
-    def chi2_func(par):
-        for i in range(3):
-            inp_func.SetParameter(i, par[i])
-        return inp_func.GetChisquare()
-    
-    # Create a PyROOT callable object
-    class PyFunc:
-        def __call__(self, par):
-            return chi2_func(par)
-    
-    py_func = PyFunc()
-    
-    # Create the functor
-    func = Math.Functor(py_func, 3)  # 3 is the number of parameters
-    minimizer.SetFunction(func)
-    
-    # Set initial values and step sizes
-    for i, param in enumerate(params):
-        minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
-    
-    # Perform the minimization
-    minimizer.Minimize()
-    
-    # Get the improved parameters
-    improved_params = [minimizer.X()[i] for i in range(3)]
-    
-    return improved_params
 
 ################################################################################################################################################
