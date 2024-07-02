@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 12:04:43 trottar"
+# Time-stamp: "2024-07-02 12:11:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -159,8 +159,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         tcut_lo = ""
 
-        #tcut_lo = "t=={0} && x!=0.0".format(float(t_list[i]))
-        tcut_lo = "t=={0} && x!=0.0 && (phi<125 || phi>225)".format(float(t_list[i]))
+        tcut_lo = "t=={0} && x!=0.0".format(float(t_list[i]))
+        #tcut_lo = "t=={0} && x!=0.0 && (phi<125 || phi>225)".format(float(t_list[i]))
         print(tcut_lo)
 
         tcut_hi = ""
@@ -278,10 +278,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 0 and 1
         fff2.SetParameter(0, 1)
-        fff2.SetParLimits(0, 0, 20)
+        fff2.SetParLimits(0, 0, 100)
 
         fff2.SetParameter(1, 1)
-        fff2.SetParLimits(1, 0, 20)
+        fff2.SetParLimits(1, 0, 100)
 
         # Fix parameter 2 and 3
         fff2.FixParameter(2, 0.0)
