@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 22:50:35 trottar"
+# Time-stamp: "2024-07-02 00:01:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,7 +45,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import simulated_annealing, acceptance_probability
+from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -216,6 +216,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Check for local minima
     local_minima = []
     last_minima = []
+    tabu_list = set()
     
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig L")
@@ -235,7 +236,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 simulated_annealing(par_lim_sigl_1, temperature),
                 simulated_annealing(par_lim_sigl_2, temperature)
             ]
-            
+
+            # Insert tabu list check here
+            if tuple(current_params) not in tabu_list:
+                tabu_list.add(tuple(current_params))
+                # Proceed with evaluation
+            else:
+                # Restart from a new random point
+                current_params = [random.uniform(0, 1) for _ in range(3)]
+                temperature = initial_temperature
+                unchanged_iterations = 0
+    
             f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
             f_sigL_pre.SetParNames("p1", "p2", "p3")
             f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
@@ -351,7 +362,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             if f_sigL_status:
                 print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
-                break
+                #break
+                sys.exit(2)
 
             # Calculate the cost (chi-square value) for the current parameters
             current_cost = f_sigL.GetChisquare()
@@ -379,7 +391,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         f_sigL.GetParameter(0),
                         f_sigL.GetParameter(1),
                         f_sigL.GetParameter(2)
-                    ])                    
+                    ])
+                    
+                # Restart from a new random point
+                current_params = [random.uniform(0, 1) for _ in range(3)]
+                temperature = initial_temperature
                 unchanged_iterations = 0
 
             previous_params = current_params[:]
@@ -388,7 +404,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params
 
             # Update the temperature
-            temperature *= cooling_rate
+            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)            
 
             iteration += 1
             
@@ -400,22 +416,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # If local minima occurs more than 100 times, it's likely the true minima
                 if last_minima.count([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]) > 100:
                     print("\n\n END: [i={}] Local minima p1={:3e}, p2={:3e}, p3={:3e} chosen...".format(iteration, f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
-                    break
+                    #break
+                    sys.exit(2)
 
-                # Adjust parameter limits within a random number
-                if f_sigL.GetParameter(0) > 0:
-                    par_lim_sigl_0 = random.uniform(0.0, f_sigL.GetParameter(0)) # Re-randomize
-                else:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(0), 0.0) # Re-randomize
-                if f_sigL.GetParameter(1) > 0:
-                    par_lim_sigl_0 = random.uniform(0.0, f_sigL.GetParameter(1)) # Re-randomize
-                else:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(1), 0.0) # Re-randomize
-                if f_sigL.GetParameter(2) > 0:
-                    par_lim_sigl_0 = random.uniform(0.0, f_sigL.GetParameter(2)) # Re-randomize
-                else:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(2), 0.0) # Re-randomize
-                    
+                current_params = adjust_params(best_params)                    
                 temperature *= 0.95  # Increase randomness in case of error
 
         except (TypeError or ZeroDivisionError) as e:
@@ -528,6 +532,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     local_minima = []
     local_iterations = 0
     last_minima = []
+    tabu_list = set()    
     
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig T")
@@ -547,6 +552,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 simulated_annealing(par_lim_sigt_1, temperature)
             ]
 
+            # Insert tabu list check here
+            if tuple(current_params) not in tabu_list:
+                tabu_list.add(tuple(current_params))
+                # Proceed with evaluation
+            else:
+                # Restart from a new random point
+                current_params = [random.uniform(0, 1) for _ in range(3)]
+                temperature = initial_temperature
+                unchanged_iterations = 0
+            
             f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
             f_sigT_pre.SetParNames("p5", "p6")
             f_sigT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
@@ -683,7 +698,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     local_minima.append([
                         f_sigT.GetParameter(0),
                         f_sigT.GetParameter(1)
-                    ])                    
+                    ])
+                # Restart from a new random point
+                current_params = [random.uniform(0, 1) for _ in range(3)]
+                temperature = initial_temperature
                 unchanged_iterations = 0
 
             previous_params = current_params[:]                
@@ -692,7 +710,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigt_0, par_lim_sigt_1 = best_params
 
             # Update the temperature
-            temperature *= cooling_rate
+            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
             iteration += 1
             
@@ -706,16 +724,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("\n\n END: [i={}] Local minima p5={:3e}, p6={:3e} chosen...".format(iteration, f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
                     break
 
-                # Adjust parameter limits within a random number
-                if f_sigT.GetParameter(0) > 0:
-                    par_lim_sigt_0 = random.uniform(0.0, f_sigT.GetParameter(0)) # Re-randomize
-                else:
-                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(0), 0.0) # Re-randomize
-                if f_sigT.GetParameter(1) > 0:
-                    par_lim_sigt_0 = random.uniform(0.0, f_sigT.GetParameter(1)) # Re-randomize
-                else:
-                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(1), 0.0) # Re-randomize
-                    
+                current_params = adjust_params(best_params)                    
                 temperature *= 0.95  # Increase randomness in case of error
             
         except (TypeError or ZeroDivisionError) as e:
@@ -826,6 +835,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     local_minima = []
     local_iterations = 0
     last_minima = []
+    tabu_list = set()    
     
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig LT")
@@ -846,6 +856,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 simulated_annealing(par_lim_siglt_2, temperature)
             ]
 
+            # Insert tabu list check here
+            if tuple(current_params) not in tabu_list:
+                tabu_list.add(tuple(current_params))
+                # Proceed with evaluation
+            else:
+                # Restart from a new random point
+                current_params = [random.uniform(0, 1) for _ in range(3)]
+                temperature = initial_temperature
+                unchanged_iterations = 0
+            
             f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
             f_sigLT_pre.SetParNames("p9", "p10", "p11")
             f_sigLT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
@@ -989,7 +1009,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         f_sigLT.GetParameter(0),
                         f_sigLT.GetParameter(1),
                         f_sigLT.GetParameter(2)
-                    ])                    
+                    ])
+                # Restart from a new random point
+                current_params = [random.uniform(0, 1) for _ in range(3)]
+                temperature = initial_temperature
                 unchanged_iterations = 0
 
             previous_params = current_params[:]                
@@ -998,7 +1021,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2 = best_params
 
             # Update the temperature
-            temperature *= cooling_rate
+            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
             iteration += 1
             
@@ -1012,20 +1035,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("\n\n END: [i={}] Local minima p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
                     break
 
-                # Adjust parameter limits within a random number
-                if f_sigLT.GetParameter(0) > 0:
-                    par_lim_siglt_0 = random.uniform(0.0, f_sigLT.GetParameter(0)) # Re-randomize
-                else:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(0), 0.0) # Re-randomize
-                if f_sigLT.GetParameter(1) > 0:
-                    par_lim_siglt_0 = random.uniform(0.0, f_sigLT.GetParameter(1)) # Re-randomize
-                else:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(1), 0.0) # Re-randomize
-                if f_sigLT.GetParameter(2) > 0:
-                    par_lim_siglt_0 = random.uniform(0.0, f_sigLT.GetParameter(2)) # Re-randomize
-                else:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(2), 0.0) # Re-randomize
-                    
+                current_params = adjust_params(best_params)                    
                 temperature *= 0.95  # Increase randomness in case of error
 
         except (TypeError or ZeroDivisionError) as e:
@@ -1136,6 +1146,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     local_minima = []
     local_iterations = 0
     last_minima = []
+    tabu_list = set()    
     
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig TT")
@@ -1151,6 +1162,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         try:
             # Perturb parameters
             current_params = simulated_annealing(par_lim_sigtt_0, temperature)
+            
+            # Insert tabu list check here
+            if tuple(current_params) not in tabu_list:
+                tabu_list.add(tuple(current_params))
+                # Proceed with evaluation
+            else:
+                # Restart from a new random point
+                current_params = random.uniform(0, 1)
+                temperature = initial_temperature
+                unchanged_iterations = 0
 
             f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
             f_sigTT_pre.SetParNames("p13")
@@ -1281,7 +1302,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if not any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):                    
                     local_minima.append([
                         f_sigTT.GetParameter(0)
-                    ])                    
+                    ])
+                # Restart from a new random point
+                current_params = random.uniform(0, 1)
+                temperature = initial_temperature
                 unchanged_iterations = 0
 
             previous_params = current_params                
@@ -1290,7 +1314,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             par_lim_sigtt_0 = best_params
 
             # Update the temperature
-            temperature *= cooling_rate
+            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
             iteration += 1
             
@@ -1303,13 +1327,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if last_minima.count([f_sigTT.GetParameter(0)]) > 100:
                     print("\n\n END: [i={}] Local minima p13={:3e} chosen...".format(iteration, f_sigTT.GetParameter(0)))
                     break
-
-                # Adjust parameter limits within a random number
-                if f_sigTT.GetParameter(0) > 0:
-                    par_lim_sigl_0 = random.uniform(0.0, f_sigTT.GetParameter(0)) # Re-randomize
-                else:
-                    par_lim_sigl_0 = random.uniform(f_sigTT.GetParameter(0), 0.0) # Re-randomize
-                    
+            
+                current_params = adjust_params(best_params)
                 temperature *= 0.95  # Increase randomness in case of error
 
         except (TypeError or ZeroDivisionError) as e:
