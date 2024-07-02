@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:29:24 trottar"
+# Time-stamp: "2024-07-02 00:30:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,7 +216,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Set initial values and step sizes
         for i, param in enumerate(params):
-            minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
 
         # Perform the minimization
         minimizer.Minimize()
@@ -593,7 +593,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Set initial values and step sizes
         for i, param in enumerate(params):
-            minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
 
         # Perform the minimization
         minimizer.Minimize()
@@ -952,7 +952,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Set initial values and step sizes
         for i, param in enumerate(params):
-            minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
 
         # Perform the minimization
         minimizer.Minimize()
@@ -1327,7 +1327,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Set initial values and step sizes
         for i, param in enumerate(params):
-            minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
 
         # Perform the minimization
         minimizer.Minimize()
