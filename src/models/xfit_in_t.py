@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 15:31:32 trottar"
+# Time-stamp: "2024-07-02 15:37:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -219,7 +219,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    total_iteration = 0
+    total_iteration = 1
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -237,7 +237,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        iteration = 0
+        iteration = 1
         
         initial_temperature = 1.0
         cooling_rate = 0.99
@@ -602,7 +602,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    total_iteration = 0
+    total_iteration = 1
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
@@ -619,7 +619,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
         
-        iteration = 0
+        iteration = 1
         
         initial_temperature = 1.0
         cooling_rate = 0.99
@@ -970,7 +970,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    total_iteration = 0
+    total_iteration = 1
 
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -988,7 +988,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        iteration = 0
+        iteration = 1
     
         initial_temperature = 1.0
         cooling_rate = 0.99
@@ -1351,7 +1351,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    total_iteration = 0
+    total_iteration = 1
 
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
@@ -1367,7 +1367,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        iteration = 0
+        iteration = 1
         
         initial_temperature = 1.0
         cooling_rate = 0.99
