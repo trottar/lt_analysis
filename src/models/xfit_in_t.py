@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 22:49:00 trottar"
+# Time-stamp: "2024-07-01 22:50:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -433,7 +433,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigl_0.0, 1) # Re-randomize
+            par_lim_sigl_0 = random.uniform(0, 1) # Re-randomize
             par_lim_sigl_1 = random.uniform(0, 1) # Re-randomize
             par_lim_sigl_2 = random.uniform(0, 1) # Re-randomize
 
@@ -732,7 +732,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigt_0.0, 1) # Re-randomize
+            par_lim_sigt_0 = random.uniform(0, 1) # Re-randomize
             par_lim_sigt_1 = random.uniform(0, 1) # Re-randomize
 
             iteration += 1
@@ -1043,7 +1043,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_siglt_0.0, 1) # Re-randomize
+            par_lim_siglt_0 = random.uniform(0, 1) # Re-randomize
             par_lim_siglt_1 = random.uniform(0, 1) # Re-randomize
             par_lim_siglt_2 = random.uniform(0, 1) # Re-randomize
 
