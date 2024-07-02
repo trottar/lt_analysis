@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:57:06 trottar"
+# Time-stamp: "2024-07-02 01:00:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -843,7 +843,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params[:]                
-
+                
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
             
@@ -1267,7 +1267,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
 
-    def local_search(param, f_sigTT):
+    def local_search(params, f_sigTT):
         minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
         minimizer.SetMaxFunctionCalls(1000000)
         minimizer.SetMaxIterations(100000)
@@ -1276,7 +1276,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Create a wrapper function that can be called by the minimizer
         def chi2_func(par):
-            f_sigTT.SetParameter(i, par)
+            f_sigTT.SetParameter(1, par)
             return f_sigTT.GetChisquare()
 
         # Create a PyROOT callable object
@@ -1287,17 +1287,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         py_func = PyFunc()
 
         # Create the functor
-        func = Math.Functor(py_func, 2)  # 1 is the number of parameters
+        func = Math.Functor(py_func, 1)  # 1 is the number of parameters
         minimizer.SetFunction(func)
 
         # Set initial values and step sizes
-        minimizer.SetVariable(i, "p1", param, 0.01 * abs(param))
+        minimizer.SetVariable(1, "p1", param, 0.01 * abs(param))
 
         # Perform the minimization
         minimizer.Minimize()
 
         # Get the improved parameters
-        improved_params = minimizer.X()[i]
+        improved_params = minimizer.X()
 
         return improved_params
     
@@ -1349,179 +1349,197 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             c1.cd(4).SetLeftMargin(0.12)
             nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
-            # Perturb parameters
-            current_params = simulated_annealing(par_lim_sigtt_0, temperature)
+            try:
+                # Perturb parameters
+                current_params = simulated_annealing(par_lim_sigtt_0, temperature)
 
-            # Insert tabu list check here
-            if current_params not in tabu_list:
-                tabu_list.add(current_params)
-                # Proceed with evaluation
-            else:
-                # Restart from a new random point
-                current_params = random.uniform(0, 1)
-                temperature = initial_temperature
-                unchanged_iterations = 0
-
-            f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
-            f_sigTT_pre.SetParNames("p13")
-            f_sigTT_pre.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
-
-            g_sigtt = TGraphErrors()
-            for i in range(nsep.GetSelectedRows()):
-                g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
-
-            for i in range(len(w_vec)):
-                sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
-                g_sigtt_prv.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_pre)
-
-                sigtt_X_fit = g_sigtt.GetY()[i]
-                sigtt_X_fit_err = g_sigtt.GetEY()[i]
-
-                g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
-                g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
-
-            g_sigtt.SetTitle("Sig TT")
-            g_sigtt.SetMarkerStyle(5)
-            g_sigtt.Draw("AP")
-            g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sigtt.GetXaxis().CenterTitle()
-            g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
-            g_sigtt.GetYaxis().SetTitleOffset(1.5)
-            g_sigtt.GetYaxis().SetTitleSize(0.035)
-            g_sigtt.GetYaxis().CenterTitle()
-
-            g_sigtt_prv.SetMarkerColor(4)
-            g_sigtt_prv.SetMarkerStyle(25)
-            g_sigtt_prv.Draw("P")
-
-            c2.cd(4).SetLeftMargin(0.12)
-            g_sigtt_fit.SetTitle("Sigma TT Model Fit")
-            g_sigtt_fit.Draw("A*")
-
-            g_sigtt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sigtt_fit.GetXaxis().CenterTitle()
-            g_sigtt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
-            g_sigtt_fit.GetYaxis().SetTitleOffset(1.5)
-            g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
-            g_sigtt_fit.GetYaxis().CenterTitle()
-
-            # Set axis limits to ensure everything is shown
-            x_min = min(g_sigtt_fit.GetX())
-            x_max = max(g_sigtt_fit.GetX())
-            y_min = min(g_sigtt_fit.GetY())
-            y_max = max(g_sigtt_fit.GetY())
-
-            # You can also set a margin to ensure all points are visible
-            margin = 0.1
-            g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-            f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
-            f_sigTT.SetParNames("p13")
-            f_sigTT.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
-
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
-
-            # Extend the y-axis range to include the fit function range
-            y_min = min(y_min, fit_y_min)
-            y_max = max(y_max, fit_y_max)
-
-            # Set a margin to ensure all points are visible
-            margin = 0.1 * (y_max - y_min)
-            g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-            g_q2_sigtt_fit = TGraphErrors()
-            for i in range(len(w_vec)):
-                g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
-                g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
-                sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
-                g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
-
-            r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
-            f_sigTT.Draw("same")
-
-            #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
-            f_sigTT_status = f_sigTT.GetNDF() != 0
-            f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
-
-            fit_status = TText()
-            fit_status.SetTextSize(0.04)
-            fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
-
-            c1.cd(4)
-            g_sigtt_fit_tot.SetMarkerStyle(26)
-            g_sigtt_fit_tot.SetMarkerColor(2)
-            g_sigtt_fit_tot.SetLineColor(2)
-            g_sigtt_fit_tot.Draw("LP")
-
-            params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
-            chi2_sigTT_history.append(f_sigTT.GetChisquare())
-            fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
-
-            # Update ROOT TGraphs for plotting
-            graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
-            graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
-
-            # Calculate the cost (chi-square value) for the current parameters
-            current_cost = f_sigTT.GetChisquare()
-
-            # If the new cost is better or accepted by the acceptance probability, update the best parameters
-            if acceptance_probability(best_cost, current_cost, temperature) > random.random():
-                best_params = current_params
-                best_cost = current_cost
-
-            if iteration % local_search_interval == 0:
-                best_params = local_search(best_params, f_sigTT)
-                current_params = best_params
-                par_lim_sigtt_0 = best_params
-
-            # Check if current parameters haven't changed for the past N iterations
-            if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
-                if round(params_sigTT_history['p13'][-2], 3) == round(params_sigTT_history['p13'][-1], 3):
-                    unchanged_iterations += 1
+                # Insert tabu list check here
+                if tuple(current_params) not in tabu_list:
+                    tabu_list.add(tuple(current_params))
+                    # Proceed with evaluation
                 else:
+                    # Restart from a new random point
+                    current_params = random.uniform(0, 1)
+                    temperature = initial_temperature
                     unchanged_iterations = 0
 
-            # Adjust the cooling rate if parameters haven't changed for N iterations
-            if unchanged_iterations >= max_unchanged_iterations:
-                if not any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):                    
-                    local_minima.append([
-                        f_sigTT.GetParameter(0)
-                    ])
-                # Restart from a new random point
-                current_params = random.uniform(0, 1)
-                temperature = initial_temperature
-                unchanged_iterations = 0
+                f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+                f_sigTT_pre.SetParNames("p13")
+                f_sigTT_pre.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
 
-            previous_params = current_params                
+                g_sigtt = TGraphErrors()
+                for i in range(nsep.GetSelectedRows()):
+                    g_sigtt.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                    g_sigtt.SetPointError(i, 0, nsep.GetV3()[i])
 
-            # Update parameters with the best found so far
-            par_lim_sigtt_0 = best_params
+                for i in range(len(w_vec)):
+                    sigtt_X_pre = (f_sigTT_pre.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
+                    g_sigtt_prv.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_pre)
 
-            # Update the temperature
-            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                    sigtt_X_fit = g_sigtt.GetY()[i]
+                    sigtt_X_fit_err = g_sigtt.GetEY()[i]
 
-            iteration += 1
+                    g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+                    g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
-            # Check if current_params are close to any local minimum
-            if any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):
-                print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigTT.GetParameter(0)))
+                g_sigtt.SetTitle("Sig TT")
+                g_sigtt.SetMarkerStyle(5)
+                g_sigtt.Draw("AP")
+                g_sigtt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+                g_sigtt.GetXaxis().CenterTitle()
+                g_sigtt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
+                g_sigtt.GetYaxis().SetTitleOffset(1.5)
+                g_sigtt.GetYaxis().SetTitleSize(0.035)
+                g_sigtt.GetYaxis().CenterTitle()
 
-                last_minima.append([f_sigTT.GetParameter(0)])
+                g_sigtt_prv.SetMarkerColor(4)
+                g_sigtt_prv.SetMarkerStyle(25)
+                g_sigtt_prv.Draw("P")
 
-                current_params = adjust_params(best_params)
-                temperature *= 0.95  # Increase randomness in case of error
+                c2.cd(4).SetLeftMargin(0.12)
+                g_sigtt_fit.SetTitle("Sigma TT Model Fit")
+                g_sigtt_fit.Draw("A*")
+
+                g_sigtt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+                g_sigtt_fit.GetXaxis().CenterTitle()
+                g_sigtt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{TT} [nb/GeV^{2}]")
+                g_sigtt_fit.GetYaxis().SetTitleOffset(1.5)
+                g_sigtt_fit.GetYaxis().SetTitleSize(0.035)
+                g_sigtt_fit.GetYaxis().CenterTitle()
+
+                # Set axis limits to ensure everything is shown
+                x_min = min(g_sigtt_fit.GetX())
+                x_max = max(g_sigtt_fit.GetX())
+                y_min = min(g_sigtt_fit.GetY())
+                y_max = max(g_sigtt_fit.GetY())
+
+                # You can also set a margin to ensure all points are visible
+                margin = 0.1
+                g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+                g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+
+                f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+                f_sigTT.SetParNames("p13")
+                f_sigTT.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+
+                # Evaluate the fit function at several points to determine its range
+                n_points = 100  # Number of points to evaluate the fit function
+                fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+                fit_y_min = min(fit_y_values)
+                fit_y_max = max(fit_y_values)
+
+                # Extend the y-axis range to include the fit function range
+                y_min = min(y_min, fit_y_min)
+                y_max = max(y_max, fit_y_max)
+
+                # Set a margin to ensure all points are visible
+                margin = 0.1 * (y_max - y_min)
+                g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+
+                g_q2_sigtt_fit = TGraphErrors()
+                for i in range(len(w_vec)):
+                    g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+                    g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
+                    sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i])) * (g_vec[i])
+                    g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
+
+                r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
+                f_sigTT.Draw("same")
+
+                #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
+                f_sigTT_status = f_sigTT.GetNDF() != 0
+                f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
+
+                fit_status = TText()
+                fit_status.SetTextSize(0.04)
+                fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
+
+                c1.cd(4)
+                g_sigtt_fit_tot.SetMarkerStyle(26)
+                g_sigtt_fit_tot.SetMarkerColor(2)
+                g_sigtt_fit_tot.SetLineColor(2)
+                g_sigtt_fit_tot.Draw("LP")
+
+                params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
+                chi2_sigTT_history.append(f_sigTT.GetChisquare())
+                fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
+
+                # Update ROOT TGraphs for plotting
+                graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
+                graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
+
+                # Calculate the cost (chi-square value) for the current parameters
+                current_cost = f_sigTT.GetChisquare()
+
+                # If the new cost is better or accepted by the acceptance probability, update the best parameters
+                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                    best_params = current_params
+                    best_cost = current_cost
+
+                if iteration % local_search_interval == 0:
+                    best_params = local_search(best_params, f_sigTT)
+                    current_params = best_params
+                    par_lim_sigtt_0 = best_params
+
+                # Check if current parameters haven't changed for the past N iterations
+                if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
+                    if round(params_sigTT_history['p13'][-2], 3) == round(params_sigTT_history['p13'][-1], 3):
+                        unchanged_iterations += 1
+                    else:
+                        unchanged_iterations = 0
+
+                # Adjust the cooling rate if parameters haven't changed for N iterations
+                if unchanged_iterations >= max_unchanged_iterations:
+                    if not any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):                    
+                        local_minima.append([
+                            f_sigTT.GetParameter(0)
+                        ])
+                    # Restart from a new random point
+                    current_params = random.uniform(0, 1)
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+
+                previous_params = current_params                
+
+                # Update parameters with the best found so far
+                par_lim_sigtt_0 = best_params
+
+                # Update the temperature
+                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                iteration += 1
+
+                # Check if current_params are close to any local minimum
+                if any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigTT.GetParameter(0)))
+
+                    last_minima.append([f_sigTT.GetParameter(0)])
+
+                    current_params = adjust_params(best_params)
+                    temperature *= 0.95  # Increase randomness in case of error
+
+            except (TypeError or ZeroDivisionError) as e:
+                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+
+                # Store the parameter values and chi-square values for each iteration
+                params_sigTT_history = {'p13': []}
+                chi2_sigTT_history = []
+                fit_sigTT_status_history = []
+
+                # Create TGraphs for parameter convergence
+                graph_sigTT_p13 = TGraph()
+                graph_sigTT_chi2 = TGraph()
+
+                # Adjust parameter limits within a random number
+                par_lim_sigtt_0 = random.uniform(0, 1) # Re-randomize
+
+                iteration += 1
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params
-
+                
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
             
