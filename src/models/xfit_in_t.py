@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 15:16:12 trottar"
+# Time-stamp: "2024-07-02 15:22:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -443,15 +443,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params
 
                 # Update the temperature
-                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)            
-
-                # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
-
-                    current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
-                    
+                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                
                 params_sigL_history['p1'].append(current_params[0])
                 params_sigL_history['p2'].append(current_params[1])
                 params_sigL_history['p3'].append(current_params[2])
@@ -464,12 +457,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_chi2.SetPoint(total_iteration, total_iteration, f_sigL.GetChisquare())
                 graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)                
                     
-                c1.Update()
-                c2.Update()
-
                 iteration += 1
                 total_iteration += 1
                 
+                c1.Update()
+                c2.Update()
+
+                # Check if current_params are close to any local minimum
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+
+                    current_params = adjust_params(best_params)                    
+                    temperature *= 0.95  # Increase randomness in case of error
+                                    
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -818,13 +818,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
-                # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
-
-                    current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
-
                 params_sigT_history['p5'].append(current_params[0])
                 params_sigT_history['p6'].append(current_params[1])
 
@@ -835,12 +828,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigT_chi2.SetPoint(total_iteration, total_iteration, f_sigT.GetChisquare())
                 graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
 
+                iteration += 1
+                total_iteration += 1
+                
                 c1.Update()
                 c2.Update()
 
-                iteration += 1
-                total_iteration += 1
+                # Check if current_params are close to any local minimum
+                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
+                    current_params = adjust_params(best_params)                    
+                    temperature *= 0.95  # Increase randomness in case of error
+                    
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -1196,13 +1196,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
-                # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
-
-                    current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
-
                 params_sigLT_history['p9'].append(current_params[0])
                 params_sigLT_history['p10'].append(current_params[1])
                 params_sigLT_history['p11'].append(current_params[2])
@@ -1215,12 +1208,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, f_sigLT.GetChisquare())
                 graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
 
+                iteration += 1
+                total_iteration += 1
+                
                 c1.Update()
                 c2.Update()
 
-                iteration += 1
-                total_iteration += 1
+                # Check if current_params are close to any local minimum
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
+                    current_params = adjust_params(best_params)                    
+                    temperature *= 0.95  # Increase randomness in case of error
+                    
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -1555,13 +1555,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
-                # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
-
-                    current_params = adjust_params(best_params)
-                    temperature *= 0.95  # Increase randomness in case of error
-
                 params_sigTT_history['p13'].append(current_params)
 
                 #if total_iteration % (max_iterations/10) == 0:
@@ -1570,12 +1563,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, f_sigTT.GetChisquare())
                 graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
 
+                iteration += 1
+                total_iteration += 1
+                
                 c1.Update()
                 c2.Update()
 
-                iteration += 1
-                total_iteration += 1
+                # Check if current_params are close to any local minimum
+                if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
 
+                    current_params = adjust_params(best_params)
+                    temperature *= 0.95  # Increase randomness in case of error
+                    
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
