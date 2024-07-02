@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 16:56:18 trottar"
+# Time-stamp: "2024-07-02 17:00:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1728,4 +1728,4 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             print("par{} = {:.3f}".format(i+1, par))
 
     # Testing
-    sys.exit(2)            
+    #sys.exit(2)            
