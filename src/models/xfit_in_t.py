@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 13:05:27 trottar"
+# Time-stamp: "2024-07-02 13:07:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,6 +158,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             q2_vec.append(q2)
             th_vec.append(thetacm)
 
+    g_sigl_prv = TGraph()            
+    g_sigt_prv = TGraph()
+    g_siglt_prv = TGraph()
+    g_sigtt_prv = TGraph()
+
+    g_sigl_fit = TGraphErrors()
+    g_sigt_fit = TGraphErrors()
+    g_siglt_fit = TGraphErrors()
+    g_sigtt_fit = TGraphErrors()
+
+    g_sigl_fit_tot = TGraph()    
+    g_sigt_fit_tot = TGraph()
+    g_siglt_fit_tot = TGraph()
+    g_sigtt_fit_tot = TGraph()
+
     c1 = TCanvas("c1", "c1", 800, 800)
     c1.Divide(2, 2)
 
@@ -264,10 +279,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         while iteration < max_iterations:
 
-            g_sigl_prv = TGraph()
-            g_sigl_fit = TGraphErrors()
-            g_sigl_fit_tot = TGraph()    
-            
             sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
@@ -645,10 +656,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         while iteration < max_iterations:
 
-            g_sigt_prv = TGraph()
-            g_sigt_fit = TGraphErrors()
-            g_sigt_fit_tot = TGraph()    
-
             sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
@@ -1013,10 +1020,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         local_search_interval = 50
 
         while iteration < max_iterations:
-            
-            g_siglt_prv = TGraph()
-            g_siglt_fit = TGraphErrors()
-            g_siglt_fit_tot = TGraph()    
 
             sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
@@ -1390,10 +1393,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         while iteration < max_iterations:
 
-            g_sigtt_prv = TGraph()
-            g_sigtt_fit = TGraphErrors()
-            g_sigtt_fit_tot = TGraph()    
-            
             sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
