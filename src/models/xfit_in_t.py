@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 01:03:19 trottar"
+# Time-stamp: "2024-07-02 01:07:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -494,11 +494,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
+
+    while len(best_overall_params) < 4:
+        best_overall_params.append(0.0)
             
-    par_vec.append(f_sigL.GetParameter(0))
-    par_vec.append(f_sigL.GetParameter(1))
-    par_vec.append(f_sigL.GetParameter(2))
-    par_vec.append(f_sigL.GetParameter(3))
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
@@ -846,11 +849,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
+
+    while len(best_overall_params) < 4:
+        best_overall_params.append(0.0)
             
-    par_vec.append(f_sigT.GetParameter(0))
-    par_vec.append(f_sigT.GetParameter(1))
-    par_vec.append(f_sigT.GetParameter(2))
-    par_vec.append(f_sigT.GetParameter(3))
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
@@ -1207,11 +1213,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
+
+    while len(best_overall_params) < 4:
+        best_overall_params.append(0.0)
     
-    par_vec.append(f_sigLT.GetParameter(0))
-    par_vec.append(f_sigLT.GetParameter(1))
-    par_vec.append(f_sigLT.GetParameter(2))
-    par_vec.append(f_sigLT.GetParameter(3))
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
@@ -1542,11 +1551,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
+
+    while len(best_overall_params) < 4:
+        best_overall_params.append(0.0)
             
-    par_vec.append(f_sigTT.GetParameter(0))
-    par_vec.append(f_sigTT.GetParameter(1))
-    par_vec.append(f_sigTT.GetParameter(2))
-    par_vec.append(f_sigTT.GetParameter(3))
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(f_sigTT.GetParError(0))
     par_err_vec.append(f_sigTT.GetParError(1))
