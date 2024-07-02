@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:22:51 trottar"
+# Time-stamp: "2024-07-02 00:23:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -575,7 +575,7 @@ def local_search(params, inp_func):
     minimizer.SetFunction(func)
     
     for i, param in enumerate(params):
-        minimizer.SetVariable(i, f"p{}".format(i), param, 0.01 * abs(param))
+        minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
     
     minimizer.Minimize()
     
