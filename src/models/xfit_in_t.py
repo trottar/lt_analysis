@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 01:18:30 trottar"
+# Time-stamp: "2024-07-02 01:21:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -232,6 +232,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_cost = float('inf')
     iteration = 0
 
+    # Store the parameter values and chi-square values for each iteration
+    params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
+    chi2_sigL_history = []
+    fit_sigL_status_history = []
+
+    # Create TGraphs for parameter convergence
+    graph_sigL_p1 = TGraph()
+    graph_sigL_p2 = TGraph()
+    graph_sigL_p3 = TGraph()
+    graph_sigL_chi2 = TGraph()
+    
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
     
@@ -245,17 +256,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         par_lim_sigl_0 = random.uniform(0, 1)
         par_lim_sigl_1 = random.uniform(0, 1)
         par_lim_sigl_2 = random.uniform(0, 1)
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
-        chi2_sigL_history = []
-        fit_sigL_status_history = []
-
-        # Create TGraphs for parameter convergence
-        graph_sigL_p1 = TGraph()
-        graph_sigL_p2 = TGraph()
-        graph_sigL_p3 = TGraph()
-        graph_sigL_chi2 = TGraph()
 
         # Track the best solution
         best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
@@ -469,17 +469,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             except (TypeError or ZeroDivisionError) as e:
                 print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
-                # Store the parameter values and chi-square values for each iteration
-                params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
-                chi2_sigL_history = []
-                fit_sigL_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigL_p1 = TGraph()
-                graph_sigL_p2 = TGraph()
-                graph_sigL_p3 = TGraph()
-                graph_sigL_chi2 = TGraph()
-
                 # Adjust parameter limits within a random number
                 par_lim_sigl_0 = random.uniform(0, 1) # Re-randomize
                 par_lim_sigl_1 = random.uniform(0, 1) # Re-randomize
@@ -597,6 +586,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     iteration = 0
+
+    # Store the parameter values and chi-square values for each iteration
+    params_sigT_history = {'p5': [], 'p6': []}
+    chi2_sigT_history = []
+    fit_sigT_status_history = []
+
+    # Create TGraphs for parameter convergence
+    graph_sigT_p5 = TGraph()
+    graph_sigT_p6 = TGraph()
+    graph_sigT_chi2 = TGraph()
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
@@ -610,16 +609,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Initialize adaptive parameter limits
         par_lim_sigt_0 = random.uniform(0, 1)
         par_lim_sigt_1 = random.uniform(0, 1)
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigT_history = {'p5': [], 'p6': []}
-        chi2_sigT_history = []
-        fit_sigT_status_history = []
-
-        # Create TGraphs for parameter convergence
-        graph_sigT_p5 = TGraph()
-        graph_sigT_p6 = TGraph()
-        graph_sigT_chi2 = TGraph()
 
         # Track the best solution
         best_params = [par_lim_sigt_0, par_lim_sigt_1]
@@ -825,16 +814,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             except (TypeError or ZeroDivisionError) as e:
                 print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
-                # Store the parameter values and chi-square values for each iteration
-                params_sigT_history = {'p5': [], 'p6': []}
-                chi2_sigT_history = []
-                fit_sigT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigT_p5 = TGraph()
-                graph_sigT_p6 = TGraph()
-                graph_sigT_chi2 = TGraph()
-
                 # Adjust parameter limits within a random number
                 par_lim_sigt_0 = random.uniform(0, 1) # Re-randomize
                 par_lim_sigt_1 = random.uniform(0, 1) # Re-randomize
@@ -950,6 +929,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     iteration = 0
+
+    # Store the parameter values and chi-square values for each iteration
+    params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
+    chi2_sigLT_history = []
+    fit_sigLT_status_history = []
+
+    # Create TGraphs for parameter convergence
+    graph_sigLT_p9 = TGraph()
+    graph_sigLT_p10 = TGraph()
+    graph_sigLT_p11 = TGraph()
+    graph_sigLT_chi2 = TGraph()
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
@@ -964,17 +954,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         par_lim_siglt_0 = random.uniform(0, 1)
         par_lim_siglt_1 = random.uniform(0, 1)
         par_lim_siglt_2 = random.uniform(0, 1)
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
-        chi2_sigLT_history = []
-        fit_sigLT_status_history = []
-
-        # Create TGraphs for parameter convergence
-        graph_sigLT_p9 = TGraph()
-        graph_sigLT_p10 = TGraph()
-        graph_sigLT_p11 = TGraph()
-        graph_sigLT_chi2 = TGraph()
 
         # Track the best solution
         best_params = [par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2]
@@ -1188,17 +1167,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             except (TypeError or ZeroDivisionError) as e:
                 print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
-                # Store the parameter values and chi-square values for each iteration
-                params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
-                chi2_sigLT_history = []
-                fit_sigLT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigLT_p9= TGraph()
-                graph_sigLT_p10 = TGraph()
-                graph_sigLT_p11 = TGraph()
-                graph_sigLT_chi2 = TGraph()
-
                 # Adjust parameter limits within a random number
                 par_lim_siglt_0 = random.uniform(0, 1) # Re-randomize
                 par_lim_siglt_1 = random.uniform(0, 1) # Re-randomize
@@ -1314,6 +1282,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     iteration = 0
+
+    # Store the parameter values and chi-square values for each iteration
+    params_sigTT_history = {'p13': []}
+    chi2_sigTT_history = []
+    fit_sigTT_status_history = []
+
+    # Create TGraphs for parameter convergence
+    graph_sigTT_p13 = TGraph()
+    graph_sigTT_chi2 = TGraph()
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
@@ -1326,15 +1303,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Initialize adaptive parameter limits
         par_lim_sigtt_0 = random.uniform(0, 1)
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigTT_history = {'p13': []}
-        chi2_sigTT_history = []
-        fit_sigTT_status_history = []
-
-        # Create TGraphs for parameter convergence
-        graph_sigTT_p13 = TGraph()
-        graph_sigTT_chi2 = TGraph()
 
         # Track the best solution
         best_params = par_lim_sigtt_0
@@ -1529,15 +1497,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             except (TypeError or ZeroDivisionError) as e:
                 print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-
-                # Store the parameter values and chi-square values for each iteration
-                params_sigTT_history = {'p13': []}
-                chi2_sigTT_history = []
-                fit_sigTT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigTT_p13 = TGraph()
-                graph_sigTT_chi2 = TGraph()
 
                 # Adjust parameter limits within a random number
                 par_lim_sigtt_0 = random.uniform(0, 1) # Re-randomize
