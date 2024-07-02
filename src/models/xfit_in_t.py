@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 08:42:07 trottar"
+# Time-stamp: "2024-07-02 09:47:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -300,9 +300,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
                 f_sigL_pre.SetParNames("p1", "p2", "p3")
-                f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
-                f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
-                f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+                #f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
+                #f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
+                #f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+                f_sigL_pre.SetParameter(0, current_params[0])
+                f_sigL_pre.SetParameter(1, current_params[1])
+                f_sigL_pre.SetParameter(2, current_params[2])
 
                 g_sigl = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
@@ -357,9 +360,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
                 f_sigL.SetParNames("p1", "p2", "p3")
-                f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
-                f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
-                f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+                #f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
+                #f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
+                #f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+                f_sigL.SetParameter(0, current_params[0])
+                f_sigL.SetParameter(1, current_params[1])
+                f_sigL.SetParameter(2, current_params[2])
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
