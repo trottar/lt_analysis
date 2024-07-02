@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:23:23 trottar"
+# Time-stamp: "2024-07-02 00:26:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -567,18 +567,31 @@ def local_search(params, inp_func):
     minimizer.SetTolerance(0.001)
     minimizer.SetPrintLevel(0)
     
+    # Create a wrapper function that can be called by the minimizer
     def chi2_func(par):
-        inp_func.SetParameters(par)
+        for i in range(3):
+            inp_func.SetParameter(i, par[i])
         return inp_func.GetChisquare()
     
-    func = Math.Functor(chi2_func, 3)  # 3 is the number of parameters
+    # Create a PyROOT callable object
+    class PyFunc:
+        def __call__(self, par):
+            return chi2_func(par)
+    
+    py_func = PyFunc()
+    
+    # Create the functor
+    func = Math.Functor(py_func, 3)  # 3 is the number of parameters
     minimizer.SetFunction(func)
     
+    # Set initial values and step sizes
     for i, param in enumerate(params):
         minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
     
+    # Perform the minimization
     minimizer.Minimize()
     
+    # Get the improved parameters
     improved_params = [minimizer.X()[i] for i in range(3)]
     
     return improved_params
