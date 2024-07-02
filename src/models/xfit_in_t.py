@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 01:26:05 trottar"
+# Time-stamp: "2024-07-02 01:31:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -230,7 +230,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    iteration = 0
+    total_iteration = 0
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -245,7 +245,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-    
+
+        iteration = 0
+        
         initial_temperature = 1.0
         cooling_rate = 0.99
         temperature = initial_temperature
@@ -404,10 +406,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 fit_sigL_status_history.append(1 if f_sigL_status else 0)
 
                 # Update ROOT TGraphs for plotting
-                graph_sigL_p1.SetPoint(iteration, iteration, current_params[0])
-                graph_sigL_p2.SetPoint(iteration, iteration, current_params[1])
-                graph_sigL_p3.SetPoint(iteration, iteration, current_params[2])
-                graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
+                graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
+                graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
+                graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
+                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, f_sigL.GetChisquare())
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigL.GetChisquare()
@@ -456,6 +458,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)            
 
                 iteration += 1
+                total_iteration += 1
 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
@@ -475,6 +478,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_lim_sigl_2 = random.uniform(0, 1) # Re-randomize
 
                 iteration += 1
+                total_iteration += 1
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -585,7 +589,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    iteration = 0
+    total_iteration = 0
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
@@ -598,8 +602,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_chi2 = TGraph()
     
     for start in range(num_starts):
-        print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-
+        print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
+        
+        iteration = 0
+        
         initial_temperature = 1.0
         cooling_rate = 0.99
         temperature = initial_temperature
@@ -754,9 +760,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 fit_sigT_status_history.append(1 if f_sigT_status else 0)
 
                 # Update ROOT TGraphs for plotting
-                graph_sigT_p5.SetPoint(iteration, iteration, current_params[0])
-                graph_sigT_p6.SetPoint(iteration, iteration, current_params[1])
-                graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
+                graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
+                graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
+                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, f_sigT.GetChisquare())
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigT.GetChisquare()
@@ -801,6 +807,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
+                total_iteration += 1
 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
@@ -819,7 +826,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_lim_sigt_1 = random.uniform(0, 1) # Re-randomize
 
                 iteration += 1
-
+                total_iteration += 1
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -928,7 +935,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    iteration = 0
+    total_iteration = 0
 
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -943,7 +950,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-        
+
+        iteration = 0
+    
         initial_temperature = 1.0
         cooling_rate = 0.99
         temperature = initial_temperature
@@ -1103,10 +1112,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 fit_sigLT_status_history.append(1 if f_sigLT_status else 0)
 
                 # Update ROOT TGraphs for plotting
-                graph_sigLT_p9.SetPoint(iteration, iteration, current_params[0])
-                graph_sigLT_p10.SetPoint(iteration, iteration, current_params[1])
-                graph_sigLT_p11.SetPoint(iteration, iteration, current_params[2])
-                graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
+                graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
+                graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
+                graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
+                graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, f_sigLT.GetChisquare())
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigLT.GetChisquare()
@@ -1154,6 +1163,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
+                total_iteration += 1
 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
@@ -1173,6 +1183,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_lim_siglt_2 = random.uniform(0, 1) # Re-randomize
 
                 iteration += 1
+                total_iteration += 1                
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -1281,7 +1292,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    iteration = 0
+    total_iteration = 0
 
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
@@ -1295,6 +1306,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
+        iteration = 0
+        
         initial_temperature = 1.0
         cooling_rate = 0.99
         temperature = initial_temperature
@@ -1442,8 +1455,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
 
                 # Update ROOT TGraphs for plotting
-                graph_sigTT_p13.SetPoint(iteration, iteration, current_params)
-                graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
+                graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
+                graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, f_sigTT.GetChisquare())
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigTT.GetChisquare()
@@ -1485,6 +1498,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
+                total_iteration += 1
 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
@@ -1502,6 +1516,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_lim_sigtt_0 = random.uniform(0, 1) # Re-randomize
 
                 iteration += 1
+                total_iteration += 1                
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
