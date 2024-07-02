@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:23:56 trottar"
+# Time-stamp: "2024-07-02 00:24:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,8 +82,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    #max_iterations = 10000
-    max_iterations = int(1e6)
+    max_iterations = 10000
+    #max_iterations = int(1e6)
     ##############
     ##############
     ##############
