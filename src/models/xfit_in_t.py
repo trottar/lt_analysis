@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 13:07:07 trottar"
+# Time-stamp: "2024-07-02 13:20:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,21 +158,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             q2_vec.append(q2)
             th_vec.append(thetacm)
 
-    g_sigl_prv = TGraph()            
-    g_sigt_prv = TGraph()
-    g_siglt_prv = TGraph()
-    g_sigtt_prv = TGraph()
-
-    g_sigl_fit = TGraphErrors()
-    g_sigt_fit = TGraphErrors()
-    g_siglt_fit = TGraphErrors()
-    g_sigtt_fit = TGraphErrors()
-
-    g_sigl_fit_tot = TGraph()    
-    g_sigt_fit_tot = TGraph()
-    g_siglt_fit_tot = TGraph()
-    g_sigtt_fit_tot = TGraph()
-
     c1 = TCanvas("c1", "c1", 800, 800)
     c1.Divide(2, 2)
 
@@ -232,7 +217,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    total_iteration = 1
+    total_iteration = 0
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -251,7 +236,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        iteration = 1
+        iteration = 0
         
         initial_temperature = 1.0
         cooling_rate = 0.99
@@ -279,6 +264,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         while iteration < max_iterations:
 
+            g_sigl_prv = TGraph()
+            g_sigl_fit = TGraphErrors()
+            g_sigl_fit_tot = TGraph()    
+            
             sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
@@ -416,7 +405,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 chi2_sigL_history.append(f_sigL.GetChisquare())
                 fit_sigL_status_history.append(1 if f_sigL_status else 0)
 
-                if iteration % (max_iterations/10) == 0:
+                if total_iteration % (max_iterations/10) == 0:
                     # Update ROOT TGraphs for plotting
                     graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                     graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -610,7 +599,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    total_iteration = 1
+    total_iteration = 0
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
@@ -628,7 +617,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
         
-        iteration = 1
+        iteration = 0
         
         initial_temperature = 1.0
         cooling_rate = 0.99
@@ -655,6 +644,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         local_search_interval = 50
 
         while iteration < max_iterations:
+
+            g_sigl_prv = TGraph()
+            g_sigl_fit = TGraphErrors()
+            g_sigl_fit_tot = TGraph()    
 
             sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
@@ -787,7 +780,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 chi2_sigT_history.append(f_sigT.GetChisquare())
                 fit_sigT_status_history.append(1 if f_sigT_status else 0)
 
-                if iteration % (max_iterations/10) == 0:
+                if total_iteration % (max_iterations/10) == 0:
                     # Update ROOT TGraphs for plotting
                     graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                     graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -973,7 +966,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    total_iteration = 1
+    total_iteration = 0
 
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -992,7 +985,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        iteration = 1
+        iteration = 0
     
         initial_temperature = 1.0
         cooling_rate = 0.99
@@ -1020,6 +1013,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         local_search_interval = 50
 
         while iteration < max_iterations:
+            
+            g_sigl_prv = TGraph()
+            g_sigl_fit = TGraphErrors()
+            g_sigl_fit_tot = TGraph()    
 
             sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
@@ -1158,7 +1155,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 chi2_sigLT_history.append(f_sigLT.GetChisquare())
                 fit_sigLT_status_history.append(1 if f_sigLT_status else 0)
 
-                if iteration % (max_iterations/10) == 0:
+                if total_iteration % (max_iterations/10) == 0:
                     # Update ROOT TGraphs for plotting
                     graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
                     graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1349,7 +1346,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-    total_iteration = 1
+    total_iteration = 0
 
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
@@ -1366,7 +1363,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        iteration = 1
+        iteration = 0
         
         initial_temperature = 1.0
         cooling_rate = 0.99
@@ -1393,6 +1390,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         while iteration < max_iterations:
 
+            g_sigl_prv = TGraph()
+            g_sigl_fit = TGraphErrors()
+            g_sigl_fit_tot = TGraph()    
+            
             sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
@@ -1516,7 +1517,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 chi2_sigTT_history.append(f_sigTT.GetChisquare())
                 fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
 
-                if iteration % (max_iterations/10) == 0:
+                if total_iteration % (max_iterations/10) == 0:
                     # Update ROOT TGraphs for plotting
                     graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
                     graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, f_sigTT.GetChisquare())
