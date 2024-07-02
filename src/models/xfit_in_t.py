@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 15:15:12 trottar"
+# Time-stamp: "2024-07-02 15:16:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -611,7 +611,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p5 = TGraph()
     graph_sigT_p6 = TGraph()
     graph_sigT_chi2 = TGraph()
-
+    graph_sigT_temp = TGraph()
+    
     # Record the start time
     start_time = time.time()
     
@@ -979,7 +980,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_p10 = TGraph()
     graph_sigLT_p11 = TGraph()
     graph_sigLT_chi2 = TGraph()
-
+    graph_sigLT_temp = TGraph()
+    
     # Record the start time
     start_time = time.time()
         
@@ -1357,7 +1359,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
     graph_sigTT_chi2 = TGraph()
-
+    graph_sigTT_temp = TGraph()
+    
     # Record the start time
     start_time = time.time()
     
