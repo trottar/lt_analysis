@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 09:47:32 trottar"
+# Time-stamp: "2024-07-02 09:52:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -666,8 +666,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
                 f_sigT_pre.SetParNames("p5", "p6")
-                f_sigT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
-                f_sigT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
+                #f_sigT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
+                #f_sigT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
+                f_sigT_pre.SetParameter(0, current_params[0])
+                f_sigT_pre.SetParameter(1, current_params[1])
 
                 g_sigt = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
@@ -722,8 +724,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
                 f_sigT.SetParNames("p5", "p6")
-                f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
-                f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
+                #f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
+                #f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
+                f_sigT.SetParameter(0, current_params[0])
+                f_sigT.SetParameter(1, current_params[1])
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
@@ -1018,9 +1022,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
                 f_sigLT_pre.SetParNames("p9", "p10", "p11")
-                f_sigLT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
-                f_sigLT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
-                f_sigLT_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
+                #f_sigLT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
+                #f_sigLT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
+                #f_sigLT_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
+                f_sigLT_pre.SetParameter(0, current_params[0])
+                f_sigLT_pre.SetParameter(1, current_params[1])
+                f_sigLT_pre.SetParameter(2, current_params[2])                
 
                 g_siglt = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
@@ -1075,9 +1082,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
                 f_sigLT.SetParNames("p9", "p10", "p11")
-                f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
-                f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
-                f_sigLT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
+                #f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
+                #f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
+                #f_sigLT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
+                f_sigLT.SetParameter(0, current_params[0])
+                f_sigLT.SetParameter(1, current_params[1])
+                f_sigLT.SetParameter(2, current_params[2])
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
@@ -1370,7 +1380,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
                 f_sigTT_pre.SetParNames("p13")
-                f_sigTT_pre.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+                #f_sigTT_pre.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+                f_sigTT_pre.SetParameter(0, current_params)
 
                 g_sigtt = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
@@ -1425,7 +1436,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
                 f_sigTT.SetParNames("p13")
-                f_sigTT.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+                #f_sigTT.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+                f_sigTT.SetParameter(0, current_params)
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
