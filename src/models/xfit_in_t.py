@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 08:37:55 trottar"
+# Time-stamp: "2024-07-02 08:42:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -469,8 +469,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
 
-            c1.Update()
-            c2.Update()
+                c1.Update()
+                c2.Update()
             
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -821,8 +821,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
 
-            c1.Update()
-            c2.Update()
+                c1.Update()
+                c2.Update()
 
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1180,8 +1180,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
 
-            c1.Update()
-            c2.Update()
+                c1.Update()
+                c2.Update()
 
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1518,8 +1518,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     temperature *= 0.95  # Increase randomness in case of error
 
-            c1.Update()
-            c2.Update()
+                c1.Update()
+                c2.Update()
 
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
