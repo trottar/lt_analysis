@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 16:52:02 trottar"
+# Time-stamp: "2024-07-02 16:54:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -562,9 +562,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot acceptance probability
     c6.cd(1).SetLeftMargin(0.12)
-    graph_sigL_temp.SetTitle("Sig L Acceptance Probability Convergence;Iteration;Acceptance Probability")
-    graph_sigL_temp.SetLineColor(ROOT.kBlack)
-    graph_sigL_temp.Draw("ALP")
+    graph_sigL_accept.SetTitle("Sig L Acceptance Probability Convergence;Iteration;Acceptance Probability")
+    graph_sigL_accept.SetLineColor(ROOT.kBlack)
+    graph_sigL_accept.Draw("ALP")
     
     print("\n")    
     
@@ -941,9 +941,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot acceptance probability convergence
     c6.cd(2).SetLeftMargin(0.12)
-    graph_sigT_temp.SetTitle("Sig T Acceptance Probability Convergence;Iteration;Acceptance Probability")
-    graph_sigT_temp.SetLineColor(ROOT.kBlack)
-    graph_sigT_temp.Draw("ALP")
+    graph_sigT_accept.SetTitle("Sig T Acceptance Probability Convergence;Iteration;Acceptance Probability")
+    graph_sigT_accept.SetLineColor(ROOT.kBlack)
+    graph_sigT_accept.Draw("ALP")
     
     print("\n")    
     
@@ -1329,15 +1329,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot temperature convergence
     c5.cd(3).SetLeftMargin(0.12)
-    graph_sigT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
-    graph_sigT_temp.SetLineColor(ROOT.kBlack)
-    graph_sigT_temp.Draw("ALP")
+    graph_sigLT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
+    graph_sigLT_temp.SetLineColor(ROOT.kBlack)
+    graph_sigLT_temp.Draw("ALP")
 
     # Plot acceptance probability convergence
     c6.cd(3).SetLeftMargin(0.12)
-    graph_sigT_temp.SetTitle("Sig T Acceptance Probability Convergence;Iteration;Acceptance Probability")
-    graph_sigT_temp.SetLineColor(ROOT.kBlack)
-    graph_sigT_temp.Draw("ALP")
+    graph_sigLT_accept.SetTitle("Sig T Acceptance Probability Convergence;Iteration;Acceptance Probability")
+    graph_sigLT_accept.SetLineColor(ROOT.kBlack)
+    graph_sigLT_accept.Draw("ALP")
     
     print("\n")    
     
@@ -1691,15 +1691,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot temperature convergence
     c5.cd(4).SetLeftMargin(0.12)
-    graph_sigT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
-    graph_sigT_temp.SetLineColor(ROOT.kBlack)
-    graph_sigT_temp.Draw("ALP")
+    graph_sigTT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
+    graph_sigTT_temp.SetLineColor(ROOT.kBlack)
+    graph_sigTT_temp.Draw("ALP")
 
     # Plot acceptance probability convergence
     c6.cd(4).SetLeftMargin(0.12)
-    graph_sigT_temp.SetTitle("Sig T Acceptance Probability Convergence;Iteration;Acceptance Probability")
-    graph_sigT_temp.SetLineColor(ROOT.kBlack)
-    graph_sigT_temp.Draw("ALP")
+    graph_sigTT_accept.SetTitle("Sig T Acceptance Probability Convergence;Iteration;Acceptance Probability")
+    graph_sigTT_accept.SetLineColor(ROOT.kBlack)
+    graph_sigTT_accept.Draw("ALP")
     
     print("\n")    
     
