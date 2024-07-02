@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 12:13:18 trottar"
+# Time-stamp: "2024-07-02 12:17:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,8 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Constants
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
-pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
+#pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
+pt_to_pt_systematic_error = 0.0
 PI = math.pi
 
 ###############################################################################################################################################
@@ -278,10 +279,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 0 and 1
         fff2.SetParameter(0, 1)
-        fff2.SetParLimits(0, 0, 10)
+        fff2.SetParLimits(0, 0, 20)
 
         fff2.SetParameter(1, 1)
-        fff2.SetParLimits(1, 0, 10)
+        fff2.SetParLimits(1, 0, 20)
 
         # Fix parameter 2 and 3
         fff2.FixParameter(2, 0.0)
