@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 01:21:57 trottar"
+# Time-stamp: "2024-07-02 01:23:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -467,7 +467,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     temperature *= 0.95  # Increase randomness in case of error
 
             except (TypeError or ZeroDivisionError) as e:
-                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
                 par_lim_sigl_0 = random.uniform(0, 1) # Re-randomize
@@ -812,7 +812,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     temperature *= 0.95  # Increase randomness in case of error
 
             except (TypeError or ZeroDivisionError) as e:
-                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
                 par_lim_sigt_0 = random.uniform(0, 1) # Re-randomize
@@ -1165,7 +1165,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     temperature *= 0.95  # Increase randomness in case of error
 
             except (TypeError or ZeroDivisionError) as e:
-                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
                 par_lim_siglt_0 = random.uniform(0, 1) # Re-randomize
@@ -1496,7 +1496,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     temperature *= 0.95  # Increase randomness in case of error
 
             except (TypeError or ZeroDivisionError) as e:
-                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
                 par_lim_sigtt_0 = random.uniform(0, 1) # Re-randomize
