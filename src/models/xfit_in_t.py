@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 22:30:39 trottar"
+# Time-stamp: "2024-07-01 22:49:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -323,8 +323,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
             f_sigL.Draw("same")
 
-            f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
-            #f_sigL_status = f_sigL.GetNDF() != 0
+            #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
+            f_sigL_status = f_sigL.GetNDF() != 0
             f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
             fit_status = TText()
@@ -350,7 +350,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
 
             if f_sigL_status:
-                print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
+                print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
                 break
 
             # Calculate the cost (chi-square value) for the current parameters
@@ -404,17 +404,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust parameter limits within a random number
                 if f_sigL.GetParameter(0) > 0:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(0), f_sigL.GetParameter(0)*10) # Re-randomize
+                    par_lim_sigl_0 = random.uniform(0.0, f_sigL.GetParameter(0)) # Re-randomize
                 else:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(0)*10, f_sigL.GetParameter(0)) # Re-randomize
+                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(0), 0.0) # Re-randomize
                 if f_sigL.GetParameter(1) > 0:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(1), f_sigL.GetParameter(1)*10) # Re-randomize
+                    par_lim_sigl_0 = random.uniform(0.0, f_sigL.GetParameter(1)) # Re-randomize
                 else:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(1)*10, f_sigL.GetParameter(1)) # Re-randomize
+                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(1), 0.0) # Re-randomize
                 if f_sigL.GetParameter(2) > 0:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(2), f_sigL.GetParameter(2)*10) # Re-randomize
+                    par_lim_sigl_0 = random.uniform(0.0, f_sigL.GetParameter(2)) # Re-randomize
                 else:
-                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(2)*10, f_sigL.GetParameter(2)) # Re-randomize
+                    par_lim_sigl_0 = random.uniform(f_sigL.GetParameter(2), 0.0) # Re-randomize
                     
                 temperature *= 0.95  # Increase randomness in case of error
 
@@ -433,7 +433,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigl_0 = random.uniform(0, 1) # Re-randomize
+            par_lim_sigl_0.0, 1) # Re-randomize
             par_lim_sigl_1 = random.uniform(0, 1) # Re-randomize
             par_lim_sigl_2 = random.uniform(0, 1) # Re-randomize
 
@@ -632,8 +632,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
             f_sigT.Draw("same")
 
-            f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
-            #f_sigT_status = f_sigT.GetNDF() != 0
+            #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
+            f_sigT_status = f_sigT.GetNDF() != 0
             f_sigT_status_message = "Fit Successful" if f_sigT_status else "Fit Failed"
 
             fit_status = TText()
@@ -708,13 +708,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust parameter limits within a random number
                 if f_sigT.GetParameter(0) > 0:
-                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(0), f_sigT.GetParameter(0)*10) # Re-randomize
+                    par_lim_sigt_0 = random.uniform(0.0, f_sigT.GetParameter(0)) # Re-randomize
                 else:
-                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(0)*10, f_sigT.GetParameter(0)) # Re-randomize
+                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(0), 0.0) # Re-randomize
                 if f_sigT.GetParameter(1) > 0:
-                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(1), f_sigT.GetParameter(1)*10) # Re-randomize
+                    par_lim_sigt_0 = random.uniform(0.0, f_sigT.GetParameter(1)) # Re-randomize
                 else:
-                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(1)*10, f_sigT.GetParameter(1)) # Re-randomize
+                    par_lim_sigt_0 = random.uniform(f_sigT.GetParameter(1), 0.0) # Re-randomize
                     
                 temperature *= 0.95  # Increase randomness in case of error
             
@@ -732,7 +732,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigT_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_sigt_0 = random.uniform(0, 1) # Re-randomize
+            par_lim_sigt_0.0, 1) # Re-randomize
             par_lim_sigt_1 = random.uniform(0, 1) # Re-randomize
 
             iteration += 1
@@ -933,8 +933,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
             f_sigLT.Draw("same")
 
-            f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
-            #f_sigLT_status = f_sigLT.GetNDF() != 0
+            #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
+            f_sigLT_status = f_sigLT.GetNDF() != 0
             f_sigLT_status_message = "Fit Successful" if f_sigLT_status else "Fit Failed"
 
             fit_status = TText()
@@ -1014,17 +1014,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust parameter limits within a random number
                 if f_sigLT.GetParameter(0) > 0:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(0), f_sigLT.GetParameter(0)*10) # Re-randomize
+                    par_lim_siglt_0 = random.uniform(0.0, f_sigLT.GetParameter(0)) # Re-randomize
                 else:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(0)*10, f_sigLT.GetParameter(0)) # Re-randomize
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(0), 0.0) # Re-randomize
                 if f_sigLT.GetParameter(1) > 0:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(1), f_sigLT.GetParameter(1)*10) # Re-randomize
+                    par_lim_siglt_0 = random.uniform(0.0, f_sigLT.GetParameter(1)) # Re-randomize
                 else:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(1)*10, f_sigLT.GetParameter(1)) # Re-randomize
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(1), 0.0) # Re-randomize
                 if f_sigLT.GetParameter(2) > 0:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(2), f_sigLT.GetParameter(2)*10) # Re-randomize
+                    par_lim_siglt_0 = random.uniform(0.0, f_sigLT.GetParameter(2)) # Re-randomize
                 else:
-                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(2)*10, f_sigLT.GetParameter(2)) # Re-randomize
+                    par_lim_siglt_0 = random.uniform(f_sigLT.GetParameter(2), 0.0) # Re-randomize
                     
                 temperature *= 0.95  # Increase randomness in case of error
 
@@ -1043,7 +1043,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigLT_chi2 = TGraph()
 
             # Adjust parameter limits within a random number
-            par_lim_siglt_0 = random.uniform(0, 1) # Re-randomize
+            par_lim_siglt_0.0, 1) # Re-randomize
             par_lim_siglt_1 = random.uniform(0, 1) # Re-randomize
             par_lim_siglt_2 = random.uniform(0, 1) # Re-randomize
 
@@ -1235,8 +1235,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
             f_sigTT.Draw("same")
 
-            f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
-            #f_sigTT_status = f_sigTT.GetNDF() != 0
+            #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
+            f_sigTT_status = f_sigTT.GetNDF() != 0
             f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
 
             fit_status = TText()
@@ -1306,9 +1306,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust parameter limits within a random number
                 if f_sigTT.GetParameter(0) > 0:
-                    par_lim_sigl_0 = random.uniform(f_sigTT.GetParameter(0), f_sigTT.GetParameter(0)*10) # Re-randomize
+                    par_lim_sigl_0 = random.uniform(0.0, f_sigTT.GetParameter(0)) # Re-randomize
                 else:
-                    par_lim_sigl_0 = random.uniform(f_sigTT.GetParameter(0)*10, f_sigTT.GetParameter(0)) # Re-randomize
+                    par_lim_sigl_0 = random.uniform(f_sigTT.GetParameter(0), 0.0) # Re-randomize
                     
                 temperature *= 0.95  # Increase randomness in case of error
 
