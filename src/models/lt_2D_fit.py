@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 11:35:38 trottar"
+# Time-stamp: "2024-07-02 11:37:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,7 +165,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         tcut_hi = ""
 
-        tcut_hi = "t=={0} && x!=0.0".format(fhiat(t_list[i]))
+        tcut_hi = "t=={0} && x!=0.0".format(float(t_list[i]))
         print(tcut_hi)
         
         lo_eps = lo_eps_list[i]
