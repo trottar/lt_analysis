@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 15:48:55 trottar"
+# Time-stamp: "2024-07-02 16:49:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -230,6 +230,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p3 = TGraph()
     graph_sigL_chi2 = TGraph()
     graph_sigL_temp = TGraph()
+    graph_sigL_accept = TGraph()
 
     # Record the start time
     start_time = time.time()
@@ -402,24 +403,27 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 params_sigL_history['p1'].append(current_params[0])
                 params_sigL_history['p2'].append(current_params[1])
                 params_sigL_history['p3'].append(current_params[2])
-
-                #if total_iteration % (max_iterations/10) == 0:
-                # Update ROOT TGraphs for plotting
-                print("!!!!!!!!!!!",iteration, "-", total_iteration)
-                graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
-                graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
-                graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, f_sigL.GetChisquare())
-                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)                
-                    
-                c1.Update()
-                c2.Update()
                 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigL.GetChisquare()
 
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
+                #if total_iteration % (max_iterations/10) == 0:
+                # Update ROOT TGraphs for plotting
+                graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
+                graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
+                graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
+                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, f_sigL.GetChisquare())
+                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
+                graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                
+                c1.Update()
+                c2.Update()
+                
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                if accept_prob > random.random():
                     best_params = current_params
                     best_cost = current_cost
 
@@ -613,6 +617,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p6 = TGraph()
     graph_sigT_chi2 = TGraph()
     graph_sigT_temp = TGraph()
+    graph_sigT_accept = TGraph()
     
     # Record the start time
     start_time = time.time()
@@ -780,21 +785,25 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 params_sigT_history['p5'].append(current_params[0])
                 params_sigT_history['p6'].append(current_params[1])
 
+                # Calculate the cost (chi-square value) for the current parameters
+                current_cost = f_sigT.GetChisquare()
+                
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigT_chi2.SetPoint(total_iteration, total_iteration, f_sigT.GetChisquare())
                 graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 c1.Update()
                 c2.Update()                
 
-                # Calculate the cost (chi-square value) for the current parameters
-                current_cost = f_sigT.GetChisquare()
-
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                if accept_prob > random.random():
                     best_params = current_params
                     best_cost = current_cost
 
@@ -982,6 +991,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_p11 = TGraph()
     graph_sigLT_chi2 = TGraph()
     graph_sigLT_temp = TGraph()
+    graph_sigLT_accept = TGraph()
     
     # Record the start time
     start_time = time.time()
@@ -1156,6 +1166,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 params_sigLT_history['p10'].append(current_params[1])
                 params_sigLT_history['p11'].append(current_params[2])
 
+                # Calculate the cost (chi-square value) for the current parameters
+                current_cost = f_sigLT.GetChisquare()
+
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
@@ -1163,15 +1179,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
                 graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, f_sigLT.GetChisquare())
                 graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                graph_sigLT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 c1.Update()
                 c2.Update()                
 
-                # Calculate the cost (chi-square value) for the current parameters
-                current_cost = f_sigLT.GetChisquare()
-
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                if accept_prob > random.random():
                     best_params = current_params
                     best_cost = current_cost
 
@@ -1361,6 +1375,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_p13 = TGraph()
     graph_sigTT_chi2 = TGraph()
     graph_sigTT_temp = TGraph()
+    graph_sigTT_accept = TGraph()
     
     # Record the start time
     start_time = time.time()
@@ -1519,20 +1534,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 params_sigTT_history['p13'].append(current_params)
 
+                # Calculate the cost (chi-square value) for the current parameters
+                current_cost = f_sigTT.GetChisquare()
+
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
                 graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, f_sigTT.GetChisquare())
                 graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                graph_sigTT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 c1.Update()
                 c2.Update()                
 
-                # Calculate the cost (chi-square value) for the current parameters
-                current_cost = f_sigTT.GetChisquare()
-
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                if accept_prob > random.random():
                     best_params = current_params
                     best_cost = current_cost
 
