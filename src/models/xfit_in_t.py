@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 14:59:02 trottar"
+# Time-stamp: "2024-07-02 15:14:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -223,8 +223,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
-    chi2_sigL_history = []
-    temp_sigL_status_history = []
 
     # Create TGraphs for parameter convergence
     graph_sigL_p1 = TGraph()
@@ -446,9 +444,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)            
 
-                iteration += 1
-                total_iteration += 1
-
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
@@ -459,8 +454,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 params_sigL_history['p1'].append(current_params[0])
                 params_sigL_history['p2'].append(current_params[1])
                 params_sigL_history['p3'].append(current_params[2])
-                chi2_sigL_history.append(f_sigL.GetChisquare())
-                temp_sigL_status_history.append(temperature)
 
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
@@ -468,10 +461,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
                 graph_sigL_chi2.SetPoint(total_iteration, total_iteration, f_sigL.GetChisquare())
+                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)                
                     
                 c1.Update()
                 c2.Update()
-            
+
+                iteration += 1
+                total_iteration += 1
+                
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -551,9 +548,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot temperature
     c5.cd(1).SetLeftMargin(0.12)
-    graph_sigL_chi2.SetTitle("Sig L Temperature Convergence;Iteration;Temperature")
-    graph_sigL_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigL_chi2.Draw("ALP")
+    graph_sigL_temp.SetTitle("Sig L Temperature Convergence;Iteration;Temperature")
+    graph_sigL_temp.SetLineColor(ROOT.kBlack)
+    graph_sigL_temp.Draw("ALP")
     
     print("\n")    
     
@@ -608,8 +605,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
-    chi2_sigT_history = []
-    temp_sigT_status_history = []
 
     # Create TGraphs for parameter convergence
     graph_sigT_p5 = TGraph()
@@ -821,9 +816,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
-                iteration += 1
-                total_iteration += 1
-
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
@@ -833,17 +825,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 params_sigT_history['p5'].append(current_params[0])
                 params_sigT_history['p6'].append(current_params[1])
-                chi2_sigT_history.append(f_sigT.GetChisquare())
-                temp_sigT_status_history.append(temperature)
 
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigT_chi2.SetPoint(total_iteration, total_iteration, f_sigT.GetChisquare())
+                graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
 
                 c1.Update()
                 c2.Update()
+
+                iteration += 1
+                total_iteration += 1
 
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -921,9 +915,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot temperature convergence
     c5.cd(2).SetLeftMargin(0.12)
-    graph_sigT_chi2.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
-    graph_sigT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigT_chi2.Draw("ALP")
+    graph_sigT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
+    graph_sigT_temp.SetLineColor(ROOT.kBlack)
+    graph_sigT_temp.Draw("ALP")
     
     print("\n")    
     
@@ -978,8 +972,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
-    chi2_sigLT_history = []
-    temp_sigLT_status_history = []
 
     # Create TGraphs for parameter convergence
     graph_sigLT_p9 = TGraph()
@@ -1201,9 +1193,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
-                iteration += 1
-                total_iteration += 1
-
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
@@ -1214,8 +1203,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 params_sigLT_history['p9'].append(current_params[0])
                 params_sigLT_history['p10'].append(current_params[1])
                 params_sigLT_history['p11'].append(current_params[2])
-                chi2_sigLT_history.append(f_sigLT.GetChisquare())
-                temp_sigLT_status_history.append(temperature)
 
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
@@ -1223,9 +1210,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
                 graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, f_sigLT.GetChisquare())
+                graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
 
                 c1.Update()
                 c2.Update()
+
+                iteration += 1
+                total_iteration += 1
 
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1306,9 +1297,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot temperature convergence
     c5.cd(3).SetLeftMargin(0.12)
-    graph_sigT_chi2.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
-    graph_sigT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigT_chi2.Draw("ALP")
+    graph_sigT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
+    graph_sigT_temp.SetLineColor(ROOT.kBlack)
+    graph_sigT_temp.Draw("ALP")
     
     print("\n")    
     
@@ -1361,8 +1352,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
-    chi2_sigTT_history = []
-    temp_sigTT_status_history = []
 
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
@@ -1562,9 +1551,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
-                iteration += 1
-                total_iteration += 1
-
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
@@ -1573,16 +1559,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     temperature *= 0.95  # Increase randomness in case of error
 
                 params_sigTT_history['p13'].append(current_params)
-                chi2_sigTT_history.append(f_sigTT.GetChisquare())
-                temp_sigTT_status_history.append(temperature)
 
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
                 graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, f_sigTT.GetChisquare())
+                graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
 
                 c1.Update()
                 c2.Update()
+
+                iteration += 1
+                total_iteration += 1
 
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1658,10 +1646,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_chi2.Draw("ALP")
 
     # Plot temperature convergence
-    c4.cd(4).SetLeftMargin(0.12)
-    graph_sigT_chi2.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
-    graph_sigT_chi2.SetLineColor(ROOT.kBlack)
-    graph_sigT_chi2.Draw("ALP")
+    c5.cd(4).SetLeftMargin(0.12)
+    graph_sigT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
+    graph_sigT_temp.SetLineColor(ROOT.kBlack)
+    graph_sigT_temp.Draw("ALP")
     
     print("\n")    
     
