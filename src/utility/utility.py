@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 23:52:41 trottar"
+# Time-stamp: "2024-07-02 00:09:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,6 +11,7 @@
 # Copyright (c) trottar
 #
 import ROOT
+from ROOT import Math
 from array import array
 import numpy as np
 from datetime import datetime
@@ -558,5 +559,28 @@ def acceptance_probability(old_cost, new_cost, temperature):
 
 def adjust_params(params, adjustment_factor=0.1):
     return [p + random.uniform(-adjustment_factor, adjustment_factor) * p for p in params]        
-        
+
+def local_search(params, inp_func):
+    minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+    minimizer.SetMaxFunctionCalls(1000000)
+    minimizer.SetMaxIterations(100000)
+    minimizer.SetTolerance(0.001)
+    minimizer.SetPrintLevel(0)
+    
+    def chi2_func(par):
+        inp_func.SetParameters(par)
+        return inp_func.GetChisquare()
+    
+    func = Math.Functor(chi2_func, 3)  # 3 is the number of parameters
+    minimizer.SetFunction(func)
+    
+    for i, param in enumerate(params):
+        minimizer.SetVariable(i, f"p{i}", param, 0.01 * abs(param))
+    
+    minimizer.Minimize()
+    
+    improved_params = [minimizer.X()[i] for i in range(3)]
+    
+    return improved_params
+
 ################################################################################################################################################
