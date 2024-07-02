@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 01:16:27 trottar"
+# Time-stamp: "2024-07-02 01:18:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -230,11 +230,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
+    iteration = 0
 
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
     
-        iteration = 0
         initial_temperature = 1.0
         cooling_rate = 0.99
         temperature = initial_temperature
@@ -596,11 +596,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-
+    iteration = 0
+    
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        iteration = 0
         initial_temperature = 1.0
         cooling_rate = 0.99
         temperature = initial_temperature
@@ -949,11 +949,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-
+    iteration = 0
+        
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
         
-        iteration = 0
         initial_temperature = 1.0
         cooling_rate = 0.99
         temperature = initial_temperature
@@ -1313,11 +1313,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     num_starts = 5  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
-
+    iteration = 0
+    
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        iteration = 0
         initial_temperature = 1.0
         cooling_rate = 0.99
         temperature = initial_temperature
