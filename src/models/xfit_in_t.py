@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 01:08:53 trottar"
+# Time-stamp: "2024-07-02 01:16:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -397,16 +397,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_sigl_fit_tot.SetLineColor(2)
                 g_sigl_fit_tot.Draw("LP")
 
-                params_sigL_history['p1'].append(f_sigL.GetParameter(0))
-                params_sigL_history['p2'].append(f_sigL.GetParameter(1))
-                params_sigL_history['p3'].append(f_sigL.GetParameter(2))
+                params_sigL_history['p1'].append(current_params[0])
+                params_sigL_history['p2'].append(current_params[1])
+                params_sigL_history['p3'].append(current_params[2])
                 chi2_sigL_history.append(f_sigL.GetChisquare())
                 fit_sigL_status_history.append(1 if f_sigL_status else 0)
 
                 # Update ROOT TGraphs for plotting
-                graph_sigL_p1.SetPoint(iteration, iteration, f_sigL.GetParameter(0))
-                graph_sigL_p2.SetPoint(iteration, iteration, f_sigL.GetParameter(1))
-                graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
+                graph_sigL_p1.SetPoint(iteration, iteration, current_params[0])
+                graph_sigL_p2.SetPoint(iteration, iteration, current_params[1])
+                graph_sigL_p3.SetPoint(iteration, iteration, current_params[2])
                 graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
 
                 # Calculate the cost (chi-square value) for the current parameters
@@ -435,11 +435,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
-                            f_sigL.GetParameter(0),
-                            f_sigL.GetParameter(1),
-                            f_sigL.GetParameter(2)
+                            current_params[0],
+                            current_params[1],
+                            current_params[2]
                         ])
 
                     # Restart from a new random point
@@ -458,10 +458,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 iteration += 1
 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
-                    last_minima.append([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)])                
+                    last_minima.append([current_params[0], current_params[1], current_params[2]])                
 
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
@@ -759,14 +759,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_sigt_fit_tot.SetLineColor(2)
                 g_sigt_fit_tot.Draw("LP")
 
-                params_sigT_history['p5'].append(f_sigT.GetParameter(0))
-                params_sigT_history['p6'].append(f_sigT.GetParameter(1))
+                params_sigT_history['p5'].append(current_params[0])
+                params_sigT_history['p6'].append(current_params[1])
                 chi2_sigT_history.append(f_sigT.GetChisquare())
                 fit_sigT_status_history.append(1 if f_sigT_status else 0)
 
                 # Update ROOT TGraphs for plotting
-                graph_sigT_p5.SetPoint(iteration, iteration, f_sigT.GetParameter(0))
-                graph_sigT_p6.SetPoint(iteration, iteration, f_sigT.GetParameter(1))
+                graph_sigT_p5.SetPoint(iteration, iteration, current_params[0])
+                graph_sigT_p6.SetPoint(iteration, iteration, current_params[1])
                 graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
 
                 # Calculate the cost (chi-square value) for the current parameters
@@ -793,10 +793,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([f_sigT.GetParameter(0), f_sigT.GetParameter(1)], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
-                            f_sigT.GetParameter(0),
-                            f_sigT.GetParameter(1)
+                            current_params[0],
+                            current_params[1]
                         ])
                     # Restart from a new random point
                     current_params = [random.uniform(0, 1) for _ in range(3)]
@@ -814,10 +814,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 iteration += 1
 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([f_sigT.GetParameter(0), f_sigT.GetParameter(1)], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
+                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
-                    last_minima.append([f_sigT.GetParameter(0), f_sigT.GetParameter(1)])                
+                    last_minima.append([current_params[0], current_params[1]])                
 
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
@@ -1117,16 +1117,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_siglt_fit_tot.SetLineColor(2)
                 g_siglt_fit_tot.Draw("LP")
 
-                params_sigLT_history['p9'].append(f_sigLT.GetParameter(0))
-                params_sigLT_history['p10'].append(f_sigLT.GetParameter(1))
-                params_sigLT_history['p11'].append(f_sigLT.GetParameter(2))
+                params_sigLT_history['p9'].append(current_params[0])
+                params_sigLT_history['p10'].append(current_params[1])
+                params_sigLT_history['p11'].append(current_params[2])
                 chi2_sigLT_history.append(f_sigLT.GetChisquare())
                 fit_sigLT_status_history.append(1 if f_sigLT_status else 0)
 
                 # Update ROOT TGraphs for plotting
-                graph_sigLT_p9.SetPoint(iteration, iteration, f_sigLT.GetParameter(0))
-                graph_sigLT_p10.SetPoint(iteration, iteration, f_sigLT.GetParameter(1))
-                graph_sigLT_p11.SetPoint(iteration, iteration, f_sigLT.GetParameter(2))
+                graph_sigLT_p9.SetPoint(iteration, iteration, current_params[0])
+                graph_sigLT_p10.SetPoint(iteration, iteration, current_params[1])
+                graph_sigLT_p11.SetPoint(iteration, iteration, current_params[2])
                 graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
 
                 # Calculate the cost (chi-square value) for the current parameters
@@ -1155,11 +1155,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
-                            f_sigLT.GetParameter(0),
-                            f_sigLT.GetParameter(1),
-                            f_sigLT.GetParameter(2)
+                            current_params[0],
+                            current_params[1],
+                            current_params[2]
                         ])
                         # Restart from a new random point
                     current_params = [random.uniform(0, 1) for _ in range(3)]
@@ -1177,10 +1177,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 iteration += 1
 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
-                    last_minima.append([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)])                
+                    last_minima.append([current_params[0], current_params[1], current_params[2]])                
 
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
@@ -1469,12 +1469,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_sigtt_fit_tot.SetLineColor(2)
                 g_sigtt_fit_tot.Draw("LP")
 
-                params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
+                params_sigTT_history['p13'].append(current_params)
                 chi2_sigTT_history.append(f_sigTT.GetChisquare())
                 fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
 
                 # Update ROOT TGraphs for plotting
-                graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
+                graph_sigTT_p13.SetPoint(iteration, iteration, current_params)
                 graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
 
                 # Calculate the cost (chi-square value) for the current parameters
@@ -1499,9 +1499,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
-                            f_sigTT.GetParameter(0)
+                            current_params
                         ])
                     # Restart from a new random point
                     current_params = random.uniform(0, 1)
@@ -1511,7 +1511,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 previous_params = current_params                
 
                 # Update parameters with the best found so far
-                par_lim_sigtt_0 = best_params
+                par_lim_sigtt_0 = current_params
 
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
@@ -1519,10 +1519,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 iteration += 1
 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigTT.GetParameter(0)))
+                if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
 
-                    last_minima.append([f_sigTT.GetParameter(0)])
+                    last_minima.append([current_params])
 
                     current_params = adjust_params(best_params)
                     temperature *= 0.95  # Increase randomness in case of error
