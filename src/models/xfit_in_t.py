@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 16:51:23 trottar"
+# Time-stamp: "2024-07-02 16:52:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -171,7 +171,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c4.Divide(2, 2)
     c5 = TCanvas("c5", "Temperature", 800, 800)
     c5.Divide(2, 2)
-    c6 = TCanvas("c5", "Acceptance Probability", 800, 800)
+    c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
     c6.Divide(2, 2)
     
     ########
