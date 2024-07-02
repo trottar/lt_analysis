@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:55:43 trottar"
+# Time-stamp: "2024-07-02 00:57:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1287,7 +1287,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         py_func = PyFunc()
 
         # Create the functor
-        func = Math.Functor(py_func, 1)  # 1 is the number of parameters
+        func = Math.Functor(py_func, 2)  # 1 is the number of parameters
         minimizer.SetFunction(func)
 
         # Set initial values and step sizes
