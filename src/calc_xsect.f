@@ -247,7 +247,7 @@ c angle check
             if (x_real < 0.0) x_real = 0.0
 
             phi_deg = phi*180./3.14159
-            if (phi_deg.le.50.or.phi_deg.gt.300) x_real = 0.0
+            if (phi_deg.le.50.or.phi_deg.gt.300) x_real = 10.0
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
      *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
