@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 15:38:29 trottar"
+# Time-stamp: "2024-07-02 15:43:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -451,6 +451,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
+                if total_iteration == 0:
+                    print("!!!!!!!!!!!",total_iteration)
                 graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
