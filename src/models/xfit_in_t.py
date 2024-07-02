@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:21:43 trottar"
+# Time-stamp: "2024-07-02 00:23:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,7 +45,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params
+from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
