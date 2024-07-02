@@ -244,10 +244,10 @@ c angle check
             if (isnan(q2)) q2 = 0.0            
 
 *     Testing
-            if (x_real < 0.0) x_real = 0.0
+            if (x_real < 0.0) x_real = 0.001
 
             phi_deg = phi*180./3.14159
-            if (phi_deg.le.50.or.phi_deg.gt.300) x_real = 10.0
+            if (phi_deg.le.50.or.phi_deg.gt.300) x_real = 0.001
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
      *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
