@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 12:36:30 trottar"
+# Time-stamp: "2024-07-01 22:26:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -323,8 +323,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
             f_sigL.Draw("same")
 
-            #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
-            f_sigL_status = f_sigL.GetNDF() != 0
+            f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
+            #f_sigL_status = f_sigL.GetNDF() != 0
             f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
             fit_status = TText()
@@ -632,8 +632,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
             f_sigT.Draw("same")
 
-            #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
-            f_sigT_status = f_sigT.GetNDF() != 0
+            f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
+            #f_sigT_status = f_sigT.GetNDF() != 0
             f_sigT_status_message = "Fit Successful" if f_sigT_status else "Fit Failed"
 
             fit_status = TText()
@@ -933,8 +933,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
             f_sigLT.Draw("same")
 
-            #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
-            f_sigLT_status = f_sigLT.GetNDF() != 0
+            f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
+            #f_sigLT_status = f_sigLT.GetNDF() != 0
             f_sigLT_status_message = "Fit Successful" if f_sigLT_status else "Fit Failed"
 
             fit_status = TText()
@@ -1235,8 +1235,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
             f_sigTT.Draw("same")
 
-            #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
-            f_sigTT_status = f_sigTT.GetNDF() != 0
+            f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
+            #f_sigTT_status = f_sigTT.GetNDF() != 0
             f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
 
             fit_status = TText()
