@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 15:14:14 trottar"
+# Time-stamp: "2024-07-02 15:15:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,6 +229,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p2 = TGraph()
     graph_sigL_p3 = TGraph()
     graph_sigL_chi2 = TGraph()
+    graph_sigL_temp = TGraph()
 
     # Record the start time
     start_time = time.time()
