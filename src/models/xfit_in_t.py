@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:50:37 trottar"
+# Time-stamp: "2024-07-02 00:54:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -492,10 +492,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             best_overall_cost = best_cost
             best_overall_params = best_params[:]
                 
-        if iteration == max_iterations:
-            print("ERROR: Sig L failed to converge!")
-            #sys.exit(2)
-
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
             
@@ -847,10 +843,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params[:]                
-                
-        if iteration == max_iterations:
-            print("ERROR: Sig T failed to converge!")
-            #sys.exit(2)
+
+    print("\nBest overall solution: {0}".format(best_overall_params))
+    print("Best overall cost: {0}".format(best_overall_cost))
             
     par_vec.append(f_sigT.GetParameter(0))
     par_vec.append(f_sigT.GetParameter(1))
@@ -1210,10 +1205,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             best_overall_cost = best_cost
             best_overall_params = best_params[:]
                 
-        if iteration == max_iterations:
-            print("ERROR: Sig LT failed to converge!")
-            #sys.exit(2)
-
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
     
@@ -1276,7 +1267,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
 
-    def local_search(params, f_sigTT):
+    def local_search(param, f_sigTT):
         minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
         minimizer.SetMaxFunctionCalls(1000000)
         minimizer.SetMaxIterations(100000)
@@ -1285,8 +1276,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Create a wrapper function that can be called by the minimizer
         def chi2_func(par):
-            for i in range(1):
-                f_sigTT.SetParameter(i, par[i])
+            f_sigTT.SetParameter(i, par)
             return f_sigTT.GetChisquare()
 
         # Create a PyROOT callable object
@@ -1301,14 +1291,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         minimizer.SetFunction(func)
 
         # Set initial values and step sizes
-        for i, param in enumerate(params):
-            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
+        minimizer.SetVariable(i, "p1", param, 0.01 * abs(param))
 
         # Perform the minimization
         minimizer.Minimize()
 
         # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(1)]
+        improved_params = minimizer.X()[i]
 
         return improved_params
     
@@ -1531,11 +1520,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
-            best_overall_params = best_params[:]
-                
-        if iteration == max_iterations:
-            print("ERROR: Sig TT failed to converge!")
-            #sys.exit(2)
+            best_overall_params = best_params
 
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
