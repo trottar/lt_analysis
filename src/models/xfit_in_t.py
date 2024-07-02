@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:41:52 trottar"
+# Time-stamp: "2024-07-02 00:46:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -412,7 +412,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if f_sigL_status:
                     print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
                     #break
-                    sys.exit(2)
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigL.GetChisquare()
@@ -471,7 +470,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     if last_minima.count([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]) > 100:
                         print("\n\n END: [i={}] Local minima p1={:3e}, p2={:3e}, p3={:3e} chosen...".format(iteration, f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
                         #break
-                        sys.exit(2)
+                        #sys.exit(2)
 
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
@@ -782,7 +781,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 if f_sigT_status:
                     print("\n\n END: [i={}] Fit converged, p5={:3e}, p6={:3e} chosen...".format(iteration, f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
-                    break
+                    #break
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigT.GetChisquare()
@@ -836,7 +835,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # If local minima occurs more than 100 times, it's likely the true minima
                     if last_minima.count([f_sigT.GetParameter(0), f_sigT.GetParameter(1)]) > 100:
                         print("\n\n END: [i={}] Local minima p5={:3e}, p6={:3e} chosen...".format(iteration, f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
-                        break
+                        #break
 
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
@@ -868,7 +867,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
         if iteration == max_iterations:
             print("ERROR: Sig T failed to converge!")
-            sys.exit(2)
+            #sys.exit(2)
             
     par_vec.append(f_sigT.GetParameter(0))
     par_vec.append(f_sigT.GetParameter(1))
@@ -1148,7 +1147,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 if f_sigLT_status:
                     print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
-                    break
+                    #break
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigLT.GetChisquare()
@@ -1205,7 +1204,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # If local minima occurs more than 100 times, it's likely the true minima
                     if last_minima.count([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]) > 100:
                         print("\n\n END: [i={}] Local minima p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
-                        break
+                        #break
 
                     current_params = adjust_params(best_params)                    
                     temperature *= 0.95  # Increase randomness in case of error
@@ -1238,7 +1237,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
         if iteration == max_iterations:
             print("ERROR: Sig LT failed to converge!")
-            sys.exit(2)
+            #sys.exit(2)
 
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
@@ -1507,7 +1506,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 if f_sigTT_status:
                     print("\n\n END: [i={}] Fit converged, p13={:3e} chosen...".format(iteration, f_sigTT.GetParameter(0)))
-                    break
+                    #break
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigTT.GetChisquare()
@@ -1558,7 +1557,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # If local minima occurs more than 100 times, it's likely the true minima
                     if last_minima.count([f_sigTT.GetParameter(0)]) > 100:
                         print("\n\n END: [i={}] Local minima p13={:3e} chosen...".format(iteration, f_sigTT.GetParameter(0)))
-                        break
+                        #break
 
                     current_params = adjust_params(best_params)
                     temperature *= 0.95  # Increase randomness in case of error
@@ -1587,7 +1586,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
         if iteration == max_iterations:
             print("ERROR: Sig TT failed to converge!")
-            sys.exit(2)
+            #sys.exit(2)
 
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
