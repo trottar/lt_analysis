@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-01 22:26:59 trottar"
+# Time-stamp: "2024-07-01 22:30:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,7 +350,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
 
             if f_sigL_status:
-                print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
+                print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
                 break
 
             # Calculate the cost (chi-square value) for the current parameters
