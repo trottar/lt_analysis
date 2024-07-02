@@ -243,6 +243,7 @@ c angle check
             if (isnan(w)) w = 0.0
             if (isnan(q2)) q2 = 0.0            
 
+*     Testing
             if (x_real < 0.0) x_real = 0.0
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
