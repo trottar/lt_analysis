@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 11:40:08 trottar"
+# Time-stamp: "2024-07-02 11:40:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -152,20 +152,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         '''
         tcut = ""
 
-        tcut = "t=={0} && x <= 0.0".format(float(t_list[i]))
-        #tcut = "t=={0} && x <= 0.0 && (phi<190 || phi>210)".format(float(t_list[i])) #  From thesis, center only
+        tcut = "t=={0} && x >= 0.0".format(float(t_list[i]))
+        #tcut = "t=={0} && x >= 0.0 && (phi<190 || phi>210)".format(float(t_list[i])) #  From thesis, center only
         print(tcut)
         '''
 
         tcut_lo = ""
 
-        #tcut_lo = "t=={0} && x <= 0.0".format(float(t_list[i]))
-        tcut_lo = "t=={0} && x <= 0.0 && (phi<125 || phi>225)".format(float(t_list[i]))
+        #tcut_lo = "t=={0} && x >= 0.0".format(float(t_list[i]))
+        tcut_lo = "t=={0} && x >= 0.0 && (phi<125 || phi>225)".format(float(t_list[i]))
         print(tcut_lo)
 
         tcut_hi = ""
 
-        tcut_hi = "t=={0} && x <= 0.0".format(float(t_list[i]))
+        tcut_hi = "t=={0} && x >= 0.0".format(float(t_list[i]))
         print(tcut_hi)
         
         lo_eps = lo_eps_list[i]
