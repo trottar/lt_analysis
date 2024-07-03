@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-03 16:27:16 trottar"
+# Time-stamp: "2024-07-03 16:33:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -597,7 +597,7 @@ def local_search(params, inp_func, num_params):
         # Get the improved parameters
         improved_params = [minimizer.X()[i] for i in range(num_params)]
 
-        return improved_params    
+        return improved_params
 
     else:
         minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
