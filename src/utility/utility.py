@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:27:33 trottar"
+# Time-stamp: "2024-07-03 16:19:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,6 +11,10 @@
 # Copyright (c) trottar
 #
 import ROOT
+from ROOT import TFile, TNtuple, TText
+from ROOT import TGraph, TGraphErrors, TCanvas
+from ROOT import TF1, TFitResultPtr
+from ROOT import Math
 from array import array
 import numpy as np
 from datetime import datetime
@@ -559,4 +563,76 @@ def acceptance_probability(old_cost, new_cost, temperature):
 def adjust_params(params, adjustment_factor=0.1):
     return [p + random.uniform(-adjustment_factor, adjustment_factor) * p for p in params]        
 
+def local_search(params, inp_func, num_params):
+
+    if num_params > 1:
+        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+        minimizer.SetMaxFunctionCalls(1000000)
+        minimizer.SetMaxIterations(100000)
+        minimizer.SetTolerance(0.001)
+        minimizer.SetPrintLevel(0)
+
+        # Create a wrapper function that can be called by the minimizer
+        def chi2_func(par):
+            for i in range(num_params):
+                inp_func.SetParameter(i, par[i])
+            return inp_func.GetChisquare()
+
+        # Create a PyROOT callable object
+        class PyFunc:
+            def __call__(self, par):
+                return chi2_func(par)
+
+        py_func = PyFunc()
+
+        # Create the functor
+        func = Math.Functor(py_func, num_params)  # num_params is the number of parameters
+        minimizer.SetFunction(func)
+
+        # Set initial values and step sizes
+        for i, param in enumerate(params):
+            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
+
+        # Perform the minimization
+        minimizer.Minimize()
+
+        # Get the improved parameters
+        improved_params = [minimizer.X()[i] for i in range(num_params)]
+
+        return improved_params    
+
+    else:
+        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+        minimizer.SetMaxFunctionCalls(1000000)
+        minimizer.SetMaxIterations(100000)
+        minimizer.SetTolerance(0.001)
+        minimizer.SetPrintLevel(0)
+
+        # Create a wrapper function that can be called by the minimizer
+        def chi2_func(par):
+            inp_func.SetParameter(1, par)
+            return inp_func.GetChisquare()
+
+        # Create a PyROOT callable object
+        class PyFunc:
+            def __call__(self, par):
+                return chi2_func(par)
+
+        py_func = PyFunc()
+
+        # Create the functor
+        func = Math.Functor(py_func, 1)  # 1 is the number of parameters
+        minimizer.SetFunction(func)
+
+        # Set initial values and step sizes
+        minimizer.SetVariable(1, "p1", param, 0.01 * abs(param))
+
+        # Perform the minimization
+        minimizer.Minimize()
+
+        # Get the improved parameters
+        improved_params = minimizer.X()
+
+        return improved_params
+    
 ################################################################################################################################################
