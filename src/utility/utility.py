@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-03 16:19:50 trottar"
+# Time-stamp: "2024-07-03 16:27:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -553,12 +553,10 @@ def acceptance_probability(old_cost, new_cost, temperature):
     # Calculate the probability of accepting a worse solution
     if new_cost < old_cost:
         return 1.0
+    elif temperature == 0:
+        return 0.0
     else:
-        try:
-            return math.exp((old_cost - new_cost) / temperature)
-        except ZeroDivisionError:
-            temperature = 1.0
-            return math.exp((old_cost - new_cost) / temperature)
+        return math.exp((old_cost - new_cost) / temperature)
 
 def adjust_params(params, adjustment_factor=0.1):
     return [p + random.uniform(-adjustment_factor, adjustment_factor) * p for p in params]        
