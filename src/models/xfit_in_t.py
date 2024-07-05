@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-03 16:21:09 trottar"
+# Time-stamp: "2024-07-05 11:13:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -478,10 +478,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_err_vec.append(f_sigL.GetParError(2))
     par_err_vec.append(f_sigL.GetParError(3))
 
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
 
     # Calculate the minimum and maximum values from the graphs
     min_sigL_y = float('inf')
@@ -822,10 +822,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_err_vec.append(f_sigT.GetParError(2))
     par_err_vec.append(f_sigT.GetParError(3))
 
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
 
     # Calculate the minimum and maximum values from the graphs
     min_sigT_y = float('inf')
@@ -1177,10 +1177,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_err_vec.append(f_sigLT.GetParError(2))
     par_err_vec.append(f_sigLT.GetParError(3))
 
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
 
     # Calculate the minimum and maximum values from the graphs
     min_sigLT_y = float('inf')
@@ -1508,10 +1508,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_err_vec.append(f_sigTT.GetParError(2))
     par_err_vec.append(f_sigTT.GetParError(3))
 
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())        
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
 
     # Calculate the minimum and maximum values from the graphs
     min_sigTT_y = float('inf')
