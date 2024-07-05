@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-05 11:37:34 trottar"
+# Time-stamp: "2024-07-05 14:24:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,7 +182,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig L")
     print("/*--------------------------------------------------*/")
 
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
@@ -438,7 +438,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
+                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -539,7 +539,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig T")
     print("/*--------------------------------------------------*/")
 
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
@@ -783,7 +783,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
+                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -881,7 +881,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig LT")
     print("/*--------------------------------------------------*/")    
 
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
@@ -1137,7 +1137,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
+                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1238,7 +1238,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
     
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
@@ -1468,7 +1468,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
 
                     current_params = adjust_params(best_params)
-                    temperature *= 0.95  # Increase randomness in case of error
+                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
