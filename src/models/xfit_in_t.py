@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-05 11:13:53 trottar"
+# Time-stamp: "2024-07-05 11:36:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -234,7 +234,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigl_fit = TGraphErrors()
             g_sigl_fit_tot = TGraph()    
             
-            sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
             c1.cd(1).SetLeftMargin(0.12)
@@ -590,7 +590,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigt_fit = TGraphErrors()
             g_sigt_fit_tot = TGraph()    
 
-            sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
             c1.cd(2).SetLeftMargin(0.12)
@@ -934,7 +934,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_siglt_fit = TGraphErrors()
             g_siglt_fit_tot = TGraph()    
 
-            sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
             c1.cd(3).SetLeftMargin(0.12)
@@ -1287,7 +1287,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_sigtt_fit = TGraphErrors()
             g_sigtt_fit_tot = TGraph()    
             
-            sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
             c1.cd(4).SetLeftMargin(0.12)
