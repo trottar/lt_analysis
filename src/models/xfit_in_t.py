@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-05 11:36:13 trottar"
+# Time-stamp: "2024-07-05 11:37:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -226,7 +226,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 50
+        local_search_interval = 10
 
         while iteration <= max_iterations:
 
@@ -582,7 +582,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()    
 
         # Local search
-        local_search_interval = 50
+        local_search_interval = 10
 
         while iteration <= max_iterations:
 
@@ -926,7 +926,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 50
+        local_search_interval = 10
 
         while iteration <= max_iterations:
             
@@ -1279,7 +1279,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 50
+        local_search_interval = 10
 
         while iteration <= max_iterations:
 
