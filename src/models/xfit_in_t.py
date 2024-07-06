@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 13:51:34 trottar"
+# Time-stamp: "2024-07-06 13:58:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,8 +186,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    par_min = -1e4
-    par_max = 1e4
+    par_min = -1e3
+    par_max = 1e3
     
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -397,9 +397,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_sigl_0 = random.uniform(par_min, par_max) # Re-randomize
-                par_sigl_1 = random.uniform(par_min, par_max) # Re-randomize
-                par_sigl_2 = random.uniform(par_min, par_max) # Re-randomize
+                par_sigl_0, par_sigl_1, par_sigl_2 = [random.uniform(par_min, par_max) for _ in range(3)] # Re-randomize
+                par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = [0.0 for _ in range(3)]
 
                 iteration += 1
                 total_iteration += 1
@@ -610,8 +609,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    par_min = -1e4
-    par_max = 1e4
+    par_min = -1e3
+    par_max = 1e3
     
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
@@ -809,10 +808,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
-                # Adjust parameter limits within a random number
-                par_sigt_0 = random.uniform(par_min, par_max) # Re-randomize
-                par_sigt_1 = random.uniform(par_min, par_max) # Re-randomize
-
+                par_sigt_0, par_sigt_1 = [random.uniform(par_min, par_max) for _ in range(3)] # Re-randomize
+                par_sigt_err_0, par_sigt_err_1 = [0.0 for _ in range(3)]
+                
                 iteration += 1
                 total_iteration += 1
 
@@ -1016,8 +1014,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    par_min = -1e4
-    par_max = 1e4
+    par_min = -1e3
+    par_max = 1e3
     
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -1233,12 +1231,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-
-                # Adjust parameter limits within a random number
-                par_siglt_0 = random.uniform(par_min, par_max) # Re-randomize
-                par_siglt_1 = random.uniform(par_min, par_max) # Re-randomize
-                par_siglt_2 = random.uniform(par_min, par_max) # Re-randomize
-
+                
+                par_siglt_0, par_siglt_1, par_siglt_2 = [random.uniform(par_min, par_max) for _ in range(3)] # Re-randomize
+                par_siglt_err_0, par_siglt_err_1, par_siglt_err_2 = [0.0 for _ in range(3)]
+                
                 iteration += 1
                 total_iteration += 1                
 
@@ -1448,8 +1444,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    par_min = -1e4
-    par_max = 1e4
+    par_min = -1e3
+    par_max = 1e3
     
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
@@ -1631,6 +1627,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust parameter limits within a random number
                 par_sigtt_0 = random.uniform(par_min, par_max) # Re-randomize
+                par_sigtt_err_0 = 0.0
 
                 iteration += 1
                 total_iteration += 1                
