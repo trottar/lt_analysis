@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 13:58:00 trottar"
+# Time-stamp: "2024-07-06 13:59:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -681,7 +681,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(2)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -782,7 +782,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[1]
                         ])
                     # Restart from a new random point
-                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(2)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -808,8 +808,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
-                par_sigt_0, par_sigt_1 = [random.uniform(par_min, par_max) for _ in range(3)] # Re-randomize
-                par_sigt_err_0, par_sigt_err_1 = [0.0 for _ in range(3)]
+                par_sigt_0, par_sigt_1 = [random.uniform(par_min, par_max) for _ in range(2)] # Re-randomize
+                par_sigt_err_0, par_sigt_err_1 = [0.0 for _ in range(2)]
                 
                 iteration += 1
                 total_iteration += 1
