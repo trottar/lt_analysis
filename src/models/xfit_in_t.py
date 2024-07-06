@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 13:24:32 trottar"
+# Time-stamp: "2024-07-06 13:27:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1570,6 +1570,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("The loop took {:.2f} seconds.".format(total_duration))
 
     best_overall_params = [best_overall_params]
+    best_overall_errors = [best_overall_errors]
 
     while len(best_overall_params) < 4:
         best_overall_params.append(0.0)
