@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 13:27:36 trottar"
+# Time-stamp: "2024-07-06 13:34:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -289,42 +289,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
                     g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
-                g_sigl.SetTitle("Sig L")
-                g_sigl.SetMarkerStyle(5)
-                g_sigl.Draw("AP")
-                g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                g_sigl.GetXaxis().CenterTitle()
-                g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
-                g_sigl.GetYaxis().SetTitleOffset(1.5)
-                g_sigl.GetYaxis().SetTitleSize(0.035)
-                g_sigl.GetYaxis().CenterTitle()
-
-                g_sigl_prv.SetMarkerColor(4)
-                g_sigl_prv.SetMarkerStyle(25)
-                g_sigl_prv.Draw("P")
-
-                c2.cd(1).SetLeftMargin(0.12)
-                g_sigl_fit.SetTitle("Sigma L Model Fit")
-                g_sigl_fit.Draw("A*")
-
-                g_sigl_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                g_sigl_fit.GetXaxis().CenterTitle()
-                g_sigl_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
-                g_sigl_fit.GetYaxis().SetTitleOffset(1.5)
-                g_sigl_fit.GetYaxis().SetTitleSize(0.035)
-                g_sigl_fit.GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(g_sigl_fit.GetX())
-                x_max = max(g_sigl_fit.GetX())
-                y_min = min(g_sigl_fit.GetY())
-                y_max = max(g_sigl_fit.GetY())
-
-                # You can also set a margin to ensure all points are visible
-                margin = 0.1
-                g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
                 f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
                 f_sigL.SetParNames("p1", "p2", "p3")
                 #f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigl_0), current_params[0] + abs(current_params[0] * par_sigl_0))
@@ -334,20 +298,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigL.SetParameter(1, current_params[1])
                 f_sigL.SetParameter(2, current_params[2])
 
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
                 g_q2_sigl_fit = TGraphErrors()
                 for i in range(len(w_vec)):
                     g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
@@ -356,21 +306,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
                 r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
-                f_sigL.Draw("same")
 
                 #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
                 f_sigL_status = f_sigL.GetNDF() != 0
                 f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
-
-                fit_status = TText()
-                fit_status.SetTextSize(0.04)
-                fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
-
-                c1.cd(1)
-                g_sigl_fit_tot.SetMarkerStyle(26)
-                g_sigl_fit_tot.SetMarkerColor(2)
-                g_sigl_fit_tot.SetLineColor(2)
-                g_sigl_fit_tot.Draw("LP")
 
                 params_sigL_history['p1'].append(current_params[0])
                 params_sigL_history['p2'].append(current_params[1])
@@ -390,9 +329,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_chi2.SetPoint(total_iteration, total_iteration, current_cost)
                 graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
-                
-                c1.Update()
-                c2.Update()
 
                 current_errors = [
                     f_sigL.GetParError(0),
@@ -503,6 +439,117 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     par_chi2_vec.append(best_cost)
     par_chi2_vec.append(best_cost)
 
+    g_sigl_prv = TGraph()
+    g_sigl_fit = TGraphErrors()
+    g_sigl_fit_tot = TGraph()        
+    
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigL_pre.SetParNames("p1", "p2", "p3")
+    #f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigl_0), current_params[0] + abs(current_params[0] * par_sigl_0))
+    #f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigl_1), current_params[1] + abs(current_params[1] * par_sigl_1))
+    #f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sigl_2), current_params[2] + abs(current_params[2] * par_sigl_2))
+    f_sigL_pre.SetParameter(0, current_params[0])
+    f_sigL_pre.SetParameter(1, current_params[1])
+    f_sigL_pre.SetParameter(2, current_params[2])
+
+    g_sigl = TGraphErrors()
+    for i in range(nsep.GetSelectedRows()):
+        g_sigl.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+        g_sigl.SetPointError(i, 0, nsep.GetV3()[i])
+
+    for i in range(len(w_vec)):
+        sigl_X_pre = (f_sigL_pre.Eval(g_sigl.GetX()[i])) * (g_vec[i])
+        g_sigl_prv.SetPoint(i, g_sigl.GetX()[i], sigl_X_pre)
+
+        sigl_X_fit = g_sigl.GetY()[i]
+        sigl_X_fit_err = g_sigl.GetEY()[i]
+
+        g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
+        g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
+
+    g_sigl.SetTitle("Sig L")
+    g_sigl.SetMarkerStyle(5)
+    g_sigl.Draw("AP")
+    g_sigl.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+    g_sigl.GetXaxis().CenterTitle()
+    g_sigl.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+    g_sigl.GetYaxis().SetTitleOffset(1.5)
+    g_sigl.GetYaxis().SetTitleSize(0.035)
+    g_sigl.GetYaxis().CenterTitle()
+
+    g_sigl_prv.SetMarkerColor(4)
+    g_sigl_prv.SetMarkerStyle(25)
+    g_sigl_prv.Draw("P")
+
+    c2.cd(1).SetLeftMargin(0.12)
+    g_sigl_fit.SetTitle("Sigma L Model Fit")
+    g_sigl_fit.Draw("A*")
+
+    g_sigl_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+    g_sigl_fit.GetXaxis().CenterTitle()
+    g_sigl_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+    g_sigl_fit.GetYaxis().SetTitleOffset(1.5)
+    g_sigl_fit.GetYaxis().SetTitleSize(0.035)
+    g_sigl_fit.GetYaxis().CenterTitle()
+
+    # Set axis limits to ensure everything is shown
+    x_min = min(g_sigl_fit.GetX())
+    x_max = max(g_sigl_fit.GetX())
+    y_min = min(g_sigl_fit.GetY())
+    y_max = max(g_sigl_fit.GetY())
+
+    # You can also set a margin to ensure all points are visible
+    margin = 0.1
+    g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+    g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigL.SetParNames("p1", "p2", "p3")
+    #f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigl_0), current_params[0] + abs(current_params[0] * par_sigl_0))
+    #f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigl_1), current_params[1] + abs(current_params[1] * par_sigl_1))
+    #f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sigl_2), current_params[2] + abs(current_params[2] * par_sigl_2))
+    f_sigL.SetParameter(0, current_params[0])
+    f_sigL.SetParameter(1, current_params[1])
+    f_sigL.SetParameter(2, current_params[2])
+
+    # Evaluate the fit function at several points to determine its range
+    n_points = 100  # Number of points to evaluate the fit function
+    fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_min = min(fit_y_values)
+    fit_y_max = max(fit_y_values)
+
+    # Extend the y-axis range to include the fit function range
+    y_min = min(y_min, fit_y_min)
+    y_max = max(y_max, fit_y_max)
+
+    # Set a margin to ensure all points are visible
+    margin = 0.1 * (y_max - y_min)
+    g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+
+    g_q2_sigl_fit = TGraphErrors()
+    for i in range(len(w_vec)):
+        g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
+        g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
+        sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
+        g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
+
+    r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
+    f_sigL.Draw("same")
+
+    #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
+    f_sigL_status = f_sigL.GetNDF() != 0
+    f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
+
+    fit_status = TText()
+    fit_status.SetTextSize(0.04)
+    fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigL_status_message))
+
+    c1.cd(1)
+    g_sigl_fit_tot.SetMarkerStyle(26)
+    g_sigl_fit_tot.SetMarkerColor(2)
+    g_sigl_fit_tot.SetLineColor(2)
+    g_sigl_fit_tot.Draw("LP")
+    
     # Calculate the minimum and maximum values from the graphs
     min_sigL_y = float('inf')
     max_sigL_y = float('-inf')
