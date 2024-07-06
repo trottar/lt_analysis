@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-05 14:24:18 trottar"
+# Time-stamp: "2024-07-06 11:15:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -212,9 +212,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigl_0 = random.uniform(0, 1)
-        par_lim_sigl_1 = random.uniform(0, 1)
-        par_lim_sigl_2 = random.uniform(0, 1)
+        par_lim_sigl_0 = random.uniform(-1000, 1000)
+        par_lim_sigl_1 = random.uniform(-1000, 1000)
+        par_lim_sigl_2 = random.uniform(-1000, 1000)
 
         # Track the best solution
         best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
@@ -254,7 +254,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -418,7 +418,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         ])
 
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -444,9 +444,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigl_0 = random.uniform(0, 1) # Re-randomize
-                par_lim_sigl_1 = random.uniform(0, 1) # Re-randomize
-                par_lim_sigl_2 = random.uniform(0, 1) # Re-randomize
+                par_lim_sigl_0 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_sigl_1 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_sigl_2 = random.uniform(-1000, 1000) # Re-randomize
 
                 iteration += 1
                 total_iteration += 1
@@ -568,8 +568,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigt_0 = random.uniform(0, 1)
-        par_lim_sigt_1 = random.uniform(0, 1)
+        par_lim_sigt_0 = random.uniform(-1000, 1000)
+        par_lim_sigt_1 = random.uniform(-1000, 1000)
 
         # Track the best solution
         best_params = [par_lim_sigt_0, par_lim_sigt_1]
@@ -609,7 +609,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -763,7 +763,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[1]
                         ])
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -789,8 +789,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigt_0 = random.uniform(0, 1) # Re-randomize
-                par_lim_sigt_1 = random.uniform(0, 1) # Re-randomize
+                par_lim_sigt_0 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_sigt_1 = random.uniform(-1000, 1000) # Re-randomize
 
                 iteration += 1
                 total_iteration += 1
@@ -911,9 +911,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_siglt_0 = random.uniform(0, 1)
-        par_lim_siglt_1 = random.uniform(0, 1)
-        par_lim_siglt_2 = random.uniform(0, 1)
+        par_lim_siglt_0 = random.uniform(-1000, 1000)
+        par_lim_siglt_1 = random.uniform(-1000, 1000)
+        par_lim_siglt_2 = random.uniform(-1000, 1000)
 
         # Track the best solution
         best_params = [par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2]
@@ -954,7 +954,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1117,7 +1117,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[2]
                         ])
                         # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1143,9 +1143,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_siglt_0 = random.uniform(0, 1) # Re-randomize
-                par_lim_siglt_1 = random.uniform(0, 1) # Re-randomize
-                par_lim_siglt_2 = random.uniform(0, 1) # Re-randomize
+                par_lim_siglt_0 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_siglt_1 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_siglt_2 = random.uniform(-1000, 1000) # Re-randomize
 
                 iteration += 1
                 total_iteration += 1                
@@ -1266,7 +1266,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigtt_0 = random.uniform(0, 1)
+        par_lim_sigtt_0 = random.uniform(-1000, 1000)
 
         # Track the best solution
         best_params = par_lim_sigtt_0
@@ -1303,7 +1303,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = random.uniform(0, 1)
+                    current_params = random.uniform(-1000, 1000)
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1448,7 +1448,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params
                         ])
                     # Restart from a new random point
-                    current_params = random.uniform(0, 1)
+                    current_params = random.uniform(-1000, 1000)
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1474,7 +1474,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigtt_0 = random.uniform(0, 1) # Re-randomize
+                par_lim_sigtt_0 = random.uniform(-1000, 1000) # Re-randomize
 
                 iteration += 1
                 total_iteration += 1                
