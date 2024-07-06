@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 12:28:02 trottar"
+# Time-stamp: "2024-07-06 12:34:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -377,7 +377,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                if total_iteration % (max_iterations/10) == 0:
+                if total_iteration % 10 == 0:
                     # Update ROOT TGraphs for plotting
                     graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                     graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -729,7 +729,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                if total_iteration % (max_iterations/10) == 0:
+                if total_iteration % 10 == 0:
                     # Update ROOT TGraphs for plotting
                     graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                     graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1081,7 +1081,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                if total_iteration % (max_iterations/10) == 0:
+                if total_iteration % 10 == 0:
                     # Update ROOT TGraphs for plotting
                     graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
                     graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1422,7 +1422,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                if total_iteration % (max_iterations/10) == 0:
+                if total_iteration % 10 == 0:
                     # Update ROOT TGraphs for plotting
                     graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
                     graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, f_sigTT.GetChisquare())
