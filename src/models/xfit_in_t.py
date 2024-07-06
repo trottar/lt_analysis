@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 13:45:54 trottar"
+# Time-stamp: "2024-07-06 13:48:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1679,8 +1679,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
     f_sigTT_pre.SetParNames("p13")
-    #f_sigTT_pre.SetParLimits(0, best_overall_params - abs(best_overall_params * par_sigtt_0), best_overall_params + abs(best_overall_params * par_sigtt_0))
-    f_sigTT_pre.SetParameter(0, best_overall_params)
+    #f_sigTT_pre.SetParLimits(0, best_overall_params[0] - abs(best_overall_params[0] * par_sigtt_0), best_overall_params[0] + abs(best_overall_params[0] * par_sigtt_0))
+    f_sigTT_pre.SetParameter(0, best_overall_params[0])
 
     g_sigtt = TGraphErrors()
     for i in range(nsep.GetSelectedRows()):
@@ -1735,8 +1735,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
     f_sigTT.SetParNames("p13")
-    #f_sigTT.SetParLimits(0, best_overall_params - abs(best_overall_params * par_sigtt_0), best_overall_params + abs(best_overall_params * par_sigtt_0))
-    f_sigTT.SetParameter(0, best_overall_params)
+    #f_sigTT.SetParLimits(0, best_overall_params[0] - abs(best_overall_params[0] * par_sigtt_0), best_overall_params[0] + abs(best_overall_params[0] * par_sigtt_0))
+    f_sigTT.SetParameter(0, best_overall_params[0])
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
