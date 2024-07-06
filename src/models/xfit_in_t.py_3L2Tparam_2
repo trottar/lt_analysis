@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 00:46:39 trottar"
+# Time-stamp: "2024-07-06 12:41:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,9 +15,9 @@ import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
-from ROOT import Math
 import numpy as np
 import math
+import time
 import os, sys
 
 ################################################################################################################################################
@@ -46,7 +46,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params
+from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -84,6 +84,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     ##############
     # Maximum iterations before ending loop
     max_iterations = 100
+    #max_iterations = 500
+    #max_iterations = 1000
     #max_iterations = 10000
     #max_iterations = int(1e6)
     ##############
@@ -156,21 +158,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             q2_vec.append(q2)
             th_vec.append(thetacm)
 
-    g_sigl_prv = TGraph()            
-    g_sigt_prv = TGraph()
-    g_siglt_prv = TGraph()
-    g_sigtt_prv = TGraph()
-
-    g_sigl_fit = TGraphErrors()
-    g_sigt_fit = TGraphErrors()
-    g_siglt_fit = TGraphErrors()
-    g_sigtt_fit = TGraphErrors()
-
-    g_sigl_fit_tot = TGraph()    
-    g_sigt_fit_tot = TGraph()
-    g_siglt_fit_tot = TGraph()
-    g_sigtt_fit_tot = TGraph()
-
     c1 = TCanvas("c1", "c1", 800, 800)
     c1.Divide(2, 2)
 
@@ -182,7 +169,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c3.Divide(2, 2)
     c4 = TCanvas("c4", "Chi-Square Convergence", 800, 800)
     c4.Divide(2, 2)
-
+    c5 = TCanvas("c5", "Temperature", 800, 800)
+    c5.Divide(2, 2)
+    c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
+    c6.Divide(2, 2)
+    
     ########
     # SigL #
     ########
@@ -191,71 +182,41 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig L")
     print("/*--------------------------------------------------*/")
 
-    def local_search(params, f_sigL):
-        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-        minimizer.SetMaxFunctionCalls(1000000)
-        minimizer.SetMaxIterations(100000)
-        minimizer.SetTolerance(0.001)
-        minimizer.SetPrintLevel(0)
-
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            for i in range(3):
-                f_sigL.SetParameter(i, par[i])
-            return f_sigL.GetChisquare()
-
-        # Create a PyROOT callable object
-        class PyFunc:
-            def __call__(self, par):
-                return chi2_func(par)
-
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, 3)  # 3 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        for i, param in enumerate(params):
-            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(3)]
-
-        return improved_params    
-
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
+    total_iteration = 0
+    par_min = -1e4
+    par_max = 1e4
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
 
+    # Create TGraphs for parameter convergence
+    graph_sigL_p1 = TGraph()
+    graph_sigL_p2 = TGraph()
+    graph_sigL_p3 = TGraph()
+    graph_sigL_chi2 = TGraph()
+    graph_sigL_temp = TGraph()
+    graph_sigL_accept = TGraph()
+
+    # Record the start time
+    start_time = time.time()
+    
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-    
+
         iteration = 0
+        
         initial_temperature = 1.0
-        cooling_rate = 0.99
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigl_0 = random.uniform(0, 1)
-        par_lim_sigl_1 = random.uniform(0, 1)
-        par_lim_sigl_2 = random.uniform(0, 1)
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
-        chi2_sigL_history = []
-        fit_sigL_status_history = []
-
-        # Create TGraphs for parameter convergence
-        graph_sigL_p1 = TGraph()
-        graph_sigL_p2 = TGraph()
-        graph_sigL_p3 = TGraph()
-        graph_sigL_chi2 = TGraph()
+        par_lim_sigl_0 = random.uniform(par_min, par_max)
+        par_lim_sigl_1 = random.uniform(par_min, par_max)
+        par_lim_sigl_2 = random.uniform(par_min, par_max)
 
         # Track the best solution
         best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
@@ -264,15 +225,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Check for local minima
         local_minima = []
-        last_minima = []
         tabu_list = set()
 
         # Local search
-        local_search_interval = 50
+        local_search_interval = 10
 
-        while iteration < max_iterations:
+        while iteration <= max_iterations:
 
-            sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+            g_sigl_prv = TGraph()
+            g_sigl_fit = TGraphErrors()
+            g_sigl_fit_tot = TGraph()    
+            
+            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
             c1.cd(1).SetLeftMargin(0.12)
@@ -292,15 +256,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
                 f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
                 f_sigL_pre.SetParNames("p1", "p2", "p3")
-                f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
-                f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
-                f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+                #f_sigL_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
+                #f_sigL_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
+                #f_sigL_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+                f_sigL_pre.SetParameter(0, current_params[0])
+                f_sigL_pre.SetParameter(1, current_params[1])
+                f_sigL_pre.SetParameter(2, current_params[2])
 
                 g_sigl = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
@@ -355,9 +322,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
                 f_sigL.SetParNames("p1", "p2", "p3")
-                f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
-                f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
-                f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+                #f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigl_0), current_params[0] + abs(current_params[0] * par_lim_sigl_0))
+                #f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigl_1), current_params[1] + abs(current_params[1] * par_lim_sigl_1))
+                #f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_sigl_2), current_params[2] + abs(current_params[2] * par_lim_sigl_2))
+                f_sigL.SetParameter(0, current_params[0])
+                f_sigL.SetParameter(1, current_params[1])
+                f_sigL.SetParameter(2, current_params[2])
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
@@ -397,32 +367,35 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_sigl_fit_tot.SetLineColor(2)
                 g_sigl_fit_tot.Draw("LP")
 
-                params_sigL_history['p1'].append(f_sigL.GetParameter(0))
-                params_sigL_history['p2'].append(f_sigL.GetParameter(1))
-                params_sigL_history['p3'].append(f_sigL.GetParameter(2))
-                chi2_sigL_history.append(f_sigL.GetChisquare())
-                fit_sigL_status_history.append(1 if f_sigL_status else 0)
-
-                # Update ROOT TGraphs for plotting
-                graph_sigL_p1.SetPoint(iteration, iteration, f_sigL.GetParameter(0))
-                graph_sigL_p2.SetPoint(iteration, iteration, f_sigL.GetParameter(1))
-                graph_sigL_p3.SetPoint(iteration, iteration, f_sigL.GetParameter(2))
-                graph_sigL_chi2.SetPoint(iteration, iteration, f_sigL.GetChisquare())
-
-                if f_sigL_status:
-                    print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
-                    #break
-
+                params_sigL_history['p1'].append(current_params[0])
+                params_sigL_history['p2'].append(current_params[1])
+                params_sigL_history['p3'].append(current_params[2])
+                
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigL.GetChisquare()
 
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
+                #if total_iteration % (max_iterations/10) == 0:
+                # Update ROOT TGraphs for plotting
+                graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
+                graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
+                graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
+                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
+                graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                
+                c1.Update()
+                c2.Update()
+                
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                if accept_prob > random.random():
                     best_params = current_params
                     best_cost = current_cost
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigL)
+                    best_params = local_search(best_params, f_sigL, 3)
                     current_params = best_params[:]
                     par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params
 
@@ -439,15 +412,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
-                            f_sigL.GetParameter(0),
-                            f_sigL.GetParameter(1),
-                            f_sigL.GetParameter(2)
+                            current_params[0],
+                            current_params[1],
+                            current_params[2]
                         ])
 
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -457,71 +430,60 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2 = best_params
 
                 # Update the temperature
-                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)            
-
+                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                                
                 iteration += 1
-
+                total_iteration += 1
+                
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
-
-                    last_minima.append([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)])                
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if last_minima.count([f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)]) > 100:
-                        print("\n\n END: [i={}] Local minima p1={:3e}, p2={:3e}, p3={:3e} chosen...".format(iteration, f_sigL.GetParameter(0), f_sigL.GetParameter(1), f_sigL.GetParameter(2)))
-                        #break
-                        #sys.exit(2)
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
-
+                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                                    
             except (TypeError or ZeroDivisionError) as e:
-                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-
-                # Store the parameter values and chi-square values for each iteration
-                params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
-                chi2_sigL_history = []
-                fit_sigL_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigL_p1 = TGraph()
-                graph_sigL_p2 = TGraph()
-                graph_sigL_p3 = TGraph()
-                graph_sigL_chi2 = TGraph()
+                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigl_0 = random.uniform(0, 1) # Re-randomize
-                par_lim_sigl_1 = random.uniform(0, 1) # Re-randomize
-                par_lim_sigl_2 = random.uniform(0, 1) # Re-randomize
+                par_lim_sigl_0 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_sigl_1 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_sigl_2 = random.uniform(par_min, par_max) # Re-randomize
 
                 iteration += 1
+                total_iteration += 1
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params[:]
                 
-        if iteration == max_iterations:
-            print("ERROR: Sig L failed to converge!")
-            #sys.exit(2)
-
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
+    
+    # Record the end time
+    end_time = time.time()
+    # Calculate the total duration
+    total_duration = end_time - start_time
+    print("The loop took {:.2f} seconds.".format(total_duration))
+
+    while len(best_overall_params) < 4:
+        best_overall_params.append(0.0)
             
-    par_vec.append(f_sigL.GetParameter(0))
-    par_vec.append(f_sigL.GetParameter(1))
-    par_vec.append(f_sigL.GetParameter(2))
-    par_vec.append(f_sigL.GetParameter(3))
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(f_sigL.GetParError(0))
     par_err_vec.append(f_sigL.GetParError(1))
     par_err_vec.append(f_sigL.GetParError(2))
     par_err_vec.append(f_sigL.GetParError(3))
 
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
-    par_chi2_vec.append(f_sigL.GetChisquare())
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
 
     # Calculate the minimum and maximum values from the graphs
     min_sigL_y = float('inf')
@@ -557,6 +519,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_chi2.SetLineColor(ROOT.kBlack)
     graph_sigL_chi2.Draw("ALP")
 
+    # Plot temperature
+    c5.cd(1).SetLeftMargin(0.12)
+    graph_sigL_temp.SetTitle("Sig L Temperature Convergence;Iteration;Temperature")
+    graph_sigL_temp.SetLineColor(ROOT.kBlack)
+    graph_sigL_temp.Draw("ALP")
+
+    # Plot acceptance probability
+    c6.cd(1).SetLeftMargin(0.12)
+    graph_sigL_accept.SetTitle("Sig L Acceptance Probability Convergence;Iteration;Acceptance Probability")
+    graph_sigL_accept.SetLineColor(ROOT.kBlack)
+    graph_sigL_accept.Draw("ALP")
+    
     print("\n")    
     
     ########
@@ -567,69 +541,39 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig T")
     print("/*--------------------------------------------------*/")
 
-    def local_search(params, f_sigT):
-        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-        minimizer.SetMaxFunctionCalls(1000000)
-        minimizer.SetMaxIterations(100000)
-        minimizer.SetTolerance(0.001)
-        minimizer.SetPrintLevel(0)
-
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            for i in range(2):
-                f_sigT.SetParameter(i, par[i])
-            return f_sigT.GetChisquare()
-
-        # Create a PyROOT callable object
-        class PyFunc:
-            def __call__(self, par):
-                return chi2_func(par)
-
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, 2)  # 2 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        for i, param in enumerate(params):
-            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(2)]
-
-        return improved_params
-
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
+    total_iteration = 0
+    par_min = -1e4
+    par_max = 1e4
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigT_history = {'p5': [], 'p6': []}
 
+    # Create TGraphs for parameter convergence
+    graph_sigT_p5 = TGraph()
+    graph_sigT_p6 = TGraph()
+    graph_sigT_chi2 = TGraph()
+    graph_sigT_temp = TGraph()
+    graph_sigT_accept = TGraph()
+    
+    # Record the start time
+    start_time = time.time()
+    
     for start in range(num_starts):
-        print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-
+        print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
+        
         iteration = 0
+        
         initial_temperature = 1.0
-        cooling_rate = 0.99
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigt_0 = random.uniform(0, 1)
-        par_lim_sigt_1 = random.uniform(0, 1)
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigT_history = {'p5': [], 'p6': []}
-        chi2_sigT_history = []
-        fit_sigT_status_history = []
-
-        # Create TGraphs for parameter convergence
-        graph_sigT_p5 = TGraph()
-        graph_sigT_p6 = TGraph()
-        graph_sigT_chi2 = TGraph()
+        par_lim_sigt_0 = random.uniform(par_min, par_max)
+        par_lim_sigt_1 = random.uniform(par_min, par_max)
 
         # Track the best solution
         best_params = [par_lim_sigt_0, par_lim_sigt_1]
@@ -639,15 +583,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Check for local minima
         local_minima = []
         local_iterations = 0
-        last_minima = []
         tabu_list = set()    
 
         # Local search
-        local_search_interval = 50
+        local_search_interval = 10
 
-        while iteration < max_iterations:
+        while iteration <= max_iterations:
 
-            sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+            g_sigt_prv = TGraph()
+            g_sigt_fit = TGraphErrors()
+            g_sigt_fit_tot = TGraph()    
+
+            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
             c1.cd(2).SetLeftMargin(0.12)
@@ -666,14 +613,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
                 f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
                 f_sigT_pre.SetParNames("p5", "p6")
-                f_sigT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
-                f_sigT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
+                #f_sigT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
+                #f_sigT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
+                f_sigT_pre.SetParameter(0, current_params[0])
+                f_sigT_pre.SetParameter(1, current_params[1])
 
                 g_sigt = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
@@ -728,8 +677,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
                 f_sigT.SetParNames("p5", "p6")
-                f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
-                f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
+                #f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_sigt_0), current_params[0] + abs(current_params[0] * par_lim_sigt_0))
+                #f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_sigt_1), current_params[1] + abs(current_params[1] * par_lim_sigt_1))
+                f_sigT.SetParameter(0, current_params[0])
+                f_sigT.SetParameter(1, current_params[1])
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
@@ -769,30 +720,33 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_sigt_fit_tot.SetLineColor(2)
                 g_sigt_fit_tot.Draw("LP")
 
-                params_sigT_history['p5'].append(f_sigT.GetParameter(0))
-                params_sigT_history['p6'].append(f_sigT.GetParameter(1))
-                chi2_sigT_history.append(f_sigT.GetChisquare())
-                fit_sigT_status_history.append(1 if f_sigT_status else 0)
-
-                # Update ROOT TGraphs for plotting
-                graph_sigT_p5.SetPoint(iteration, iteration, f_sigT.GetParameter(0))
-                graph_sigT_p6.SetPoint(iteration, iteration, f_sigT.GetParameter(1))
-                graph_sigT_chi2.SetPoint(iteration, iteration, f_sigT.GetChisquare())
-
-                if f_sigT_status:
-                    print("\n\n END: [i={}] Fit converged, p5={:3e}, p6={:3e} chosen...".format(iteration, f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
-                    #break
+                params_sigT_history['p5'].append(current_params[0])
+                params_sigT_history['p6'].append(current_params[1])
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigT.GetChisquare()
+                
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
+                #if total_iteration % (max_iterations/10) == 0:
+                # Update ROOT TGraphs for plotting
+                graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
+                graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
+                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                
+                c1.Update()
+                c2.Update()                
 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                if accept_prob > random.random():
                     best_params = current_params
                     best_cost = current_cost
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigT)
+                    best_params = local_search(best_params, f_sigT, 2)
                     current_params = best_params[:]
                     par_lim_sigt_0, par_lim_sigt_1 = best_params
 
@@ -807,13 +761,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([f_sigT.GetParameter(0), f_sigT.GetParameter(1)], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
-                            f_sigT.GetParameter(0),
-                            f_sigT.GetParameter(1)
+                            current_params[0],
+                            current_params[1]
                         ])
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -826,63 +780,56 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
-
+                total_iteration += 1
+                
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([f_sigT.GetParameter(0), f_sigT.GetParameter(1)], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
-
-                    last_minima.append([f_sigT.GetParameter(0), f_sigT.GetParameter(1)])                
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if last_minima.count([f_sigT.GetParameter(0), f_sigT.GetParameter(1)]) > 100:
-                        print("\n\n END: [i={}] Local minima p5={:3e}, p6={:3e} chosen...".format(iteration, f_sigT.GetParameter(0), f_sigT.GetParameter(1)))
-                        #break
+                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
-
+                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                    
             except (TypeError or ZeroDivisionError) as e:
-                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-
-                # Store the parameter values and chi-square values for each iteration
-                params_sigT_history = {'p5': [], 'p6': []}
-                chi2_sigT_history = []
-                fit_sigT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigT_p5 = TGraph()
-                graph_sigT_p6 = TGraph()
-                graph_sigT_chi2 = TGraph()
+                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigt_0 = random.uniform(0, 1) # Re-randomize
-                par_lim_sigt_1 = random.uniform(0, 1) # Re-randomize
+                par_lim_sigt_0 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_sigt_1 = random.uniform(par_min, par_max) # Re-randomize
 
                 iteration += 1
-
+                total_iteration += 1
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params[:]                
                 
-        if iteration == max_iterations:
-            print("ERROR: Sig T failed to converge!")
-            #sys.exit(2)
+    print("\nBest overall solution: {0}".format(best_overall_params))
+    print("Best overall cost: {0}".format(best_overall_cost))
+    
+    # Record the end time
+    end_time = time.time()
+    # Calculate the total duration
+    total_duration = end_time - start_time
+    print("The loop took {:.2f} seconds.".format(total_duration))
+
+    while len(best_overall_params) < 4:
+        best_overall_params.append(0.0)
             
-    par_vec.append(f_sigT.GetParameter(0))
-    par_vec.append(f_sigT.GetParameter(1))
-    par_vec.append(f_sigT.GetParameter(2))
-    par_vec.append(f_sigT.GetParameter(3))
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(f_sigT.GetParError(0))
     par_err_vec.append(f_sigT.GetParError(1))
     par_err_vec.append(f_sigT.GetParError(2))
     par_err_vec.append(f_sigT.GetParError(3))
 
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
-    par_chi2_vec.append(f_sigT.GetChisquare())
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
 
     # Calculate the minimum and maximum values from the graphs
     min_sigT_y = float('inf')
@@ -915,6 +862,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigT_chi2.Draw("ALP")
+
+    # Plot temperature convergence
+    c5.cd(2).SetLeftMargin(0.12)
+    graph_sigT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
+    graph_sigT_temp.SetLineColor(ROOT.kBlack)
+    graph_sigT_temp.Draw("ALP")
+
+    # Plot acceptance probability convergence
+    c6.cd(2).SetLeftMargin(0.12)
+    graph_sigT_accept.SetTitle("Sig T Acceptance Probability Convergence;Iteration;Acceptance Probability")
+    graph_sigT_accept.SetLineColor(ROOT.kBlack)
+    graph_sigT_accept.Draw("ALP")
     
     print("\n")    
     
@@ -924,73 +883,43 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig LT")
-    print("/*--------------------------------------------------*/")
-    
-    def local_search(params, f_sigLT):
-        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-        minimizer.SetMaxFunctionCalls(1000000)
-        minimizer.SetMaxIterations(100000)
-        minimizer.SetTolerance(0.001)
-        minimizer.SetPrintLevel(0)
+    print("/*--------------------------------------------------*/")    
 
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            for i in range(3):
-                f_sigLT.SetParameter(i, par[i])
-            return f_sigLT.GetChisquare()
-
-        # Create a PyROOT callable object
-        class PyFunc:
-            def __call__(self, par):
-                return chi2_func(par)
-
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, 3)  # 3 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        for i, param in enumerate(params):
-            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(3)]
-
-        return improved_params
-
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
+    total_iteration = 0
+    par_min = -1e4
+    par_max = 1e4
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
 
+    # Create TGraphs for parameter convergence
+    graph_sigLT_p9 = TGraph()
+    graph_sigLT_p10 = TGraph()
+    graph_sigLT_p11 = TGraph()
+    graph_sigLT_chi2 = TGraph()
+    graph_sigLT_temp = TGraph()
+    graph_sigLT_accept = TGraph()
+    
+    # Record the start time
+    start_time = time.time()
+        
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-        
+
         iteration = 0
+    
         initial_temperature = 1.0
-        cooling_rate = 0.99
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_siglt_0 = random.uniform(0, 1)
-        par_lim_siglt_1 = random.uniform(0, 1)
-        par_lim_siglt_2 = random.uniform(0, 1)
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
-        chi2_sigLT_history = []
-        fit_sigLT_status_history = []
-
-        # Create TGraphs for parameter convergence
-        graph_sigLT_p9 = TGraph()
-        graph_sigLT_p10 = TGraph()
-        graph_sigLT_p11 = TGraph()
-        graph_sigLT_chi2 = TGraph()
+        par_lim_siglt_0 = random.uniform(par_min, par_max)
+        par_lim_siglt_1 = random.uniform(par_min, par_max)
+        par_lim_siglt_2 = random.uniform(par_min, par_max)
 
         # Track the best solution
         best_params = [par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2]
@@ -1000,15 +929,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Check for local minima
         local_minima = []
         local_iterations = 0
-        last_minima = []
         tabu_list = set()
 
         # Local search
-        local_search_interval = 50
+        local_search_interval = 10
 
-        while iteration < max_iterations:
+        while iteration <= max_iterations:
+            
+            g_siglt_prv = TGraph()
+            g_siglt_fit = TGraphErrors()
+            g_siglt_fit_tot = TGraph()    
 
-            sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
             c1.cd(3).SetLeftMargin(0.12)
@@ -1028,15 +960,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
                 f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
                 f_sigLT_pre.SetParNames("p9", "p10", "p11")
-                f_sigLT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
-                f_sigLT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
-                f_sigLT_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
+                #f_sigLT_pre.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
+                #f_sigLT_pre.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
+                #f_sigLT_pre.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
+                f_sigLT_pre.SetParameter(0, current_params[0])
+                f_sigLT_pre.SetParameter(1, current_params[1])
+                f_sigLT_pre.SetParameter(2, current_params[2])                
 
                 g_siglt = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
@@ -1091,9 +1026,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
                 f_sigLT.SetParNames("p9", "p10", "p11")
-                f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
-                f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
-                f_sigLT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
+                #f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_lim_siglt_0), current_params[0] + abs(current_params[0] * par_lim_siglt_0))
+                #f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_lim_siglt_1), current_params[1] + abs(current_params[1] * par_lim_siglt_1))
+                #f_sigLT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_lim_siglt_2), current_params[2] + abs(current_params[2] * par_lim_siglt_2))
+                f_sigLT.SetParameter(0, current_params[0])
+                f_sigLT.SetParameter(1, current_params[1])
+                f_sigLT.SetParameter(2, current_params[2])
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
@@ -1133,32 +1071,35 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_siglt_fit_tot.SetLineColor(2)
                 g_siglt_fit_tot.Draw("LP")
 
-                params_sigLT_history['p9'].append(f_sigLT.GetParameter(0))
-                params_sigLT_history['p10'].append(f_sigLT.GetParameter(1))
-                params_sigLT_history['p11'].append(f_sigLT.GetParameter(2))
-                chi2_sigLT_history.append(f_sigLT.GetChisquare())
-                fit_sigLT_status_history.append(1 if f_sigLT_status else 0)
-
-                # Update ROOT TGraphs for plotting
-                graph_sigLT_p9.SetPoint(iteration, iteration, f_sigLT.GetParameter(0))
-                graph_sigLT_p10.SetPoint(iteration, iteration, f_sigLT.GetParameter(1))
-                graph_sigLT_p11.SetPoint(iteration, iteration, f_sigLT.GetParameter(2))
-                graph_sigLT_chi2.SetPoint(iteration, iteration, f_sigLT.GetChisquare())
-
-                if f_sigLT_status:
-                    print("\n\n END: [i={}] Fit converged, p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
-                    #break
+                params_sigLT_history['p9'].append(current_params[0])
+                params_sigLT_history['p10'].append(current_params[1])
+                params_sigLT_history['p11'].append(current_params[2])
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigLT.GetChisquare()
 
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
+                #if total_iteration % (max_iterations/10) == 0:
+                # Update ROOT TGraphs for plotting
+                graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
+                graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
+                graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
+                graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                graph_sigLT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                
+                c1.Update()
+                c2.Update()                
+
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                if accept_prob > random.random():
                     best_params = current_params
                     best_cost = current_cost
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigLT)
+                    best_params = local_search(best_params, f_sigLT, 3)
                     current_params = best_params[:]
                     par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2 = best_params
 
@@ -1175,14 +1116,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
-                            f_sigLT.GetParameter(0),
-                            f_sigLT.GetParameter(1),
-                            f_sigLT.GetParameter(2)
+                            current_params[0],
+                            current_params[1],
+                            current_params[2]
                         ])
                         # Restart from a new random point
-                    current_params = [random.uniform(0, 1) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1195,67 +1136,57 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
-
+                total_iteration += 1
+                
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
-
-                    last_minima.append([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)])                
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if last_minima.count([f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)]) > 100:
-                        print("\n\n END: [i={}] Local minima p9={:3e}, p10={:3e}, p11={:3e} chosen...".format(iteration, f_sigLT.GetParameter(0), f_sigLT.GetParameter(1), f_sigLT.GetParameter(2)))
-                        #break
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
-                    temperature *= 0.95  # Increase randomness in case of error
-
+                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                    
             except (TypeError or ZeroDivisionError) as e:
-                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-
-                # Store the parameter values and chi-square values for each iteration
-                params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
-                chi2_sigLT_history = []
-                fit_sigLT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigLT_p9= TGraph()
-                graph_sigLT_p10 = TGraph()
-                graph_sigLT_p11 = TGraph()
-                graph_sigLT_chi2 = TGraph()
+                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_siglt_0 = random.uniform(0, 1) # Re-randomize
-                par_lim_siglt_1 = random.uniform(0, 1) # Re-randomize
-                par_lim_siglt_2 = random.uniform(0, 1) # Re-randomize
+                par_lim_siglt_0 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_siglt_1 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_siglt_2 = random.uniform(par_min, par_max) # Re-randomize
 
                 iteration += 1
+                total_iteration += 1                
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params[:]
                 
-        if iteration == max_iterations:
-            print("ERROR: Sig LT failed to converge!")
-            #sys.exit(2)
-
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
     
-    par_vec.append(f_sigLT.GetParameter(0))
-    par_vec.append(f_sigLT.GetParameter(1))
-    par_vec.append(f_sigLT.GetParameter(2))
-    par_vec.append(f_sigLT.GetParameter(3))
+    # Record the end time
+    end_time = time.time()
+    # Calculate the total duration
+    total_duration = end_time - start_time
+    print("The loop took {:.2f} seconds.".format(total_duration))
+
+    while len(best_overall_params) < 4:
+        best_overall_params.append(0.0)
+    
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(f_sigLT.GetParError(0))
     par_err_vec.append(f_sigLT.GetParError(1))
     par_err_vec.append(f_sigLT.GetParError(2))
     par_err_vec.append(f_sigLT.GetParError(3))
 
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
-    par_chi2_vec.append(f_sigLT.GetChisquare())
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
 
     # Calculate the minimum and maximum values from the graphs
     min_sigLT_y = float('inf')
@@ -1290,6 +1221,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_chi2.SetTitle("Sig LT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigLT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigLT_chi2.Draw("ALP")
+
+    # Plot temperature convergence
+    c5.cd(3).SetLeftMargin(0.12)
+    graph_sigLT_temp.SetTitle("Sig LT Temperature Convergence;Iteration;Temperature")
+    graph_sigLT_temp.SetLineColor(ROOT.kBlack)
+    graph_sigLT_temp.Draw("ALP")
+
+    # Plot acceptance probability convergence
+    c6.cd(3).SetLeftMargin(0.12)
+    graph_sigLT_accept.SetTitle("Sig LT Acceptance Probability Convergence;Iteration;Acceptance Probability")
+    graph_sigLT_accept.SetLineColor(ROOT.kBlack)
+    graph_sigLT_accept.Draw("ALP")
     
     print("\n")    
     
@@ -1300,68 +1243,38 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
-
-    def local_search(params, f_sigTT):
-        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-        minimizer.SetMaxFunctionCalls(1000000)
-        minimizer.SetMaxIterations(100000)
-        minimizer.SetTolerance(0.001)
-        minimizer.SetPrintLevel(0)
-
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            for i in range(1):
-                f_sigTT.SetParameter(i, par[i])
-            return f_sigTT.GetChisquare()
-
-        # Create a PyROOT callable object
-        class PyFunc:
-            def __call__(self, par):
-                return chi2_func(par)
-
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, 1)  # 1 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        for i, param in enumerate(params):
-            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(1)]
-
-        return improved_params
     
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
+    total_iteration = 0
+    par_min = -1e4
+    par_max = 1e4
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigTT_history = {'p13': []}
 
+    # Create TGraphs for parameter convergence
+    graph_sigTT_p13 = TGraph()
+    graph_sigTT_chi2 = TGraph()
+    graph_sigTT_temp = TGraph()
+    graph_sigTT_accept = TGraph()
+    
+    # Record the start time
+    start_time = time.time()
+    
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
         iteration = 0
+        
         initial_temperature = 1.0
-        cooling_rate = 0.99
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigtt_0 = random.uniform(0, 1)
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigTT_history = {'p13': []}
-        chi2_sigTT_history = []
-        fit_sigTT_status_history = []
-
-        # Create TGraphs for parameter convergence
-        graph_sigTT_p13 = TGraph()
-        graph_sigTT_chi2 = TGraph()
+        par_lim_sigtt_0 = random.uniform(par_min, par_max)
 
         # Track the best solution
         best_params = par_lim_sigtt_0
@@ -1371,15 +1284,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Check for local minima
         local_minima = []
         local_iterations = 0
-        last_minima = []
         tabu_list = set()
 
         # Local search
-        local_search_interval = 50
+        local_search_interval = 10
 
-        while iteration < max_iterations:
+        while iteration <= max_iterations:
 
-            sys.stdout.write(" \rIteration ({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+            g_sigtt_prv = TGraph()
+            g_sigtt_fit = TGraphErrors()
+            g_sigtt_fit_tot = TGraph()    
+            
+            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
             c1.cd(4).SetLeftMargin(0.12)
@@ -1390,18 +1306,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 current_params = simulated_annealing(par_lim_sigtt_0, temperature)
 
                 # Insert tabu list check here
-                if tuple(current_params) not in tabu_list:
-                    tabu_list.add(tuple(current_params))
+                if current_params not in tabu_list:
+                    tabu_list.add(current_params)
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = random.uniform(0, 1)
+                    current_params = random.uniform(par_min, par_max)
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
                 f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
                 f_sigTT_pre.SetParNames("p13")
-                f_sigTT_pre.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+                #f_sigTT_pre.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+                f_sigTT_pre.SetParameter(0, current_params)
 
                 g_sigtt = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
@@ -1456,7 +1373,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
                 f_sigTT.SetParNames("p13")
-                f_sigTT.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+                #f_sigTT.SetParLimits(0, current_params - abs(current_params * par_lim_sigtt_0), current_params + abs(current_params * par_lim_sigtt_0))
+                f_sigTT.SetParameter(0, current_params)
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
@@ -1496,28 +1414,31 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 g_sigtt_fit_tot.SetLineColor(2)
                 g_sigtt_fit_tot.Draw("LP")
 
-                params_sigTT_history['p13'].append(f_sigTT.GetParameter(0))
-                chi2_sigTT_history.append(f_sigTT.GetChisquare())
-                fit_sigTT_status_history.append(1 if f_sigTT_status else 0)
-
-                # Update ROOT TGraphs for plotting
-                graph_sigTT_p13.SetPoint(iteration, iteration, f_sigTT.GetParameter(0))
-                graph_sigTT_chi2.SetPoint(iteration, iteration, f_sigTT.GetChisquare())
-
-                if f_sigTT_status:
-                    print("\n\n END: [i={}] Fit converged, p13={:3e} chosen...".format(iteration, f_sigTT.GetParameter(0)))
-                    #break
+                params_sigTT_history['p13'].append(current_params)
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigTT.GetChisquare()
 
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
+                #if total_iteration % (max_iterations/10) == 0:
+                # Update ROOT TGraphs for plotting
+                graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
+                graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                graph_sigTT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                
+                c1.Update()
+                c2.Update()                
+
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                if acceptance_probability(best_cost, current_cost, temperature) > random.random():
+                if accept_prob > random.random():
                     best_params = current_params
                     best_cost = current_cost
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigTT)
+                    best_params = local_search(best_params, f_sigTT, 1)
                     current_params = best_params
                     par_lim_sigtt_0 = best_params
 
@@ -1530,81 +1451,75 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
-                            f_sigTT.GetParameter(0)
+                            current_params
                         ])
                     # Restart from a new random point
-                    current_params = random.uniform(0, 1)
+                    current_params = random.uniform(par_min, par_max)
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
                 previous_params = current_params                
 
                 # Update parameters with the best found so far
-                par_lim_sigtt_0 = best_params
+                par_lim_sigtt_0 = current_params
 
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
-
+                total_iteration += 1
+                
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([f_sigTT.GetParameter(0)], minima, atol=1e-3) for minima in local_minima):
-                    print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(f_sigTT.GetParameter(0)))
-
-                    last_minima.append([f_sigTT.GetParameter(0)])
-                    # If local minima occurs more than 100 times, it's likely the true minima
-                    if last_minima.count([f_sigTT.GetParameter(0)]) > 100:
-                        print("\n\n END: [i={}] Local minima p13={:3e} chosen...".format(iteration, f_sigTT.GetParameter(0)))
-                        #break
+                if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
+                    print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
 
                     current_params = adjust_params(best_params)
-                    temperature *= 0.95  # Increase randomness in case of error
-
+                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                    
             except (TypeError or ZeroDivisionError) as e:
-                print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-
-                # Store the parameter values and chi-square values for each iteration
-                params_sigTT_history = {'p13': []}
-                chi2_sigTT_history = []
-                fit_sigTT_status_history = []
-
-                # Create TGraphs for parameter convergence
-                graph_sigTT_p13 = TGraph()
-                graph_sigTT_chi2 = TGraph()
+                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigtt_0 = random.uniform(0, 1) # Re-randomize
+                par_lim_sigtt_0 = random.uniform(par_min, par_max) # Re-randomize
 
                 iteration += 1
+                total_iteration += 1                
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
-            best_overall_params = best_params[:]
+            best_overall_params = best_params
                 
-        if iteration == max_iterations:
-            print("ERROR: Sig TT failed to converge!")
-            #sys.exit(2)
-
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
+    
+    # Record the end time
+    end_time = time.time()
+    # Calculate the total duration
+    total_duration = end_time - start_time
+    print("The loop took {:.2f} seconds.".format(total_duration))
+
+    best_overall_params = [best_overall_params]
+    
+    while len(best_overall_params) < 4:
+        best_overall_params.append(0.0)
             
-    par_vec.append(f_sigTT.GetParameter(0))
-    par_vec.append(f_sigTT.GetParameter(1))
-    par_vec.append(f_sigTT.GetParameter(2))
-    par_vec.append(f_sigTT.GetParameter(3))
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(f_sigTT.GetParError(0))
     par_err_vec.append(f_sigTT.GetParError(1))
     par_err_vec.append(f_sigTT.GetParError(2))
     par_err_vec.append(f_sigTT.GetParError(3))
 
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())
-    par_chi2_vec.append(f_sigTT.GetChisquare())        
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
+    par_chi2_vec.append(best_cost)
 
     # Calculate the minimum and maximum values from the graphs
     min_sigTT_y = float('inf')
@@ -1635,13 +1550,27 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigTT_chi2.Draw("ALP")
+
+    # Plot temperature convergence
+    c5.cd(4).SetLeftMargin(0.12)
+    graph_sigTT_temp.SetTitle("Sig TT Temperature Convergence;Iteration;Temperature")
+    graph_sigTT_temp.SetLineColor(ROOT.kBlack)
+    graph_sigTT_temp.Draw("ALP")
+
+    # Plot acceptance probability convergence
+    c6.cd(4).SetLeftMargin(0.12)
+    graph_sigTT_accept.SetTitle("Sig TT Acceptance Probability Convergence;Iteration;Acceptance Probability")
+    graph_sigTT_accept.SetLineColor(ROOT.kBlack)
+    graph_sigTT_accept.Draw("ALP")
     
     print("\n")    
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
     c3.Print(outputpdf)
-    c4.Print(outputpdf+')')
+    c4.Print(outputpdf)
+    c5.Print(outputpdf)
+    c6.Print(outputpdf+')')
     
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
