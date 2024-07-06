@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 14:22:53 trottar"
+# Time-stamp: "2024-07-06 14:26:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -389,7 +389,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
                                 
                 iteration += 1
-                total_iteration += 1 if total_iteration % max_iterations == 0 else 0
+                total_iteration += 1 if total_iteration % max_iterations/10 == 0 else 0
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
@@ -406,7 +406,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = [0.0 for _ in range(3)]
 
                 iteration += 1
-                total_iteration += 1 if total_iteration % max_iterations == 0 else 0
+                total_iteration += 1 if total_iteration % max_iterations/10 == 0 else 0
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -806,7 +806,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
-                total_iteration += 1 if total_iteration % max_iterations == 0 else 0
+                total_iteration += 1 if total_iteration % max_iterations/10 == 0 else 0
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
@@ -822,7 +822,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_sigt_err_0, par_sigt_err_1 = [0.0 for _ in range(2)]
                 
                 iteration += 1
-                total_iteration += 1 if total_iteration % max_iterations == 0 else 0
+                total_iteration += 1 if total_iteration % max_iterations/10 == 0 else 0
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -1235,7 +1235,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
-                total_iteration += 1 if total_iteration % max_iterations == 0 else 0
+                total_iteration += 1 if total_iteration % max_iterations/10 == 0 else 0
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
@@ -1251,7 +1251,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_siglt_err_0, par_siglt_err_1, par_siglt_err_2 = [0.0 for _ in range(3)]
                 
                 iteration += 1
-                total_iteration += 1 if total_iteration % max_iterations == 0 else 0                
+                total_iteration += 1 if total_iteration % max_iterations/10 == 0 else 0                
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -1630,7 +1630,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                 iteration += 1
-                total_iteration += 1 if total_iteration % max_iterations == 0 else 0
+                total_iteration += 1 if total_iteration % max_iterations/10 == 0 else 0
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
@@ -1647,7 +1647,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par_sigtt_err_0 = 0.0
 
                 iteration += 1
-                total_iteration += 1 if total_iteration % max_iterations == 0 else 0                
+                total_iteration += 1 if total_iteration % max_iterations/10 == 0 else 0                
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
