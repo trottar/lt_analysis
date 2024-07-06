@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 13:42:39 trottar"
+# Time-stamp: "2024-07-06 13:45:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1119,6 +1119,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                     g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
                     g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
+
+                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+                f_sigLT.SetParNames("p9", "p10", "p11")
+                #f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_siglt_0), current_params[0] + abs(current_params[0] * par_siglt_0))
+                #f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_siglt_1), current_params[1] + abs(current_params[1] * par_siglt_1))
+                #f_sigLT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_siglt_2), current_params[2] + abs(current_params[2] * par_siglt_2))
+                f_sigLT.SetParameter(0, current_params[0])
+                f_sigLT.SetParameter(1, current_params[1])
+                f_sigLT.SetParameter(2, current_params[2])                
 
                 g_q2_siglt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
