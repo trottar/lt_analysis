@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 11:16:02 trottar"
+# Time-stamp: "2024-07-06 11:16:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,7 +182,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig L")
     print("/*--------------------------------------------------*/")
 
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
@@ -539,7 +539,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig T")
     print("/*--------------------------------------------------*/")
 
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
@@ -881,7 +881,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig LT")
     print("/*--------------------------------------------------*/")    
 
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
@@ -1238,7 +1238,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
     
-    num_starts = 5  # Number of times to restart the algorithm
+    num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
