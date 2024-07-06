@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 11:16:12 trottar"
+# Time-stamp: "2024-07-06 12:28:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,8 +83,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    #max_iterations = 100
-    max_iterations = 500
+    max_iterations = 100
+    #max_iterations = 500
     #max_iterations = 1000
     #max_iterations = 10000
     #max_iterations = int(1e6)
@@ -186,7 +186,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-
+    par_min = -1e4
+    par_max = 1e4
+    
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
 
@@ -212,9 +214,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigl_0 = random.uniform(-1000, 1000)
-        par_lim_sigl_1 = random.uniform(-1000, 1000)
-        par_lim_sigl_2 = random.uniform(-1000, 1000)
+        par_lim_sigl_0 = random.uniform(par_min, par_max)
+        par_lim_sigl_1 = random.uniform(par_min, par_max)
+        par_lim_sigl_2 = random.uniform(par_min, par_max)
 
         # Track the best solution
         best_params = [par_lim_sigl_0, par_lim_sigl_1, par_lim_sigl_2]
@@ -254,7 +256,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -375,14 +377,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                #if total_iteration % (max_iterations/10) == 0:
-                # Update ROOT TGraphs for plotting
-                graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
-                graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
-                graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, f_sigL.GetChisquare())
-                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                if total_iteration % (max_iterations/10) == 0:
+                    # Update ROOT TGraphs for plotting
+                    graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
+                    graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
+                    graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
+                    graph_sigL_chi2.SetPoint(total_iteration, total_iteration, f_sigL.GetChisquare())
+                    graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
+                    graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 c1.Update()
                 c2.Update()
@@ -418,7 +420,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         ])
 
                     # Restart from a new random point
-                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -444,9 +446,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigl_0 = random.uniform(-1000, 1000) # Re-randomize
-                par_lim_sigl_1 = random.uniform(-1000, 1000) # Re-randomize
-                par_lim_sigl_2 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_sigl_0 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_sigl_1 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_sigl_2 = random.uniform(par_min, par_max) # Re-randomize
 
                 iteration += 1
                 total_iteration += 1
@@ -543,7 +545,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-
+    par_min = -1e4
+    par_max = 1e4
+    
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
 
@@ -568,8 +572,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigt_0 = random.uniform(-1000, 1000)
-        par_lim_sigt_1 = random.uniform(-1000, 1000)
+        par_lim_sigt_0 = random.uniform(par_min, par_max)
+        par_lim_sigt_1 = random.uniform(par_min, par_max)
 
         # Track the best solution
         best_params = [par_lim_sigt_0, par_lim_sigt_1]
@@ -609,7 +613,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -725,13 +729,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                #if total_iteration % (max_iterations/10) == 0:
-                # Update ROOT TGraphs for plotting
-                graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
-                graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
-                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, f_sigT.GetChisquare())
-                graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                if total_iteration % (max_iterations/10) == 0:
+                    # Update ROOT TGraphs for plotting
+                    graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
+                    graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
+                    graph_sigT_chi2.SetPoint(total_iteration, total_iteration, f_sigT.GetChisquare())
+                    graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                    graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 c1.Update()
                 c2.Update()                
@@ -763,7 +767,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[1]
                         ])
                     # Restart from a new random point
-                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -789,8 +793,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigt_0 = random.uniform(-1000, 1000) # Re-randomize
-                par_lim_sigt_1 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_sigt_0 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_sigt_1 = random.uniform(par_min, par_max) # Re-randomize
 
                 iteration += 1
                 total_iteration += 1
@@ -885,7 +889,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-
+    par_min = -1e4
+    par_max = 1e4
+    
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
 
@@ -911,9 +917,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_siglt_0 = random.uniform(-1000, 1000)
-        par_lim_siglt_1 = random.uniform(-1000, 1000)
-        par_lim_siglt_2 = random.uniform(-1000, 1000)
+        par_lim_siglt_0 = random.uniform(par_min, par_max)
+        par_lim_siglt_1 = random.uniform(par_min, par_max)
+        par_lim_siglt_2 = random.uniform(par_min, par_max)
 
         # Track the best solution
         best_params = [par_lim_siglt_0, par_lim_siglt_1, par_lim_siglt_2]
@@ -954,7 +960,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1075,14 +1081,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                #if total_iteration % (max_iterations/10) == 0:
-                # Update ROOT TGraphs for plotting
-                graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
-                graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
-                graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, f_sigLT.GetChisquare())
-                graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigLT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                if total_iteration % (max_iterations/10) == 0:
+                    # Update ROOT TGraphs for plotting
+                    graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
+                    graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
+                    graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
+                    graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, f_sigLT.GetChisquare())
+                    graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                    graph_sigLT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 c1.Update()
                 c2.Update()                
@@ -1117,7 +1123,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[2]
                         ])
                         # Restart from a new random point
-                    current_params = [random.uniform(-1000, 1000) for _ in range(3)]
+                    current_params = [random.uniform(par_min, par_max) for _ in range(3)]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1143,9 +1149,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_siglt_0 = random.uniform(-1000, 1000) # Re-randomize
-                par_lim_siglt_1 = random.uniform(-1000, 1000) # Re-randomize
-                par_lim_siglt_2 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_siglt_0 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_siglt_1 = random.uniform(par_min, par_max) # Re-randomize
+                par_lim_siglt_2 = random.uniform(par_min, par_max) # Re-randomize
 
                 iteration += 1
                 total_iteration += 1                
@@ -1242,7 +1248,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-
+    par_min = -1e4
+    par_max = 1e4
+    
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
 
@@ -1266,7 +1274,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_lim_sigtt_0 = random.uniform(-1000, 1000)
+        par_lim_sigtt_0 = random.uniform(par_min, par_max)
 
         # Track the best solution
         best_params = par_lim_sigtt_0
@@ -1303,7 +1311,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = random.uniform(-1000, 1000)
+                    current_params = random.uniform(par_min, par_max)
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1414,12 +1422,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                #if total_iteration % (max_iterations/10) == 0:
-                # Update ROOT TGraphs for plotting
-                graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
-                graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, f_sigTT.GetChisquare())
-                graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigTT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                if total_iteration % (max_iterations/10) == 0:
+                    # Update ROOT TGraphs for plotting
+                    graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
+                    graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, f_sigTT.GetChisquare())
+                    graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                    graph_sigTT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 c1.Update()
                 c2.Update()                
@@ -1448,7 +1456,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params
                         ])
                     # Restart from a new random point
-                    current_params = random.uniform(-1000, 1000)
+                    current_params = random.uniform(par_min, par_max)
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -1474,7 +1482,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_lim_sigtt_0 = random.uniform(-1000, 1000) # Re-randomize
+                par_lim_sigtt_0 = random.uniform(par_min, par_max) # Re-randomize
 
                 iteration += 1
                 total_iteration += 1                
