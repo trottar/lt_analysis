@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 13:59:31 trottar"
+# Time-stamp: "2024-07-06 14:00:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -744,9 +744,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
-                c1.Update()
-                c2.Update()                
-
                 current_errors = [
                     f_sigT.GetParError(0),
                     f_sigT.GetParError(1)
@@ -1159,9 +1156,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigLT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
-                c1.Update()
-                c2.Update()                
-
                 current_errors = [
                     f_sigLT.GetParError(0),
                     f_sigLT.GetParError(1),
@@ -1567,9 +1561,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigTT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
-                c1.Update()
-                c2.Update()                
-
                 current_errors = f_sigL.GetParError(0)
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
