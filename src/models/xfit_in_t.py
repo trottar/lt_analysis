@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 13:21:37 trottar"
+# Time-stamp: "2024-07-06 13:24:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -834,7 +834,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params[:]                
-            best_overall_error = best_error
+            best_overall_errors = best_errors
             best_overall_status = best_status
         
     print("\nBest overall solution: {0}".format(best_overall_params))
@@ -1214,7 +1214,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params[:]
-            best_overall_error = best_error
+            best_overall_errors = best_errors
             best_overall_status = best_status
         
     print("\nBest overall solution: {0}".format(best_overall_params))
@@ -1557,7 +1557,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
             best_overall_params = best_params
-            best_overall_error = best_error
+            best_overall_errors = best_errors
             best_overall_status = best_status
                 
     print("\nBest overall solution: {0}".format(best_overall_params))
