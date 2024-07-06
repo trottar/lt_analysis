@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 14:06:53 trottar"
+# Time-stamp: "2024-07-06 14:15:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -320,6 +320,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                current_params = [
+                    f_sigL.GetParameter(0),
+                    f_sigL.GetParameter(1),
+                    f_sigL.GetParameter(2)
+                ]
+
+                current_errors = [
+                    f_sigL.GetParError(0),
+                    f_sigL.GetParError(1),
+                    f_sigL.GetParError(2)
+                ]
 
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
@@ -329,12 +340,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_chi2.SetPoint(total_iteration, total_iteration, current_cost)
                 graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
-
-                current_errors = [
-                    f_sigL.GetParError(0),
-                    f_sigL.GetParError(1),
-                    f_sigL.GetParError(2)
-                ]
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
@@ -736,6 +741,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                
+                current_params = [
+                    f_sigT.GetParameter(0),
+                    f_sigT.GetParameter(1)
+                ]
+
+                current_errors = [
+                    f_sigT.GetParError(0),
+                    f_sigT.GetParError(1)
+                ]
+
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
@@ -743,12 +761,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
                 graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
-                
-                current_errors = [
-                    f_sigT.GetParError(0),
-                    f_sigT.GetParError(1)
-                ]
-                
+                                
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
                     best_params = current_params
@@ -1147,6 +1160,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                current_params = [
+                    f_sigLT.GetParameter(0),
+                    f_sigLT.GetParameter(1),
+                    f_sigLT.GetParameter(2)
+                ]
+
+                current_errors = [
+                    f_sigLT.GetParError(0),
+                    f_sigLT.GetParError(1),
+                    f_sigLT.GetParError(2)
+                ]
+
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
@@ -1155,12 +1182,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
                 graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigLT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
-                
-                current_errors = [
-                    f_sigLT.GetParError(0),
-                    f_sigLT.GetParError(1),
-                    f_sigLT.GetParError(2)
-                ]
 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
@@ -1554,14 +1575,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
+                # Acceptance probability
+                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                
+                current_params = f_sigL.GetParameter(0)
+
+                current_errors = f_sigL.GetParError(0)
+
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
                 graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
                 graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigTT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
-                
-                current_errors = f_sigL.GetParError(0)
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
