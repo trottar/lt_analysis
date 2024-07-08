@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-07 23:22:47 trottar"
+# Time-stamp: "2024-07-07 23:57:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1502,9 +1502,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                 
-                current_params = f_sigL.GetParameter(0)
+                current_params = f_sigTT.GetParameter(0)
 
-                current_errors = f_sigL.GetParError(0)
+                current_errors = f_sigTT.GetParError(0)
 
                 #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
