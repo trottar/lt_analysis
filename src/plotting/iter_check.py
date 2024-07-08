@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-06 14:31:52 trottar"
+# Time-stamp: "2024-07-07 23:38:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -181,7 +181,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_pmy_SIMC_OLD"] = TH1D("H_pmy_SIMC_OLD","pmy ", 100, -10.0, 10.0)
         hist["H_pmz_SIMC_OLD"] = TH1D("H_pmz_SIMC_OLD","pmz", 100, -10.0, 10.0)        
         
-        print("\n\nReweighing {} histograms for comparison...".format(hist["phi_setting"].lower()))
+        print("\nReweighing {} histograms for comparison...".format(hist["phi_setting"].lower()))
         for i,evt in enumerate(TBRANCH_SIMC):
 
             # Progress bar
