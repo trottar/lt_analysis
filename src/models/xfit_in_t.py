@@ -1,9 +1,9 @@
-g#! /usr/bin/python
+#! /usr/bin/python
 
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-07 23:16:14 trottar"
+# Time-stamp: "2024-07-07 23:22:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
