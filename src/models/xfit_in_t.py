@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-06 14:33:01 trottar"
+# Time-stamp: "2024-07-07 20:50:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,9 +83,9 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    #max_iterations = 100
+    max_iterations = 100
     #max_iterations = 500
-    max_iterations = 1000
+    #max_iterations = 1000
     #max_iterations = 10000
     #max_iterations = int(1e6)
     ##############
@@ -186,7 +186,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    par_min = -1e3
+    #par_min = -1e3
+    par_min = 1
     par_max = 1e3
     
     # Store the parameter values and chi-square values for each iteration
