@@ -1,9 +1,9 @@
-#! /usr/bin/python
+g#! /usr/bin/python
 
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-07 22:50:18 trottar"
+# Time-stamp: "2024-07-07 23:16:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -225,7 +225,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         best_params = [par_sigl_0, par_sigl_1, par_sigl_2]
         best_cost = float('inf')
         best_errors = [par_sigl_err_0, par_sigl_err_1, par_sigl_err_2]
-        best_status = ""
         previous_params = best_params[:]
 
         # Check for local minima
@@ -297,7 +296,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
                 f_sigL_status = f_sigL.GetNDF() != 0
-                f_sigL_status_message = "Fit Successful" if f_sigL_status else "Fit Failed"
 
                 params_sigL_history['p1'].append(current_params[0])
                 params_sigL_history['p2'].append(current_params[1])
@@ -308,6 +306,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                
                 current_params = [
                     f_sigL.GetParameter(0),
                     f_sigL.GetParameter(1),
@@ -334,11 +333,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_params = current_params
                     best_cost = current_cost
                     best_errors = current_errors
-                    best_status = f_sigL_status_message
 
                 if iteration % local_search_interval == 0:
                     best_params = local_search(best_params, f_sigL, 3)
                     current_params = best_params[:]
+                    current_errors = best_errors[:]
                     par_sigl_0, par_sigl_1, par_sigl_2 = best_params
                     par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = best_errors
 
@@ -401,7 +400,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             best_overall_cost = best_cost
             best_overall_params = best_params[:]
             best_overall_errors = best_errors
-            best_overall_status = best_status
         
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
@@ -633,7 +631,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         best_cost = float('inf')
         previous_params = best_params[:]
         best_errors = [par_sigt_err_0, par_sigt_err_1]
-        best_status = ""
         
         # Check for local minima
         local_minima = []
@@ -702,7 +699,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
                 f_sigT_status = f_sigT.GetNDF() != 0
-                f_sigT_status_message = "Fit Successful" if f_sigT_status else "Fit Failed"
 
                 params_sigT_history['p5'].append(current_params[0])
                 params_sigT_history['p6'].append(current_params[1])
@@ -710,9 +706,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigT.GetChisquare()
                 
-                # Acceptance probability
-                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                 
@@ -739,11 +732,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_params = current_params
                     best_cost = current_cost
                     best_errors = current_errors
-                    best_status = f_sigT_status_message
 
                 if iteration % local_search_interval == 0:
                     best_params = local_search(best_params, f_sigT, 2)
                     current_params = best_params[:]
+                    current_errors = best_errors[:]
                     par_sigt_0, par_sigt_1 = best_params
                     par_sigt_err_0, par_sigt_err_1 = best_errors
 
@@ -801,7 +794,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             best_overall_cost = best_cost
             best_overall_params = best_params[:]                
             best_overall_errors = best_errors
-            best_overall_status = best_status
         
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
@@ -1032,7 +1024,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         best_cost = float('inf')
         previous_params = best_params[:]
         best_errors = [par_siglt_err_0, par_siglt_err_1, par_siglt_err_2]
-        best_status = ""
         
         # Check for local minima
         local_minima = []
@@ -1104,7 +1095,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
                 f_sigLT_status = f_sigLT.GetNDF() != 0
-                f_sigLT_status_message = "Fit Successful" if f_sigLT_status else "Fit Failed"
 
                 params_sigLT_history['p9'].append(current_params[0])
                 params_sigLT_history['p10'].append(current_params[1])
@@ -1116,8 +1106,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                # Acceptance probability
-                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                 current_params = [
                     f_sigLT.GetParameter(0),
                     f_sigLT.GetParameter(1),
@@ -1144,7 +1132,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_params = current_params
                     best_cost = current_cost
                     best_errors = current_errors
-                    best_status = f_sigL_status_message
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
@@ -1154,6 +1141,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if iteration % local_search_interval == 0:
                     best_params = local_search(best_params, f_sigLT, 3)
                     current_params = best_params[:]
+                    current_errors = best_errors[:]
                     par_siglt_0, par_siglt_1, par_siglt_2 = best_params
                     par_siglt_err_0, par_siglt_err_1, par_siglt_err_2 = best_errors
 
@@ -1214,7 +1202,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             best_overall_cost = best_cost
             best_overall_params = best_params[:]
             best_overall_errors = best_errors
-            best_overall_status = best_status
         
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
@@ -1443,7 +1430,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         best_cost = float('inf')
         previous_params = best_params
         best_errors = par_sigtt_err_0
-        best_status = ""
         
         # Check for local minima
         local_minima = []
@@ -1507,15 +1493,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
                 f_sigTT_status = f_sigTT.GetNDF() != 0
-                f_sigTT_status_message = "Fit Successful" if f_sigTT_status else "Fit Failed"
 
                 params_sigTT_history['p13'].append(current_params)
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigTT.GetChisquare()
-
-                # Acceptance probability
-                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                 # Acceptance probability
                 accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -1536,11 +1518,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_params = current_params
                     best_cost = current_cost
                     best_errors = current_errors
-                    best_status = f_sigL_status_message
 
                 if iteration % local_search_interval == 0:
                     best_params = local_search(best_params, f_sigTT, 1)
                     current_params = best_params
+                    current_errors = best_errors
                     par_sigtt_0 = best_params
                     par_sigtt_err_0 = best_errors
 
@@ -1596,7 +1578,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             best_overall_cost = best_cost
             best_overall_params = best_params
             best_overall_errors = best_errors
-            best_overall_status = best_status
                 
     print("\nBest overall solution: {0}".format(best_overall_params))
     print("Best overall cost: {0}".format(best_overall_cost))
