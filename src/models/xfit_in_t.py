@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-07 21:01:19 trottar"
+# Time-stamp: "2024-07-07 22:44:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,8 +186,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    #par_min = -1e3
-    par_min = 1
+    par_min = -1e3
     par_max = 1e3
     
     # Store the parameter values and chi-square values for each iteration
