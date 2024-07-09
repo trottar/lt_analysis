@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-09 03:01:19 trottar"
+# Time-stamp: "2024-07-09 04:18:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -870,7 +870,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt.Draw("AP")
     g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigt.GetXaxis().CenterTitle()
-    g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+    g_sigt.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [nb/GeV^{2}]")
     g_sigt.GetYaxis().SetTitleOffset(1.5)
     g_sigt.GetYaxis().SetTitleSize(0.035)
     g_sigt.GetYaxis().CenterTitle()
@@ -880,12 +880,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_prv.Draw("P")
 
     c2.cd(2).SetLeftMargin(0.12)
-    g_sigt_fit.SetTitle("Sigma L Model Fit")
+    g_sigt_fit.SetTitle("Sigma T Model Fit")
     g_sigt_fit.Draw("A*")
 
     g_sigt_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
     g_sigt_fit.GetXaxis().CenterTitle()
-    g_sigt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{L} [nb/GeV^{2}]")
+    g_sigt_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{T} [nb/GeV^{2}]")
     g_sigt_fit.GetYaxis().SetTitleOffset(1.5)
     g_sigt_fit.GetYaxis().SetTitleSize(0.035)
     g_sigt_fit.GetYaxis().CenterTitle()
