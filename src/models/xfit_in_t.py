@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-08 20:39:19 trottar"
+# Time-stamp: "2024-07-08 20:59:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -557,31 +557,31 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p1.SetLineColor(ROOT.kRed)
     graph_sigL_p2.SetLineColor(ROOT.kBlue)
     graph_sigL_p3.SetLineColor(ROOT.kGreen)
-    set_axis_labels(graph_sigL_p1.GetYaxis(), 3)
     graph_sigL_p1.Draw("ALP")
     graph_sigL_p2.Draw("LP SAME")
     graph_sigL_p3.Draw("LP SAME")
-
+    set_axis_labels(graph_sigL_p1.GetYaxis())
+    
     # Plot chi-square convergence
     c4.cd(1).SetLeftMargin(0.12)
     graph_sigL_chi2.SetTitle("Sig L Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigL_chi2.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigL_chi2.GetYaxis(), 3)
     graph_sigL_chi2.Draw("ALP")
-
+    set_axis_labels(graph_sigL_chi2.GetYaxis())
+    
     # Plot temperature
     c5.cd(1).SetLeftMargin(0.12)
     graph_sigL_temp.SetTitle("Sig L Temperature Convergence;Iteration;Temperature")
     graph_sigL_temp.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigL_temp.GetYaxis(), 3)
     graph_sigL_temp.Draw("ALP")
-
+    set_axis_labels(graph_sigL_temp.GetYaxis())
+    
     # Plot acceptance probability
     c6.cd(1).SetLeftMargin(0.12)
     graph_sigL_accept.SetTitle("Sig L Acceptance Probability Convergence;Iteration;Acceptance Probability")
     graph_sigL_accept.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigL_accept.GetYaxis(), 3)
     graph_sigL_accept.Draw("ALP")
+    set_axis_labels(graph_sigL_accept.GetYaxis())
     
     print("\n")    
     
@@ -952,30 +952,30 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p5.SetTitle("Sig T Parameter Convergence;Iteration;Parameter")
     graph_sigT_p5.SetLineColor(ROOT.kRed)
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
-    set_axis_labels(graph_sigT_p5.GetYaxis(), 3)
     graph_sigT_p5.Draw("ALP")
     graph_sigT_p6.Draw("LP SAME")
-
+    set_axis_labels(graph_sigT_p5.GetYaxis())
+    
     # Plot chi-square convergence
     c4.cd(2).SetLeftMargin(0.12)
     graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigT_chi2.GetYaxis(), 3)
     graph_sigT_chi2.Draw("ALP")
-
+    set_axis_labels(graph_sigT_chi2.GetYaxis())
+    
     # Plot temperature convergence
     c5.cd(2).SetLeftMargin(0.12)
     graph_sigT_temp.SetTitle("Sig T Temperature Convergence;Iteration;Temperature")
     graph_sigT_temp.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigT_temp.GetYaxis(), 3)
     graph_sigT_temp.Draw("ALP")
-
+    set_axis_labels(graph_sigT_temp.GetYaxis())
+    
     # Plot acceptance probability convergence
     c6.cd(2).SetLeftMargin(0.12)
     graph_sigT_accept.SetTitle("Sig T Acceptance Probability Convergence;Iteration;Acceptance Probability")
     graph_sigT_accept.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigT_accept.GetYaxis(), 3)
     graph_sigT_accept.Draw("ALP")
+    set_axis_labels(graph_sigT_accept.GetYaxis())
     
     print("\n")    
     
@@ -1367,31 +1367,31 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_p9.SetLineColor(ROOT.kRed)
     graph_sigLT_p10.SetLineColor(ROOT.kBlue)
     graph_sigLT_p11.SetLineColor(ROOT.kGreen)
-    set_axis_labels(graph_sigLT_p9.GetYaxis(), 3)
     graph_sigLT_p9.Draw("ALP")
     graph_sigLT_p10.Draw("LP SAME")
     graph_sigLT_p11.Draw("LP SAME")
-
+    set_axis_labels(graph_sigLT_p9.GetYaxis())
+    
     # Plot chi-square convergence
     c4.cd(3).SetLeftMargin(0.12)
     graph_sigLT_chi2.SetTitle("Sig LT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigLT_chi2.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigLT_chi2.GetYaxis(), 3)
     graph_sigLT_chi2.Draw("ALP")
-
+    set_axis_labels(graph_sigLT_chi2.GetYaxis())
+    
     # Plot temperature convergence
     c5.cd(3).SetLeftMargin(0.12)
     graph_sigLT_temp.SetTitle("Sig LT Temperature Convergence;Iteration;Temperature")
     graph_sigLT_temp.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigLT_temp.GetYaxis(), 3)
     graph_sigLT_temp.Draw("ALP")
-
+    set_axis_labels(graph_sigLT_temp.GetYaxis())
+    
     # Plot acceptance probability convergence
     c6.cd(3).SetLeftMargin(0.12)
     graph_sigLT_accept.SetTitle("Sig LT Acceptance Probability Convergence;Iteration;Acceptance Probability")
     graph_sigLT_accept.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigLT_accept.GetYaxis(), 3)
     graph_sigLT_accept.Draw("ALP")
+    set_axis_labels(graph_sigLT_accept.GetYaxis())
     
     print("\n")    
     
@@ -1744,29 +1744,29 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     c3.cd(4).SetLeftMargin(0.12)
     graph_sigTT_p13.SetTitle("Sig TT Parameter Convergence;Iteration;Parameter")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
-    set_axis_labels(graph_sigTT_p13.GetYaxis(), 3)
     graph_sigTT_p13.Draw("ALP")
-
+    set_axis_labels(graph_sigTT_p13.GetYaxis())
+    
     # Plot chi-square convergence
     c4.cd(4).SetLeftMargin(0.12)
     graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Iteration;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigTT_chi2.GetYaxis(), 3)
     graph_sigTT_chi2.Draw("ALP")
-
+    set_axis_labels(graph_sigTT_chi2.GetYaxis())
+    
     # Plot temperature convergence
     c5.cd(4).SetLeftMargin(0.12)
     graph_sigTT_temp.SetTitle("Sig TT Temperature Convergence;Iteration;Temperature")
     graph_sigTT_temp.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigTT_temp.GetYaxis(), 3)
     graph_sigTT_temp.Draw("ALP")
-
+    set_axis_labels(graph_sigTT_temp.GetYaxis())
+    
     # Plot acceptance probability convergence
     c6.cd(4).SetLeftMargin(0.12)
     graph_sigTT_accept.SetTitle("Sig TT Acceptance Probability Convergence;Iteration;Acceptance Probability")
     graph_sigTT_accept.SetLineColor(ROOT.kBlack)
-    set_axis_labels(graph_sigTT_accept.GetYaxis(), 3)
     graph_sigTT_accept.Draw("ALP")
+    set_axis_labels(graph_sigTT_accept.GetYaxis())
     
     print("\n")    
     

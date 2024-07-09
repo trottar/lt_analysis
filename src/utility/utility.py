@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-08 20:40:57 trottar"
+# Time-stamp: "2024-07-08 20:58:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -633,16 +633,9 @@ def local_search(params, inp_func, num_params):
 
         return improved_params
 
-def set_axis_labels(axis, sig_figs):
-    for i in range(1, axis.GetNbins() + 1):
-        label = axis.GetBinLabel(i)
-        if label:
-            try:
-                value = float(label)
-                format_str = "{{:.{}g}}".format(sig_figs)
-                formatted_label = format_str.format(value)
-                axis.SetBinLabel(i, formatted_label)
-            except ValueError:
-                pass
+def set_axis_labels(axis):
+    # Assuming graph_sigL_p1.GetYaxis().SetNdivisions(505) for better label readability
+    axis.SetNdivisions(510)  # Adjust the number of divisions
+    axis.SetLabelSize(0.03)  # Adjust the label size
             
 ################################################################################################################################################
