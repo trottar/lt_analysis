@@ -196,7 +196,7 @@ c      pause
                e=e+(drd(ip,it))/ymc(ip,it)**2
                e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
                e=sqrt(e)
-*     Set ratio to zero if exceeds 1000
+*     Set ratio to zero if exceeds 10
 *     This prevents errors in output file
                if (r >= 10.) then
                   r=0.0
