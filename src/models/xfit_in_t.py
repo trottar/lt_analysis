@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-09 02:53:18 trottar"
+# Time-stamp: "2024-07-09 02:57:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -625,9 +625,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         max_unchanged_iterations = 25
 
         # Initialize adaptive parameter limits
-        par_sigt_0 = l0
-        par_sigt_1 = l1
-        par_sigt_2 = l2
+        par_sigt_0 = t0
+        par_sigt_1 = t1
+        par_sigt_2 = t2
         par_sigt_err_0 = 0.0
         par_sigt_err_1 = 0.0
         par_sigt_err_2 = 0.0
@@ -671,7 +671,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     # Proceed with evaluation
                 else:
                     # Restart from a new random point
-                    current_params = [l0, l1, l2]
+                    current_params = [t0, t1, t2]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -687,7 +687,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
                     g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-                f_sigT = TF1("sig_T", fun_Sig_L, tmin_range, tmax_range, 3)
+                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
                 f_sigT.SetParNames("p5", "p6", "p7")
                 f_sigT.SetParameter(0, current_params[0])
                 f_sigT.SetParameter(1, current_params[1])
@@ -773,7 +773,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         ])
 
                     # Restart from a new random point
-                    current_params = [l0, l1, l2]
+                    current_params = [t0, t1, t2]
                     temperature = initial_temperature
                     unchanged_iterations = 0
 
@@ -800,7 +800,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                 # Adjust parameter limits within a random number
-                par_sigt_0, par_sigt_1, par_sigt_2 = [l0, l1, l2]
+                par_sigt_0, par_sigt_1, par_sigt_2 = [t0, t1, t2]
                 par_sigt_err_0, par_sigt_err_1, par_sigt_err_2 = [0.0 for _ in range(3)]
 
                 iteration += 1
@@ -844,7 +844,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit = TGraphErrors()
     g_sigt_fit_tot = TGraph()        
     
-    f_sigT_pre = TF1("sig_T", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT_pre.SetParNames("p5", "p6", "p7")
     f_sigT_pre.FixParameter(0, best_overall_params[0])
     f_sigT_pre.FixParameter(1, best_overall_params[1])
@@ -865,7 +865,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
         g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-    g_sigt.SetTitle("Sig L")
+    g_sigt.SetTitle("Sig T")
     g_sigt.SetMarkerStyle(5)
     g_sigt.Draw("AP")
     g_sigt.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
@@ -901,7 +901,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigT = TF1("sig_T", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT.SetParNames("p5", "p6", "p7")
     f_sigT.FixParameter(0, best_overall_params[0])
     f_sigT.FixParameter(1, best_overall_params[1])
@@ -965,7 +965,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(1).SetLeftMargin(0.12)
-    graph_sigT_p5.SetTitle("Sig L Parameter Convergence;Optimization Run;Parameter")
+    graph_sigT_p5.SetTitle("Sig T Parameter Convergence;Optimization Run;Parameter")
     graph_sigT_p5.SetLineColor(ROOT.kRed)
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
     graph_sigT_p7.SetLineColor(ROOT.kGreen)
@@ -976,21 +976,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     # Plot chi-square convergence
     c4.cd(1).SetLeftMargin(0.12)
-    graph_sigT_chi2.SetTitle("Sig L Chi-Square Convergence;Optimization Run;Chi-Square")
+    graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Optimization Run;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigT_chi2.Draw("ALP")
     set_axis_labels(graph_sigT_chi2.GetYaxis())
     
     # Plot temperature
     c5.cd(1).SetLeftMargin(0.12)
-    graph_sigT_temp.SetTitle("Sig L Temperature Convergence;Optimization Run;Temperature")
+    graph_sigT_temp.SetTitle("Sig T Temperature Convergence;Optimization Run;Temperature")
     graph_sigT_temp.SetLineColor(ROOT.kBlack)
     graph_sigT_temp.Draw("ALP")
     set_axis_labels(graph_sigT_temp.GetYaxis())
     
     # Plot acceptance probability
     c6.cd(1).SetLeftMargin(0.12)
-    graph_sigT_accept.SetTitle("Sig L Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
+    graph_sigT_accept.SetTitle("Sig T Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigT_accept.SetLineColor(ROOT.kBlack)
     graph_sigT_accept.Draw("ALP")
     set_axis_labels(graph_sigT_accept.GetYaxis())
