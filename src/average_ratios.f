@@ -196,9 +196,11 @@ c      pause
                e=e+(drd(ip,it))/ymc(ip,it)**2
                e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
                e=sqrt(e)
-*     Skip the event if r >= 10 or r <= 0.1
+*     Set ratio to zero if exceeds order of magnitude
+*     This prevents errors in output file
                if (r >= 10. .or. r <= 0.1) then
-                  cycle
+                  r=-1000.0
+                  e=0.0
                endif
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
