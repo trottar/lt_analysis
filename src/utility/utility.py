@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-08 20:58:41 trottar"
+# Time-stamp: "2024-07-08 22:57:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -633,6 +633,28 @@ def local_search(params, inp_func, num_params):
 
         return improved_params
 
+def grab_params(sig_dict, key, data, temperature=None):
+    if isinstance(data, list):
+        if temperature != None:
+            # Iterate through the parameters in the sub-dictionary
+            for param in sig_dict[key]:
+                inp_df.append(simulated_annealing(param, temperature))
+        else:
+            # Iterate through the parameters in the sub-dictionary
+            for param in sig_dict[key]:
+                inp_df.append(param)
+    elif isinstance(data, dict):
+        # Create a new history dictionary for each key
+        inp_df[key] = {}
+        # Iterate through the parameters in the sub-dictionary
+        for param in sig_dict[key]:
+            # Initialize the history dictionary with empty lists for each parameter
+            inp_df[key][param] = []
+    else:
+        print("ERROR: Invalid data structure...")
+        sys.exit(2)
+            
+            
 def set_axis_labels(axis):
     # Assuming graph_sigL_p1.GetYaxis().SetNdivisions(505) for better label readability
     axis.SetNdivisions(510)  # Adjust the number of divisions
