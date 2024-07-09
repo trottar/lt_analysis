@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-09 02:46:44 trottar"
+# Time-stamp: "2024-07-09 11:20:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,8 +86,8 @@ def fun_Sig_T(x, par):
         #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        #f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
-        f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+        f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+        #f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")        
