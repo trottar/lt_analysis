@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-08 20:40:10 trottar"
+# Time-stamp: "2024-07-08 20:40:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -639,9 +639,10 @@ def set_axis_labels(axis, sig_figs):
         if label:
             try:
                 value = float(label)
-                formatted_label = f"{value:.{sig_figs}g}"
+                format_str = "{{:.{}g}}".format(sig_figs)
+                formatted_label = format_str.format(value)
                 axis.SetBinLabel(i, formatted_label)
             except ValueError:
-                pass    
-    
+                pass
+            
 ################################################################################################################################################
