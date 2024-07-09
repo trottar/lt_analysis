@@ -661,10 +661,10 @@ if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
     NumtBins=2
     NumPhiBins=6
-    #TMIN=0.150
-    #TMAX=0.400
-    TMIN=0.100
-    TMAX=0.600
+    TMIN=0.150
+    TMAX=0.400
+    #TMIN=0.100
+    #TMAX=0.600
     #TMIN=0.150 # Center low
     #TMAX=0.400 # Center low
 elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
