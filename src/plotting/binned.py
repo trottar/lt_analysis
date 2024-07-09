@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-09 05:27:16 trottar"
+# Time-stamp: "2024-07-09 05:44:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -204,7 +204,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             i = key_tuple[0] # t bin
             j = key_tuple[1] # phi bin
             tmp_ratio[0].append(ratioDict["binned"]["t_bins"][i])
-            if nested_dict["ratio"][key_tuple]["ratio"] > 1.0:
+            if nested_dict["ratio"][key_tuple]["ratio"] > 0.0:
                 tmp_ratio[1].append(nested_dict["ratio"][key_tuple]["ratio"])
             else:
                 tmp_ratio[1].append(0.0)
