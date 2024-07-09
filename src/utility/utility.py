@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-03 16:33:13 trottar"
+# Time-stamp: "2024-07-08 20:40:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -632,5 +632,16 @@ def local_search(params, inp_func, num_params):
         improved_params = minimizer.X()
 
         return improved_params
+
+def set_axis_labels(axis, sig_figs):
+    for i in range(1, axis.GetNbins() + 1):
+        label = axis.GetBinLabel(i)
+        if label:
+            try:
+                value = float(label)
+                formatted_label = f"{value:.{sig_figs}g}"
+                axis.SetBinLabel(i, formatted_label)
+            except ValueError:
+                pass    
     
 ################################################################################################################################################
