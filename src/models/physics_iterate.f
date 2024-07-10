@@ -375,6 +375,9 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *       q2_set/w_set are dynamically changed with the set_ProdInput.sh script
 	   q2_set=2.45
 	   w_set=2.45
+	   if (q2_set == 2.1) then
+	      q2_set = 2.115
+	   end if	   
 ***
 *       RLT (9/25/2023):
 *       tav is meant to be a simple equation to give roughly
