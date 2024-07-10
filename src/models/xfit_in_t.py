@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-09 11:24:10 trottar"
+# Time-stamp: "2024-07-10 18:01:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2039,10 +2039,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         best_overall_params.append(0.0)
         best_overall_errors.append(0.0)
             
-    par_vec.append(best_overall_params[0])
-    par_vec.append(best_overall_params[1])
-    par_vec.append(best_overall_params[2])
-    par_vec.append(best_overall_params[3])
+    #par_vec.append(best_overall_params[0])
+    #par_vec.append(best_overall_params[1])
+    #par_vec.append(best_overall_params[2])
+    #par_vec.append(best_overall_params[3])
+
+    par_vec.append(0.0)
+    par_vec.append(0.0)
+    par_vec.append(0.0)
+    par_vec.append(0.0)
 
     par_err_vec.append(best_overall_errors[0])
     par_err_vec.append(best_overall_errors[0])
@@ -2422,10 +2427,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         best_overall_params.append(0.0)
         best_overall_errors.append(0.0)
             
-    par_vec.append(best_overall_params[0])
-    par_vec.append(best_overall_params[1])
-    par_vec.append(best_overall_params[2])
-    par_vec.append(best_overall_params[3])
+    #par_vec.append(best_overall_params[0])
+    #par_vec.append(best_overall_params[1])
+    #par_vec.append(best_overall_params[2])
+    #par_vec.append(best_overall_params[3])
+
+    par_vec.append(0.0)
+    par_vec.append(0.0)
+    par_vec.append(0.0)
+    par_vec.append(0.0)
 
     par_err_vec.append(best_overall_errors[0])
     par_err_vec.append(best_overall_errors[0])
