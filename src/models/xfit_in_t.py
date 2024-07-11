@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 18:28:30 trottar"
+# Time-stamp: "2024-07-11 18:39:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -559,7 +559,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.SetLineColor(ROOT.kBlack)
     graph_sigL_accept.Draw("ALP")
     
-    print("\n")    
+    print("\n")
+    ROOT.gROOT.GetListOfCleanups().Delete()
+    ROOT.gROOT.CleanUp()    
     
     '''   
     # 3 params
@@ -966,6 +968,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.Draw("ALP")
     
     print("\n")    
+    ROOT.gROOT.GetListOfCleanups().Delete()
+    ROOT.gROOT.CleanUp()
     '''
     
     # 2 params
@@ -1352,7 +1356,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.SetLineColor(ROOT.kBlack)
     graph_sigT_accept.Draw("ALP")
     
-    print("\n")    
+    print("\n")
+    ROOT.gROOT.GetListOfCleanups().Delete()
+    ROOT.gROOT.CleanUp()    
     
     '''
     # 3 params
@@ -1758,6 +1764,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.Draw("ALP")
     
     print("\n")    
+    ROOT.gROOT.GetListOfCleanups().Delete()
+    ROOT.gROOT.CleanUp()
     '''
 
     # 2 params
@@ -2152,7 +2160,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.SetLineColor(ROOT.kBlack)
     graph_sigLT_accept.Draw("ALP")
     
-    print("\n")    
+    print("\n")
+    ROOT.gROOT.GetListOfCleanups().Delete()
+    ROOT.gROOT.CleanUp()    
 
     '''    
     # 3 params
@@ -2565,6 +2575,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.Draw("ALP")
     
     print("\n")    
+    ROOT.gROOT.GetListOfCleanups().Delete()
+    ROOT.gROOT.CleanUp()
     '''
 
     '''
@@ -2935,6 +2947,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.Draw("ALP")
     
     print("\n")    
+    ROOT.gROOT.GetListOfCleanups().Delete()
+    ROOT.gROOT.CleanUp()
     '''    
 
     # 2 params
@@ -3329,7 +3343,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.SetLineColor(ROOT.kBlack)
     graph_sigTT_accept.Draw("ALP")
     
-    print("\n")    
+    print("\n")
+    ROOT.gROOT.GetListOfCleanups().Delete()
+    ROOT.gROOT.CleanUp()    
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
