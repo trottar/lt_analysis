@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 19:26:10 trottar"
+# Time-stamp: "2024-07-11 19:28:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -367,10 +367,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigl_0, par_sigl_1 = current_params
                     par_sigl_err_0, par_sigl_err_1 = [0.0 for _ in range(2)]
-
-                g_sigl.Delete()
-                g_q2_sigl_fit.Delete()
-                f_sigL.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -381,10 +377,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-        g_sigl_prv.Delete()
-        g_sigl_fit.Delete()
-        g_sigl_fit_tot.Delete()
                 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -566,14 +558,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.SetTitle("Sig L Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigL_accept.SetLineColor(ROOT.kBlack)
     graph_sigL_accept.Draw("ALP")
-
-    g_sigl_prv.Delete()
-    g_q2_sigl_fit.Delete()
-    g_sigl_fit.Delete()
-    g_sigl_fit_tot.Delete()
-    f_sigL_pre.Delete()
-    g_sigl.Delete()
-    f_sigL.Delete()
     
     print("\n")    
     
@@ -785,10 +769,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigl_0, par_sigl_1, par_sigl_2 = current_params
                     par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = [0.0 for _ in range(3)]
-
-                g_sigl.Delete()
-                g_q2_sigl_fit.Delete()
-                f_sigL.Delete()
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -799,10 +779,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-        g_sigl_prv.Delete()
-        g_sigl_fit.Delete()
-        g_sigl_fit_tot.Delete()
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -988,14 +964,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.SetTitle("Sig L Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigL_accept.SetLineColor(ROOT.kBlack)
     graph_sigL_accept.Draw("ALP")
-
-    g_sigl_prv.Delete()
-    g_q2_sigl_fit.Delete()
-    g_sigl_fit.Delete()
-    g_sigl_fit_tot.Delete()
-    f_sigL_pre.Delete()
-    g_sigl.Delete()
-    f_sigL.Delete()
     
     print("\n")    
     '''
@@ -1193,10 +1161,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigt_0, par_sigt_1 = current_params
                     par_sigt_err_0, par_sigt_err_1 = [0.0 for _ in range(2)]
-
-                g_sigt.Delete()
-                g_q2_sigt_fit.Delete()
-                f_sigT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1206,10 +1170,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-        g_sigt_prv.Delete()
-        g_sigt_fit.Delete()
-        g_sigt_fit_tot.Delete()
                 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -1391,14 +1351,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.SetTitle("Sig T Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigT_accept.SetLineColor(ROOT.kBlack)
     graph_sigT_accept.Draw("ALP")
-
-    g_sigt_prv.Delete()
-    g_q2_sigt_fit.Delete()
-    g_sigt_fit.Delete()
-    g_sigt_fit_tot.Delete()
-    f_sigT_pre.Delete()
-    g_sigt.Delete()
-    f_sigT.Delete()
 
     print("\n")    
     
@@ -1609,10 +1561,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigt_0, par_sigt_1, par_sigt_2 = current_params
                     par_sigt_err_0, par_sigt_err_1, par_sigt_err_2 = [0.0 for _ in range(3)]
-
-                g_sigt.Delete()
-                g_q2_sigt_fit.Delete()
-                f_sigT.Delete()
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1623,10 +1571,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-        g_sigt_prv.Delete()
-        g_sigt_fit.Delete()
-        g_sigt_fit_tot.Delete()
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -1812,14 +1756,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.SetTitle("Sig T Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigT_accept.SetLineColor(ROOT.kBlack)
     graph_sigT_accept.Draw("ALP")
-
-    g_sigt_prv.Delete()
-    g_q2_sigt_fit.Delete()
-    g_sigt_fit.Delete()
-    g_sigt_fit_tot.Delete()
-    f_sigT_pre.Delete()
-    g_sigt.Delete()
-    f_sigT.Delete()
     
     print("\n")    
     '''
@@ -2025,10 +1961,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_siglt_0, par_siglt_1 = current_params
                     par_siglt_err_0, par_siglt_err_1 = [0.0 for _ in range(2)]
-
-                g_siglt.Delete()
-                g_q2_siglt_fit.Delete()
-                f_sigLT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -2038,10 +1970,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
-
-        g_siglt_prv.Delete()
-        g_siglt_fit.Delete()
-        g_siglt_fit_tot.Delete()
                 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -2223,14 +2151,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.SetTitle("Sig LT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigLT_accept.SetLineColor(ROOT.kBlack)
     graph_sigLT_accept.Draw("ALP")
-
-    g_siglt_prv.Delete()
-    g_q2_siglt_fit.Delete()
-    g_siglt_fit.Delete()
-    g_siglt_fit_tot.Delete()
-    f_sigLT_pre.Delete()
-    g_siglt.Delete()
-    f_sigLT.Delete()
 
     print("\n")    
 
@@ -2449,10 +2369,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_siglt_0, par_siglt_1, par_siglt_2 = current_params
                     par_siglt_err_0, par_siglt_err_1, par_siglt_err_2 = [0.0 for _ in range(3)]
-
-                g_siglt.Delete()
-                g_q2_siglt_fit.Delete()
-                f_sigLT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -2462,10 +2378,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
-
-        g_siglt_prv.Delete()
-        g_siglt_fit.Delete()
-        g_siglt_fit_tot.Delete()
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -2651,14 +2563,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.SetTitle("Sig LT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigLT_accept.SetLineColor(ROOT.kBlack)
     graph_sigLT_accept.Draw("ALP")
-
-    g_siglt_prv.Delete()
-    g_q2_siglt_fit.Delete()
-    g_siglt_fit.Delete()
-    g_siglt_fit_tot.Delete()
-    f_sigLT_pre.Delete()
-    g_siglt.Delete()
-    f_sigLT.Delete()
     
     print("\n")    
     '''
@@ -2839,10 +2743,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigtt_0 = current_params
                     par_sigtt_err_0 = 0.0
-
-                g_sigtt.Delete()
-                g_q2_sigtt_fit.Delete()
-                f_sigTT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -2853,10 +2753,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
-
-        g_sigtt_prv.Delete()
-        g_sigtt_fit.Delete()
-        g_sigtt_fit_tot.Delete()
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -3037,14 +2933,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.SetTitle("Sig TT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigTT_accept.SetLineColor(ROOT.kBlack)
     graph_sigTT_accept.Draw("ALP")
-
-    g_sigtt_prv.Delete()
-    g_q2_sigtt_fit.Delete()
-    g_sigtt_fit.Delete()
-    g_sigtt_fit_tot.Delete()
-    f_sigTT_pre.Delete()
-    g_sigtt.Delete()
-    f_sigTT.Delete()
     
     print("\n")    
     '''    
@@ -3250,10 +3138,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigtt_0, par_sigtt_1 = current_params
                     par_sigtt_err_0, par_sigtt_err_1 = [0.0 for _ in range(2)]
-
-                g_sigtt.Delete()
-                g_q2_sigtt_fit.Delete()
-                f_sigTT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -3263,10 +3147,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
-
-        g_sigtt_prv.Delete()
-        g_sigtt_fit.Delete()
-        g_sigtt_fit_tot.Delete()
                 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -3448,14 +3328,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.SetTitle("Sig TT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigTT_accept.SetLineColor(ROOT.kBlack)
     graph_sigTT_accept.Draw("ALP")
-
-    g_sigtt_prv.Delete()
-    g_q2_sigtt_fit.Delete()
-    g_sigtt_fit.Delete()
-    g_sigtt_fit_tot.Delete()
-    f_sigTT_pre.Delete()
-    g_sigtt.Delete()
-    f_sigTT.Delete()
 
     print("\n")    
     
