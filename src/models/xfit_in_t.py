@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:29:39 trottar"
+# Time-stamp: "2024-07-11 02:36:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,8 +333,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigL_history['p1']) >= max_unchanged_iterations  and \
                    len(params_sigL_history['p2']) >= max_unchanged_iterations:
-                    if round(params_sigL_history['p1'][-2], 1) == round(params_sigL_history['p1'][-1], 1) and \
-                       round(params_sigL_history['p2'][-2], 1) == round(params_sigL_history['p2'][-1], 1):
+                    if np.allclose(round(params_sigL_history['p1'][-2], 3), round(params_sigL_history['p1'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigL_history['p2'][-2], 3), round(params_sigL_history['p2'][-1], 3), atol=5.0):
                         unchanged_iterations += 1        
                     else:
                         unchanged_iterations = 0
@@ -743,9 +743,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if len(params_sigL_history['p1']) >= max_unchanged_iterations  and \
                    len(params_sigL_history['p2']) >= max_unchanged_iterations  and \
                    len(params_sigL_history['p3']) >= max_unchanged_iterations:
-                    if round(params_sigL_history['p1'][-2], 1) == round(params_sigL_history['p1'][-1], 1) and \
-                       round(params_sigL_history['p2'][-2], 1) == round(params_sigL_history['p2'][-1], 1) and \
-                       round(params_sigL_history['p3'][-2], 1) == round(params_sigL_history['p3'][-1], 1):
+                    if np.allclose(round(params_sigL_history['p1'][-2], 3), round(params_sigL_history['p1'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigL_history['p2'][-2], 3), round(params_sigL_history['p2'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigL_history['p3'][-2], 3), round(params_sigL_history['p3'][-1], 3), atol=5.0):
                         unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
@@ -1146,8 +1146,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigT_history['p5']) >= max_unchanged_iterations  and \
                    len(params_sigT_history['p6']) >= max_unchanged_iterations:
-                    if round(params_sigT_history['p5'][-2], 1) == round(params_sigT_history['p5'][-1], 1) and \
-                       round(params_sigT_history['p6'][-2], 1) == round(params_sigT_history['p6'][-1], 1):
+                    if np.allclose(round(params_sigT_history['p5'][-2], 3), round(params_sigT_history['p5'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigT_history['p6'][-2], 3), round(params_sigT_history['p6'][-1], 3), atol=5.0):
                         unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
@@ -1552,10 +1552,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if len(params_sigT_history['p5']) >= max_unchanged_iterations  and \
                    len(params_sigT_history['p6']) >= max_unchanged_iterations  and \
                    len(params_sigT_history['p7']) >= max_unchanged_iterations:
-                    if round(params_sigT_history['p5'][-2], 1) == round(params_sigT_history['p5'][-1], 1) and \
-                       round(params_sigT_history['p6'][-2], 1) == round(params_sigT_history['p6'][-1], 1) and \
-                       round(params_sigT_history['p7'][-2], 1) == round(params_sigT_history['p7'][-1], 1):
-                        unchanged_iterations += 1        
+                    if np.allclose(round(params_sigT_history['p5'][-2], 3), round(params_sigT_history['p5'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigT_history['p6'][-2], 3), round(params_sigT_history['p6'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigT_history['p7'][-2], 3), round(params_sigT_history['p7'][-1], 3), atol=5.0):
+                        unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
 
@@ -1971,9 +1971,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if len(params_sigLT_history['p9']) >= max_unchanged_iterations  and \
                    len(params_sigLT_history['p10']) >= max_unchanged_iterations  and \
                    len(params_sigLT_history['p11']) >= max_unchanged_iterations:
-                    if round(params_sigLT_history['p9'][-2], 1) == round(params_sigLT_history['p9'][-1], 1) and \
-                       round(params_sigLT_history['p10'][-2], 1) == round(params_sigLT_history['p10'][-1], 1) and \
-                       round(params_sigLT_history['p11'][-2], 1) == round(params_sigLT_history['p11'][-1], 1):
+                    if np.allclose(round(params_sigLT_history['p9'][-2], 3), round(params_sigLT_history['p9'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigLT_history['p10'][-2], 3), round(params_sigLT_history['p10'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigLT_history['p11'][-2], 3), round(params_sigLT_history['p11'][-1], 3), atol=5.0):
                         unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
@@ -2354,7 +2354,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
-                    if round(params_sigTT_history['p13'][-2], 1) == round(params_sigTT_history['p13'][-1], 1):
+                    if np.allclose(round(params_sigTT_history['p13'][-2], 3), round(params_sigTT_history['p13'][-1], 3), atol=5.0):
                         unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
