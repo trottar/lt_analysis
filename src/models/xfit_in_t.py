@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 01:28:08 trottar"
+# Time-stamp: "2024-07-11 01:29:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,7 +83,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    max_iterations = 100
+    max_iterations = 1
+    #max_iterations = 100
     #max_iterations = 500
     #max_iterations = 1000
     #max_iterations = 10000
@@ -341,7 +342,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-2) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1]
@@ -365,7 +366,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-2) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)                    
@@ -749,7 +750,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-2) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1],
@@ -774,7 +775,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-2) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
@@ -1149,7 +1150,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-2) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1]
@@ -1172,7 +1173,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-2) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)                    
@@ -1554,7 +1555,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-2) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1],
@@ -1579,7 +1580,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-2) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p5={:.3e}, p6={:.3e}, p7={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
@@ -1971,7 +1972,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-2) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1],
@@ -1995,7 +1996,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-2) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
@@ -2350,7 +2351,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params], minima, atol=1e-2) for minima in local_minima):                    
+                    if not any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):                    
                         local_minima.append([
                             current_params
                         ])
@@ -2372,7 +2373,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params], minima, atol=1e-2) for minima in local_minima):
+                if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
                     print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
 
                     current_params = adjust_params(best_params)
