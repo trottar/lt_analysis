@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 18:56:28 trottar"
+# Time-stamp: "2024-07-11 19:01:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,9 +186,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    
-    # Store the parameter values and chi-square values for each iteration
-    params_sigL_history = {'p1': [], 'p2': []}
 
     # Create TGraphs for parameter convergence
     graph_sigL_p1 = TGraph()
@@ -203,6 +200,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
+        # Store the parameter values and chi-square values for each iteration
+        params_sigL_history = {'p1': [], 'p2': []}
+        
         iteration = 0
         
         initial_temperature = 1.0
@@ -589,9 +589,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    
-    # Store the parameter values and chi-square values for each iteration
-    params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
 
     # Create TGraphs for parameter convergence
     graph_sigL_p1 = TGraph()
@@ -606,6 +603,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Store the parameter values and chi-square values for each iteration
+        params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
 
         iteration = 0
         
@@ -1009,9 +1009,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    
-    # Store the parameter values and chi-square values for each iteration
-    params_sigT_history = {'p5': [], 'p6': []}
 
     # Create TGraphs for parameter convergence
     graph_sigT_p5 = TGraph()
@@ -1025,6 +1022,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
+
+        # Store the parameter values and chi-square values for each iteration
+        params_sigT_history = {'p5': [], 'p6': []}
         
         iteration = 0
         
@@ -1410,9 +1410,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    
-    # Store the parameter values and chi-square values for each iteration
-    params_sigT_history = {'p5': [], 'p6': [], 'p7': []}
 
     # Create TGraphs for parameter convergence
     graph_sigT_p5 = TGraph()
@@ -1427,6 +1424,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Store the parameter values and chi-square values for each iteration
+        params_sigT_history = {'p5': [], 'p6': [], 'p7': []}
 
         iteration = 0
         
@@ -1829,9 +1829,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    
-    # Store the parameter values and chi-square values for each iteration
-    params_sigLT_history = {'p9': [], 'p10': []}
 
     # Create TGraphs for parameter convergence
     graph_sigLT_p9 = TGraph()
@@ -1846,6 +1843,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
+        # Store the parameter values and chi-square values for each iteration
+        params_sigLT_history = {'p9': [], 'p10': []}
+        
         iteration = 0
     
         initial_temperature = 1.0
@@ -2238,9 +2238,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    
-    # Store the parameter values and chi-square values for each iteration
-    params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
 
     # Create TGraphs for parameter convergence
     graph_sigLT_p9 = TGraph()
@@ -2255,6 +2252,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Store the parameter values and chi-square values for each iteration
+        params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
 
         iteration = 0
     
@@ -2665,9 +2665,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    
-    # Store the parameter values and chi-square values for each iteration
-    params_sigTT_history = {'p13': []}
 
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
@@ -2680,6 +2677,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Store the parameter values and chi-square values for each iteration
+        params_sigTT_history = {'p13': []}
 
         iteration = 0
         
@@ -3048,9 +3048,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    
-    # Store the parameter values and chi-square values for each iteration
-    params_sigTT_history = {'p13': [], 'p14': []}
 
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
@@ -3065,6 +3062,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
+        # Store the parameter values and chi-square values for each iteration
+        params_sigTT_history = {'p13': [], 'p14': []}
+        
         iteration = 0
     
         initial_temperature = 1.0
