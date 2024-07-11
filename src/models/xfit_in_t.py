@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 01:29:09 trottar"
+# Time-stamp: "2024-07-11 01:47:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,8 +83,7 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    max_iterations = 1
-    #max_iterations = 100
+    max_iterations = 100
     #max_iterations = 500
     #max_iterations = 1000
     #max_iterations = 10000
@@ -770,7 +769,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                                
+
+
+                print("!!!!!!!!!!!!!",best_params)
+                
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
