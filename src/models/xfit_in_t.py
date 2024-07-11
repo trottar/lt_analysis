@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 01:53:29 trottar"
+# Time-stamp: "2024-07-11 01:55:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -743,14 +743,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     if round(params_sigL_history['p1'][-2], 1) == round(params_sigL_history['p1'][-1], 1) and \
                        round(params_sigL_history['p2'][-2], 1) == round(params_sigL_history['p2'][-1], 1) and \
                        round(params_sigL_history['p3'][-2], 1) == round(params_sigL_history['p3'][-1], 1):
-                        print("!!!!!!!!!")
                         unchanged_iterations += 1        
                     else:
                         unchanged_iterations = 0
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):
+                        print("!!!!!!!!!")
                         local_minima.append([
                             current_params[0],
                             current_params[1],
