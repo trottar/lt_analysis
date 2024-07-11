@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:19:26 trottar"
+# Time-stamp: "2024-07-11 02:24:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -544,10 +544,10 @@ def get_centroid(hist, x_min, x_max):
 def adaptive_cooling(initial_temp, iteration, max_iterations):
     return initial_temp * (1 - iteration / max_iterations)
 
-def simulated_annealing(param, temperature):
-    # Perturb the parameter based on the temperature
-    #perturbation = random.uniform(-1, 1) * temperature
-    perturbation = random.uniform(-100, 100) * temperature
+def simulated_annealing(param, temperature, perturbation_factor=1.0):
+    # Perturbation factor determines the maximum percentage change
+    max_perturbation = abs(param) * perturbation_factor
+    perturbation = random.uniform(-max_perturbation, max_perturbation) * temperature
     return param + perturbation
 
 def acceptance_probability(old_cost, new_cost, temperature):
@@ -559,7 +559,7 @@ def acceptance_probability(old_cost, new_cost, temperature):
     else:
         return math.exp((old_cost - new_cost) / temperature)
 
-def adjust_params(params, adjustment_factor=10.0):
+def adjust_params(params, adjustment_factor=1.0):
     return [p + random.uniform(-adjustment_factor, adjustment_factor) * p for p in params]
 
 def local_search(params, inp_func, num_params):

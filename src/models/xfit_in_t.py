@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:18:32 trottar"
+# Time-stamp: "2024-07-11 02:27:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -369,7 +369,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("WARNING: Parameters p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)
-                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                    par_sigl_0, par_sigl_1, par_sigl_2 = current_params
+                    par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = [0.0 for _ in range(3)]
                     iteration = 0
                                     
             except (TypeError or ZeroDivisionError) as e:
@@ -1179,9 +1180,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
-                    current_params = adjust_params(best_params)                    
-                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                    iteration = 0                    
+                    current_params = adjust_params(best_params)
+                    par_sigt_0, par_sigt_1 = current_params
+                    par_sigt_err_0, par_sigt_err_1 = [0.0 for _ in range(2)]
+                    iteration = 0
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1587,8 +1589,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p5={:.3e}, p6={:.3e}, p7={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
-                    current_params = adjust_params(best_params)                    
-                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                    current_params = adjust_params(best_params)
+                    par_sigt_0, par_sigt_1, par_sigt_2 = current_params
+                    par_sigt_err_0, par_sigt_err_1, par_sigt_err_2 = [0.0 for _ in range(3)]
                     iteration = 0
                                     
             except (TypeError or ZeroDivisionError) as e:
@@ -2004,9 +2007,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
-                    current_params = adjust_params(best_params)                    
-                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                    iteration = 0                    
+                    current_params = adjust_params(best_params)
+                    par_siglt_0, par_siglt_1, par_siglt_2 = current_params
+                    par_siglt_err_0, par_siglt_err_1, par_siglt_err_2 = [0.0 for _ in range(3)]
+                    iteration = 0
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -2383,8 +2387,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
 
                     current_params = adjust_params(best_params)
-                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                    iteration = 0                    
+                    par_sigtt_0 = current_params
+                    par_sigtt_err_0 = 0.0
+                    iteration = 0
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
