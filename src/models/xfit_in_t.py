@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 01:50:49 trottar"
+# Time-stamp: "2024-07-11 01:52:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -209,7 +209,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 25
+        max_unchanged_iterations = 5
 
         # Initialize adaptive parameter limits
         par_sigl_0 = l0
@@ -606,7 +606,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 25
+        max_unchanged_iterations = 5
 
         # Initialize adaptive parameter limits
         par_sigl_0 = l0
@@ -1016,7 +1016,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 25
+        max_unchanged_iterations = 5
 
         # Initialize adaptive parameter limits
         par_sigt_0 = t0
@@ -1411,7 +1411,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 25
+        max_unchanged_iterations = 5
 
         # Initialize adaptive parameter limits
         par_sigt_0 = t0
@@ -1822,7 +1822,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 25
+        max_unchanged_iterations = 5
 
         # Initialize adaptive parameter limits
         par_siglt_0 = lt0
@@ -2234,7 +2234,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 25
+        max_unchanged_iterations = 5
 
         # Initialize adaptive parameter limits
         par_sigtt_0 = tt0
