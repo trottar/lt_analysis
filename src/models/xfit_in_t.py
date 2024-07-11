@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 19:07:06 trottar"
+# Time-stamp: "2024-07-11 19:09:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -197,12 +197,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_temp = TGraph()
     graph_sigL_accept = TGraph()
 
-    # Initialize adaptive parameter limits
-    par_sigl_0 = l0
-    par_sigl_1 = l1
-    par_sigl_err_0 = 0.0
-    par_sigl_err_1 = 0.0
-    
+    c1.cd(1).SetLeftMargin(0.12)
+    nsep.Draw("sigl:t:sigl_e", "", "goff")
+
     # Record the start time
     start_time = time.time()
     
@@ -216,6 +213,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         unchanged_iterations = 0
         max_unchanged_iterations = 5
 
+        # Initialize adaptive parameter limits
+        par_sigl_0 = l0
+        par_sigl_1 = l1
+        par_sigl_err_0 = 0.0
+        par_sigl_err_1 = 0.0
+
         # Track the best solution
         best_params = [par_sigl_0, par_sigl_1]
         best_cost = float('inf')
@@ -228,9 +231,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Local search
         local_search_interval = 10
-
-        c1.cd(1).SetLeftMargin(0.12)
-        nsep.Draw("sigl:t:sigl_e", "", "goff")
         
         while iteration <= max_iterations:
 
@@ -601,13 +601,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_temp = TGraph()
     graph_sigL_accept = TGraph()
 
-    # Initialize adaptive parameter limits
-    par_sigl_0 = l0
-    par_sigl_1 = l1
-    par_sigl_2 = l2
-    par_sigl_err_0 = 0.0
-    par_sigl_err_1 = 0.0
-    par_sigl_err_2 = 0.0
+    c1.cd(1).SetLeftMargin(0.12)
+    nsep.Draw("sigl:t:sigl_e", "", "goff")
 
     # Record the start time
     start_time = time.time()
@@ -622,6 +617,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         unchanged_iterations = 0
         max_unchanged_iterations = 5
 
+        # Initialize adaptive parameter limits
+        par_sigl_0 = l0
+        par_sigl_1 = l1
+        par_sigl_2 = l2
+        par_sigl_err_0 = 0.0
+        par_sigl_err_1 = 0.0
+        par_sigl_err_2 = 0.0
+
         # Track the best solution
         best_params = [par_sigl_0, par_sigl_1, par_sigl_2]
         best_cost = float('inf')
@@ -634,9 +637,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Local search
         local_search_interval = 10
-
-        c1.cd(1).SetLeftMargin(0.12)
-        nsep.Draw("sigl:t:sigl_e", "", "goff")
 
         while iteration <= max_iterations:
 
@@ -1020,11 +1020,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_temp = TGraph()
     graph_sigT_accept = TGraph()
     
-    # Initialize adaptive parameter limits
-    par_sigt_0 = t0
-    par_sigt_1 = t1
-    par_sigt_err_0 = 0.0
-    par_sigt_err_1 = 0.0
+    c1.cd(2).SetLeftMargin(0.12)
+    nsep.Draw("sigt:t:sigt_e", "", "goff")
     
     # Record the start time
     start_time = time.time()
@@ -1039,6 +1036,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         unchanged_iterations = 0
         max_unchanged_iterations = 5
 
+        # Initialize adaptive parameter limits
+        par_sigt_0 = t0
+        par_sigt_1 = t1
+        par_sigt_err_0 = 0.0
+        par_sigt_err_1 = 0.0
+
         # Track the best solution
         best_params = [par_sigt_0, par_sigt_1]
         best_cost = float('inf')
@@ -1052,9 +1055,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Local search
         local_search_interval = 10
-
-        c1.cd(2).SetLeftMargin(0.12)
-        nsep.Draw("sigt:t:sigt_e", "", "goff")
         
         while iteration <= max_iterations:
 
@@ -1422,13 +1422,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_temp = TGraph()
     graph_sigT_accept = TGraph()
 
-    # Initialize adaptive parameter limits
-    par_sigt_0 = t0
-    par_sigt_1 = t1
-    par_sigt_2 = t2
-    par_sigt_err_0 = 0.0
-    par_sigt_err_1 = 0.0
-    par_sigt_err_2 = 0.0
+    c1.cd(2).SetLeftMargin(0.12)
+    nsep.Draw("sigt:t:sigt_e", "", "goff")
 
     # Record the start time
     start_time = time.time()
@@ -1443,6 +1438,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         unchanged_iterations = 0
         max_unchanged_iterations = 5
 
+        # Initialize adaptive parameter limits
+        par_sigt_0 = t0
+        par_sigt_1 = t1
+        par_sigt_2 = t2
+        par_sigt_err_0 = 0.0
+        par_sigt_err_1 = 0.0
+        par_sigt_err_2 = 0.0
+
         # Track the best solution
         best_params = [par_sigt_0, par_sigt_1, par_sigt_2]
         best_cost = float('inf')
@@ -1455,9 +1458,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Local search
         local_search_interval = 10
-
-        c1.cd(2).SetLeftMargin(0.12)
-        nsep.Draw("sigt:t:sigt_e", "", "goff")
 
         while iteration <= max_iterations:
 
@@ -1840,12 +1840,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_temp = TGraph()
     graph_sigLT_accept = TGraph()
     
-    # Initialize adaptive parameter limits
-    par_siglt_0 = lt0
-    par_siglt_1 = lt1
-    par_siglt_err_0 = 0.0
-    par_siglt_err_1 = 0.0
-    par_siglt_err_2 = 0.0
+    c1.cd(3).SetLeftMargin(0.12)
+    nsep.Draw("siglt:t:siglt_e", "", "goff")
     
     # Record the start time
     start_time = time.time()
@@ -1860,6 +1856,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         unchanged_iterations = 0
         max_unchanged_iterations = 5
 
+        # Initialize adaptive parameter limits
+        par_siglt_0 = lt0
+        par_siglt_1 = lt1
+        par_siglt_err_0 = 0.0
+        par_siglt_err_1 = 0.0
+        par_siglt_err_2 = 0.0
+
         # Track the best solution
         best_params = [par_siglt_0, par_siglt_1]
         best_cost = float('inf')
@@ -1873,9 +1876,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Local search
         local_search_interval = 10
-
-        c1.cd(3).SetLeftMargin(0.12)
-        nsep.Draw("siglt:t:siglt_e", "", "goff")
         
         while iteration <= max_iterations:
             
@@ -2250,13 +2250,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_temp = TGraph()
     graph_sigLT_accept = TGraph()
     
-    # Initialize adaptive parameter limits
-    par_siglt_0 = lt0
-    par_siglt_1 = lt1
-    par_siglt_2 = lt2
-    par_siglt_err_0 = 0.0
-    par_siglt_err_1 = 0.0
-    par_siglt_err_2 = 0.0
+    c1.cd(3).SetLeftMargin(0.12)
+    nsep.Draw("siglt:t:siglt_e", "", "goff")
 
     # Record the start time
     start_time = time.time()
@@ -2271,6 +2266,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         unchanged_iterations = 0
         max_unchanged_iterations = 5
 
+        # Initialize adaptive parameter limits
+        par_siglt_0 = lt0
+        par_siglt_1 = lt1
+        par_siglt_2 = lt2
+        par_siglt_err_0 = 0.0
+        par_siglt_err_1 = 0.0
+        par_siglt_err_2 = 0.0
+
         # Track the best solution
         best_params = [par_siglt_0, par_siglt_1, par_siglt_2]
         best_cost = float('inf')
@@ -2284,9 +2287,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Local search
         local_search_interval = 10
-
-        c1.cd(3).SetLeftMargin(0.12)
-        nsep.Draw("siglt:t:siglt_e", "", "goff")
 
         while iteration <= max_iterations:
             
@@ -2675,9 +2675,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_temp = TGraph()
     graph_sigTT_accept = TGraph()
     
-    # Initialize adaptive parameter limits
-    par_sigtt_0 = tt0
-    par_sigtt_err_0 = 0.0
+    c1.cd(4).SetLeftMargin(0.12)
+    nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
     # Record the start time
     start_time = time.time()
@@ -2692,6 +2691,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         unchanged_iterations = 0
         max_unchanged_iterations = 5
 
+        # Initialize adaptive parameter limits
+        par_sigtt_0 = tt0
+        par_sigtt_err_0 = 0.0
+
         # Track the best solution
         best_params = par_sigtt_0
         best_cost = float('inf')
@@ -2705,9 +2708,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Local search
         local_search_interval = 10
-
-        c1.cd(4).SetLeftMargin(0.12)
-        nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
         while iteration <= max_iterations:
 
@@ -3059,12 +3059,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_temp = TGraph()
     graph_sigTT_accept = TGraph()
     
-    # Initialize adaptive parameter limits
-    par_sigtt_0 = tt0
-    par_sigtt_1 = tt1
-    par_sigtt_err_0 = 0.0
-    par_sigtt_err_1 = 0.0
-    par_sigtt_err_2 = 0.0
+    c1.cd(4).SetLeftMargin(0.12)
+    nsep.Draw("sigtt:t:sigtt_e", "", "goff")
     
     # Record the start time
     start_time = time.time()
@@ -3079,6 +3075,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         unchanged_iterations = 0
         max_unchanged_iterations = 5
 
+        # Initialize adaptive parameter limits
+        par_sigtt_0 = tt0
+        par_sigtt_1 = tt1
+        par_sigtt_err_0 = 0.0
+        par_sigtt_err_1 = 0.0
+        par_sigtt_err_2 = 0.0
+
         # Track the best solution
         best_params = [par_sigtt_0, par_sigtt_1]
         best_cost = float('inf')
@@ -3092,9 +3095,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         # Local search
         local_search_interval = 10
-
-        c1.cd(4).SetLeftMargin(0.12)
-        nsep.Draw("sigtt:t:sigtt_e", "", "goff")
         
         while iteration <= max_iterations:
             
