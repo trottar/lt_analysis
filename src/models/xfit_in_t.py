@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:45:31 trottar"
+# Time-stamp: "2024-07-11 03:13:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -309,7 +309,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     f_sigL.GetParError(1)
                 ]
 
-                #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -714,7 +713,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     f_sigL.GetParError(2)
                 ]
 
-                #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1116,7 +1114,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     f_sigT.GetParError(1)
                 ]
 
-                #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1517,7 +1514,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     f_sigT.GetParError(2)
                 ]
 
-                #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1928,7 +1924,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     f_sigLT.GetParError(2)
                 ]
 
-                #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
@@ -2317,7 +2312,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 current_errors = f_sigTT.GetParError(0)
 
-                #if total_iteration % (max_iterations/10) == 0:
                 # Update ROOT TGraphs for plotting
                 graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
                 graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
