@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 19:01:50 trottar"
+# Time-stamp: "2024-07-11 19:07:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -186,6 +186,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigL_history = {'p1': [], 'p2': []}
 
     # Create TGraphs for parameter convergence
     graph_sigL_p1 = TGraph()
@@ -194,27 +197,24 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_temp = TGraph()
     graph_sigL_accept = TGraph()
 
+    # Initialize adaptive parameter limits
+    par_sigl_0 = l0
+    par_sigl_1 = l1
+    par_sigl_err_0 = 0.0
+    par_sigl_err_1 = 0.0
+    
     # Record the start time
     start_time = time.time()
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        # Store the parameter values and chi-square values for each iteration
-        params_sigL_history = {'p1': [], 'p2': []}
-        
         iteration = 0
         
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 5
-
-        # Initialize adaptive parameter limits
-        par_sigl_0 = l0
-        par_sigl_1 = l1
-        par_sigl_err_0 = 0.0
-        par_sigl_err_1 = 0.0
 
         # Track the best solution
         best_params = [par_sigl_0, par_sigl_1]
@@ -589,6 +589,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
 
     # Create TGraphs for parameter convergence
     graph_sigL_p1 = TGraph()
@@ -598,14 +601,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_temp = TGraph()
     graph_sigL_accept = TGraph()
 
+    # Initialize adaptive parameter limits
+    par_sigl_0 = l0
+    par_sigl_1 = l1
+    par_sigl_2 = l2
+    par_sigl_err_0 = 0.0
+    par_sigl_err_1 = 0.0
+    par_sigl_err_2 = 0.0
+
     # Record the start time
     start_time = time.time()
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
 
         iteration = 0
         
@@ -613,14 +621,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 5
-
-        # Initialize adaptive parameter limits
-        par_sigl_0 = l0
-        par_sigl_1 = l1
-        par_sigl_2 = l2
-        par_sigl_err_0 = 0.0
-        par_sigl_err_1 = 0.0
-        par_sigl_err_2 = 0.0
 
         # Track the best solution
         best_params = [par_sigl_0, par_sigl_1, par_sigl_2]
@@ -1009,6 +1009,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigT_history = {'p5': [], 'p6': []}
 
     # Create TGraphs for parameter convergence
     graph_sigT_p5 = TGraph()
@@ -1017,14 +1020,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_temp = TGraph()
     graph_sigT_accept = TGraph()
     
+    # Initialize adaptive parameter limits
+    par_sigt_0 = t0
+    par_sigt_1 = t1
+    par_sigt_err_0 = 0.0
+    par_sigt_err_1 = 0.0
+    
     # Record the start time
     start_time = time.time()
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigT_history = {'p5': [], 'p6': []}
         
         iteration = 0
         
@@ -1032,12 +1038,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 5
-
-        # Initialize adaptive parameter limits
-        par_sigt_0 = t0
-        par_sigt_1 = t1
-        par_sigt_err_0 = 0.0
-        par_sigt_err_1 = 0.0
 
         # Track the best solution
         best_params = [par_sigt_0, par_sigt_1]
@@ -1410,6 +1410,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigT_history = {'p5': [], 'p6': [], 'p7': []}
 
     # Create TGraphs for parameter convergence
     graph_sigT_p5 = TGraph()
@@ -1419,14 +1422,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_temp = TGraph()
     graph_sigT_accept = TGraph()
 
+    # Initialize adaptive parameter limits
+    par_sigt_0 = t0
+    par_sigt_1 = t1
+    par_sigt_2 = t2
+    par_sigt_err_0 = 0.0
+    par_sigt_err_1 = 0.0
+    par_sigt_err_2 = 0.0
+
     # Record the start time
     start_time = time.time()
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigT_history = {'p5': [], 'p6': [], 'p7': []}
 
         iteration = 0
         
@@ -1434,14 +1442,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 5
-
-        # Initialize adaptive parameter limits
-        par_sigt_0 = t0
-        par_sigt_1 = t1
-        par_sigt_2 = t2
-        par_sigt_err_0 = 0.0
-        par_sigt_err_1 = 0.0
-        par_sigt_err_2 = 0.0
 
         # Track the best solution
         best_params = [par_sigt_0, par_sigt_1, par_sigt_2]
@@ -1829,6 +1829,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigLT_history = {'p9': [], 'p10': []}
 
     # Create TGraphs for parameter convergence
     graph_sigLT_p9 = TGraph()
@@ -1837,28 +1840,25 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_temp = TGraph()
     graph_sigLT_accept = TGraph()
     
+    # Initialize adaptive parameter limits
+    par_siglt_0 = lt0
+    par_siglt_1 = lt1
+    par_siglt_err_0 = 0.0
+    par_siglt_err_1 = 0.0
+    par_siglt_err_2 = 0.0
+    
     # Record the start time
     start_time = time.time()
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        # Store the parameter values and chi-square values for each iteration
-        params_sigLT_history = {'p9': [], 'p10': []}
-        
         iteration = 0
     
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 5
-
-        # Initialize adaptive parameter limits
-        par_siglt_0 = lt0
-        par_siglt_1 = lt1
-        par_siglt_err_0 = 0.0
-        par_siglt_err_1 = 0.0
-        par_siglt_err_2 = 0.0
 
         # Track the best solution
         best_params = [par_siglt_0, par_siglt_1]
@@ -2238,6 +2238,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
 
     # Create TGraphs for parameter convergence
     graph_sigLT_p9 = TGraph()
@@ -2247,14 +2250,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_temp = TGraph()
     graph_sigLT_accept = TGraph()
     
+    # Initialize adaptive parameter limits
+    par_siglt_0 = lt0
+    par_siglt_1 = lt1
+    par_siglt_2 = lt2
+    par_siglt_err_0 = 0.0
+    par_siglt_err_1 = 0.0
+    par_siglt_err_2 = 0.0
+
     # Record the start time
     start_time = time.time()
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
 
         iteration = 0
     
@@ -2262,14 +2270,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 5
-
-        # Initialize adaptive parameter limits
-        par_siglt_0 = lt0
-        par_siglt_1 = lt1
-        par_siglt_2 = lt2
-        par_siglt_err_0 = 0.0
-        par_siglt_err_1 = 0.0
-        par_siglt_err_2 = 0.0
 
         # Track the best solution
         best_params = [par_siglt_0, par_siglt_1, par_siglt_2]
@@ -2665,6 +2665,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigTT_history = {'p13': []}
 
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
@@ -2672,14 +2675,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_temp = TGraph()
     graph_sigTT_accept = TGraph()
     
+    # Initialize adaptive parameter limits
+    par_sigtt_0 = tt0
+    par_sigtt_err_0 = 0.0
+
     # Record the start time
     start_time = time.time()
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
-
-        # Store the parameter values and chi-square values for each iteration
-        params_sigTT_history = {'p13': []}
 
         iteration = 0
         
@@ -2687,10 +2691,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 5
-
-        # Initialize adaptive parameter limits
-        par_sigtt_0 = tt0
-        par_sigtt_err_0 = 0.0
 
         # Track the best solution
         best_params = par_sigtt_0
@@ -3048,6 +3048,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    
+    # Store the parameter values and chi-square values for each iteration
+    params_sigTT_history = {'p13': [], 'p14': []}
 
     # Create TGraphs for parameter convergence
     graph_sigTT_p13 = TGraph()
@@ -3056,28 +3059,25 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_temp = TGraph()
     graph_sigTT_accept = TGraph()
     
+    # Initialize adaptive parameter limits
+    par_sigtt_0 = tt0
+    par_sigtt_1 = tt1
+    par_sigtt_err_0 = 0.0
+    par_sigtt_err_1 = 0.0
+    par_sigtt_err_2 = 0.0
+    
     # Record the start time
     start_time = time.time()
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
-        # Store the parameter values and chi-square values for each iteration
-        params_sigTT_history = {'p13': [], 'p14': []}
-        
         iteration = 0
     
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
         max_unchanged_iterations = 5
-
-        # Initialize adaptive parameter limits
-        par_sigtt_0 = tt0
-        par_sigtt_1 = tt1
-        par_sigtt_err_0 = 0.0
-        par_sigtt_err_1 = 0.0
-        par_sigtt_err_2 = 0.0
 
         # Track the best solution
         best_params = [par_sigtt_0, par_sigtt_1]
