@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 19:09:50 trottar"
+# Time-stamp: "2024-07-11 19:20:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -370,7 +370,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 g_sigl.Delete()
                 f_sigL.Delete()
-                    
+                r_sigl_fit.Delete()
+                
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -786,7 +787,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 g_sigl.Delete()
                 f_sigL.Delete()
-                                    
+                r_sigl_fit.Delete()
+                    
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -1192,7 +1194,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 g_sigt.Delete()
                 f_sigT.Delete()
-                    
+                r_sigt_fit.Delete()                
+                
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -1606,7 +1609,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 g_sigt.Delete()
                 f_sigT.Delete()
-                                    
+                r_sigt_fit.Delete()
+             
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -2020,7 +2024,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 g_siglt.Delete()
                 f_sigLT.Delete()
-                    
+                r_siglt_fit.Delete()                
+                
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
                 
@@ -2442,6 +2447,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 g_siglt.Delete()
                 f_sigLT.Delete()
+                r_siglt_fit.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -2830,6 +2836,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 g_sigtt.Delete()
                 f_sigTT.Delete()
+                r_sigtt_fit.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -3239,7 +3246,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 g_sigtt.Delete()
                 f_sigTT.Delete()
-                    
+                r_sigtt_fit.Delete()                
+                
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
                 
