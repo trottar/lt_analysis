@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 16:35:41 trottar"
+# Time-stamp: "2024-07-11 17:16:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -416,7 +416,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit = TGraphErrors()
     g_sigl_fit_tot = TGraph()        
     
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
     f_sigL_pre.SetParNames("p1", "p2")
     f_sigL_pre.FixParameter(0, best_overall_params[0])
     f_sigL_pre.FixParameter(1, best_overall_params[1])
@@ -2952,11 +2952,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     total_iteration = 0
     
     # Store the parameter values and chi-square values for each iteration
-    params_sigTT_history = {'p9': [], 'p10': []}
+    params_sigTT_history = {'p13': [], 'p14': []}
 
     # Create TGraphs for parameter convergence
-    graph_sigTT_p9 = TGraph()
-    graph_sigTT_p10 = TGraph()
+    graph_sigTT_p13 = TGraph()
+    graph_sigTT_p14 = TGraph()
     graph_sigTT_chi2 = TGraph()
     graph_sigTT_temp = TGraph()
     graph_sigTT_accept = TGraph()
@@ -3037,7 +3037,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
                 f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
-                f_sigTT.SetParNames("p9", "p10")
+                f_sigTT.SetParNames("p13", "p14")
                 f_sigTT.SetParameter(0, current_params[0])
                 f_sigTT.SetParameter(1, current_params[1])
                 #f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigtt_0), current_params[0] + abs(current_params[0] * par_sigtt_0))
@@ -3057,8 +3057,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
                 f_sigTT_status = f_sigTT.GetNDF() != 0
 
-                params_sigTT_history['p9'].append(current_params[0])
-                params_sigTT_history['p10'].append(current_params[1])
+                params_sigTT_history['p13'].append(current_params[0])
+                params_sigTT_history['p14'].append(current_params[1])
 
                 # Calculate the cost (chi-square value) for the current parameters
                 current_cost = f_sigTT.GetChisquare()
@@ -3077,8 +3077,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 ]
 
                 # Update ROOT TGraphs for plotting
-                graph_sigTT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
-                graph_sigTT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
+                graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params[0])
+                graph_sigTT_p14.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                 graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigTT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
@@ -3099,10 +3099,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     par_sigtt_0, par_sigtt_1 = current_params
 
                 # Check if current parameters haven't changed for the past N iterations
-                if len(params_sigTT_history['p9']) >= max_unchanged_iterations  and \
-                   len(params_sigTT_history['p10']) >= max_unchanged_iterations:
-                    if np.allclose(round(params_sigTT_history['p9'][-2], 3), round(params_sigTT_history['p9'][-1], 3), atol=5.0) and \
-                       np.allclose(round(params_sigTT_history['p10'][-2], 3), round(params_sigTT_history['p10'][-1], 3), atol=5.0):
+                if len(params_sigTT_history['p13']) >= max_unchanged_iterations  and \
+                   len(params_sigTT_history['p14']) >= max_unchanged_iterations:
+                    if np.allclose(round(params_sigTT_history['p13'][-2], 3), round(params_sigTT_history['p13'][-1], 3), atol=5.0) and \
+                       np.allclose(round(params_sigTT_history['p14'][-2], 3), round(params_sigTT_history['p14'][-1], 3), atol=5.0):
                         unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
@@ -3133,7 +3133,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):
-                    #print("WARNING: Parameters p9={:.3e}, p10={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
+                    #print("WARNING: Parameters p13={:.3e}, p14={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)
                     par_sigtt_0, par_sigtt_1 = current_params
@@ -3187,7 +3187,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit_tot = TGraph()    
 
     f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
-    f_sigTT_pre.SetParNames("p9", "p10")
+    f_sigTT_pre.SetParNames("p13", "p14")
     f_sigTT_pre.FixParameter(0, best_overall_params[0])
     f_sigTT_pre.FixParameter(1, best_overall_params[1])
 
@@ -3243,7 +3243,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
     f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
-    f_sigTT.SetParNames("p9", "p10")
+    f_sigTT.SetParNames("p13", "p14")
     f_sigTT.FixParameter(0, best_overall_params[0])
     f_sigTT.FixParameter(1, best_overall_params[1])
 
@@ -3290,7 +3290,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     max_sigTT_y = float('-inf')
 
     # Update min_sigTT_y and max_sigTT_y based on each graph's values
-    for graph in [graph_sigTT_p9, graph_sigTT_p10]:
+    for graph in [graph_sigTT_p13, graph_sigTT_p14]:
         n_points = graph.GetN()
         for i in range(n_points):
             y = graph.GetY()[i]
@@ -3300,16 +3300,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 max_sigTT_y = y
 
     # Scale the y-axis
-    graph_sigTT_p9.SetMinimum(min_sigTT_y * 0.9)
-    graph_sigTT_p9.SetMaximum(max_sigTT_y * 1.1)    
+    graph_sigTT_p13.SetMinimum(min_sigTT_y * 0.9)
+    graph_sigTT_p13.SetMaximum(max_sigTT_y * 1.1)    
     
     # Plot parameter convergence
     c3.cd(3).SetLeftMargin(0.12)
-    graph_sigTT_p9.SetTitle("Sig TT Parameter Convergence;Optimization Run;Parameter")
-    graph_sigTT_p9.SetLineColor(ROOT.kRed)
-    graph_sigTT_p10.SetLineColor(ROOT.kBlue)
-    graph_sigTT_p9.Draw("ALP")
-    graph_sigTT_p10.Draw("LP SAME")
+    graph_sigTT_p13.SetTitle("Sig TT Parameter Convergence;Optimization Run;Parameter")
+    graph_sigTT_p13.SetLineColor(ROOT.kRed)
+    graph_sigTT_p14.SetLineColor(ROOT.kBlue)
+    graph_sigTT_p13.Draw("ALP")
+    graph_sigTT_p14.Draw("LP SAME")
     
     # Plot chi-square convergence
     c4.cd(3).SetLeftMargin(0.12)
