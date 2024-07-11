@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:15:15 trottar"
+# Time-stamp: "2024-07-11 02:17:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -209,7 +209,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 2
+        max_unchanged_iterations = 3
 
         # Initialize adaptive parameter limits
         par_sigl_0 = l0
@@ -254,7 +254,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     tabu_list.add(tuple(current_params))
                     # Proceed with evaluation
                 else:
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [l0, l1]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -347,7 +347,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[1]
                         ])
 
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [l0, l1]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -607,7 +607,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 2
+        max_unchanged_iterations = 3
 
         # Initialize adaptive parameter limits
         par_sigl_0 = l0
@@ -656,7 +656,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     tabu_list.add(tuple(current_params))
                     # Proceed with evaluation
                 else:
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [l0, l1, l2]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -758,7 +758,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[2]
                         ])
 
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [l0, l1, l2]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -1020,7 +1020,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 2
+        max_unchanged_iterations = 3
 
         # Initialize adaptive parameter limits
         par_sigt_0 = t0
@@ -1066,7 +1066,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     tabu_list.add(tuple(current_params))
                     # Proceed with evaluation
                 else:
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [t0, t1]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -1158,7 +1158,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[0],
                             current_params[1]
                         ])
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [t0, t1]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -1416,7 +1416,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 2
+        max_unchanged_iterations = 3
 
         # Initialize adaptive parameter limits
         par_sigt_0 = t0
@@ -1464,7 +1464,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     tabu_list.add(tuple(current_params))
                     # Proceed with evaluation
                 else:
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [t0, t1, t2]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -1566,7 +1566,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[2]
                         ])
 
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [t0, t1, t2]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -1828,7 +1828,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 2
+        max_unchanged_iterations = 3
 
         # Initialize adaptive parameter limits
         par_siglt_0 = lt0
@@ -1877,7 +1877,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     tabu_list.add(tuple(current_params))
                     # Proceed with evaluation
                 else:
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = [lt0, lt1, lt2]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -1983,7 +1983,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                             current_params[1],
                             current_params[2]
                         ])
-                        # Restart from a new random point
+                        # Restart from initial parameters
                     current_params = [lt0, lt1, lt2]
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -2241,7 +2241,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         initial_temperature = 1.0
         temperature = initial_temperature
         unchanged_iterations = 0
-        max_unchanged_iterations = 2
+        max_unchanged_iterations = 3
 
         # Initialize adaptive parameter limits
         par_sigtt_0 = tt0
@@ -2282,7 +2282,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     tabu_list.add(current_params)
                     # Proceed with evaluation
                 else:
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = tt0
                     temperature = initial_temperature
                     unchanged_iterations = 0
@@ -2361,7 +2361,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         local_minima.append([
                             current_params
                         ])
-                    # Restart from a new random point
+                    # Restart from initial parameters
                     current_params = tt0
                     temperature = initial_temperature
                     unchanged_iterations = 0
