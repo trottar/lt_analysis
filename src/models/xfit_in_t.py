@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:51:43 trottar"
+# Time-stamp: "2024-07-11 03:54:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -312,7 +312,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update ROOT TGraphs for plotting
                 graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
-                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 3))
                 graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
@@ -536,7 +536,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(1).SetLeftMargin(0.12)
-    c3.cd(1).SetLogy()
     graph_sigL_p1.SetTitle("Sig L Parameter Convergence;Optimization Run;Parameter")
     graph_sigL_p1.SetLineColor(ROOT.kRed)
     graph_sigL_p2.SetLineColor(ROOT.kBlue)
@@ -714,7 +713,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 3))
                 graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
@@ -942,7 +941,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(1).SetLeftMargin(0.12)
-    c3.cd(1).SetLogy()
     graph_sigL_p1.SetTitle("Sig L Parameter Convergence;Optimization Run;Parameter")
     graph_sigL_p1.SetLineColor(ROOT.kRed)
     graph_sigL_p2.SetLineColor(ROOT.kBlue)
@@ -1110,7 +1108,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update ROOT TGraphs for plotting
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
-                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 3))
                 graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                                 
@@ -1331,7 +1329,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     # Plot parameter convergence
     c3.cd(2).SetLeftMargin(0.12)
-    c3.cd(2).SetLogy()
     graph_sigT_p5.SetTitle("Sig T Parameter Convergence;Optimization Run;Parameter")
     graph_sigT_p5.SetLineColor(ROOT.kRed)
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
@@ -1507,7 +1504,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigT_p7.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 3))
                 graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
@@ -1735,7 +1732,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(2).SetLeftMargin(0.12)
-    c3.cd(2).SetLogy()
     graph_sigT_p5.SetTitle("Sig T Parameter Convergence;Optimization Run;Parameter")
     graph_sigT_p5.SetLineColor(ROOT.kRed)
     graph_sigT_p6.SetLineColor(ROOT.kBlue)
@@ -1913,7 +1909,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 3))
                 graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigLT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
 
@@ -2144,7 +2140,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     # Plot parameter convergence
     c3.cd(3).SetLeftMargin(0.12)
-    c3.cd(3).SetLogy()
     graph_sigLT_p9.SetTitle("Sig LT Parameter Convergence;Optimization Run;Parameter")
     graph_sigLT_p9.SetLineColor(ROOT.kRed)
     graph_sigLT_p10.SetLineColor(ROOT.kBlue)
@@ -2295,7 +2290,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Update ROOT TGraphs for plotting
                 graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
-                graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
+                graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 3))
                 graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigTT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
@@ -2515,7 +2510,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot parameter convergence
     c3.cd(4).SetLeftMargin(0.12)
-    c3.cd(4).SetLogy()
     graph_sigTT_p13.SetTitle("Sig TT Parameter Convergence;Optimization Run;Parameter")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
     graph_sigTT_p13.Draw("ALP")
