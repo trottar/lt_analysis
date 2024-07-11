@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:14:06 trottar"
+# Time-stamp: "2024-07-11 02:15:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -780,8 +780,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)
-                    temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
                     par_sigl_0, par_sigl_1, par_sigl_2 = current_params
+                    par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = [0.0 for _ in range(3)]
                     iteration = 0
                                     
             except (TypeError or ZeroDivisionError) as e:
