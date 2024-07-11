@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 17:18:29 trottar"
+# Time-stamp: "2024-07-11 17:33:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3004,7 +3004,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
 
-            c1.cd(3).SetLeftMargin(0.12)
+            c1.cd(4).SetLeftMargin(0.12)
             nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
             try:
@@ -3220,7 +3220,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_prv.SetMarkerStyle(25)
     g_sigtt_prv.Draw("P")
 
-    c2.cd(3).SetLeftMargin(0.12)
+    c2.cd(4).SetLeftMargin(0.12)
     g_sigtt_fit.SetTitle("Sigma TT Model Fit")
     g_sigtt_fit.Draw("A*")
 
@@ -3279,7 +3279,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     fit_status.SetTextSize(0.04)
     fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sigTT_status_message))
 
-    c1.cd(3)
+    c1.cd(4)
     g_sigtt_fit_tot.SetMarkerStyle(26)
     g_sigtt_fit_tot.SetMarkerColor(2)
     g_sigtt_fit_tot.SetLineColor(2)
@@ -3304,7 +3304,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_p13.SetMaximum(max_sigTT_y * 1.1)    
     
     # Plot parameter convergence
-    c3.cd(3).SetLeftMargin(0.12)
+    c3.cd(4).SetLeftMargin(0.12)
     graph_sigTT_p13.SetTitle("Sig TT Parameter Convergence;Optimization Run;Parameter")
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
     graph_sigTT_p14.SetLineColor(ROOT.kBlue)
@@ -3312,19 +3312,19 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_p14.Draw("LP SAME")
     
     # Plot chi-square convergence
-    c4.cd(3).SetLeftMargin(0.12)
+    c4.cd(4).SetLeftMargin(0.12)
     graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Optimization Run;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigTT_chi2.Draw("ALP")
     
     # Plot temperature convergence
-    c5.cd(3).SetLeftMargin(0.12)
+    c5.cd(4).SetLeftMargin(0.12)
     graph_sigTT_temp.SetTitle("Sig TT Temperature Convergence;Optimization Run;Temperature")
     graph_sigTT_temp.SetLineColor(ROOT.kBlack)
     graph_sigTT_temp.Draw("ALP")
     
     # Plot acceptance probability convergence
-    c6.cd(3).SetLeftMargin(0.12)
+    c6.cd(4).SetLeftMargin(0.12)
     graph_sigTT_accept.SetTitle("Sig TT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigTT_accept.SetLineColor(ROOT.kBlack)
     graph_sigTT_accept.Draw("ALP")
