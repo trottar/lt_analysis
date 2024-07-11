@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:59:00 trottar"
+# Time-stamp: "2024-07-11 04:01:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -312,8 +312,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update ROOT TGraphs for plotting
                 graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
-                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 5))
-                graph_sigL_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 5))
+                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                graph_sigL_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
@@ -713,9 +713,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 5))
+                graph_sigL_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                 graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigL_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 5))
+                graph_sigL_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
@@ -1108,9 +1108,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update ROOT TGraphs for plotting
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
-                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 5))
+                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                 graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 5))
+                graph_sigT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
                                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
@@ -1504,9 +1504,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigT_p7.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 5))
+                graph_sigT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                 graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 5))
+                graph_sigT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
@@ -1909,9 +1909,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigLT_p9.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
-                graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 5))
+                graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                 graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigLT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 5))
+                graph_sigLT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
@@ -2290,9 +2290,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Update ROOT TGraphs for plotting
                 graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
-                graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 5))
+                graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                 graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
-                graph_sigTT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 5))
+                graph_sigTT_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                 if accept_prob > random.random():
