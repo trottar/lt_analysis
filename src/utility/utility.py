@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:37:41 trottar"
+# Time-stamp: "2024-07-11 02:47:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -564,7 +564,7 @@ def adjust_params(params, adjustment_factor=100.0):
 
 def local_search(params, inp_func, num_params):
 
-    if num_params > 1:
+    if num_params+1 > 2:
         minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
         minimizer.SetMaxFunctionCalls(1000000)
         minimizer.SetMaxIterations(100000)
@@ -573,7 +573,7 @@ def local_search(params, inp_func, num_params):
 
         # Create a wrapper function that can be called by the minimizer
         def chi2_func(par):
-            for i in range(num_params):
+            for i in range(num_params+1):
                 inp_func.SetParameter(i, par[i])
             return inp_func.GetChisquare()
 
@@ -585,7 +585,7 @@ def local_search(params, inp_func, num_params):
         py_func = PyFunc()
 
         # Create the functor
-        func = Math.Functor(py_func, num_params)  # num_params is the number of parameters
+        func = Math.Functor(py_func, num_params+1)  # num_params+1 is the number of parameters
         minimizer.SetFunction(func)
 
         # Set initial values and step sizes
@@ -596,7 +596,7 @@ def local_search(params, inp_func, num_params):
         minimizer.Minimize()
 
         # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(num_params)]
+        improved_params = [minimizer.X()[i] for i in range(num_params+1)]
 
         return improved_params
 
