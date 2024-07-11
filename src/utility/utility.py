@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:48:56 trottar"
+# Time-stamp: "2024-07-11 18:59:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -598,6 +598,9 @@ def local_search(params, inp_func, num_params):
         # Get the improved parameters
         improved_params = [minimizer.X()[i] for i in range(num_params+1)]
 
+        minimizer.Delete()
+        func.Delete()
+
         return improved_params
 
     else:
@@ -632,6 +635,9 @@ def local_search(params, inp_func, num_params):
         # Get the improved parameters
         improved_params = minimizer.X()
 
+        minimizer.Delete()
+        func.Delete()
+        
         return improved_params            
             
 ################################################################################################################################################
