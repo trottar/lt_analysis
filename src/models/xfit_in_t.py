@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:23:57 trottar"
+# Time-stamp: "2024-07-11 03:24:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -362,7 +362,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):
-                    print("WARNING: Parameters p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
+                    #print("WARNING: Parameters p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)
                     par_sigl_0, par_sigl_1, par_sigl_2 = current_params
@@ -770,7 +770,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
-                    print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+                    #print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)
                     par_sigl_0, par_sigl_1, par_sigl_2 = current_params
@@ -1166,7 +1166,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):
-                    print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
+                    #print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)
                     par_sigt_0, par_sigt_1 = current_params
@@ -1571,7 +1571,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
-                    print("WARNING: Parameters p5={:.3e}, p6={:.3e}, p7={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+                    #print("WARNING: Parameters p5={:.3e}, p6={:.3e}, p7={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)
                     par_sigt_0, par_sigt_1, par_sigt_2 = current_params
@@ -1985,7 +1985,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
-                    print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+                    #print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)
                     par_siglt_0, par_siglt_1, par_siglt_2 = current_params
@@ -2360,7 +2360,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):
-                    print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
+                    #print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
 
                     current_params = adjust_params(best_params)
                     par_sigtt_0 = current_params
