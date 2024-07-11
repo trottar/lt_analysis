@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:25:18 trottar"
+# Time-stamp: "2024-07-11 03:28:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -313,7 +313,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_p1.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigL_chi2.SetPoint(total_iteration, total_iteration, current_cost)
-                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
@@ -356,6 +355,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
                                 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -717,7 +718,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigL_p2.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigL_p3.SetPoint(total_iteration, total_iteration, current_params[2])
                 graph_sigL_chi2.SetPoint(total_iteration, total_iteration, current_cost)
-                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigL_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
@@ -763,7 +763,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                
+
+                graph_sigL_temp.SetPoint(total_iteration, total_iteration, temperature)
+                                
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
@@ -1116,7 +1118,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigT_p5.SetPoint(total_iteration, total_iteration, current_params[0])
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
-                graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
@@ -1161,7 +1162,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-                
+
+                graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                                
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):
                     #print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
@@ -1516,7 +1519,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigT_p6.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigT_p7.SetPoint(total_iteration, total_iteration, current_params[2])
                 graph_sigT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
-                graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
@@ -1562,6 +1564,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                graph_sigT_temp.SetPoint(total_iteration, total_iteration, temperature)
                                 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -1925,7 +1929,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 graph_sigLT_p10.SetPoint(total_iteration, total_iteration, current_params[1])
                 graph_sigLT_p11.SetPoint(total_iteration, total_iteration, current_params[2])
                 graph_sigLT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
-                graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigLT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
@@ -1976,6 +1979,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
+                graph_sigLT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                                
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
@@ -2310,7 +2315,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Update ROOT TGraphs for plotting
                 graph_sigTT_p13.SetPoint(total_iteration, total_iteration, current_params)
                 graph_sigTT_chi2.SetPoint(total_iteration, total_iteration, current_cost)
-                graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
                 graph_sigTT_accept.SetPoint(total_iteration, total_iteration, accept_prob)
                 
                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
@@ -2352,7 +2356,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-                
+
+                graph_sigTT_temp.SetPoint(total_iteration, total_iteration, temperature)
+                                
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):
                     #print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
