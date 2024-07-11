@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:22:59 trottar"
+# Time-stamp: "2024-07-11 03:23:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -367,7 +367,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigl_0, par_sigl_1, par_sigl_2 = current_params
                     par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = [0.0 for _ in range(3)]
-                    iteration = 0
+                    iteration += 1
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -775,7 +775,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigl_0, par_sigl_1, par_sigl_2 = current_params
                     par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = [0.0 for _ in range(3)]
-                    iteration = 0
+                    iteration += 1
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1171,7 +1171,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigt_0, par_sigt_1 = current_params
                     par_sigt_err_0, par_sigt_err_1 = [0.0 for _ in range(2)]
-                    iteration = 0
+                    iteration += 1
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1576,7 +1576,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigt_0, par_sigt_1, par_sigt_2 = current_params
                     par_sigt_err_0, par_sigt_err_1, par_sigt_err_2 = [0.0 for _ in range(3)]
-                    iteration = 0
+                    iteration += 1
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1990,7 +1990,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_siglt_0, par_siglt_1, par_siglt_2 = current_params
                     par_siglt_err_0, par_siglt_err_1, par_siglt_err_2 = [0.0 for _ in range(3)]
-                    iteration = 0
+                    iteration += 1
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -2365,7 +2365,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigtt_0 = current_params
                     par_sigtt_err_0 = 0.0
-                    iteration = 0
+                    iteration += 1
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
