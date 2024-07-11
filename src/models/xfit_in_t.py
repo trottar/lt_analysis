@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:10:02 trottar"
+# Time-stamp: "2024-07-11 02:11:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -643,12 +643,18 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             nsep.Draw("sigl:t:sigl_e", "", "goff")
 
             try:
+                for i, param in enumerate(current_params):
+                    print("!!!!!!!!", current_params[i])
+                
                 # Perturb parameters
                 current_params = [
                     simulated_annealing(par_sigl_0, temperature),
                     simulated_annealing(par_sigl_1, temperature),
                     simulated_annealing(par_sigl_2, temperature)
                 ]
+
+                for i, param in enumerate(current_params):
+                    print("$$$$$$", current_params[i])
 
                 # Insert tabu list check here
                 if tuple(current_params) not in tabu_list:
@@ -776,13 +782,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 # Check if current_params are close to any local minimum
                 if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):
-                    print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+                    #print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)
                     temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
                     iteration = 0
-                    for i, param in enumerate(current_params):
-                        print("!!!!!!!!", current_params[i])
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
