@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:05:16 trottar"
+# Time-stamp: "2024-07-11 02:07:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -780,7 +780,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                     current_params = adjust_params(best_params)
                     temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                    iteration = 0                    
+                    iteration = 0
+                    for i, param in enumerate(current_params):
+                        current_params[i] = current_params[i]*10
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
