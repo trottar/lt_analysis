@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:10:19 trottar"
+# Time-stamp: "2024-07-11 02:19:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -546,7 +546,8 @@ def adaptive_cooling(initial_temp, iteration, max_iterations):
 
 def simulated_annealing(param, temperature):
     # Perturb the parameter based on the temperature
-    perturbation = random.uniform(-1, 1) * temperature
+    #perturbation = random.uniform(-1, 1) * temperature
+    perturbation = random.uniform(-100, 100) * temperature
     return param + perturbation
 
 def acceptance_probability(old_cost, new_cost, temperature):
