@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 19:28:03 trottar"
+# Time-stamp: "2024-07-11 19:32:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,7 +251,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Insert tabu list check here
                 if tuple(current_params) not in tabu_list:
                     tabu_list.add(tuple(current_params))
-                    # Proceed with evaluation
                 else:
                     # Restart from initial parameters
                     current_params = [l0, l1]
@@ -645,7 +644,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Insert tabu list check here
                 if tuple(current_params) not in tabu_list:
                     tabu_list.add(tuple(current_params))
-                    # Proceed with evaluation
                 else:
                     # Restart from initial parameters
                     current_params = [l0, l1, l2]
@@ -1047,7 +1045,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Insert tabu list check here
                 if tuple(current_params) not in tabu_list:
                     tabu_list.add(tuple(current_params))
-                    # Proceed with evaluation
                 else:
                     # Restart from initial parameters
                     current_params = [t0, t1]
@@ -1437,7 +1434,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Insert tabu list check here
                 if tuple(current_params) not in tabu_list:
                     tabu_list.add(tuple(current_params))
-                    # Proceed with evaluation
                 else:
                     # Restart from initial parameters
                     current_params = [t0, t1, t2]
@@ -1840,7 +1836,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Insert tabu list check here
                 if tuple(current_params) not in tabu_list:
                     tabu_list.add(tuple(current_params))
-                    # Proceed with evaluation
                 else:
                     # Restart from initial parameters
                     current_params = [lt0, lt1]
@@ -2238,7 +2233,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Insert tabu list check here
                 if tuple(current_params) not in tabu_list:
                     tabu_list.add(tuple(current_params))
-                    # Proceed with evaluation
                 else:
                     # Restart from initial parameters
                     current_params = [lt0, lt1, lt2]
@@ -2641,7 +2635,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Insert tabu list check here
                 if current_params not in tabu_list:
                     tabu_list.add(current_params)
-                    # Proceed with evaluation
                 else:
                     # Restart from initial parameters
                     current_params = tt0
@@ -3017,7 +3010,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Insert tabu list check here
                 if tuple(current_params) not in tabu_list:
                     tabu_list.add(tuple(current_params))
-                    # Proceed with evaluation
                 else:
                     # Restart from initial parameters
                     current_params = [tt0, tt1]
