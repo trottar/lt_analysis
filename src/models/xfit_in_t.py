@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:11:49 trottar"
+# Time-stamp: "2024-07-11 02:12:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -643,8 +643,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             nsep.Draw("sigl:t:sigl_e", "", "goff")
 
             try:
-                for i, param in enumerate(current_params):
-                    print("!!!!!!!!", current_params[i])
                 
                 # Perturb parameters
                 current_params = [
@@ -786,6 +784,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                     current_params = adjust_params(best_params)
                     temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                    par_sigl_0, par_sigl_1, par_sigl_2 = current_params
                     iteration = 0
                                     
             except (TypeError or ZeroDivisionError) as e:
