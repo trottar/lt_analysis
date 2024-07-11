@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 01:47:01 trottar"
+# Time-stamp: "2024-07-11 01:48:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,15 +333,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigL_history['p1']) >= max_unchanged_iterations  and \
                    len(params_sigL_history['p2']) >= max_unchanged_iterations:
-                    if round(params_sigL_history['p1'][-2], 3) == round(params_sigL_history['p1'][-1], 3) and \
-                       round(params_sigL_history['p2'][-2], 3) == round(params_sigL_history['p2'][-1], 3):
+                    if round(params_sigL_history['p1'][-2], 1) == round(params_sigL_history['p1'][-1], 1) and \
+                       round(params_sigL_history['p2'][-2], 1) == round(params_sigL_history['p2'][-1], 1):
                         unchanged_iterations += 1        
                     else:
                         unchanged_iterations = 0
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-1) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1]
@@ -365,7 +365,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)                    
@@ -419,7 +419,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit = TGraphErrors()
     g_sigl_fit_tot = TGraph()        
     
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 1)
     f_sigL_pre.SetParNames("p1", "p2")
     f_sigL_pre.FixParameter(0, best_overall_params[0])
     f_sigL_pre.FixParameter(1, best_overall_params[1])
@@ -671,7 +671,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
                     g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
-                f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+                f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 1)
                 f_sigL.SetParNames("p1", "p2", "p3")
                 f_sigL.SetParameter(0, current_params[0])
                 f_sigL.SetParameter(1, current_params[1])
@@ -730,7 +730,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_errors = current_errors
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigL, 3)
+                    best_params = local_search(best_params, f_sigL, 1)
                     current_params = best_params[:]
                     current_errors = best_errors[:]
                     par_sigl_0, par_sigl_1, par_sigl_2 = best_params
@@ -740,16 +740,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if len(params_sigL_history['p1']) >= max_unchanged_iterations  and \
                    len(params_sigL_history['p2']) >= max_unchanged_iterations  and \
                    len(params_sigL_history['p3']) >= max_unchanged_iterations:
-                    if round(params_sigL_history['p1'][-2], 3) == round(params_sigL_history['p1'][-1], 3) and \
-                       round(params_sigL_history['p2'][-2], 3) == round(params_sigL_history['p2'][-1], 3) and \
-                       round(params_sigL_history['p3'][-2], 3) == round(params_sigL_history['p3'][-1], 3):
+                    if round(params_sigL_history['p1'][-2], 1) == round(params_sigL_history['p1'][-1], 1) and \
+                       round(params_sigL_history['p2'][-2], 1) == round(params_sigL_history['p2'][-1], 1) and \
+                       round(params_sigL_history['p3'][-2], 1) == round(params_sigL_history['p3'][-1], 1):
                         unchanged_iterations += 1        
                     else:
                         unchanged_iterations = 0
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1],
@@ -777,7 +777,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p1={:.3e}, p2={:.3e}, p3={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
@@ -831,7 +831,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit = TGraphErrors()
     g_sigl_fit_tot = TGraph()        
     
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 1)
     f_sigL_pre.SetParNames("p1", "p2", "p3")
     f_sigL_pre.FixParameter(0, best_overall_params[0])
     f_sigL_pre.FixParameter(1, best_overall_params[1])
@@ -888,7 +888,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 1)
     f_sigL.SetParNames("p1", "p2", "p3")
     f_sigL.FixParameter(0, best_overall_params[0])
     f_sigL.FixParameter(1, best_overall_params[1])
@@ -1144,15 +1144,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigT_history['p5']) >= max_unchanged_iterations  and \
                    len(params_sigT_history['p6']) >= max_unchanged_iterations:
-                    if round(params_sigT_history['p5'][-2], 3) == round(params_sigT_history['p5'][-1], 3) and \
-                       round(params_sigT_history['p6'][-2], 3) == round(params_sigT_history['p6'][-1], 3):
+                    if round(params_sigT_history['p5'][-2], 1) == round(params_sigT_history['p5'][-1], 1) and \
+                       round(params_sigT_history['p6'][-2], 1) == round(params_sigT_history['p6'][-1], 1):
                         unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-1) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1]
@@ -1175,7 +1175,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-3) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1]], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p5={:.3e}, p6={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
 
                     current_params = adjust_params(best_params)                    
@@ -1479,7 +1479,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
                     g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
+                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 1)
                 f_sigT.SetParNames("p5", "p6", "p7")
                 f_sigT.SetParameter(0, current_params[0])
                 f_sigT.SetParameter(1, current_params[1])
@@ -1538,7 +1538,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_errors = current_errors
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigT, 3)
+                    best_params = local_search(best_params, f_sigT, 1)
                     current_params = best_params[:]
                     current_errors = best_errors[:]
                     par_sigt_0, par_sigt_1, par_sigt_2 = best_params
@@ -1548,16 +1548,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if len(params_sigT_history['p5']) >= max_unchanged_iterations  and \
                    len(params_sigT_history['p6']) >= max_unchanged_iterations  and \
                    len(params_sigT_history['p7']) >= max_unchanged_iterations:
-                    if round(params_sigT_history['p5'][-2], 3) == round(params_sigT_history['p5'][-1], 3) and \
-                       round(params_sigT_history['p6'][-2], 3) == round(params_sigT_history['p6'][-1], 3) and \
-                       round(params_sigT_history['p7'][-2], 3) == round(params_sigT_history['p7'][-1], 3):
+                    if round(params_sigT_history['p5'][-2], 1) == round(params_sigT_history['p5'][-1], 1) and \
+                       round(params_sigT_history['p6'][-2], 1) == round(params_sigT_history['p6'][-1], 1) and \
+                       round(params_sigT_history['p7'][-2], 1) == round(params_sigT_history['p7'][-1], 1):
                         unchanged_iterations += 1        
                     else:
                         unchanged_iterations = 0
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1],
@@ -1582,7 +1582,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p5={:.3e}, p6={:.3e}, p7={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
@@ -1636,7 +1636,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit = TGraphErrors()
     g_sigt_fit_tot = TGraph()        
     
-    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 1)
     f_sigT_pre.SetParNames("p5", "p6", "p7")
     f_sigT_pre.FixParameter(0, best_overall_params[0])
     f_sigT_pre.FixParameter(1, best_overall_params[1])
@@ -1693,7 +1693,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 1)
     f_sigT.SetParNames("p5", "p6", "p7")
     f_sigT.FixParameter(0, best_overall_params[0])
     f_sigT.FixParameter(1, best_overall_params[1])
@@ -1891,7 +1891,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
                     g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
-                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 1)
                 f_sigLT.SetParNames("p9", "p10", "p11")
                 f_sigLT.SetParameter(0, current_params[0])
                 f_sigLT.SetParameter(1, current_params[1])
@@ -1955,7 +1955,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_cost = current_cost
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigLT, 3)
+                    best_params = local_search(best_params, f_sigLT, 1)
                     current_params = best_params[:]
                     current_errors = best_errors[:]
                     par_siglt_0, par_siglt_1, par_siglt_2 = best_params
@@ -1965,16 +1965,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 if len(params_sigLT_history['p9']) >= max_unchanged_iterations  and \
                    len(params_sigLT_history['p10']) >= max_unchanged_iterations  and \
                    len(params_sigLT_history['p11']) >= max_unchanged_iterations:
-                    if round(params_sigLT_history['p9'][-2], 3) == round(params_sigLT_history['p9'][-1], 3) and \
-                       round(params_sigLT_history['p10'][-2], 3) == round(params_sigLT_history['p10'][-1], 3) and \
-                       round(params_sigLT_history['p11'][-2], 3) == round(params_sigLT_history['p11'][-1], 3):
+                    if round(params_sigLT_history['p9'][-2], 1) == round(params_sigLT_history['p9'][-1], 1) and \
+                       round(params_sigLT_history['p10'][-2], 1) == round(params_sigLT_history['p10'][-1], 1) and \
+                       round(params_sigLT_history['p11'][-2], 1) == round(params_sigLT_history['p11'][-1], 1):
                         unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):                    
                         local_minima.append([
                             current_params[0],
                             current_params[1],
@@ -1998,7 +1998,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-3) for minima in local_minima):
+                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p9={:.3e}, p10={:.3e}, p11={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
 
                     current_params = adjust_params(best_params)                    
@@ -2051,7 +2051,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit = TGraphErrors()
     g_siglt_fit_tot = TGraph()    
 
-    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 1)
     f_sigLT_pre.SetParNames("p9", "p10", "p11")
     f_sigLT_pre.FixParameter(0, best_overall_params[0])
     f_sigLT_pre.FixParameter(1, best_overall_params[1])
@@ -2108,7 +2108,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_siglt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 1)
     f_sigLT.SetParNames("p9", "p10", "p11")
     f_sigLT.FixParameter(0, best_overall_params[0])
     f_sigLT.FixParameter(1, best_overall_params[1])
@@ -2346,14 +2346,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
-                    if round(params_sigTT_history['p13'][-2], 3) == round(params_sigTT_history['p13'][-1], 3):
+                    if round(params_sigTT_history['p13'][-2], 1) == round(params_sigTT_history['p13'][-1], 1):
                         unchanged_iterations += 1
                     else:
                         unchanged_iterations = 0
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    if not any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):                    
+                    if not any(np.allclose([current_params], minima, atol=1e-1) for minima in local_minima):                    
                         local_minima.append([
                             current_params
                         ])
@@ -2375,7 +2375,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                 
                 # Check if current_params are close to any local minimum
-                if any(np.allclose([current_params], minima, atol=1e-3) for minima in local_minima):
+                if any(np.allclose([current_params], minima, atol=1e-1) for minima in local_minima):
                     print("WARNING: Parameters p13={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
 
                     current_params = adjust_params(best_params)
