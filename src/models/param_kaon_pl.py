@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-09 11:20:22 trottar"
+# Time-stamp: "2024-07-11 17:02:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,7 +45,9 @@ def iterWeight(arg_str):
     # RLT (10/8/2023): Testing new tav parameterization
     tav=(0.1112 + 0.0066*math.log(q2_set))*q2_set
     ftav = (abs(t_gev) - tav) / tav
-    ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2
+
+    # RLT (7/11/2024): Moved below for Q2dep func form
+    #ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2
     
     # Calculate sigl, sigt, siglt, sigtt, sig219, sig
     # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
@@ -61,15 +63,22 @@ def iterWeight(arg_str):
         # RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for initial start parameterization
         # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
         # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
-        ##
-        ##sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
+        #
+        #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)))
         #sigl = (p1 + p2 * math.log(q2_gev)) * math.exp((p3 + p4 * math.log(q2_gev)) * (abs(t_gev)+0.2))
         # RLT (4/23/2024): Marco's thesis functional forms
         #sigl = p1 * math.exp(-p2*abs(t_gev)) * (1.0 / (1.0 + p3*q2_gev))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp(p3 * (abs(t_gev)))
+        ##sigl = (p1 + p2 * math.log(q2_gev)) * math.exp(p3 * (abs(t_gev)))
         #sigl = (p1 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p2 * (abs(t_gev)))
+        ##                
+        # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+        #                  that incorporates Q2-dep based of pi FF
+        ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2 # pole term
+        Qdep_L=q2_gev/(1.0+(1.77*q2_gev)+0.12*(q2_gev**2))
+        sigL=(p1*Qdep_L*f_t_gev)*exp(-p2*(abs(t_gev)))
+
     except OverflowError:
         sigl = -1000.0
         #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
@@ -79,8 +88,8 @@ def iterWeight(arg_str):
         #                  to be driving poor sep xsects results
         # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
         # RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
-        ##
-        ##sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
+        #
+        #sigt = p5 + p6 * math.log(q2_gev) + (p7 + p8 * math.log(q2_gev)) * ftav
         #sigt = p5 + p6 * math.log(q2_gev)
         #sigt = p5 * math.log(q2_gev) + p6 / (q2_gev**2)
         #sigt = p5 / (1 + p6*q2_gev)
@@ -93,17 +102,28 @@ def iterWeight(arg_str):
         #sigt = p5 * math.exp(-p6*abs(t_gev)) * (1.0 / (1.0 + p7*q2_gev))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        sigt = (p5 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p6 * (abs(t_gev)))
+        ##sigt = (p5 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p6 * (abs(t_gev)))
         #sigt = (p5 + p6 * math.log(q2_gev)) * math.exp(p7 * (abs(t_gev)))
+        ##
+        # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+        #                  that incorporates Q2-dep based of pi FF
+        sigT=(p5/q2_gev)*exp(-p6*(q2_gev**2))
+
     except OverflowError:        
         sigt = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
 
     try:
-        siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
+        ##
+        ##siglt = (p9 * math.exp(p10 * abs(t_gev)) + p11 / abs(t_gev)) * math.sin(thetacm_sim)
         #siglt = (p9 + p11 / abs(t_gev)) * math.sin(thetacm_sim)
         # RLT (4/23/2024): Marco's thesis functional forms
         #siglt = p9 * math.exp(-p10*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)*p11))
+        ##        
+        # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+        #                  that incorporates Q2-dep based of pi FF
+        sigLT=(p9/(1+q2_gev))*math.sin(thetacm)*exp(-p10*(abs(t_gev)))
+
     except OverflowError:
         siglt = -1000.0
         #print("WARNING: Overflowerror on sigLT, setting to zero for this event...\n\n")
@@ -112,9 +132,15 @@ def iterWeight(arg_str):
         # RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for the
         #                 xfit_in_t.py script to work. LT/TT are zeros
         #                 Therefore param 12 was also changed to 13
-        sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
+        ##
+        ##sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
         # RLT (4/23/2024): Marco's thesis functional forms
-        #sigtt = p13 * math.exp(-p14*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)*p15))        
+        #sigtt = p13 * math.exp(-p14*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)*p15))
+        ##
+        # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+        #                  that incorporates Q2-dep based of pi FF
+        sigTT=(-p13/(1+q2_gev))*(math.sin(thetacm)**2)*exp(-p14*(abs(t_gev)))
+        
     except OverflowError:
         sigtt = -1000.0
         #print("WARNING: Overflowerror on sigTT, setting to zero for this event...\n\n")

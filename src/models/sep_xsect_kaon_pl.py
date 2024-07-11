@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-09 11:20:18 trottar"
+# Time-stamp: "2024-07-11 17:04:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,15 +35,23 @@ def import_model(inp_model, arg_str):
             # RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
             #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
             try:
-                ##
-                ##f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
+                #
+                #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
                 #f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
                 # RLT (6/04/2024): Testing simplier exp form for L+T
                 ##
-                f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+                ##f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
                 #f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+                ##
+                ##                
+                # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+                #                  that incorporates Q2-dep based of pi FF
+                ft = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
+                Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
+                sigL=(par[0]*Qdep_L*f_tt)*exp(-par[1]*(abs(tt)))
+                
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigL, setting to zero for this event...")
@@ -63,8 +71,8 @@ def import_model(inp_model, arg_str):
                 #                  to be driving poor sep xsects results
                 # RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
                 # RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
-                ##
-                ##f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
+                #
+                #f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
                 #f = par[0]+par[1]*math.log(qq)
                 #f = par[0]*math.log(qq)+par[1]/(qq**2)
                 #f = par[0] / (1 + par[1]*qq)
@@ -77,8 +85,13 @@ def import_model(inp_model, arg_str):
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
                 # RLT (6/04/2024): Testing simplier exp form for L+T
                 ##
-                f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+                ##f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
                 #f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+                ##
+                # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+                #                  that incorporates Q2-dep based of pi FF
+                sigT=(par[0]/qq)*exp(-par[1]*(qq**2))
+                
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigT, setting to zero for this event...")
@@ -93,10 +106,16 @@ def import_model(inp_model, arg_str):
         if inp_model == "sigLT":
             print("Calculating function for sigLT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             try:
-                f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
+                ##
+                ##f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
                 #f = (par[0]+par[2]/abs(tt))*math.sin(theta_cm)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
+                ##
+                # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+                #                  that incorporates Q2-dep based of pi FF
+                sigLT=(par[0]/(1+qq))*math.sin(thetacm)*exp(-par[1]*(abs(tt)))
+                
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigLT, setting to zero for this event...")
@@ -110,11 +129,18 @@ def import_model(inp_model, arg_str):
     def sig_TT(*par):
         if inp_model == "sigTT":
             print("Calculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
-            try:            
-                f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
-                f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
+            try:
+                #  RLT (7/11/2024): Moved below for Q2dep func form
+                #f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
+                ##
+                ##f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
                 # RLT (4/23/2024): Marco's thesis functional forms
-                #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))                
+                #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
+                ##
+                # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+                #                  that incorporates Q2-dep based of pi FF
+                sigTT=(-par[0]/(1+qq))*(math.sin(thetacm)**2)*exp(-par[1]*(abs(tt)))
+                
             except ValueError:
                 f = -1000.0
                 #print("WARNING: Overflowerror on sigTT, setting to zero for this event...")
