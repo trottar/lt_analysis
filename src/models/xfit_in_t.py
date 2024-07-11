@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 01:56:04 trottar"
+# Time-stamp: "2024-07-11 01:56:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -750,7 +750,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Adjust the cooling rate if parameters haven't changed for N iterations
                 if unchanged_iterations >= max_unchanged_iterations:
-                    print("!!!!!!!!!")
+                    print("$$$$$$$$", unchanged_iterations)
                     if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=1e-1) for minima in local_minima):
                         local_minima.append([
                             current_params[0],
