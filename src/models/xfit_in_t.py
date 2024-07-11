@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 02:36:14 trottar"
+# Time-stamp: "2024-07-11 02:45:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -324,11 +324,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_errors = current_errors
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigL, 2)
-                    current_params = best_params[:]
-                    current_errors = best_errors[:]
-                    par_sigl_0, par_sigl_1 = best_params
-                    par_sigl_err_0, par_sigl_err_1 = best_errors
+                    current_params = local_search(current_params, f_sigL, 2)
+                    par_sigl_0, par_sigl_1 = current_params
 
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigL_history['p1']) >= max_unchanged_iterations  and \
@@ -733,11 +730,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_errors = current_errors
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigL, 3)
-                    current_params = best_params[:]
-                    current_errors = best_errors[:]
-                    par_sigl_0, par_sigl_1, par_sigl_2 = best_params
-                    par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = best_errors
+                    current_params = local_search(current_params, f_sigL, 3)
+                    par_sigl_0, par_sigl_1, par_sigl_2 = current_params
 
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigL_history['p1']) >= max_unchanged_iterations  and \
@@ -1137,11 +1131,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_errors = current_errors
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigT, 2)
-                    current_params = best_params[:]
-                    current_errors = best_errors[:]
-                    par_sigt_0, par_sigt_1 = best_params
-                    par_sigt_err_0, par_sigt_err_1 = best_errors
+                    current_params = local_search(current_params, f_sigT, 2)
+                    par_sigt_0, par_sigt_1 = current_params
 
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigT_history['p5']) >= max_unchanged_iterations  and \
@@ -1542,11 +1533,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_errors = current_errors
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigT, 3)
-                    current_params = best_params[:]
-                    current_errors = best_errors[:]
-                    par_sigt_0, par_sigt_1, par_sigt_2 = best_params
-                    par_sigt_err_0, par_sigt_err_1, par_sigt_err_2 = best_errors
+                    current_params = local_search(current_params, f_sigT, 3)
+                    par_sigt_0, par_sigt_1, par_sigt_2 = current_params
 
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigT_history['p5']) >= max_unchanged_iterations  and \
@@ -1961,11 +1949,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_cost = current_cost
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigLT, 3)
-                    current_params = best_params[:]
-                    current_errors = best_errors[:]
-                    par_siglt_0, par_siglt_1, par_siglt_2 = best_params
-                    par_siglt_err_0, par_siglt_err_1, par_siglt_err_2 = best_errors
+                    current_params = local_search(current_params, f_sigLT, 3)
+                    par_siglt_0, par_siglt_1, par_siglt_2 = current_params
 
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigLT_history['p9']) >= max_unchanged_iterations  and \
@@ -2346,11 +2331,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     best_errors = current_errors
 
                 if iteration % local_search_interval == 0:
-                    best_params = local_search(best_params, f_sigTT, 1)
-                    current_params = best_params
-                    current_errors = best_errors
-                    par_sigtt_0 = best_params
-                    par_sigtt_err_0 = best_errors
+                    current_params = local_search(current_params, f_sigTT, 1)
+                    par_sigtt_0 = current_params
 
                 # Check if current parameters haven't changed for the past N iterations
                 if len(params_sigTT_history['p13']) >= max_unchanged_iterations:
