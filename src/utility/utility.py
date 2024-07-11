@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:21:06 trottar"
+# Time-stamp: "2024-07-11 03:48:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -633,10 +633,5 @@ def local_search(params, inp_func, num_params):
         improved_params = minimizer.X()
 
         return improved_params            
-            
-def set_axis_labels(axis):
-    # Assuming graph_sigL_p1.GetYaxis().SetNdivisions(505) for better label readability
-    axis.SetNdivisions(510)  # Adjust the number of divisions
-    axis.SetLabelSize(0.03)  # Adjust the label size
             
 ################################################################################################################################################
