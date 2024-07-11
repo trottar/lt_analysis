@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:49:40 trottar"
+# Time-stamp: "2024-07-11 03:51:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -545,7 +545,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot chi-square convergence
     c4.cd(1).SetLeftMargin(0.12)
-    c4.cd(1).SetLogy()
     graph_sigL_chi2.SetTitle("Sig L Chi-Square Convergence;Optimization Run;Chi-Square")
     graph_sigL_chi2.SetLineColor(ROOT.kBlack)
     graph_sigL_chi2.Draw("ALP")
@@ -954,7 +953,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     # Plot chi-square convergence
     c4.cd(1).SetLeftMargin(0.12)
-    c4.cd(1).SetLogy()    
     graph_sigL_chi2.SetTitle("Sig L Chi-Square Convergence;Optimization Run;Chi-Square")
     graph_sigL_chi2.SetLineColor(ROOT.kBlack)
     graph_sigL_chi2.Draw("ALP")
@@ -1342,7 +1340,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     # Plot chi-square convergence
     c4.cd(2).SetLeftMargin(0.12)
-    c4.cd(2).SetLogy()    
     graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Optimization Run;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigT_chi2.Draw("ALP")
@@ -1749,7 +1746,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Plot chi-square convergence
     c4.cd(2).SetLeftMargin(0.12)
-    c4.cd(2).SetLogy()
     graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Optimization Run;Chi-Square")
     graph_sigT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigT_chi2.Draw("ALP")
@@ -2159,7 +2155,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     # Plot chi-square convergence
     c4.cd(3).SetLeftMargin(0.12)
-    c4.cd(3).SetLogy()    
     graph_sigLT_chi2.SetTitle("Sig LT Chi-Square Convergence;Optimization Run;Chi-Square")
     graph_sigLT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigLT_chi2.Draw("ALP")
@@ -2527,7 +2522,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     # Plot chi-square convergence
     c4.cd(4).SetLeftMargin(0.12)
-    c4.cd(4).SetLogy()    
     graph_sigTT_chi2.SetTitle("Sig TT Chi-Square Convergence;Optimization Run;Chi-Square")
     graph_sigTT_chi2.SetLineColor(ROOT.kBlack)
     graph_sigTT_chi2.Draw("ALP")
