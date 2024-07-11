@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 04:01:06 trottar"
+# Time-stamp: "2024-07-11 04:05:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -349,7 +349,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 previous_params = current_params[:]
 
-                # Update parameter limits
+                # Update parameters with the best found so far
                 par_sigl_0, par_sigl_1 = best_params
                 par_sigl_err_0, par_sigl_err_1 = best_errors
 
@@ -754,7 +754,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 previous_params = current_params[:]
 
-                # Update parameter limits
+                # Update parameters with the best found so far
                 par_sigl_0, par_sigl_1, par_sigl_2 = best_params
                 par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = best_errors
 
@@ -2325,7 +2325,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 previous_params = current_params                
 
                 # Update parameters with the best found so far
-                par_sigtt_0 = current_params
+                par_sigtt_0 = best_params
                 par_sigtt_err_0 = best_errors
 
                 # Update the temperature
