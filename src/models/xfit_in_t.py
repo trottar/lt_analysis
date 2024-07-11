@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 18:45:07 trottar"
+# Time-stamp: "2024-07-11 18:56:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -367,7 +367,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigl_0, par_sigl_1 = current_params
                     par_sigl_err_0, par_sigl_err_1 = [0.0 for _ in range(2)]
-                                    
+
+                g_sigl.Delete()
+                f_sigL.Delete()
+                    
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
@@ -378,6 +381,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
 
+        g_sigl_prv.Delete()
+        g_sigl_fit.Delete()
+        g_sigl_fit_tot.Delete()
+                
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
@@ -776,6 +783,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigl_0, par_sigl_1, par_sigl_2 = current_params
                     par_sigl_err_0, par_sigl_err_1, par_sigl_err_2 = [0.0 for _ in range(3)]
+
+                g_sigl.Delete()
+                f_sigL.Delete()
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -786,6 +796,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
+
+        g_sigl_prv.Delete()
+        g_sigl_fit.Delete()
+        g_sigl_fit_tot.Delete()
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -1175,6 +1189,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigt_0, par_sigt_1 = current_params
                     par_sigt_err_0, par_sigt_err_1 = [0.0 for _ in range(2)]
+
+                g_sigt.Delete()
+                f_sigT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1185,6 +1202,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
 
+        g_sigt_prv.Delete()
+        g_sigt_fit.Delete()
+        g_sigt_fit_tot.Delete()
+                
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
@@ -1582,6 +1603,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigt_0, par_sigt_1, par_sigt_2 = current_params
                     par_sigt_err_0, par_sigt_err_1, par_sigt_err_2 = [0.0 for _ in range(3)]
+
+                g_sigt.Delete()
+                f_sigT.Delete()
                                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1592,6 +1616,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
+
+        g_sigt_prv.Delete()
+        g_sigt_fit.Delete()
+        g_sigt_fit_tot.Delete()
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -1989,6 +2017,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_siglt_0, par_siglt_1 = current_params
                     par_siglt_err_0, par_siglt_err_1 = [0.0 for _ in range(2)]
+
+                g_siglt.Delete()
+                f_sigLT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1999,6 +2030,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
+        g_siglt_prv.Delete()
+        g_siglt_fit.Delete()
+        g_siglt_fit_tot.Delete()
+                
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
@@ -2404,6 +2439,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_siglt_0, par_siglt_1, par_siglt_2 = current_params
                     par_siglt_err_0, par_siglt_err_1, par_siglt_err_2 = [0.0 for _ in range(3)]
+
+                g_siglt.Delete()
+                f_sigLT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -2413,6 +2451,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
+
+        g_siglt_prv.Delete()
+        g_siglt_fit.Delete()
+        g_siglt_fit_tot.Delete()
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -2785,6 +2827,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigtt_0 = current_params
                     par_sigtt_err_0 = 0.0
+
+                g_sigtt.Delete()
+                f_sigTT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -2795,6 +2840,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
+
+        g_sigtt_prv.Delete()
+        g_sigtt_fit.Delete()
+        g_sigtt_fit_tot.Delete()
 
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
@@ -3187,6 +3236,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     current_params = adjust_params(best_params)
                     par_sigtt_0, par_sigtt_1 = current_params
                     par_sigtt_err_0, par_sigtt_err_1 = [0.0 for _ in range(2)]
+
+                g_sigtt.Delete()
+                f_sigTT.Delete()
                     
             except (TypeError or ZeroDivisionError) as e:
                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -3197,6 +3249,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
+        g_sigtt_prv.Delete()
+        g_sigtt_fit.Delete()
+        g_sigtt_fit_tot.Delete()
+                
         # After the while loop, check if this run found a better solution
         if best_cost < best_overall_cost:
             best_overall_cost = best_cost
