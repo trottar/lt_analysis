@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 03:33:03 trottar"
+# Time-stamp: "2024-07-11 03:36:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -542,7 +542,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p1.Draw("ALP")
     graph_sigL_p2.Draw("LP SAME")
     set_axis_labels(graph_sigL_p1.GetYaxis())
-    
+    c3.SetLogy()    
+
     # Plot chi-square convergence
     c4.cd(1).SetLeftMargin(0.12)
     graph_sigL_chi2.SetTitle("Sig L Chi-Square Convergence;Optimization Run;Chi-Square")
@@ -953,6 +954,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_p2.Draw("LP SAME")
     graph_sigL_p3.Draw("LP SAME")
     set_axis_labels(graph_sigL_p1.GetYaxis())
+    c3.SetLogy()
     
     # Plot chi-square convergence
     c4.cd(1).SetLeftMargin(0.12)
@@ -1343,6 +1345,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p5.Draw("ALP")
     graph_sigT_p6.Draw("LP SAME")
     set_axis_labels(graph_sigT_p5.GetYaxis())
+    c3.SetLogy()
     
     # Plot chi-square convergence
     c4.cd(2).SetLeftMargin(0.12)
@@ -1752,7 +1755,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_p6.Draw("LP SAME")
     graph_sigT_p7.Draw("LP SAME")
     set_axis_labels(graph_sigT_p5.GetYaxis())
-    
+    c3.SetLogy()    
+
     # Plot chi-square convergence
     c4.cd(2).SetLeftMargin(0.12)
     graph_sigT_chi2.SetTitle("Sig T Chi-Square Convergence;Optimization Run;Chi-Square")
@@ -2164,6 +2168,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_p10.Draw("LP SAME")
     graph_sigLT_p11.Draw("LP SAME")
     set_axis_labels(graph_sigLT_p9.GetYaxis())
+    c3.SetLogy()
     
     # Plot chi-square convergence
     c4.cd(3).SetLeftMargin(0.12)
@@ -2534,6 +2539,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_p13.SetLineColor(ROOT.kRed)
     graph_sigTT_p13.Draw("ALP")
     set_axis_labels(graph_sigTT_p13.GetYaxis())
+    c3.SetLogy()
     
     # Plot chi-square convergence
     c4.cd(4).SetLeftMargin(0.12)
