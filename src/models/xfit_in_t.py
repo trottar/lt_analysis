@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 01:48:42 trottar"
+# Time-stamp: "2024-07-11 01:49:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -769,9 +769,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
                 # Update the temperature
                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-
-
-                print("!!!!!!!!!!!!!",best_params)
                 
                 iteration += 1
                 total_iteration += 1 if iteration % max_iterations == 0 else 0
