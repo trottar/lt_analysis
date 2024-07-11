@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 17:12:25 trottar"
+# Time-stamp: "2024-07-11 17:14:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ def import_model(inp_model, arg_str):
                 #                  that incorporates Q2-dep based of pi FF
                 ft = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
                 Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
-                sigL=(par[0]*Qdep_L*ft)*exp(-par[1]*(abs(tt)))
+                sigL=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
                 
             except ValueError:
                 f = -1000.0
@@ -90,7 +90,7 @@ def import_model(inp_model, arg_str):
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                sigT=(par[0]/qq)*exp(-par[1]*(qq**2))
+                sigT=(par[0]/qq)*math.exp(-par[1]*(qq**2))
                 
             except ValueError:
                 f = -1000.0
@@ -114,7 +114,7 @@ def import_model(inp_model, arg_str):
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                sigLT=(par[0]/(1+qq))*math.sin(thetacm)*exp(-par[1]*(abs(tt)))
+                sigLT=(par[0]/(1+qq))*math.sin(thetacm)*math.exp(-par[1]*(abs(tt)))
                 
             except ValueError:
                 f = -1000.0
@@ -139,7 +139,7 @@ def import_model(inp_model, arg_str):
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                sigTT=(-par[0]/(1+qq))*(math.sin(thetacm)**2)*exp(-par[1]*(abs(tt)))
+                sigTT=(-par[0]/(1+qq))*(math.sin(thetacm)**2)*math.exp(-par[1]*(abs(tt)))
                 
             except ValueError:
                 f = -1000.0
