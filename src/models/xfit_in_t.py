@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 18:39:47 trottar"
+# Time-stamp: "2024-07-11 18:45:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -558,10 +558,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.SetTitle("Sig L Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigL_accept.SetLineColor(ROOT.kBlack)
     graph_sigL_accept.Draw("ALP")
+
+    g_sigl_prv.Delete()
+    g_sigl_fit.Delete()
+    g_sigl_fit_tot.Delete()
+    f_sigL_pre.Delete()
+    g_sigl.Delete()
+    f_sigL.Delete()
     
-    print("\n")
-    ROOT.gROOT.GetListOfCleanups().Delete()
-    ROOT.gROOT.CleanUp()    
+    print("\n")    
     
     '''   
     # 3 params
@@ -966,10 +971,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.SetTitle("Sig L Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigL_accept.SetLineColor(ROOT.kBlack)
     graph_sigL_accept.Draw("ALP")
+
+    g_sigl_prv.Delete()
+    g_sigl_fit.Delete()
+    g_sigl_fit_tot.Delete()
+    f_sigL_pre.Delete()
+    g_sigl.Delete()
+    f_sigL.Delete()
     
     print("\n")    
-    ROOT.gROOT.GetListOfCleanups().Delete()
-    ROOT.gROOT.CleanUp()
     '''
     
     # 2 params
@@ -1355,10 +1365,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.SetTitle("Sig T Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigT_accept.SetLineColor(ROOT.kBlack)
     graph_sigT_accept.Draw("ALP")
-    
-    print("\n")
-    ROOT.gROOT.GetListOfCleanups().Delete()
-    ROOT.gROOT.CleanUp()    
+
+    g_sigt_prv.Delete()
+    g_sigt_fit.Delete()
+    g_sigt_fit_tot.Delete()
+    f_sigT_pre.Delete()
+    g_sigt.Delete()
+    f_sigT.Delete()
+
+    print("\n")    
     
     '''
     # 3 params
@@ -1762,10 +1777,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.SetTitle("Sig T Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigT_accept.SetLineColor(ROOT.kBlack)
     graph_sigT_accept.Draw("ALP")
+
+    g_sigt_prv.Delete()
+    g_sigt_fit.Delete()
+    g_sigt_fit_tot.Delete()
+    f_sigT_pre.Delete()
+    g_sigt.Delete()
+    f_sigT.Delete()
     
     print("\n")    
-    ROOT.gROOT.GetListOfCleanups().Delete()
-    ROOT.gROOT.CleanUp()
     '''
 
     # 2 params
@@ -2159,10 +2179,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.SetTitle("Sig LT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigLT_accept.SetLineColor(ROOT.kBlack)
     graph_sigLT_accept.Draw("ALP")
-    
-    print("\n")
-    ROOT.gROOT.GetListOfCleanups().Delete()
-    ROOT.gROOT.CleanUp()    
+
+    g_siglt_prv.Delete()
+    g_siglt_fit.Delete()
+    g_siglt_fit_tot.Delete()
+    f_sigLT_pre.Delete()
+    g_siglt.Delete()
+    f_sigLT.Delete()
+
+    print("\n")    
 
     '''    
     # 3 params
@@ -2573,10 +2598,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.SetTitle("Sig LT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigLT_accept.SetLineColor(ROOT.kBlack)
     graph_sigLT_accept.Draw("ALP")
+
+    g_siglt_prv.Delete()
+    g_siglt_fit.Delete()
+    g_siglt_fit_tot.Delete()
+    f_sigLT_pre.Delete()
+    g_siglt.Delete()
+    f_sigLT.Delete()
     
     print("\n")    
-    ROOT.gROOT.GetListOfCleanups().Delete()
-    ROOT.gROOT.CleanUp()
     '''
 
     '''
@@ -2945,10 +2975,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.SetTitle("Sig TT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigTT_accept.SetLineColor(ROOT.kBlack)
     graph_sigTT_accept.Draw("ALP")
+
+    g_sigtt_prv.Delete()
+    g_sigtt_fit.Delete()
+    g_sigtt_fit_tot.Delete()
+    f_sigTT_pre.Delete()
+    g_sigtt.Delete()
+    f_sigTT.Delete()
     
     print("\n")    
-    ROOT.gROOT.GetListOfCleanups().Delete()
-    ROOT.gROOT.CleanUp()
     '''    
 
     # 2 params
@@ -3342,10 +3377,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.SetTitle("Sig TT Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
     graph_sigTT_accept.SetLineColor(ROOT.kBlack)
     graph_sigTT_accept.Draw("ALP")
-    
-    print("\n")
-    ROOT.gROOT.GetListOfCleanups().Delete()
-    ROOT.gROOT.CleanUp()    
+
+    g_sigtt_prv.Delete()
+    g_sigtt_fit.Delete()
+    g_sigtt_fit_tot.Delete()
+    f_sigTT_pre.Delete()
+    g_sigtt.Delete()
+    f_sigTT.Delete()
+
+    print("\n")    
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
