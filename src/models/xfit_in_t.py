@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 01:52:11 trottar"
+# Time-stamp: "2024-07-11 01:53:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -743,6 +743,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     if round(params_sigL_history['p1'][-2], 1) == round(params_sigL_history['p1'][-1], 1) and \
                        round(params_sigL_history['p2'][-2], 1) == round(params_sigL_history['p2'][-1], 1) and \
                        round(params_sigL_history['p3'][-2], 1) == round(params_sigL_history['p3'][-1], 1):
+                        print("!!!!!!!!!")
                         unchanged_iterations += 1        
                     else:
                         unchanged_iterations = 0
