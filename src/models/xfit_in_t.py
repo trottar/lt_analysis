@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 17:33:22 trottar"
+# Time-stamp: "2024-07-11 18:28:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,6 +229,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Local search
         local_search_interval = 10
 
+        c1.cd(1).SetLeftMargin(0.12)
+        nsep.Draw("sigl:t:sigl_e", "", "goff")
+        
         while iteration <= max_iterations:
 
             g_sigl_prv = TGraph()
@@ -237,9 +240,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
-
-            c1.cd(1).SetLeftMargin(0.12)
-            nsep.Draw("sigl:t:sigl_e", "", "goff")
 
             try:
                 # Perturb parameters
@@ -621,6 +621,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Local search
         local_search_interval = 10
 
+        c1.cd(1).SetLeftMargin(0.12)
+        nsep.Draw("sigl:t:sigl_e", "", "goff")
+
         while iteration <= max_iterations:
 
             g_sigl_prv = TGraph()
@@ -629,9 +632,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
-
-            c1.cd(1).SetLeftMargin(0.12)
-            nsep.Draw("sigl:t:sigl_e", "", "goff")
 
             try:
                 
@@ -1025,6 +1025,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Local search
         local_search_interval = 10
 
+        c1.cd(2).SetLeftMargin(0.12)
+        nsep.Draw("sigt:t:sigt_e", "", "goff")
+        
         while iteration <= max_iterations:
 
             g_sigt_prv = TGraph()
@@ -1033,9 +1036,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
-
-            c1.cd(2).SetLeftMargin(0.12)
-            nsep.Draw("sigt:t:sigt_e", "", "goff")
 
             try:
                 # Perturb parameters
@@ -1414,6 +1414,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Local search
         local_search_interval = 10
 
+        c1.cd(2).SetLeftMargin(0.12)
+        nsep.Draw("sigt:t:sigt_e", "", "goff")
+
         while iteration <= max_iterations:
 
             g_sigt_prv = TGraph()
@@ -1422,9 +1425,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
-
-            c1.cd(2).SetLeftMargin(0.12)
-            nsep.Draw("sigt:t:sigt_e", "", "goff")
 
             try:
                 # Perturb parameters
@@ -1818,6 +1818,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Local search
         local_search_interval = 10
 
+        c1.cd(3).SetLeftMargin(0.12)
+        nsep.Draw("siglt:t:siglt_e", "", "goff")
+        
         while iteration <= max_iterations:
             
             g_siglt_prv = TGraph()
@@ -1826,9 +1829,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
-
-            c1.cd(3).SetLeftMargin(0.12)
-            nsep.Draw("siglt:t:siglt_e", "", "goff")
 
             try:
                 # Perturb parameters
@@ -2215,6 +2215,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Local search
         local_search_interval = 10
 
+        c1.cd(3).SetLeftMargin(0.12)
+        nsep.Draw("siglt:t:siglt_e", "", "goff")
+
         while iteration <= max_iterations:
             
             g_siglt_prv = TGraph()
@@ -2223,9 +2226,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
-
-            c1.cd(3).SetLeftMargin(0.12)
-            nsep.Draw("siglt:t:siglt_e", "", "goff")
 
             try:
                 # Perturb parameters
@@ -2622,6 +2622,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Local search
         local_search_interval = 10
 
+        c1.cd(4).SetLeftMargin(0.12)
+        nsep.Draw("sigtt:t:sigtt_e", "", "goff")
+
         while iteration <= max_iterations:
 
             g_sigtt_prv = TGraph()
@@ -2630,9 +2633,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
-
-            c1.cd(4).SetLeftMargin(0.12)
-            nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
             try:
                 # Perturb parameters
@@ -2995,6 +2995,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Local search
         local_search_interval = 10
 
+        c1.cd(4).SetLeftMargin(0.12)
+        nsep.Draw("sigtt:t:sigtt_e", "", "goff")
+        
         while iteration <= max_iterations:
             
             g_sigtt_prv = TGraph()
@@ -3003,9 +3006,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
             sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
             sys.stdout.flush()
-
-            c1.cd(4).SetLeftMargin(0.12)
-            nsep.Draw("sigtt:t:sigtt_e", "", "goff")
 
             try:
                 # Perturb parameters
