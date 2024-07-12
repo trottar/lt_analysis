@@ -147,7 +147,8 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       sigT=(-par(5)*((abs(tm))/q2))*exp(-par(6)*(q2**2)*(abs(tm)))
       sigLT=(par(9)/((1+q2)*abs(tm)))*sin(thetacm)
      >     *exp(-par(10)*(abs(tm)))
-      sigTT=(-par(13)/(1+q2))*(sin(thetacm)**2)**exp(-par(14)*(q2**2))
+      sigTT=(-par(13)/(1+q2))*(sin(thetacm)**2)
+     >     *exp(-par(14)*(q2**2)*(abs(tm)))
       
 c     Correct for W.
       g_W=1./(W**2-targ**2)**2       ! W factor
