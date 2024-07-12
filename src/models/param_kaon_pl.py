@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 17:49:47 trottar"
+# Time-stamp: "2024-07-12 02:57:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -107,7 +107,8 @@ def iterWeight(arg_str):
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
-        sigt=(p5/q2_gev)*math.exp(-p6*(q2_gev**2))
+        #sigt=(p5/q2_gev)*math.exp(-p6*(q2_gev**2))
+        sigt=(p5/q2_gev)*math.exp(-p6*(q2_gev**2))*abs(t_gev)
 
     except OverflowError:        
         sigt = -1000.0
