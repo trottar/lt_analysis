@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 23:24:20 trottar"
+# Time-stamp: "2024-07-11 23:24:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -562,6 +562,7 @@ def acceptance_probability(old_cost, new_cost, temperature):
 def adjust_params(params, adjustment_factor=1.0):
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
+################################################################################################################################################
 
 # Create a PyROOT callable object
 class PyFunc:
