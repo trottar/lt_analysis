@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 23:39:44 trottar"
+# Time-stamp: "2024-07-11 23:54:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -394,7 +394,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Calculate the total duration
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
-
+        
+        queue.put(("sigL", end_time - start_time, result_sigL))
+        
         while len(best_overall_params) < 4:
             best_overall_params.append(0.0)
             best_overall_errors.append(0.0)
@@ -796,6 +798,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
 
+        queue.put(("sigL", end_time - start_time, result_sigL))
+
         while len(best_overall_params) < 4:
             best_overall_params.append(0.0)
             best_overall_errors.append(0.0)
@@ -1186,7 +1190,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Calculate the total duration
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
-
+        
+        queue.put(("sigT", end_time - start_time, result_sigT))
+        
         while len(best_overall_params) < 4:
             best_overall_params.append(0.0)
             best_overall_errors.append(0.0)
@@ -1587,6 +1593,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
 
+        queue.put(("sigT", end_time - start_time, result_sigT))
+
         while len(best_overall_params) < 4:
             best_overall_params.append(0.0)
             best_overall_errors.append(0.0)
@@ -1985,7 +1993,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Calculate the total duration
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
-
+        
+        queue.put(("sigLT", end_time - start_time, result_sigLT))
+        
         while len(best_overall_params) < 4:
             best_overall_params.append(0.0)
             best_overall_errors.append(0.0)
@@ -2393,6 +2403,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
 
+        queue.put(("sigLT", end_time - start_time, result_sigLT))
+
         while len(best_overall_params) < 4:
             best_overall_params.append(0.0)
             best_overall_errors.append(0.0)
@@ -2767,6 +2779,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Calculate the total duration
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
+
+        queue.put(("sigTT", end_time - start_time, result_sigTT))
 
         best_overall_params = [best_overall_params]
         best_overall_errors = [best_overall_errors]
@@ -3160,7 +3174,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Calculate the total duration
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
-
+        
+        queue.put(("sigTT", end_time - start_time, result_sigTT))
+        
         while len(best_overall_params) < 4:
             best_overall_params.append(0.0)
             best_overall_errors.append(0.0)
@@ -3329,27 +3345,31 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         print("\n")    
 
-    queue_L, queue_T, queue_LT, queue_TT = Queue(), Queue(), Queue(), Queue()
-    process_L = Process(target=run_sigL, args=(queue_L,))
-    process_T = Process(target=run_sigT, args=(queue_T,))
-    process_LT = Process(target=run_sigLT, args=(queue_LT,))
-    process_TT = Process(target=run_sigTT, args=(queue_TT,))
+    queue = Queue()
+    process_L = Process(target=run_sigL, args=(queue,))
+    process_T = Process(target=run_sigT, args=(queue,))
+    process_LT = Process(target=run_sigLT, args=(queue,))
+    process_TT = Process(target=run_sigTT, args=(queue,))
     
     process_L.start()
     process_T.start()
     process_LT.start()
     process_TT.start()
-    
-    result_sigL = queue_L.get()
-    result_sigT = queue_T.get()
-    result_sigLT = queue_LT.get()
-    result_sigTT = queue_TT.get()
-    
+
+    results = []
+    for _ in range(2):  # We expect two results
+        results.append(q.get())
+        
     process_L.join()
     process_T.join()
     process_LT.join()
     process_TT.join()
-        
+
+    # Process the results
+    for result in results:
+        name, duration, result_data = result
+        print("{0} took {1:.2f} seconds".format(name, duration))
+    
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
     c3.Print(outputpdf)
