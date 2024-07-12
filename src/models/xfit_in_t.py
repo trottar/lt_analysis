@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 22:20:05 trottar"
+# Time-stamp: "2024-07-11 23:01:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,6 +18,7 @@ from ROOT import TF1, TFitResultPtr
 import numpy as np
 import math
 import time
+import gc
 import os, sys
 
 ################################################################################################################################################
@@ -181,7 +182,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig L")
     print("/*--------------------------------------------------*/")
-
+    
+    gc.collect()
+    
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
@@ -558,7 +561,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.SetLineColor(ROOT.kBlack)
     graph_sigL_accept.Draw("ALP")
     
-    print("\n")    
+    print("\n")
+
+    gc.collect()
     
     '''   
     # 3 params
@@ -569,6 +574,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig L")
     print("/*--------------------------------------------------*/")
+
+    gc.collect()
 
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
@@ -964,6 +971,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.Draw("ALP")
     
     print("\n")    
+
+    gc.collect()
     '''
     
     # 2 params
@@ -975,6 +984,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig T")
     print("/*--------------------------------------------------*/")
 
+    gc.collect()    
+    
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
@@ -1350,6 +1361,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.Draw("ALP")
 
     print("\n")    
+
+    gc.collect()    
     
     '''
     # 3 params
@@ -1360,6 +1373,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig T")
     print("/*--------------------------------------------------*/")
+
+    gc.collect()
 
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
@@ -1754,6 +1769,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.Draw("ALP")
     
     print("\n")    
+
+    gc.collect()
     '''
 
     # 2 params
@@ -1765,6 +1782,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig LT")
     print("/*--------------------------------------------------*/")    
 
+    gc.collect()
+    
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
@@ -2149,6 +2168,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     print("\n")    
 
+    gc.collect()
+    
     '''    
     # 3 params
     #########
@@ -2158,6 +2179,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig LT")
     print("/*--------------------------------------------------*/")    
+
+    gc.collect()
 
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
@@ -2559,6 +2582,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.Draw("ALP")
     
     print("\n")    
+
+    gc.collect()
     '''
 
     '''
@@ -2570,6 +2595,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
+
+    gc.collect()
     
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
@@ -2928,6 +2955,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.Draw("ALP")
     
     print("\n")    
+
+    gc.collect()
     '''    
 
     # 2 params
@@ -2939,6 +2968,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")    
 
+    gc.collect()
+    
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
