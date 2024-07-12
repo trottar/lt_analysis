@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 23:23:55 trottar"
+# Time-stamp: "2024-07-11 23:24:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -550,9 +550,6 @@ def simulated_annealing(param, temperature, perturbation_factor=0.1):
     perturbation = random.uniform(-max_perturbation, max_perturbation) * temperature
     return param + perturbation
 
-from numba import jit
-
-@jit(nopython=True)
 def acceptance_probability(old_cost, new_cost, temperature):
     # Calculate the probability of accepting a worse solution
     if new_cost < old_cost:
