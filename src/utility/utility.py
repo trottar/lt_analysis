@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 23:24:57 trottar"
+# Time-stamp: "2024-07-12 02:22:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -559,7 +559,7 @@ def acceptance_probability(old_cost, new_cost, temperature):
     else:
         return math.exp((old_cost - new_cost) / temperature)
     
-def adjust_params(params, adjustment_factor=1.0):
+def adjust_params(params, adjustment_factor=0.1):
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
 ################################################################################################################################################
