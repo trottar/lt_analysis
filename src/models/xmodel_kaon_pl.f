@@ -144,7 +144,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
       sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
 *     sigT=(par(5)/q2)*exp(-par(6)*(q2**2))
-      sigT=(par(5)/q2)*exp(-par(6)*(q2**2))*(abs(tm))
+      sigT=(-par(5)/q2)*exp(-par(6)*(q2**2))*(abs(tm))
       sigLT=(par(9)/(1+q2))*sin(thetacm)*exp(-par(10)*(abs(tm)))
       sigTT=(-par(13)/(1+q2))*(sin(thetacm)**2)**exp(-par(14)*(abs(tm)))
       
