@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 23:01:59 trottar"
+# Time-stamp: "2024-07-11 23:06:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,8 +183,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig L")
     print("/*--------------------------------------------------*/")
     
-    gc.collect()
-    
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
@@ -209,6 +207,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
+        # Collect garbage
+        gc.collect()
+        ROOT.gROOT.GetListOfCanvases().Clear()
+        ROOT.gROOT.GetListOfSpecials().Clear()
+        
         iteration = 0
         
         initial_temperature = 1.0
@@ -561,9 +564,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.SetLineColor(ROOT.kBlack)
     graph_sigL_accept.Draw("ALP")
     
-    print("\n")
-
-    gc.collect()
+    print("\n")    
     
     '''   
     # 3 params
@@ -574,8 +575,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig L")
     print("/*--------------------------------------------------*/")
-
-    gc.collect()
 
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
@@ -601,6 +600,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Collect garbage
+        gc.collect()
+        ROOT.gROOT.GetListOfCanvases().Clear()
+        ROOT.gROOT.GetListOfSpecials().Clear()
 
         iteration = 0
         
@@ -971,8 +975,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigL_accept.Draw("ALP")
     
     print("\n")    
-
-    gc.collect()
     '''
     
     # 2 params
@@ -984,8 +986,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig T")
     print("/*--------------------------------------------------*/")
 
-    gc.collect()    
-    
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
@@ -1009,6 +1009,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
+
+        # Collect garbage
+        gc.collect()
+        ROOT.gROOT.GetListOfCanvases().Clear()
+        ROOT.gROOT.GetListOfSpecials().Clear()
         
         iteration = 0
         
@@ -1361,8 +1366,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.Draw("ALP")
 
     print("\n")    
-
-    gc.collect()    
     
     '''
     # 3 params
@@ -1373,8 +1376,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig T")
     print("/*--------------------------------------------------*/")
-
-    gc.collect()
 
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
@@ -1400,6 +1401,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Collect garbage
+        gc.collect()
+        ROOT.gROOT.GetListOfCanvases().Clear()
+        ROOT.gROOT.GetListOfSpecials().Clear()
 
         iteration = 0
         
@@ -1769,8 +1775,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.Draw("ALP")
     
     print("\n")    
-
-    gc.collect()
     '''
 
     # 2 params
@@ -1782,8 +1786,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig LT")
     print("/*--------------------------------------------------*/")    
 
-    gc.collect()
-    
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
@@ -1807,6 +1809,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Collect garbage
+        gc.collect()
+        ROOT.gROOT.GetListOfCanvases().Clear()
+        ROOT.gROOT.GetListOfSpecials().Clear()
 
         iteration = 0
     
@@ -2168,8 +2175,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     print("\n")    
 
-    gc.collect()
-    
     '''    
     # 3 params
     #########
@@ -2179,8 +2184,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig LT")
     print("/*--------------------------------------------------*/")    
-
-    gc.collect()
 
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
@@ -2206,6 +2209,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Collect garbage
+        gc.collect()
+        ROOT.gROOT.GetListOfCanvases().Clear()
+        ROOT.gROOT.GetListOfSpecials().Clear()
 
         iteration = 0
     
@@ -2582,8 +2590,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.Draw("ALP")
     
     print("\n")    
-
-    gc.collect()
     '''
 
     '''
@@ -2595,8 +2601,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("\n/*--------------------------------------------------*/")
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")
-
-    gc.collect()
     
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
@@ -2620,6 +2624,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Collect garbage
+        gc.collect()
+        ROOT.gROOT.GetListOfCanvases().Clear()
+        ROOT.gROOT.GetListOfSpecials().Clear()
 
         iteration = 0
         
@@ -2955,8 +2964,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.Draw("ALP")
     
     print("\n")    
-
-    gc.collect()
     '''    
 
     # 2 params
@@ -2968,8 +2975,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     print("Fit for Sig TT")
     print("/*--------------------------------------------------*/")    
 
-    gc.collect()
-    
     num_starts = 10  # Number of times to restart the algorithm
     best_overall_params = None
     best_overall_cost = float('inf')
@@ -2993,6 +2998,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         
     for start in range(num_starts):
         print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+
+        # Collect garbage
+        gc.collect()
+        ROOT.gROOT.GetListOfCanvases().Clear()
+        ROOT.gROOT.GetListOfSpecials().Clear()
 
         iteration = 0
     
@@ -3353,8 +3363,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.Draw("ALP")
 
     print("\n")    
-
-    gc.collect()
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
