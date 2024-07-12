@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-12 00:01:53 trottar"
+# Time-stamp: "2024-07-12 00:06:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -180,10 +180,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         ########
         # SigL #
         ########
-
-        print("\n/*--------------------------------------------------*/")
-        print("Fit for Sig L")
-        print("/*--------------------------------------------------*/")
 
         num_starts = 10  # Number of times to restart the algorithm
         best_overall_params = None
@@ -386,6 +382,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_overall_params = best_params[:]
                 best_overall_errors = best_errors
 
+        print("\n/*--------------------------------------------------*/")
+        print("Fit for Sig L")
+        print("/*--------------------------------------------------*/")
+                
         print("\nBest overall solution: {0}".format(best_overall_params))
         print("Best overall cost: {0}".format(best_overall_cost))
 
@@ -568,10 +568,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         ########
         # SigL #
         ########
-
-        print("\n/*--------------------------------------------------*/")
-        print("Fit for Sig L")
-        print("/*--------------------------------------------------*/")
 
         num_starts = 10  # Number of times to restart the algorithm
         best_overall_params = None
@@ -787,6 +783,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 best_overall_params = best_params[:]
                 best_overall_errors = best_errors
 
+        print("\n/*--------------------------------------------------*/")
+        print("Fit for Sig L")
+        print("/*--------------------------------------------------*/")
+
         print("\nBest overall solution: {0}".format(best_overall_params))
         print("Best overall cost: {0}".format(best_overall_cost))
 
@@ -975,10 +975,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # SigT #
         ########
 
-        print("\n/*--------------------------------------------------*/")
-        print("Fit for Sig T")
-        print("/*--------------------------------------------------*/")
-
         num_starts = 10  # Number of times to restart the algorithm
         best_overall_params = None
         best_overall_cost = float('inf')
@@ -1001,7 +997,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         start_time = time.time()
 
         for start in range(num_starts):
-            print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
+            #print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))
 
             iteration = 0
 
@@ -1186,6 +1182,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Calculate the total duration
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
+
+        print("\n/*--------------------------------------------------*/")
+        print("Fit for Sig T")
+        print("/*--------------------------------------------------*/")
         
         while len(best_overall_params) < 4:
             best_overall_params.append(0.0)
@@ -1361,10 +1361,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # SigT #
         ########
 
-        print("\n/*--------------------------------------------------*/")
-        print("Fit for Sig T")
-        print("/*--------------------------------------------------*/")
-
         num_starts = 10  # Number of times to restart the algorithm
         best_overall_params = None
         best_overall_cost = float('inf')
@@ -1388,7 +1384,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         start_time = time.time()
 
         for start in range(num_starts):
-            print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            #print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
             iteration = 0
 
@@ -1581,6 +1577,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("\nBest overall solution: {0}".format(best_overall_params))
         print("Best overall cost: {0}".format(best_overall_cost))
 
+        print("\n/*--------------------------------------------------*/")
+        print("Fit for Sig T")
+        print("/*--------------------------------------------------*/")
+
         # Record the end time
         end_time = time.time()
         # Calculate the total duration
@@ -1766,10 +1766,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # SigLT #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print("Fit for Sig LT")
-        print("/*--------------------------------------------------*/")    
-
         num_starts = 10  # Number of times to restart the algorithm
         best_overall_params = None
         best_overall_cost = float('inf')
@@ -1792,7 +1788,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         start_time = time.time()
 
         for start in range(num_starts):
-            print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            #print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
             iteration = 0
 
@@ -1980,6 +1976,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("\nBest overall solution: {0}".format(best_overall_params))
         print("Best overall cost: {0}".format(best_overall_cost))
 
+        print("\n/*--------------------------------------------------*/")
+        print("Fit for Sig LT")
+        print("/*--------------------------------------------------*/")    
+        
         # Record the end time
         end_time = time.time()
         # Calculate the total duration
@@ -2160,10 +2160,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # SigLT #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print("Fit for Sig LT")
-        print("/*--------------------------------------------------*/")    
-
         num_starts = 10  # Number of times to restart the algorithm
         best_overall_params = None
         best_overall_cost = float('inf')
@@ -2187,7 +2183,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         start_time = time.time()
 
         for start in range(num_starts):
-            print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            #print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
             iteration = 0
 
@@ -2387,6 +2383,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("\nBest overall solution: {0}".format(best_overall_params))
         print("Best overall cost: {0}".format(best_overall_cost))
 
+        print("\n/*--------------------------------------------------*/")
+        print("Fit for Sig LT")
+        print("/*--------------------------------------------------*/")    
+
         # Record the end time
         end_time = time.time()
         # Calculate the total duration
@@ -2573,10 +2573,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # SigTT #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print("Fit for Sig TT")
-        print("/*--------------------------------------------------*/")
-
         num_starts = 10  # Number of times to restart the algorithm
         best_overall_params = None
         best_overall_cost = float('inf')
@@ -2598,7 +2594,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         start_time = time.time()
 
         for start in range(num_starts):
-            print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            #print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
             iteration = 0
 
@@ -2767,6 +2763,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # Calculate the total duration
         total_duration = end_time - start_time
         print("The loop took {:.2f} seconds.".format(total_duration))
+
+        print("\n/*--------------------------------------------------*/")
+        print("Fit for Sig TT")
+        print("/*--------------------------------------------------*/")
 
         best_overall_params = [best_overall_params]
         best_overall_errors = [best_overall_errors]
@@ -2941,10 +2941,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         # SigTT #
         #########
 
-        print("\n/*--------------------------------------------------*/")
-        print("Fit for Sig TT")
-        print("/*--------------------------------------------------*/")    
-
         num_starts = 10  # Number of times to restart the algorithm
         best_overall_params = None
         best_overall_cost = float('inf')
@@ -2967,7 +2963,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         start_time = time.time()
 
         for start in range(num_starts):
-            print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            #print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
 
             iteration = 0
 
@@ -3155,6 +3151,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         print("\nBest overall solution: {0}".format(best_overall_params))
         print("Best overall cost: {0}".format(best_overall_cost))
 
+        print("\n/*--------------------------------------------------*/")
+        print("Fit for Sig TT")
+        print("/*--------------------------------------------------*/")    
+        
         # Record the end time
         end_time = time.time()
         # Calculate the total duration
@@ -3339,12 +3339,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     process_T.start()
     process_LT.start()
     process_TT.start()
-        
-    process_L.join()
-    process_T.join()
-    process_LT.join()
-    process_TT.join()
-    
+            
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
     c3.Print(outputpdf)
@@ -3369,5 +3364,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         for i,par in enumerate(prv_par_vec):
             print("par{} = {:.3f}".format(i+1, par))
 
+    process_L.join()
+    process_T.join()
+    process_LT.join()
+    process_TT.join()            
+            
     # Testing
     #sys.exit(2)            
