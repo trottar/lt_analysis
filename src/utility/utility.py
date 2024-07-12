@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 18:59:07 trottar"
+# Time-stamp: "2024-07-11 23:23:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -550,6 +550,9 @@ def simulated_annealing(param, temperature, perturbation_factor=0.1):
     perturbation = random.uniform(-max_perturbation, max_perturbation) * temperature
     return param + perturbation
 
+from numba import jit
+
+@jit(nopython=True)
 def acceptance_probability(old_cost, new_cost, temperature):
     # Calculate the probability of accepting a worse solution
     if new_cost < old_cost:
@@ -558,29 +561,30 @@ def acceptance_probability(old_cost, new_cost, temperature):
         return 0.0
     else:
         return math.exp((old_cost - new_cost) / temperature)
-
+    
 def adjust_params(params, adjustment_factor=1.0):
-    return [p + random.uniform(-adjustment_factor, adjustment_factor) * p for p in params]
+    return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
+
+
+# Create a PyROOT callable object
+class PyFunc:
+    def __call__(self, par):
+        return chi2_func(par)
+
+minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+minimizer.SetMaxFunctionCalls(1000000)
+minimizer.SetMaxIterations(100000)
+minimizer.SetTolerance(0.001)
+minimizer.SetPrintLevel(0)
 
 def local_search(params, inp_func, num_params):
 
     if num_params+1 > 2:
-        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-        minimizer.SetMaxFunctionCalls(1000000)
-        minimizer.SetMaxIterations(100000)
-        minimizer.SetTolerance(0.001)
-        minimizer.SetPrintLevel(0)
-
         # Create a wrapper function that can be called by the minimizer
         def chi2_func(par):
             for i in range(num_params+1):
                 inp_func.SetParameter(i, par[i])
             return inp_func.GetChisquare()
-
-        # Create a PyROOT callable object
-        class PyFunc:
-            def __call__(self, par):
-                return chi2_func(par)
 
         py_func = PyFunc()
 
@@ -604,21 +608,11 @@ def local_search(params, inp_func, num_params):
         return improved_params
 
     else:
-        minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-        minimizer.SetMaxFunctionCalls(1000000)
-        minimizer.SetMaxIterations(100000)
-        minimizer.SetTolerance(0.001)
-        minimizer.SetPrintLevel(0)
 
         # Create a wrapper function that can be called by the minimizer
         def chi2_func(par):
             inp_func.SetParameter(1, par)
             return inp_func.GetChisquare()
-
-        # Create a PyROOT callable object
-        class PyFunc:
-            def __call__(self, par):
-                return chi2_func(par)
 
         py_func = PyFunc()
 
