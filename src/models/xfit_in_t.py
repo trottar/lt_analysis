@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 21:33:05 trottar"
+# Time-stamp: "2024-07-11 22:20:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,8 +84,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     ##############
     # Maximum iterations before ending loop
     #max_iterations = 100
-    max_iterations = 500
-    #max_iterations = 1000
+    #max_iterations = 500
+    max_iterations = 1000
     #max_iterations = 10000
     ##############
     ##############
@@ -230,7 +230,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 10
+        local_search_interval = 25
         
         while iteration <= max_iterations:
 
@@ -621,7 +621,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 10
+        local_search_interval = 25
 
         while iteration <= max_iterations:
 
@@ -1024,7 +1024,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()    
 
         # Local search
-        local_search_interval = 10
+        local_search_interval = 25
         
         while iteration <= max_iterations:
 
@@ -1412,7 +1412,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 10
+        local_search_interval = 25
 
         while iteration <= max_iterations:
 
@@ -1815,7 +1815,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 10
+        local_search_interval = 25
         
         while iteration <= max_iterations:
             
@@ -1860,8 +1860,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigLT.SetParameter(1, current_params[1])
                 #f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_siglt_0), current_params[0] + abs(current_params[0] * par_siglt_0))
                 #f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_siglt_1), current_params[1] + abs(current_params[1] * par_siglt_1))
-                f_sigLT.SetParLimits(0, -1, 1)
-                f_sigLT.SetParLimits(1, -1, 1)
+                #f_sigLT.SetParLimits(0, -1, 1)
+                #f_sigLT.SetParLimits(1, -1, 1)
 
                 g_q2_siglt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -2211,7 +2211,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 10
+        local_search_interval = 25
 
         while iteration <= max_iterations:
             
@@ -2259,9 +2259,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_siglt_0), current_params[0] + abs(current_params[0] * par_siglt_0))
                 #f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_siglt_1), current_params[1] + abs(current_params[1] * par_siglt_1))
                 #f_sigLT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_siglt_2), current_params[2] + abs(current_params[2] * par_siglt_2))
-                f_sigLT.SetParLimits(0, -1, 1)
-                f_sigLT.SetParLimits(1, -1, 1)
-                f_sigLT.SetParLimits(2, -1, 1)
+                #f_sigLT.SetParLimits(0, -1, 1)
+                #f_sigLT.SetParLimits(1, -1, 1)
+                #f_sigLT.SetParLimits(2, -1, 1)
 
                 g_q2_siglt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -2617,7 +2617,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 10
+        local_search_interval = 25
 
         while iteration <= max_iterations:
 
@@ -2657,7 +2657,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT.SetParNames("p13")
                 f_sigTT.SetParameter(0, current_params)
                 #f_sigTT.SetParLimits(0, current_params - abs(current_params * par_sigtt_0), current_params + abs(current_params * par_sigtt_0))
-                f_sigTT.SetParLimits(0, -1, 1)
+                #f_sigTT.SetParLimits(0, -1, 1)
 
                 g_q2_sigtt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -2989,7 +2989,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         tabu_list = set()
 
         # Local search
-        local_search_interval = 10
+        local_search_interval = 25
         
         while iteration <= max_iterations:
             
@@ -3034,8 +3034,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT.SetParameter(1, current_params[1])
                 #f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigtt_0), current_params[0] + abs(current_params[0] * par_sigtt_0))
                 #f_sigTT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigtt_1), current_params[1] + abs(current_params[1] * par_sigtt_1))
-                f_sigTT.SetParLimits(0, -1, 1)
-                f_sigTT.SetParLimits(1, -1, 1)
+                #f_sigTT.SetParLimits(0, -1, 1)
+                #f_sigTT.SetParLimits(1, -1, 1)
 
                 g_q2_sigtt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
