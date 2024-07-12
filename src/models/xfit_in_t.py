@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 23:39:13 trottar"
+# Time-stamp: "2024-07-11 23:39:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3329,7 +3329,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         print("\n")    
 
-    queue_L, queue_T, queue_LT, queue_TT = Queue(), Queue()
+    queue_L, queue_T, queue_LT, queue_TT = Queue(), Queue(), Queue(), Queue()
     process_L = Process(target=run_sigL, args=(queue_L,))
     process_T = Process(target=run_sigT, args=(queue_T,))
     process_LT = Process(target=run_sigLT, args=(queue_LT,))
