@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-11 23:54:43 trottar"
+# Time-stamp: "2024-07-11 23:55:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3358,7 +3358,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     results = []
     for _ in range(2):  # We expect two results
-        results.append(q.get())
+        results.append(queue.get())
         
     process_L.join()
     process_T.join()
