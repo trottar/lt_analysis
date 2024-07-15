@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-14 23:46:49 trottar"
+# Time-stamp: "2024-07-15 00:48:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -505,7 +505,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)    
         f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, q2_vec[i], "x")
-        r_sigl_fit_xproj = g_sigl_fit.Fit(f_sigL_xproj, "SQ")
+        #r_sigl_fit_xproj = g_sigl_fit.Fit(f_sigL_xproj, "SQ")
+        r_sigl_fit_xproj = g_sigl_fit_tot.Fit(f_sigL_xproj, "SQ")
         f_sigL_xproj.SetLineColor(i+1)
         f_sigL_xproj.Draw("same")
 
