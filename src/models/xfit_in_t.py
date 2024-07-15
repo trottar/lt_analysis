@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-14 22:29:29 trottar"
+# Time-stamp: "2024-07-14 22:30:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -502,7 +502,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
     r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
-    f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, Q2, "x")
+    f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, q2_set, "x")
     r_sigl_fit_xproj = g_sigl_fit.Fit(f_sigL, "SQ")
     f_sigL_xproj.Draw("same")
 
@@ -907,7 +907,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
     r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
-    f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, Q2, "x")
+    f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, q2_set, "x")
     r_sigl_fit_xproj = g_sigl_fit.Fit(f_sigL, "SQ")
     f_sigL_xproj.Draw("same")
 
@@ -1297,7 +1297,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
     r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
-    f_sigT_xproj = TF12("f_sigT_xproj", f_sigT, Q2, "x")
+    f_sigT_xproj = TF12("f_sigT_xproj", f_sigT, q2_set, "x")
     r_sigt_fit_xproj = g_sigt_fit.Fit(f_sigT, "SQ")
     f_sigT_xproj.Draw("same")
 
@@ -1701,7 +1701,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
     r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
-    f_sigT_xproj = TF12("f_sigT_xproj", f_sigT, Q2, "x")
+    f_sigT_xproj = TF12("f_sigT_xproj", f_sigT, q2_set, "x")
     r_sigt_fit_xproj = g_sigt_fit.Fit(f_sigT, "SQ")
     f_sigT_xproj.Draw("same")
 
@@ -2099,7 +2099,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
     r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
-    f_sigLT_xproj = TF12("f_sigLT_xproj", f_sigLT, Q2, "x")
+    f_sigLT_xproj = TF12("f_sigLT_xproj", f_sigLT, q2_set, "x")
     r_siglt_fit_xproj = g_siglt_fit.Fit(f_sigLT, "SQ")
     f_sigLT_xproj.Draw("same")
 
@@ -2510,7 +2510,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
     r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
-    f_sigLT_xproj = TF12("f_sigLT_xproj", f_sigLT, Q2, "x")
+    f_sigLT_xproj = TF12("f_sigLT_xproj", f_sigLT, q2_set, "x")
     r_siglt_fit_xproj = g_siglt_fit.Fit(f_sigLT, "SQ")
     f_sigLT_xproj.Draw("same")
 
@@ -2885,7 +2885,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
     r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
-    f_sigTT_xproj = TF12("f_sigTT_xproj", f_sigTT, Q2, "x")
+    f_sigTT_xproj = TF12("f_sigTT_xproj", f_sigTT, q2_set, "x")
     r_sigtt_fit_xproj = g_sigtt_fit.Fit(f_sigTT, "SQ")
     f_sigTT_xproj.Draw("same")
 
@@ -3279,7 +3279,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
     r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
-    f_sigTT_xproj = TF12("f_sigTT_xproj", f_sigTT, Q2, "x")
+    f_sigTT_xproj = TF12("f_sigTT_xproj", f_sigTT, q2_set, "x")
     r_sigtt_fit_xproj = g_sigtt_fit.Fit(f_sigTT, "SQ")
     f_sigTT_xproj.Draw("same")
 
