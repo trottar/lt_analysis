@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-14 22:02:39 trottar"
+# Time-stamp: "2024-07-14 22:04:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,6 +158,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_vec.append(g)
             w_vec.append(w)
             q2_vec.append(q2)
+            print("!!!!!!!",q2)
             th_vec.append(thetacm)
 
     c1 = TCanvas("c1", "c1", 800, 800)
