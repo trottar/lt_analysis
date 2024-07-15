@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-14 22:04:30 trottar"
+# Time-stamp: "2024-07-14 22:22:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -158,7 +158,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             g_vec.append(g)
             w_vec.append(w)
             q2_vec.append(q2)
-            print("!!!!!!!",q2)
             th_vec.append(thetacm)
 
     c1 = TCanvas("c1", "c1", 800, 800)
@@ -483,7 +482,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigL.Eval(x, y) for x, y in zip(np.linspace(tmin_range, tmax_range, n_points), np.linspace(Q2min_range, Q2max_range, n_points))]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -886,7 +885,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigL.Eval(x, y) for x, y in zip(np.linspace(tmin_range, tmax_range, n_points), np.linspace(Q2min_range, Q2max_range, n_points))]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -1274,7 +1273,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigT.Eval(x, y) for x, y in zip(np.linspace(tmin_range, tmax_range, n_points), np.linspace(Q2min_range, Q2max_range, n_points))]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -1676,7 +1675,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigT.Eval(x, y) for x, y in zip(np.linspace(tmin_range, tmax_range, n_points), np.linspace(Q2min_range, Q2max_range, n_points))]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -2072,7 +2071,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigLT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigLT.Eval(x, y) for x, y in zip(np.linspace(tmin_range, tmax_range, n_points), np.linspace(Q2min_range, Q2max_range, n_points))]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -2481,7 +2480,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigLT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigLT.Eval(x, y) for x, y in zip(np.linspace(tmin_range, tmax_range, n_points), np.linspace(Q2min_range, Q2max_range, n_points))]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -2854,7 +2853,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigTT.Eval(x, y) for x, y in zip(np.linspace(tmin_range, tmax_range, n_points), np.linspace(Q2min_range, Q2max_range, n_points))]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -3246,7 +3245,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigTT.Eval(x, y) for x, y in zip(np.linspace(tmin_range, tmax_range, n_points), np.linspace(Q2min_range, Q2max_range, n_points))]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
