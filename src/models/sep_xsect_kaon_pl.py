@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-14 19:07:38 trottar"
+# Time-stamp: "2024-07-15 11:55:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -115,7 +115,8 @@ def import_model(inp_model, arg_str):
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                f=(par[0]/(abs(tt)*(1+qq)))*math.sin(theta_cm)*math.exp(-par[1]*(abs(tt)))
+                f=(par[0]/(1+qq))*math.sin(theta_cm)*math.exp(-par[1]*(abs(tt)))
+                #f=(par[0]/(abs(tt)*(1+qq)))*math.sin(theta_cm)*math.exp(-par[1]*(abs(tt)))
                 
             except ValueError:
                 f = -1000.0
@@ -140,7 +141,8 @@ def import_model(inp_model, arg_str):
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                f=(par[0]*(abs(tt))/(1+qq))*(math.sin(theta_cm)**2)*math.exp(-par[1]*((abs(tt))/qq**4))
+                f=(-par[0]*(1+qq))*(math.sin(theta_cm)**2)*math.exp(-par[1]*(abs(tt)))
+                #f=(par[0]*(abs(tt))/(1+qq))*(math.sin(theta_cm)**2)*math.exp(-par[1]*((abs(tt))/qq**4))
                 
             except ValueError:
                 f = -1000.0
