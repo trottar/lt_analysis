@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-14 21:54:43 trottar"
+# Time-stamp: "2024-07-14 21:56:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,7 +14,7 @@ import random
 import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
-from ROOT import TF1, TFitResultPtr
+from ROOT import TF1, TF2, TFitResultPtr
 from multiprocessing import Process, Queue
 import numpy as np
 import math
