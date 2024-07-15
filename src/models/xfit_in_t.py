@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-14 23:45:23 trottar"
+# Time-stamp: "2024-07-14 23:46:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -504,9 +504,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)    
-        f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, q2_vec[i], "y")
+        f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, q2_vec[i], "x")
         r_sigl_fit_xproj = g_sigl_fit.Fit(f_sigL_xproj, "SQ")
-        f_sigL_xproj.SetLineColor(i+1)        
+        f_sigL_xproj.SetLineColor(i+1)
         f_sigL_xproj.Draw("same")
 
     #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
@@ -912,7 +912,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, q2_vec[i], "y")
+        f_sigL_xproj = TF12("f_sigL_xproj", f_sigL, q2_vec[i], "x")
         r_sigl_fit_xproj = g_sigl_fit.Fit(f_sigL_xproj, "SQ")
         f_sigL_xproj.SetLineColor(i+1)
         f_sigL_xproj.Draw("same")
@@ -1305,7 +1305,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)    
-        f_sigT_xproj = TF12("f_sigT_xproj", f_sigT, q2_vec[i], "y")
+        f_sigT_xproj = TF12("f_sigT_xproj", f_sigT, q2_vec[i], "x")
         r_sigt_fit_xproj = g_sigt_fit.Fit(f_sigT_xproj, "SQ")
         f_sigT_xproj.SetLineColor(i+1)                
         f_sigT_xproj.Draw("same")
@@ -1712,7 +1712,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigT_xproj = TF12("f_sigT_xproj", f_sigT, q2_vec[i], "y")
+        f_sigT_xproj = TF12("f_sigT_xproj", f_sigT, q2_vec[i], "x")
         r_sigt_fit_xproj = g_sigt_fit.Fit(f_sigT_xproj, "SQ")
         f_sigT_xproj.SetLineColor(i+1)
         f_sigT_xproj.Draw("same")
@@ -2113,7 +2113,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)    
-        f_sigLT_xproj = TF12("f_sigLT_xproj", f_sigLT, q2_vec[i], "y")
+        f_sigLT_xproj = TF12("f_sigLT_xproj", f_sigLT, q2_vec[i], "x")
         r_siglt_fit_xproj = g_siglt_fit.Fit(f_sigLT_xproj, "SQ")
         f_sigLT_xproj.SetLineColor(i+1)                        
         f_sigLT_xproj.Draw("same")
@@ -2527,7 +2527,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigLT_xproj = TF12("f_sigLT_xproj", f_sigLT, q2_vec[i], "y")
+        f_sigLT_xproj = TF12("f_sigLT_xproj", f_sigLT, q2_vec[i], "x")
         r_siglt_fit_xproj = g_siglt_fit.Fit(f_sigLT_xproj, "SQ")
         f_sigLT_xproj.SetLineColor(i+1)
         f_sigLT_xproj.Draw("same")
@@ -2905,7 +2905,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)
-        f_sigTT_xproj = TF12("f_sigTT_xproj", f_sigTT, q2_vec[i], "y")
+        f_sigTT_xproj = TF12("f_sigTT_xproj", f_sigTT, q2_vec[i], "x")
         r_sigtt_fit_xproj = g_sigtt_fit.Fit(f_sigTT_xproj, "SQ")
         f_sigTT_xproj.SetLineColor(i+1)
         f_sigTT_xproj.Draw("same")
@@ -3302,7 +3302,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
     for i in range(len(w_vec)):
         # TF2 projected to 1D along x-axis (ie only t-dependence, fixed Q2)    
-        f_sigTT_xproj = TF12("f_sigTT_xproj", f_sigTT, q2_vec[i], "y")
+        f_sigTT_xproj = TF12("f_sigTT_xproj", f_sigTT, q2_vec[i], "x")
         r_sigtt_fit_xproj = g_sigtt_fit.Fit(f_sigTT_xproj, "SQ")
         f_sigTT_xproj.SetLineColor(i+1)                                
         f_sigTT_xproj.Draw("same")
