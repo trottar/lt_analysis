@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-16 01:32:09 trottar"
+# Time-stamp: "2024-07-12 13:50:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,7 +15,6 @@ import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
-from ROOT import TF12, TF2, TGraph2DErrors
 from multiprocessing import Process, Queue
 import numpy as np
 import math
@@ -69,7 +68,7 @@ DEBUG=False
 ###############################################################################################################################################
 # Import separated xsects models
 
-from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT, fun2d_Sig_L, fun2d_Sig_T, fun2d_Sig_LT, fun2d_Sig_TT, set_val
+from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT, set_val
 
 ###############################################################################################################################################
 
@@ -86,8 +85,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    #max_iterations = 100
-    max_iterations = 500
+    max_iterations = 100
+    #max_iterations = 500
     #max_iterations = 1000
     #max_iterations = 10000
     ##############
@@ -273,21 +272,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
                     g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
-                f_sigL = TF2("sig_L", fun2d_Sig_L, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
+                f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
                 f_sigL.SetParNames("p1", "p2")
                 f_sigL.SetParameter(0, current_params[0])
                 f_sigL.SetParameter(1, current_params[1])
                 #f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigl_0), current_params[0] + abs(current_params[0] * par_sigl_0))
                 #f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigl_1), current_params[1] + abs(current_params[1] * par_sigl_1))
 
-                g_q2_sigl_fit = TGraph2DErrors()
+                g_q2_sigl_fit = TGraphErrors()
                 for i in range(len(w_vec)):
-                    g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], q2_vec[i], sigl_X_fit)
-                    g_q2_sigl_fit.SetPointError(i, 0.0, 0.0, sigl_X_fit_err)
-                    sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
+                    g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
+                    g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
+                    sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
                     g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-                r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
+                r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
 
                 #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
                 f_sigL_status = f_sigL.GetNDF() != 0
@@ -493,7 +492,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Set a margin to ensure all points are visible
     margin = 0.1 * (y_max - y_min)
     g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-    
+
     g_q2_sigl_fit = TGraphErrors()
     for i in range(len(w_vec)):
         g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
@@ -666,7 +665,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
                     g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
-                f_sigL = TF2("sig_L", fun2d_Sig_L, tmin_range, tmax_range, 3)
+                f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
                 f_sigL.SetParNames("p1", "p2", "p3")
                 f_sigL.SetParameter(0, current_params[0])
                 f_sigL.SetParameter(1, current_params[1])
@@ -675,14 +674,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigl_1), current_params[1] + abs(current_params[1] * par_sigl_1))
                 #f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sigl_2), current_params[2] + abs(current_params[2] * par_sigl_2))
 
-                g_q2_sigl_fit = TGraph2DErrors()
+                g_q2_sigl_fit = TGraphErrors()
                 for i in range(len(w_vec)):
-                    g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], q2_vec[i], sigl_X_fit)
-                    g_q2_sigl_fit.SetPointError(i, 0.0, 0.0, sigl_X_fit_err)
-                    sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
+                    g_q2_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
+                    g_q2_sigl_fit.SetPointError(i, 0.0, sigl_X_fit_err)
+                    sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
                     g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-                r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
+                r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
 
                 #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
                 f_sigL_status = f_sigL.GetNDF() != 0
@@ -820,7 +819,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit = TGraphErrors()
     g_sigl_fit_tot = TGraph()        
 
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range,3)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
     f_sigL_pre.SetParNames("p1", "p2", "p3")
     f_sigL_pre.FixParameter(0, best_overall_params[0])
     f_sigL_pre.FixParameter(1, best_overall_params[1])
@@ -877,7 +876,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range,3)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
     f_sigL.SetParNames("p1", "p2", "p3")
     f_sigL.FixParameter(0, best_overall_params[0])
     f_sigL.FixParameter(1, best_overall_params[1])
@@ -1067,21 +1066,21 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
                     g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-                f_sigT = TF2("sig_T", fun2d_Sig_T, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
+                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
                 f_sigT.SetParNames("p5", "p6")
                 f_sigT.SetParameter(0, current_params[0])
                 f_sigT.SetParameter(1, current_params[1])
                 #f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigt_0), current_params[0] + abs(current_params[0] * par_sigt_0))
                 #f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigt_1), current_params[1] + abs(current_params[1] * par_sigt_1))
 
-                g_q2_sigt_fit = TGraph2DErrors()
+                g_q2_sigt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
-                    g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], q2_vec[i], sigt_X_fit)
-                    g_q2_sigt_fit.SetPointError(i, 0.0, 0.0, sigt_X_fit_err)
-                    sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * (g_vec[i])
+                    g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
+                    g_q2_sigt_fit.SetPointError(i, 0.0, sigt_X_fit_err)
+                    sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
                     g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
-                r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
+                r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
 
                 #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
                 f_sigT_status = f_sigT.GetNDF() != 0
@@ -1456,7 +1455,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
                     g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-                f_sigT = TF2("sig_T", fun2d_Sig_T, tmin_range, tmax_range, 3)
+                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
                 f_sigT.SetParNames("p5", "p6", "p7")
                 f_sigT.SetParameter(0, current_params[0])
                 f_sigT.SetParameter(1, current_params[1])
@@ -1465,14 +1464,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigt_1), current_params[1] + abs(current_params[1] * par_sigt_1))
                 #f_sigT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sigt_2), current_params[2] + abs(current_params[2] * par_sigt_2))
 
-                g_q2_sigt_fit = TGraph2DErrors()
+                g_q2_sigt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
-                    g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], q2_vec[i], sigt_X_fit)
-                    g_q2_sigt_fit.SetPointError(i, 0.0, 0.0, sigt_X_fit_err)
-                    sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * (g_vec[i])
+                    g_q2_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
+                    g_q2_sigt_fit.SetPointError(i, 0.0, sigt_X_fit_err)
+                    sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
                     g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
-                r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
+                r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
 
                 #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
                 f_sigT_status = f_sigT.GetNDF() != 0
@@ -1610,7 +1609,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit = TGraphErrors()
     g_sigt_fit_tot = TGraph()        
 
-    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range,3)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT_pre.SetParNames("p5", "p6", "p7")
     f_sigT_pre.FixParameter(0, best_overall_params[0])
     f_sigT_pre.FixParameter(1, best_overall_params[1])
@@ -1667,7 +1666,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range,3)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
     f_sigT.SetParNames("p5", "p6", "p7")
     f_sigT.FixParameter(0, best_overall_params[0])
     f_sigT.FixParameter(1, best_overall_params[1])
@@ -1858,7 +1857,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
                     g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
-                f_sigLT = TF2("sig_LT", fun2d_Sig_LT, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
+                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 2)
                 f_sigLT.SetParNames("p9", "p10")
                 f_sigLT.SetParameter(0, current_params[0])
                 f_sigLT.SetParameter(1, current_params[1])
@@ -1867,14 +1866,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #f_sigLT.SetParLimits(0, -5, 5)
                 #f_sigLT.SetParLimits(1, -5, 5)
 
-                g_q2_siglt_fit = TGraph2DErrors()
+                g_q2_siglt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
-                    g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], q2_vec[i], siglt_X_fit)
-                    g_q2_siglt_fit.SetPointError(i, 0.0, 0.0, siglt_X_fit_err)
-                    siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
+                    g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
+                    g_q2_siglt_fit.SetPointError(i, 0.0, siglt_X_fit_err)
+                    siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
                     g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
-                r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
+                r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
 
                 #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
                 f_sigLT_status = f_sigLT.GetNDF() != 0
@@ -2255,7 +2254,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
                     g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
-                f_sigLT = TF2("sig_LT", fun2d_Sig_LT, tmin_range, tmax_range, 3)
+                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
                 f_sigLT.SetParNames("p9", "p10", "p11")
                 f_sigLT.SetParameter(0, current_params[0])
                 f_sigLT.SetParameter(1, current_params[1])
@@ -2267,14 +2266,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #f_sigLT.SetParLimits(1, -5, 5)
                 #f_sigLT.SetParLimits(2, -5, 5)
 
-                g_q2_siglt_fit = TGraph2DErrors()
+                g_q2_siglt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
-                    g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], q2_vec[i], siglt_X_fit)
-                    g_q2_siglt_fit.SetPointError(i, 0.0, 0.0, siglt_X_fit_err)
-                    siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
+                    g_q2_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
+                    g_q2_siglt_fit.SetPointError(i, 0.0, siglt_X_fit_err)
+                    siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
                     g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
-                r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
+                r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
 
                 #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
                 f_sigLT_status = f_sigLT.GetNDF() != 0
@@ -2415,7 +2414,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit = TGraphErrors()
     g_siglt_fit_tot = TGraph()    
 
-    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range,3)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT_pre.SetParNames("p9", "p10", "p11")
     f_sigLT_pre.FixParameter(0, best_overall_params[0])
     f_sigLT_pre.FixParameter(1, best_overall_params[1])
@@ -2472,7 +2471,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_siglt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range,3)
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
     f_sigLT.SetParNames("p9", "p10", "p11")
     f_sigLT.FixParameter(0, best_overall_params[0])
     f_sigLT.FixParameter(1, best_overall_params[1])
@@ -2657,20 +2656,20 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
                     g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
-                f_sigTT = TF2("sig_TT", fun2d_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
+                f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
                 f_sigTT.SetParNames("p13")
                 f_sigTT.SetParameter(0, current_params)
                 #f_sigTT.SetParLimits(0, current_params - abs(current_params * par_sigtt_0), current_params + abs(current_params * par_sigtt_0))
                 #f_sigTT.SetParLimits(0, -5, 5)
 
-                g_q2_sigtt_fit = TGraph2DErrors()
+                g_q2_sigtt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
-                    g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], q2_vec[i], sigtt_X_fit)
-                    g_q2_sigtt_fit.SetPointError(i, 0.0, 0.0, sigtt_X_fit_err)
-                    sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+                    g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+                    g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
+                    sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                     g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
-                r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
+                r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
 
                 #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
                 f_sigTT_status = f_sigTT.GetNDF() != 0
@@ -3032,7 +3031,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
                     g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
-                f_sigTT = TF2("sig_TT", fun2d_Sig_TT, tmin_range, tmax_range, Q2min_range, Q2max_range, 2)
+                f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
                 f_sigTT.SetParNames("p13", "p14")
                 f_sigTT.SetParameter(0, current_params[0])
                 f_sigTT.SetParameter(1, current_params[1])
@@ -3041,14 +3040,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 #f_sigTT.SetParLimits(0, -5, 5)
                 #f_sigTT.SetParLimits(1, -5, 5)
 
-                g_q2_sigtt_fit = TGraph2DErrors()
+                g_q2_sigtt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
-                    g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], q2_vec[i], sigtt_X_fit)
-                    g_q2_sigtt_fit.SetPointError(i, 0.0, 0.0, sigtt_X_fit_err)
-                    sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+                    g_q2_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
+                    g_q2_sigtt_fit.SetPointError(i, 0.0, sigtt_X_fit_err)
+                    sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                     g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
-                r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
+                r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
 
                 #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
                 f_sigTT_status = f_sigTT.GetNDF() != 0
