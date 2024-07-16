@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-16 00:50:33 trottar"
+# Time-stamp: "2024-07-16 01:23:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -287,7 +287,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
                     g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-                r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
+                r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
 
                 #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
                 f_sigL_status = f_sigL.GetNDF() != 0
@@ -501,7 +501,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-    r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
+    r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
     f_sigL.Draw("same")
 
     #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
@@ -682,7 +682,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigl_X = (f_sigL.Eval(g_sigl.GetX()[i], q2_vec[i])) * (g_vec[i])
                     g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-                r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
+                r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
 
                 #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
                 f_sigL_status = f_sigL.GetNDF() != 0
@@ -904,7 +904,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigl_X = (f_sigL.Eval(g_sigl.GetX()[i])) * (g_vec[i])
         g_sigl_fit_tot.SetPoint(i, g_sigl.GetX()[i], sigl_X)
 
-    r_sigl_fit = g_q2_sigl_fit.Fit(f_sigL, "SQ")
+    r_sigl_fit = g_sigl_fit.Fit(f_sigL, "SQ")
     f_sigL.Draw("same")
 
     #f_sigL_status = (r_sigl_fit.Status() == 0 and r_sigl_fit.IsValid())
@@ -1081,7 +1081,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * (g_vec[i])
                     g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
-                r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
+                r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
 
                 #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
                 f_sigT_status = f_sigT.GetNDF() != 0
@@ -1292,7 +1292,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
-    r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
+    r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
     f_sigT.Draw("same")
 
     #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
@@ -1472,7 +1472,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigt_X = (f_sigT.Eval(g_sigt.GetX()[i], q2_vec[i])) * (g_vec[i])
                     g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
-                r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
+                r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
 
                 #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
                 f_sigT_status = f_sigT.GetNDF() != 0
@@ -1694,7 +1694,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigt_X = (f_sigT.Eval(g_sigt.GetX()[i])) * (g_vec[i])
         g_sigt_fit_tot.SetPoint(i, g_sigt.GetX()[i], sigt_X)
 
-    r_sigt_fit = g_q2_sigt_fit.Fit(f_sigT, "SQ")
+    r_sigt_fit = g_sigt_fit.Fit(f_sigT, "SQ")
     f_sigT.Draw("same")
 
     #f_sigT_status = (r_sigt_fit.Status() == 0 and r_sigt_fit.IsValid())
@@ -1874,7 +1874,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
                     g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
-                r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
+                r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
 
                 #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
                 f_sigLT_status = f_sigLT.GetNDF() != 0
@@ -2090,7 +2090,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
-    r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
+    r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
     f_sigLT.Draw("same")
 
     #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
@@ -2274,7 +2274,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
                     g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
-                r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
+                r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
 
                 #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
                 f_sigLT_status = f_sigLT.GetNDF() != 0
@@ -2499,7 +2499,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         siglt_X = (f_sigLT.Eval(g_siglt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])
         g_siglt_fit_tot.SetPoint(i, g_siglt.GetX()[i], siglt_X)
 
-    r_siglt_fit = g_q2_siglt_fit.Fit(f_sigLT, "SQ")
+    r_siglt_fit = g_siglt_fit.Fit(f_sigLT, "SQ")
     f_sigLT.Draw("same")
 
     #f_sigLT_status = (r_siglt_fit.Status() == 0 and r_siglt_fit.IsValid())
@@ -2670,7 +2670,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                     g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
-                r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
+                r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
 
                 #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
                 f_sigTT_status = f_sigTT.GetNDF() != 0
@@ -2872,7 +2872,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
-    r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
+    r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
     f_sigTT.Draw("same")
 
     #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
@@ -3048,7 +3048,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i], q2_vec[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                     g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
-                r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
+                r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
 
                 #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
                 f_sigTT_status = f_sigTT.GetNDF() != 0
@@ -3264,7 +3264,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         sigtt_X = (f_sigTT.Eval(g_sigtt.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
         g_sigtt_fit_tot.SetPoint(i, g_sigtt.GetX()[i], sigtt_X)
 
-    r_sigtt_fit = g_q2_sigtt_fit.Fit(f_sigTT, "SQ")
+    r_sigtt_fit = g_sigtt_fit.Fit(f_sigTT, "SQ")
     f_sigTT.Draw("same")
 
     #f_sigTT_status = (r_sigtt_fit.Status() == 0 and r_sigtt_fit.IsValid())
