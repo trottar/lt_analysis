@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-16 12:02:30 trottar"
+# Time-stamp: "2024-07-16 12:24:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -334,20 +334,27 @@ with PdfPages(outputpdf) as pdf:
 
             mask = (df['tbin'] == (k+1))
 
-            # Calculate the weighted average and its error
+            # Filter out zero values
             ratios = df['ratio'][mask]
             errors = df['dratio'][mask]
-            weights = 1 / (errors**2)
-            weighted_avg = np.average(ratios, weights=weights)
-            weighted_error = np.sqrt(1 / np.sum(weights))
+            non_zero_mask = (ratios != 0) & (errors != 0)
+            ratios = ratios[non_zero_mask]
+            errors = errors[non_zero_mask]
 
-            # Update the legend label to include the weighted average and its error
-            legend_label = "{} (Avg: {:.2f} ± {:.2f})".format(epsilon_label, weighted_avg, weighted_error)
+            if len(ratios) > 0:  # Check if we have any non-zero data points
+                weights = 1 / (errors ** 2)
 
-            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], 
-                        yerr=df['dratio'][mask], marker=markers[i], linestyle='None', 
-                        label=legend_label, color=colors[i], markeredgecolor=colors[i], 
-                        markerfacecolor='none', capsize=2)
+                weighted_average = np.average(ratios, weights=weights)
+                weighted_error = np.sqrt(1 / np.sum(weights))
+
+                # Update the legend label to include the weighted average and its error
+                legend_label = "{} (Avg: {:.2f} ± {:.2f})".format(epsilon_label, weighted_average, weighted_error)
+            else:
+                legend_label = "{} (No valid data)".format(epsilon_label)
+
+            ax.errorbar(phi_bin_centers[df['phibin'][mask][non_zero_mask]], ratios, yerr=errors, 
+                        marker=markers[i], linestyle='None', label=legend_label, 
+                        color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
         ax.set_xlabel('$\phi$', fontsize=24)
