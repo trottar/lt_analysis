@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-15 21:04:56 trottar"
+# Time-stamp: "2024-07-16 12:02:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -320,10 +320,8 @@ with PdfPages(outputpdf) as pdf:
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
-
         # Create a figure and axis objects
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
-
         ax = axes
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
@@ -336,31 +334,34 @@ with PdfPages(outputpdf) as pdf:
 
             mask = (df['tbin'] == (k+1))
 
-            # Calculate the average value of 'ratio' for the current epsilon dataset
-            average_ratio = df['ratio'][mask].mean()
+            # Calculate the weighted average and its error
+            ratios = df['ratio'][mask]
+            errors = df['dratio'][mask]
+            weights = 1 / (errors**2)
+            weighted_avg = np.average(ratios, weights=weights)
+            weighted_error = np.sqrt(1 / np.sum(weights))
 
-            # Update the legend label to include the average ratio
-            legend_label = "{} (Avg: {:.2f})".format(epsilon_label, average_ratio)
+            # Update the legend label to include the weighted average and its error
+            legend_label = "{} (Avg: {:.2f} ± {:.2f})".format(epsilon_label, weighted_avg, weighted_error)
 
-            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=legend_label, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], 
+                        yerr=df['dratio'][mask], marker=markers[i], linestyle='None', 
+                        label=legend_label, color=colors[i], markeredgecolor=colors[i], 
+                        markerfacecolor='none', capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
-
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('Ratio', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        #ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 360)
-
         ax.legend(fontsize=24)
+
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
 
-    
     ###
 
     # Define exponential function
