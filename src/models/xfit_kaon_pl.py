@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-15 11:43:56 trottar"
+# Time-stamp: "2024-07-16 00:31:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,8 +100,8 @@ def fun_Sig_T(x, par):
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
-        f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
-        #f=(-par[0]*(abs(tt)/qq))*math.exp(-par[1]*(qq**2)*abs(tt))
+        #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
+        f=(par[0]/math.log(qq))*math.exp(-par[1]*(qq**2))
         
     except OverflowError:
         f = -1000.0
@@ -126,8 +126,8 @@ def fun_Sig_LT(x, par):
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
-        f=(par[0]/(1+qq))*math.exp(-par[1]*(abs(tt)))
-        #f=(par[0]/(abs(tt)*(1+qq)))*math.exp(-par[1]*(abs(tt)))
+        #f=(par[0]/(1+qq))*math.exp(-par[1]*(abs(tt)))
+        f=(par[0]/(1+math.log(qq)))*math.exp(-par[1]*(abs(tt)))
         
     except OverflowError:
         f = -1000.0
@@ -153,8 +153,8 @@ def fun_Sig_TT(x, par):
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
-        f=(-par[0]/(1+qq))*math.exp(-par[1]*abs(tt))
-        #f=(par[0]*(abs(tt))/(1+qq))*math.exp(-par[1]*((abs(tt))/qq**4))
+        #f=(-par[0]/(1+qq))*math.exp(-par[1]*abs(tt))
+        f=(-par[0]/(1+math.log(qq)))*math.exp(-par[1]*abs(tt))
         
     except OverflowError:
         f = -1000.0
