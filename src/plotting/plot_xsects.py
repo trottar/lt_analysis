@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-16 12:24:01 trottar"
+# Time-stamp: "2024-07-16 19:37:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -348,7 +348,7 @@ with PdfPages(outputpdf) as pdf:
                 weighted_error = np.sqrt(1 / np.sum(weights))
 
                 # Update the legend label to include the weighted average and its error
-                legend_label = "{} (Avg: {:.2f} ± {:.2f})".format(epsilon_label, weighted_average, weighted_error)
+                legend_label = "{} (Avg: {:.3e} ± {:.3e})".format(epsilon_label, weighted_average, weighted_error)
             else:
                 legend_label = "{} (No valid data)".format(epsilon_label)
 
