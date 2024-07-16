@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-15 20:18:58 trottar"
+# Time-stamp: "2024-07-15 21:04:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -340,7 +340,7 @@ with PdfPages(outputpdf) as pdf:
             average_ratio = df['ratio'][mask].mean()
 
             # Update the legend label to include the average ratio
-            legend_label = f"{epsilon_label} (Avg: {average_ratio:.2f})"
+            legend_label = "{} (Avg: {:.2f})".format(epsilon_label, average_ratio)
 
             ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=legend_label, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
@@ -360,6 +360,7 @@ with PdfPages(outputpdf) as pdf:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
 
+    
     ###
 
     # Define exponential function
