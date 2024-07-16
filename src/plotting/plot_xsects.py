@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-30 16:27:46 trottar"
+# Time-stamp: "2024-07-15 20:18:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -330,12 +330,19 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
             df = file_df_dict[df_key]
             if "hi" in df_key:
-                df_key = "High $\epsilon$"
+                epsilon_label = "High $\epsilon$"
             else:
-                df_key = "Low $\epsilon$"
-                
+                epsilon_label = "Low $\epsilon$"
+
             mask = (df['tbin'] == (k+1))
-            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+
+            # Calculate the average value of 'ratio' for the current epsilon dataset
+            average_ratio = df['ratio'][mask].mean()
+
+            # Update the legend label to include the average ratio
+            legend_label = f"{epsilon_label} (Avg: {average_ratio:.2f})"
+
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=legend_label, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
 
