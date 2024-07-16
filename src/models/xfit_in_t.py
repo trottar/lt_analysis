@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-16 00:48:44 trottar"
+# Time-stamp: "2024-07-16 00:50:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -419,7 +419,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit = TGraphErrors()
     g_sigl_fit_tot = TGraph()        
 
-    f_sigL_pre = TF1("sig_L", fun2d_Sig_L, tmin_range, tmax_range, 2)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
     f_sigL_pre.SetParNames("p1", "p2")
     f_sigL_pre.FixParameter(0, best_overall_params[0])
     f_sigL_pre.FixParameter(1, best_overall_params[1])
@@ -475,7 +475,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigL = TF1("sig_L", fun2d_Sig_L, tmin_range, tmax_range, 2)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
     f_sigL.SetParNames("p1", "p2")
     f_sigL.FixParameter(0, best_overall_params[0])
     f_sigL.FixParameter(1, best_overall_params[1])
@@ -820,7 +820,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit = TGraphErrors()
     g_sigl_fit_tot = TGraph()        
 
-    f_sigL_pre = TF1("sig_L", fun2d_Sig_L, tmin_range, tmax_range,3)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range,3)
     f_sigL_pre.SetParNames("p1", "p2", "p3")
     f_sigL_pre.FixParameter(0, best_overall_params[0])
     f_sigL_pre.FixParameter(1, best_overall_params[1])
@@ -877,7 +877,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigL = TF1("sig_L", fun2d_Sig_L, tmin_range, tmax_range,3)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range,3)
     f_sigL.SetParNames("p1", "p2", "p3")
     f_sigL.FixParameter(0, best_overall_params[0])
     f_sigL.FixParameter(1, best_overall_params[1])
@@ -1210,7 +1210,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit = TGraphErrors()
     g_sigt_fit_tot = TGraph()    
 
-    f_sigT_pre = TF1("sig_T", fun2d_Sig_T, tmin_range, tmax_range, 2)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
     f_sigT_pre.SetParNames("p5", "p6")
     f_sigT_pre.FixParameter(0, best_overall_params[0])
     f_sigT_pre.FixParameter(1, best_overall_params[1])
@@ -1266,7 +1266,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigT = TF1("sig_T", fun2d_Sig_T, tmin_range, tmax_range, 2)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
     f_sigT.SetParNames("p5", "p6")
     f_sigT.FixParameter(0, best_overall_params[0])
     f_sigT.FixParameter(1, best_overall_params[1])
@@ -1610,7 +1610,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit = TGraphErrors()
     g_sigt_fit_tot = TGraph()        
 
-    f_sigT_pre = TF1("sig_T", fun2d_Sig_T, tmin_range, tmax_range,3)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range,3)
     f_sigT_pre.SetParNames("p5", "p6", "p7")
     f_sigT_pre.FixParameter(0, best_overall_params[0])
     f_sigT_pre.FixParameter(1, best_overall_params[1])
@@ -1667,7 +1667,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigT = TF1("sig_T", fun2d_Sig_T, tmin_range, tmax_range,3)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range,3)
     f_sigT.SetParNames("p5", "p6", "p7")
     f_sigT.FixParameter(0, best_overall_params[0])
     f_sigT.FixParameter(1, best_overall_params[1])
@@ -2008,7 +2008,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit = TGraphErrors()
     g_siglt_fit_tot = TGraph()    
 
-    f_sigLT_pre = TF1("sig_LT", fun2d_Sig_LT, tmin_range, tmax_range, 2)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 2)
     f_sigLT_pre.SetParNames("p9", "p10")
     f_sigLT_pre.FixParameter(0, best_overall_params[0])
     f_sigLT_pre.FixParameter(1, best_overall_params[1])
@@ -2064,7 +2064,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_siglt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigLT = TF1("sig_LT", fun2d_Sig_LT, tmin_range, tmax_range, 2)
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 2)
     f_sigLT.SetParNames("p9", "p10")
     f_sigLT.FixParameter(0, best_overall_params[0])
     f_sigLT.FixParameter(1, best_overall_params[1])
@@ -2415,7 +2415,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit = TGraphErrors()
     g_siglt_fit_tot = TGraph()    
 
-    f_sigLT_pre = TF1("sig_LT", fun2d_Sig_LT, tmin_range, tmax_range,3)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range,3)
     f_sigLT_pre.SetParNames("p9", "p10", "p11")
     f_sigLT_pre.FixParameter(0, best_overall_params[0])
     f_sigLT_pre.FixParameter(1, best_overall_params[1])
@@ -2472,7 +2472,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_siglt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigLT = TF1("sig_LT", fun2d_Sig_LT, tmin_range, tmax_range,3)
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range,3)
     f_sigLT.SetParNames("p9", "p10", "p11")
     f_sigLT.FixParameter(0, best_overall_params[0])
     f_sigLT.FixParameter(1, best_overall_params[1])
@@ -2792,7 +2792,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit = TGraphErrors()
     g_sigtt_fit_tot = TGraph()    
 
-    f_sigTT_pre = TF1("sig_TT", fun2d_Sig_TT, tmin_range, tmax_range, 2)
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
     f_sigTT_pre.SetParNames("p13")
     f_sigTT_pre.FixParameter(0, best_overall_params[0])
 
@@ -2847,7 +2847,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigTT = TF1("sig_TT", fun2d_Sig_TT, tmin_range, tmax_range, 2)
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
     f_sigTT.SetParNames("p13")
     f_sigTT.FixParameter(0, best_overall_params[0])
 
@@ -3182,7 +3182,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit = TGraphErrors()
     g_sigtt_fit_tot = TGraph()    
 
-    f_sigTT_pre = TF1("sig_TT", fun2d_Sig_TT, tmin_range, tmax_range, 2)
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
     f_sigTT_pre.SetParNames("p13", "p14")
     f_sigTT_pre.FixParameter(0, best_overall_params[0])
     f_sigTT_pre.FixParameter(1, best_overall_params[1])
@@ -3238,7 +3238,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigTT = TF1("sig_TT", fun2d_Sig_TT, tmin_range, tmax_range, 2)
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
     f_sigTT.SetParNames("p13", "p14")
     f_sigTT.FixParameter(0, best_overall_params[0])
     f_sigTT.FixParameter(1, best_overall_params[1])
