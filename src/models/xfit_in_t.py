@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-18 00:33:08 trottar"
+# Time-stamp: "2024-07-18 00:41:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,8 +85,8 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    #max_iterations = 100
-    max_iterations = 500
+    max_iterations = 100
+    #max_iterations = 500
     #max_iterations = 1000
     #max_iterations = 10000
     ##############
@@ -3162,10 +3162,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         best_overall_params.append(0.0)
         best_overall_errors.append(0.0)
             
-    par_vec.append(best_overall_params[0])
-    par_vec.append(best_overall_params[1])
-    par_vec.append(best_overall_params[2])
-    par_vec.append(best_overall_params[3])
+    #par_vec.append(best_overall_params[0])
+    #par_vec.append(best_overall_params[1])
+    #par_vec.append(best_overall_params[2])
+    #par_vec.append(best_overall_params[3])
+    par_vec.append(0.0)
+    par_vec.append(0.0)
+    par_vec.append(0.0)
+    par_vec.append(0.0)
 
     par_err_vec.append(best_overall_errors[0])
     par_err_vec.append(best_overall_errors[0])
