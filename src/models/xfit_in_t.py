@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-18 02:40:49 trottar"
+# Time-stamp: "2024-07-18 03:08:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3035,8 +3035,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT.SetParNames("p13", "p14")
                 f_sigTT.SetParameter(0, current_params[0])
                 f_sigTT.SetParameter(1, current_params[1])
-                f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigtt_0), current_params[0] + abs(current_params[0] * par_sigtt_0))
-                f_sigTT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigtt_1), current_params[1] + abs(current_params[1] * par_sigtt_1))
+                #f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigtt_0), current_params[0] + abs(current_params[0] * par_sigtt_0))
+                #f_sigTT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigtt_1), current_params[1] + abs(current_params[1] * par_sigtt_1))
                 #f_sigTT.SetParLimits(0, -5, 5)
                 #f_sigTT.SetParLimits(1, -5, 5)
 
