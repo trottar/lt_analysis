@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-18 01:38:20 trottar"
+# Time-stamp: "2024-07-18 02:17:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3037,8 +3037,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT.SetParameter(1, current_params[1])
                 #f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigtt_0), current_params[0] + abs(current_params[0] * par_sigtt_0))
                 #f_sigTT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigtt_1), current_params[1] + abs(current_params[1] * par_sigtt_1))
-                #f_sigTT.SetParLimits(0, -5, 5)
-                #f_sigTT.SetParLimits(1, -5, 5)
+                f_sigTT.SetParLimits(0, -5, 5)
+                f_sigTT.SetParLimits(1, -5, 5)
 
                 g_q2_sigtt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -3162,14 +3162,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         best_overall_params.append(0.0)
         best_overall_errors.append(0.0)
             
-    #par_vec.append(best_overall_params[0])
-    #par_vec.append(best_overall_params[1])
-    #par_vec.append(best_overall_params[2])
-    #par_vec.append(best_overall_params[3])
-    par_vec.append(tt0)
-    par_vec.append(tt1)
-    par_vec.append(tt2)
-    par_vec.append(tt3)
+    par_vec.append(best_overall_params[0])
+    par_vec.append(best_overall_params[1])
+    par_vec.append(best_overall_params[2])
+    par_vec.append(best_overall_params[3])
 
     par_err_vec.append(best_overall_errors[0])
     par_err_vec.append(best_overall_errors[0])
