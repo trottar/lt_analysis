@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 13:49:57 trottar"
+# Time-stamp: "2024-07-19 13:57:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -157,8 +157,10 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
 
             multiDict["G_yieldvsphi_plt_{}".format(i)] = TMultiGraph()
 
-            G_yieldvsphi_data = TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1], dtype='float64')),yield_err_data[i][1])
-            G_yieldvsphi_simc = TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1], dtype='float64')),yield_err_simc[i][1])
+            G_yieldvsphi_data = TGraphErrors(len(yield_data[i][1]),np.array(phibins_data[i][1], dtype='float64'),\
+                                             np.array(yield_data[i][1], dtype='float64'),np.zeros(len(phibins_data[i][1]), dtype='float64'),np.array(yield_err_data[i][1], dtype='float64'))
+            G_yieldvsphi_simc = TGraphErrors(len(yield_simc[i][1]),np.array(phibins_simc[i][1], dtype='float64'),\
+                                             np.array(yield_simc[i][1], dtype='float64'),np.zeros(len(phibins_simc[i][1])),np.array(yield_err_simc[i][1], dtype='float64'))
 
             G_yieldvsphi_data.SetMarkerStyle(21)
             G_yieldvsphi_data.SetMarkerSize(1)
@@ -226,7 +228,8 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
 
             multiDict["G_ratiovsphi_plt_{}".format(i)] = TMultiGraph()
 
-            G_ratiovsphi = TGraphErrors(len(ratio[i][1]),phibins[i][1],ratio[i][1],np.array([0]*len(phibins[i][1], dtype='float64')),ratio_err[i][1])
+            G_ratiovsphi = TGraphErrors(len(ratio[i][1]),np.array(phibins[i][1], dtype='float64'),\
+                                        np.array(ratio[i][1], dtype='float64'),np.zeros(len(phibins[i][1])),np.array(ratio_err[i][1], dtype='float64'))
 
             G_ratiovsphi.SetMarkerStyle(21)
             G_ratiovsphi.SetMarkerSize(1)
@@ -250,7 +253,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
 
     C_yield_data_plt.SetGrid()
 
-    yield_data = np.array([], dtype='float64')
+    yield_data = np.array([])
     yield_err_data = np.array([])
     yield_simc = np.array([])
     yield_err_simc = np.array([])    
