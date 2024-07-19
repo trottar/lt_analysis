@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-02 12:27:19 trottar"
+# Time-stamp: "2024-07-19 14:20:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,7 +207,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
         
         g_plot_err = TGraph2DErrors()
-        g_xx, g_yy, g_yy_err = ROOT.Double(),ROOT.Double(),ROOT.Double()
+        g_xx, g_yy, g_yy_err = ROOT.Double(0),ROOT.Double(0),ROOT.Double(0)
 
         for ii in range(glo.GetN()):
             
