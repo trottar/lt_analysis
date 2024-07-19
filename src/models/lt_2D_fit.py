@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 15:20:48 trottar"
+# Time-stamp: "2024-07-19 15:21:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -813,7 +813,7 @@ for i in range(num_events):
     g_unsep_lo.GetPoint(i, x_lo, y_lo)
     x_err_lo = g_unsep_lo.GetErrorX(i)
     y_err_lo = g_unsep_lo.GetErrorY(i)
-    g_lo_event = ROOT.TGraphErrors(1, array('d', [x_lo.value]), array('d', [y_lo.value]), array('d', [x_err_lo.value]), array('d', [y_err_lo.value]))
+    g_lo_event = ROOT.TGraphErrors(1, array('d', [x_lo.value]), array('d', [y_lo.value]), array('d', [x_err_lo]), array('d', [y_err_lo]))
     
     # Add 'lo' event to the TMultiGraph
     g_unsep_mult.Add(g_lo_event)
@@ -823,7 +823,7 @@ for i in range(num_events):
     g_unsep_hi.GetPoint(i, x_hi, y_hi)
     x_err_hi = g_unsep_hi.GetErrorX(i)
     y_err_hi = g_unsep_hi.GetErrorY(i)
-    g_hi_event = ROOT.TGraphErrors(1, array('d', [x_hi.value]), array('d', [y_hi.value]), array('d', [x_err_hi.value]), array('d', [y_err_hi.value]))
+    g_hi_event = ROOT.TGraphErrors(1, array('d', [x_hi.value]), array('d', [y_hi.value]), array('d', [x_err_hi]), array('d', [y_err_hi]))
     
     # Add 'hi' event to the TMultiGraph
     g_unsep_mult.Add(g_hi_event)
