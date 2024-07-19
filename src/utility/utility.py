@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 13:25:16 trottar"
+# Time-stamp: "2024-07-19 13:25:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -569,7 +569,7 @@ class PyFunc:
     def __call__(self, par):
         return chi2_func(par)
 
-minimizer = ROOT.Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
 minimizer.SetMaxFunctionCalls(1000000)
 minimizer.SetMaxIterations(100000)
 minimizer.SetTolerance(0.001)
