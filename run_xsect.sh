@@ -1,10 +1,9 @@
 #! /bin/bash
-#! /usr/bin/expect
 
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 14:24:01 trottar"
+# Time-stamp: "2024-07-19 14:51:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -171,7 +170,10 @@ if [ $? -ne 0 ]; then
 fi
 echo
 echo "Running average_kinematics..."
-./average_kinematics.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
+# RedHat7
+#./average_kinematics.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
+# Alma9
+python3 average_kinematics.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling average_ratios.f..."
@@ -186,7 +188,10 @@ if [ $? -ne 0 ]; then
 fi
 echo
 echo "Running average_ratios..."
-./average_ratios.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
+# RedHat7
+#./average_ratios.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
+# Alma9
+python3 average_ratios.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
@@ -201,7 +206,10 @@ if [ $? -ne 0 ]; then
 fi
 echo
 echo "Running calc_xsect..."
-./calc_xsect.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
+# RedHat7
+#./calc_xsect.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
+# Alma9
+python3 calc_xsect.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 
 # Replace p with '.'
 Q2=${Q2//./p}
