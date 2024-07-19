@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 13:57:18 trottar"
+# Time-stamp: "2024-07-19 14:03:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -277,8 +277,8 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             elif phiset == "Left": setting = np.append(setting,1)
             else: setting = np.append(setting,2)
 
-    G_yield_data = TGraphErrors(len(yield_data),setting,yield_data,np.array([0]*len(setting)),yield_err_data)
-    G_yield_simc = TGraphErrors(len(yield_simc),setting,yield_simc,np.array([0]*len(setting)),yield_err_simc)
+    G_yield_data = TGraphErrors(len(yield_data),np.array(setting, dtype='float64'),np.array(yield_data, dtype='float64'),np.zeros(len(setting)),np.array(yield_err_data, dtype='float64'))
+    G_yield_simc = TGraphErrors(len(yield_simc),np.array(setting, dtype='float64'),np.array(yield_simc, dtype='float64'),np.zeros(len(setting)),np.array(yield_err_simc, dtype='float64'))
 
     G_yield_data.SetMarkerStyle(21)
     G_yield_data.SetMarkerSize(1)
@@ -330,7 +330,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
             else: setting = np.append(setting,2)
 
     #G_ratio = TGraphErrors(len(ratio_data),setting,ratio_data,np.array([0]*len(setting)),ratio_err_data)
-    G_ratio = TGraphErrors(len(ratio_data),setting,ratio_data)
+    G_ratio = TGraphErrors(len(ratio_data),np.array(setting, dtype='float64'),np.array(ratio_data, dtype='float64'))
 
     G_ratio.SetMarkerStyle(21)
     G_ratio.SetMarkerSize(1)
