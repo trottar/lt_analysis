@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-24 15:24:18 trottar"
+# Time-stamp: "2024-07-19 15:45:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,8 +127,8 @@ def get_eff_charge(hist, inpDict):
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
-        InData_efficiency = np.array([float(x) for x in InData_efficiency_right.split(' ')])
-        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_right.split(' ')])
+        InData_efficiency = np.array([float(x) for x in InData_efficiency_right.split(' ')], dtype='float64')
+        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_right.split(' ')], dtype='float64')
         
     if phi_setting == "Left":
         runNums = np.array([int(x) for x in runNumLeft.split(' ')])
@@ -149,8 +149,8 @@ def get_eff_charge(hist, inpDict):
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
-        InData_efficiency = np.array([float(x) for x in InData_efficiency_left.split(' ')])
-        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_left.split(' ')])
+        InData_efficiency = np.array([float(x) for x in InData_efficiency_left.split(' ')], dtype='float64')
+        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_left.split(' ')], dtype='float64')
         
     if phi_setting == "Center":
         runNums = np.array([int(x) for x in runNumCenter.split(' ')])
@@ -171,8 +171,8 @@ def get_eff_charge(hist, inpDict):
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
                 continue
-        InData_efficiency = np.array([float(x) for x in InData_efficiency_center.split(' ')])
-        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_center.split(' ')])
+        InData_efficiency = np.array([float(x) for x in InData_efficiency_center.split(' ')], dtype='float64')
+        InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_center.split(' ')], dtype='float64')
 
     '''
     if 'pid_text' in locals():
@@ -188,9 +188,9 @@ def get_eff_charge(hist, inpDict):
 
     # Define total efficiency vs run number plots
     G_data_eff = TGraphErrors(len(InData_efficiency), \
-                              np.array([float(x) for x in runNums]), \
+                              np.array([float(x) for x in runNums], dtype='float64'), \
                               InData_efficiency, \
-                              np.array([0]*len(InData_error_efficiency)), \
+                              np.zeros(len(InData_error_efficiency)), \
                               InData_error_efficiency*InData_efficiency)
     G_data_eff.SetName("G_data_eff")    
     
