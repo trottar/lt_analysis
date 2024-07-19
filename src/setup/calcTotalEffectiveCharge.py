@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-23 17:51:42 trottar"
+# Time-stamp: "2024-07-19 15:36:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,6 +18,7 @@ import sys, os
 '''
 User Inputs
 '''
+print(sys.argv)
 try:
     runs_eff_charge = [float(q) for q in sys.argv[1].split(" ")]
     runs_eff_charge_err = [float(err) for err in sys.argv[2].split(" ")]
