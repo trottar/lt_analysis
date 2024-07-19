@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 15:10:53 trottar"
+# Time-stamp: "2024-07-19 15:12:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -207,7 +207,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
         
         g_plot_err = TGraph2DErrors()
-        g_xx, g_yy, g_yy_err = float(0),float(0),float(0)
+        g_xx, g_yy, g_yy_err = ctypes.c_double(0),ctypes.c_double(0),ctypes.c_double(0)
 
         for ii in range(glo.GetN()):
             
@@ -808,7 +808,7 @@ for i in range(num_events):
     g_unsep_mult = ROOT.TMultiGraph()
     
     # Create TGraphErrors for 'lo' event
-    x_lo, y_lo = float(0), float(0)
+    x_lo, y_lo = ctypes.c_double(0), ctypes.c_double(0)
     g_unsep_lo.GetPoint(i, x_lo, y_lo)
     x_err_lo = g_unsep_lo.GetErrorX(i)
     y_err_lo = g_unsep_lo.GetErrorY(i)
@@ -818,7 +818,7 @@ for i in range(num_events):
     g_unsep_mult.Add(g_lo_event)
     
     # Create TGraphErrors for 'hi' event
-    x_hi, y_hi = float(0), float(0)
+    x_hi, y_hi = ctypes.c_double(0), ctypes.c_double(0)
     g_unsep_hi.GetPoint(i, x_hi, y_hi)
     x_err_hi = g_unsep_hi.GetErrorX(i)
     y_err_hi = g_unsep_hi.GetErrorY(i)
