@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 15:14:16 trottar"
+# Time-stamp: "2024-07-19 15:14:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -208,11 +208,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
         
         g_plot_err = TGraph2DErrors()
-        g_xx, g_yy, g_yy_err = 0.0,0.0,0.0
+        g_xx, g_yy, g_yy_err = ctypes.c_double(0),ctypes.c_double(0),ctypes.c_double(0)
 
         for ii in range(glo.GetN()):
             
-            glo.GetPoint(ii, ctypes.c_double(g_xx), ctypes.c_double(g_yy)
+            glo.GetPoint(ii, g_xx, g_yy)
             g_yy_err = math.sqrt((glo.GetErrorY(ii) / g_yy)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy
 
             lo_cross_sec_err[i] += 1 / (g_yy_err**2)
@@ -222,7 +222,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         for ii in range(ghi.GetN()):
             
-            ghi.GetPoint(ii, ctypes.c_double(g_xx), ctypes.c_double(g_yy)
+            ghi.GetPoint(ii, g_xx, g_yy)
             g_yy_err = math.sqrt((ghi.GetErrorY(ii) / g_yy)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy
 
             hi_cross_sec_err[i] += 1 / (g_yy_err**2)
@@ -809,7 +809,7 @@ for i in range(num_events):
     g_unsep_mult = ROOT.TMultiGraph()
     
     # Create TGraphErrors for 'lo' event
-    x_lo, y_lo = 0.0, 0.0
+    x_lo, y_lo = ctypes.c_double(0), ctypes.c_double(0)
     g_unsep_lo.GetPoint(i, x_lo, y_lo)
     x_err_lo = g_unsep_lo.GetErrorX(i)
     y_err_lo = g_unsep_lo.GetErrorY(i)
@@ -819,7 +819,7 @@ for i in range(num_events):
     g_unsep_mult.Add(g_lo_event)
     
     # Create TGraphErrors for 'hi' event
-    x_hi, y_hi = 0.0, 0.0
+    x_hi, y_hi = ctypes.c_double(0), ctypes.c_double(0)
     g_unsep_hi.GetPoint(i, x_hi, y_hi)
     x_err_hi = g_unsep_hi.GetErrorX(i)
     y_err_hi = g_unsep_hi.GetErrorY(i)
