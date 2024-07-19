@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 13:34:07 trottar"
+# Time-stamp: "2024-07-19 15:37:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -573,7 +573,6 @@ class PyFunc:
 #minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
 # Alma9
 minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
-print("minimizer initialized: {}".format(minimizer))
 minimizer.SetMaxFunctionCalls(1000000)
 minimizer.SetMaxIterations(100000)
 minimizer.SetTolerance(0.001)
