@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 13:45:13 trottar"
+# Time-stamp: "2024-07-19 13:49:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -157,39 +157,8 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
 
             multiDict["G_yieldvsphi_plt_{}".format(i)] = TMultiGraph()
 
-            # Assuming phibins_data and yield_data are numpy arrays
-            phibins_data_array = np.array(phibins_data[i][1], dtype='float64')
-            yield_data_array = np.array(yield_data[i][1], dtype='float64')
-            yield_err_data_array = np.array(yield_err_data[i][1], dtype='float64')
-
-            # Ensure the error arrays are also numpy arrays of the correct type
-            zero_error_array = np.zeros(len(phibins_data_array), dtype='float64')
-
-            # Create the TGraphErrors object
-            G_yieldvsphi_data = TGraphErrors(len(yield_data_array),
-                                             phibins_data_array,
-                                             yield_data_array,
-                                             zero_error_array,
-                                             yield_err_data_array)
-            
-            #G_yieldvsphi_data = TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1])),yield_err_data[i][1])
-
-            # Assuming phibins_simc and yield_simc are numpy arrays
-            phibins_simc_array = np.array(phibins_simc[i][1], dtype='float64')
-            yield_simc_array = np.array(yield_simc[i][1], dtype='float64')
-            yield_err_simc_array = np.array(yield_err_simc[i][1], dtype='float64')
-
-            # Ensure the error arrays are also numpy arrays of the correct type
-            zero_error_array = np.zeros(len(phibins_simc_array), dtype='float64')
-
-            # Create the TGraphErrors object
-            G_yieldvsphi_simc = TGraphErrors(len(yield_simc_array),
-                                             phibins_simc_array,
-                                             yield_simc_array,
-                                             zero_error_array,
-                                             yield_err_simc_array)
-            
-            #G_yieldvsphi_simc = TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1])),yield_err_simc[i][1])
+            G_yieldvsphi_data = TGraphErrors(len(yield_data[i][1]),phibins_data[i][1],yield_data[i][1],np.array([0]*len(phibins_data[i][1], dtype='float64')),yield_err_data[i][1])
+            G_yieldvsphi_simc = TGraphErrors(len(yield_simc[i][1]),phibins_simc[i][1],yield_simc[i][1],np.array([0]*len(phibins_simc[i][1], dtype='float64')),yield_err_simc[i][1])
 
             G_yieldvsphi_data.SetMarkerStyle(21)
             G_yieldvsphi_data.SetMarkerSize(1)
@@ -257,7 +226,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
 
             multiDict["G_ratiovsphi_plt_{}".format(i)] = TMultiGraph()
 
-            G_ratiovsphi = TGraphErrors(len(ratio[i][1]),phibins[i][1],ratio[i][1],np.array([0]*len(phibins[i][1])),ratio_err[i][1])
+            G_ratiovsphi = TGraphErrors(len(ratio[i][1]),phibins[i][1],ratio[i][1],np.array([0]*len(phibins[i][1], dtype='float64')),ratio_err[i][1])
 
             G_ratiovsphi.SetMarkerStyle(21)
             G_ratiovsphi.SetMarkerSize(1)
@@ -281,7 +250,7 @@ def plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, rati
 
     C_yield_data_plt.SetGrid()
 
-    yield_data = np.array([])
+    yield_data = np.array([], dtype='float64')
     yield_err_data = np.array([])
     yield_simc = np.array([])
     yield_err_simc = np.array([])    
