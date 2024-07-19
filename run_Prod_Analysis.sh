@@ -1026,7 +1026,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_right_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge right..."
-	    python3 findEffectiveCharge.py ${EffData} "${data_right_tmp[*]}" ${ParticleType}	    
 	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_right_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1060,6 +1059,7 @@ if [[ $i_flag != "true" ]]; then
 	    fi
 	    #echo ${DataEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
+	    python3 calcTotalEffectiveCharge.py "${DataEffChargeValRight[*]}" "${DataEffChargeErrRight[*]}"
 	    PYRIGHTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataEffChargeValRight[*]}" "${DataEffChargeErrRight[*]}")
 	    arr1=()
 	    arr2=()
@@ -1088,7 +1088,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_right_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge right..."
-	    python3 findEffectiveCharge.py ${EffData} "${dummy_right_tmp[*]}" ${ParticleType}	    
 	    PYRIGHTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_right_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1122,6 +1121,7 @@ if [[ $i_flag != "true" ]]; then
 	    fi
 	    #echo ${DummyEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
+	    python3 calcTotalEffectiveCharge.py "${DummyEffChargeValRight[*]}" "${DummyEffChargeErrRight[*]}"
 	    PYRIGHTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyEffChargeValRight[*]}" "${DummyEffChargeErrRight[*]}")
 	    arr1=()
 	    arr2=()
@@ -1150,7 +1150,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_left_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge left..."
-	    python3 findEffectiveCharge.py ${EffData} "${data_left_tmp[*]}" ${ParticleType}	    
 	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_left_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1184,6 +1183,7 @@ if [[ $i_flag != "true" ]]; then
 	    fi
 	    #echo ${DataEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
+	    python3 calcTotalEffectiveCharge.py "${DataEffChargeValLeft[*]}" "${DataEffChargeErrLeft[*]}"
 	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataEffChargeValLeft[*]}" "${DataEffChargeErrLeft[*]}")
 	    arr1=()
 	    arr2=()
@@ -1212,7 +1212,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_left_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge left..."
-	    python3 findEffectiveCharge.py ${EffData} "${dummy_left_tmp[*]}" ${ParticleType}	    
 	    PYLEFTSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_left_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1246,6 +1245,7 @@ if [[ $i_flag != "true" ]]; then
 	    fi
 	    #echo ${DummyEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
+	    python3 calcTotalEffectiveCharge.py "${DummyEffChargeValLeft[*]}" "${DummyEffChargeErrLeft[*]}"
 	    PYLEFTTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyEffChargeValLeft[*]}" "${DummyEffChargeErrLeft[*]}")
 	    arr1=()
 	    arr2=()
@@ -1274,7 +1274,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_center_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge center..."
-	    python3 findEffectiveCharge.py ${EffData} "${data_center_tmp[*]}" ${ParticleType}	    
 	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_center_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1308,6 +1307,7 @@ if [[ $i_flag != "true" ]]; then
 	    fi
 	    #echo ${DataEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
+	    python3 calcTotalEffectiveCharge.py "${DataEffChargeValCenter[*]}" "${DataEffChargeErrCenter[*]}"
 	    PYCENTERTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DataEffChargeValCenter[*]}" "${DataEffChargeErrCenter[*]}")
 	    arr1=()
 	    arr2=()
@@ -1336,7 +1336,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#dummy_center_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating dummy total effective charge center..."
-	    python3 findEffectiveCharge.py ${EffData} "${dummy_center_tmp[*]}" ${ParticleType}	    
 	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_center_tmp[*]}" ${ParticleType})
 	    arr1=()
 	    arr2=()
@@ -1370,6 +1369,7 @@ if [[ $i_flag != "true" ]]; then
 	    fi
 	    #echo ${DummyEffChargeVal[*]}
 	    # Sums the array to get the total effective charge and effective charge error
+	    python3 calcTotalEffectiveCharge.py "${DummyEffChargeValCenter[*]}" "${DummyEffChargeErrCenter[*]}"
 	    PYCENTERTOTEFFCHARGE=$(python3 calcTotalEffectiveCharge.py "${DummyEffChargeValCenter[*]}" "${DummyEffChargeErrCenter[*]}")
 	    arr1=()
 	    arr2=()
