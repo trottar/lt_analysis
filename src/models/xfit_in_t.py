@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 22:33:08 trottar"
+# Time-stamp: "2024-07-19 22:33:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2136,7 +2136,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     max_sigT_y = float('-inf')
 
     # Update min_sigT_y and max_sigT_y based on each graph's values
-    for graph in [graph_sigT_p5, graph_sigT_p6, graph_sigT_p7, , graph_sigT_p8]:
+    for graph in [graph_sigT_p5, graph_sigT_p6, graph_sigT_p7, graph_sigT_p8]:
         n_points = graph.GetN()
         for i in range(n_points):
             y = graph.GetY()[i]
