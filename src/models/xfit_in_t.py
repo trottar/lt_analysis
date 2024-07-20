@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 22:33:48 trottar"
+# Time-stamp: "2024-07-19 23:54:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,9 +93,9 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     ##############
     ##############
     
-    single_setting(ParticleType, pol_str, closest_date, Q2, W, tmin_range, tmax_range, Q2min_range, Q2max_range, iter_num, max_iterations)
+    single_setting(ParticleType, pol_str, closest_date, Q2, W, tmin_range+0.1, tmax_range-0.1, Q2min_range, Q2max_range, iter_num, max_iterations)
     
-def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range, Q2min_range, Q2max_range, iter_num, max_iterations):
+def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range+0.1, tmax_range-0.1, Q2min_range, Q2max_range, iter_num, max_iterations):
 
     # Set pol_str, q2_set for xfit_active script
     set_val(pol_str, q2_set)
@@ -272,7 +272,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
                     g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
-                f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
+                f_sigL = TF1("sig_L", fun_Sig_L, tmin_range+0.1, tmax_range-0.1, 2)
                 f_sigL.SetParNames("p1", "p2")
                 f_sigL.SetParameter(0, current_params[0])
                 f_sigL.SetParameter(1, current_params[1])
@@ -418,7 +418,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit = TGraphErrors()
     g_sigl_fit_tot = TGraph()        
 
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigL_pre.SetParNames("p1", "p2")
     f_sigL_pre.FixParameter(0, best_overall_params[0])
     f_sigL_pre.FixParameter(1, best_overall_params[1])
@@ -474,14 +474,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 2)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigL.SetParNames("p1", "p2")
     f_sigL.FixParameter(0, best_overall_params[0])
     f_sigL.FixParameter(1, best_overall_params[1])
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -665,7 +665,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigl_fit.SetPoint(i, g_sigl.GetX()[i], sigl_X_fit)
                     g_sigl_fit.SetPointError(i, 0, sigl_X_fit_err)
 
-                f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+                f_sigL = TF1("sig_L", fun_Sig_L, tmin_range+0.1, tmax_range-0.1, 3)
                 f_sigL.SetParNames("p1", "p2", "p3")
                 f_sigL.SetParameter(0, current_params[0])
                 f_sigL.SetParameter(1, current_params[1])
@@ -819,7 +819,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit = TGraphErrors()
     g_sigl_fit_tot = TGraph()        
 
-    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigL_pre = TF1("sig_L", fun_Sig_L, tmin_range+0.1, tmax_range-0.1, 3)
     f_sigL_pre.SetParNames("p1", "p2", "p3")
     f_sigL_pre.FixParameter(0, best_overall_params[0])
     f_sigL_pre.FixParameter(1, best_overall_params[1])
@@ -876,7 +876,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigl_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigl_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range, tmax_range, 3)
+    f_sigL = TF1("sig_L", fun_Sig_L, tmin_range+0.1, tmax_range-0.1, 3)
     f_sigL.SetParNames("p1", "p2", "p3")
     f_sigL.FixParameter(0, best_overall_params[0])
     f_sigL.FixParameter(1, best_overall_params[1])
@@ -884,7 +884,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigL.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -1067,7 +1067,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
                     g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 2)
                 f_sigT.SetParNames("p5", "p6")
                 f_sigT.SetParameter(0, current_params[0])
                 f_sigT.SetParameter(1, current_params[1])
@@ -1210,7 +1210,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit = TGraphErrors()
     g_sigt_fit_tot = TGraph()    
 
-    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigT_pre.SetParNames("p5", "p6")
     f_sigT_pre.FixParameter(0, best_overall_params[0])
     f_sigT_pre.FixParameter(1, best_overall_params[1])
@@ -1266,14 +1266,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 2)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigT.SetParNames("p5", "p6")
     f_sigT.FixParameter(0, best_overall_params[0])
     f_sigT.FixParameter(1, best_overall_params[1])
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigT.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -1457,7 +1457,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
                     g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
+                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 3)
                 f_sigT.SetParNames("p5", "p6", "p7")
                 f_sigT.SetParameter(0, current_params[0])
                 f_sigT.SetParameter(1, current_params[1])
@@ -1611,7 +1611,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit = TGraphErrors()
     g_sigt_fit_tot = TGraph()        
 
-    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 3)
     f_sigT_pre.SetParNames("p5", "p6", "p7")
     f_sigT_pre.FixParameter(0, best_overall_params[0])
     f_sigT_pre.FixParameter(1, best_overall_params[1])
@@ -1668,7 +1668,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 3)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 3)
     f_sigT.SetParNames("p5", "p6", "p7")
     f_sigT.FixParameter(0, best_overall_params[0])
     f_sigT.FixParameter(1, best_overall_params[1])
@@ -1676,7 +1676,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigT.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -1865,7 +1865,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigt_fit.SetPoint(i, g_sigt.GetX()[i], sigt_X_fit)
                     g_sigt_fit.SetPointError(i, 0, sigt_X_fit_err)
 
-                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 4)
+                f_sigT = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 4)
                 f_sigT.SetParNames("p5", "p6", "p7", "p8")
                 f_sigT.SetParameter(0, current_params[0])
                 f_sigT.SetParameter(1, current_params[1])
@@ -2028,7 +2028,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit = TGraphErrors()
     g_sigt_fit_tot = TGraph()        
 
-    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 4)
+    f_sigT_pre = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 4)
     f_sigT_pre.SetParNames("p5", "p6", "p7", "p8")
     f_sigT_pre.FixParameter(0, best_overall_params[0])
     f_sigT_pre.FixParameter(1, best_overall_params[1])
@@ -2086,7 +2086,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range, tmax_range, 4)
+    f_sigT = TF1("sig_T", fun_Sig_T, tmin_range+0.1, tmax_range-0.1, 4)
     f_sigT.SetParNames("p5", "p6", "p7")
     f_sigT.FixParameter(0, best_overall_params[0])
     f_sigT.FixParameter(1, best_overall_params[1])
@@ -2095,7 +2095,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigT.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -2277,7 +2277,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
                     g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
-                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 2)
+                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range+0.1, tmax_range-0.1, 2)
                 f_sigLT.SetParNames("p9", "p10")
                 f_sigLT.SetParameter(0, current_params[0])
                 f_sigLT.SetParameter(1, current_params[1])
@@ -2427,7 +2427,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit = TGraphErrors()
     g_siglt_fit_tot = TGraph()    
 
-    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 2)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigLT_pre.SetParNames("p9", "p10")
     f_sigLT_pre.FixParameter(0, best_overall_params[0])
     f_sigLT_pre.FixParameter(1, best_overall_params[1])
@@ -2483,14 +2483,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_siglt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 2)
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigLT.SetParNames("p9", "p10")
     f_sigLT.FixParameter(0, best_overall_params[0])
     f_sigLT.FixParameter(1, best_overall_params[1])
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigLT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigLT.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -2674,7 +2674,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_siglt_fit.SetPoint(i, g_siglt.GetX()[i], siglt_X_fit)
                     g_siglt_fit.SetPointError(i, 0, siglt_X_fit_err)
 
-                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+                f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range+0.1, tmax_range-0.1, 3)
                 f_sigLT.SetParNames("p9", "p10", "p11")
                 f_sigLT.SetParameter(0, current_params[0])
                 f_sigLT.SetParameter(1, current_params[1])
@@ -2834,7 +2834,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit = TGraphErrors()
     g_siglt_fit_tot = TGraph()    
 
-    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+    f_sigLT_pre = TF1("sig_LT", fun_Sig_LT, tmin_range+0.1, tmax_range-0.1, 3)
     f_sigLT_pre.SetParNames("p9", "p10", "p11")
     f_sigLT_pre.FixParameter(0, best_overall_params[0])
     f_sigLT_pre.FixParameter(1, best_overall_params[1])
@@ -2891,7 +2891,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_siglt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_siglt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range, tmax_range, 3)
+    f_sigLT = TF1("sig_LT", fun_Sig_LT, tmin_range+0.1, tmax_range-0.1, 3)
     f_sigLT.SetParNames("p9", "p10", "p11")
     f_sigLT.FixParameter(0, best_overall_params[0])
     f_sigLT.FixParameter(1, best_overall_params[1])
@@ -2899,7 +2899,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigLT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigLT.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -3076,7 +3076,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
                     g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
-                f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+                f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range+0.1, tmax_range-0.1, 2)
                 f_sigTT.SetParNames("p13")
                 f_sigTT.SetParameter(0, current_params)
                 #f_sigTT.SetParLimits(0, current_params - abs(current_params * par_sigtt_0), current_params + abs(current_params * par_sigtt_0))
@@ -3211,7 +3211,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit = TGraphErrors()
     g_sigtt_fit_tot = TGraph()    
 
-    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigTT_pre.SetParNames("p13")
     f_sigTT_pre.FixParameter(0, best_overall_params[0])
 
@@ -3266,13 +3266,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigTT.SetParNames("p13")
     f_sigTT.FixParameter(0, best_overall_params[0])
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
@@ -3451,7 +3451,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                     g_sigtt_fit.SetPoint(i, g_sigtt.GetX()[i], sigtt_X_fit)
                     g_sigtt_fit.SetPointError(i, 0, sigtt_X_fit_err)
 
-                f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+                f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range+0.1, tmax_range-0.1, 2)
                 f_sigTT.SetParNames("p13", "p14")
                 f_sigTT.SetParameter(0, current_params[0])
                 f_sigTT.SetParameter(1, current_params[1])
@@ -3601,7 +3601,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit = TGraphErrors()
     g_sigtt_fit_tot = TGraph()    
 
-    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+    f_sigTT_pre = TF1("sig_TT", fun_Sig_TT, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigTT_pre.SetParNames("p13", "p14")
     f_sigTT_pre.FixParameter(0, best_overall_params[0])
     f_sigTT_pre.FixParameter(1, best_overall_params[1])
@@ -3657,14 +3657,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     g_sigtt_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
     g_sigtt_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range, tmax_range, 2)
+    f_sigTT = TF1("sig_TT", fun_Sig_TT, tmin_range+0.1, tmax_range-0.1, 2)
     f_sigTT.SetParNames("p13", "p14")
     f_sigTT.FixParameter(0, best_overall_params[0])
     f_sigTT.FixParameter(1, best_overall_params[1])
 
     # Evaluate the fit function at several points to determine its range
     n_points = 100  # Number of points to evaluate the fit function
-    fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+    fit_y_values = [f_sigTT.Eval(x) for x in np.linspace(tmin_range+0.1, tmax_range-0.1, n_points)]
     fit_y_min = min(fit_y_values)
     fit_y_max = max(fit_y_values)
 
