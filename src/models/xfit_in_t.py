@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-20 12:05:13 trottar"
+# Time-stamp: "2024-07-20 17:50:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3755,7 +3755,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
-            print("par{} changed from {:.3f} to {:.3f}".format(i+1, old, new))
+            print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
             
     # Don't write to new parameter file if debugging
     if not DEBUG:
