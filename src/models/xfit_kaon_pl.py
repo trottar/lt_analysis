@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-21 14:06:42 trottar"
+# Time-stamp: "2024-07-21 14:31:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -279,7 +279,7 @@ def fun_Sig_TT(x, par):
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
         #f=(-par[0]/(1+qq))*math.exp(-par[1]*abs(tt))
-        f=(par[0]*(1+qq)**par[1])*abs(tt)
+        f=(par[0]*(1+qq)**par[1])*math.exp(-par[2]*abs(tt))
         
     except OverflowError:
         f = -1000.0

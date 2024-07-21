@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-21 14:05:01 trottar"
+# Time-stamp: "2024-07-21 14:31:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3352,7 +3352,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     
     print("\n")    
     '''    
-
+    '''
     # 2 params
     #########
     # SigTT #
@@ -3744,9 +3744,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.SetLineColor(ROOT.kBlack)
     graph_sigTT_accept.Draw("ALP")
 
-    print("\n")
-    
+    print("\n")   
     '''
+    
     # 3 params
     #########
     # SigTT #
@@ -4152,7 +4152,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.Draw("ALP")
 
     print("\n")    
-    '''
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
