@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-21 14:31:04 trottar"
+# Time-stamp: "2024-07-21 14:58:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,7 +134,7 @@ def import_model(inp_model, arg_str):
             print("Calculating function for sigTT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             try:
                 #  RLT (7/11/2024): Moved below for Q2dep func form
-                #f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
+                f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 ##
                 ##f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
                 # RLT (4/23/2024): Marco's thesis functional forms
@@ -143,7 +143,7 @@ def import_model(inp_model, arg_str):
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
                 #f=(-par[0]/(1+qq))*(math.sin(theta_cm)**2)*math.exp(-par[1]*(abs(tt)))
-                f=(par[0]*(1+qq)**par[0])*(math.sin(theta_cm)**2)**math.exp(-par[2]*(abs(tt)))
+                f=(-par[0]/(1+qq))*(math.sin(theta_cm)**2)*f_tt*math.exp(-par[1]*(qq))
                 
             except ValueError:
                 f = -1000.0
