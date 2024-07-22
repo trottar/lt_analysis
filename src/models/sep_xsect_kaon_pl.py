@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-21 15:03:14 trottar"
+# Time-stamp: "2024-07-22 18:30:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,6 +66,7 @@ def import_model(inp_model, arg_str):
             print("Calculating function for sigT...\nQ2={:.4e}, t={:.4e}\npar=({:.4e}, {:.4e}, {:.4e}, {:.4e})".format(qq, tt, *par))
             tav = (0.1112 + 0.0066*math.log(Q2))*Q2
             ftav = (abs(tt)-tav)/tav
+            f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
             try:
                 # RLT (2/15/2024): Removing t dependence from sigT because it seems
                 #                  to be driving poor sep xsects results
@@ -90,8 +91,10 @@ def import_model(inp_model, arg_str):
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
-                #f=(par[0]/math.log(qq))*math.exp(-par[1]*(qq**2))                
+                #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
+                Qdep_T=(math.exp(-qq**2))/qq
+                #f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
+                f=par[0]*(f_tt)*(Qdep_T**par[1])
                 
             except ValueError:
                 f = -1000.0

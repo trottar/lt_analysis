@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-21 15:03:22 trottar"
+# Time-stamp: "2024-07-22 18:28:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,6 +200,7 @@ def fun_Sig_T(x, par):
     qq = float(q2_set.replace("p","."))
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
     ftav = (abs(tt)-tav)/tav
+    f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
     try:
         #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         # RLT (2/15/2024): Removing t dependence from sigT because it seems
@@ -228,7 +229,8 @@ def fun_Sig_T(x, par):
         #                  that incorporates Q2-dep based of pi FF
         #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
         Qdep_T=(math.exp(-qq**2))/qq
-        f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
+        #f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
+        f=par[0]*(f_tt)*(Qdep_T**par[1])
         
     except OverflowError:
         f = -1000.0
