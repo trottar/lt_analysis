@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-23 01:57:45 trottar"
+# Time-stamp: "2024-07-23 10:18:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -244,6 +244,8 @@ def fun_Sig_T(x, par):
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
     qq = float(q2_set.replace("p","."))
+    if pol_str == "pl":
+        f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor    
     try:
         #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         ##
@@ -254,8 +256,8 @@ def fun_Sig_LT(x, par):
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
-        f=(par[0]/(1+qq))*math.exp(-par[1]*(abs(tt)))
-        #f=(par[0]/(1+math.log(qq)))*math.exp(-par[1]*(abs(tt)))
+        #f=(par[0]/(1+qq))*math.exp(-par[1]*(abs(tt)))
+        f=(par[0]/(1+qq))*f_tt*math.exp(-par[1]*(qq))
         
     except OverflowError:
         f = -1000.0
