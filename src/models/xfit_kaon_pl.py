@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-24 05:15:27 trottar"
+# Time-stamp: "2024-07-24 05:33:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,8 +58,7 @@ def fun_Sig_L(x, par):
         #                  that incorporates Q2-dep based of pi FF
         f_tt = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
         Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
-        #f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
-        f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)/(qq**4)))
+        f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
         
     except OverflowError:
         f = -1000.0
