@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-24 05:33:18 trottar"
+# Time-stamp: "2024-07-24 05:57:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,8 +93,7 @@ def import_model(inp_model, arg_str):
                 #                  that incorporates Q2-dep based of pi FF
                 #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
                 Qdep_T=(math.exp(-qq**2))/qq
-                ##f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
-                f=par[0]*(f_tt)*math.exp(-par[1]*(abs(tt)))*(Qdep_T**par[2])
+                f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
                 
             except ValueError:
                 f = -1000.0
