@@ -141,16 +141,16 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
 *                      that incorporates Q2-dep based of pi FF
       f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
-*      Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))      
-      Qdep_L=(q2**4)/(1.0+(1.77*q2)+0.12*(q2**2))
-      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
+      Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))      
+*      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
+      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)/(q2**4)))
 *     sigT=(par(5)/q2)*exp(-par(6)*(q2**2))
       Qdep_T=(exp(-q2**2))/q2
-*     sigT=par(5)*(par(6)+exp(-par(7)*(abs(tm))))*(Qdep_T**par(8))
+**     sigT=par(5)*(par(6)+exp(-par(7)*(abs(tm))))*(Qdep_T**par(8))
       sigT=par(5)*(f_tm)
      >     *exp(-par(6)*(abs(tm)))*(Qdep_T**par(7))
-*      sigLT=(par(9)/(1+q2))*sin(thetacm)
-*     >     *exp(-par(10)*(abs(tm)))      
+**      sigLT=(par(9)/(1+q2))*sin(thetacm)
+**     >     *exp(-par(10)*(abs(tm)))      
       sigLT=(par(9)/(1+q2))*sin(thetacm)
      >     *f_tm*exp(-par(10)*(q2))
 *      sigTT=(-par(13)/(1+q2))*(sin(thetacm)**2)

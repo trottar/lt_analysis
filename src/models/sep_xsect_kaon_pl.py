@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-24 04:58:03 trottar"
+# Time-stamp: "2024-07-24 05:18:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,9 +49,9 @@ def import_model(inp_model, arg_str):
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
                 ft = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
-                #Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
-                Qdep_L=(qq**4)/(1.0+(1.77*qq)+0.12*(qq**2))
-                f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
+                Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
+                ##f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
+                f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)/(qq**4)))
                 
             except ValueError:
                 f = -1000.0
@@ -94,7 +94,7 @@ def import_model(inp_model, arg_str):
                 #                  that incorporates Q2-dep based of pi FF
                 #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
                 Qdep_T=(math.exp(-qq**2))/qq
-                #f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
+                ##f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
                 f=par[0]*(f_tt)*math.exp(-par[1]*(abs(tt)))*(Qdep_T**par[2])
                 
             except ValueError:
@@ -120,7 +120,7 @@ def import_model(inp_model, arg_str):
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                #f=(par[0]/(1+qq))*math.sin(theta_cm)*math.exp(-par[1]*(abs(tt)))
+                ##f=(par[0]/(1+qq))*math.sin(theta_cm)*math.exp(-par[1]*(abs(tt)))
                 f=(par[0]/(1+qq))*math.sin(theta_cm)*f_tt*math.exp(-par[1]*(qq))
                 
             except ValueError:
@@ -146,7 +146,7 @@ def import_model(inp_model, arg_str):
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                #f=(-par[0]/(1+qq))*(math.sin(theta_cm)**2)*math.exp(-par[1]*(abs(tt)))
+                ##f=(-par[0]/(1+qq))*(math.sin(theta_cm)**2)*math.exp(-par[1]*(abs(tt)))
                 f=(par[0]/(1+qq))*(math.sin(theta_cm)**2)*f_tt*math.exp(-par[1]*(qq))
                 
             except ValueError:
