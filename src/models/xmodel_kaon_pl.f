@@ -143,7 +143,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
       Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
 *     sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
-      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)*(q2)))
+      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)/(q2**4)))
 *     sigT=(par(5)/q2)*exp(-par(6)*(q2**2))
       Qdep_T=(exp(-q2**2))/q2
 *     sigT=par(5)*(par(6)+exp(-par(7)*(abs(tm))))*(Qdep_T**par(8))
