@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-24 05:01:05 trottar"
+# Time-stamp: "2024-07-24 05:02:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -38,8 +38,8 @@ def set_val(inp_pol_str, inp_q2_set):
 # Function for SigL
 def fun_Sig_L(x, par):
     tt = abs(x[0])
-    #qq = float(q2_set.replace("p","."))
-    qq = abs(x[1])
+    qq = float(q2_set.replace("p","."))
+    #qq = abs(x[1])
     try:
         #print("Calculating function for func_SigL...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         # RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
@@ -71,8 +71,8 @@ def fun_Sig_L(x, par):
 # Function for SigT
 def fun_Sig_T(x, par):
     tt = abs(x[0])
-    #qq = float(q2_set.replace("p","."))
-    qq = abs(x[1])
+    qq = float(q2_set.replace("p","."))
+    #qq = abs(x[1])
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
     ftav = (abs(tt)-tav)/tav
     try:
@@ -117,8 +117,8 @@ def fun_Sig_T(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
-    #qq = float(q2_set.replace("p","."))
-    qq = abs(x[1])
+    qq = float(q2_set.replace("p","."))
+    #qq = abs(x[1])
     try:
         #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         ##
@@ -143,8 +143,8 @@ def fun_Sig_LT(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
-    #qq = float(q2_set.replace("p","."))
-    qq = abs(x[1])
+    qq = float(q2_set.replace("p","."))
+    #qq = abs(x[1])
     if pol_str == "pl":
         f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
     try:
