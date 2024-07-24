@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-24 05:02:35 trottar"
+# Time-stamp: "2024-07-24 05:04:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -56,10 +56,10 @@ def fun_Sig_L(x, par):
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
-        ft = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
+        f_tt = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
         #Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
         Qdep_L=(qq**4)/(1.0+(1.77*qq)+0.12*(qq**2))
-        f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
+        f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
         
     except OverflowError:
         f = -1000.0
@@ -75,6 +75,7 @@ def fun_Sig_T(x, par):
     #qq = abs(x[1])
     tav = (0.1112 + 0.0066*math.log(float(q2_set.replace("p","."))))*float(q2_set.replace("p","."))
     ftav = (abs(tt)-tav)/tav
+    f_tt = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
     try:
         #print("Calculating function for func_SigT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         # RLT (2/15/2024): Removing t dependence from sigT because it seems
@@ -119,6 +120,7 @@ def fun_Sig_LT(x, par):
     tt = abs(x[0])
     qq = float(q2_set.replace("p","."))
     #qq = abs(x[1])
+    f_tt = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
     try:
         #print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         ##
@@ -145,6 +147,7 @@ def fun_Sig_TT(x, par):
     tt = abs(x[0])
     qq = float(q2_set.replace("p","."))
     #qq = abs(x[1])
+    f_tt = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
     if pol_str == "pl":
         f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
     try:
@@ -191,9 +194,9 @@ def fun2d_Sig_L(x, par):
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
-        ft = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
+        f_tt = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
         Qdep_L=(qq**4)/(1.0+(1.77*qq)+0.12*(qq**2))
-        f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
+        f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
         
     except OverflowError:
         f = -1000.0
