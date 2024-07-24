@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-23 17:43:45 trottar"
+# Time-stamp: "2024-07-24 02:05:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,7 +77,8 @@ def iterWeight(arg_str):
         #                  that incorporates Q2-dep based of pi FF
         ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2 # pole term
         Qdep_L=q2_gev/(1.0+(1.77*q2_gev)+0.12*(q2_gev**2))
-        sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)))
+        #sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)))
+        sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)/(q2_gev**2)))
 
     except OverflowError:
         sigl = -1000.0
