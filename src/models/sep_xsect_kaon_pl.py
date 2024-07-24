@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-24 02:37:43 trottar"
+# Time-stamp: "2024-07-24 03:09:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ def import_model(inp_model, arg_str):
                 ft = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
                 Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
                 #f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
-                f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)/(qq**4)))
+                f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)/(qq)))
                 
             except ValueError:
                 f = -1000.0
