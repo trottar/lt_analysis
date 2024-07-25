@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-25 15:45:52 trottar"
+# Time-stamp: "2024-07-25 16:32:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -95,7 +95,7 @@ def import_model(inp_model, arg_str):
                 #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
                 Qdep_T=(math.exp(-qq**2))/qq
                 ##f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
-                f=(math.exp(-par[0]*(abs(tt)))+par[1]*(abs(tt))+par[2]*(abs(tt)**4))*(Qdep_T**par[3])
+                f=(math.exp(-par[0]*(abs(tt)))+par[1]*(abs(tt)**2)+par[2]*(abs(tt)**3))*(Qdep_T**par[3])
                 
             except ValueError:
                 f = -1000.0
