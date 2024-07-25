@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-24 21:27:42 trottar"
+# Time-stamp: "2024-07-24 23:18:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,7 +78,7 @@ def iterWeight(arg_str):
         ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2 # pole term
         Qdep_L=q2_gev/(1.0+(1.77*q2_gev)+0.12*(q2_gev**2))
         ##sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)))
-        sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)/q2_gev**2))
+        sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)*q2_gev**2))
 
     except OverflowError:
         sigl = -1000.0
@@ -126,7 +126,7 @@ def iterWeight(arg_str):
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
         ##siglt=(p9/(1+q2_gev))*math.sin(thetacm_sim)*math.exp(-p10*(abs(t_gev)))
-        siglt=(p9/(1+q2_gev))*math.sin(thetacm_sim)*math.exp(-p10*(abs(t_gev)/q2_gev**2))
+        siglt=(p9/(1+q2_gev))*math.sin(thetacm_sim)*math.exp(-p10*(abs(t_gev)*q2_gev**2))
 
     except OverflowError:
         siglt = -1000.0
