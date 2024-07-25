@@ -1443,6 +1443,16 @@ else
 	echo "Running for iteration ${iter}/${iterations}"
 	echo "=================================="
 	echo
+
+	# Find new date for each iteration
+	# - `date` is a command that prints or sets the system date and time.
+	# - `+%H` extracts the hour in 24-hour format.
+	# - `+%M` extracts the minute.
+	# - `+%S` extracts the second.
+	# - `+%Y` extracts the year.
+	# - `+%B` extracts the full month name.
+	# - `%d` extracts the day of the month.
+	formatted_date=$(date +%Y%B%d_H%HM%MS%S)
 	
 	# Need to rerun loop separately so that the combined files for high and low epsilon exists for diamond cut script
 	declare -a EPS=("low" "high")
