@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-25 09:09:50 trottar"
+# Time-stamp: "2024-07-25 15:42:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,8 +76,7 @@ def iterWeight(arg_str):
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
         #                  that incorporates Q2-dep based of pi FF
         ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2 # pole term
-        ##Qdep_L=q2_gev/(1.0+(1.77*q2_gev)+0.12*(q2_gev**2))
-        Qdep_L=1/(1.0+(1.77*q2_gev)+0.12*(q2_gev**2))
+        Qdep_L=q2_gev/(1.0+(1.77*q2_gev)+0.12*(q2_gev**2))
         ##sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)))
         sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)))
 
@@ -111,7 +110,8 @@ def iterWeight(arg_str):
         #                  that incorporates Q2-dep based of pi FF
         #sigt=(p5/q2_gev)*math.exp(-p6*(q2_gev**2))
         Qdep_T=(math.exp(-q2_gev**2))/q2_gev
-        sigt=p5*(p6+math.exp(-p7*(abs(t_gev))))*(Qdep_T**p8)
+        #sigt=p5*(p6+math.exp(-p7*(abs(t_gev))))*(Qdep_T**p8)
+        sigt=(math.exp(-p5*(abs(t_gev)))+p6*(abs(t_gev))+p7*(abs(t_gev)**2))*(Qdep_T**p8)
 
     except OverflowError:        
         sigt = -1000.0
