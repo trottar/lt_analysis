@@ -1439,10 +1439,11 @@ else
     # Run for N iterations
     for ((iter=1; iter<=iterations; iter++)); do
 	echo
-	echo "----------------------------------"
-	echo "Running for ${iter}/${iterations}"
-	echo "----------------------------------"
-	echo	
+	echo "=================================="
+	echo "Running for iteration ${iter}/${iterations}"
+	echo "=================================="
+	echo
+	
 	# Need to rerun loop separately so that the combined files for high and low epsilon exists for diamond cut script
 	declare -a EPS=("low" "high")
 	for j in "${EPS[@]}"
@@ -1472,6 +1473,7 @@ else
 	    echo
 	    echo "Running weight iteration analysis for Q2=${Q2}, W=${W}, ${EPSILON} setting..."
 	    echo
+	    echo "                       Number of iterations: ${iterations}"
 	    echo "                       Number of t bins: ${NumtBins}"
 	    echo "                       Range of t: ${TMIN} - ${TMAX}"
 	    echo "                       Missing Mass range: ${MissMassMin} - ${MissMassMax}"	
