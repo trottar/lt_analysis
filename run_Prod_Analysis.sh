@@ -40,8 +40,8 @@ while getopts 'hci:p' flag; do
 	echo "    Q2=arg1, W=arg2"
         echo "    -h, help"
         echo "    -c, combine all runs for each setting"
-	echo "    -i, iterate SIMC to find proper weight"
-	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
+	echo "    -iN, 'N' iterations of SIMC to find proper weight"
+	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for default (i.e., kaon)."
 	echo
 	echo " Avaliable Kinematics..."	
 	echo "                      Q2=5p5, W=3p02"
