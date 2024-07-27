@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-27 15:31:19 trottar"
+# Time-stamp: "2024-07-27 15:32:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -452,7 +452,7 @@ with PdfPages(outputpdf) as pdf:
         else:
             df_key = "Low $\epsilon$"
 
-        ax.scatter(df['phi'], df['Q2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markerfacecolor='none', capsize=2)
+        ax.scatter(df['phi'], df['Q2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], capsize=2)
 
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, df['phi'], df['Q2'])
