@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 21:45:01 trottar"
+# Time-stamp: "2024-07-28 21:47:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -403,7 +403,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 legend_label = "{} (No valid data)".format(epsilon_label)
 
-            ax.errorbar(t_bin_centers[df['tbin'][mask][non_zero_mask]], ratios, yerr=errors, 
+            ax.errorbar(t_bins[df['tbin'][mask][non_zero_mask]], ratios, yerr=errors, 
                         marker=markers[i], linestyle='None', label=legend_label, 
                         color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
