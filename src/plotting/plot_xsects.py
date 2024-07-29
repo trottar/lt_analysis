@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:42:58 trottar"
+# Time-stamp: "2024-07-28 22:44:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -503,7 +503,7 @@ with PdfPages(outputpdf) as pdf:
             
             df = file_df_dict[df_key]
 
-            mask =  (df['phi'][k*NumPhiBins+int(i/NumPhiBins)] == df['phi'])
+            mask =  (df['phi'][k+i] == df['phi'])
             ratio = df['x_real'][mask]/df['x_mod'][mask]
             dratio = df['dx_real'][mask]/df['x_mod'][mask]
             non_zero_mask = (ratio != 0) & (dratio != 0)
