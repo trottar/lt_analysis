@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 19:14:11 trottar"
+# Time-stamp: "2024-07-29 19:21:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -372,10 +372,8 @@ with PdfPages(outputpdf) as pdf:
 
     ### HERE 1
 
-    def fit_function(Wset, Q2set, a, b, c, d):
-        Wval = np.linspace(min(Wset)-0.5, max(Wset)+0.5, len(Wset))
-        Q2val = np.linspace(min(Q2set)-0.5, max(Q2set)+0.5, len(Q2set))
-        return a + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
+    def fit_function(tset, a, b, c, d):
+        return a + b*(math.exp(c*(tval-tset))) + d * (tval-tset)
 
     # Create a single figure and axis object for all phi bins
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -405,14 +403,14 @@ with PdfPages(outputpdf) as pdf:
                     markerfacecolor='none', capsize=2)
 
         def fit_func(data, a, b, c, d):
-            Wval, Q2val = data
-            return fit_function(Wval, Q2val, a, b, c, d)
+            tval = data
+            return fit_function(tval, a, b, c, d)
 
-        popt, pcov = curve_fit(fit_func, (df['W'][non_zero_mask], df['Q2'][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
+        popt, pcov = curve_fit(fit_func, (df['t'][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['W'][non_zero_mask], df['Q2'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['t'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
         # Plot fitted function
         ax.plot(range(len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
@@ -425,7 +423,7 @@ with PdfPages(outputpdf) as pdf:
 
 
     # Add the equation as text above the legend
-    equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
+    equation = r'$a + b\cdote^{c\cdot(t - t_{\text{c}})} + d\cdot(t - t_{\text{c}})$'
     ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
         
     ax.axhline(1.0, color='gray', linestyle='--')
