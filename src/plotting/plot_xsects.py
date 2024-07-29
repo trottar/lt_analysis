@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:40:51 trottar"
+# Time-stamp: "2024-07-29 18:40:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -589,7 +589,7 @@ with PdfPages(outputpdf) as pdf:
 
         # Set integer ticks on x-axis
         ax.set_xticks(range(x_increment, x_len, 2))
-        ax.set_xticklabels(range(x_increment+1, x_increment+x_len + 1, 2))  # Start from 1 instead of 0
+        ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
 
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
