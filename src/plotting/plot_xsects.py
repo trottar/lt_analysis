@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:55:20 trottar"
+# Time-stamp: "2024-07-29 00:56:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -392,6 +392,9 @@ with PdfPages(outputpdf) as pdf:
 
         ratios = df['x_real']/df['x_mod']
         errors = df['dx_real']/df['x_mod']
+        non_zero_mask = (ratios != 0) & (errors != 0)
+        ratios = ratios[non_zero_mask]
+        errors = errors[non_zero_mask]        
 
         # Use x_increment for x-axis values
         x_values = np.arange(0, len(ratios))
