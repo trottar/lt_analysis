@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:16:17 trottar"
+# Time-stamp: "2024-07-29 00:17:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -399,7 +399,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Add vertical lines every NumPhiBins
     for x in range(0, x_increment, NumPhiBins):
-        ax.axvline(x, color='gray', linestyle='-', linewidth=0.5, alpha=0.5)
+        ax.axvline(x, color='blue', linestyle='-', linewidth=0.5, alpha=0.5)
 
     ax.axhline(1.0, color='gray', linestyle='--')
     ax.set_xlabel('$Q^2$, W, t', fontsize=24)
