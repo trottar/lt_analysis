@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 02:36:14 trottar"
+# Time-stamp: "2024-07-29 02:42:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -616,7 +616,8 @@ with PdfPages(outputpdf) as pdf:
                 epsilon_label = "Low $\epsilon$" if k == 0 else ""
                 epsilon_fit_color = "-"
 
-            mask = (df['t'][k+1] == df['t'])
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
+            #mask = (df['t'][k+1] == df['t'])
                 
             ratios = df['x_real'][mask]/df['x_mod'][mask]
             errors = df['dx_real'][mask]/df['x_mod'][mask]
