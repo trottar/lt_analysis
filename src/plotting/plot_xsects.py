@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 20:41:24 trottar"
+# Time-stamp: "2024-07-28 20:42:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -447,7 +447,7 @@ with PdfPages(outputpdf) as pdf:
 
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
         df = file_df_dict[df_key]
-        print("!!!!!!!",df)
+        print("!!!!!!!",df['Q2','phi'])
         if "hi" in df_key:
             df_key = "High $\epsilon$"
         else:
