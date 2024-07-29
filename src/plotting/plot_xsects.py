@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:56:29 trottar"
+# Time-stamp: "2024-07-29 00:57:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -407,11 +407,11 @@ with PdfPages(outputpdf) as pdf:
             Wval, Q2val = data
             return fit_function(Wval, Q2val, a, b, c, d)
 
-        popt, pcov = curve_fit(fit_func, (df['W'], df['Q2']), ratios, sigma=errors, absolute_sigma=True)
+        popt, pcov = curve_fit(fit_func, (df['W'][non_zero_mask], df['Q2'][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['W'], df['Q2'], a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['W'][non_zero_mask], df['Q2'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
         # Plot fitted function
         ax.plot(range(len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
