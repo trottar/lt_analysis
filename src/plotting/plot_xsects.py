@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:17:45 trottar"
+# Time-stamp: "2024-07-28 22:22:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -494,24 +494,28 @@ with PdfPages(outputpdf) as pdf:
     # Create a figure and axis objects for Q2 plot
     fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
-    ax = axes
-    ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+    # Loop through t bins and plot data
+    for k in range(NumtBins):
+        ax = axes
+        ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
-    for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-        df = file_df_dict[df_key]
-        ratio = df['x_real'].to_numpy()/df['x_mod'].to_numpy()
-        print("!!!!!!!",ratio,df['phi'].to_numpy())
-        if "hi" in df_key:
-            df_key = "High $\epsilon$"
-        else:
-            df_key = "Low $\epsilon$"
+        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+            df = file_df_dict[df_key]
+            ratio = df['x_real'].to_numpy()/df['x_mod'].to_numpy()
+            dratio = df['dx_real'].to_numpy()/df['x_mod'].to_numpy()
+            print("!!!!!!!",ratio,df['phi'].to_numpy())
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
+            ax.errorbar(df['phi'][mask], ratio[mask], yerr=dratio[mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
-        ax.scatter(df['phi'].to_numpy(), ratio, marker=markers[i], linestyle='None', label=df_key, color=colors[i])
-
-        # Fit the data using exponential function
-        #popt, _ = curve_fit(exp_func, df['phi'].to_numpy(), ratio)
-        #fit_line = exp_func(df['phi'].to_numpy(), *popt)
-        #ax.plot(df['phi'].to_numpy(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+            # Fit the data using exponential function
+            #popt, _ = curve_fit(exp_func, df['phi'].to_numpy(), ratio)
+            #fit_line = exp_func(df['phi'].to_numpy(), *popt)
+            #ax.plot(df['phi'].to_numpy(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('$\phi$', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
