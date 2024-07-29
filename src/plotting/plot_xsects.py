@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 19:25:37 trottar"
+# Time-stamp: "2024-07-29 19:26:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -424,7 +424,7 @@ with PdfPages(outputpdf) as pdf:
 
 
     # Add the equation as text above the legend
-    equation = r'$a + b\cdote^{c\cdot(t - t_{\text{c}})} + d\cdot(t - t_{\text{c}})$'
+    equation = r'$a + b\cdot e^{c\cdot(t - t_{\text{c}})} + d\cdot(t - t_{\text{c}})$'
     ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
         
     ax.axhline(1.0, color='gray', linestyle='--')
