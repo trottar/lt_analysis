@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:51:19 trottar"
+# Time-stamp: "2024-07-29 00:52:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -411,7 +411,7 @@ with PdfPages(outputpdf) as pdf:
             fitted_values = fit_function(df['W'], df['Q2'], a_fit, b_fit, c_fit, d_fit)
             
             # Plot fitted function
-            ax.plot(range(len(ratios)), fitted_values, 'r-', label=f'a = {a_fit:.4f}, b = {b_fit:.4f}, c = {c_fit:.4f}, d = {d_fit:.4f}')
+            ax.plot(range(len(ratios)), fitted_values, 'r-', label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
         
         x_len = len(x_values)
 
