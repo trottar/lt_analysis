@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 17:31:46 trottar"
+# Time-stamp: "2024-07-29 17:35:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -490,8 +490,8 @@ with PdfPages(outputpdf) as pdf:
         
         x_len = len(x_values)
 
-    # Add vertical lines every NumtBins
-    for x in range(0, x_len, NumtBins):
+    # Add vertical lines every NumPhiBins
+    for x in range(0, x_len, NumPhiBins):
         ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
 
     # Add the equation as text above the legend
