@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:52:39 trottar"
+# Time-stamp: "2024-07-29 00:55:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -384,9 +384,11 @@ with PdfPages(outputpdf) as pdf:
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
         df = file_df_dict[df_key]
         if "hi" in df_key:
-            epsilon_label = "High $\epsilon$" if k == 0 else ""            
+            epsilon_label = "High $\epsilon$" if k == 0 else ""
+            epsilon_fit_color = "r-"
         else:
             epsilon_label = "Low $\epsilon$" if k == 0 else ""
+            epsilon_fit_color = "b-"
 
         ratios = df['x_real']/df['x_mod']
         errors = df['dx_real']/df['x_mod']
@@ -398,20 +400,18 @@ with PdfPages(outputpdf) as pdf:
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                     markerfacecolor='none', capsize=2)
 
-        if "hi" in df_key:
+        def fit_func(data, a, b, c, d):
+            Wval, Q2val = data
+            return fit_function(Wval, Q2val, a, b, c, d)
 
-            def fit_func(data, a, b, c, d):
-                Wval, Q2val = data
-                return fit_function(Wval, Q2val, a, b, c, d)
+        popt, pcov = curve_fit(fit_func, (df['W'], df['Q2']), ratios, sigma=errors, absolute_sigma=True)
 
-            popt, pcov = curve_fit(fit_func, (df['W'], df['Q2']), ratios, sigma=errors, absolute_sigma=True)
+        a_fit, b_fit, c_fit, d_fit = popt
 
-            a_fit, b_fit, c_fit, d_fit = popt
+        fitted_values = fit_function(df['W'], df['Q2'], a_fit, b_fit, c_fit, d_fit)
 
-            fitted_values = fit_function(df['W'], df['Q2'], a_fit, b_fit, c_fit, d_fit)
-            
-            # Plot fitted function
-            ax.plot(range(len(ratios)), fitted_values, 'r-', label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+        # Plot fitted function
+        ax.plot(range(len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
         
         x_len = len(x_values)
 
