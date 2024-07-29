@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:56:04 trottar"
+# Time-stamp: "2024-07-29 18:56:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -571,11 +571,11 @@ with PdfPages(outputpdf) as pdf:
             # Plot fitted function
             ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
-            #x_len = x_increment+len(x_values)
-            x_len = len(x_values)
+            x_len = x_increment+len(x_values)
+            #x_len = len(x_values)
 
         # Add vertical lines every NumPhiBins
-        for x in range(0, x_len, NumPhiBins):
+        for x in range(x_increment, x_len, NumPhiBins):
             ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
 
 
