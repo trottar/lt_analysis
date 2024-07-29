@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 02:55:45 trottar"
+# Time-stamp: "2024-07-29 17:04:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -444,8 +444,8 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
 
-    def fit_function(thetaval, a, b, c, d):
-        phival = np.linspace(0.0, 360, len(thetaval)) 
+    def fit_function(phival, thetaval, a, b, c, d):
+        #phival = np.linspace(0.0, 360, len(thetaval)) 
         return a + b*(np.sin(thetaval)**2) + c*(np.sin(thetaval)*np.cos(phival)) + d*((np.sin(thetaval)**2)*np.cos(2*phival))
 
     # Create a single figure and axis object for all phi bins
@@ -479,11 +479,11 @@ with PdfPages(outputpdf) as pdf:
             thetaval = data
             return fit_function(thetaval, a, b, c, d)
 
-        popt, pcov = curve_fit(fit_func, (df['th_cm'][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
+        popt, pcov = curve_fit(fit_func, (df['phi'][non_zero_mask].to_numpy(), df['th_cm'][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['th_cm'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['phi'][non_zero_mask], df['th_cm'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
         # Plot fitted function
         ax.plot(range(len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
