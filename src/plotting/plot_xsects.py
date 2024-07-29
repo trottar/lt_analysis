@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:13:42 trottar"
+# Time-stamp: "2024-07-29 18:29:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -523,6 +523,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
+        j=0
         # Loop through t bins and plot data
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
 
@@ -547,7 +548,7 @@ with PdfPages(outputpdf) as pdf:
             errors = errors[non_zero_mask]        
 
             # Use x_increment for x-axis values
-            x_values = np.arange(0, len(ratios))
+            x_values = np.arange(j+k*NumtBins, len(ratios))
 
             ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                         label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
@@ -592,6 +593,8 @@ with PdfPages(outputpdf) as pdf:
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
+
+        j+=1
 
     def fit_function(phival, thetaval, a, b, c, d):
         #phival = np.linspace(0.0, 360, len(thetaval)) 
