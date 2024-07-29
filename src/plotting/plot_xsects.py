@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 20:47:01 trottar"
+# Time-stamp: "2024-07-28 20:48:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -457,14 +457,14 @@ with PdfPages(outputpdf) as pdf:
 
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, df['phi'].tolist(), df['Q2'].tolist())
-        fit_line = exp_func(t_bin_centers, *popt)
+        fit_line = exp_func(df['phi'].tolist(), *popt)
         ax.plot(df['phi'].tolist(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('$\phi$', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)        
-    ax.set_xlim(tmin, tmax)
+    ax.set_xlim(0, 360)
     ax.legend(fontsize=16)
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
