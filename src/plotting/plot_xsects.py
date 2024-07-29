@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:17:29 trottar"
+# Time-stamp: "2024-07-29 01:19:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -441,7 +441,7 @@ with PdfPages(outputpdf) as pdf:
 
     def fit_function(thetaval, a, b, c, d):
         phival = np.linspace(0.0, 360, len(thetaval)) 
-        return a + b*(math.sin(thetaval)**2) + c*(math.sin(thetaval)*math.cos(phival)) + d*((math.sin(thetaval)**2)*math.cos(2*phival))
+        return a + b*(np.sin(thetaval)**2) + c*(np.sin(thetaval)*np.cos(phival)) + d*((np.sin(thetaval)**2)*np.cos(2*phival))
 
     # Create a single figure and axis object for all phi bins
     fig, ax = plt.subplots(figsize=(12, 8))
