@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:37:19 trottar"
+# Time-stamp: "2024-07-28 22:38:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -501,13 +501,13 @@ with PdfPages(outputpdf) as pdf:
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
-            ratio = df['x_real'].to_numpy()/df['x_mod'].to_numpy()
-            dratio = df['dx_real'].to_numpy()/df['x_mod'].to_numpy()
+            ratio = df['x_real']/df['x_mod']
+            dratio = df['dx_real']/df['x_mod']
             non_zero_mask = (ratio != 0) & (dratio != 0)
             ratio = ratio[non_zero_mask]
             dratio = dratio[non_zero_mask]
 
-            print("!!!!!!!",ratio,df['Q2'].to_numpy())
+            print("!!!!!!!",ratio,df['Q2'])
             if "hi" in df_key:
                 df_key = "High $\epsilon$"
             else:
@@ -516,9 +516,9 @@ with PdfPages(outputpdf) as pdf:
             ax.errorbar(df['Q2'][non_zero_mask], ratio[non_zero_mask], yerr=dratio[non_zero_mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
             # Fit the data using exponential function
-            #popt, _ = curve_fit(exp_func, df['Q2'].to_numpy(), ratio)
-            #fit_line = exp_func(df['Q2'].to_numpy(), *popt)
-            #ax.plot(df['Q2'].to_numpy(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+            #popt, _ = curve_fit(exp_func, df['Q2'], ratio)
+            #fit_line = exp_func(df['Q2'], *popt)
+            #ax.plot(df['Q2'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
         ax.axhline(1.0, color='gray', linestyle='--')
         ax.set_xlabel('$Q^2$', fontsize=24)
