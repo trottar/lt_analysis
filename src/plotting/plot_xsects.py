@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:56:30 trottar"
+# Time-stamp: "2024-07-29 18:59:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -548,8 +548,6 @@ with PdfPages(outputpdf) as pdf:
             errors = errors[non_zero_mask]
 
             x_increment = j+k*NumPhiBins
-
-            print("!!!!!!!!!!!!",x_increment)
             
             # Use x_increment for x-axis values
             x_values = np.arange(x_increment, x_increment+len(ratios))
@@ -572,7 +570,6 @@ with PdfPages(outputpdf) as pdf:
             ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
             x_len = x_increment+len(x_values)
-            #x_len = len(x_values)
 
         # Add vertical lines every NumPhiBins
         for x in range(x_increment, x_len, NumPhiBins):
@@ -605,74 +602,79 @@ with PdfPages(outputpdf) as pdf:
         #phival = np.linspace(0.0, 360, len(thetaval)) 
         return a + b*(np.sin(thetaval)**2) + c*(np.sin(thetaval)*np.cos(phival)) + d*((np.sin(thetaval)**2)*np.cos(2*phival))
 
-    # Create a single figure and axis object for all phi bins
-    fig, ax = plt.subplots(figsize=(12, 8))
-    ax.set_title(f"$Q^2$={float(Q2.replace('p', '.'))}, W={float(W.replace('p', '.'))}", fontsize=24)
-
     # Loop through t bins and plot data
-    for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-        df = file_df_dict[df_key]
-        if "hi" in df_key:
-            epsilon_label = "High $\epsilon$" if k == 0 else ""
-            epsilon_fit_color = "r-"
-        else:
-            epsilon_label = "Low $\epsilon$" if k == 0 else ""
-            epsilon_fit_color = "-"
+    for k in range(NumtBins):
+        j=0
+    
+        # Create a single figure and axis object for all phi bins
+        fig, ax = plt.subplots(figsize=(12, 8))
+        ax.set_title(f"$Q^2$={float(Q2.replace('p', '.'))}, W={float(W.replace('p', '.'))}", fontsize=24)
 
-        mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-                            
-        ratios = df['x_real'][mask]/df['x_mod'][mask]
-        errors = df['dx_real'][mask]/df['x_mod'][mask]
-        non_zero_mask = (ratios != 0) & (errors != 0)
-        ratios = ratios[non_zero_mask]
-        errors = errors[non_zero_mask]        
+        # Loop through t bins and plot data
+        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+            df = file_df_dict[df_key]
+            if "hi" in df_key:
+                epsilon_label = "High $\epsilon$" if k == 0 else ""
+                epsilon_fit_color = "r-"
+            else:
+                epsilon_label = "Low $\epsilon$" if k == 0 else ""
+                epsilon_fit_color = "-"
 
-        # Use x_increment for x-axis values
-        x_values = np.arange(0, len(ratios))
-        
-        ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
-                    label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
-                    markerfacecolor='none', capsize=2)
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
 
-        def fit_func(data, a, b, c, d):
-            phival, thetaval = data
-            return fit_function(phival, thetaval, a, b, c, d)
+            ratios = df['x_real'][mask]/df['x_mod'][mask]
+            errors = df['dx_real'][mask]/df['x_mod'][mask]
+            non_zero_mask = (ratios != 0) & (errors != 0)
+            ratios = ratios[non_zero_mask]
+            errors = errors[non_zero_mask]        
 
-        popt, pcov = curve_fit(fit_func, (df['phi'][mask][non_zero_mask].to_numpy(), df['th_cm'][mask][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
+            # Use x_increment for x-axis values
+            x_values = np.arange(0, len(ratios))
 
-        a_fit, b_fit, c_fit, d_fit = popt
+            ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
+                        label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
+                        markerfacecolor='none', capsize=2)
 
-        fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+            def fit_func(data, a, b, c, d):
+                phival, thetaval = data
+                return fit_function(phival, thetaval, a, b, c, d)
 
-        # Plot fitted function
-        ax.plot(range(len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
-        
-        x_len = len(x_values)
+            popt, pcov = curve_fit(fit_func, (df['phi'][mask][non_zero_mask].to_numpy(), df['th_cm'][mask][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
 
-    # Add vertical lines every NumPhiBins
-    for x in range(0, x_len, NumPhiBins):
-        ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
+            a_fit, b_fit, c_fit, d_fit = popt
 
-    # Add the equation as text above the legend
-    equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
-    ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
-        
-    ax.axhline(1.0, color='gray', linestyle='--')
-    ax.set_xlabel('$Q^2$, W, t', fontsize=24)
-    ax.set_ylabel('Ratio', fontsize=24)
-    ax.tick_params(axis='x', labelsize=16)
-    ax.tick_params(axis='y', labelsize=16)        
-    ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+            fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
-    # Set integer ticks on x-axis
-    ax.set_xticks(range(0, x_len, 2))
-    ax.set_xticklabels(range(1, x_len + 1, 2))  # Start from 1 instead of 0
+                # Plot fitted function
+                ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
-    # Add grid
-    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-    plt.tight_layout()
-    pdf.savefig(fig, bbox_inches='tight')
+                x_len = x_increment+len(x_values)
 
+            # Add vertical lines every NumPhiBins
+            for x in range(x_increment, x_len, NumPhiBins):
+                ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
+
+            # Add the equation as text above the legend
+            equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
+            ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
+
+            ax.axhline(1.0, color='gray', linestyle='--')
+            ax.set_xlabel('$Q^2$, W, t', fontsize=24)
+            ax.set_ylabel('Ratio', fontsize=24)
+            ax.tick_params(axis='x', labelsize=16)
+            ax.tick_params(axis='y', labelsize=16)        
+            ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+
+            # Set integer ticks on x-axis
+            ax.set_xticks(range(x_increment, x_len, 2))
+            ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
+
+            # Add grid
+            ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+            plt.tight_layout()
+            pdf.savefig(fig, bbox_inches='tight')
+
+            j+=1
     
     ##
 
