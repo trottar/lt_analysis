@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:38:19 trottar"
+# Time-stamp: "2024-07-29 00:40:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -371,10 +371,10 @@ with PdfPages(outputpdf) as pdf:
 
     ###
 
-    def fit_function(W, Q2, a, b, c, d):
+    def fit_function(Wval, Q2val, a, b, c, d):
         Wset = float(W.replace('p', '.'))
         Q2set = float(Q2.replace('p', '.'))
-        return a + b*(W-Wset) + c*(Q2-Q2set) + d*(W-Wset)*(Q2-Q2set)
+        return a + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
 
     # Create a single figure and axis object for all phi bins
     fig, ax = plt.subplots(figsize=(12, 8))
