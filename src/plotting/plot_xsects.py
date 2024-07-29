@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:10:00 trottar"
+# Time-stamp: "2024-07-29 01:10:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -475,11 +475,11 @@ with PdfPages(outputpdf) as pdf:
             thetaval = data
             return fit_function(thetaval, a, b, c, d)
 
-        popt, pcov = curve_fit(fit_func, df['th_cm'][non_zero_mask].to_numpy(), ratios, sigma=errors, absolute_sigma=True)
+        popt, pcov = curve_fit(fit_func, df['th_cm'][non_zero_mask], ratios, sigma=errors, absolute_sigma=True)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['th_cm'][non_zero_mask].to_numpy(), a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['th_cm'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
         # Plot fitted function
         ax.plot(range(len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
