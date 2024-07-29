@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:52:06 trottar"
+# Time-stamp: "2024-07-29 18:53:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -547,7 +547,7 @@ with PdfPages(outputpdf) as pdf:
             ratios = ratios[non_zero_mask]
             errors = errors[non_zero_mask]
 
-            x_increment = j+k*NumtBins
+            x_increment = j+k*NumPhiBins
 
             print("!!!!!!!!!!!!",x_increment)
             
