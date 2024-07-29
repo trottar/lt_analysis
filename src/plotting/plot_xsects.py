@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:47:57 trottar"
+# Time-stamp: "2024-07-28 22:49:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -499,11 +499,15 @@ with PdfPages(outputpdf) as pdf:
         ax = axes
         ax.set_title("$\phi$={:.1f}, $Q^2$={:.1f}, W={:.2f}".format(phi_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
-        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-            
+        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):            
             df = file_df_dict[df_key]
-
+            if "hi" in df_key:
+                epsilon_label = "High $\epsilon$"
+            else:
+                epsilon_label = "Low $\epsilon$"            
+            
             mask =  (df['phi'][k+i] == df['phi'])
+            
             ratios = df['x_real'][mask]/df['x_mod'][mask]
             errors = df['dx_real'][mask]/df['x_mod'][mask]
             non_zero_mask = (ratios != 0) & (errors != 0)
