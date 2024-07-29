@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:52:37 trottar"
+# Time-stamp: "2024-07-28 23:54:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -383,9 +383,9 @@ with PdfPages(outputpdf) as pdf:
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):            
             df = file_df_dict[df_key]
             if "hi" in df_key:
-                epsilon_label = "High $\epsilon$"
+                epsilon_label = "High $\epsilon$" if k == 0 else ""
             else:
-                epsilon_label = "Low $\epsilon$"            
+                epsilon_label = "Low $\epsilon$" if k == 0 else ""
 
             mask = (df['phi'][k+i] == df['phi'])
 
