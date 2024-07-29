@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:59:47 trottar"
+# Time-stamp: "2024-07-29 19:01:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -628,9 +628,11 @@ with PdfPages(outputpdf) as pdf:
             ratios = ratios[non_zero_mask]
             errors = errors[non_zero_mask]        
 
+            x_increment = j+k*NumPhiBins
+            
             # Use x_increment for x-axis values
-            x_values = np.arange(0, len(ratios))
-
+            x_values = np.arange(x_increment, x_increment+len(ratios))
+            
             ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                         label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                         markerfacecolor='none', capsize=2)
