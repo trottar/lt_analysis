@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:30:22 trottar"
+# Time-stamp: "2024-07-29 18:35:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -547,8 +547,10 @@ with PdfPages(outputpdf) as pdf:
             ratios = ratios[non_zero_mask]
             errors = errors[non_zero_mask]        
 
+            x_increment = j+k*NumtBins
+            
             # Use x_increment for x-axis values
-            x_values = np.arange(j+k*NumtBins, (j+k*NumtBins)+len(ratios))
+            x_values = np.arange(x_increment, x_increment+len(ratios))
 
             ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                         label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
@@ -586,8 +588,8 @@ with PdfPages(outputpdf) as pdf:
         ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
         # Set integer ticks on x-axis
-        ax.set_xticks(range(0, x_len, 2))
-        ax.set_xticklabels(range(1, x_len + 1, 2))  # Start from 1 instead of 0
+        ax.set_xticks(range(x_increment, x_len, 2))
+        ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
 
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
