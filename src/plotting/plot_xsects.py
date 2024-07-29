@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 20:48:24 trottar"
+# Time-stamp: "2024-07-28 20:50:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -447,18 +447,18 @@ with PdfPages(outputpdf) as pdf:
 
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
         df = file_df_dict[df_key]
-        print("!!!!!!!",df['Q2'].tolist(),df['phi'].tolist())
+        print("!!!!!!!",df['Q2'].to_numpy(),df['phi'].to_numpy())
         if "hi" in df_key:
             df_key = "High $\epsilon$"
         else:
             df_key = "Low $\epsilon$"
 
-        ax.scatter(df['phi'].tolist(), df['Q2'].tolist(), marker=markers[i], linestyle='None', label=df_key, color=colors[i])
+        ax.scatter(df['phi'].to_numpy(), df['Q2'].to_numpy(), marker=markers[i], linestyle='None', label=df_key, color=colors[i])
 
         # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, df['phi'].tolist(), df['Q2'].tolist())
-        fit_line = exp_func(df['phi'].tolist(), *popt)
-        ax.plot(df['phi'].tolist(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        popt, _ = curve_fit(exp_func, df['phi'].to_numpy(), df['Q2'].to_numpy())
+        fit_line = exp_func(df['phi'].to_numpy(), *popt)
+        ax.plot(df['phi'].to_numpy(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
     ax.set_xlabel('$\phi$', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
