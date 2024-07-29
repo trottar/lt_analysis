@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 21:03:20 trottar"
+# Time-stamp: "2024-07-28 21:34:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -447,12 +447,11 @@ with PdfPages(outputpdf) as pdf:
 
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
         df = file_df_dict[df_key]
-        print("!!!!!!!", df['Q2'].to_numpy(), df['phi'].to_numpy())
 
         # Extract unique values
         unique_phi = np.unique(df['phi'].to_numpy())
         unique_Q2 = np.unique(df['Q2'].to_numpy())
-
+        print("!!!!!!!", unique_phi, unique_Q2)
         # Ensure the label reflects the value of df['t']
         t_value = df['t'].iloc[0]  # Assuming all rows have the same 't' value
 
