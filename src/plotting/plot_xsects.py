@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:50:46 trottar"
+# Time-stamp: "2024-07-28 23:51:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -403,7 +403,7 @@ with PdfPages(outputpdf) as pdf:
                         markerfacecolor='none', capsize=2)
 
             # Increment x_increment for the next set of data points
-            x_increment += int(len(ratios)/2)
+            x_increment += len(ratios)
 
     ax.axhline(1.0, color='gray', linestyle='--')
     ax.set_xlabel('$\Q^2$, W, t', fontsize=24)
