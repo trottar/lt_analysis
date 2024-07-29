@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:44:01 trottar"
+# Time-stamp: "2024-07-28 22:47:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -504,22 +504,34 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
 
             mask =  (df['phi'][k+i] == df['phi'])
-            ratio = df['x_real'][mask]/df['x_mod'][mask]
-            dratio = df['dx_real'][mask]/df['x_mod'][mask]
-            non_zero_mask = (ratio != 0) & (dratio != 0)
-            ratio = ratio[non_zero_mask]
-            dratio = dratio[non_zero_mask]
+            ratios = df['x_real'][mask]/df['x_mod'][mask]
+            errors = df['dx_real'][mask]/df['x_mod'][mask]
+            non_zero_mask = (ratios != 0) & (errors != 0)
+            ratios = ratios[non_zero_mask]
+            errors = errors[non_zero_mask]
 
-            print("!!!!!!!",ratio,df['Q2'])
+            if len(ratioss) > 0:  # Check if we have any non-zero data points
+                weights = 1 / (errors ** 2)
+
+                weighted_average = np.average(ratioss, weights=weights)
+                weighted_error = np.sqrt(1 / np.sum(weights))
+
+                # Update the legend label to include the weighted average and its error
+                legend_label = "{} (Avg: {:.3e} ± {:.3e})".format(epsilon_label, weighted_average, weighted_error)
+            else:
+                legend_label = "{} (No valid data)".format(epsilon_label)
+
+            
+            print("!!!!!!!",ratios,df['Q2'])
             if "hi" in df_key:
                 df_key = "High $\epsilon$"
             else:
                 df_key = "Low $\epsilon$"
                 
-            ax.errorbar(df['Q2'][mask][non_zero_mask], ratio[mask][non_zero_mask], yerr=dratio[mask][non_zero_mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['Q2'][mask][non_zero_mask], ratios, yerr=errors, marker=markers[i], linestyle='None', label=legend_label, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
             # Fit the data using exponential function
-            #popt, _ = curve_fit(exp_func, df['Q2'], ratio)
+            #popt, _ = curve_fit(exp_func, df['Q2'], ratios)
             #fit_line = exp_func(df['Q2'], *popt)
             #ax.plot(df['Q2'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
