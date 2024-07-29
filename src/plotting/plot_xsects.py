@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:01:04 trottar"
+# Time-stamp: "2024-07-29 00:02:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -378,8 +378,8 @@ with PdfPages(outputpdf) as pdf:
     # Initialize a counter for x-axis increments
     x_increment = 0
 
-    # Loop through phi bins and plot data
-    for k in range(NumPhiBins):
+    # Loop through t bins and plot data
+    for k in range(NumtBins):
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):            
             df = file_df_dict[df_key]
             if "hi" in df_key:
@@ -387,7 +387,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 epsilon_label = "Low $\epsilon$" if k == 0 else ""
 
-            mask = (df['phi'][k+i] == df['phi'])
+            mask = (df['t'][k+i] == df['t'])
 
             ratios = df['x_real'][mask]/df['x_mod'][mask]
             errors = df['dx_real'][mask]/df['x_mod'][mask]
