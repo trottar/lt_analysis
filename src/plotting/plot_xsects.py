@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:38:45 trottar"
+# Time-stamp: "2024-07-28 23:41:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -396,7 +396,7 @@ with PdfPages(outputpdf) as pdf:
             errors = errors[non_zero_mask]
 
             # Use x_increment for x-axis values
-            x_values = np.arange(x_increment, x_increment + len(ratios))
+            x_values = np.arange(x_increment, (x_increment + len(ratios))/2)
 
             ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                         label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
@@ -406,7 +406,7 @@ with PdfPages(outputpdf) as pdf:
             x_increment += len(ratios)
 
     ax.axhline(1.0, color='gray', linestyle='--')
-    ax.set_xlabel('W, Q2, t', fontsize=24)
+    ax.set_xlabel('$\Q^2$, W, t', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)        
