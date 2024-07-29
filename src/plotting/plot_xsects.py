@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:36:18 trottar"
+# Time-stamp: "2024-07-28 23:38:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -395,26 +395,18 @@ with PdfPages(outputpdf) as pdf:
             ratios = ratios[non_zero_mask]
             errors = errors[non_zero_mask]
 
-            if len(ratios) > 0:
-                weights = 1 / (errors ** 2)
-                weighted_average = np.average(ratios, weights=weights)
-                weighted_error = np.sqrt(1 / np.sum(weights))
-                legend_label = f"{epsilon_label}, $\phi$={phi_bin_centers[k]:.1f} (Avg: {weighted_average:.3e} ± {weighted_error:.3e})"
-            else:
-                legend_label = f"{epsilon_label}, $\phi$={phi_bin_centers[k]:.1f} (No valid data)"
-
             # Use x_increment for x-axis values
             x_values = np.arange(x_increment, x_increment + len(ratios))
 
             ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
-                        label=legend_label, color=colors[i], markeredgecolor=colors[i], 
+                        label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                         markerfacecolor='none', capsize=2)
 
             # Increment x_increment for the next set of data points
             x_increment += len(ratios)
 
     ax.axhline(1.0, color='gray', linestyle='--')
-    ax.set_xlabel('Data Point Index', fontsize=24)
+    ax.set_xlabel('W, Q2, t', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)        
