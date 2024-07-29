@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 19:24:46 trottar"
+# Time-stamp: "2024-07-29 19:25:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -407,7 +407,7 @@ with PdfPages(outputpdf) as pdf:
             tval = data
             return fit_function(tval, a, b, c, d)
 
-        popt, pcov = curve_fit(fit_func, (df['t'][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
+        popt, pcov = curve_fit(fit_func, (df['t'][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True, maxfev = 10000)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
