@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:09:21 trottar"
+# Time-stamp: "2024-07-28 23:13:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -595,7 +595,7 @@ with PdfPages(outputpdf) as pdf:
             #ax.plot(df['th_cm'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
         ax.axhline(1.0, color='gray', linestyle='--')
-        ax.set_xlabel('$\theta$', fontsize=24)
+        ax.set_xlabel('$\Theta$', fontsize=24)
         ax.set_ylabel('Ratio', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
