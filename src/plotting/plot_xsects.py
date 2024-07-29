@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 19:12:25 trottar"
+# Time-stamp: "2024-07-29 19:14:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -452,13 +452,11 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         j=0
+        # Create a single figure and axis object for all phi bins
+        fig, ax = plt.subplots(figsize=(12, 8))
+        ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)        
         # Loop through t bins and plot data
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-
-            # Create a single figure and axis object for all phi bins
-            fig, ax = plt.subplots(figsize=(12, 8))
-            ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
-
             df = file_df_dict[df_key]
             if "hi" in df_key:
                 epsilon_label = "High $\epsilon$" if k == 0 else ""
@@ -605,11 +603,9 @@ with PdfPages(outputpdf) as pdf:
     # Loop through t bins and plot data
     for k in range(NumtBins):
         j=0
-    
         # Create a single figure and axis object for all phi bins
         fig, ax = plt.subplots(figsize=(12, 8))
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
-
         # Loop through t bins and plot data
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
