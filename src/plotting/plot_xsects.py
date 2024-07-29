@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:34:50 trottar"
+# Time-stamp: "2024-07-29 01:35:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -495,7 +495,7 @@ with PdfPages(outputpdf) as pdf:
         ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
 
     # Add the equation as text above the legend
-    equation = r'$a + b \sin(\Theta})^2 + c \sin(\Theta}) \cos(\phi) + d \sin(\Theta})^2 \cos(2\phi)$'
+    equation = r'$a + b \sin(\theta})^2 + c \sin(\theta}) \cos(\phi) + d \sin(\theta})^2 \cos(2\phi)$'
     ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
         
     ax.axhline(1.0, color='gray', linestyle='--')
