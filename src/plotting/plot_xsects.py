@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:17:33 trottar"
+# Time-stamp: "2024-07-29 00:18:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -380,27 +380,27 @@ with PdfPages(outputpdf) as pdf:
 
     # Loop through t bins and plot data
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+
         df = file_df_dict[df_key]
         if "hi" in df_key:
             epsilon_label = "High $\epsilon$" if k == 0 else ""
         else:
             epsilon_label = "Low $\epsilon$" if k == 0 else ""
+
         ratios = df['x_real']/df['x_mod']
         errors = df['dx_real']/df['x_mod']
 
         # Use x_increment for x-axis values
         x_values = np.arange(x_increment, x_increment + len(ratios))
+
         ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                     markerfacecolor='none', capsize=2)
 
-        # Update x_increment for the next dataset
-        x_increment += len(ratios)
-
     # Add vertical lines every NumPhiBins
     for x in range(0, x_increment, NumPhiBins):
         ax.axvline(x, color='blue', linestyle='-', linewidth=0.5, alpha=0.5)
-
+        
     ax.axhline(1.0, color='gray', linestyle='--')
     ax.set_xlabel('$Q^2$, W, t', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
@@ -412,7 +412,7 @@ with PdfPages(outputpdf) as pdf:
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
-
+    
     '''
 
     # Loop through phi bins and plot data
