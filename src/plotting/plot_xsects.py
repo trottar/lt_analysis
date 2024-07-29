@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:30:40 trottar"
+# Time-stamp: "2024-07-28 22:34:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -491,13 +491,13 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
 
-    # Create a figure and axis objects for Q2 plot
-    fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
-
-    # Loop through t bins and plot data
-    for k in range(NumtBins):
-        ax = axes[k]
-        ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+    # Loop through phi bins and plot data
+    for k in range(NumPhiBins):
+        
+        # Create a figure and axis objects for Q2 plot
+        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
+        ax = axes
+        ax.set_title("$\phi$={:.1f}, $Q^2$={:.1f}, W={:.2f}".format(phi_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             df = file_df_dict[df_key]
@@ -509,8 +509,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['Q2'][mask], ratio[mask], yerr=dratio[mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['Q2'], ratio, yerr=dratio, marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
             # Fit the data using exponential function
             #popt, _ = curve_fit(exp_func, df['Q2'].to_numpy(), ratio)
