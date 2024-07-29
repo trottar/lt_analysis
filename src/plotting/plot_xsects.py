@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:15:11 trottar"
+# Time-stamp: "2024-07-29 01:16:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -441,8 +441,7 @@ with PdfPages(outputpdf) as pdf:
 
     def fit_function(thetaval, a, b, c, d):
         phival = np.linspace(0.0, 360, len(thetaval)) 
-        return a + b*(math.sin(thetaval)**2) + c*(math.sin(thetaval)*math.cos(phival))\
-            + d*((math.sin(thetaval)**2)*math.cos(2*phival))
+        return a + b*(math.sin(thetaval)**2) + c*(math.sin(thetaval)*math.cos(phival)) + d*((math.sin(thetaval)**2)*math.cos(2*phival))
 
     # Create a single figure and axis object for all phi bins
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -474,8 +473,6 @@ with PdfPages(outputpdf) as pdf:
         def fit_func(data, a, b, c, d):
             thetaval = data
             return fit_function(thetaval, a, b, c, d)
-
-        print("!!!!!!!!!!!!!",df['th_cm'][non_zero_mask])
 
         popt, pcov = curve_fit(fit_func, (df['th_cm'][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
 
