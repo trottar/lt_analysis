@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:42:07 trottar"
+# Time-stamp: "2024-07-28 23:43:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -380,15 +380,16 @@ with PdfPages(outputpdf) as pdf:
 
     # Loop through phi bins and plot data
     for k in range(NumPhiBins):
-        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):            
+        for df_key in ['unsep_file_loeps', 'unsep_file_hieps']:            
             df = file_df_dict[df_key]
             if "hi" in df_key:
                 epsilon_label = "High $\epsilon$"
+                i = 1
             else:
-                epsilon_label = "Low $\epsilon$"            
+                epsilon_label = "Low $\epsilon$"
+                i = 0
 
-            mask = (df['phi'][k+i] == df['phi'])
-
+            mask = (df['phi'] == phi_bin_centers[k])
             ratios = df['x_real'][mask]/df['x_mod'][mask]
             errors = df['dx_real'][mask]/df['x_mod'][mask]
             non_zero_mask = (ratios != 0) & (errors != 0)
@@ -396,17 +397,18 @@ with PdfPages(outputpdf) as pdf:
             errors = errors[non_zero_mask]
 
             # Use x_increment for x-axis values
-            x_values = np.arange(x_increment/2, (x_increment + len(ratios))/2)
+            x_values = np.arange(x_increment, x_increment + len(ratios))
 
             ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
-                        label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
+                        label=f"{epsilon_label}, $\phi$={phi_bin_centers[k]:.1f}", 
+                        color=colors[i], markeredgecolor=colors[i], 
                         markerfacecolor='none', capsize=2)
 
             # Increment x_increment for the next set of data points
             x_increment += len(ratios)
 
     ax.axhline(1.0, color='gray', linestyle='--')
-    ax.set_xlabel('$\Q^2$, W, t', fontsize=24)
+    ax.set_xlabel('$Q^2$, W, t', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)        
