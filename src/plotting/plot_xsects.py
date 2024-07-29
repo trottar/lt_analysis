@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:10:32 trottar"
+# Time-stamp: "2024-07-29 01:13:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -474,6 +474,8 @@ with PdfPages(outputpdf) as pdf:
         def fit_func(data, a, b, c, d):
             thetaval = data
             return fit_function(thetaval, a, b, c, d)
+
+        print("!!!!!!!!!!!!!",df['th_cm'][non_zero_mask])
 
         popt, pcov = curve_fit(fit_func, df['th_cm'][non_zero_mask], ratios, sigma=errors, absolute_sigma=True)
 
