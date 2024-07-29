@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:22:27 trottar"
+# Time-stamp: "2024-07-28 22:24:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -517,14 +517,14 @@ with PdfPages(outputpdf) as pdf:
             #fit_line = exp_func(df['phi'].to_numpy(), *popt)
             #ax.plot(df['phi'].to_numpy(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
-    ax.set_xlabel('$\phi$', fontsize=24)
-    ax.set_ylabel('Ratio', fontsize=24)
-    ax.tick_params(axis='x', labelsize=16)
-    ax.tick_params(axis='y', labelsize=16)        
-    ax.set_xlim(0, 365)
-    ax.legend(fontsize=16)
-    # Add grid
-    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        ax.set_xlabel('$\phi$', fontsize=24)
+        ax.set_ylabel('Ratio', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
+        ax.set_xlim(0, 365)
+        ax.legend(fontsize=16)
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
