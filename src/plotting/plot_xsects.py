@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:22:02 trottar"
+# Time-stamp: "2024-07-29 01:28:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -381,6 +381,9 @@ with PdfPages(outputpdf) as pdf:
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.set_title(f"$Q^2$={float(Q2.replace('p', '.'))}, W={float(W.replace('p', '.'))}", fontsize=24)
 
+    # Set the legend with the equations
+    plt.legend([r'$a + b (W - W_{\text{c}}) + c (Q^2 - Q^2_{\text{c}}) + d (W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'])
+    
     # Loop through t bins and plot data
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
         df = file_df_dict[df_key]
@@ -389,7 +392,7 @@ with PdfPages(outputpdf) as pdf:
             epsilon_fit_color = "r-"
         else:
             epsilon_label = "Low $\epsilon$" if k == 0 else ""
-            epsilon_fit_color = "b-"
+            epsilon_fit_color = "-"
 
         ratios = df['x_real']/df['x_mod']
         errors = df['dx_real']/df['x_mod']
@@ -447,6 +450,9 @@ with PdfPages(outputpdf) as pdf:
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.set_title(f"$Q^2$={float(Q2.replace('p', '.'))}, W={float(W.replace('p', '.'))}", fontsize=24)
 
+    # Set the legend with the equation
+    plt.legend([r'$a + b \sin(\theta_{\text{cm}})^2 + c \sin(\theta_{\text{cm}}) \cos(\phi) + d \sin(\theta_{\text{cm}})^2 \cos(2\phi)$'])
+
     # Loop through t bins and plot data
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
         df = file_df_dict[df_key]
@@ -455,7 +461,7 @@ with PdfPages(outputpdf) as pdf:
             epsilon_fit_color = "r-"
         else:
             epsilon_label = "Low $\epsilon$" if k == 0 else ""
-            epsilon_fit_color = "b-"
+            epsilon_fit_color = "-"
 
         ratios = df['x_real']/df['x_mod']
         errors = df['dx_real']/df['x_mod']
