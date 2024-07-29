@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:40:49 trottar"
+# Time-stamp: "2024-07-28 22:42:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -500,12 +500,12 @@ with PdfPages(outputpdf) as pdf:
         ax.set_title("$\phi$={:.1f}, $Q^2$={:.1f}, W={:.2f}".format(phi_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-
-            mask =  (df['phi'][k*NumPhiBins+int(i/NumPhiBins)] == df['phi'])
             
             df = file_df_dict[df_key]
-            ratio = df['x_real']/df['x_mod']
-            dratio = df['dx_real']/df['x_mod']
+
+            mask =  (df['phi'][k*NumPhiBins+int(i/NumPhiBins)] == df['phi'])
+            ratio = df['x_real'][mask]/df['x_mod'][mask]
+            dratio = df['dx_real'][mask]/df['x_mod'][mask]
             non_zero_mask = (ratio != 0) & (dratio != 0)
             ratio = ratio[non_zero_mask]
             dratio = dratio[non_zero_mask]
@@ -516,7 +516,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            ax.errorbar(df['Q2'][non_zero_mask], ratio[non_zero_mask], yerr=dratio[non_zero_mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['Q2'][mask][non_zero_mask], ratio[mask][non_zero_mask], yerr=dratio[mask][non_zero_mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
             # Fit the data using exponential function
             #popt, _ = curve_fit(exp_func, df['Q2'], ratio)
