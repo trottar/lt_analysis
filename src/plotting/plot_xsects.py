@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 19:01:15 trottar"
+# Time-stamp: "2024-07-29 19:02:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -647,36 +647,36 @@ with PdfPages(outputpdf) as pdf:
 
             fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
-                # Plot fitted function
-                ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+            # Plot fitted function
+            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+            
+            x_len = x_increment+len(x_values)
 
-                x_len = x_increment+len(x_values)
+        # Add vertical lines every NumPhiBins
+        for x in range(x_increment, x_len, NumPhiBins):
+            ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
 
-            # Add vertical lines every NumPhiBins
-            for x in range(x_increment, x_len, NumPhiBins):
-                ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
+        # Add the equation as text above the legend
+        equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
+        ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
 
-            # Add the equation as text above the legend
-            equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
-            ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
+        ax.axhline(1.0, color='gray', linestyle='--')
+        ax.set_xlabel('$Q^2$, W, t', fontsize=24)
+        ax.set_ylabel('Ratio', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
+        ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
-            ax.axhline(1.0, color='gray', linestyle='--')
-            ax.set_xlabel('$Q^2$, W, t', fontsize=24)
-            ax.set_ylabel('Ratio', fontsize=24)
-            ax.tick_params(axis='x', labelsize=16)
-            ax.tick_params(axis='y', labelsize=16)        
-            ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+        # Set integer ticks on x-axis
+        ax.set_xticks(range(x_increment, x_len, 2))
+        ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
 
-            # Set integer ticks on x-axis
-            ax.set_xticks(range(x_increment, x_len, 2))
-            ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
 
-            # Add grid
-            ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-            plt.tight_layout()
-            pdf.savefig(fig, bbox_inches='tight')
-
-            j+=1
+        j+=1
     
     ##
 
