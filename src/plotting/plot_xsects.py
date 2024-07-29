@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:26:43 trottar"
+# Time-stamp: "2024-07-28 22:29:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -503,21 +503,21 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
             ratio = df['x_real'].to_numpy()/df['x_mod'].to_numpy()
             dratio = df['dx_real'].to_numpy()/df['x_mod'].to_numpy()
-            print("!!!!!!!",ratio,df['phi'].to_numpy())
+            print("!!!!!!!",ratio,df['Q2'].to_numpy())
             if "hi" in df_key:
                 df_key = "High $\epsilon$"
             else:
                 df_key = "Low $\epsilon$"
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            ax.errorbar(df['phi'][mask], ratio[mask], yerr=dratio[mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['Q2'][mask], ratio[mask], yerr=dratio[mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
             # Fit the data using exponential function
-            #popt, _ = curve_fit(exp_func, df['phi'].to_numpy(), ratio)
-            #fit_line = exp_func(df['phi'].to_numpy(), *popt)
-            #ax.plot(df['phi'].to_numpy(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+            #popt, _ = curve_fit(exp_func, df['Q2'].to_numpy(), ratio)
+            #fit_line = exp_func(df['Q2'].to_numpy(), *popt)
+            #ax.plot(df['Q2'].to_numpy(), fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
-        ax.set_xlabel('$\phi$', fontsize=24)
+        ax.set_xlabel('$Q^2$', fontsize=24)
         ax.set_ylabel('Ratio', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
