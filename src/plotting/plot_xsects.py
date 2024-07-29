@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:43:36 trottar"
+# Time-stamp: "2024-07-28 23:45:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -384,10 +384,10 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
             if "hi" in df_key:
                 epsilon_label = "High $\epsilon$"
-                i = 1
+                # Increment x_increment for the next set of data points
+                x_increment += len(ratios)-1
             else:
                 epsilon_label = "Low $\epsilon$"
-                i = 0
 
             mask = (df['phi'] == phi_bin_centers[k])
             ratios = df['x_real'][mask]/df['x_mod'][mask]
@@ -404,8 +404,6 @@ with PdfPages(outputpdf) as pdf:
                         color=colors[i], markeredgecolor=colors[i], 
                         markerfacecolor='none', capsize=2)
 
-            # Increment x_increment for the next set of data points
-            x_increment += len(ratios)
 
     ax.axhline(1.0, color='gray', linestyle='--')
     ax.set_xlabel('$Q^2$, W, t', fontsize=24)
