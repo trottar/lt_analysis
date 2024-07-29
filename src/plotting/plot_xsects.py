@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:40:28 trottar"
+# Time-stamp: "2024-07-29 18:40:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -569,7 +569,7 @@ with PdfPages(outputpdf) as pdf:
             # Plot fitted function
             ax.plot(range(x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
-            x_len = len(x_values)
+            x_len = x_increment+len(x_values)
 
         # Add vertical lines every NumPhiBins
         for x in range(0, x_len, NumPhiBins):
@@ -588,7 +588,7 @@ with PdfPages(outputpdf) as pdf:
         ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
         # Set integer ticks on x-axis
-        ax.set_xticks(range(x_increment, x_increment+x_len, 2))
+        ax.set_xticks(range(x_increment, x_len, 2))
         ax.set_xticklabels(range(x_increment+1, x_increment+x_len + 1, 2))  # Start from 1 instead of 0
 
         # Add grid
