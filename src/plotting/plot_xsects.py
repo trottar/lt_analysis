@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 02:53:01 trottar"
+# Time-stamp: "2024-07-29 02:55:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -516,6 +516,7 @@ with PdfPages(outputpdf) as pdf:
 
     ##
 
+    '''
 
     def fit_function(Wset, Q2set, a, b, c, d):
         Wval = np.linspace(min(Wset)-0.5, max(Wset)+0.5, len(Wset))
@@ -671,8 +672,11 @@ with PdfPages(outputpdf) as pdf:
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')    
+
+    '''
     
-    
+    #####################################################
+        
     '''
 
     # Loop through phi bins and plot data
