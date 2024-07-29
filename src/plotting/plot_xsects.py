@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 18:09:25 trottar"
+# Time-stamp: "2024-07-29 18:13:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -557,11 +557,11 @@ with PdfPages(outputpdf) as pdf:
                 Wval, Q2val = data
                 return fit_function(Wval, Q2val, a, b, c, d)
 
-            popt, pcov = curve_fit(fit_func, (df['W'][non_zero_mask][mask], df['Q2'][non_zero_mask][mask]), ratios, sigma=errors, absolute_sigma=True)
+            popt, pcov = curve_fit(fit_func, (df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
 
             a_fit, b_fit, c_fit, d_fit = popt
 
-            fitted_values = fit_function(df['W'][non_zero_mask][mask], df['Q2'][non_zero_mask][mask], a_fit, b_fit, c_fit, d_fit)
+            fitted_values = fit_function(df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
             # Plot fitted function
             ax.plot(range(len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
@@ -630,11 +630,11 @@ with PdfPages(outputpdf) as pdf:
             phival, thetaval = data
             return fit_function(phival, thetaval, a, b, c, d)
 
-        popt, pcov = curve_fit(fit_func, (df['phi'][non_zero_mask][mask].to_numpy(), df['th_cm'][non_zero_mask][mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
+        popt, pcov = curve_fit(fit_func, (df['phi'][mask][non_zero_mask].to_numpy(), df['th_cm'][mask][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['phi'][non_zero_mask][mask], df['th_cm'][non_zero_mask][mask], a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
         # Plot fitted function
         ax.plot(range(len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
