@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:52:03 trottar"
+# Time-stamp: "2024-07-28 23:52:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,7 +406,7 @@ with PdfPages(outputpdf) as pdf:
             x_increment += int(len(ratios)/2)
 
     ax.axhline(1.0, color='gray', linestyle='--')
-    ax.set_xlabel('$\Q^2$, W, t', fontsize=24)
+    ax.set_xlabel('$Q^2$, W, t', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)        
@@ -414,7 +414,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-    #plt.tight_layout()
+    plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
     
     '''
