@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:08:47 trottar"
+# Time-stamp: "2024-07-29 00:09:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -379,7 +379,7 @@ with PdfPages(outputpdf) as pdf:
     x_increment = 0
 
     # Loop through t bins and plot data
-    for k in range(NumtBins):
+    for k in range(NumtBins+1):
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
             
             df = file_df_dict[df_key]
