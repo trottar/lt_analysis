@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 23:45:03 trottar"
+# Time-stamp: "2024-07-28 23:45:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -384,8 +384,6 @@ with PdfPages(outputpdf) as pdf:
             df = file_df_dict[df_key]
             if "hi" in df_key:
                 epsilon_label = "High $\epsilon$"
-                # Increment x_increment for the next set of data points
-                x_increment += len(ratios)-1
             else:
                 epsilon_label = "Low $\epsilon$"
 
@@ -397,7 +395,7 @@ with PdfPages(outputpdf) as pdf:
             errors = errors[non_zero_mask]
 
             # Use x_increment for x-axis values
-            x_values = np.arange(x_increment, x_increment + len(ratios))
+            x_values = np.arange(k, k + len(ratios))
 
             ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                         label=f"{epsilon_label}, $\phi$={phi_bin_centers[k]:.1f}", 
