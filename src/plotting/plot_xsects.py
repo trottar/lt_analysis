@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:47:02 trottar"
+# Time-stamp: "2024-07-28 22:47:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -510,10 +510,10 @@ with PdfPages(outputpdf) as pdf:
             ratios = ratios[non_zero_mask]
             errors = errors[non_zero_mask]
 
-            if len(ratioss) > 0:  # Check if we have any non-zero data points
+            if len(ratios) > 0:  # Check if we have any non-zero data points
                 weights = 1 / (errors ** 2)
 
-                weighted_average = np.average(ratioss, weights=weights)
+                weighted_average = np.average(ratios, weights=weights)
                 weighted_error = np.sqrt(1 / np.sum(weights))
 
                 # Update the legend label to include the weighted average and its error
