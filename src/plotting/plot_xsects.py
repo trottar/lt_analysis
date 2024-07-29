@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:49:35 trottar"
+# Time-stamp: "2024-07-28 22:54:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -311,7 +311,7 @@ with PdfPages(outputpdf) as pdf:
         #ax.set_ylim(0.0, 2.0)
         ax.set_xlim(0, 365)
 
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -362,13 +362,13 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 365)
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
 
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
-
+        
     # Loop through phi bins and plot data
     for k in range(NumPhiBins):
         # Create a figure and axis objects
@@ -413,13 +413,130 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(tmin-0.1, tmax+0.1)
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
 
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
 
+    # Loop through phi bins and plot data
+    for k in range(NumPhiBins):
+        
+        # Create a figure and axis objects for Q2 plot
+        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
+        ax = axes
+        ax.set_title("$\phi$={:.1f}, $Q^2$={:.1f}, W={:.2f}".format(phi_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+
+        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):            
+            df = file_df_dict[df_key]
+            if "hi" in df_key:
+                epsilon_label = "High $\epsilon$"
+            else:
+                epsilon_label = "Low $\epsilon$"            
+            
+            mask =  (df['phi'][k+i] == df['phi'])
+            
+            ratios = df['x_real'][mask]/df['x_mod'][mask]
+            errors = df['dx_real'][mask]/df['x_mod'][mask]
+            non_zero_mask = (ratios != 0) & (errors != 0)
+            ratios = ratios[non_zero_mask]
+            errors = errors[non_zero_mask]
+
+            if len(ratios) > 0:  # Check if we have any non-zero data points
+                weights = 1 / (errors ** 2)
+
+                weighted_average = np.average(ratios, weights=weights)
+                weighted_error = np.sqrt(1 / np.sum(weights))
+
+                # Update the legend label to include the weighted average and its error
+                legend_label = "{} (Avg: {:.3e} ± {:.3e})".format(epsilon_label, weighted_average, weighted_error)
+            else:
+                legend_label = "{} (No valid data)".format(epsilon_label)
+            
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
+            ax.errorbar(df['Q2'][mask][non_zero_mask], ratios, yerr=errors, marker=markers[i], linestyle='None', label=legend_label, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+
+            # Fit the data using exponential function
+            #popt, _ = curve_fit(exp_func, df['Q2'], ratios)
+            #fit_line = exp_func(df['Q2'], *popt)
+            #ax.plot(df['Q2'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+
+        ax.axhline(1.0, color='gray', linestyle='--')
+        ax.set_xlabel('$Q^2$', fontsize=24)
+        ax.set_ylabel('Ratio', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
+        #ax.set_xlim(0, 365)
+        ax.legend(fontsize=14)
+        
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
+
+    # Loop through phi bins and plot data
+    for k in range(NumPhiBins):
+        
+        # Create a figure and axis objects for W plot
+        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
+        ax = axes
+        ax.set_title("$\phi$={:.1f}, $Q^2$={:.1f}, W={:.2f}".format(phi_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+
+        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):            
+            df = file_df_dict[df_key]
+            if "hi" in df_key:
+                epsilon_label = "High $\epsilon$"
+            else:
+                epsilon_label = "Low $\epsilon$"            
+            
+            mask =  (df['phi'][k+i] == df['phi'])
+            
+            ratios = df['x_real'][mask]/df['x_mod'][mask]
+            errors = df['dx_real'][mask]/df['x_mod'][mask]
+            non_zero_mask = (ratios != 0) & (errors != 0)
+            ratios = ratios[non_zero_mask]
+            errors = errors[non_zero_mask]
+
+            if len(ratios) > 0:  # Check if we have any non-zero data points
+                weights = 1 / (errors ** 2)
+
+                weighted_average = np.average(ratios, weights=weights)
+                weighted_error = np.sqrt(1 / np.sum(weights))
+
+                # Update the legend label to include the weighted average and its error
+                legend_label = "{} (Avg: {:.3e} ± {:.3e})".format(epsilon_label, weighted_average, weighted_error)
+            else:
+                legend_label = "{} (No valid data)".format(epsilon_label)
+
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
+            ax.errorbar(df['W'][mask][non_zero_mask], ratios, yerr=errors, marker=markers[i], linestyle='None', label=legend_label, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+
+            # Fit the data using exponential function
+            #popt, _ = curve_fit(exp_func, df['W'], ratios)
+            #fit_line = exp_func(df['W'], *popt)
+            #ax.plot(df['W'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+
+        ax.axhline(1.0, color='gray', linestyle='--')
+        ax.set_xlabel('W', fontsize=24)
+        ax.set_ylabel('Ratio', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
+        #ax.set_xlim(0, 365)
+        ax.legend(fontsize=14)
+        
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')        
         
     ###
 
@@ -490,68 +607,7 @@ with PdfPages(outputpdf) as pdf:
 
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
-
-    # Loop through phi bins and plot data
-    for k in range(NumPhiBins):
         
-        # Create a figure and axis objects for Q2 plot
-        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
-        ax = axes
-        ax.set_title("$\phi$={:.1f}, $Q^2$={:.1f}, W={:.2f}".format(phi_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
-
-        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):            
-            df = file_df_dict[df_key]
-            if "hi" in df_key:
-                epsilon_label = "High $\epsilon$"
-            else:
-                epsilon_label = "Low $\epsilon$"            
-            
-            mask =  (df['phi'][k+i] == df['phi'])
-            
-            ratios = df['x_real'][mask]/df['x_mod'][mask]
-            errors = df['dx_real'][mask]/df['x_mod'][mask]
-            non_zero_mask = (ratios != 0) & (errors != 0)
-            ratios = ratios[non_zero_mask]
-            errors = errors[non_zero_mask]
-
-            if len(ratios) > 0:  # Check if we have any non-zero data points
-                weights = 1 / (errors ** 2)
-
-                weighted_average = np.average(ratios, weights=weights)
-                weighted_error = np.sqrt(1 / np.sum(weights))
-
-                # Update the legend label to include the weighted average and its error
-                legend_label = "{} (Avg: {:.3e} ± {:.3e})".format(epsilon_label, weighted_average, weighted_error)
-            else:
-                legend_label = "{} (No valid data)".format(epsilon_label)
-
-            
-            print("!!!!!!!",ratios,df['Q2'])
-            if "hi" in df_key:
-                df_key = "High $\epsilon$"
-            else:
-                df_key = "Low $\epsilon$"
-                
-            ax.errorbar(df['Q2'][mask][non_zero_mask], ratios, yerr=errors, marker=markers[i], linestyle='None', label=legend_label, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
-
-            # Fit the data using exponential function
-            #popt, _ = curve_fit(exp_func, df['Q2'], ratios)
-            #fit_line = exp_func(df['Q2'], *popt)
-            #ax.plot(df['Q2'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q($\phi$) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
-
-        ax.axhline(1.0, color='gray', linestyle='--')
-        ax.set_xlabel('$Q^2$', fontsize=24)
-        ax.set_ylabel('Ratio', fontsize=24)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)        
-        #ax.set_xlim(0, 365)
-        ax.legend(fontsize=24)
-        
-        # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-        plt.tight_layout()
-        pdf.savefig(fig, bbox_inches='tight')
-    
     ###
         
     # Create a figure and axis objects
@@ -576,7 +632,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('x_real')
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -604,7 +660,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_ylabel('x_mod')
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
@@ -633,7 +689,7 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 365)
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
 
@@ -662,7 +718,7 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 365)
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         
@@ -694,7 +750,7 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 365)
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         # Set y-axis to logarithmic scale
@@ -726,7 +782,7 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 365)
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         
@@ -765,7 +821,7 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(tmin-0.1, tmax+0.1)
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=14)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
     print("="*50)
