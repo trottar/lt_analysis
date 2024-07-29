@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:22:55 trottar"
+# Time-stamp: "2024-07-29 00:25:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -397,6 +397,8 @@ with PdfPages(outputpdf) as pdf:
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                     markerfacecolor='none', capsize=2)
 
+        x_increment = len(x_values)
+        
     # Add vertical lines every NumPhiBins
     for x in range(0, x_increment, NumPhiBins):
         print("!!!!!!!",x)
