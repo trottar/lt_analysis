@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 22:24:01 trottar"
+# Time-stamp: "2024-07-28 22:25:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -496,7 +496,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
-        ax = axes
+        ax = axes[k]
         ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
         for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
@@ -522,16 +522,14 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(0, 365)
-        ax.legend(fontsize=16)
+        ax.legend(fontsize=24)
         # Add grid
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
-
     
     ###
-
         
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
