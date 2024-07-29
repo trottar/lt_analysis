@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:26:17 trottar"
+# Time-stamp: "2024-07-29 00:29:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -370,17 +370,13 @@ with PdfPages(outputpdf) as pdf:
         pdf.savefig(fig, bbox_inches='tight')
 
     ###
-
+    
     # Create a single figure and axis object for all phi bins
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.set_title(f"$Q^2$={float(Q2.replace('p', '.'))}, W={float(W.replace('p', '.'))}", fontsize=24)
 
-    # Initialize a counter for x-axis increments
-    x_increment = 0
-
     # Loop through t bins and plot data
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-
         df = file_df_dict[df_key]
         if "hi" in df_key:
             epsilon_label = "High $\epsilon$" if k == 0 else ""
@@ -391,18 +387,18 @@ with PdfPages(outputpdf) as pdf:
         errors = df['dx_real']/df['x_mod']
 
         # Use x_increment for x-axis values
-        x_values = np.arange(x_increment, x_increment + len(ratios))
+        x_values = np.arange(0, len(ratios))
 
         ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                     markerfacecolor='none', capsize=2)
 
         x_len = len(x_values)
-        
+
     # Add vertical lines every NumPhiBins
     for x in range(0, x_len, NumPhiBins):
         ax.axvline(x, color='blue', linestyle='-', linewidth=0.5, alpha=0.5)
-        
+
     ax.axhline(1.0, color='gray', linestyle='--')
     ax.set_xlabel('$Q^2$, W, t', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
@@ -410,11 +406,15 @@ with PdfPages(outputpdf) as pdf:
     ax.tick_params(axis='y', labelsize=16)        
     ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
+    # Set integer ticks on x-axis
+    ax.set_xticks(range(0, x_len))
+    ax.set_xticklabels(range(1, x_len + 1))  # Start from 1 instead of 0
+
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
-    
+
     '''
 
     # Loop through phi bins and plot data
