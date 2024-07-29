@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:37:55 trottar"
+# Time-stamp: "2024-07-29 01:39:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -425,7 +425,7 @@ with PdfPages(outputpdf) as pdf:
 
 
     # Add the equation as text above the legend
-    equation = r'$a + b (W - W_{\text{c}}) + c (Q^2 - Q^2_{\text{c}}) + d (W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
+    equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
     ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
         
     ax.axhline(1.0, color='gray', linestyle='--')
@@ -495,7 +495,7 @@ with PdfPages(outputpdf) as pdf:
         ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
 
     # Add the equation as text above the legend
-    equation = r'$a + b \sin(\theta_{\text{cm}})^2 + c \sin(\theta_{\text{cm}}) \cos(\phi) + d \sin(\theta_{\text{cm}})^2 \cos(2\phi)$'
+    equation = r'$a + b\cdot\sin(\theta)^2 + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin(\theta)^2 \cos(2\phi)$'
     ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
         
     ax.axhline(1.0, color='gray', linestyle='--')
