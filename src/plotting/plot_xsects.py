@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:02:37 trottar"
+# Time-stamp: "2024-07-29 00:07:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -380,7 +380,8 @@ with PdfPages(outputpdf) as pdf:
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
-        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):            
+        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
+            
             df = file_df_dict[df_key]
             if "hi" in df_key:
                 epsilon_label = "High $\epsilon$" if k == 0 else ""
@@ -396,12 +397,17 @@ with PdfPages(outputpdf) as pdf:
             #errors = errors[non_zero_mask]
 
             # Use x_increment for x-axis values
-            x_values = np.arange(i, i + len(ratios))
+            x_values = np.arange(x_increment, x_increment + len(ratios))
 
             ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                         label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                         markerfacecolor='none', capsize=2)
 
+            # Increment x_increment for the next set of data points
+            x_increment += len(ratios)
+
+            print("!!!!!!!!!!",x_increment)
+            
     ax.axhline(1.0, color='gray', linestyle='--')
     ax.set_xlabel('$Q^2$, W, t', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
