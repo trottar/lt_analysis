@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 21:35:58 trottar"
+# Time-stamp: "2024-07-28 21:45:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -369,6 +369,58 @@ with PdfPages(outputpdf) as pdf:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
 
+    # Loop through phi bins and plot data
+    for k in range(NumPhiBins):
+        # Create a figure and axis objects
+        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
+        ax = axes
+        ax.set_title("$\phi$={:.1f}, $Q^2$={:.1f}, W={:.2f}".format(phi_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+
+        for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
+            df = file_df_dict[df_key]
+            if "hi" in df_key:
+                epsilon_label = "High $\epsilon$"
+            else:
+                epsilon_label = "Low $\epsilon$"
+
+            mask = (df['phibin'] == (k+1))
+
+            # Filter out zero values
+            ratios = df['ratio'][mask]
+            errors = df['dratio'][mask]
+            non_zero_mask = (ratios != 0) & (errors != 0)
+            ratios = ratios[non_zero_mask]
+            errors = errors[non_zero_mask]
+
+            if len(ratios) > 0:  # Check if we have any non-zero data points
+                weights = 1 / (errors ** 2)
+
+                weighted_average = np.average(ratios, weights=weights)
+                weighted_error = np.sqrt(1 / np.sum(weights))
+
+                # Update the legend label to include the weighted average and its error
+                legend_label = "{} (Avg: {:.3e} ± {:.3e})".format(epsilon_label, weighted_average, weighted_error)
+            else:
+                legend_label = "{} (No valid data)".format(epsilon_label)
+
+            ax.errorbar(t_bin_centers[df['tbin'][mask][non_zero_mask]], ratios, yerr=errors, 
+                        marker=markers[i], linestyle='None', label=legend_label, 
+                        color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+
+        ax.axhline(1.0, color='gray', linestyle='--')
+        ax.set_xlabel('-t', fontsize=24)
+        ax.set_ylabel('Ratio', fontsize=24)
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
+        ax.set_xlim(tmin, tmax)
+        ax.legend(fontsize=24)
+
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        pdf.savefig(fig, bbox_inches='tight')
+
+        
     ###
 
     # Define exponential function
