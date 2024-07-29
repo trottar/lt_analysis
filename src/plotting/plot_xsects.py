@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:29:11 trottar"
+# Time-stamp: "2024-07-29 01:32:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -450,9 +450,6 @@ with PdfPages(outputpdf) as pdf:
     fig, ax = plt.subplots(figsize=(12, 8))
     ax.set_title(f"$Q^2$={float(Q2.replace('p', '.'))}, W={float(W.replace('p', '.'))}", fontsize=24)
 
-    # Set the legend with the equation
-    ax.legend([r'$a + b \sin(\theta_{\text{cm}})^2 + c \sin(\theta_{\text{cm}}) \cos(\phi) + d \sin(\theta_{\text{cm}})^2 \cos(2\phi)$'])
-
     # Loop through t bins and plot data
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
         df = file_df_dict[df_key]
@@ -495,6 +492,10 @@ with PdfPages(outputpdf) as pdf:
     for x in range(0, x_len, NumtBins):
         ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
 
+    # Add the equation as text above the legend
+    equation = r'$a + b \sin(\theta_{\text{cm}})^2 + c \sin(\theta_{\text{cm}}) \cos(\phi) + d \sin(\theta_{\text{cm}})^2 \cos(2\phi)$'
+    ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
+        
     ax.axhline(1.0, color='gray', linestyle='--')
     ax.set_xlabel('$Q^2$, W, t', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
