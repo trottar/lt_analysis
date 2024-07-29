@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:07:51 trottar"
+# Time-stamp: "2024-07-29 00:08:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -404,7 +404,7 @@ with PdfPages(outputpdf) as pdf:
                         markerfacecolor='none', capsize=2)
 
             # Increment x_increment for the next set of data points
-            x_increment += len(ratios)
+            x_increment += int(len(ratios)/2)
 
             print("!!!!!!!!!!",x_increment)
             
