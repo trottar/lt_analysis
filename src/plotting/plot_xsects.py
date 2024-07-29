@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:39:42 trottar"
+# Time-stamp: "2024-07-29 01:41:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -437,7 +437,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Set integer ticks on x-axis
     ax.set_xticks(range(0, x_len))
-    ax.set_xticklabels(range(1, x_len + 1))  # Start from 1 instead of 0
+    ax.set_xticklabels(range(1, x_len + 1, 2))  # Start from 1 instead of 0
 
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
@@ -507,7 +507,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Set integer ticks on x-axis
     ax.set_xticks(range(0, x_len))
-    ax.set_xticklabels(range(1, x_len + 1))  # Start from 1 instead of 0
+    ax.set_xticklabels(range(1, x_len + 1, 2))  # Start from 1 instead of 0
 
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
