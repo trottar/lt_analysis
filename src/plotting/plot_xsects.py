@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 01:28:08 trottar"
+# Time-stamp: "2024-07-29 01:29:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -382,7 +382,7 @@ with PdfPages(outputpdf) as pdf:
     ax.set_title(f"$Q^2$={float(Q2.replace('p', '.'))}, W={float(W.replace('p', '.'))}", fontsize=24)
 
     # Set the legend with the equations
-    plt.legend([r'$a + b (W - W_{\text{c}}) + c (Q^2 - Q^2_{\text{c}}) + d (W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'])
+    ax.legend([r'$a + b (W - W_{\text{c}}) + c (Q^2 - Q^2_{\text{c}}) + d (W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'])
     
     # Loop through t bins and plot data
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
@@ -451,7 +451,7 @@ with PdfPages(outputpdf) as pdf:
     ax.set_title(f"$Q^2$={float(Q2.replace('p', '.'))}, W={float(W.replace('p', '.'))}", fontsize=24)
 
     # Set the legend with the equation
-    plt.legend([r'$a + b \sin(\theta_{\text{cm}})^2 + c \sin(\theta_{\text{cm}}) \cos(\phi) + d \sin(\theta_{\text{cm}})^2 \cos(2\phi)$'])
+    ax.legend([r'$a + b \sin(\theta_{\text{cm}})^2 + c \sin(\theta_{\text{cm}}) \cos(\phi) + d \sin(\theta_{\text{cm}})^2 \cos(2\phi)$'])
 
     # Loop through t bins and plot data
     for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
