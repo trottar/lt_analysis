@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:44:07 trottar"
+# Time-stamp: "2024-07-29 00:45:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -372,8 +372,8 @@ with PdfPages(outputpdf) as pdf:
     ###
 
     def fit_function(Wset, Q2set, a, b, c, d):
-        Wval = np.linspace(Wset-0.5, Wset+0.5, 100)
-        Q2val = np.linspace(Q2set-0.5, Q2set+0.5, 100)
+        Wval = np.linspace(min(Wset)-0.5, max(Wset)+0.5, 100)
+        Q2val = np.linspace(min(Q2set)-0.5, max(Q2set)+0.5, 100)
         return a + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
 
     # Create a single figure and axis object for all phi bins
