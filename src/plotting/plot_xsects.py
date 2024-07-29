@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 00:12:18 trottar"
+# Time-stamp: "2024-07-29 00:13:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -379,34 +379,25 @@ with PdfPages(outputpdf) as pdf:
     x_increment = 0
 
     # Loop through t bins and plot data
-    for k in range(NumtBins):
-        for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
-            
-            df = file_df_dict[df_key]
-            if "hi" in df_key:
-                epsilon_label = "High $\epsilon$" if k == 0 else ""
-            else:
-                epsilon_label = "Low $\epsilon$" if k == 0 else ""
+    for i, df_key in enumerate(['unsep_file_loeps', 'unsep_file_hieps']):
 
-            mask = (df['t'][k+i] == df['t'])
+        df = file_df_dict[df_key]
+        if "hi" in df_key:
+            epsilon_label = "High $\epsilon$" if k == 0 else ""
+        else:
+            epsilon_label = "Low $\epsilon$" if k == 0 else ""
 
-            ratios = df['x_real'][mask]/df['x_mod'][mask]
-            errors = df['dx_real'][mask]/df['x_mod'][mask]
-            #non_zero_mask = (ratios != 0) & (errors != 0)
-            #ratios = ratios[non_zero_mask]
-            #errors = errors[non_zero_mask]
+        ratios = df['x_real']/df['x_mod']
+        errors = df['dx_real']/df['x_mod']
 
-            # Use x_increment for x-axis values
-            x_values = np.arange(x_increment, x_increment + len(ratios))
+        # Use x_increment for x-axis values
+        x_values = np.arange(x_increment, x_increment + len(ratios))
 
-            ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
-                        label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
-                        markerfacecolor='none', capsize=2)
+        ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
+                    label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
+                    markerfacecolor='none', capsize=2)
 
-            # Increment x_increment for the next set of data points
-            x_increment += int(len(ratios)/2)
-
-            print("!!!!!!!!!!",x_increment)
+        print("!!!!!!!!!!",x_increment)
             
     ax.axhline(1.0, color='gray', linestyle='--')
     ax.set_xlabel('$Q^2$, W, t', fontsize=24)
