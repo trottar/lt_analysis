@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:42:23 trottar"
+# Time-stamp: "2024-07-30 15:46:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -444,7 +444,7 @@ with PdfPages(outputpdf) as pdf:
     def fit_function(Wset, Q2set, a, b, c, d):
         Wval = np.linspace(float(W.replace("p","."))-1.0, float(W.replace("p","."))+1.0, len(Wset))
         Q2val = np.linspace(float(Q2.replace("p","."))-1.0, float(Q2.replace("p","."))+1.0, len(Q2set))
-        return a + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
+        return 1 + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
