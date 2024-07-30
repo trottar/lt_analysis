@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 14:52:36 trottar"
+# Time-stamp: "2024-07-30 14:55:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -487,15 +487,15 @@ with PdfPages(outputpdf) as pdf:
             x_len = x_increment+len(x_values)
 
             if "hi" in df_key:
-                a_hi_lst.append(a_fit)
-                b_hi_lst.append(b_fit*(df['W'][k]-float(W.replace("p","."))))
-                c_hi_lst.append(c_fit)
-                d_hi_lst.append(d_fit)
+                a_hi_lst.append((a_fit, df['t'][k]))
+                b_hi_lst.append((b_fit, df['t'][k]))
+                c_hi_lst.append((c_fit, df['t'][k]))
+                d_hi_lst.append((d_fit, df['t'][k]))
             else:
-                a_lo_lst.append(a_fit)
-                b_lo_lst.append(b_fit*(df['W'][k]-float(W.replace("p","."))))
-                c_lo_lst.append(c_fit)
-                d_lo_lst.append(d_fit)
+                a_lo_lst.append((a_fit, df['t'][k]))
+                b_lo_lst.append((b_fit, df['t'][k]))
+                c_lo_lst.append((c_fit, df['t'][k]))
+                d_lo_lst.append((d_fit, df['t'][k]))
                 
         # Add the equation as text above the legend
         equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
