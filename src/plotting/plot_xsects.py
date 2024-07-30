@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:02:16 trottar"
+# Time-stamp: "2024-07-30 15:05:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -486,6 +486,8 @@ with PdfPages(outputpdf) as pdf:
 
             x_len = x_increment+len(x_values)
 
+
+            print("!!!!!!!!!", df['t'], df['t'][k])
             if "hi" in df_key:
                 a_hi_lst.append((df['t'][k], a_fit))
                 b_hi_lst.append((df['t'][k], b_fit))
