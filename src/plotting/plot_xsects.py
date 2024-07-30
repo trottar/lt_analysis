@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:06:47 trottar"
+# Time-stamp: "2024-07-30 15:08:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -434,8 +434,8 @@ with PdfPages(outputpdf) as pdf:
     d_lo_lst  = []
     
     def fit_function(Wset, Q2set, a, b, c, d):
-        Wval = np.linspace(float(W.replace("p","."))-1.0, float(W.replace("p","."))+1.0, len(Wset))
-        Q2val = np.linspace(float(Q2.replace("p","."))-1.0, float(Q2.replace("p","."))+1.0, len(Q2set))
+        Wval = np.linspace(float(W.replace("p","."))-0.1, float(W.replace("p","."))+0.1, len(Wset))
+        Q2val = np.linspace(float(Q2.replace("p","."))-0.1, float(Q2.replace("p","."))+0.1, len(Q2set))
         return a + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
 
     # Loop through t bins and plot data
@@ -486,8 +486,6 @@ with PdfPages(outputpdf) as pdf:
 
             x_len = x_increment+len(x_values)
 
-
-            print("!!!!!!!!!", df['t'], df['t'][x_increment])
             if "hi" in df_key:
                 a_hi_lst.append((df['t'][x_increment], a_fit))
                 b_hi_lst.append((df['t'][x_increment], b_fit))
