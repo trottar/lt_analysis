@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:19:59 trottar"
+# Time-stamp: "2024-07-30 15:25:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -427,11 +427,19 @@ with PdfPages(outputpdf) as pdf:
     b_hi_lst  = []
     c_hi_lst  = []
     d_hi_lst  = []
-
+    a_hierr_lst  = []
+    b_hierr_lst  = []
+    c_hierr_lst  = []
+    d_hierr_lst  = []
+    
     a_lo_lst  = []
     b_lo_lst  = []
     c_lo_lst  = []
     d_lo_lst  = []
+    a_loerr_lst  = []
+    b_loerr_lst  = []
+    c_loerr_lst  = []
+    d_loerr_lst  = []
     
     def fit_function(Wset, Q2set, a, b, c, d):
         Wval = np.linspace(float(W.replace("p","."))-0.5, float(W.replace("p","."))+0.5, len(Wset))
@@ -479,6 +487,12 @@ with PdfPages(outputpdf) as pdf:
 
             a_fit, b_fit, c_fit, d_fit = popt
 
+            # Calculate the errors of the fitted parameters
+            perr = np.sqrt(np.diag(pcov))
+
+            # Extract the errors of each parameter
+            a_fit_err, b_fit_err, c_fit_err, d_fit_err = perr
+            
             fitted_values = fit_function(df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
             # Plot fitted function
@@ -491,11 +505,19 @@ with PdfPages(outputpdf) as pdf:
                 b_hi_lst.append((df['t'][x_increment], b_fit))
                 c_hi_lst.append((df['t'][x_increment], c_fit))
                 d_hi_lst.append((df['t'][x_increment], d_fit))
+                a_hierr_lst.append(a_fit_err)
+                b_hierr_lst.append(b_fit_err)
+                c_hierr_lst.append(c_fit_err)
+                d_hierr_lst.append(d_fit_err)
             else:
                 a_lo_lst.append((df['t'][x_increment], a_fit))
                 b_lo_lst.append((df['t'][x_increment], b_fit))
                 c_lo_lst.append((df['t'][x_increment], c_fit))
                 d_lo_lst.append((df['t'][x_increment], d_fit))
+                a_loerr_lst.append(a_fit_err)
+                b_loerr_lst.append(b_fit_err)
+                c_loerr_lst.append(c_fit_err)
+                d_loerr_lst.append(d_fit_err)                
                 
         # Add the equation as text above the legend
         equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
@@ -522,29 +544,29 @@ with PdfPages(outputpdf) as pdf:
     # Create a figure with 4 subplots
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
-    # Scatter data for 'a'
-    axs[0, 0].scatter(*zip(*a_hi_lst), label='High $\epsilon$', markerfacecolor='none', capsize=2)
-    axs[0, 0].scatter(*zip(*a_lo_lst), label='Low $\epsilon$', markerfacecolor='none', capsize=2)
+    # Errorbar data for 'a'
+    axs[0, 0].errorbar(*zip(*a_hi_lst), yerr=a_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', markerfacecolor='none', capsize=2)
+    axs[0, 0].errorbar(*zip(*a_lo_lst), yerr=a_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', markerfacecolor='none', capsize=2)
     axs[0, 0].set_title('a')
     axs[0, 0].legend()
 
-    # Scatter data for 'b'
-    axs[0, 1].scatter(*zip(*b_hi_lst), label=None, markerfacecolor='none', capsize=2)
-    axs[0, 1].scatter(*zip(*b_lo_lst), label=None, markerfacecolor='none', capsize=2)
+    # Errorbar data for 'b'
+    axs[0, 1].errorbar(*zip(*b_hi_lst), yerr=b_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', markerfacecolor='none', capsize=2)
+    axs[0, 1].errorbar(*zip(*b_lo_lst), yerr=b_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', markerfacecolor='none', capsize=2)
     axs[0, 1].set_title('$b\cdot(W - W_{\text{c}})$')
-    axs[0, 1].legend()
+    #axs[0, 1].legend()
 
-    # Scatter data for 'c'
-    axs[1, 0].scatter(*zip(*c_hi_lst), label=None, markerfacecolor='none', capsize=2)
-    axs[1, 0].scatter(*zip(*c_lo_lst), label=None, markerfacecolor='none', capsize=2)
+    # Errorbar data for 'c'
+    axs[1, 0].errorbar(*zip(*c_hi_lst), yerr=c_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', markerfacecolor='none', capsize=2)
+    axs[1, 0].errorbar(*zip(*c_lo_lst), yerr=c_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', markerfacecolor='none', capsize=2)
     axs[1, 0].set_title('$c\cdot(Q^2 - Q^2_{\text{c}})$')
-    axs[1, 0].legend()
+    #axs[1, 0].legend()
 
-    # Scatter data for 'd'
-    axs[1, 1].scatter(*zip(*d_hi_lst), label=None, markerfacecolor='none', capsize=2)
-    axs[1, 1].scatter(*zip(*d_lo_lst), label=None, markerfacecolor='none', capsize=2)
+    # Errorbar data for 'd'
+    axs[1, 1].errorbar(*zip(*d_hi_lst), yerr=d_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', markerfacecolor='none', capsize=2)
+    axs[1, 1].errorbar(*zip(*d_lo_lst), yerr=d_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', markerfacecolor='none', capsize=2)
     axs[1, 1].set_title('$d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$')
-    axs[1, 1].legend()
+    #axs[1, 1].legend()
 
     # Adjust layout
     plt.tight_layout()
