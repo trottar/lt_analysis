@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 18:46:21 trottar"
+# Time-stamp: "2024-07-30 19:07:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,7 +110,7 @@ def iterWeight(arg_str):
         #                  that incorporates Q2-dep based of pi FF
         #sigt=(p5/q2_gev)*math.exp(-p6*(q2_gev**2))
         #Qdep_T=(math.exp(-q2_gev**2))/q2_gev
-        Qdep_T=1.0/q2_gev
+        Qdep_T=(math.exp(-q2_gev**2))
         #sigt=p5*(p6+math.exp(-p7*(abs(t_gev))))*(Qdep_T**p8)
         sigt=(p5*math.exp(-p6*(abs(t_gev)))+p7*(abs(t_gev)))*(Qdep_T**p8)
 
