@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:49:38 trottar"
+# Time-stamp: "2024-07-30 15:50:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -523,26 +523,26 @@ with PdfPages(outputpdf) as pdf:
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
     # Scatter data for 'a'
-    axs[0, 0].scatter(*zip(*a_hi_lst), yerr=a_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
-    axs[0, 0].scatter(*zip(*a_lo_lst), yerr=a_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
+    axs[0, 0].scatter(*zip(*a_hi_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[0, 0].scatter(*zip(*a_lo_lst), marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
     axs[0, 0].set_title('a')
     axs[0, 0].legend()
 
     # Scatter data for 'b'
-    axs[0, 1].scatter(*zip(*b_hi_lst), yerr=b_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
-    axs[0, 1].scatter(*zip(*b_lo_lst), yerr=b_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
+    axs[0, 1].scatter(*zip(*b_hi_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[0, 1].scatter(*zip(*b_lo_lst), marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
     axs[0, 1].set_title('$b\cdot(W - W_{\text{c}})$')
     #axs[0, 1].legend()
 
     # Scatter data for 'c'
-    axs[1, 0].scatter(*zip(*c_hi_lst), yerr=c_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
-    axs[1, 0].scatter(*zip(*c_lo_lst), yerr=c_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
+    axs[1, 0].scatter(*zip(*c_hi_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[1, 0].scatter(*zip(*c_lo_lst), marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
     axs[1, 0].set_title('$c\cdot(Q^2 - Q^2_{\text{c}})$')
     #axs[1, 0].legend()
 
     # Scatter data for 'd'
-    axs[1, 1].scatter(*zip(*d_hi_lst), yerr=d_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
-    axs[1, 1].scatter(*zip(*d_lo_lst), yerr=d_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
+    axs[1, 1].scatter(*zip(*d_hi_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[1, 1].scatter(*zip(*d_lo_lst), marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
     axs[1, 1].set_title('$d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$')
     #axs[1, 1].legend()
 
