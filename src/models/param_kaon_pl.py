@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-29 21:14:11 trottar"
+# Time-stamp: "2024-07-30 15:55:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -111,7 +111,7 @@ def iterWeight(arg_str):
         #sigt=(p5/q2_gev)*math.exp(-p6*(q2_gev**2))
         Qdep_T=(math.exp(-q2_gev**2))/q2_gev
         #sigt=p5*(p6+math.exp(-p7*(abs(t_gev))))*(Qdep_T**p8)
-        sigt=(p5*math.exp(-p6*(abs(t_gev)))+p7*(abs(t_gev)))*(Qdep_T**p8)
+        sigt=(p5*math.exp(-p6*(abs(t_gev))*q2_gev)+p7*(abs(t_gev)))*(Qdep_T**p8)
 
     except OverflowError:        
         sigt = -1000.0
