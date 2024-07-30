@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:30:03 trottar"
+# Time-stamp: "2024-07-30 15:31:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -497,7 +497,7 @@ with PdfPages(outputpdf) as pdf:
 
             # Plot fitted function
             ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label= \
-                    f'a = {a_fit:.4f}$\pm${a_fit_err:.4f}\nb = {b_fit:.4f}$\pm${b_fit_err:.4f}\nc = {c_fit:.4f}$\pm${c_fit_err:.4f}\nd = {d_fit:.4f}$\pm${d_fit_err:.4f}')
+                    f'a = {a_fit:.4e}$\pm${a_fit_err:.4e}\nb = {b_fit:.4e}$\pm${b_fit_err:.4e}\nc = {c_fit:.4e}$\pm${c_fit_err:.4e}\nd = {d_fit:.4e}$\pm${d_fit_err:.4e}')
 
             x_len = x_increment+len(x_values)
 
