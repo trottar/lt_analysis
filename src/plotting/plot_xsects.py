@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 14:58:42 trottar"
+# Time-stamp: "2024-07-30 15:00:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -523,26 +523,26 @@ with PdfPages(outputpdf) as pdf:
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
     # Scatter data for 'a'
-    axs[0, 0].scatter(a_hi_lst, label='a_hi')
-    axs[0, 0].scatter(a_lo_lst, label='a_lo')
+    axs[0, 0].scatter(*zip(*a_hi_lst), label='a_hi')
+    axs[0, 0].scatter(*zip(*a_lo_lst), label='a_lo')
     axs[0, 0].set_title('a')
     axs[0, 0].legend()
 
     # Scatter data for 'b'
-    axs[0, 1].scatter(b_hi_lst, label='b_hi')
-    axs[0, 1].scatter(b_lo_lst, label='b_lo')
+    axs[0, 1].scatter(*zip(*b_hi_lst), label='b_hi')
+    axs[0, 1].scatter(*zip(*b_lo_lst), label='b_lo')
     axs[0, 1].set_title('b')
     axs[0, 1].legend()
 
     # Scatter data for 'c'
-    axs[1, 0].scatter(c_hi_lst, label='c_hi')
-    axs[1, 0].scatter(c_lo_lst, label='c_lo')
+    axs[1, 0].scatter(*zip(*c_hi_lst), label='c_hi')
+    axs[1, 0].scatter(*zip(*c_lo_lst), label='c_lo')
     axs[1, 0].set_title('c')
     axs[1, 0].legend()
 
     # Scatter data for 'd'
-    axs[1, 1].scatter(d_hi_lst, label='d_hi')
-    axs[1, 1].scatter(d_lo_lst, label='d_lo')
+    axs[1, 1].scatter(*zip(*d_hi_lst), label='d_hi')
+    axs[1, 1].scatter(*zip(*d_lo_lst), label='d_lo')
     axs[1, 1].set_title('d')
     axs[1, 1].legend()
 
