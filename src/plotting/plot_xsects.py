@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:10:27 trottar"
+# Time-stamp: "2024-07-30 15:14:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,7 +406,7 @@ with PdfPages(outputpdf) as pdf:
         ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)        
         
     ax.axhline(1.0, color='gray', linestyle='--')
-    ax.set_xlabel('tbin', fontsize=24)
+    ax.set_xlabel('t-$\phi$ bin', fontsize=24)
     ax.set_ylabel('Ratio', fontsize=24)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)        
@@ -502,7 +502,7 @@ with PdfPages(outputpdf) as pdf:
         ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
 
         ax.axhline(1.0, color='gray', linestyle='--')
-        ax.set_xlabel('tbin', fontsize=24)
+        ax.set_xlabel('t-$\phi$ bin', fontsize=24)
         ax.set_ylabel('Ratio', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
@@ -531,19 +531,19 @@ with PdfPages(outputpdf) as pdf:
     # Scatter data for 'b'
     axs[0, 1].scatter(*zip(*b_hi_lst), label='b_hi')
     axs[0, 1].scatter(*zip(*b_lo_lst), label='b_lo')
-    axs[0, 1].set_title('b')
+    axs[0, 1].set_title('$b\cdot(W - W_{\text{c}})$')
     axs[0, 1].legend()
 
     # Scatter data for 'c'
     axs[1, 0].scatter(*zip(*c_hi_lst), label='c_hi')
     axs[1, 0].scatter(*zip(*c_lo_lst), label='c_lo')
-    axs[1, 0].set_title('c')
+    axs[1, 0].set_title('$c\cdot(Q^2 - Q^2_{\text{c}})$')
     axs[1, 0].legend()
 
     # Scatter data for 'd'
     axs[1, 1].scatter(*zip(*d_hi_lst), label='d_hi')
     axs[1, 1].scatter(*zip(*d_lo_lst), label='d_lo')
-    axs[1, 1].set_title('d')
+    axs[1, 1].set_title('$d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$')
     axs[1, 1].legend()
 
     # Adjust layout
@@ -609,7 +609,7 @@ with PdfPages(outputpdf) as pdf:
         ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
 
         ax.axhline(1.0, color='gray', linestyle='--')
-        ax.set_xlabel('tbin', fontsize=24)
+        ax.set_xlabel('t-$\phi$ bin', fontsize=24)
         ax.set_ylabel('Ratio', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
