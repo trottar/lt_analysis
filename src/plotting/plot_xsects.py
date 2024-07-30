@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:31:13 trottar"
+# Time-stamp: "2024-07-30 15:32:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -620,10 +620,17 @@ with PdfPages(outputpdf) as pdf:
 
             a_fit, b_fit, c_fit, d_fit = popt
 
-            fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+            # Calculate the errors of the fitted parameters
+            perr = np.sqrt(np.diag(pcov))
 
+            # Extract the errors of each parameter
+            a_fit_err, b_fit_err, c_fit_err, d_fit_err = perr            
+            
+            fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+            
             # Plot fitted function
-            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label= \
+                    f'a = {a_fit:.4e}$\pm${a_fit_err:.4e}\nb = {b_fit:.4e}$\pm${b_fit_err:.4e}\nc = {c_fit:.4e}$\pm${c_fit_err:.4e}\nd = {d_fit:.4e}$\pm${d_fit_err:.4e}')
             
             x_len = x_increment+len(x_values)
 
