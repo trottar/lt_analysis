@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 14:49:33 trottar"
+# Time-stamp: "2024-07-30 14:50:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -488,12 +488,12 @@ with PdfPages(outputpdf) as pdf:
 
             if "hi" in df_key:
                 a_hi_lst.append(a_fit)
-                b_hi_lst.append(b_fit*(df['W'][mask][non_zero_mask].tolist()-float(W.replace("p","."))))
+                b_hi_lst.append(b_fit*(df['W'][mask][non_zero_mask][k].to_numpy()-float(W.replace("p","."))))
                 c_hi_lst.append(c_fit)
                 d_hi_lst.append(d_fit)
             else:
                 a_lo_lst.append(a_fit)
-                b_lo_lst.append(b_fit*(df['W'][mask][non_zero_mask].tolist()-float(W.replace("p","."))))
+                b_lo_lst.append(b_fit*(df['W'][mask][non_zero_mask][k].to_numpy()-float(W.replace("p","."))))
                 c_lo_lst.append(c_fit)
                 d_lo_lst.append(d_fit)
                 
