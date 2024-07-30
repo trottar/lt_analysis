@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:25:06 trottar"
+# Time-stamp: "2024-07-30 15:27:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -545,26 +545,26 @@ with PdfPages(outputpdf) as pdf:
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
     # Errorbar data for 'a'
-    axs[0, 0].errorbar(*zip(*a_hi_lst), yerr=a_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', markerfacecolor='none', capsize=2)
-    axs[0, 0].errorbar(*zip(*a_lo_lst), yerr=a_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', markerfacecolor='none', capsize=2)
+    axs[0, 0].errorbar(*zip(*a_hi_lst), yerr=a_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0], markerfacecolor='none', capsize=2)
+    axs[0, 0].errorbar(*zip(*a_lo_lst), yerr=a_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1], markerfacecolor='none', capsize=2)
     axs[0, 0].set_title('a')
     axs[0, 0].legend()
 
     # Errorbar data for 'b'
-    axs[0, 1].errorbar(*zip(*b_hi_lst), yerr=b_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', markerfacecolor='none', capsize=2)
-    axs[0, 1].errorbar(*zip(*b_lo_lst), yerr=b_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', markerfacecolor='none', capsize=2)
+    axs[0, 1].errorbar(*zip(*b_hi_lst), yerr=b_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0], markerfacecolor='none', capsize=2)
+    axs[0, 1].errorbar(*zip(*b_lo_lst), yerr=b_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1], markerfacecolor='none', capsize=2)
     axs[0, 1].set_title('$b\cdot(W - W_{\text{c}})$')
     #axs[0, 1].legend()
 
     # Errorbar data for 'c'
-    axs[1, 0].errorbar(*zip(*c_hi_lst), yerr=c_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', markerfacecolor='none', capsize=2)
-    axs[1, 0].errorbar(*zip(*c_lo_lst), yerr=c_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', markerfacecolor='none', capsize=2)
+    axs[1, 0].errorbar(*zip(*c_hi_lst), yerr=c_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0], markerfacecolor='none', capsize=2)
+    axs[1, 0].errorbar(*zip(*c_lo_lst), yerr=c_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1], markerfacecolor='none', capsize=2)
     axs[1, 0].set_title('$c\cdot(Q^2 - Q^2_{\text{c}})$')
     #axs[1, 0].legend()
 
     # Errorbar data for 'd'
-    axs[1, 1].errorbar(*zip(*d_hi_lst), yerr=d_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', markerfacecolor='none', capsize=2)
-    axs[1, 1].errorbar(*zip(*d_lo_lst), yerr=d_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', markerfacecolor='none', capsize=2)
+    axs[1, 1].errorbar(*zip(*d_hi_lst), yerr=d_hierr_lst, marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0], markerfacecolor='none', capsize=2)
+    axs[1, 1].errorbar(*zip(*d_lo_lst), yerr=d_loerr_lst, marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1], markerfacecolor='none', capsize=2)
     axs[1, 1].set_title('$d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$')
     #axs[1, 1].legend()
 
