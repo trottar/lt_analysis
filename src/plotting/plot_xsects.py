@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:27:33 trottar"
+# Time-stamp: "2024-07-30 15:30:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -496,7 +496,8 @@ with PdfPages(outputpdf) as pdf:
             fitted_values = fit_function(df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
             # Plot fitted function
-            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label= \
+                    f'a = {a_fit:.4f}$\pm${a_fit_err:.4f}\nb = {b_fit:.4f}$\pm${b_fit_err:.4f}\nc = {c_fit:.4f}$\pm${c_fit_err:.4f}\nd = {d_fit:.4f}$\pm${d_fit_err:.4f}')
 
             x_len = x_increment+len(x_values)
 
