@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 14:31:08 trottar"
+# Time-stamp: "2024-07-30 14:32:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -476,11 +476,6 @@ with PdfPages(outputpdf) as pdf:
 
             x_len = x_increment+len(x_values)
 
-        # Add vertical lines every NumPhiBins
-        for x in range(x_increment, x_len, NumPhiBins):
-            ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
-
-
         # Add the equation as text above the legend
         equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
         ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
@@ -556,10 +551,6 @@ with PdfPages(outputpdf) as pdf:
             ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
             
             x_len = x_increment+len(x_values)
-
-        # Add vertical lines every NumPhiBins
-        for x in range(x_increment, x_len, NumPhiBins):
-            ax.axvline(x, color='blue', linestyle='-', linewidth=0.75, alpha=0.5)
 
         # Add the equation as text above the legend
         equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
