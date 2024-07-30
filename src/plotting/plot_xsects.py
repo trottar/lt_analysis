@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 14:32:49 trottar"
+# Time-stamp: "2024-07-30 14:41:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -422,6 +422,16 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
 
     ### HERE 1
+
+    a_hi_lst  = []
+    b_hi_lst  = []
+    c_hi_lst  = []
+    d_hi_lst  = []
+
+    a_lo_lst  = []
+    b_lo_lst  = []
+    c_lo_lst  = []
+    d_lo_lst  = []
     
     def fit_function(Wset, Q2set, a, b, c, d):
         Wval = np.linspace(float(W.replace("p","."))-1.0, float(W.replace("p","."))+1.0, len(Wset))
@@ -476,6 +486,17 @@ with PdfPages(outputpdf) as pdf:
 
             x_len = x_increment+len(x_values)
 
+            if "hi" in df_key:
+                a_hi_lst.append(a_fit)
+                b_hi_lst.append(b_fit)
+                c_hi_lst.append(c_fit)
+                d_hi_lst.append(d_fit)
+            else:
+                a_lo_lst.append(a_fit)
+                b_lo_lst.append(b_fit)
+                c_lo_lst.append(c_fit)
+                d_lo_lst.append(d_fit)
+                
         # Add the equation as text above the legend
         equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
         ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
@@ -497,6 +518,36 @@ with PdfPages(outputpdf) as pdf:
         pdf.savefig(fig, bbox_inches='tight')
 
         j+=1
+
+    # Create a figure with 4 subplots
+    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+
+    # Plot data for 'a'
+    axs[0, 0].plot(a_hi_lst, label='a_hi')
+    axs[0, 0].plot(a_lo_lst, label='a_lo')
+    axs[0, 0].set_title('a')
+    axs[0, 0].legend()
+
+    # Plot data for 'b'
+    axs[0, 1].plot(b_hi_lst, label='b_hi')
+    axs[0, 1].plot(b_lo_lst, label='b_lo')
+    axs[0, 1].set_title('b')
+    axs[0, 1].legend()
+
+    # Plot data for 'c'
+    axs[1, 0].plot(c_hi_lst, label='c_hi')
+    axs[1, 0].plot(c_lo_lst, label='c_lo')
+    axs[1, 0].set_title('c')
+    axs[1, 0].legend()
+
+    # Plot data for 'd'
+    axs[1, 1].plot(d_hi_lst, label='d_hi')
+    axs[1, 1].plot(d_lo_lst, label='d_lo')
+    axs[1, 1].set_title('d')
+    axs[1, 1].legend()
+
+    # Adjust layout
+    plt.tight_layout()
 
     ### HERE 2
                 
