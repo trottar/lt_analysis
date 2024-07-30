@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:05:27 trottar"
+# Time-stamp: "2024-07-30 15:06:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -487,17 +487,17 @@ with PdfPages(outputpdf) as pdf:
             x_len = x_increment+len(x_values)
 
 
-            print("!!!!!!!!!", df['t'], df['t'][k])
+            print("!!!!!!!!!", df['t'], df['t'][x_increment])
             if "hi" in df_key:
-                a_hi_lst.append((df['t'][k], a_fit))
-                b_hi_lst.append((df['t'][k], b_fit))
-                c_hi_lst.append((df['t'][k], c_fit))
-                d_hi_lst.append((df['t'][k], d_fit))
+                a_hi_lst.append((df['t'][x_increment], a_fit))
+                b_hi_lst.append((df['t'][x_increment], b_fit))
+                c_hi_lst.append((df['t'][x_increment], c_fit))
+                d_hi_lst.append((df['t'][x_increment], d_fit))
             else:
-                a_lo_lst.append((df['t'][k], a_fit))
-                b_lo_lst.append((df['t'][k], b_fit))
-                c_lo_lst.append((df['t'][k], c_fit))
-                d_lo_lst.append((df['t'][k], d_fit))
+                a_lo_lst.append((df['t'][x_increment], a_fit))
+                b_lo_lst.append((df['t'][x_increment], b_fit))
+                c_lo_lst.append((df['t'][x_increment], c_fit))
+                d_lo_lst.append((df['t'][x_increment], d_fit))
                 
         # Add the equation as text above the legend
         equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
