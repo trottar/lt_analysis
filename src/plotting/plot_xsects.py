@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 14:41:08 trottar"
+# Time-stamp: "2024-07-30 14:42:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -548,6 +548,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Adjust layout
     plt.tight_layout()
+    pdf.savefig(fig, bbox_inches='tight')
 
     ### HERE 2
                 
