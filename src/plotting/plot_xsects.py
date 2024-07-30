@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 14:03:32 trottar"
+# Time-stamp: "2024-07-30 14:11:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -420,8 +420,8 @@ with PdfPages(outputpdf) as pdf:
     ### HERE 1
     
     def fit_function(Wset, Q2set, a, b, c, d):
-        Wval = np.linspace(min(Wset)-0.1, max(Wset)+0.1, len(Wset))
-        Q2val = np.linspace(min(Q2set)-0.1, max(Q2set)+0.1, len(Q2set))
+        Wval = np.linspace(min(Wset), max(Wset), len(Wset))
+        Q2val = np.linspace(min(Q2set), max(Q2set), len(Q2set))
         return a + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
 
     # Loop through t bins and plot data
