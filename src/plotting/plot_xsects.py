@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-30 15:52:14 trottar"
+# Time-stamp: "2024-07-31 04:07:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -554,7 +554,7 @@ with PdfPages(outputpdf) as pdf:
                 
     def fit_function(phival, thetaval, a, b, c, d):
         #phival = np.linspace(0.0, 360, len(thetaval)) 
-        return a + b*(np.sin(thetaval)**2) + c*(np.sin(thetaval)*np.cos(phival)) + d*((np.sin(thetaval)**2)*np.cos(2*phival))
+        return 1 + b*(np.sin(thetaval)**2) + c*(np.sin(thetaval)*np.cos(phival)) + d*((np.sin(thetaval)**2)*np.cos(2*phival))
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
