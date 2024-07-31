@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-31 04:07:15 trottar"
+# Time-stamp: "2024-07-31 04:44:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -551,7 +551,17 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')
 
     ### HERE 2
-                
+
+    a_hi_lst  = []
+    b_hi_lst  = []
+    c_hi_lst  = []
+    d_hi_lst  = []
+    
+    a_lo_lst  = []
+    b_lo_lst  = []
+    c_lo_lst  = []
+    d_lo_lst  = []
+    
     def fit_function(phival, thetaval, a, b, c, d):
         #phival = np.linspace(0.0, 360, len(thetaval)) 
         return 1 + b*(np.sin(thetaval)**2) + c*(np.sin(thetaval)*np.cos(phival)) + d*((np.sin(thetaval)**2)*np.cos(2*phival))
@@ -603,6 +613,17 @@ with PdfPages(outputpdf) as pdf:
             ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
             
             x_len = x_increment+len(x_values)
+            
+            if "hi" in df_key:
+                a_hi_lst.append((df['t'][x_increment], a_fit))
+                b_hi_lst.append((df['t'][x_increment], b_fit))
+                c_hi_lst.append((df['t'][x_increment], c_fit))
+                d_hi_lst.append((df['t'][x_increment], d_fit))
+            else:
+                a_lo_lst.append((df['t'][x_increment], a_fit))
+                b_lo_lst.append((df['t'][x_increment], b_fit))
+                c_lo_lst.append((df['t'][x_increment], c_fit))
+                d_lo_lst.append((df['t'][x_increment], d_fit))
 
         # Add the equation as text above the legend
         equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
@@ -625,7 +646,38 @@ with PdfPages(outputpdf) as pdf:
         pdf.savefig(fig, bbox_inches='tight')
 
         j+=1
-    
+
+    # Create a figure with 4 subplots
+    fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+
+    # Scatter data for 'a'
+    axs[0, 0].scatter(*zip(*a_hi_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[0, 0].scatter(*zip(*a_lo_lst), marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
+    axs[0, 0].set_title('a')
+    axs[0, 0].legend()
+
+    # Scatter data for 'b'
+    axs[0, 1].scatter(*zip(*b_hi_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[0, 1].scatter(*zip(*b_lo_lst), marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
+    axs[0, 1].set_title('$b\cdot\sin^2(\theta)$')
+    #axs[0, 1].legend()
+
+    # Scatter data for 'c'
+    axs[1, 0].scatter(*zip(*c_hi_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[1, 0].scatter(*zip(*c_lo_lst), marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
+    axs[1, 0].set_title('$c\cdot\sin(\theta) \cos(\phi)$')
+    #axs[1, 0].legend()
+
+    # Scatter data for 'd'
+    axs[1, 1].scatter(*zip(*d_hi_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[1, 1].scatter(*zip(*d_lo_lst), marker=markers[1], linestyle='None', label='Low $\epsilon$', color=colors[1])
+    axs[1, 1].set_title('$d\cdot\sin^2(\theta) \cos(2\phi)$')
+    #axs[1, 1].legend()
+
+    # Adjust layout
+    plt.tight_layout()
+    pdf.savefig(fig, bbox_inches='tight')
+        
     ##
                 
     
