@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-01 23:44:51 trottar"
+# Time-stamp: "2024-08-01 23:46:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -993,8 +993,8 @@ with PdfPages(outputpdf) as pdf:
     for i, df_key in enumerate(['sep_file']):
         df = file_df_dict[df_key]
 
-        ratios = df['x_real']/df['x_mod']
-        errors = df['dx_real']/df['x_mod']
+        ratios = df['sigL']
+        errors = df['dsigL']
         non_zero_mask = (ratios != 0) & (errors != 0)
         ratios = ratios[non_zero_mask]
         errors = errors[non_zero_mask]
@@ -1093,8 +1093,8 @@ with PdfPages(outputpdf) as pdf:
     for i, df_key in enumerate(['sep_file']):
         df = file_df_dict[df_key]
 
-        ratios = df['x_real']/df['x_mod']
-        errors = df['dx_real']/df['x_mod']
+        ratios = df['sigL']
+        errors = df['dsigL']
         non_zero_mask = (ratios != 0) & (errors != 0)
         ratios = ratios[non_zero_mask]
         errors = errors[non_zero_mask]        
