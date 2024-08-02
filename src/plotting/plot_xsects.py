@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-02 09:57:24 trottar"
+# Time-stamp: "2024-08-02 10:02:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -995,10 +995,8 @@ with PdfPages(outputpdf) as pdf:
         ratios = df['sigL']
         errors = df['dsigL']
 
-        x_increment = j+k*NumPhiBins
-
         # Use x_increment for x-axis values
-        x_values = np.arange(x_increment, x_increment+len(ratios))
+        x_values = np.arange(0, len(ratios))
 
         ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
@@ -1015,13 +1013,13 @@ with PdfPages(outputpdf) as pdf:
         fitted_values = fit_function(df['W'], df['Q2'], b_fit, c_fit, d_fit)
 
         # Plot fitted function
-        ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'b = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+        ax.plot(range(0, len(ratios)), fitted_values, epsilon_fit_color, label=f'b = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
         x_len = x_increment+len(x_values)
 
-        b_lst.append((df['t'][x_increment], b_fit))
-        c_lst.append((df['t'][x_increment], c_fit))
-        d_lst.append((df['t'][x_increment], d_fit))
+        b_lst.append((df['t'], b_fit))
+        c_lst.append((df['t'], c_fit))
+        d_lst.append((df['t'], d_fit))
 
     # Add the equation as text above the legend
     equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
@@ -1085,10 +1083,8 @@ with PdfPages(outputpdf) as pdf:
         ratios = df['sigL']
         errors = df['dsigL']
 
-        x_increment = j+k*NumPhiBins
-
         # Use x_increment for x-axis values
-        x_values = np.arange(x_increment, x_increment+len(ratios))
+        x_values = np.arange(0, len(ratios))
 
         ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
@@ -1105,13 +1101,13 @@ with PdfPages(outputpdf) as pdf:
         fitted_values = fit_function(df['phi'], df['th_cm'], b_fit, c_fit, d_fit)
 
         # Plot fitted function
-        ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'b = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+        ax.plot(range(0, len(ratios)), fitted_values, epsilon_fit_color, label=f'b = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
         x_len = x_increment+len(x_values)
 
-        b_lst.append((df['t'][x_increment], b_fit))
-        c_lst.append((df['t'][x_increment], c_fit))
-        d_lst.append((df['t'][x_increment], d_fit))
+        b_lst.append((df['t'], b_fit))
+        c_lst.append((df['t'], c_fit))
+        d_lst.append((df['t'], d_fit))
 
     # Add the equation as text above the legend
     equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
