@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-02 09:55:51 trottar"
+# Time-stamp: "2024-08-02 09:57:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1006,7 +1006,7 @@ with PdfPages(outputpdf) as pdf:
 
         def fit_func(data, b, c, d):
             Wval, Q2val = data
-            return fit_function(Wval, Q2val, a, b, c, d)
+            return fit_function(Wval, Q2val, b, c, d)
 
         popt, pcov = curve_fit(fit_func, (df['W'], df['Q2']), ratios, sigma=errors, absolute_sigma=True)
 
