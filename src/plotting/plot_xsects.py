@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-02 09:48:29 trottar"
+# Time-stamp: "2024-08-02 09:54:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -976,12 +976,11 @@ with PdfPages(outputpdf) as pdf:
 
     ### HERE 1
 
-    a_lst  = []
     b_lst  = []
     c_lst  = []
     d_lst  = []
     
-    def fit_function(Wset, Q2set, a, b, c, d):
+    def fit_function(Wset, Q2set, b, c, d):
         Wval = np.linspace(float(W.replace("p","."))-0.5, float(W.replace("p","."))+0.5, len(Wset))
         Q2val = np.linspace(float(Q2.replace("p","."))-0.5, float(Q2.replace("p","."))+0.5, len(Q2set))
         return 1 + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
@@ -1005,22 +1004,21 @@ with PdfPages(outputpdf) as pdf:
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                     markerfacecolor='none', capsize=2)
 
-        def fit_func(data, a, b, c, d):
+        def fit_func(data, b, c, d):
             Wval, Q2val = data
             return fit_function(Wval, Q2val, a, b, c, d)
 
         popt, pcov = curve_fit(fit_func, (df['W'], df['Q2']), ratios, sigma=errors, absolute_sigma=True)
 
-        a_fit, b_fit, c_fit, d_fit = popt
+        b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['W'], df['Q2'], a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['W'], df['Q2'], b_fit, c_fit, d_fit)
 
         # Plot fitted function
-        ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+        ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'b = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
         x_len = x_increment+len(x_values)
 
-        a_lst.append((df['t'][x_increment], a_fit))
         b_lst.append((df['t'][x_increment], b_fit))
         c_lst.append((df['t'][x_increment], c_fit))
         d_lst.append((df['t'][x_increment], d_fit))
@@ -1048,23 +1046,18 @@ with PdfPages(outputpdf) as pdf:
     # Create a figure with 4 subplots
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
-    # Scatter data for 'a'
-    axs[0, 0].scatter(*zip(*a_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
-    axs[0, 0].set_title('a')
-    axs[0, 0].legend()
-
     # Scatter data for 'b'
-    axs[0, 1].scatter(*zip(*b_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[0, 1].scatter(*zip(*b_lst), marker=markers[0], linestyle='None', label=None, color=colors[0])
     axs[0, 1].set_title('$b\cdot(W - W_{\text{c}})$')
     #axs[0, 1].legend()
 
     # Scatter data for 'c'
-    axs[1, 0].scatter(*zip(*c_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[1, 0].scatter(*zip(*c_lst), marker=markers[0], linestyle='None', label=None, color=colors[0])
     axs[1, 0].set_title('$c\cdot(Q^2 - Q^2_{\text{c}})$')
     #axs[1, 0].legend()
 
     # Scatter data for 'd'
-    axs[1, 1].scatter(*zip(*d_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[1, 1].scatter(*zip(*d_lst), marker=markers[0], linestyle='None', label=None, color=colors[0])
     axs[1, 1].set_title('$d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$')
     #axs[1, 1].legend()
 
@@ -1074,12 +1067,11 @@ with PdfPages(outputpdf) as pdf:
 
     ### HERE 2
 
-    a_lst  = []
     b_lst  = []
     c_lst  = []
     d_lst  = []
         
-    def fit_function(phival, thetaval, a, b, c, d):
+    def fit_function(phival, thetaval, b, c, d):
         #phival = np.linspace(0.0, 360, len(thetaval)) 
         return 1 + b*(np.sin(thetaval)**2) + c*(np.sin(thetaval)*np.cos(phival)) + d*((np.sin(thetaval)**2)*np.cos(2*phival))
 
@@ -1104,20 +1096,19 @@ with PdfPages(outputpdf) as pdf:
 
         def fit_func(data, a, b, c, d):
             phival, thetaval = data
-            return fit_function(phival, thetaval, a, b, c, d)
+            return fit_function(phival, thetaval, b, c, d)
 
         popt, pcov = curve_fit(fit_func, (df['phi'].to_numpy(), df['th_cm'].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['phi'], df['th_cm'], a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['phi'], df['th_cm'], b_fit, c_fit, d_fit)
 
         # Plot fitted function
-        ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+        ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'b = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
         x_len = x_increment+len(x_values)
 
-        a_lst.append((df['t'][x_increment], a_fit))
         b_lst.append((df['t'][x_increment], b_fit))
         c_lst.append((df['t'][x_increment], c_fit))
         d_lst.append((df['t'][x_increment], d_fit))
@@ -1145,23 +1136,18 @@ with PdfPages(outputpdf) as pdf:
     # Create a figure with 4 subplots
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
-    # Scatter data for 'a'
-    axs[0, 0].scatter(*zip(*a_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
-    axs[0, 0].set_title('a')
-    axs[0, 0].legend()
-
     # Scatter data for 'b'
-    axs[0, 1].scatter(*zip(*b_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[0, 1].scatter(*zip(*b_lst), marker=markers[0], linestyle='None', label=None, color=colors[0])
     axs[0, 1].set_title('$b\cdot\sin^2(\theta)$')
     #axs[0, 1].legend()
 
     # Scatter data for 'c'
-    axs[1, 0].scatter(*zip(*c_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[1, 0].scatter(*zip(*c_lst), marker=markers[0], linestyle='None', label=None, color=colors[0])
     axs[1, 0].set_title('$c\cdot\sin(\theta) \cos(\phi)$')
     #axs[1, 0].legend()
 
     # Scatter data for 'd'
-    axs[1, 1].scatter(*zip(*d_lst), marker=markers[0], linestyle='None', label='High $\epsilon$', color=colors[0])
+    axs[1, 1].scatter(*zip(*d_lst), marker=markers[0], linestyle='None', label=None, color=colors[0])
     axs[1, 1].set_title('$d\cdot\sin^2(\theta) \cos(2\phi)$')
     #axs[1, 1].legend()
 
