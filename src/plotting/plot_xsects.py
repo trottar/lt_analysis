@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-02 10:02:21 trottar"
+# Time-stamp: "2024-08-02 10:06:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -995,7 +995,6 @@ with PdfPages(outputpdf) as pdf:
         ratios = df['sigL']
         errors = df['dsigL']
 
-        # Use x_increment for x-axis values
         x_values = np.arange(0, len(ratios))
 
         ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
@@ -1015,7 +1014,7 @@ with PdfPages(outputpdf) as pdf:
         # Plot fitted function
         ax.plot(range(0, len(ratios)), fitted_values, epsilon_fit_color, label=f'b = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
-        x_len = x_increment+len(x_values)
+        x_len = len(x_values)
 
         b_lst.append((df['t'], b_fit))
         c_lst.append((df['t'], c_fit))
@@ -1033,8 +1032,8 @@ with PdfPages(outputpdf) as pdf:
     ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
     # Set integer ticks on x-axis
-    ax.set_xticks(range(x_increment, x_len, 2))
-    ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
+    ax.set_xticks(range(0, x_len, 2))
+    ax.set_xticklabels(range(1, x_len + 1, 2))  # Start from 1 instead of 0
 
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
@@ -1083,7 +1082,6 @@ with PdfPages(outputpdf) as pdf:
         ratios = df['sigL']
         errors = df['dsigL']
 
-        # Use x_increment for x-axis values
         x_values = np.arange(0, len(ratios))
 
         ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
@@ -1103,7 +1101,7 @@ with PdfPages(outputpdf) as pdf:
         # Plot fitted function
         ax.plot(range(0, len(ratios)), fitted_values, epsilon_fit_color, label=f'b = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
-        x_len = x_increment+len(x_values)
+        x_len = len(x_values)
 
         b_lst.append((df['t'], b_fit))
         c_lst.append((df['t'], c_fit))
@@ -1121,8 +1119,8 @@ with PdfPages(outputpdf) as pdf:
     ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
     # Set integer ticks on x-axis
-    ax.set_xticks(range(x_increment, x_len, 2))
-    ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
+    ax.set_xticks(range(0, x_len, 2))
+    ax.set_xticklabels(range(1, x_len + 1, 2))  # Start from 1 instead of 0
 
     # Add grid
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
