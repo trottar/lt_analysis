@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-01 23:42:31 trottar"
+# Time-stamp: "2024-08-01 23:44:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -986,74 +986,67 @@ with PdfPages(outputpdf) as pdf:
         Q2val = np.linspace(float(Q2.replace("p","."))-0.5, float(Q2.replace("p","."))+0.5, len(Q2set))
         return 1 + b*(Wval-Wset) + c*(Q2val-Q2set) + d*(Wval-Wset)*(Q2val-Q2set)
 
+    # Create a single figure and axis object for all phi bins
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)        
     # Loop through t bins and plot data
-    for k in range(NumtBins):
-        j=0
-        # Create a single figure and axis object for all phi bins
-        fig, ax = plt.subplots(figsize=(12, 8))
-        ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)        
-        # Loop through t bins and plot data
-        for i, df_key in enumerate(['sep_file']):
-            df = file_df_dict[df_key]
+    for i, df_key in enumerate(['sep_file']):
+        df = file_df_dict[df_key]
 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-                
-            ratios = df['x_real'][mask]/df['x_mod'][mask]
-            errors = df['dx_real'][mask]/df['x_mod'][mask]
-            non_zero_mask = (ratios != 0) & (errors != 0)
-            ratios = ratios[non_zero_mask]
-            errors = errors[non_zero_mask]
+        ratios = df['x_real']/df['x_mod']
+        errors = df['dx_real']/df['x_mod']
+        non_zero_mask = (ratios != 0) & (errors != 0)
+        ratios = ratios[non_zero_mask]
+        errors = errors[non_zero_mask]
 
-            x_increment = j+k*NumPhiBins
-            
-            # Use x_increment for x-axis values
-            x_values = np.arange(x_increment, x_increment+len(ratios))
+        x_increment = j+k*NumPhiBins
 
-            ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
-                        label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
-                        markerfacecolor='none', capsize=2)
+        # Use x_increment for x-axis values
+        x_values = np.arange(x_increment, x_increment+len(ratios))
 
-            def fit_func(data, a, b, c, d):
-                Wval, Q2val = data
-                return fit_function(Wval, Q2val, a, b, c, d)
+        ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
+                    label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
+                    markerfacecolor='none', capsize=2)
 
-            popt, pcov = curve_fit(fit_func, (df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
+        def fit_func(data, a, b, c, d):
+            Wval, Q2val = data
+            return fit_function(Wval, Q2val, a, b, c, d)
 
-            a_fit, b_fit, c_fit, d_fit = popt
+        popt, pcov = curve_fit(fit_func, (df['W'][non_zero_mask], df['Q2'][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
 
-            fitted_values = fit_function(df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+        a_fit, b_fit, c_fit, d_fit = popt
 
-            # Plot fitted function
-            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+        fitted_values = fit_function(df['W'][non_zero_mask], df['Q2'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
-            x_len = x_increment+len(x_values)
+        # Plot fitted function
+        ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
-            a_lst.append((df['t'][x_increment], a_fit))
-            b_lst.append((df['t'][x_increment], b_fit))
-            c_lst.append((df['t'][x_increment], c_fit))
-            d_lst.append((df['t'][x_increment], d_fit))
-                
-        # Add the equation as text above the legend
-        equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
-        ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
+        x_len = x_increment+len(x_values)
 
-        ax.axhline(1.0, color='gray', linestyle='--')
-        ax.set_xlabel('t-$\phi$ bin', fontsize=24)
-        ax.set_ylabel('Ratio', fontsize=24)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)        
-        ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+        a_lst.append((df['t'][x_increment], a_fit))
+        b_lst.append((df['t'][x_increment], b_fit))
+        c_lst.append((df['t'][x_increment], c_fit))
+        d_lst.append((df['t'][x_increment], d_fit))
 
-        # Set integer ticks on x-axis
-        ax.set_xticks(range(x_increment, x_len, 2))
-        ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
+    # Add the equation as text above the legend
+    equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
+    ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
 
-        # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-        plt.tight_layout()
-        pdf.savefig(fig, bbox_inches='tight')
+    ax.axhline(1.0, color='gray', linestyle='--')
+    ax.set_xlabel('t-$\phi$ bin', fontsize=24)
+    ax.set_ylabel('Ratio', fontsize=24)
+    ax.tick_params(axis='x', labelsize=16)
+    ax.tick_params(axis='y', labelsize=16)        
+    ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
-        j+=1
+    # Set integer ticks on x-axis
+    ax.set_xticks(range(x_increment, x_len, 2))
+    ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
+
+    # Add grid
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure with 4 subplots
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
@@ -1093,74 +1086,67 @@ with PdfPages(outputpdf) as pdf:
         #phival = np.linspace(0.0, 360, len(thetaval)) 
         return 1 + b*(np.sin(thetaval)**2) + c*(np.sin(thetaval)*np.cos(phival)) + d*((np.sin(thetaval)**2)*np.cos(2*phival))
 
+    # Create a single figure and axis object for all phi bins
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
     # Loop through t bins and plot data
-    for k in range(NumtBins):
-        j=0
-        # Create a single figure and axis object for all phi bins
-        fig, ax = plt.subplots(figsize=(12, 8))
-        ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
-        # Loop through t bins and plot data
-        for i, df_key in enumerate(['sep_file']):
-            df = file_df_dict[df_key]
+    for i, df_key in enumerate(['sep_file']):
+        df = file_df_dict[df_key]
 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
+        ratios = df['x_real']/df['x_mod']
+        errors = df['dx_real']/df['x_mod']
+        non_zero_mask = (ratios != 0) & (errors != 0)
+        ratios = ratios[non_zero_mask]
+        errors = errors[non_zero_mask]        
 
-            ratios = df['x_real'][mask]/df['x_mod'][mask]
-            errors = df['dx_real'][mask]/df['x_mod'][mask]
-            non_zero_mask = (ratios != 0) & (errors != 0)
-            ratios = ratios[non_zero_mask]
-            errors = errors[non_zero_mask]        
+        x_increment = j+k*NumPhiBins
 
-            x_increment = j+k*NumPhiBins
-            
-            # Use x_increment for x-axis values
-            x_values = np.arange(x_increment, x_increment+len(ratios))
-            
-            ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
-                        label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
-                        markerfacecolor='none', capsize=2)
+        # Use x_increment for x-axis values
+        x_values = np.arange(x_increment, x_increment+len(ratios))
 
-            def fit_func(data, a, b, c, d):
-                phival, thetaval = data
-                return fit_function(phival, thetaval, a, b, c, d)
+        ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
+                    label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
+                    markerfacecolor='none', capsize=2)
 
-            popt, pcov = curve_fit(fit_func, (df['phi'][mask][non_zero_mask].to_numpy(), df['th_cm'][mask][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
+        def fit_func(data, a, b, c, d):
+            phival, thetaval = data
+            return fit_function(phival, thetaval, a, b, c, d)
 
-            a_fit, b_fit, c_fit, d_fit = popt
+        popt, pcov = curve_fit(fit_func, (df['phi'][non_zero_mask].to_numpy(), df['th_cm'][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
 
-            fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+        a_fit, b_fit, c_fit, d_fit = popt
 
-            # Plot fitted function
-            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
-            
-            x_len = x_increment+len(x_values)
-            
-            a_lst.append((df['t'][x_increment], a_fit))
-            b_lst.append((df['t'][x_increment], b_fit))
-            c_lst.append((df['t'][x_increment], c_fit))
-            d_lst.append((df['t'][x_increment], d_fit))
+        fitted_values = fit_function(df['phi'][non_zero_mask], df['th_cm'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
-        # Add the equation as text above the legend
-        equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
-        ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
+        # Plot fitted function
+        ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
 
-        ax.axhline(1.0, color='gray', linestyle='--')
-        ax.set_xlabel('t-$\phi$ bin', fontsize=24)
-        ax.set_ylabel('Ratio', fontsize=24)
-        ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)        
-        ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+        x_len = x_increment+len(x_values)
 
-        # Set integer ticks on x-axis
-        ax.set_xticks(range(x_increment, x_len, 2))
-        ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
+        a_lst.append((df['t'][x_increment], a_fit))
+        b_lst.append((df['t'][x_increment], b_fit))
+        c_lst.append((df['t'][x_increment], c_fit))
+        d_lst.append((df['t'][x_increment], d_fit))
 
-        # Add grid
-        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-        plt.tight_layout()
-        pdf.savefig(fig, bbox_inches='tight')
+    # Add the equation as text above the legend
+    equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
+    ax.text(1.05, 1.02, equation, transform=ax.transAxes, fontsize=10, verticalalignment='bottom')
 
-        j+=1
+    ax.axhline(1.0, color='gray', linestyle='--')
+    ax.set_xlabel('t-$\phi$ bin', fontsize=24)
+    ax.set_ylabel('Ratio', fontsize=24)
+    ax.tick_params(axis='x', labelsize=16)
+    ax.tick_params(axis='y', labelsize=16)        
+    ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+
+    # Set integer ticks on x-axis
+    ax.set_xticks(range(x_increment, x_len, 2))
+    ax.set_xticklabels(range(x_increment+1, x_len + 1, 2))  # Start from 1 instead of 0
+
+    # Add grid
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+    plt.tight_layout()
+    pdf.savefig(fig, bbox_inches='tight')
 
     # Create a figure with 4 subplots
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
