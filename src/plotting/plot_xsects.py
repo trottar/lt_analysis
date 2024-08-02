@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-02 09:54:37 trottar"
+# Time-stamp: "2024-08-02 09:55:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1094,7 +1094,7 @@ with PdfPages(outputpdf) as pdf:
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                     markerfacecolor='none', capsize=2)
 
-        def fit_func(data, a, b, c, d):
+        def fit_func(data, b, c, d):
             phival, thetaval = data
             return fit_function(phival, thetaval, b, c, d)
 
