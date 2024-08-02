@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-02 02:28:51 trottar"
+# Time-stamp: "2024-08-02 09:48:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -995,9 +995,6 @@ with PdfPages(outputpdf) as pdf:
 
         ratios = df['sigL']
         errors = df['dsigL']
-        non_zero_mask = (ratios != 0) & (errors != 0)
-        ratios = ratios[non_zero_mask]
-        errors = errors[non_zero_mask]
 
         x_increment = j+k*NumPhiBins
 
@@ -1012,11 +1009,11 @@ with PdfPages(outputpdf) as pdf:
             Wval, Q2val = data
             return fit_function(Wval, Q2val, a, b, c, d)
 
-        popt, pcov = curve_fit(fit_func, (df['W'][non_zero_mask], df['Q2'][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
+        popt, pcov = curve_fit(fit_func, (df['W'], df['Q2']), ratios, sigma=errors, absolute_sigma=True)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['W'][non_zero_mask], df['Q2'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['W'], df['Q2'], a_fit, b_fit, c_fit, d_fit)
 
         # Plot fitted function
         ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
@@ -1095,9 +1092,6 @@ with PdfPages(outputpdf) as pdf:
 
         ratios = df['sigL']
         errors = df['dsigL']
-        non_zero_mask = (ratios != 0) & (errors != 0)
-        ratios = ratios[non_zero_mask]
-        errors = errors[non_zero_mask]        
 
         x_increment = j+k*NumPhiBins
 
@@ -1112,11 +1106,11 @@ with PdfPages(outputpdf) as pdf:
             phival, thetaval = data
             return fit_function(phival, thetaval, a, b, c, d)
 
-        popt, pcov = curve_fit(fit_func, (df['phi'][non_zero_mask].to_numpy(), df['th_cm'][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
+        popt, pcov = curve_fit(fit_func, (df['phi'].to_numpy(), df['th_cm'].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
 
         a_fit, b_fit, c_fit, d_fit = popt
 
-        fitted_values = fit_function(df['phi'][non_zero_mask], df['th_cm'][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
+        fitted_values = fit_function(df['phi'], df['th_cm'], a_fit, b_fit, c_fit, d_fit)
 
         # Plot fitted function
         ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
