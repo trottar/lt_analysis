@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-01 23:46:36 trottar"
+# Time-stamp: "2024-08-02 02:28:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -988,7 +988,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Create a single figure and axis object for all phi bins
     fig, ax = plt.subplots(figsize=(12, 8))
-    ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)        
+    ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)        
     # Loop through t bins and plot data
     for i, df_key in enumerate(['sep_file']):
         df = file_df_dict[df_key]
@@ -1088,7 +1088,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Create a single figure and axis object for all phi bins
     fig, ax = plt.subplots(figsize=(12, 8))
-    ax.set_title("t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(t_bin_centers[k], float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+    ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
     # Loop through t bins and plot data
     for i, df_key in enumerate(['sep_file']):
         df = file_df_dict[df_key]
