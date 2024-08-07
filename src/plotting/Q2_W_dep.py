@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:09:34 trottar"
+# Time-stamp: "2024-08-07 12:10:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -68,14 +68,14 @@ settings = {
         'W': '2p95',
         'LOEPS': 0.2477,
         'HIEPS': 0.7864,
-        'inp_dir': CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_9/2024July25_H17M05S03" # i=1
+        'inp_dir': "trial_9/2024July25_H17M05S03" # i=1
     },
     'set_2': {
         'Q2': '3p0',
         'W': '3p14',
         'LOEPS': 0.3935,
         'HIEPS': 0.6668,
-        'inp_dir': CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_30/2024July25_H17M19S51" # i=1        
+        'inp_dir': "trial_30/2024July25_H17M19S51" # i=1        
     },    
     'set_3': {
         'Q2': '3p0',
@@ -96,7 +96,7 @@ settings = {
         'W': '3p02',
         'LOEPS': 0.1838,
         'HIEPS': 0.5291,
-        'inp_dir': CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_14/2024July25_H16M26S50" # i=1        
+        'inp_dir': "trial_14/2024July25_H16M26S50" # i=1        
     }
 }
 
@@ -107,7 +107,9 @@ for key, values in settings.items():
         Q2, W, LOEPS, HIEPS, inp_dir = values.values()
     else:
         break
-        
+
+    inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+inp_dir
+    
     ###############################################################################################################################################
     '''
     Import model parameterization
