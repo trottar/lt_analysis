@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:22:00 trottar"
+# Time-stamp: "2024-08-07 14:24:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -441,7 +441,7 @@ with PdfPages(outputpdf) as pdf:
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
 
-        tolerance = 0.3
+        tolerance = 0.1
         
         if (abs(df['Q2'] - 2.115) < tolerance).any():
             mask = abs(df['Q2'] - 2.115) < 0.5
@@ -472,7 +472,7 @@ with PdfPages(outputpdf) as pdf:
         y_fit = exp_func(x_fit, *popt)
 
         # Plot the fit
-        ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*Q^2)')
+        ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
         
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
