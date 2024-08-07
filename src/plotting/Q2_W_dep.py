@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:15:27 trottar"
+# Time-stamp: "2024-08-07 12:15:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -106,7 +106,7 @@ for key, values in settings.items():
     if key in ('set_1', 'set_3', 'set_5'):
         Q2, W, LOEPS, HIEPS, inp_dir = values.values()
     else:
-        break
+        continue
 
     inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+inp_dir
     
