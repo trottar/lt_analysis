@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:24:26 trottar"
+# Time-stamp: "2024-08-07 12:26:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -320,8 +320,10 @@ for key in merged_dict.keys():
 print("\n\n")
 
 # Redefine tmin and tmax
-tmin = merged_dict['setting_df'].iloc[0]['TMIN']
-tmax = merged_dict['setting_df'].iloc[0]['TMAX']
+#tmin = merged_dict['setting_df'].iloc[0]['TMIN']
+#tmax = merged_dict['setting_df'].iloc[0]['TMAX']
+tmin = 0.1
+tmax = 0.2
 
 
 # Create a PdfPages object to manage the PDF file
