@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:48:22 trottar"
+# Time-stamp: "2024-08-07 12:50:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -329,8 +329,12 @@ print("\n\n")
 # Redefine tmin and tmax
 #tmin = merged_dict['setting_df'].iloc[0]['TMIN']
 #tmax = merged_dict['setting_df'].iloc[0]['TMAX']
-tmin = 0.1
-tmax = 0.2
+# Q2=2.115+3.0
+#tmin = 0.1
+#tmax = 0.2
+# Q2=3.0+5.5
+tmin = 0.4
+tmax = 0.5
 
 
 # Create a PdfPages object to manage the PDF file
@@ -452,7 +456,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
         df = merged_dict["sep_file"]
         df = df[(df['t'] >= tmin) & (df['t'] <= tmax)]
-        cut_str = f"t = [{df['t'].min():.3f}, {df['t'].max():.3f}]"
+        cut_str = f"t = [{tmin:.3f}, {tmax:.3f}]"
 
         W_ref = 3.0 # Scale data to W=3.0 GeV
         n = -2.0
