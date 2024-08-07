@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:56:50 trottar"
+# Time-stamp: "2024-08-07 12:02:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -99,7 +99,10 @@ comb_dict = {}
 
 for key, values in comb_dict.items():
     if key == ('set_1' or 'set_2' or 'set_5'):
-        Q2, W, LOEPS, HIEPS = values.values()
+        Q2 = values['Q2']
+        W = values['W']
+        LOEPS = values['LOEPS']
+        HIEPS = values['HIEPS']
 
     if Q2 == "2p1" and W == "2p95":
         inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_9/2024July25_H17M05S03"
