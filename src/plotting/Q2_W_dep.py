@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:29:32 trottar"
+# Time-stamp: "2024-08-07 11:32:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -409,7 +409,8 @@ with PdfPages(outputpdf) as pdf:
         ax.set_xlabel('$Q^2$')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
-        ax.tick_params(axis='y', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
+        ax.set_xlim(df['Q2'].min-0.1, df['Q2'].max-0.1)
         #ax.legend(fontsize=24)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
