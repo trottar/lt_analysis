@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:27:08 trottar"
+# Time-stamp: "2024-08-07 14:28:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -330,8 +330,8 @@ for key in merged_dict.keys():
 print("\n\n")
 
 # Redefine tmin and tmax
-tmin = merged_dict['setting_df'].iloc[0]['TMIN']
-tmax = merged_dict['setting_df'].iloc[0]['TMAX']
+tmin = merged_dict['setting_df'].iloc[0]['TMIN'].min()
+tmax = merged_dict['setting_df'].iloc[0]['TMAX'].max()
 # Q2=2.115+3.0, 1
 #tmin = 0.15
 #tmax = 0.2
