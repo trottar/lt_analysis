@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 13:16:30 trottar"
+# Time-stamp: "2024-08-07 13:17:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -469,7 +469,7 @@ with PdfPages(outputpdf) as pdf:
         ax.errorbar(df['Q2'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=cut_str, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
 
         # Perform exponential fit
-        popt, _ = curve_fit(exp_func, df['Q2'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 1000)
+        popt, _ = curve_fit(exp_func, df['Q2'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
 
         # Generate points for smooth curve
         x_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
