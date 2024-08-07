@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:50:52 trottar"
+# Time-stamp: "2024-08-07 13:13:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -445,29 +445,39 @@ with PdfPages(outputpdf) as pdf:
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
-
+    
     fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
-
     for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
-        
+
         # Use integer division to get the correct subplot position
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
+        
         df = merged_dict["sep_file"]
         df = df[(df['t'] >= tmin) & (df['t'] <= tmax)]
         cut_str = f"t = [{tmin:.3f}, {tmax:.3f}]"
-
+        
         W_ref = 3.0 # Scale data to W=3.0 GeV
         n = -2.0
         w_scale_factor = ((W_ref**2+mkpl**2)**n)/((df['W']**2+mkpl**2)**n)
-        
+
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
-                
+
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
         ax.errorbar(df['Q2'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=cut_str, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
-        
+
+        # Perform exponential fit
+        popt, _ = curve_fit(exp_func, df['Q2'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True)
+
+        # Generate points for smooth curve
+        x_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
+        y_fit = exp_func(x_fit, *popt)
+
+        # Plot the fit
+        ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*Q^2)')
+
         ax.set_xlabel('$Q^2$')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
@@ -477,10 +487,8 @@ with PdfPages(outputpdf) as pdf:
             ax.legend(fontsize=12)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
-        
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
-    pdf.savefig(fig, bbox_inches='tight')
 
-    
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    pdf.savefig(fig, bbox_inches='tight')    
     ###
 
