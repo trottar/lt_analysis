@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:19:29 trottar"
+# Time-stamp: "2024-08-07 12:21:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -315,7 +315,7 @@ for subdict in comb_dict.values():
 # Flatten the merged dictionary
 for key in merged_dict.keys():
     merged_dict[key] = pd.concat(merged_dict[key], ignore_index=True)
-    print("-"*5, key, "-"*5, "\n", merged_dict[key])
+    print("-"*10, key, "-"*10, "\n", merged_dict[key])
     
 print("\n\nmerged_dict")
 #print(merged_dict)
@@ -407,7 +407,7 @@ with PdfPages(outputpdf) as pdf:
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
-        df = file_df_dict["sep_file"]
+        df = merged_dict["sep_file"]
 
         ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         
@@ -431,7 +431,7 @@ with PdfPages(outputpdf) as pdf:
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
-        df = file_df_dict["sep_file"]
+        df = merged_dict["sep_file"]
         df = df[(df['t'] > tmin) & (df['t'] < tmax)]
         cut_str = f"t = [{df['t'].min()}, {df['t'].max()}]"
                 
