@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:32:34 trottar"
+# Time-stamp: "2024-08-07 12:44:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -61,6 +61,12 @@ if pol_str == "pl" and ParticleType == "kaon":
     from sep_xsect_kaon_pl import import_model
 
 ################################################################################################################################################
+
+# Define constants
+PI = math.pi
+m_p = 0.93827231
+m_n = 0.93956541
+mkpl = 0.493677
 
 settings = {
     'set_1': {
@@ -439,9 +445,16 @@ with PdfPages(outputpdf) as pdf:
         df = merged_dict["sep_file"]
         df = df[(df['t'] >= tmin) & (df['t'] <= tmax)]
         cut_str = f"t = [{df['t'].min():.3f}, {df['t'].max():.3f}]"
+
+        W_ref = 3.0 # Scale data to W=3.0 GeV
+        n = -2.0
+        w_scale_factor = ((W_ref**2+mkpl**2)**n)/((df['W']**2+mkpl**2)**n)
+        
+        scaled_sig = df['{}'.format(sig)]*w_scale_factor
+        d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
                 
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
-        ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=cut_str, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(df['Q2'], scaled_sig, yerr=d_scaled_sig, marker=markers[i], linestyle='None', label=cut_str, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         
         ax.set_xlabel('$Q^2$')
         ax.set_ylabel("${}$".format(formatted_sig))
