@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:13:02 trottar"
+# Time-stamp: "2024-08-07 12:15:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -72,18 +72,18 @@ settings = {
     },
     'set_2': {
         'Q2': '3p0',
+        'W': '2p32',
+        'LOEPS': 0.5736,
+        'HIEPS': 0.8791,
+        'inp_dir': "N/A"
+    },    
+    'set_3': {
+        'Q2': '3p0',
         'W': '3p14',
         'LOEPS': 0.3935,
         'HIEPS': 0.6668,
         'inp_dir': "trial_30/2024July25_H17M19S51" # i=1        
     },    
-    'set_3': {
-        'Q2': '3p0',
-        'W': '2p32',
-        'LOEPS': 0.5736,
-        'HIEPS': 0.8791,
-        'inp_dir': "N/A"
-    },
     'set_4': {
         'Q2': '4p4',
         'W': '2p74',
@@ -103,7 +103,7 @@ settings = {
 comb_dict = {}
 
 for key, values in settings.items():
-    if key == ('set_1' or 'set_2' or 'set_5'):
+    if key in ('set_1', 'set_3', 'set_5'):
         Q2, W, LOEPS, HIEPS, inp_dir = values.values()
     else:
         break
@@ -433,7 +433,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
         df = file_df_dict["sep_file"]
         df = df[(df['t'] > 0.1) & (df['t'] < 0.3)]
-        cut_str = "t = [{df['t'].min()}, {df['t'].max()}]"
+        cut_str = f"t = [{df['t'].min()}, {df['t'].max()}]"
                 
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
         ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=cut_str, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
