@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:04:48 trottar"
+# Time-stamp: "2024-08-07 14:07:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -442,6 +442,16 @@ with PdfPages(outputpdf) as pdf:
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
                 
         ax.errorbar(df['t'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=None, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
+        
+        # Perform exponential fit
+        popt, _ = curve_fit(exp_func, df['t'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+
+        # Generate points for smooth curve
+        x_fit = np.linspace(df['t'].min(), df['t'].max(), 100)
+        y_fit = exp_func(x_fit, *popt)
+
+        # Plot the fit
+        ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*Q^2)')
         
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
