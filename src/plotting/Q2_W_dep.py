@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 13:17:12 trottar"
+# Time-stamp: "2024-08-07 13:18:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -333,7 +333,7 @@ print("\n\n")
 #tmin = 0.1
 #tmax = 0.2
 # Q2=3.0+5.5
-tmin = 0.4
+tmin = 0.45
 tmax = 0.5
 
 
