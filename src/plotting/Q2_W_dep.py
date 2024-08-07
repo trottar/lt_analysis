@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:25:20 trottar"
+# Time-stamp: "2024-08-07 11:27:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -377,8 +377,10 @@ with PdfPages(outputpdf) as pdf:
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
-                
-        ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[0], linestyle='None', label='Data', color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
+        df = file_df_dict["sep_file"]
+
+        ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
@@ -399,9 +401,11 @@ with PdfPages(outputpdf) as pdf:
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
+        df = file_df_dict["sep_file"]
                 
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
-        ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[0], linestyle='None', label='Data', color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
+        ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        
         ax.set_xlabel('$Q^2$')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
