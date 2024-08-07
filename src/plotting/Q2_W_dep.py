@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:17:34 trottar"
+# Time-stamp: "2024-08-07 14:18:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -360,7 +360,7 @@ with PdfPages(outputpdf) as pdf:
 
     # Define markers and colors
     markers = ['x', 'o', '*', 'D'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
-    colors = ['black', 'red']
+    colors = ['black', 'red', 'blue']
     
     ax = axes
     #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
