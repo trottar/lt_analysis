@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:46:40 trottar"
+# Time-stamp: "2024-08-07 12:47:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -428,7 +428,7 @@ with PdfPages(outputpdf) as pdf:
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
                 
-        ax.errorbar(df['t'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=cut_str, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
+        ax.errorbar(df['t'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=None, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
         
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
