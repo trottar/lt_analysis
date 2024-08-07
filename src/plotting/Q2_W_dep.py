@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 13:58:51 trottar"
+# Time-stamp: "2024-08-07 14:00:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -333,11 +333,11 @@ print("\n\n")
 #tmin = merged_dict['setting_df'].iloc[0]['TMIN']
 #tmax = merged_dict['setting_df'].iloc[0]['TMAX']
 # Q2=2.115+3.0, 1
-#tmin = 0.15
-#tmax = 0.2
+tmin = 0.15
+tmax = 0.2
 # Q2=2.115+3.0, 2
-tmin = 0.2
-tmax = 0.25
+#tmin = 0.2
+#tmax = 0.25
 # Q2=2.115+3.0, 3
 #tmin = 0.3
 #tmax = 0.35
