@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:45:51 trottar"
+# Time-stamp: "2024-08-07 11:51:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -67,9 +67,25 @@ W_lst = ["2p95", "3p14"]
 LOEPS_lst = [0.2477, 0.3935]
 HIEPS_lst = [0.7864, 0.6668]
 
+settings = {
+    'set_1': {
+        'Q2': '2p1',
+        'W': '2p95',
+        'LOEPS': 0.2477,
+        'HIEPS': 0.7864
+    },
+    'set_2': {
+        'Q2': '3p0',
+        'W': '3p14',
+        'LOEPS': 0.3935,
+        'HIEPS': 0.6668
+    }
+}
+
 comb_dict = {}
 
-for Q2, W, LOEPS, HIEPS in zip(Q2_lst,W_lst, LOEPS_lst, HIEPS_lst):
+for values in settings.values():
+    Q2, W, LOEPS, HIEPS = values.values()
 
     if Q2 == "2p1" and W == "2p95":
         inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_9/2024July25_H17M05S03"
