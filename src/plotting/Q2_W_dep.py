@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:10:50 trottar"
+# Time-stamp: "2024-08-07 12:13:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -311,12 +311,11 @@ for subdict in comb_dict.values():
         if key not in merged_dict:
             merged_dict[key] = []
         merged_dict[key].append(value)
-        print("!!!!!!!", key, merged_dict[key])
 
 # Flatten the merged dictionary
 for key in merged_dict.keys():
     merged_dict[key] = pd.concat(merged_dict[key], ignore_index=True)
-    print("$$$$$$$", key, merged_dict[key])
+    print("-"*25, key, "-"*25, "\n", merged_dict[key])
     
 print("\n\nmerged_dict")
 #print(merged_dict)
