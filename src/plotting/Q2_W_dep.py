@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 13:29:23 trottar"
+# Time-stamp: "2024-08-07 13:38:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -76,7 +76,7 @@ settings = {
         'LOEPS': 0.2477,
         'HIEPS': 0.7864,
         #'inp_dir': "trial_9/2024July25_H17M05S03" # i=1
-        'inp_dir': "trial_9/2024July26_H05M28S47/" # i=12
+        'inp_dir': "trial_9/2024July26_H05M28S47" # i=12
     },
     'set_2': {
         'Q2': '3p0',
@@ -91,7 +91,7 @@ settings = {
         'LOEPS': 0.3935,
         'HIEPS': 0.6668,
         #'inp_dir': "trial_30/2024July25_H17M19S51" # i=1
-        'inp_dir': "trial_30/2024July26_H08M04S15/" # i=12
+        'inp_dir': "trial_30/2024July26_H08M04S15" # i=12
     },    
     'set_4': {
         'Q2': '4p4',
@@ -332,9 +332,12 @@ print("\n\n")
 # Redefine tmin and tmax
 #tmin = merged_dict['setting_df'].iloc[0]['TMIN']
 #tmax = merged_dict['setting_df'].iloc[0]['TMAX']
-# Q2=2.115+3.0
-tmin = 0.15
-tmax = 0.2
+# Q2=2.115+3.0, 1
+#tmin = 0.15
+#tmax = 0.2
+# Q2=2.115+3.0, 2
+tmin = 0.2
+tmax = 0.25
 # Q2=3.0+5.5
 #tmin = 0.45
 #tmax = 0.5
