@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:30:45 trottar"
+# Time-stamp: "2024-08-07 14:33:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -330,8 +330,8 @@ for key in merged_dict.keys():
 print("\n\n")
 
 # Redefine tmin and tmax
-tmin = merged_dict['sep_file']['t'].min()
-tmax = merged_dict['sep_file']['t'].max()
+tmin = merged_dict['sep_file']['t'].min()-0.1
+tmax = merged_dict['sep_file']['t'].max()+0.1
 # Q2=2.115+3.0, 1
 #tmin = 0.15
 #tmax = 0.2
@@ -441,7 +441,7 @@ with PdfPages(outputpdf) as pdf:
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
 
-        tolerance = 0.25
+        tolerance = 0.35
         
         if (abs(df['Q2'] - 2.115) < tolerance).any():
             mask = abs(df['Q2'] - 2.115)< tolerance
