@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:41:29 trottar"
+# Time-stamp: "2024-08-07 14:43:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -330,11 +330,11 @@ for key in merged_dict.keys():
 print("\n\n")
 
 # Redefine tmin and tmax
-tmin = merged_dict['sep_file']['t'].min()-0.1
-tmax = merged_dict['sep_file']['t'].max()+0.1
+#tmin = merged_dict['sep_file']['t'].min()-0.1
+#tmax = merged_dict['sep_file']['t'].max()+0.1
 # Q2=2.115+3.0, 1
-#tmin = 0.15
-#tmax = 0.2
+tmin = 0.15
+tmax = 0.2
 # Q2=2.115+3.0, 2
 #tmin = 0.2
 #tmax = 0.25
