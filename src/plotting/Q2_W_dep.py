@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:11:03 trottar"
+# Time-stamp: "2024-08-07 11:15:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -397,6 +397,36 @@ with PdfPages(outputpdf) as pdf:
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
+
+    for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
+        
+        # Use integer division to get the correct subplot position
+        ax = axes[k // 2, k % 2]
+        formatted_sig = sig.replace("sig", "\sigma_{") + "}"
+        ax.set_title("${}$".format(formatted_sig), fontsize=24)
+        for i, df_key in enumerate(['sep_file']):
+            df = file_df_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
+                
+            print("\n\n",df_key,"\nt\n",df['t'], "\nQ2\n", df['d{}'.format(sig)])
+            ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.set_xlabel('t')
+        ax.set_ylabel("${}$".format(formatted_sig))
+        ax.tick_params(axis='x', labelsize=16)
+        ax.tick_params(axis='y', labelsize=16)        
+        ax.set_xlim(tmin, tmax)
+        ax.legend(fontsize=24)
+        # Add grid to subplot
+        ax.grid(True, linestyle='--', linewidth=0.5)
+        
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    pdf.savefig(fig, bbox_inches='tight')
+
     
     ###
 
