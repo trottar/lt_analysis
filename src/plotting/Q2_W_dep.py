@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:33:58 trottar"
+# Time-stamp: "2024-08-07 11:37:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -401,7 +401,7 @@ with PdfPages(outputpdf) as pdf:
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
-        df = file_df_dict["sep_file"]
+        df = file_df_dict["sep_file"][(df['t'] > 0.1) & (df['t'] < 0.3)]
                 
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
         ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
