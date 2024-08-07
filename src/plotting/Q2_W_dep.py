@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:17:24 trottar"
+# Time-stamp: "2024-08-07 12:19:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -315,7 +315,7 @@ for subdict in comb_dict.values():
 # Flatten the merged dictionary
 for key in merged_dict.keys():
     merged_dict[key] = pd.concat(merged_dict[key], ignore_index=True)
-    print("-"*25, key, "-"*25, "\n", merged_dict[key])
+    print("-"*5, key, "-"*5, "\n", merged_dict[key])
     
 print("\n\nmerged_dict")
 #print(merged_dict)
@@ -432,7 +432,7 @@ with PdfPages(outputpdf) as pdf:
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
         df = file_df_dict["sep_file"]
-        df = df[(df['t'] > 0.1) & (df['t'] < 0.3)]
+        df = df[(df['t'] > tmin) & (df['t'] < tmax)]
         cut_str = f"t = [{df['t'].min()}, {df['t'].max()}]"
                 
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
