@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:43:11 trottar"
+# Time-stamp: "2024-08-07 14:45:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -333,11 +333,11 @@ print("\n\n")
 #tmin = merged_dict['sep_file']['t'].min()-0.1
 #tmax = merged_dict['sep_file']['t'].max()+0.1
 # Q2=2.115+3.0, 1
-tmin = 0.15
-tmax = 0.2
+#tmin = 0.15
+#tmax = 0.2
 # Q2=2.115+3.0, 2
-#tmin = 0.2
-#tmax = 0.25
+tmin = 0.2
+tmax = 0.25
 # Q2=2.115+3.0, 3
 #tmin = 0.3
 #tmax = 0.35
