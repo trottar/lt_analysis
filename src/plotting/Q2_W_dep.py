@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 13:18:38 trottar"
+# Time-stamp: "2024-08-07 13:20:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -330,11 +330,11 @@ print("\n\n")
 #tmin = merged_dict['setting_df'].iloc[0]['TMIN']
 #tmax = merged_dict['setting_df'].iloc[0]['TMAX']
 # Q2=2.115+3.0
-#tmin = 0.1
-#tmax = 0.2
+tmin = 0.1
+tmax = 0.2
 # Q2=3.0+5.5
-tmin = 0.45
-tmax = 0.5
+#tmin = 0.45
+#tmax = 0.5
 
 
 # Create a PdfPages object to manage the PDF file
