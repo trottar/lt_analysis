@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:04:02 trottar"
+# Time-stamp: "2024-08-07 12:06:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -99,7 +99,11 @@ comb_dict = {}
 
 for key, values in comb_dict.items():
     if key == ('set_1' or 'set_2' or 'set_5'):
-        Q2, W, LOEPS, HIEPS = values.values()
+        #Q2, W, LOEPS, HIEPS = values.values()
+        Q2 = values['Q2']
+        W = values['W']
+        LOEPS = values['LOEPS']
+        HIEPS = values['HIEPS']
 
     print(Q2)
 
