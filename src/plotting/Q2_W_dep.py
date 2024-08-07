@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:21:44 trottar"
+# Time-stamp: "2024-08-07 12:24:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -317,9 +317,12 @@ for key in merged_dict.keys():
     merged_dict[key] = pd.concat(merged_dict[key], ignore_index=True)
     print("-"*10, key, "-"*10, "\n", merged_dict[key])
     
-print("\n\nmerged_dict")
-#print(merged_dict)
 print("\n\n")
+
+# Redefine tmin and tmax
+tmin = merged_dict['setting_df'].iloc[0]['TMIN']
+tmax = merged_dict['setting_df'].iloc[0]['TMAX']
+
 
 # Create a PdfPages object to manage the PDF file
 with PdfPages(outputpdf) as pdf:
@@ -433,7 +436,7 @@ with PdfPages(outputpdf) as pdf:
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
         df = merged_dict["sep_file"]
         df = df[(df['t'] > tmin) & (df['t'] < tmax)]
-        cut_str = f"t = [{df['t'].min()}, {df['t'].max()}]"
+        cut_str = f"t = [{df['t'].min():.3f}, {df['t'].max():.3f}]"
                 
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
         ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=cut_str, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
