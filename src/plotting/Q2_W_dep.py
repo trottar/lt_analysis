@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:34:31 trottar"
+# Time-stamp: "2024-08-07 14:41:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -436,7 +436,7 @@ with PdfPages(outputpdf) as pdf:
 
         W_ref = 3.0 # Scale data to W=3.0 GeV
         n = -2.0
-        w_scale_factor = ((W_ref**2+mkpl**2)**n)/((df['W']**2+mkpl**2)**n)
+        w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
         
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
@@ -500,7 +500,7 @@ with PdfPages(outputpdf) as pdf:
         
         W_ref = 3.0 # Scale data to W=3.0 GeV
         n = -2.0
-        w_scale_factor = ((W_ref**2+mkpl**2)**n)/((df['W']**2+mkpl**2)**n)
+        w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
 
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
