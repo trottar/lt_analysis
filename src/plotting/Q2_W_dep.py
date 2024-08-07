@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:51:09 trottar"
+# Time-stamp: "2024-08-07 11:56:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -62,11 +62,6 @@ if pol_str == "pl" and ParticleType == "kaon":
 
 ################################################################################################################################################
 
-Q2_lst = ["2p1", "3p0"]
-W_lst = ["2p95", "3p14"]
-LOEPS_lst = [0.2477, 0.3935]
-HIEPS_lst = [0.7864, 0.6668]
-
 settings = {
     'set_1': {
         'Q2': '2p1',
@@ -79,13 +74,32 @@ settings = {
         'W': '3p14',
         'LOEPS': 0.3935,
         'HIEPS': 0.6668
+    },    
+    'set_3': {
+        'Q2': '3p0',
+        'W': '2p32',
+        'LOEPS': 0.5736,
+        'HIEPS': 0.8791
+    },
+    'set_4': {
+        'Q2': '4p4',
+        'W': '2p74',
+        'LOEPS': 0.4805,
+        'HIEPS': 0.7148
+    },    
+    'set_5': {
+        'Q2': '5p5',
+        'W': '3p02',
+        'LOEPS': 0.1838,
+        'HIEPS': 0.5291
     }
 }
 
 comb_dict = {}
 
-for values in settings.values():
-    Q2, W, LOEPS, HIEPS = values.values()
+for key, values in comb_dict.items():
+    if key == ('set_1' or 'set_2' or 'set_5'):
+        Q2, W, LOEPS, HIEPS = values.values()
 
     if Q2 == "2p1" and W == "2p95":
         inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_9/2024July25_H17M05S03"
