@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:06:13 trottar"
+# Time-stamp: "2024-08-07 12:09:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -67,55 +67,46 @@ settings = {
         'Q2': '2p1',
         'W': '2p95',
         'LOEPS': 0.2477,
-        'HIEPS': 0.7864
+        'HIEPS': 0.7864,
+        'inp_dir': CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_9/2024July25_H17M05S03" # i=1
     },
     'set_2': {
         'Q2': '3p0',
         'W': '3p14',
         'LOEPS': 0.3935,
-        'HIEPS': 0.6668
+        'HIEPS': 0.6668,
+        'inp_dir': CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_30/2024July25_H17M19S51" # i=1        
     },    
     'set_3': {
         'Q2': '3p0',
         'W': '2p32',
         'LOEPS': 0.5736,
-        'HIEPS': 0.8791
+        'HIEPS': 0.8791,
+        'inp_dir': "N/A"
     },
     'set_4': {
         'Q2': '4p4',
         'W': '2p74',
         'LOEPS': 0.4805,
-        'HIEPS': 0.7148
+        'HIEPS': 0.7148,
+        'inp_dir': "N/A"        
     },    
     'set_5': {
         'Q2': '5p5',
         'W': '3p02',
         'LOEPS': 0.1838,
-        'HIEPS': 0.5291
+        'HIEPS': 0.5291,
+        'inp_dir': CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_14/2024July25_H16M26S50" # i=1        
     }
 }
 
 comb_dict = {}
 
-for key, values in comb_dict.items():
+for key, values in settings.items():
     if key == ('set_1' or 'set_2' or 'set_5'):
-        #Q2, W, LOEPS, HIEPS = values.values()
-        Q2 = values['Q2']
-        W = values['W']
-        LOEPS = values['LOEPS']
-        HIEPS = values['HIEPS']
+        Q2, W, LOEPS, HIEPS, inp_dir = values.values()
 
-    print(Q2)
-
-    if Q2 == "2p1" and W == "2p95":
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_9/2024July25_H17M05S03" # i=1
-    elif Q2 == "3p0" and W == "3p14":
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_30/2024July25_H17M19S51" # i=1
-    elif Q2 == "5p5" and W == "3p02":
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_14/2024July25_H16M26S50" # i=1
-    else:
-        print("Error: No valid path for Q{}W{}...".format(Q2,W))
-        sys.exit(2)
+    print("!!!!!!777", Q2)
         
     ###############################################################################################################################################
     '''
