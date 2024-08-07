@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 12:02:32 trottar"
+# Time-stamp: "2024-08-07 12:03:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -99,15 +99,14 @@ comb_dict = {}
 
 for key, values in comb_dict.items():
     if key == ('set_1' or 'set_2' or 'set_5'):
-        Q2 = values['Q2']
-        W = values['W']
-        LOEPS = values['LOEPS']
-        HIEPS = values['HIEPS']
+        Q2, W, LOEPS, HIEPS = values.values()
 
     if Q2 == "2p1" and W == "2p95":
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_9/2024July25_H17M05S03"
+        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_9/2024July25_H17M05S03" # i=1
     elif Q2 == "3p0" and W == "3p14":
-        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_30/2024July25_H17M19S51"
+        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_30/2024July25_H17M19S51" # i=1
+    elif Q2 == "5p5" and W == "3p02":
+        inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+"trial_14/2024July25_H16M26S50" # i=1
     else:
         print("Error: No valid path for Q{}W{}...".format(Q2,W))
         sys.exit(2)
