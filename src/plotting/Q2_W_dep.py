@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 13:21:16 trottar"
+# Time-stamp: "2024-08-07 13:24:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -75,7 +75,8 @@ settings = {
         'W': '2p95',
         'LOEPS': 0.2477,
         'HIEPS': 0.7864,
-        'inp_dir': "trial_9/2024July25_H17M05S03" # i=1
+        #'inp_dir': "trial_9/2024July25_H17M05S03" # i=1
+        'inp_dir': "trial_9/2024July26_H05M28S47/" # i=12
     },
     'set_2': {
         'Q2': '3p0',
@@ -89,7 +90,8 @@ settings = {
         'W': '3p14',
         'LOEPS': 0.3935,
         'HIEPS': 0.6668,
-        'inp_dir': "trial_30/2024July25_H17M19S51" # i=1        
+        #'inp_dir': "trial_30/2024July25_H17M19S51" # i=1
+        'inp_dir': "trial_30/2024July26_H08M04S15/" # i=12
     },    
     'set_4': {
         'Q2': '4p4',
@@ -103,7 +105,8 @@ settings = {
         'W': '3p02',
         'LOEPS': 0.1838,
         'HIEPS': 0.5291,
-        'inp_dir': "trial_14/2024July25_H17M34S49" # i=1        
+        #'inp_dir': "trial_14/2024July25_H17M34S49" # i=1
+        'inp_dir': "trial_14/2024July26_H10M45S46" # i=12
     }
 }
 
