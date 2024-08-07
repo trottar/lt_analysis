@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:10:26 trottar"
+# Time-stamp: "2024-08-07 11:11:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -56,7 +56,7 @@ Import separated xsects model
 pol_str = "pl"
 ParticleType = "kaon"
 
-sys.path.append("models")
+sys.path.append("../models")
 if pol_str == "pl" and ParticleType == "kaon":
     from sep_xsect_kaon_pl import import_model
 
