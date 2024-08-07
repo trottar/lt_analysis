@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:39:38 trottar"
+# Time-stamp: "2024-08-07 11:42:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -405,14 +405,15 @@ with PdfPages(outputpdf) as pdf:
         df = df[(df['t'] > 0.1) & (df['t'] < 0.3)]
                 
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
-        ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df['t'].astype(str), color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         
         ax.set_xlabel('$Q^2$')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(df['Q2'].min()-0.1, df['Q2'].max()+0.1)
-        #ax.legend(fontsize=24)
+        if k == 0:
+            ax.legend(fontsize=12)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         
