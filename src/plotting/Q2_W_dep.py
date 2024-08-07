@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:33:19 trottar"
+# Time-stamp: "2024-08-07 14:34:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -441,24 +441,24 @@ with PdfPages(outputpdf) as pdf:
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
 
-        tolerance = 0.35
+        tolerance = 0.4
         
         if (abs(df['Q2'] - 2.115) < tolerance).any():
-            mask = abs(df['Q2'] - 2.115)< tolerance
+            mask = abs(df['Q2'] - 2.115) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[0], linestyle='', label='$Q^2$=2.115', 
                         color=colors[0], markeredgecolor=colors[0], 
                         markerfacecolor='none', capsize=2)
 
         if (abs(df['Q2'] - 3.0) < tolerance).any():
-            mask = abs(df['Q2'] - 3.0)< tolerance
+            mask = abs(df['Q2'] - 3.0) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[1], linestyle='', label='$Q^2$=3.0', 
                         color=colors[1], markeredgecolor=colors[1], 
                         markerfacecolor='none', capsize=2)
 
         if (abs(df['Q2'] - 5.5) < tolerance).any():
-            mask = abs(df['Q2'] - 5.5)< tolerance
+            mask = abs(df['Q2'] - 5.5) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[2], linestyle='', label='$Q^2$=5.5', 
                         color=colors[2], markeredgecolor=colors[2], 
