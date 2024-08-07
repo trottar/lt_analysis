@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:20:39 trottar"
+# Time-stamp: "2024-08-07 14:22:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -441,21 +441,23 @@ with PdfPages(outputpdf) as pdf:
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
 
-        if (abs(df['Q2'] - 2.115) < 0.5).any():
+        tolerance = 0.3
+        
+        if (abs(df['Q2'] - 2.115) < tolerance).any():
             mask = abs(df['Q2'] - 2.115) < 0.5
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[0], linestyle='', label='$Q^2$=2.115', 
                         color=colors[0], markeredgecolor=colors[0], 
                         markerfacecolor='none', capsize=2)
 
-        if (abs(df['Q2'] - 3.0) < 0.5).any():
+        if (abs(df['Q2'] - 3.0) < tolerance).any():
             mask = abs(df['Q2'] - 3.0) < 0.5
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[1], linestyle='', label='$Q^2$=3.0', 
                         color=colors[1], markeredgecolor=colors[1], 
                         markerfacecolor='none', capsize=2)
 
-        if (abs(df['Q2'] - 5.5) < 0.5).any():
+        if (abs(df['Q2'] - 5.5) < tolerance).any():
             mask = abs(df['Q2'] - 5.5) < 0.5
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[2], linestyle='', label='$Q^2$=5.5', 
@@ -477,7 +479,7 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(tmin, tmax)
-        ax.legend(fontsize=24)
+        ax.legend(fontsize=8)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
         
