@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:15:01 trottar"
+# Time-stamp: "2024-08-07 11:16:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -415,7 +415,7 @@ with PdfPages(outputpdf) as pdf:
                 
             print("\n\n",df_key,"\nt\n",df['t'], "\nQ2\n", df['d{}'.format(sig)])
             ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
-        ax.set_xlabel('t')
+        ax.set_xlabel('$Q^2$')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
