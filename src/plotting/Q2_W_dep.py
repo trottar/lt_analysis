@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:22:57 trottar"
+# Time-stamp: "2024-08-07 11:25:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -377,15 +377,8 @@ with PdfPages(outputpdf) as pdf:
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
-        for i, df_key in enumerate(['sep_file']):
-            df = file_df_dict[df_key]
-            if "hi" in df_key:
-                df_key = "High $\epsilon$"
-            else:
-                df_key = "Low $\epsilon$"
                 
-            print("\n\n",df_key,"\nt\n",df['t'], "\nQ2\n", df['d{}'.format(sig)])
-            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[0], linestyle='None', label='Data', color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
@@ -406,15 +399,9 @@ with PdfPages(outputpdf) as pdf:
         ax = axes[k // 2, k % 2]
         formatted_sig = sig.replace("sig", "\sigma_{") + "}"
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
-        for i, df_key in enumerate(['sep_file']):
-            df = file_df_dict[df_key]
-            if "hi" in df_key:
-                df_key = "High $\epsilon$"
-            else:
-                df_key = "Low $\epsilon$"
                 
-            print("\n\n","-"*25,df_key,"-"*25,df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
-            ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
+        ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[0], linestyle='None', label='Data', color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
         ax.set_xlabel('$Q^2$')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
