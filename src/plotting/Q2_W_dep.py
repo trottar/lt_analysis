@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:07:45 trottar"
+# Time-stamp: "2024-08-07 14:17:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -440,14 +440,33 @@ with PdfPages(outputpdf) as pdf:
         
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
-                
-        ax.errorbar(df['t'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=None, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
-        
+
+        if (abs(df['Q2'] - 2.115) < 0.5).any():
+            mask = abs(df['Q2'] - 2.115) < 0.5
+            ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                        marker=markers[0], linestyle='', label='$Q^2$=2.115', 
+                        color=colors[0], markeredgecolor=colors[0], 
+                        markerfacecolor='none', capsize=2)
+
+        if (abs(df['Q2'] - 3.0) < 0.5).any():
+            mask = abs(df['Q2'] - 3.0) < 0.5
+            ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                        marker=markers[1], linestyle='', label='$Q^2$=3.0', 
+                        color=colors[1], markeredgecolor=colors[1], 
+                        markerfacecolor='none', capsize=2)
+
+        if (abs(df['Q2'] - 5.5) < 0.5).any():
+            mask = abs(df['Q2'] - 5.5) < 0.5
+            ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                        marker=markers[2], linestyle='', label='$Q^2$=5.5', 
+                        color=colors[2], markeredgecolor=colors[2], 
+                        markerfacecolor='none', capsize=2)
+
         # Perform exponential fit
         popt, _ = curve_fit(exp_func, df['t'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
 
         # Generate points for smooth curve
-        x_fit = np.linspace(df['t'].min(), df['t'].max(), 100)
+        x_fit = np.linspace(tmin, tmax, 100)
         y_fit = exp_func(x_fit, *popt)
 
         # Plot the fit
