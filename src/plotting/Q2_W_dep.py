@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 11:42:59 trottar"
+# Time-stamp: "2024-08-07 11:45:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -403,9 +403,10 @@ with PdfPages(outputpdf) as pdf:
         ax.set_title("${}$".format(formatted_sig), fontsize=24)
         df = file_df_dict["sep_file"]
         df = df[(df['t'] > 0.1) & (df['t'] < 0.3)]
+        cut_str = "{df['t'].min()}, {df['t'].max()}"
                 
         print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
-        ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=df['t'].astype(str), color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(df['Q2'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label=, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         
         ax.set_xlabel('$Q^2$')
         ax.set_ylabel("${}$".format(formatted_sig))
