@@ -8,7 +8,7 @@
 *       RLT: (9/15/2023) Updated for kaon cross section
 *   output:
 *	peek		!d5sigma/dEe'dOmegae'Omegak	(microbarn/MeV/sr^2)
-
+	USE structureModule
 	implicit none
 	include 'simulate.inc'
 
