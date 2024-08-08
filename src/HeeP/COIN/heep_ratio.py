@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-08 17:34:34 trottar"
+# Time-stamp: "2024-08-08 17:36:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,30 +70,30 @@ y_simc = np.array([5.57e+01, 8.32e+01, 3.06e+02, 1.41e+03, 9.04e+02])
 rel_yield = y_data/y_simc
 
 for q,r in zip(Q2, rel_yield):
-    print(f"Q2:{q}, ratio={r}")
-
-# Calculate linear fit for y_data_nooffset
-#slope_data_nooffset, intercept_data_nooffset, _, _, _ = linregress(Q2, y_data_nooffset)
-
-# Calculate linear fit for y_simc_nooffset
-#slope_simc_nooffset, intercept_simc_nooffset, _, _, _ = linregress(Q2, y_simc_nooffset)
-
-# Calculate linear fit for y_data
-slope_data, intercept_data, _, _, _ = linregress(Q2, y_data)
-
-# Calculate linear fit for y_simc
-slope_simc, intercept_simc, _, _, _ = linregress(Q2, y_simc)
-
-#slope_relyield_nooffset, intercept_relyield_nooffset, _, _, _ = linregress(Q2, rel_yield_nooffset)
-
-slope_relyield, intercept_relyield, _, _, _ = linregress(Q2, rel_yield)
-
+    print(f"Q2:{q:.3f}, ratio={r:.3f}")
 
 # Create a PdfPages object to manage the PDF file
 with PdfPages(outputpdf) as pdf:
 
+    # Calculate linear fit for y_data_nooffset
+    #slope_data_nooffset, intercept_data_nooffset, _, _, _ = linregress(Q2, y_data_nooffset)
+
+    # Calculate linear fit for y_simc_nooffset
+    #slope_simc_nooffset, intercept_simc_nooffset, _, _, _ = linregress(Q2, y_simc_nooffset)
+
+    # Calculate linear fit for y_data
+    slope_data, intercept_data, _, _, _ = linregress(Q2, y_data)
+
+    # Calculate linear fit for y_simc
+    slope_simc, intercept_simc, _, _, _ = linregress(Q2, y_simc)
+
+    #slope_relyield_nooffset, intercept_relyield_nooffset, _, _, _ = linregress(Q2, rel_yield_nooffset)
+
+    slope_relyield, intercept_relyield, _, _, _ = linregress(Q2, rel_yield)
+
+    
     # Plotting
-    plt.figure(figsize=(12,8))
+    fig = plt.figure(figsize=(12,8))
 
     '''
     # Plot y_data_nooffset and y_simc_nooffset on the same plot with linear fits
@@ -160,7 +160,7 @@ with PdfPages(outputpdf) as pdf:
     slope_relyield, intercept_relyield, _, _, _ = linregress(Ebeam, rel_yield)
 
     # Plotting
-    plt.figure(figsize=(12,8))
+    fig = plt.figure(figsize=(12,8))
 
     '''
     # Plot y_data_nooffset and y_simc_nooffset on the same plot with linear fits
