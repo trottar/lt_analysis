@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-08 16:39:45 trottar"
+# Time-stamp: "2024-08-08 17:24:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,8 +33,8 @@ Ebeam = [10.59070, 8.21290, 6.18720, 4.92950, 3.8338]
 #y_simc = [5.57e1, 8.32e1, 3.06e2, 1.41e3, 9.04e2]
 #rel_yield = [1.17, 1.29, 1.05, 1.03, 1.01]
 # RLT (7/29/2024): Integrated fit
-y_data = [3.19e+02, 1.45e+03, 9.08e+02]
-y_simc = [3.06e+02, 1.41e+03, 9.04e+02]
+y_data = [6.31e+01, 1.02e+02, 3.19e+02, 1.45e+03, 9.08e+02]
+y_simc = [5.57e+01, 8.32e+01, 3.06e+02, 1.41e+03, 9.04e+02]
 rel_yield = y_simc/y_data
 
 # Calculate linear fit for y_data_nooffset
@@ -136,7 +136,7 @@ plt.legend()
 '''
 
 # Plot y_data and y_simc on the same plot with linear fits
-plt.subplot(221)
+plt.subplot(211)
 plt.plot(Ebeam, y_data, 'bo', label='y_data')
 plt.plot(Ebeam, y_simc, 'ro', label='y_simc')
 plt.plot(Ebeam, slope_data * np.array(Ebeam) + intercept_data, 'b--', label='m={:.2f}, b={:.2f}'.format(slope_data, intercept_data))
@@ -158,20 +158,11 @@ plt.legend()
 '''
 
 # Duplicate the third plot for better visualization
-plt.subplot(222)
+plt.subplot(212)
 plt.plot(Ebeam, rel_yield, 'go')
 plt.plot(Ebeam, slope_relyield * np.array(Ebeam) + intercept_relyield, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield, intercept_relyield))
 plt.axhline(y=1.0, color='gray')
 plt.xlabel('Ebeam')
-plt.ylabel('Rel. Yield')
-plt.legend()
-
-# Duplicate the third plot for better visualization
-plt.subplot(223)
-plt.plot(Q2, rel_yield, 'go')
-plt.plot(Q2, slope_relyield * np.array(Q2) + intercept_relyield, 'g--', label='m={:.2f}, b={:.2f}'.format(slope_relyield, intercept_relyield))
-plt.axhline(y=1.0, color='gray')
-plt.xlabel('Q2')
 plt.ylabel('Rel. Yield')
 plt.legend()
 
