@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 12:16:53 trottar"
+# Time-stamp: "2024-08-08 13:29:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,9 +66,9 @@ InData_efficiency = np.array([float(x) for x in InData_efficiency.split(' ')])
 InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency.split(' ')])
 data_runNums = np.array([int(x) for x in data_runNums.split(' ')])
 G_data_eff = TGraphErrors(len(InData_efficiency), \
-                          np.array([float(x) for x in data_runNums]), \
+                          np.array([float(x) for x in data_runNums], dtype='float64'), \
                           InData_efficiency, \
-                          np.array([0]*len(InData_error_efficiency)), \
+                          np.zeros(len(InData_error_efficiency), dtype='float64'), \
                           InData_error_efficiency*InData_efficiency)
 G_data_eff.SetName("G_data_eff")    
 
@@ -76,9 +76,9 @@ InDummy_efficiency = np.array([float(x) for x in InDummy_efficiency.split(' ')])
 InDummy_error_efficiency = np.array([float(x) for x in InDummy_error_efficiency.split(' ')])
 dummy_runNums = np.array([int(x) for x in dummy_runNums.split(' ')])
 G_dummy_eff = TGraphErrors(len(InDummy_efficiency), \
-                          np.array([float(x) for x in dummy_runNums]), \
+                          np.array([float(x) for x in dummy_runNums], dtype='float64'), \
                           InDummy_efficiency, \
-                          np.array([0]*len(InDummy_error_efficiency)), \
+                          np.zeros(len(InDummy_error_efficiency), dtype='float64'), \
                           InDummy_error_efficiency*InDummy_efficiency)
 G_dummy_eff.SetName("G_dummy_eff")    
 
