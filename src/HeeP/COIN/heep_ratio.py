@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-08 16:25:55 trottar"
+# Time-stamp: "2024-08-08 16:39:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,8 +33,8 @@ Ebeam = [10.59070, 8.21290, 6.18720, 4.92950, 3.8338]
 #y_simc = [5.57e1, 8.32e1, 3.06e2, 1.41e3, 9.04e2]
 #rel_yield = [1.17, 1.29, 1.05, 1.03, 1.01]
 # RLT (7/29/2024): Integrated fit
-y_data = [1.45e+03, 9.08e+02]
-y_simc = [1.41e+03, 9.04e+02]
+y_data = [3.19e+02, 1.45e+03, 9.08e+02]
+y_simc = [3.06e+02, 1.41e+03, 9.04e+02]
 rel_yield = y_simc/y_data
 
 # Calculate linear fit for y_data_nooffset
