@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-08 17:25:54 trottar"
+# Time-stamp: "2024-08-08 17:27:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,7 +35,10 @@ Ebeam = [10.59070, 8.21290, 6.18720, 4.92950, 3.8338]
 # RLT (7/29/2024): Integrated fit
 y_data = np.array([6.31e+01, 1.02e+02, 3.19e+02, 1.45e+03, 9.08e+02])
 y_simc = np.array([5.57e+01, 8.32e+01, 3.06e+02, 1.41e+03, 9.04e+02])
-rel_yield = y_simc/y_data
+rel_yield = y_data/y_simc
+
+for q,r in zip(Q2, rel_yield):
+    print("Q2:{q}, ratio={r}")
 
 # Calculate linear fit for y_data_nooffset
 #slope_data_nooffset, intercept_data_nooffset, _, _, _ = linregress(Q2, y_data_nooffset)
