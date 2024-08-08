@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-08 13:48:56 trottar"
+# Time-stamp: "2024-08-08 16:33:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1858,19 +1858,19 @@ bpm_tar_y_DATA.SetLineColor(kRed)
 bpm_tar_y_DATA_nocut.SetLineColor(kCyan)
 bpm_tar_y_DATA_nopid.SetLineColor(kMagenta)
 
-tmp_b_mean_bpm_tar_y_data = fit_gaussian(bpm_tar_y_DATA, 0.0, 0.2, "data")
-b_mean_bpm_tar_y_data = tmp_b_mean_bpm_tar_y_data[0]
-b_mean_err_bpm_tar_y_data = tmp_b_mean_bpm_tar_y_data[1]
+#tmp_b_mean_bpm_tar_y_data = fit_gaussian(bpm_tar_y_DATA, 0.0, 0.2, "data")
+#b_mean_bpm_tar_y_data = tmp_b_mean_bpm_tar_y_data[0]
+#b_mean_err_bpm_tar_y_data = tmp_b_mean_bpm_tar_y_data[1]
 
 bpm_tar_y_DATA.Draw("E1")
 if DEBUG:
     bpm_tar_y_DATA_nocut.Draw("same, E1")
     bpm_tar_y_DATA_nopid.Draw("same, E1")
 
-l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.4e}\pm{:.4e}".format( b_mean_bpm_tar_y_data, b_mean_err_bpm_tar_y_data))
-if DEBUG:
-    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = {:.4e}".format( b_mean_bpm_tar_y_data_nocut))
-    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = {:.4e}".format( b_mean_bpm_tar_y_data_nopid))
+#l_bpm_tar_y.AddEntry(bpm_tar_y_DATA,"DATA, Mean = {:.4e}\pm{:.4e}".format( b_mean_bpm_tar_y_data, b_mean_err_bpm_tar_y_data))
+#if DEBUG:
+#    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nocut,"DATA (no cut), Mean = {:.4e}".format( b_mean_bpm_tar_y_data_nocut))
+#    l_bpm_tar_y.AddEntry(bpm_tar_y_DATA_nopid,"DATA (no PID cut), Mean = {:.4e}".format( b_mean_bpm_tar_y_data_nopid))
     
 b_stddev_bpm_tar_y_data = (bpm_tar_y_DATA.GetStdDev())
 b_stddev_bpm_tar_y_data_nocut = (bpm_tar_y_DATA_nocut.GetStdDev())
