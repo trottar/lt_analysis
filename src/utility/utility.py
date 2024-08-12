@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:30:50 trottar"
+# Time-stamp: "2024-08-12 15:32:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,11 +104,12 @@ def append_or_create_column(file_path, column_name, new_value):
     if column_name not in fieldnames:
         fieldnames.append(column_name)
     
-    # Append new value to existing or new column
-    if data:
-        data[-1][column_name] = new_value
-    else:
-        data.append({column_name: new_value})
+    # Create a new row with the new value
+    new_row = {fn: '' for fn in fieldnames}
+    new_row[column_name] = new_value
+    
+    # Append the new row to the data
+    data.append(new_row)
     
     # Write updated data back to file
     with open(file_path, 'w', newline='') as file:
