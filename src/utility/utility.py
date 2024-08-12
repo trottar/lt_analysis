@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:22:58 trottar"
+# Time-stamp: "2024-08-12 15:30:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,43 +85,37 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
 ################################################################################################################################################
 
-import pandas as pd
-import os
-
-def append_or_create_column(file_path, column_name, value):
-    """
-    Appends values to an existing column if it exists, or creates a new column.
+def append_or_create_column(file_path, column_name, new_value):
+    # Check if file exists
+    file_exists = os.path.isfile(file_path)
     
-    Parameters:
-    - file_path (str): The path to the CSV file.
-    - column_name (str): The name of the column to append or create.
-    - new_values (list): The values to append to the column (or to initialize the new column).
-    
-    Returns:
-    - None: The function saves the updated DataFrame back to the file.
-    """
-    
-    # Step 1: Check if the file exists and is not empty
-    if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
-        try:
-            # Step 2: Read the existing CSV file
-            df = pd.read_csv(file_path)
-        except pd.errors.EmptyDataError:
-            df = pd.DataFrame()  # Start with an empty DataFrame if the file is empty
+    if file_exists:
+        # Read existing data
+        with open(file_path, 'r', newline='') as file:
+            reader = csv.DictReader(file)
+            data = list(reader)
+            fieldnames = reader.fieldnames
     else:
-        df = pd.DataFrame()  # Create an empty DataFrame if the file doesn't exist
-
-    # Step 3: Check if the column exists
-    if column_name in df.columns:
-        # Append the value to each element in the existing column
-        df[column_name] = df[column_name] + value
+        # Initialize empty data and fieldnames
+        data = []
+        fieldnames = []
+    
+    # Add new column name if it doesn't exist
+    if column_name not in fieldnames:
+        fieldnames.append(column_name)
+    
+    # Append new value to existing or new column
+    if data:
+        data[-1][column_name] = new_value
     else:
-        # Create a new column with the new value repeated for each row
-        df[column_name] = [value] * len(df) if not df.empty else [value]
-        
-    # Step 4: Save the updated DataFrame back to the CSV file
-    df.to_csv(file_path, index=False)
-        
+        data.append({column_name: new_value})
+    
+    # Write updated data back to file
+    with open(file_path, 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(data)
+
 ################################################################################################################################################
 
 def show_pdf_with_evince(file_path):
