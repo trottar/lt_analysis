@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:04:28 trottar"
+# Time-stamp: "2024-08-12 15:06:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,6 +29,9 @@ lt=Root(os.path.realpath(__file__))
 # Add this to all files for more dynamic pathing
 OUTPATH=lt.OUTPATH
 UTILPATH=lt.UTILPATH
+
+if "None" in OUTPATH:
+    OUTPATH = OUTPATH.replace("None", "HeeP")
 
 OutFilename = "heep_table"
 out_f = OUTPATH + "/" + OutFilename + ".csv"
