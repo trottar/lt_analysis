@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:48:56 trottar"
+# Time-stamp: "2024-08-12 15:53:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,6 +20,7 @@ User Inputs
 efficiency_table = sys.argv[1]
 RUNLIST = sys.argv[2].split(" ")
 ParticleType = sys.argv[3]
+kinematics = sys.argv[4]
 
 ################################################################################################################################################
 '''
@@ -47,7 +48,7 @@ from utility import check_runs_in_effcharge
 if "None" in OUTPATH:
     OUTPATH = OUTPATH.replace("None", f"{ANATYPE}LT")
 
-OutFilename = f"{efficiency_table}"
+OutFilename = f"table_{ParticleType}_{kinematics}"
 foutcsv = OUTPATH + "/" + OutFilename + ".csv"
 
 ################################################################################################################################################

@@ -324,7 +324,7 @@ cd "${LTANAPATH}/src/setup"
 if [[ ${#data_tmp[@]} -ne 0 ]]; then
     echo
     echo "Calculating data total effective charge ..."
-    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_tmp[*]}" "heep")
+    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_tmp[*]}" "heep" ${KIN})
     arr1=()
     arr2=()
     arr3=()
@@ -368,7 +368,7 @@ fi
 if [[ ${#dummy_tmp[@]} -ne 0 ]]; then
     echo
     echo "Calculating dummy total effective charge ..."
-    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_tmp[*]}" "heep")
+    PYSTRING=$(python3 findEffectiveCharge.py ${EffData} "${dummy_tmp[*]}" "heep" ${KIN})
     arr1=()
     arr2=()
     arr3=()
