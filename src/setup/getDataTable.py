@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:36:18 trottar"
+# Time-stamp: "2024-08-12 15:37:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -346,7 +346,7 @@ def calculate_eff_charge_err(runNum,efficiency_table):
     # Error propagation by addition in quadrature (units of mC)
     eff_charge_err = np.sqrt((eff_charge**2)*(d_eff**2+d_charge**2))
     
-    append_or_create_column(out_f, "Effective Charge Error", eff_charge_err)   , runNum 
+    append_or_create_column(out_f, "Effective Charge Error", eff_charge_err, runNum)
 
     for (key1, value1), (key2, value2) in zip(effDict.items(), efficiency_errDict.items()):    
         append_or_create_column(out_f, key1, value1, runNum)
