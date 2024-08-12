@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:33:37 trottar"
+# Time-stamp: "2024-08-12 15:35:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,7 +85,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
 ################################################################################################################################################
 
-def append_or_create_column(file_path, column_name, new_value):
+def append_or_create_column(file_path, column_name, new_value, run_number):
     # Check if file exists
     file_exists = os.path.isfile(file_path)
     
@@ -98,19 +98,21 @@ def append_or_create_column(file_path, column_name, new_value):
     else:
         # Initialize empty data and fieldnames
         data = []
-        fieldnames = []
+        fieldnames = ['Run Number']
     
     # Add new column name if it doesn't exist
-    if column_name not in fieldnames:
+    if column_name not in fieldnames and column_name != 'Run Number':
         fieldnames.append(column_name)
     
-    # If data exists, update the last row, otherwise create a new row
-    if data:
-        data[-1][column_name] = new_value
-    else:
-        new_row = {fn: '' for fn in fieldnames}
-        new_row[column_name] = new_value
-        data.append(new_row)
+    # Find or create the row for this run number
+    row = next((row for row in data if row['Run Number'] == str(run_number)), None)
+    if row is None:
+        row = {fn: '' for fn in fieldnames}
+        row['Run Number'] = str(run_number)
+        data.append(row)
+    
+    # Update the value in the correct column
+    row[column_name] = new_value
     
     # Write updated data back to file
     with open(file_path, 'w', newline='') as file:

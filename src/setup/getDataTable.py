@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:30:12 trottar"
+# Time-stamp: "2024-08-12 15:36:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -274,8 +274,8 @@ def calculate_efficiency(runNum,efficiency_table):
     # Calculate run by run total efficiency
     tot_efficiency = reduce(lambda x, y: x*y, list(effDict.values()))
     
-    append_or_create_column(out_f, "Run Number", runNum)
-    append_or_create_column(out_f, "Total Efficiency", tot_efficiency)
+    append_or_create_column(out_f, "Run Number", runNum, runNum)
+    append_or_create_column(out_f, "Total Efficiency", tot_efficiency, runNum)
     
     return tot_efficiency
 
@@ -297,7 +297,7 @@ def calculate_efficiency_err(runNum,efficiency_table):
     # Error propagation by addition in quadrature
     tot_efficiency_err = np.sqrt((tot_efficiency**2)*(d_eff**2))
 
-    append_or_create_column(out_f, "Total Efficiency Error", tot_efficiency_err)
+    append_or_create_column(out_f, "Total Efficiency Error", tot_efficiency_err, runNum)
     
     return tot_efficiency_err
 
@@ -318,8 +318,8 @@ def calculate_eff_charge(runNum,efficiency_table):
 
     eff_charge = tot_efficiency*charge
 
-    append_or_create_column(out_f, "Charge", charge)
-    append_or_create_column(out_f, "Effective Charge", eff_charge)
+    append_or_create_column(out_f, "Charge", charge, runNum)
+    append_or_create_column(out_f, "Effective Charge", eff_charge, runNum)
     
     return eff_charge
 
@@ -346,10 +346,10 @@ def calculate_eff_charge_err(runNum,efficiency_table):
     # Error propagation by addition in quadrature (units of mC)
     eff_charge_err = np.sqrt((eff_charge**2)*(d_eff**2+d_charge**2))
     
-    append_or_create_column(out_f, "Effective Charge Error", eff_charge_err)    
+    append_or_create_column(out_f, "Effective Charge Error", eff_charge_err)   , runNum 
 
     for (key1, value1), (key2, value2) in zip(effDict.items(), efficiency_errDict.items()):    
-        append_or_create_column(out_f, key1, value1)
-        append_or_create_column(out_f, key2, value2)
+        append_or_create_column(out_f, key1, value1, runNum)
+        append_or_create_column(out_f, key2, value2, runNum)
     
     return eff_charge_err
