@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 15:37:25 trottar"
+# Time-stamp: "2024-08-12 14:59:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,6 +82,36 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
             
     return inpDict    
 
+################################################################################################################################################
+
+def append_or_create_column(file_path, column_name, new_values):
+    """
+    Appends values to an existing column if it exists, or creates a new column.
+    
+    Parameters:
+    - file_path (str): The path to the CSV file.
+    - column_name (str): The name of the column to append or create.
+    - new_values (list): The values to append to the column (or to initialize the new column).
+    
+    Returns:
+    - None: The function saves the updated DataFrame back to the file.
+    """
+    
+    # Step 1: Read the existing CSV file
+    df = pd.read_csv(file_path)
+    
+    # Step 2: Check if the column exists
+    if column_name in df.columns:
+        # Step 3: Append values to the existing column (e.g., adding to each value)
+        # This assumes you're appending a list of new values (length should match the number of rows)
+        df[column_name] = df[column_name] + new_values
+    else:
+        # Step 4: Create a new column if it doesn't exist
+        df[column_name] = new_values
+    
+    # Step 5: Save the updated DataFrame back to the CSV file
+    df.to_csv(file_path, index=False)
+        
 ################################################################################################################################################
 
 def show_pdf_with_evince(file_path):

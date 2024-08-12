@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 14:50:10 trottar"
+# Time-stamp: "2024-08-12 15:04:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -27,7 +27,17 @@ from ltsep import Root
 lt=Root(os.path.realpath(__file__))
 
 # Add this to all files for more dynamic pathing
+OUTPATH=lt.OUTPATH
 UTILPATH=lt.UTILPATH
+
+OutFilename = "heep_table"
+out_f = OUTPATH + "/" + OutFilename + ".csv"
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import append_or_create_column
 
 ################################################################################################################################################
 # Grab bcm value
@@ -259,6 +269,9 @@ def calculate_efficiency(runNum,efficiency_table):
     # Calculate run by run total efficiency
     tot_efficiency = reduce(lambda x, y: x*y, list(effDict.values()))
     
+    append_or_create_column(out_f, "Run Number", runNum)
+    append_or_create_column(out_f, "Total Efficiency", tot_efficiency)
+    
     return tot_efficiency
 
 def calculate_efficiency_err(runNum,efficiency_table):
@@ -278,6 +291,8 @@ def calculate_efficiency_err(runNum,efficiency_table):
     d_eff = np.sqrt(sum((float(efferr)/float(eff))**2 for efferr,eff in zip(efficiency_errDict.values(),effDict.values())))
     # Error propagation by addition in quadrature
     tot_efficiency_err = np.sqrt((tot_efficiency**2)*(d_eff**2))
+
+    append_or_create_column(out_f, "Total Efficiency Error", tot_efficiency_err)
     
     return tot_efficiency_err
 
@@ -297,6 +312,9 @@ def calculate_eff_charge(runNum,efficiency_table):
     charge  = get_bcm(runNum,efficiency_table)
 
     eff_charge = tot_efficiency*charge
+
+    append_or_create_column(out_f, "Charge", charge)
+    append_or_create_column(out_f, "Effective Charge", eff_charge)
     
     return eff_charge
 
@@ -304,9 +322,6 @@ def calculate_eff_charge_err(runNum,efficiency_table):
 
     effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
     efficiency_errDict = get_efficiencies(runNum,efficiency_table)[1] # Efficiency errors dictionary
-
-    for (key1, value1), (key2, value2) in zip(effDict.items(), efficiency_errDict.items()):
-        print(f"{key1}, Value: {value1}+/-{value2}")
     
     charge  = get_bcm(runNum,efficiency_table)
     
@@ -326,5 +341,10 @@ def calculate_eff_charge_err(runNum,efficiency_table):
     # Error propagation by addition in quadrature (units of mC)
     eff_charge_err = np.sqrt((eff_charge**2)*(d_eff**2+d_charge**2))
     
-    return eff_charge_err
+    append_or_create_column(out_f, "Effective Charge Error", eff_charge_err)    
 
+    for (key1, value1), (key2, value2) in zip(effDict.items(), efficiency_errDict.items()):    
+        append_or_create_column(out_f, key1, value1)
+        append_or_create_column(out_f, key2, value2)
+    
+    return eff_charge_err
