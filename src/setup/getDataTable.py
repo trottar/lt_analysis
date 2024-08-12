@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:38:39 trottar"
+# Time-stamp: "2024-08-12 15:39:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,7 +40,7 @@ from utility import data_to_csv
 ################################################################################################################################################
 
 if "None" in OUTPATH:
-    OUTPATH = OUTPATH.replace("None", ANATYPE)
+    OUTPATH = OUTPATH.replace("None", f"{ANATYPE}LT")
 
 OutFilename = f"{ANATYPE.lower()}_table"
 out_f = OUTPATH + "/" + OutFilename + ".csv"
