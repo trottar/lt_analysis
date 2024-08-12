@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:22:13 trottar"
+# Time-stamp: "2024-08-12 15:22:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,10 +114,10 @@ def append_or_create_column(file_path, column_name, new_values):
     # Step 3: Check if the column exists
     if column_name in df.columns:
         # Append the value to each element in the existing column
-        df[column_name] = df[column_name] + new_value
+        df[column_name] = df[column_name] + value
     else:
         # Create a new column with the new value repeated for each row
-        df[column_name] = [new_value] * len(df) if not df.empty else [new_value]
+        df[column_name] = [value] * len(df) if not df.empty else [value]
         
     # Step 4: Save the updated DataFrame back to the CSV file
     df.to_csv(file_path, index=False)
