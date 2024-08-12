@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:35:58 trottar"
+# Time-stamp: "2024-08-12 15:37:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,7 +85,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
 ################################################################################################################################################
 
-def append_or_create_column(file_path, column_name, new_value, run_number):
+def data_to_csv(file_path, column_name, new_value, run_number):
     # Check if file exists
     file_exists = os.path.isfile(file_path)
     
