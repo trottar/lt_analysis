@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:47:08 trottar"
+# Time-stamp: "2024-08-12 15:49:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -273,8 +273,8 @@ def calculate_efficiency(runNum,efficiency_table,foutcsv):
 def calculate_efficiency_err(runNum,efficiency_table,foutcsv):
 
     runbyrun_efficiencies = get_efficiencies(runNum,efficiency_table,foutcsv)
-    effDict = get_efficiencies[0] # Efficiency dictionary
-    efficiency_errDict = get_efficiencies[1] # Efficiency errors dictionary
+    effDict = runbyrun_efficiencies[0] # Efficiency dictionary
+    efficiency_errDict = runbyrun_efficiencies[1] # Efficiency errors dictionary
     
     # Calculate total efficiency. The reduce function pretty much iterates on
     # its arguments which in this case is a lambda function. This lambda function
@@ -318,8 +318,8 @@ def calculate_eff_charge(runNum,efficiency_table,foutcsv):
 def calculate_eff_charge_err(runNum,efficiency_table,foutcsv):
 
     runbyrun_efficiencies = get_efficiencies(runNum,efficiency_table,foutcsv)
-    effDict = get_efficiencies[0] # Efficiency dictionary
-    efficiency_errDict = get_efficiencies[1] # Efficiency errors dictionary
+    effDict = runbyrun_efficiencies[0] # Efficiency dictionary
+    efficiency_errDict = runbyrun_efficiencies[1] # Efficiency errors dictionary
     
     charge  = get_bcm(runNum,efficiency_table,foutcsv)
     
