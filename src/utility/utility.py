@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:05:26 trottar"
+# Time-stamp: "2024-08-12 15:14:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,6 +192,18 @@ def create_dir(dir_name):
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
 
+################################################################################################################################################        
+        
+# Create a new file specified by argument        
+def create_file(dir_name, file_name):
+    # Create the file inside the directory
+    file_path = os.path.join(dir_name, file_name)
+    
+    # Check if the file already exists
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            pass  # Creates an empty file
+        
 ################################################################################################################################################
 
 # Flatten TH1D to NumPy array

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:06:26 trottar"
+# Time-stamp: "2024-08-12 15:15:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,17 +30,20 @@ lt=Root(os.path.realpath(__file__))
 OUTPATH=lt.OUTPATH
 UTILPATH=lt.UTILPATH
 
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import create_file, append_or_create_column
+
+################################################################################################################################################
+
 if "None" in OUTPATH:
     OUTPATH = OUTPATH.replace("None", "HeeP")
 
 OutFilename = "heep_table"
 out_f = OUTPATH + "/" + OutFilename + ".csv"
-
-##################################################################################################################################################
-# Importing utility functions
-
-sys.path.append("utility")
-from utility import append_or_create_column
+create_file(out_f)
 
 ################################################################################################################################################
 # Grab bcm value
