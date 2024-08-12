@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:44:34 trottar"
+# Time-stamp: "2024-08-12 15:48:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,7 +47,7 @@ from utility import check_runs_in_effcharge
 if "None" in OUTPATH:
     OUTPATH = OUTPATH.replace("None", f"{ANATYPE}LT")
 
-OutFilename = f"{ParticleType}_table"
+OutFilename = f"{efficiency_table}"
 foutcsv = OUTPATH + "/" + OutFilename + ".csv"
 
 ################################################################################################################################################
