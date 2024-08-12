@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 15:27:29 trottar"
+# Time-stamp: "2024-08-12 15:56:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -188,6 +188,9 @@ foutjson  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".json"
 outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 output_file_lst = []
+
+# Append csv of efficiencies
+output_file_lst.append(OUTPATH + "/" + f"table_{ParticleType}_{kinematics}" + ".csv")
 
 ###############################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
