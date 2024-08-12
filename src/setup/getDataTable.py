@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:39:22 trottar"
+# Time-stamp: "2024-08-12 15:47:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -27,9 +27,7 @@ from ltsep import Root
 lt=Root(os.path.realpath(__file__))
 
 # Add this to all files for more dynamic pathing
-OUTPATH=lt.OUTPATH
 UTILPATH=lt.UTILPATH
-ANATYPE=lt.ANATYPE
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -38,17 +36,9 @@ sys.path.append("utility")
 from utility import data_to_csv
 
 ################################################################################################################################################
-
-if "None" in OUTPATH:
-    OUTPATH = OUTPATH.replace("None", f"{ANATYPE}LT")
-
-OutFilename = f"{ANATYPE.lower()}_table"
-out_f = OUTPATH + "/" + OutFilename + ".csv"
-
-################################################################################################################################################
 # Grab bcm value
 
-def get_bcm(runNum,efficiency_table):
+def get_bcm(runNum,efficiency_table,foutcsv):
     
     inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
 
@@ -69,7 +59,7 @@ def get_bcm(runNum,efficiency_table):
 ################################################################################################################################################
 # Grab ebeam value
 
-def get_ebeam(runNum,efficiency_table):
+def get_ebeam(runNum,efficiency_table,foutcsv):
     
     inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
 
@@ -90,7 +80,7 @@ def get_ebeam(runNum,efficiency_table):
 ################################################################################################################################################
 # Grab pTheta value
 
-def get_pTheta(runNum,efficiency_table):
+def get_pTheta(runNum,efficiency_table,foutcsv):
     
     inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
 
@@ -111,7 +101,7 @@ def get_pTheta(runNum,efficiency_table):
 ################################################################################################################################################
 # Define efficiencies
 
-def get_efficiencies(runNum,efficiency_table):
+def get_efficiencies(runNum,efficiency_table,foutcsv):
 
     inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
 
@@ -262,9 +252,9 @@ def get_efficiencies(runNum,efficiency_table):
             
     return [effDict,efficiency_errDict]
 
-def calculate_efficiency(runNum,efficiency_table):
+def calculate_efficiency(runNum,efficiency_table,foutcsv):
 
-    effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
+    effDict = get_efficiencies(runNum,efficiency_table,foutcsv)[0] # Efficiency dictionary
 
     # Calculate total efficiency. The reduce function pretty much iterates on
     # its arguments which in this case is a lambda function. This lambda function
@@ -275,15 +265,16 @@ def calculate_efficiency(runNum,efficiency_table):
     # Calculate run by run total efficiency
     tot_efficiency = reduce(lambda x, y: x*y, list(effDict.values()))
     
-    data_to_csv(out_f, "Run Number", runNum, runNum)
-    data_to_csv(out_f, "Total Efficiency", tot_efficiency, runNum)
+    data_to_csv(foutcsv, "Run Number", runNum, runNum)
+    data_to_csv(foutcsv, "Total Efficiency", tot_efficiency, runNum)
     
     return tot_efficiency
 
-def calculate_efficiency_err(runNum,efficiency_table):
+def calculate_efficiency_err(runNum,efficiency_table,foutcsv):
 
-    effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
-    efficiency_errDict = get_efficiencies(runNum,efficiency_table)[1] # Efficiency errors dictionary
+    runbyrun_efficiencies = get_efficiencies(runNum,efficiency_table,foutcsv)
+    effDict = get_efficiencies[0] # Efficiency dictionary
+    efficiency_errDict = get_efficiencies[1] # Efficiency errors dictionary
     
     # Calculate total efficiency. The reduce function pretty much iterates on
     # its arguments which in this case is a lambda function. This lambda function
@@ -298,13 +289,13 @@ def calculate_efficiency_err(runNum,efficiency_table):
     # Error propagation by addition in quadrature
     tot_efficiency_err = np.sqrt((tot_efficiency**2)*(d_eff**2))
 
-    data_to_csv(out_f, "Total Efficiency Error", tot_efficiency_err, runNum)
+    data_to_csv(foutcsv, "Total Efficiency Error", tot_efficiency_err, runNum)
     
     return tot_efficiency_err
 
-def calculate_eff_charge(runNum,efficiency_table):
+def calculate_eff_charge(runNum,efficiency_table,foutcsv):
 
-    effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
+    effDict = get_efficiencies(runNum,efficiency_table,foutcsv)[0] # Efficiency dictionary
 
     # Calculate total efficiency. The reduce function pretty much iterates on
     # its arguments which in this case is a lambda function. This lambda function
@@ -315,21 +306,22 @@ def calculate_eff_charge(runNum,efficiency_table):
     # Calculate run by run total efficiency
     tot_efficiency = reduce(lambda x, y: x*y, list(effDict.values()))
 
-    charge  = get_bcm(runNum,efficiency_table)
+    charge  = get_bcm(runNum,efficiency_table,foutcsv)
 
     eff_charge = tot_efficiency*charge
 
-    data_to_csv(out_f, "Charge", charge, runNum)
-    data_to_csv(out_f, "Effective Charge", eff_charge, runNum)
+    data_to_csv(foutcsv, "Charge", charge, runNum)
+    data_to_csv(foutcsv, "Effective Charge", eff_charge, runNum)
     
     return eff_charge
 
-def calculate_eff_charge_err(runNum,efficiency_table):
+def calculate_eff_charge_err(runNum,efficiency_table,foutcsv):
 
-    effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
-    efficiency_errDict = get_efficiencies(runNum,efficiency_table)[1] # Efficiency errors dictionary
+    runbyrun_efficiencies = get_efficiencies(runNum,efficiency_table,foutcsv)
+    effDict = get_efficiencies[0] # Efficiency dictionary
+    efficiency_errDict = get_efficiencies[1] # Efficiency errors dictionary
     
-    charge  = get_bcm(runNum,efficiency_table)
+    charge  = get_bcm(runNum,efficiency_table,foutcsv)
     
     # Calculate total efficiency. The reduce function pretty much iterates on
     # its arguments which in this case is a lambda function. This lambda function
@@ -347,10 +339,10 @@ def calculate_eff_charge_err(runNum,efficiency_table):
     # Error propagation by addition in quadrature (units of mC)
     eff_charge_err = np.sqrt((eff_charge**2)*(d_eff**2+d_charge**2))
     
-    data_to_csv(out_f, "Effective Charge Error", eff_charge_err, runNum)
+    data_to_csv(foutcsv, "Effective Charge Error", eff_charge_err, runNum)
 
     for (key1, value1), (key2, value2) in zip(effDict.items(), efficiency_errDict.items()):    
-        data_to_csv(out_f, key1, value1, runNum)
-        data_to_csv(out_f, key2, value2, runNum)
+        data_to_csv(foutcsv, key1, value1, runNum)
+        data_to_csv(foutcsv, key2, value2, runNum)
     
     return eff_charge_err

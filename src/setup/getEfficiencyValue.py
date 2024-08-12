@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-11 01:09:06 trottar"
+# Time-stamp: "2024-08-12 15:45:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -27,7 +27,7 @@ lt=Root(os.path.realpath(__file__))
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
 
-def getEfficiencyValue(runNum,efficiency_table,table_val):
+def getEfficiencyValue(runNum,efficiency_table,foutcsv,table_val):
 
     if table_val == "efficiency":
         ################################################################################################################################################
@@ -35,7 +35,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import calculate_efficiency
 
-        tot_efficiency = calculate_efficiency(runNum,efficiency_table)
+        tot_efficiency = calculate_efficiency(runNum,efficiency_table,foutcsv)
 
         ################################################################################################################################################
 
@@ -47,7 +47,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import calculate_efficiency_err
 
-        tot_efficiency_err = calculate_efficiency_err(runNum,efficiency_table)
+        tot_efficiency_err = calculate_efficiency_err(runNum,efficiency_table,foutcsv)
 
         ################################################################################################################################################
 
@@ -59,7 +59,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import calculate_eff_charge
 
-        eff_charge = calculate_eff_charge(runNum,efficiency_table)
+        eff_charge = calculate_eff_charge(runNum,efficiency_table,foutcsv)
 
         ################################################################################################################################################
 
@@ -71,7 +71,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import calculate_eff_charge_err
 
-        eff_charge_err = calculate_eff_charge_err(runNum,efficiency_table)
+        eff_charge_err = calculate_eff_charge_err(runNum,efficiency_table,foutcsv)
 
         ################################################################################################################################################
 
@@ -83,7 +83,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import get_bcm
 
-        bcm_val = get_bcm(runNum,efficiency_table)
+        bcm_val = get_bcm(runNum,efficiency_table,foutcsv)
 
         ################################################################################################################################################
 
@@ -95,7 +95,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import get_ebeam
 
-        ebeam_val = get_ebeam(runNum,efficiency_table)
+        ebeam_val = get_ebeam(runNum,efficiency_table,foutcsv)
 
         ################################################################################################################################################
 
@@ -107,7 +107,7 @@ def getEfficiencyValue(runNum,efficiency_table,table_val):
 
         from getDataTable import get_pTheta
 
-        pTheta_val = get_pTheta(runNum,efficiency_table)
+        pTheta_val = get_pTheta(runNum,efficiency_table,foutcsv)
 
         ################################################################################################################################################
 

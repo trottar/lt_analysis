@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-03-26 10:53:08 trottar"
+# Time-stamp: "2024-08-12 15:44:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,6 +32,7 @@ lt=Root(os.path.realpath(__file__))
 
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
+OUTPATH=lt.OUTPATH
 ANATYPE=lt.ANATYPE
 LTANAPATH=lt.LTANAPATH
 
@@ -40,6 +41,14 @@ LTANAPATH=lt.LTANAPATH
 
 sys.path.append("../utility")
 from utility import check_runs_in_effcharge
+
+##################################################################################################################################################
+
+if "None" in OUTPATH:
+    OUTPATH = OUTPATH.replace("None", f"{ANATYPE}LT")
+
+OutFilename = f"{ParticleType}_table"
+foutcsv = OUTPATH + "/" + OutFilename + ".csv"
 
 ################################################################################################################################################
 # Grab and calculate efficiency 
@@ -59,10 +68,10 @@ for runNum in RUNLIST:
 
     if ParticleType == "heep":
 
-            efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
-            efficiency_err = getEfficiencyValue(runNum,efficiency_table,"efficiency_err")
-            eff_charge = getEfficiencyValue(runNum,efficiency_table,"eff_charge")
-            eff_charge_err = getEfficiencyValue(runNum,efficiency_table,"eff_charge_err")
+            efficiency = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency")
+            efficiency_err = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency_err")
+            eff_charge = getEfficiencyValue(runNum,efficiency_table,foutcsv,"eff_charge")
+            eff_charge_err = getEfficiencyValue(runNum,efficiency_table,foutcsv,"eff_charge_err")
 
             # Run by run list of effective charge
             eff_charge_lst += " " + str(float(eff_charge))
@@ -72,18 +81,18 @@ for runNum in RUNLIST:
             efficiency_lst += " " + str(efficiency)
             efficiency_err_lst += " " + str(efficiency_err)
 
-            ebeam_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
-            pTheta_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
+            ebeam_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,foutcsv,"ebeam"))
+            pTheta_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,foutcsv,"pTheta"))
         
     else:
     
         # Check if run number exists in analysed root files
         if check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ANATYPE)):
 
-            efficiency = getEfficiencyValue(runNum,efficiency_table,"efficiency")
-            efficiency_err = getEfficiencyValue(runNum,efficiency_table,"efficiency_err")
-            eff_charge = getEfficiencyValue(runNum,efficiency_table,"eff_charge")
-            eff_charge_err = getEfficiencyValue(runNum,efficiency_table,"eff_charge_err")
+            efficiency = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency")
+            efficiency_err = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency_err")
+            eff_charge = getEfficiencyValue(runNum,efficiency_table,foutcsv,"eff_charge")
+            eff_charge_err = getEfficiencyValue(runNum,efficiency_table,foutcsv,"eff_charge_err")
 
             # Run by run list of effective charge
             eff_charge_lst += " " + str(float(eff_charge))
@@ -93,8 +102,8 @@ for runNum in RUNLIST:
             efficiency_lst += " " + str(efficiency)
             efficiency_err_lst += " " + str(efficiency_err)
 
-            ebeam_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"ebeam"))
-            pTheta_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,"pTheta"))
+            ebeam_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,foutcsv,"ebeam"))
+            pTheta_val_lst += " " + str(getEfficiencyValue(runNum,efficiency_table,foutcsv,"pTheta"))
 
         else:
             RUNLIST.remove(runNum)
