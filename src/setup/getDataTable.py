@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-02-12 17:34:10 trottar"
+# Time-stamp: "2024-08-12 14:50:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -305,6 +305,9 @@ def calculate_eff_charge_err(runNum,efficiency_table):
     effDict = get_efficiencies(runNum,efficiency_table)[0] # Efficiency dictionary
     efficiency_errDict = get_efficiencies(runNum,efficiency_table)[1] # Efficiency errors dictionary
 
+    for (key1, value1), (key2, value2) in zip(effDict.items(), efficiency_errDict.items()):
+        print(f"{key1}, Value: {value1}+/-{value2}")
+    
     charge  = get_bcm(runNum,efficiency_table)
     
     # Calculate total efficiency. The reduce function pretty much iterates on
