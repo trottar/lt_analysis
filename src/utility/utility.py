@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:22:39 trottar"
+# Time-stamp: "2024-08-12 15:22:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,7 +88,7 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 import pandas as pd
 import os
 
-def append_or_create_column(file_path, column_name, new_values):
+def append_or_create_column(file_path, column_name, value):
     """
     Appends values to an existing column if it exists, or creates a new column.
     
