@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:15:49 trottar"
+# Time-stamp: "2024-08-12 15:18:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,6 +85,9 @@ def check_runs_in_main(OUTPATH, phiset, inpDict):
 
 ################################################################################################################################################
 
+import pandas as pd
+import os
+
 def append_or_create_column(file_path, column_name, new_values):
     """
     Appends values to an existing column if it exists, or creates a new column.
@@ -98,19 +101,25 @@ def append_or_create_column(file_path, column_name, new_values):
     - None: The function saves the updated DataFrame back to the file.
     """
     
-    # Step 1: Read the existing CSV file
-    df = pd.read_csv(file_path)
-    
-    # Step 2: Check if the column exists
+    # Step 1: Check if the file exists and is not empty
+    if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+        try:
+            # Step 2: Read the existing CSV file
+            df = pd.read_csv(file_path)
+        except pd.errors.EmptyDataError:
+            df = pd.DataFrame()  # Start with an empty DataFrame if the file is empty
+    else:
+        df = pd.DataFrame()  # Create an empty DataFrame if the file doesn't exist
+
+    # Step 3: Check if the column exists
     if column_name in df.columns:
-        # Step 3: Append values to the existing column (e.g., adding to each value)
-        # This assumes you're appending a list of new values (length should match the number of rows)
+        # Step 4: Append values to the existing column
         df[column_name] = df[column_name] + new_values
     else:
-        # Step 4: Create a new column if it doesn't exist
+        # Step 5: Create a new column if it doesn't exist
         df[column_name] = new_values
-    
-    # Step 5: Save the updated DataFrame back to the CSV file
+
+    # Step 6: Save the updated DataFrame back to the CSV file
     df.to_csv(file_path, index=False)
         
 ################################################################################################################################################
