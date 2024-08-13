@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 18:28:47 trottar"
+# Time-stamp: "2024-08-13 18:30:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -359,8 +359,8 @@ with PdfPages(outputpdf) as pdf:
     fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
     # Define markers and colors
-    markers = ['x', 'o', '*', 'D'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
-    colors = ['black', 'red', 'blue']
+    markers = ['x', 'o', '*', 'D', '^'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
+    colors = ['black', 'red', 'blue', 'green']
     
     ax = axes
     #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
@@ -467,8 +467,8 @@ with PdfPages(outputpdf) as pdf:
         if (abs(df['Q2'] - 5.5) < tolerance).any():
             mask = abs(df['Q2'] - 5.5) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                        marker=markers[2], linestyle='', label='$Q^2$=5.5', 
-                        color=colors[2], markeredgecolor=colors[2], 
+                        marker=markers[3], linestyle='', label='$Q^2$=5.5', 
+                        color=colors[3], markeredgecolor=colors[3], 
                         markerfacecolor='none', capsize=2)
 
         # Perform exponential fit
