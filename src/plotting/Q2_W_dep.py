@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 18:34:33 trottar"
+# Time-stamp: "2024-08-13 18:37:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -342,8 +342,11 @@ print("\n\n")
 #tmin = 0.3
 #tmax = 0.35
 # Q2=3.0+4.4+5.5
-tmin = 0.425
-tmax = 0.5
+#tmin = 0.425
+#tmax = 0.5
+# Q2=4.4+5.5
+tmin = 0.85
+tmax = 0.9
 
 
 # Create a PdfPages object to manage the PDF file
