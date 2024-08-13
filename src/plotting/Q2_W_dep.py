@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-07 14:50:30 trottar"
+# Time-stamp: "2024-08-13 18:25:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -98,7 +98,7 @@ settings = {
         'W': '2p74',
         'LOEPS': 0.4805,
         'HIEPS': 0.7148,
-        'inp_dir': "N/A"        
+        'inp_dir': "2024August13_H17M30S09" # i=1        
     },    
     'set_5': {
         'Q2': '5p5',
