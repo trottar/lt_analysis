@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 18:27:33 trottar"
+# Time-stamp: "2024-08-13 18:28:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -457,6 +457,13 @@ with PdfPages(outputpdf) as pdf:
                         color=colors[1], markeredgecolor=colors[1], 
                         markerfacecolor='none', capsize=2)
 
+        if (abs(df['Q2'] - 4.4) < tolerance).any():
+            mask = abs(df['Q2'] - 4.4) < tolerance
+            ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                        marker=markers[2], linestyle='', label='$Q^2$=4.4', 
+                        color=colors[2], markeredgecolor=colors[2], 
+                        markerfacecolor='none', capsize=2)
+            
         if (abs(df['Q2'] - 5.5) < tolerance).any():
             mask = abs(df['Q2'] - 5.5) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
