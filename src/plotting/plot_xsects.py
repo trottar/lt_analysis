@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 15:53:32 trottar"
+# Time-stamp: "2024-08-13 15:56:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,6 +15,7 @@ import root_pandas as rpd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import warnings
 from scipy.optimize import curve_fit
 import math
 import re
@@ -27,6 +28,9 @@ if len(sys.argv)-1!=10:
     print("!!!!! ERROR !!!!!\n Expected 10 arguments\n Usage is with - ParticleType POL Q2 W LOEPS HIEPS NumtBins NumPhiBins KIN OutUnsepxsectsFilename\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
+###############################################################################################################################################    
+# Suppress the OptimizeWarning
+warnings.filterwarnings("ignore", category=RuntimeWarning)    
 ###############################################################################################################################################
 
 ParticleType = sys.argv[1]
@@ -769,7 +773,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['dx_real'] > 0.0)
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['x_real'] > 0.0)  & (df['dx_real'] > 0.0)
             ax.errorbar(df['th_cm'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.set_xlabel('$\theta_{cm}$')
@@ -825,7 +829,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['dx_real'] > 0.0)
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['x_real'] > 0.0)  & (df['dx_real'] > 0.0)
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.set_xlabel('$\phi$', fontsize=24)
@@ -885,7 +889,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['x_real'] > 0.0)  & (df['dx_real'] > 0.0)
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i+2], linestyle='None', label=df_key+" Model")
 
@@ -917,7 +921,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['x_real'] > 0.0)  & (df['dx_real'] > 0.0)
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i+2], linestyle='None', label=df_key+" Model")
 
