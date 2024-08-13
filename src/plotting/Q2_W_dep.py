@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 19:52:30 trottar"
+# Time-stamp: "2024-08-13 19:53:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -331,8 +331,8 @@ for key in merged_dict.keys():
 print("\n\n")
 
 # Redefine tmin and tmax
-#tmin = merged_dict['sep_file']['t'].min()-0.1
-#tmax = merged_dict['sep_file']['t'].max()+0.1
+tmin = merged_dict['sep_file']['t'].min()-0.1
+tmax = merged_dict['sep_file']['t'].max()+0.1
 # Q2=2.115+3.0, 1
 #tmin = 0.15
 #tmax = 0.2
@@ -346,8 +346,8 @@ print("\n\n")
 #tmin = 0.425
 #tmax = 0.5
 # Q2=4.4+5.5
-tmin = 0.85
-tmax = 0.9
+#tmin = 0.85
+#tmax = 0.9
 
 
 # Create a PdfPages object to manage the PDF file
