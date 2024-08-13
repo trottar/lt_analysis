@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 14:55:34 trottar"
+# Time-stamp: "2024-08-13 15:53:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -769,8 +769,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
-            mask =  (df['dx_real'] > 0.0)
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['dx_real'] > 0.0)
             ax.errorbar(df['th_cm'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.set_xlabel('$\theta_{cm}$')
@@ -826,7 +825,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 df_key = "Low $\epsilon$"
                 
-            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t'])
+            mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['dx_real'] > 0.0)
             ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.set_xlabel('$\phi$', fontsize=24)
