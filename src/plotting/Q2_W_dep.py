@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:33:40 trottar"
+# Time-stamp: "2024-08-14 00:36:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -385,13 +385,13 @@ for tmin, tmax in tmin_tmax_pairs:
 
         def siglt_func(data, p9, p10):
             q2, t, theta = data
-            theta = theta * (PI/180)
+            #theta = theta * (PI/180)
             siglt=(p9/(1+q2))*np.sin(theta)*np.exp(-p10*(abs(t)))
             return siglt
 
         def sigtt_func(data, p13, p14):
             q2, t, theta = data
-            theta = theta * (PI/180)
+            #theta = theta * (PI/180)
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
             sigtt=(p13/(1+q2))*(np.sin(theta)**2)*ft*np.exp(-p14*(q2))
             return sigtt
@@ -524,7 +524,8 @@ for tmin, tmax in tmin_tmax_pairs:
             # Generate points for smooth curve
             q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
             t_fit = np.linspace(tmin, tmax, 100)
-            theta_fit = np.linspace(0, 360, 100)
+            #theta_fit = np.linspace(0, 360, 100)
+            theta_fit = np.linspace(0, 2*PI, 100)
                 
             if sig == "sigL":
                 # Perform exponential fit
