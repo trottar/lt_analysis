@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 23:05:37 trottar"
+# Time-stamp: "2024-08-13 23:06:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -358,7 +358,7 @@ for tmin, tmax in tmin_tmax_pairs:
     # Add your code here to perform actions using tmin and tmax
 
     # Create a PdfPages object to manage the PDF file
-    with PdfPages(outputpdf.replace(".pdf","_tmin{tmin}-tmax{tmax}.pdf")) as pdf:
+    with PdfPages(outputpdf.replace(f".pdf","_tmin{tmin}-tmax{tmax}.pdf")) as pdf:
 
         ###
 
