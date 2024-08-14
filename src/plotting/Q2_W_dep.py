@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 01:04:13 trottar"
+# Time-stamp: "2024-08-14 01:05:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -397,9 +397,7 @@ for tmin, tmax in tmin_tmax_pairs:
         def sigtt_func(data, p13, p14):
             q2, t, theta = data
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
-            #sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*ft*np.exp(-p14*(q2))
-            ##
-            sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*p14*(abs(t)**3) # Testing
+            sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*ft*np.exp(-p14*(q2))
             return sigtt
 
         # Create a figure and axis objects for Q2 plot
@@ -529,7 +527,8 @@ for tmin, tmax in tmin_tmax_pairs:
 
             # Generate points for smooth curve
             q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
-            t_fit = np.linspace(tmin, tmax, 100)
+            #t_fit = np.linspace(tmin, tmax, 100)
+            t_fit = np.linspace(0.0, 2.0, 1000)
             theta_fit = np.linspace(df['th_cm'].min(), df['th_cm'].max(), 100)
                 
             if sig == "sigL":
