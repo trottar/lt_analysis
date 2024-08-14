@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:54:04 trottar"
+# Time-stamp: "2024-08-14 00:54:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -388,6 +388,7 @@ for tmin, tmax in tmin_tmax_pairs:
         def siglt_func(data, p9, p10):
             q2, t, theta = data
             #siglt=(p9/(1+q2))*np.sin(theta*(PI/180))*np.exp(-p10*(abs(t)))
+            ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
             siglt=(p9/(1+q2))*np.sin(theta*(PI/180))*ft*np.exp(-p10*(abs(t)))
             return siglt
 
