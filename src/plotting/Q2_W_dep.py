@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:02:38 trottar"
+# Time-stamp: "2024-08-14 00:04:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -370,22 +370,26 @@ for tmin, tmax in tmin_tmax_pairs:
         def exp_func(t, a, b):
             return a * np.exp(b * t)
 
-        def sigl_func(q2, t, p1, p2):
+        def sigl_func(data, p1, p2):
+            q2, t = data
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
             Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
             sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t)))
             return sigl
 
-        def sigt_func(q2, t, p5, p6, p7, p8):
+        def sigt_func(data, p5, p6, p7, p8):
+            q2, t = data
             Qdep_T=(math.exp(-q2**2))/q2
             sigt=(p5*math.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)            
             return sigt
 
-        def siglt_func(q2, t, p9, p10):
+        def siglt_func(data, p9, p10):
+            q2, t = data
             siglt=(p9/(1+q2))*math.sin(thetacm_sim)*math.exp(-p10*(abs(t)))
             return siglt
 
-        def sigtt_func(q2, t, p13, p14):
+        def sigtt_func(data, p13, p14):
+            q2, t = data
             sigtt=(p13/(1+q2))*(math.sin(thetacm_sim)**2)*ft*math.exp(-p14*(q2))
             return sigtt        
         
