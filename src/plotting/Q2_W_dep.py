@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:29:06 trottar"
+# Time-stamp: "2024-08-14 00:29:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -548,7 +548,7 @@ for tmin, tmax in tmin_tmax_pairs:
                 y_fit = sigtt_func((q2_fit, t_fit, theta_fit), p13, p14)
 
             # Plot the fit
-            ax.plot(t_fit, y_fit, 'r-', label=f'Fit: {popt:.3f}')
+            ax.plot(t_fit, y_fit, 'r-', label=f'Fit: {popt:.1f}')
 
             ax.set_xlabel('t')
             ax.set_ylabel("${}$".format(formatted_sig))
