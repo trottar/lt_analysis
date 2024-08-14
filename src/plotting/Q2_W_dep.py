@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 22:37:04 trottar"
+# Time-stamp: "2024-08-13 22:47:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -451,7 +451,7 @@ with PdfPages(outputpdf) as pdf:
         scaled_sig = df['{}'.format(sig)]*w_scale_factor
         d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
 
-        tolerance = 0.4
+        tolerance = 0.45
         
         if (abs(df['Q2'] - 2.115) < tolerance).any():
             mask = abs(df['Q2'] - 2.115) < tolerance
