@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:54:35 trottar"
+# Time-stamp: "2024-08-14 00:55:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -396,7 +396,7 @@ for tmin, tmax in tmin_tmax_pairs:
             q2, t, theta = data
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
             #sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*ft*np.exp(-p14*(q2))
-            sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*np.exp(-p14*(abs(t)))
+            sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*ft*p14*(abs(t))
             return sigtt
 
         # Create a figure and axis objects for Q2 plot
