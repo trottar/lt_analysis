@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 01:13:24 trottar"
+# Time-stamp: "2024-08-14 01:16:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -380,18 +380,18 @@ for tmin, tmax in tmin_tmax_pairs:
         def sigt_func(data, p5, p6, p7, p8):
             q2, t = data            
             Qdep_T=(np.exp(-q2**2))/q2
-            #sigt=(p5*np.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)
+            sigt=(p5*np.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)
             ##
-            ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
-            sigt=(p5*np.exp(-p6*(abs(t)))+p7)*(ft*(abs(t)))*(Qdep_T**p8) # Testing
+            ##ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
+            ##sigt=(p5*np.exp(-p6*(abs(t)))+p7)*(ft*(abs(t)))*(Qdep_T**p8) # Testing
             return sigt
 
         def siglt_func(data, p9, p10):
             q2, t, theta = data
-            #siglt=(p9/(1+q2))*np.sin(theta*(PI/180))*np.exp(-p10*(abs(t)))
+            siglt=(p9/(1+q2))*np.sin(theta*(PI/180))*np.exp(-p10*(abs(t)))
             ##
-            ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
-            siglt=(p9/(1+q2))*np.sin(theta*(PI/180))*ft*np.exp(-p10*(abs(t))) # Testing
+            ##ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
+            ##siglt=(p9/(1+q2))*np.sin(theta*(PI/180))*ft*np.exp(-p10*(abs(t))) # Testing
             return siglt
 
         def sigtt_func(data, p13, p14):
@@ -562,7 +562,7 @@ for tmin, tmax in tmin_tmax_pairs:
             ax.set_ylabel("${}$".format(formatted_sig))
             ax.tick_params(axis='x', labelsize=16)
             ax.tick_params(axis='y', labelsize=16)        
-            ax.set_xlim(tmin-0.01, tmax+0.01)
+            ax.set_xlim(tmin-0.05, tmax+0.05)
             ax.legend(fontsize=8)
             # Add grid to subplot
             ax.grid(True, linestyle='--', linewidth=0.5)
