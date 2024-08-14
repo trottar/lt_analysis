@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 23:13:01 trottar"
+# Time-stamp: "2024-08-13 23:19:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -374,8 +374,8 @@ for tmin, tmax in tmin_tmax_pairs:
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
         # Define markers and colors
-        markers = ['x', 'o', '*', 'D', '^'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
-        colors = ['black', 'red', 'blue', 'green']
+        markers = ['x', 'o', '*', 'D', '^', '+'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
+        colors = ['black', 'red', 'blue', 'green', 'purple']
 
         ax = axes
         #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
@@ -466,24 +466,31 @@ for tmin, tmax in tmin_tmax_pairs:
                             markerfacecolor='none', capsize=2)
 
             if (abs(df['Q2'] - 3.0) < tolerance).any():
-                mask = abs(df['Q2'] - 3.0) < tolerance
-                ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                            marker=markers[1], linestyle='', label='$Q^2$=3.0', 
-                            color=colors[1], markeredgecolor=colors[1], 
-                            markerfacecolor='none', capsize=2)
+                if (abs(df['W'] - 2.32) < tolerance).any():
+                    mask = (abs(df['Q2'] - 3.0) < tolerance) & (abs(df['W'] - 2.32) < tolerance)
+                    ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                                marker=markers[1], linestyle='', label='$Q^2$=3.0, W=2.32', 
+                                color=colors[1], markeredgecolor=colors[1], 
+                                markerfacecolor='none', capsize=2)
+                if (abs(df['W'] - 3.14) < tolerance).any():
+                    mask = (abs(df['Q2'] - 3.0) < tolerance) & (abs(df['W'] - 3.14) < tolerance)
+                    ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                                marker=markers[2], linestyle='', label='$Q^2$=3.0, W=3.14', 
+                                color=colors[2], markeredgecolor=colors[2], 
+                                markerfacecolor='none', capsize=2)                    
 
             if (abs(df['Q2'] - 4.4) < tolerance).any():
                 mask = abs(df['Q2'] - 4.4) < tolerance
                 ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                            marker=markers[2], linestyle='', label='$Q^2$=4.4', 
-                            color=colors[2], markeredgecolor=colors[2], 
+                            marker=markers[3], linestyle='', label='$Q^2$=4.4', 
+                            color=colors[3], markeredgecolor=colors[3], 
                             markerfacecolor='none', capsize=2)
 
             if (abs(df['Q2'] - 5.5) < tolerance).any():
                 mask = abs(df['Q2'] - 5.5) < tolerance
                 ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                            marker=markers[3], linestyle='', label='$Q^2$=5.5', 
-                            color=colors[3], markeredgecolor=colors[3], 
+                            marker=markers[4], linestyle='', label='$Q^2$=5.5', 
+                            color=colors[4], markeredgecolor=colors[4], 
                             markerfacecolor='none', capsize=2)
 
             # Perform exponential fit
