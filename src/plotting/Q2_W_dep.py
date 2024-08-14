@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:04:46 trottar"
+# Time-stamp: "2024-08-14 00:07:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -520,24 +520,25 @@ for tmin, tmax in tmin_tmax_pairs:
                             markerfacecolor='none', capsize=2)
 
             # Generate points for smooth curve
-            x_fit = np.linspace(tmin, tmax, 100)
+            q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
+            t_fit = np.linspace(tmin, tmax, 100)
                 
             if sig == "sigL":
-                # Perform exponential fit                
+                # Perform exponential fit
                 popt, _ = curve_fit(sigl_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-                y_fit = sigl_func(x_fit, *popt)
+                y_fit = sigl_func(q2_fit, t_fit, *popt)
             if sig == "sigT":
                 # Perform exponential fit
                 popt, _ = curve_fit(sigt_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-                y_fit = sigt_func(x_fit, *popt)
+                y_fit = sigt_func(q2_fit, t_fit, *popt)
             if sig == "sigLT":
                 # Perform exponential fit
                 popt, _ = curve_fit(siglt_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-                y_fit = siglt_func(x_fit, *popt)
+                y_fit = siglt_func(q2_fit, t_fit, *popt)
             if sig == "sigTT":
                 # Perform exponential fit
                 popt, _ = curve_fit(sigtt_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-                y_fit = sigtt_func(x_fit, *popt)
+                y_fit = sigtt_func(q2_fit, t_fit, *popt)
 
             # Plot the fit
             ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
