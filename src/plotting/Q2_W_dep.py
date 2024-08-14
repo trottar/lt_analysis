@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:36:40 trottar"
+# Time-stamp: "2024-08-14 00:38:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -385,13 +385,11 @@ for tmin, tmax in tmin_tmax_pairs:
 
         def siglt_func(data, p9, p10):
             q2, t, theta = data
-            #theta = theta * (PI/180)
             siglt=(p9/(1+q2))*np.sin(theta)*np.exp(-p10*(abs(t)))
             return siglt
 
         def sigtt_func(data, p13, p14):
             q2, t, theta = data
-            #theta = theta * (PI/180)
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
             sigtt=(p13/(1+q2))*(np.sin(theta)**2)*ft*np.exp(-p14*(q2))
             return sigtt
@@ -524,7 +522,6 @@ for tmin, tmax in tmin_tmax_pairs:
             # Generate points for smooth curve
             q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
             t_fit = np.linspace(tmin, tmax, 100)
-            #theta_fit = np.linspace(0, 360, 100)
             theta_fit = np.linspace(0, 2*PI, 100)
                 
             if sig == "sigL":
@@ -541,13 +538,13 @@ for tmin, tmax in tmin_tmax_pairs:
                 y_fit = sigt_func((q2_fit, t_fit), p5, p6, p7, p8)
             if sig == "sigLT":
                 # Perform exponential fit
-                popt, _ = curve_fit(siglt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                popt, _ = curve_fit(siglt_func, (df['Q2'], df['t'], df['th_cm']*(PI/180)), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
                 p9, p10 = popt
                 param_str = f"{p9:.3e}, {p10:.3e}"
                 y_fit = siglt_func((q2_fit, t_fit, theta_fit), p9, p10)
             if sig == "sigTT":
                 # Perform exponential fit
-                popt, _ = curve_fit(sigtt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                popt, _ = curve_fit(sigtt_func, (df['Q2'], df['t'], df['th_cm']*(PI/180)), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
                 p13, p14 = popt
                 param_str = f"{p13:.3e}, {p14:.3e}"
                 y_fit = sigtt_func((q2_fit, t_fit, theta_fit), p13, p14)
