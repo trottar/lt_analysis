@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 23:19:11 trottar"
+# Time-stamp: "2024-08-13 23:21:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -461,7 +461,7 @@ for tmin, tmax in tmin_tmax_pairs:
             if (abs(df['Q2'] - 2.115) < tolerance).any():
                 mask = abs(df['Q2'] - 2.115) < tolerance
                 ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                            marker=markers[0], linestyle='', label='$Q^2$=2.115', 
+                            marker=markers[0], linestyle='', label='$Q^2$=2.115, W=2.95', 
                             color=colors[0], markeredgecolor=colors[0], 
                             markerfacecolor='none', capsize=2)
 
@@ -482,14 +482,14 @@ for tmin, tmax in tmin_tmax_pairs:
             if (abs(df['Q2'] - 4.4) < tolerance).any():
                 mask = abs(df['Q2'] - 4.4) < tolerance
                 ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                            marker=markers[3], linestyle='', label='$Q^2$=4.4', 
+                            marker=markers[3], linestyle='', label='$Q^2$=4.4, W=2.74', 
                             color=colors[3], markeredgecolor=colors[3], 
                             markerfacecolor='none', capsize=2)
 
             if (abs(df['Q2'] - 5.5) < tolerance).any():
                 mask = abs(df['Q2'] - 5.5) < tolerance
                 ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                            marker=markers[4], linestyle='', label='$Q^2$=5.5', 
+                            marker=markers[4], linestyle='', label='$Q^2$=5.5, W=3.02', 
                             color=colors[4], markeredgecolor=colors[4], 
                             markerfacecolor='none', capsize=2)
 
