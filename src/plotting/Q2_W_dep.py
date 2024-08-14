@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:46:11 trottar"
+# Time-stamp: "2024-08-14 00:48:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -382,7 +382,7 @@ for tmin, tmax in tmin_tmax_pairs:
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
             Qdep_T=(np.exp(-q2**2))/q2
             #sigt=(p5*np.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)
-            sigt=(p5*np.exp((abs(t)))+p7*(abs(t)))*ft*(Qdep_T**p8)
+            sigt=((p5/abs(t))*np.exp(-p6*(abs(t)))+p7*(abs(t)))*ft*(Qdep_T**p8)
             return sigt
 
         def siglt_func(data, p9, p10):
