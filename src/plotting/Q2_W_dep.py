@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 22:53:11 trottar"
+# Time-stamp: "2024-08-13 23:00:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -454,7 +454,6 @@ with PdfPages(outputpdf) as pdf:
         tolerance = 0.5
         
         if (abs(df['Q2'] - 2.115) < tolerance).any():
-            print(abs(df['Q2'] - 2.115), "<", tolerance)
             mask = abs(df['Q2'] - 2.115) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[0], linestyle='', label='$Q^2$=2.115', 
@@ -462,7 +461,6 @@ with PdfPages(outputpdf) as pdf:
                         markerfacecolor='none', capsize=2)
 
         if (abs(df['Q2'] - 3.0) < tolerance).any():
-            print(abs(df['Q2'] - 3.0), "<", tolerance)
             mask = abs(df['Q2'] - 3.0) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[1], linestyle='', label='$Q^2$=3.0', 
@@ -470,7 +468,6 @@ with PdfPages(outputpdf) as pdf:
                         markerfacecolor='none', capsize=2)
 
         if (abs(df['Q2'] - 4.4) < tolerance).any():
-            print(abs(df['Q2'] - 4.4), "<", tolerance)
             mask = abs(df['Q2'] - 4.4) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[2], linestyle='', label='$Q^2$=4.4', 
@@ -478,7 +475,6 @@ with PdfPages(outputpdf) as pdf:
                         markerfacecolor='none', capsize=2)
             
         if (abs(df['Q2'] - 5.5) < tolerance).any():
-            print(abs(df['Q2'] - 5.5), "<", tolerance)
             mask = abs(df['Q2'] - 5.5) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[3], linestyle='', label='$Q^2$=5.5', 
@@ -493,7 +489,7 @@ with PdfPages(outputpdf) as pdf:
         y_fit = exp_func(x_fit, *popt)
 
         # Plot the fit
-        ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
+        #ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
         
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
