@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:31:28 trottar"
+# Time-stamp: "2024-08-14 00:32:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -559,7 +559,7 @@ for tmin, tmax in tmin_tmax_pairs:
             ax.tick_params(axis='x', labelsize=16)
             ax.tick_params(axis='y', labelsize=16)        
             ax.set_xlim(tmin-0.1, tmax+0.1)
-            ax.legend(fontsize=6)
+            ax.legend(fontsize=10)
             # Add grid to subplot
             ax.grid(True, linestyle='--', linewidth=0.5)
 
