@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 22:48:48 trottar"
+# Time-stamp: "2024-08-13 22:52:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -454,6 +454,7 @@ with PdfPages(outputpdf) as pdf:
         tolerance = 0.5
         
         if (abs(df['Q2'] - 2.115) < tolerance).any():
+            print(abs(df['Q2'] - 2.115) < tolerance)
             mask = abs(df['Q2'] - 2.115) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[0], linestyle='', label='$Q^2$=2.115', 
@@ -461,6 +462,7 @@ with PdfPages(outputpdf) as pdf:
                         markerfacecolor='none', capsize=2)
 
         if (abs(df['Q2'] - 3.0) < tolerance).any():
+            print(abs(df['Q2'] - 3.0) < tolerance)
             mask = abs(df['Q2'] - 3.0) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[1], linestyle='', label='$Q^2$=3.0', 
@@ -468,6 +470,7 @@ with PdfPages(outputpdf) as pdf:
                         markerfacecolor='none', capsize=2)
 
         if (abs(df['Q2'] - 4.4) < tolerance).any():
+            print(abs(df['Q2'] - 4.4) < tolerance)
             mask = abs(df['Q2'] - 4.4) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[2], linestyle='', label='$Q^2$=4.4', 
@@ -475,6 +478,7 @@ with PdfPages(outputpdf) as pdf:
                         markerfacecolor='none', capsize=2)
             
         if (abs(df['Q2'] - 5.5) < tolerance).any():
+            print(abs(df['Q2'] - 5.5) < tolerance)
             mask = abs(df['Q2'] - 5.5) < tolerance
             ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
                         marker=markers[3], linestyle='', label='$Q^2$=5.5', 
