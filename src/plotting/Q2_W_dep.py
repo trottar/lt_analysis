@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 22:25:55 trottar"
+# Time-stamp: "2024-08-13 22:37:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -48,6 +48,12 @@ OUTPATH=lt.OUTPATH
 foutname = OUTPATH+"/" + OutFilename + ".root"
 fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
 outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("../utility")
+from utility import show_pdf_with_evince
 
 ################################################################################################################################################
 '''
@@ -542,3 +548,4 @@ with PdfPages(outputpdf) as pdf:
     pdf.savefig(fig, bbox_inches='tight')    
     ###
 
+show_pdf_with_evince(outputpdf)
