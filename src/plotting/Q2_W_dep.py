@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 23:42:08 trottar"
+# Time-stamp: "2024-08-14 00:00:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -370,6 +370,26 @@ for tmin, tmax in tmin_tmax_pairs:
         def exp_func(t, a, b):
             return a * np.exp(b * t)
 
+        def sigl_func(q2, t, p1, p2):
+            ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
+            Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
+            sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t)))
+            return sigl
+
+        def sigt_func(q2, t, p5, p6, p7, p8):
+            Qdep_T=(math.exp(-q2**2))/q2
+            sigt=(p5*math.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)            
+            return sigt
+
+        def siglt_func(q2, t, p9, p10):
+            siglt=(p9/(1+q2))*math.sin(thetacm_sim)*math.exp(-p10*(abs(t)))
+            return siglt
+
+        def sigtt_func(q2, t, p13, p14):
+            sigtt=(p13/(1+q2))*(math.sin(thetacm_sim)**2)*ft*math.exp(-p14*(q2))
+            return sigtt        
+        
+
         # Create a figure and axis objects for Q2 plot
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
@@ -495,12 +515,25 @@ for tmin, tmax in tmin_tmax_pairs:
                             color=colors[4], markeredgecolor=colors[4], 
                             markerfacecolor='none', capsize=2)
 
-            # Perform exponential fit
-            popt, _ = curve_fit(exp_func, df['t'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-
             # Generate points for smooth curve
             x_fit = np.linspace(tmin, tmax, 100)
-            y_fit = exp_func(x_fit, *popt)
+                
+            if sig == "sigL":
+                # Perform exponential fit                
+                popt, _ = curve_fit(sig_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                y_fit = sig_func(x_fit, *popt)
+            if sig == "sigT":
+                # Perform exponential fit
+                popt, _ = curve_fit(sig_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                y_fit = sig_func(x_fit, *popt)
+            if sig == "sigLT":
+                # Perform exponential fit
+                popt, _ = curve_fit(sig_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                y_fit = sig_func(x_fit, *popt)
+            if sig == "sigTT":
+                # Perform exponential fit
+                popt, _ = curve_fit(sig_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                y_fit = sig_func(x_fit, *popt)
 
             # Plot the fit
             ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
