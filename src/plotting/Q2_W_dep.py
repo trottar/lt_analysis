@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 01:05:57 trottar"
+# Time-stamp: "2024-08-14 01:06:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -528,7 +528,7 @@ for tmin, tmax in tmin_tmax_pairs:
             # Generate points for smooth curve
             q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
             #t_fit = np.linspace(tmin, tmax, 100)
-            t_fit = np.linspace(0.0, 2.0, 1000)
+            t_fit = np.linspace(0.0, 2.0, 100)
             theta_fit = np.linspace(df['th_cm'].min(), df['th_cm'].max(), 100)
                 
             if sig == "sigL":
