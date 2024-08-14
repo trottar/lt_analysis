@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:00:44 trottar"
+# Time-stamp: "2024-08-14 00:01:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -520,20 +520,20 @@ for tmin, tmax in tmin_tmax_pairs:
                 
             if sig == "sigL":
                 # Perform exponential fit                
-                popt, _ = curve_fit(sig_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-                y_fit = sig_func(x_fit, *popt)
+                popt, _ = curve_fit(sigl_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                y_fit = sigl_func(x_fit, *popt)
             if sig == "sigT":
                 # Perform exponential fit
-                popt, _ = curve_fit(sig_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-                y_fit = sig_func(x_fit, *popt)
+                popt, _ = curve_fit(sigt_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                y_fit = sigt_func(x_fit, *popt)
             if sig == "sigLT":
                 # Perform exponential fit
-                popt, _ = curve_fit(sig_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-                y_fit = sig_func(x_fit, *popt)
+                popt, _ = curve_fit(siglt_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                y_fit = siglt_func(x_fit, *popt)
             if sig == "sigTT":
                 # Perform exponential fit
-                popt, _ = curve_fit(sig_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-                y_fit = sig_func(x_fit, *popt)
+                popt, _ = curve_fit(sigtt_func, (df['q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                y_fit = sigtt_func(x_fit, *popt)
 
             # Plot the fit
             ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
