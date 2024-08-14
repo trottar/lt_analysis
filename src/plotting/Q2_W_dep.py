@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 23:00:40 trottar"
+# Time-stamp: "2024-08-13 23:05:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -337,215 +337,216 @@ for key in merged_dict.keys():
 print("\n\n")
 
 # Redefine tmin and tmax
-tmin = merged_dict['sep_file']['t'].min()-0.1
-tmax = merged_dict['sep_file']['t'].max()+0.1
-# Q2=2.115+3.0, 1
-#tmin = 0.15
-#tmax = 0.2
-# Q2=2.115+3.0, 2
-#tmin = 0.2
-#tmax = 0.25
-# Q2=2.115+3.0, 3
-#tmin = 0.3
-#tmax = 0.35
-# Q2=3.0+4.4+5.5
-#tmin = 0.425
-#tmax = 0.5
-# Q2=4.4+5.5
-#tmin = 0.85
-#tmax = 0.9
+# Calculate the first tmin and tmax based on the data
+tmin_initial = merged_dict['sep_file']['t'].min() - 0.1
+tmax_initial = merged_dict['sep_file']['t'].max() + 0.1
 
+# Define the list of (tmin, tmax) pairs, including the initial pair
+tmin_tmax_pairs = [
+    (tmin_initial, tmax_initial),  # Calculated from merged_dict['sep_file']['t']
+    (0.15, 0.2),                   # Q2=2.115+3.0, 1
+    (0.2, 0.25),                   # Q2=2.115+3.0, 2
+    (0.3, 0.35),                   # Q2=2.115+3.0, 3
+    (0.425, 0.5),                  # Q2=3.0+4.4+5.5
+    (0.85, 0.9)                    # Q2=4.4+5.5
+]
 
-# Create a PdfPages object to manage the PDF file
-with PdfPages(outputpdf) as pdf:
+# Loop through the list and set tmin and tmax for each iteration
+for tmin, tmax in tmin_tmax_pairs:
+    # Use tmin and tmax in your calculations here
+    print(f"tmin: {tmin}, tmax: {tmax}")
+    # Add your code here to perform actions using tmin and tmax
 
-    ###
+    # Create a PdfPages object to manage the PDF file
+    with PdfPages(outputpdf.replace(".pdf","_tmin{tmin}-tmax{tmax}.pdf")) as pdf:
 
-    # Define exponential function
-    def exp_func(t, a, b):
-        return a * np.exp(b * t)
+        ###
 
-    # Create a figure and axis objects for Q2 plot
-    fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
+        # Define exponential function
+        def exp_func(t, a, b):
+            return a * np.exp(b * t)
 
-    # Define markers and colors
-    markers = ['x', 'o', '*', 'D', '^'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
-    colors = ['black', 'red', 'blue', 'green']
-    
-    ax = axes
-    #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
+        # Create a figure and axis objects for Q2 plot
+        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
-    for i, df_key in enumerate(['kindata_loeps_{}'.format('center'), 'kindata_hieps_{}'.format('center')]):
-        df = merged_dict[df_key]
-        if "hi" in df_key:
-            df_key = "High $\epsilon$"
-        else:
-            df_key = "Low $\epsilon$"
+        # Define markers and colors
+        markers = ['x', 'o', '*', 'D', '^'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
+        colors = ['black', 'red', 'blue', 'green']
 
-        print("\n\n",df_key,"\nt_bin_centers\n",merged_dict['t_bin_centers']['t_bin_centers'], "\nQ2\n", df['Q2'])
-        ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax = axes
+        #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
-        # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers']['t_bin_centers'], df['Q2'])
-        fit_line = exp_func(merged_dict['t_bin_centers']['t_bin_centers'], *popt)
-        #ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        for i, df_key in enumerate(['kindata_loeps_{}'.format('center'), 'kindata_hieps_{}'.format('center')]):
+            df = merged_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
 
-    ax.set_xlabel('-t', fontsize=24)
-    ax.set_ylabel('$Q^2$', fontsize=24)
-    ax.tick_params(axis='x', labelsize=16)
-    ax.tick_params(axis='y', labelsize=16)        
-    ax.set_xlim(tmin, tmax)
-    ax.legend(fontsize=16)
-    # Add grid
-    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+            print("\n\n",df_key,"\nt_bin_centers\n",merged_dict['t_bin_centers']['t_bin_centers'], "\nQ2\n", df['Q2'])
+            ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
-    plt.tight_layout()
-    pdf.savefig(fig, bbox_inches='tight')
+            # Fit the data using exponential function
+            popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers']['t_bin_centers'], df['Q2'])
+            fit_line = exp_func(merged_dict['t_bin_centers']['t_bin_centers'], *popt)
+            #ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
-    # Create a figure and axis objects for W plot
-    fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
-
-    ax = axes
-    #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
-
-    for i, df_key in enumerate(['kindata_loeps_{}'.format('center'), 'kindata_hieps_{}'.format('center')]):
-        df = merged_dict[df_key]
-        if "hi" in df_key:
-            df_key = "High $\epsilon$"
-        else:
-            df_key = "Low $\epsilon$"
-
-        ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
-
-        # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers']['t_bin_centers'], df['W'])
-        fit_line = exp_func(merged_dict['t_bin_centers']['t_bin_centers'], *popt)
-        #ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
-
-    ax.set_xlabel('-t', fontsize=24)
-    ax.set_ylabel('W', fontsize=24)
-    ax.tick_params(axis='x', labelsize=16)
-    ax.tick_params(axis='y', labelsize=16)        
-    ax.set_xlim(tmin, tmax)
-    ax.legend(fontsize=16)
-    # Add grid
-    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-
-    plt.tight_layout()
-    pdf.savefig(fig, bbox_inches='tight')
-
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
-
-    for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
-        
-        # Use integer division to get the correct subplot position
-        ax = axes[k // 2, k % 2]
-        formatted_sig = sig.replace("sig", "\sigma_{") + "}"
-        ax.set_title("${}$".format(formatted_sig), fontsize=24)
-        df = merged_dict["sep_file"]
-
-        W_ref = 3.0 # Scale data to W=3.0 GeV
-        n = -2.0
-        w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
-        
-        scaled_sig = df['{}'.format(sig)]*w_scale_factor
-        d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
-
-        tolerance = 0.5
-        
-        if (abs(df['Q2'] - 2.115) < tolerance).any():
-            mask = abs(df['Q2'] - 2.115) < tolerance
-            ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                        marker=markers[0], linestyle='', label='$Q^2$=2.115', 
-                        color=colors[0], markeredgecolor=colors[0], 
-                        markerfacecolor='none', capsize=2)
-
-        if (abs(df['Q2'] - 3.0) < tolerance).any():
-            mask = abs(df['Q2'] - 3.0) < tolerance
-            ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                        marker=markers[1], linestyle='', label='$Q^2$=3.0', 
-                        color=colors[1], markeredgecolor=colors[1], 
-                        markerfacecolor='none', capsize=2)
-
-        if (abs(df['Q2'] - 4.4) < tolerance).any():
-            mask = abs(df['Q2'] - 4.4) < tolerance
-            ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                        marker=markers[2], linestyle='', label='$Q^2$=4.4', 
-                        color=colors[2], markeredgecolor=colors[2], 
-                        markerfacecolor='none', capsize=2)
-            
-        if (abs(df['Q2'] - 5.5) < tolerance).any():
-            mask = abs(df['Q2'] - 5.5) < tolerance
-            ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
-                        marker=markers[3], linestyle='', label='$Q^2$=5.5', 
-                        color=colors[3], markeredgecolor=colors[3], 
-                        markerfacecolor='none', capsize=2)
-
-        # Perform exponential fit
-        popt, _ = curve_fit(exp_func, df['t'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
-
-        # Generate points for smooth curve
-        x_fit = np.linspace(tmin, tmax, 100)
-        y_fit = exp_func(x_fit, *popt)
-
-        # Plot the fit
-        #ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
-        
-        ax.set_xlabel('t')
-        ax.set_ylabel("${}$".format(formatted_sig))
+        ax.set_xlabel('-t', fontsize=24)
+        ax.set_ylabel('$Q^2$', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(tmin, tmax)
-        ax.legend(fontsize=8)
-        # Add grid to subplot
-        ax.grid(True, linestyle='--', linewidth=0.5)
-        
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
-    pdf.savefig(fig, bbox_inches='tight')
-    
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
-    for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
+        ax.legend(fontsize=16)
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-        # Use integer division to get the correct subplot position
-        ax = axes[k // 2, k % 2]
-        formatted_sig = sig.replace("sig", "\sigma_{") + "}"
-        ax.set_title("${}$".format(formatted_sig), fontsize=24)
-        
-        df = merged_dict["sep_file"]
-        df = df[(df['t'] >= tmin) & (df['t'] <= tmax)]
-        cut_str = f"t = [{tmin:.3f}, {tmax:.3f}]"
-        
-        W_ref = 3.0 # Scale data to W=3.0 GeV
-        n = -2.0
-        w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
 
-        scaled_sig = df['{}'.format(sig)]*w_scale_factor
-        d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
+        # Create a figure and axis objects for W plot
+        fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
 
-        print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
-        ax.errorbar(df['Q2'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=cut_str, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
+        ax = axes
+        #ax.set_title("$Q^2$={:.1f}, W={:.2f}".format(float(Q2.replace("p",".")), float(W.replace("p","."))), fontsize=24)
 
-        # Perform exponential fit
-        popt, _ = curve_fit(exp_func, df['Q2'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+        for i, df_key in enumerate(['kindata_loeps_{}'.format('center'), 'kindata_hieps_{}'.format('center')]):
+            df = merged_dict[df_key]
+            if "hi" in df_key:
+                df_key = "High $\epsilon$"
+            else:
+                df_key = "Low $\epsilon$"
 
-        # Generate points for smooth curve
-        x_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
-        y_fit = exp_func(x_fit, *popt)
+            ax.errorbar(merged_dict['t_bin_centers']['t_bin_centers'], df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
-        # Plot the fit
-        ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*Q^2)')
+            # Fit the data using exponential function
+            popt, _ = curve_fit(exp_func, merged_dict['t_bin_centers']['t_bin_centers'], df['W'])
+            fit_line = exp_func(merged_dict['t_bin_centers']['t_bin_centers'], *popt)
+            #ax.plot(merged_dict['t_bin_centers']['t_bin_centers'], fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
 
-        ax.set_xlabel('$Q^2$')
-        ax.set_ylabel("${}$".format(formatted_sig))
+        ax.set_xlabel('-t', fontsize=24)
+        ax.set_ylabel('W', fontsize=24)
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
-        ax.set_xlim(df['Q2'].min()-0.1, df['Q2'].max()+0.1)
-        ax.legend(fontsize=12)
-        # Add grid to subplot
-        ax.grid(True, linestyle='--', linewidth=0.5)
+        ax.set_xlim(tmin, tmax)
+        ax.legend(fontsize=16)
+        # Add grid
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
-    pdf.savefig(fig, bbox_inches='tight')    
-    ###
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
 
-show_pdf_with_evince(outputpdf)
+        fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
+
+        for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
+
+            # Use integer division to get the correct subplot position
+            ax = axes[k // 2, k % 2]
+            formatted_sig = sig.replace("sig", "\sigma_{") + "}"
+            ax.set_title("${}$".format(formatted_sig), fontsize=24)
+            df = merged_dict["sep_file"]
+
+            W_ref = 3.0 # Scale data to W=3.0 GeV
+            n = -2.0
+            w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
+
+            scaled_sig = df['{}'.format(sig)]*w_scale_factor
+            d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
+
+            tolerance = 0.5
+
+            if (abs(df['Q2'] - 2.115) < tolerance).any():
+                mask = abs(df['Q2'] - 2.115) < tolerance
+                ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                            marker=markers[0], linestyle='', label='$Q^2$=2.115', 
+                            color=colors[0], markeredgecolor=colors[0], 
+                            markerfacecolor='none', capsize=2)
+
+            if (abs(df['Q2'] - 3.0) < tolerance).any():
+                mask = abs(df['Q2'] - 3.0) < tolerance
+                ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                            marker=markers[1], linestyle='', label='$Q^2$=3.0', 
+                            color=colors[1], markeredgecolor=colors[1], 
+                            markerfacecolor='none', capsize=2)
+
+            if (abs(df['Q2'] - 4.4) < tolerance).any():
+                mask = abs(df['Q2'] - 4.4) < tolerance
+                ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                            marker=markers[2], linestyle='', label='$Q^2$=4.4', 
+                            color=colors[2], markeredgecolor=colors[2], 
+                            markerfacecolor='none', capsize=2)
+
+            if (abs(df['Q2'] - 5.5) < tolerance).any():
+                mask = abs(df['Q2'] - 5.5) < tolerance
+                ax.errorbar(df.loc[mask, 't'], scaled_sig[mask], yerr=d_scaled_sig[mask], 
+                            marker=markers[3], linestyle='', label='$Q^2$=5.5', 
+                            color=colors[3], markeredgecolor=colors[3], 
+                            markerfacecolor='none', capsize=2)
+
+            # Perform exponential fit
+            popt, _ = curve_fit(exp_func, df['t'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+
+            # Generate points for smooth curve
+            x_fit = np.linspace(tmin, tmax, 100)
+            y_fit = exp_func(x_fit, *popt)
+
+            # Plot the fit
+            #ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
+
+            ax.set_xlabel('t')
+            ax.set_ylabel("${}$".format(formatted_sig))
+            ax.tick_params(axis='x', labelsize=16)
+            ax.tick_params(axis='y', labelsize=16)        
+            ax.set_xlim(tmin, tmax)
+            ax.legend(fontsize=8)
+            # Add grid to subplot
+            ax.grid(True, linestyle='--', linewidth=0.5)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        pdf.savefig(fig, bbox_inches='tight')
+
+        fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
+        for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
+
+            # Use integer division to get the correct subplot position
+            ax = axes[k // 2, k % 2]
+            formatted_sig = sig.replace("sig", "\sigma_{") + "}"
+            ax.set_title("${}$".format(formatted_sig), fontsize=24)
+
+            df = merged_dict["sep_file"]
+            df = df[(df['t'] >= tmin) & (df['t'] <= tmax)]
+            cut_str = f"t = [{tmin:.3f}, {tmax:.3f}]"
+
+            W_ref = 3.0 # Scale data to W=3.0 GeV
+            n = -2.0
+            w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
+
+            scaled_sig = df['{}'.format(sig)]*w_scale_factor
+            d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
+
+            print("\n\n",df[['t', 'Q2', '{}'.format(sig), 'd{}'.format(sig)]])
+            ax.errorbar(df['Q2'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=cut_str, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
+
+            # Perform exponential fit
+            popt, _ = curve_fit(exp_func, df['Q2'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+
+            # Generate points for smooth curve
+            x_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
+            y_fit = exp_func(x_fit, *popt)
+
+            # Plot the fit
+            ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*Q^2)')
+
+            ax.set_xlabel('$Q^2$')
+            ax.set_ylabel("${}$".format(formatted_sig))
+            ax.tick_params(axis='x', labelsize=16)
+            ax.tick_params(axis='y', labelsize=16)        
+            ax.set_xlim(df['Q2'].min()-0.1, df['Q2'].max()+0.1)
+            ax.legend(fontsize=12)
+            # Add grid to subplot
+            ax.grid(True, linestyle='--', linewidth=0.5)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        pdf.savefig(fig, bbox_inches='tight')    
+        ###
+
+    show_pdf_with_evince(outputpdf)
