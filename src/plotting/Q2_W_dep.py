@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 23:11:04 trottar"
+# Time-stamp: "2024-08-13 23:12:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -356,7 +356,10 @@ for tmin, tmax in tmin_tmax_pairs:
     # Use tmin and tmax in your calculations here
     print(f"tmin: {tmin:.3f}, tmax: {tmax:.3f}")
 
-    outputpdf = outputpdf.replace(".pdf", f"_tmin{tmin:.3f}-tmax{tmax:.3f}.pdf")
+    tmin  = float(f"{tmin:.3f}")
+    tmax  = float(f"{tmax:.3f}")    
+
+    outputpdf = outputpdf.replace(".pdf", f"_tmin{tmin.replace('.','p')}-tmax{tmax.replace('.','p')}.pdf")
     
     # Create a PdfPages object to manage the PDF file
     with PdfPages(outputpdf) as pdf:
