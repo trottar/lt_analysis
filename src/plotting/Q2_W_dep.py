@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:32:27 trottar"
+# Time-stamp: "2024-08-14 00:33:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -530,25 +530,25 @@ for tmin, tmax in tmin_tmax_pairs:
                 # Perform exponential fit
                 popt, _ = curve_fit(sigl_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
                 p1, p2 = popt
-                param_str = f"{p1:.1f}, {p2:.1f}"
+                param_str = f"{p1:.3e}, {p2:.3e}"
                 y_fit = sigl_func((q2_fit, t_fit), p1, p2)
             if sig == "sigT":
                 # Perform exponential fit
                 popt, _ = curve_fit(sigt_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
                 p5, p6, p7, p8 = popt
-                param_str = f"{p5:.1f}, {p6:.1f}, {p7:.1f}, {p8:.1f}"
+                param_str = f"{p5:.3e}, {p6:.3e}, {p7:.3e}, {p8:.3e}"
                 y_fit = sigt_func((q2_fit, t_fit), p5, p6, p7, p8)
             if sig == "sigLT":
                 # Perform exponential fit
                 popt, _ = curve_fit(siglt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
                 p9, p10 = popt
-                param_str = f"{p9:.1f}, {p10:.1f}"
+                param_str = f"{p9:.3e}, {p10:.3e}"
                 y_fit = siglt_func((q2_fit, t_fit, theta_fit), p9, p10)
             if sig == "sigTT":
                 # Perform exponential fit
                 popt, _ = curve_fit(sigtt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
                 p13, p14 = popt
-                param_str = f"{p13:.1f}, {p14:.1f}"
+                param_str = f"{p13:.3e}, {p14:.3e}"
                 y_fit = sigtt_func((q2_fit, t_fit, theta_fit), p13, p14)
 
             # Plot the fit
@@ -559,7 +559,7 @@ for tmin, tmax in tmin_tmax_pairs:
             ax.tick_params(axis='x', labelsize=16)
             ax.tick_params(axis='y', labelsize=16)        
             ax.set_xlim(tmin-0.1, tmax+0.1)
-            ax.legend(fontsize=10)
+            ax.legend(fontsize=8)
             # Add grid to subplot
             ax.grid(True, linestyle='--', linewidth=0.5)
 
