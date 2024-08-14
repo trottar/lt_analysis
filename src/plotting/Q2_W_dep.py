@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:07:46 trottar"
+# Time-stamp: "2024-08-14 00:12:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -374,25 +374,24 @@ for tmin, tmax in tmin_tmax_pairs:
             q2, t = data
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
             Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
-            sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t)))
+            sigl=(p1*Qdep_L*ft)*np.exp(-p2*(abs(t)))
             return sigl
 
         def sigt_func(data, p5, p6, p7, p8):
             q2, t = data
-            Qdep_T=(math.exp(-q2**2))/q2
-            sigt=(p5*math.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)            
+            Qdep_T=(np.exp(-q2**2))/q2
+            sigt=(p5*np.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)            
             return sigt
 
         def siglt_func(data, p9, p10):
             q2, t = data
-            siglt=(p9/(1+q2))*math.sin(thetacm_sim)*math.exp(-p10*(abs(t)))
+            siglt=(p9/(1+q2))*np.sin(thetacm_sim)*np.exp(-p10*(abs(t)))
             return siglt
 
         def sigtt_func(data, p13, p14):
             q2, t = data
-            sigtt=(p13/(1+q2))*(math.sin(thetacm_sim)**2)*ft*math.exp(-p14*(q2))
-            return sigtt        
-        
+            sigtt=(p13/(1+q2))*(np.sin(thetacm_sim)**2)*ft*np.exp(-p14*(q2))
+            return sigtt                
 
         # Create a figure and axis objects for Q2 plot
         fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
@@ -541,7 +540,7 @@ for tmin, tmax in tmin_tmax_pairs:
                 y_fit = sigtt_func(q2_fit, t_fit, *popt)
 
             # Plot the fit
-            ax.plot(x_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
+            ax.plot(t_fit, y_fit, 'r-', label=f'Fit: {popt[0]:.2e}*exp({popt[1]:.2f}*t)')
 
             ax.set_xlabel('t')
             ax.set_ylabel("${}$".format(formatted_sig))
