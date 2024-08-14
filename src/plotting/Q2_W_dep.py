@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-13 23:25:02 trottar"
+# Time-stamp: "2024-08-13 23:28:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -451,7 +451,8 @@ for tmin, tmax in tmin_tmax_pairs:
 
             W_ref = 3.0 # Scale data to W=3.0 GeV
             #n = -2.0
-            n = -2.25 # From Phys. Rev. C 85, 018202 (2012), kaon
+            #n = -2.25 # From Phys. Rev. C 85, 018202 (2012), kaon
+            n = -2.41 # From Phys. Rev. C 85, 018202 (2012), pion            
             w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
 
             scaled_sig = df['{}'.format(sig)]*w_scale_factor
@@ -530,7 +531,8 @@ for tmin, tmax in tmin_tmax_pairs:
 
             W_ref = 3.0 # Scale data to W=3.0 GeV
             #n = -2.0
-            n = -2.25 # From Phys. Rev. C 85, 018202 (2012), kaon
+            #n = -2.25 # From Phys. Rev. C 85, 018202 (2012), kaon
+            n = -2.41 # From Phys. Rev. C 85, 018202 (2012), pion            
             w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
 
             scaled_sig = df['{}'.format(sig)]*w_scale_factor
