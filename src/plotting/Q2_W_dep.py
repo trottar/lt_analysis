@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 00:50:41 trottar"
+# Time-stamp: "2024-08-14 00:52:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -378,11 +378,11 @@ for tmin, tmax in tmin_tmax_pairs:
             return sigl
 
         def sigt_func(data, p5, p6, p7, p8):
-            q2, t = data
-            ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
+            q2, t = data            
             Qdep_T=(np.exp(-q2**2))/q2
-            #sigt=(p5*np.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)
-            sigt=(p5*np.exp(-p6*(abs(t)))+p7)*(ft*(abs(t)))*(Qdep_T**p8)
+            sigt=(p5*np.exp(-p6*(abs(t)))+p7*(abs(t)))*(Qdep_T**p8)
+            ##ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
+            ##sigt=(p5*np.exp(-p6*(abs(t)))+p7)*(ft*(abs(t)))*(Qdep_T**p8) # Testing
             return sigt
 
         def siglt_func(data, p9, p10):
@@ -393,7 +393,8 @@ for tmin, tmax in tmin_tmax_pairs:
         def sigtt_func(data, p13, p14):
             q2, t, theta = data
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
-            sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*ft*np.exp(-p14*(q2))
+            #sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*ft*np.exp(-p14*(q2))
+            sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*ft*np.exp(-p14*(abs(t)))
             return sigtt
 
         # Create a figure and axis objects for Q2 plot
