@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-15 18:08:56 trottar"
+# Time-stamp: "2024-08-15 18:09:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -120,7 +120,7 @@ settings = {
 comb_dict = {}
 
 for key, values in settings.items():
-    if key in ('set_1', 'set_3', 'set_4', 'set_5'):
+    if key in ('set_1', 'set_2', 'set_3', 'set_4', 'set_5'):
         Q2, W, LOEPS, HIEPS, inp_dir = values.values()
     else:
         continue
