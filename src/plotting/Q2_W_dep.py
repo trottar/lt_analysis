@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-14 01:16:59 trottar"
+# Time-stamp: "2024-08-15 10:32:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -483,7 +483,8 @@ for tmin, tmax in tmin_tmax_pairs:
             n = -2.0
             #n = -2.25 # From Phys. Rev. C 85, 018202 (2012), kaon
             #n = -2.41 # From Phys. Rev. C 85, 018202 (2012), pion
-            w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
+            #w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
+            w_scale_factor = ((W_ref**2-mkpl**2)**n)
 
             scaled_sig = df['{}'.format(sig)]*w_scale_factor
             d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
@@ -586,7 +587,8 @@ for tmin, tmax in tmin_tmax_pairs:
             n = -2.0
             #n = -2.25 # From Phys. Rev. C 85, 018202 (2012), kaon
             #n = -2.41 # From Phys. Rev. C 85, 018202 (2012), pion
-            w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
+            #w_scale_factor = ((W_ref**2-mkpl**2)**n)/((df['W']**2-mkpl**2)**n)
+            w_scale_factor = ((W_ref**2-mkpl**2)**n)
 
             scaled_sig = df['{}'.format(sig)]*w_scale_factor
             d_scaled_sig = df['d{}'.format(sig)]*w_scale_factor
