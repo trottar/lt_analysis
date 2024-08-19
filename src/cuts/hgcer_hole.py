@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-19 01:53:49 trottar"
+# Time-stamp: "2024-08-19 02:37:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -19,7 +19,6 @@ def apply_HGCer_hole_cut(Q2, W, EPSSET, simc=False):
     cutg = TCutG("cutg",21)
     cutg.SetVarX("P_hgcer_xAtCer")
     cutg.SetVarY("P_hgcer_yAtCer")
-    '''
     cutg.SetPoint(0, 2+10, -25-1)
     cutg.SetPoint(1, 2+10, -2-1)
     cutg.SetPoint(2, 2+10, -1.5-1)
@@ -41,7 +40,6 @@ def apply_HGCer_hole_cut(Q2, W, EPSSET, simc=False):
     cutg.SetPoint(18, 0.5+10, -2-1)
     cutg.SetPoint(19, 0.5+10, -25-1)
     cutg.SetPoint(20, 2+10, -25-1)
-    '''
     
     '''
     if "low" in EPSSET:
