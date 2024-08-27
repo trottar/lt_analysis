@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 17:01:43 trottar"
+# Time-stamp: "2024-08-27 17:39:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -637,6 +637,30 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hDelta.Print(outputpdf)
 
+    C_ssxptar_ssyptar = []        
+    for i,hist in enumerate(histlist_copy):
+        C_ssxptar_ssyptar.append(TCanvas())
+        C_ssxptar_ssyptar[i].Divide(1,2)
+        C_ssxptar_ssyptar[i].cd(1)
+        h_ssyptar_ssxptar_data = plot1DAs2D(hist["H_ssxptar_DATA"], hist["H_ssyptar_DATA"], h2d_name="h_ssyptar_ssxptar_data", title=f"{phisetlist[i]} Data;SHMS xptar;SHMS yptar")
+        h_ssyptar_ssxptar_data.Draw("COLZ")
+        C_ssxptar_ssyptar[i].cd(2)
+        h_ssyptar_ssxptar_simc = plot1DAs2D(hist["H_ssxptar_SIMC"], hist["H_ssyptar_SIMC"], h2d_name="h_ssyptar_ssxptar_simc", title=f"{phisetlist[i]} Simc;SHMS xptar;SHMS yptar")
+        h_ssyptar_ssxptar_simc.Draw("COLZ")
+        C_ssxptar_ssyptar[i].Print(outputpdf)
+
+    C_hsxptar_hsyptar = []        
+    for i,hist in enumerate(histlist_copy):
+        C_hsxptar_hsyptar.append(TCanvas())
+        C_hsxptar_hsyptar[i].Divide(1,2)
+        C_hsxptar_hsyptar[i].cd(1)
+        h_hsyptar_hsxptar_data = plot1DAs2D(hist["H_hsxptar_DATA"], hist["H_hsyptar_DATA"], h2d_name="h_hsyptar_hsxptar_data", title=f"{phisetlist[i]} Data;HMS xptar;HMS yptar")
+        h_hsyptar_hsxptar_data.Draw("COLZ")
+        C_hsxptar_hsyptar[i].cd(2)
+        h_hsyptar_hsxptar_simc = plot1DAs2D(hist["H_hsxptar_SIMC"], hist["H_hsyptar_SIMC"], h2d_name="h_hsyptar_hsxptar_simc", title=f"{phisetlist[i]} Simc;HMS xptar;HMS yptar")
+        h_hsyptar_hsxptar_simc.Draw("COLZ")
+        C_hsxptar_hsyptar[i].Print(outputpdf)        
+        
     C_ssdelta_ssxptar = []    
     for i,hist in enumerate(histlist_copy):
         C_ssdelta_ssxptar.append(TCanvas())
@@ -696,6 +720,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         h_hsdelta_ssdelta_simc = plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_hsdelta_SIMC"], h2d_name="h_hsdelta_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;HMS Delta")
         h_hsdelta_ssdelta_simc.Draw("COLZ")
         C_ssdelta_hsdelta[i].Print(outputpdf)
+
         
     Cph_q = TCanvas()
 
