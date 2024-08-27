@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 13:58:25 trottar"
+# Time-stamp: "2024-08-27 14:52:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,10 +242,7 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
         x_value = h1.GetBinCenter(i)
         y_value = h2.GetBinContent(i)
         h2d.Fill(x_value, y_value)
-    
-    # Draw the 2D histogram
-    h2d.Draw("COLZ")
-    
+        
     # Return the 2D histogram in case further manipulation is needed
     return h2d
 
