@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 16:17:16 trottar"
+# Time-stamp: "2024-08-27 16:23:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -225,36 +225,40 @@ def flatten_hist(histogram):
 
 ################################################################################################################################################
 
-# Function to create and fill a 2D histogram from two 1D histograms
 def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
+    # Get the number of bins for each histogram
     n_bins_x = h1.GetNbinsX()
     n_bins_y = h2.GetNbinsX()
 
-    # Ensure both histograms have the same number of bins
-    if n_bins_x != n_bins_y:
-        raise ValueError("The two histograms must have the same number of bins")
-
-    # Get the bin edges (range) directly from the TH1Ds
+    # Get the bin edges directly from the TH1Ds
     x_bins = np.array([h1.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_x + 2)])
     y_bins = np.array([h2.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_y + 2)])
 
-    # Create a 2D histogram dynamically based on h1 and h2 bin edges
+    # Create a 2D histogram
     h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_bins, n_bins_y, y_bins)
 
-    flatten_h1 = flatten_hist(h1)
-    flatten_h2 = flatten_hist(h2)
-    
-    # Ensure both flattened histograms have the same length
-    if len(flatten_h1) != len(flatten_h2):
-        raise ValueError("The flattened histograms do not have the same number of entries")
+    # Fill the 2D histogram
+    for i in range(1, n_bins_x + 1):
+        for j in range(1, n_bins_y + 1):
+            x_value = h1.GetBinCenter(i)
+            y_value = h2.GetBinCenter(j)
+            
+            # Get bin contents and errors
+            z_value1 = h1.GetBinContent(i)
+            z_value2 = h2.GetBinContent(j)
+            z_error1 = h1.GetBinError(i)
+            z_error2 = h2.GetBinError(j)
+            
+            # Calculate the new bin content and error
+            z_value = z_value1 * z_value2
+            z_error = z_value * np.sqrt((z_error1/z_value1)**2 + (z_error2/z_value2)**2)
+            
+            # Fill the bin
+            bin = h2d.Fill(x_value, y_value, z_value)
+            
+            # Set the bin error
+            h2d.SetBinError(bin, z_error)
 
-    # Fill the 2D histogram using the contents of the two 1D histograms
-    for i in range(len(flatten_h1)):
-        x_value = flatten_h1[i]
-        y_value = flatten_h2[i]
-        h2d.Fill(x_value, y_value)
-
-    # Return the 2D histogram in case further manipulation is needed
     return h2d
 
 ################################################################################################################################################
