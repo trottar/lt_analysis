@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 16:29:05 trottar"
+# Time-stamp: "2024-08-27 16:40:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -237,6 +237,9 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
     # Create a 2D histogram
     h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_bins, n_bins_y, y_bins)
 
+    print(f"Input histogram 1: {h1.GetName()}, bins: {h1.GetNbinsX()}, integral: {h1.Integral()}")
+    print(f"Input histogram 2: {h2.GetName()}, bins: {h2.GetNbinsX()}, integral: {h2.Integral()}")
+    
     # Fill the 2D histogram
     for i in range(1, n_bins_x + 1):
         for j in range(1, n_bins_y + 1):
@@ -270,6 +273,8 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
             # Set the bin error
             h2d.SetBinError(bin_val, z_error)
 
+    print(f"Output histogram: {h2d.GetName()}, bins: {h2d.GetNbinsX()}x{h2d.GetNbinsY()}, integral: {h2d.Integral()}")
+            
     return h2d
 
 ################################################################################################################################################
