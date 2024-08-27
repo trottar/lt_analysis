@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 15:35:15 trottar"
+# Time-stamp: "2024-08-27 15:43:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,11 +242,11 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
     h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_bins, n_bins_y, y_bins)
     
     # Fill the 2D histogram using the contents of the two 1D histograms
-    for i in range(1, n_bins_x + 1):
+    for i in range(1, n_bins_x + 1):        
         x_value = h1.GetBinContent(i)
         y_value = h2.GetBinContent(i)
-        z_value = h1.GetBinContent(i) + h2.GetBinContent(i)  # Use the product of the bin contents for the z-axis fill
-        h2d.Fill(x_value, y_value, z_value)
+        print(f"!!!!!!!!! x={x_value} y={y_value}")
+        h2d.Fill(x_value, y_value)
         
     # Return the 2D histogram in case further manipulation is needed
     return h2d
