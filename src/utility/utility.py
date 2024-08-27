@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 16:11:20 trottar"
+# Time-stamp: "2024-08-27 16:17:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -225,8 +225,8 @@ def flatten_hist(histogram):
 
 ################################################################################################################################################
 
+# Function to create and fill a 2D histogram from two 1D histograms
 def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
-    # Determine the number of bins for the 2D histogram based on h1 and h2
     n_bins_x = h1.GetNbinsX()
     n_bins_y = h2.GetNbinsX()
 
@@ -238,21 +238,22 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
     x_bins = np.array([h1.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_x + 2)])
     y_bins = np.array([h2.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_y + 2)])
 
-    print(f"!!!!!!!!! x={x_bins} y={y_bins}")
-    
     # Create a 2D histogram dynamically based on h1 and h2 bin edges
     h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_bins, n_bins_y, y_bins)
 
     flatten_h1 = flatten_hist(h1)
     flatten_h2 = flatten_hist(h2)
     
+    # Ensure both flattened histograms have the same length
+    if len(flatten_h1) != len(flatten_h2):
+        raise ValueError("The flattened histograms do not have the same number of entries")
+
     # Fill the 2D histogram using the contents of the two 1D histograms
-    for i in range(1, len(flatten_h1) + 1):
+    for i in range(len(flatten_h1)):
         x_value = flatten_h1[i]
         y_value = flatten_h2[i]
-        print(f"!!!!!!!!! x={x_value} y={y_value}")
         h2d.Fill(x_value, y_value)
-        
+
     # Return the 2D histogram in case further manipulation is needed
     return h2d
 
