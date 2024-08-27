@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 16:06:16 trottar"
+# Time-stamp: "2024-08-27 16:11:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -248,8 +248,8 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
     
     # Fill the 2D histogram using the contents of the two 1D histograms
     for i in range(1, len(flatten_h1) + 1):
-        x_value = flatten_h1
-        y_value = flatten_h2
+        x_value = flatten_h1[i]
+        y_value = flatten_h2[i]
         print(f"!!!!!!!!! x={x_value} y={y_value}")
         h2d.Fill(x_value, y_value)
         
